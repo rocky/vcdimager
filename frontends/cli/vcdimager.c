@@ -79,7 +79,6 @@ static struct
 
   int verbose_flag;
   int quiet_flag;
-  int progress_flag;
 
   vcd_log_handler_t default_vcd_log_handler;
 }
@@ -119,18 +118,6 @@ _vcd_log_handler (log_level_t level, const char message[])
     return;
   
   gl.default_vcd_log_handler (level, message);
-}
-
-static int
-_progress_callback (const progress_info_t * info, void *user_data)
-{
-  fprintf (stdout, "#%d/%d: %ld/%ld (%2.0f%%)\r",
-           info->in_track, info->total_tracks, info->sectors_written,
-           info->total_sectors,
-           (double) info->sectors_written / info->total_sectors * 100);
-  fflush (stdout);
-
-  return 0;
 }
 
 static int
@@ -226,8 +213,8 @@ main (int argc, const char *argv[])
          "')", "LABEL"},
 
         {"iso-application-id", '\0', POPT_ARG_STRING, &gl.application_id, 0,
-         "specify ISO application id for video cd (default: '" DEFAULT_APPLICATION_ID
-         "')", "LABEL"},
+         "specify ISO application id for video cd (default: '" 
+         DEFAULT_APPLICATION_ID "')", "LABEL"},
 
         {"info-album-id", '\0', POPT_ARG_STRING, &gl.album_id, 0,
          "specify album id for video cd set (default: '" DEFAULT_ALBUM_ID
@@ -258,10 +245,13 @@ main (int argc, const char *argv[])
          "add file containing full 2336 byte sectors to ISO fs",
          "FILE,ISO_FILENAME"},
 
-        {"progress", 'p', POPT_ARG_NONE, &gl.progress_flag, 0, "show progress"},
+        {"progress", 'p', POPT_ARG_NONE | POPT_ARGFLAG_DOC_HIDDEN,
+         NULL, 0, "show progress"},
+
         {"verbose", 'v', POPT_ARG_NONE, &gl.verbose_flag, 0, "be verbose"},
 
-        {"quiet", 'q', POPT_ARG_NONE, &gl.quiet_flag, 0, "show only critical messages"},
+        {"quiet", 'q', POPT_ARG_NONE, &gl.quiet_flag, 0, 
+         "show only critical messages"},
 
         {"version", 'V', POPT_ARG_NONE, NULL, CL_VERSION,
          "display version and copyright information and exit"},
@@ -460,8 +450,7 @@ main (int argc, const char *argv[])
 
     sectors = vcd_obj_begin_output (gl_vcd_obj);
 
-    vcd_obj_write_image (gl_vcd_obj, image_sink,
-                         gl.progress_flag ? _progress_callback : NULL, NULL);
+    vcd_obj_write_image (gl_vcd_obj, image_sink, NULL, NULL);
 
     vcd_obj_end_output (gl_vcd_obj);
 

@@ -1548,7 +1548,7 @@ _write_sequence (VcdObj *obj, int track_idx)
     case MPEG_NORM_OTHER:
       {
         char buf[1024] = { 0, };
-        switch (_info->hsize)
+        switch (_info->vsize)
           {
           case 480:
           case 240:

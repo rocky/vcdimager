@@ -1,5 +1,11 @@
 2001-08-29  Herbert Valerio Riedel  <hvr@gnu.org>
 
+ 	* configure.in: released version 0.7.10
+	
+	* frontends/cli/vcdimager.c: removed progress indication
+
+	* libvcd/vcd.c: fixed small vsize/hsize typo
+
 	* libvcd/vcd.c (vcd_obj_set_param_str): new parameter for setting 
 		publisher ID added
 		(vcd_version_string): changed version string to conform to 

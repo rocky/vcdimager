@@ -43,8 +43,7 @@ static const char _rcsid[] = "$Id$";
 inline static bool
 _pal_p (const struct vcd_mpeg_stream_vid_info *_info)
 {
-  return (_info->vsize == 288
-          || _info->vsize == 576);
+  return (_info->vsize == 288 || _info->vsize == 576);
 }
 
 static int
@@ -369,7 +368,7 @@ set_info_vcd(VcdObj *obj, void *buf)
           if (vcd_mpeg_get_norm (_info) == MPEG_NORM_PAL
               || vcd_mpeg_get_norm (_info) == MPEG_NORM_PAL_S)
             _set_bit(info_vcd.pal_flags, n);
-          else if (_info->vsize == 288 || _info->vsize == 576)
+          else if (_pal_p (_info))
             {
               vcd_warn ("INFO.{VCD,SVD}: assuming PAL-type resolution for track #%d"
                         " -- are we creating a X(S)VCD?", n);

@@ -4,7 +4,7 @@ see ChangeLog for more information
 
 version 0.7.10 (unstable/development)
 =====================================
-2001-0...
+2001-08-29
 
 * vcdxrip: new option for ignoring (faulty) extended pbc's 
 * fixed wrong warning for extended end list attributes
@@ -17,7 +17,8 @@ version 0.7.10 (unstable/development)
 * new option "svcd vcd30 tracksvd"
 * set pregap and subindexes explicitly in cue sheet
 * vcdxminfo output format changed and enhanced
-* missing flag to indicate presence of extended PBC (hotspots) on VCD2.0 added
+* missing flag to indicate presence of extended PBC (hotspots) on
+  VCD2.0 added
 * new options for customization track gaps/margins
 * added --image-type/--image-option to vcdxbuild
 * implemented setting of <publisher-id> 

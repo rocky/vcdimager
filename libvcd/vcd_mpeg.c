@@ -989,7 +989,7 @@ vcd_mpeg_parse_packet (const void *_buf, unsigned buflen, bool parse_pes,
               pos = bitpos >> 3;
 
               ctx->packet.scr = _scr;
-              ctx->packet.muxrate = _muxrate * 50;
+              ctx->stream.muxrate = ctx->packet.muxrate = _muxrate * 50 * 8;
             }
           else
             {
