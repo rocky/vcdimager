@@ -2,6 +2,7 @@
     $Id$
 
     Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
+                  2002 Rocky Bernstein <rocky@panix.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,13 +33,44 @@
 static const char _rcsid[] = "$Id$";
 
 /*
- * VcdImageSource 
+ * VcdImageSource routines next.
  */
 
 struct _VcdImageSource {
   void *user_data;
   vcd_image_source_funcs op;
 };
+
+/*!
+  Eject media in CD drive if there is a routine to do so. 
+  Return 0 if success and 1 for failure, and 2 if no routine.
+ */
+int
+vcd_image_source_eject_media (VcdImageSource *obj)
+{
+  vcd_assert (obj != NULL);
+
+  if (obj->op.eject_media) {
+    return obj->op.eject_media (obj->user_data);
+  } else {
+    return 2;
+  }
+}
+
+/*!
+  Return a string containing the default VCD device if none is specified.
+ */
+char *
+vcd_image_source_get_default_device (VcdImageSource *obj)
+{
+  vcd_assert (obj != NULL);
+
+  if (obj->op.eject_media) {
+    return obj->op.get_default_device ();
+  } else {
+    return NULL;
+  }
+}
 
 VcdImageSource *
 vcd_image_source_new (void *user_data, const vcd_image_source_funcs *funcs)
@@ -64,11 +96,12 @@ vcd_image_source_destroy (VcdImageSource *obj)
 
 int
 vcd_image_source_read_mode2_sectors (VcdImageSource *obj, void *buf, 
-				     uint32_t lsn, bool mode2raw, unsigned num_sectors)
+				     uint32_t lsn, bool mode2raw, 
+				     unsigned num_sectors)
 {
   char *_buf = buf;
   const int blocksize = mode2raw ? M2RAW_SECTOR_SIZE : ISO_BLOCKSIZE;
-  int n, rc;
+  int n;
 
   vcd_assert (obj != NULL);
   vcd_assert (buf != NULL);
@@ -77,19 +110,28 @@ vcd_image_source_read_mode2_sectors (VcdImageSource *obj, void *buf,
   
   if (obj->op.read_mode2_sectors)
     return obj->op.read_mode2_sectors (obj->user_data, buf, lsn,
-				      mode2raw, num_sectors);
+				       mode2raw, num_sectors);
 
   /* fallback */
   for (n = 0; n < num_sectors; n++)
-    if ((rc = vcd_image_source_read_mode2_sector (obj, &_buf[n * blocksize],
-						  lsn + n, mode2raw)))
-      return rc;
-
+    {
+      int rc = vcd_image_source_read_mode2_sector (obj, &_buf[n * blocksize],
+						   lsn + n, mode2raw);
+      
+      if (rc)
+	return rc;
+    }
+  
   return 0;
 }
 
+/*!
+   Reads a single mode2 sector from cd device into data starting
+   from lsn. Returns 0 if no error. 
+ */
 int
-vcd_image_source_read_mode2_sector (VcdImageSource *obj, void *buf, uint32_t lsn, bool mode2raw)
+vcd_image_source_read_mode2_sector (VcdImageSource *obj, void *buf, 
+				    uint32_t lsn, bool mode2raw)
 {
   vcd_assert (obj != NULL);
   vcd_assert (buf != NULL);
@@ -101,6 +143,8 @@ vcd_image_source_read_mode2_sector (VcdImageSource *obj, void *buf, uint32_t lsn
 
   /* fallback */
   return vcd_image_source_read_mode2_sectors (obj, buf, lsn, mode2raw, 1);
+
+  /* not reached */
 }
 
 uint32_t
@@ -111,6 +155,9 @@ vcd_image_source_stat_size (VcdImageSource *obj)
   return obj->op.stat_size (obj->user_data);
 }
 
+/*!
+  Set the arg "key" with "value" in the source device.
+*/
 int
 vcd_image_source_set_arg (VcdImageSource *obj, const char key[],
 			  const char value[])
@@ -118,12 +165,12 @@ vcd_image_source_set_arg (VcdImageSource *obj, const char key[],
   vcd_assert (obj != NULL);
   vcd_assert (obj->op.set_arg != NULL);
   vcd_assert (key != NULL);
-
+  
   return obj->op.set_arg (obj->user_data, key, value);
 }
 
 /*
- * VcdImageSource 
+ * VcdImageSink routines next.
  */
 
 struct _VcdImageSink {
@@ -169,9 +216,13 @@ vcd_image_sink_write (VcdImageSink *obj, void *buf, uint32_t lsn)
   return obj->op.write (obj->user_data, buf, lsn);
 }
 
+/*!
+  Set the arg "key" with "value" in the target device.
+*/
+
 int
 vcd_image_sink_set_arg (VcdImageSink *obj, const char key[],
-			  const char value[])
+			const char value[])
 {
   vcd_assert (obj != NULL);
   vcd_assert (obj->op.set_arg != NULL);
@@ -179,3 +230,12 @@ vcd_image_sink_set_arg (VcdImageSink *obj, const char key[],
 
   return obj->op.set_arg (obj->user_data, key, value);
 }
+
+
+/* 
+ * Local variables:
+ *  c-file-style: "gnu"
+ *  tab-width: 8
+ *  indent-tabs-mode: nil
+ * End:
+ */
