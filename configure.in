@@ -151,10 +151,12 @@ LIBVCD_LIBS='$(top_builddir)/libvcd/libvcd.a'
 AC_SUBST(LIBVCD_CFLAGS)
 AC_SUBST(LIBVCD_LIBS)
 
-LIBXML2_CFLAGS=`xml2-config --cflags`
-LIBXML2_LIBS=`xml2-config --libs`
-AC_SUBST(LIBXML2_CFLAGS)
-AC_SUBST(LIBXML2_LIBS)
+AM_PATH_XML2(2.3.0, , AC_MSG_ERROR([libxml2 required but not found]))
+
+dnl LIBXML2_CFLAGS=`xml2-config --cflags`
+dnl LIBXML2_LIBS=`xml2-config --libs`
+dnl AC_SUBST(LIBXML2_CFLAGS)
+dnl AC_SUBST(LIBXML2_LIBS)
 
 AC_OUTPUT([ \
 	Makefile \

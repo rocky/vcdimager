@@ -31,7 +31,7 @@ libvcd_a_SOURCES = \
 	vcd_mpeg_stream.h \
 	vcd_obj.h \
 	vcd_pbc.h \
-b	vcd_pbc.c \
+	vcd_pbc.c \
 	vcd_salloc.c \
 	vcd_salloc.h \
 	vcd_stream.c \
