@@ -16,6 +16,8 @@ version 0.7.21 (unstable/development)
 * release number is now preprocessor symbol so applications can make use of
   for compatibility
 * LSN's match MMC-3 specs better.
+* Miscellaneous contributed bug fixes
+* Darwin compilation fixes
 
 version 0.7.20 (unstable/development)
 =====================================
