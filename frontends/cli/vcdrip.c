@@ -680,7 +680,7 @@ dump_tracks_svd (const void *data)
           "no stream",
           "1 stream",
           "2 streams",
-          "1 multi-channel stream"
+          "ext MC stream"
         };
 
       const char *video_types[] =
@@ -1062,7 +1062,7 @@ ripspi (const char device_fname[])
 
           fwrite (buf.data, 2324, 1, outfd);
 
-          if (buf.subheader[2] & (SM_EOF | SM_EOR))
+          if (buf.subheader[2] & SM_EOF);
             break;
         }
 

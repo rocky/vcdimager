@@ -1,0 +1,21 @@
+-*- text -*-
+
+VCDIMAGER FAQ
+~~~~~~~~~~~~~
+
+Q: ...cdrdao does not understand .cue-style toc-sheets!?
+
+A: make sure you use at least version 1.1.4 of cdrdao. 
+   (see also cdrdao's man page!)
+
+- -
+
+Q: I converted the .bin/.cue files to an .iso image and burned it. Why
+   can't I access the movie tracks?
+
+A: You must burn the Video CD image in DAO mode, converting it to an
+   'ISO Image' destroys important data stored in the cdrom mode 2 type sectors.
+
+hvr
+--
+$Id$

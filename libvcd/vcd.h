@@ -24,7 +24,7 @@
 #define __VCD_H__
 
 #include "vcd_stream.h"
-#include "vcd_mpeg.h"
+#include "vcd_mpeg_stream.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -70,18 +70,14 @@ int
 vcd_obj_add_file (VcdObj *obj, const char iso_pathname[],
                   VcdDataSource *file, bool raw_flag);
 
-/* this one is for actually adding mpeg tracks to VCD, returns item a
+/* this one is for actually adding mpeg tracks to VCD, returns a track
    id, or a negative value for error..  */
 int 
-vcd_obj_append_mpeg_track (VcdObj *obj, VcdDataSource *mpeg_file);
+vcd_obj_append_mpeg_track (VcdObj *obj, VcdMpegSource *mpeg_source);
 
-/* removes mpeg tracks by item id */
+/* removes mpeg tracks by track id */
 void 
 vcd_obj_remove_mpeg_track (VcdObj *obj, int track_id);
-
-/* returns information structure of mpeg track by item id */
-const mpeg_info_t *
-vcd_obj_get_mpeg_info (VcdObj *obj, int track_id);
 
 /* returns image size in sectors */
 long 

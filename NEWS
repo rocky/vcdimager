@@ -2,6 +2,16 @@ $Id$
 
 see ChangeLog for more information
 
+version 0.6.2
+=============
+2001-05-..
+
+* mpeg padding on the fly implemented
+* create /EXT/SCANDATA.DAT for SVCD (disabled for VCD2.0)
+* detect audio streams
+* mpeg scanning code rewritten
+* minor XVCD & XSVCD support improvements
+
 version 0.6.1
 =============
 2001-05-01

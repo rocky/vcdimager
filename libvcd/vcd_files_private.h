@@ -417,8 +417,7 @@ typedef struct {
                                               points[time(iframe)/0.5] */
 } ScandataDat_v2;
 
-#if 0 
-/* SCANDATA.DAT
+/* SCANDATA.DAT for SVCD
    This file fulfills much the same purpose of the SEARCH.DAT file except
    that this file is mandatory only if the System Profile Tag of the
    INFO.SVD file is 0x01 (HQ-VCD) and also that it contains sector addresses
@@ -429,30 +428,45 @@ typedef struct {
   char file_id[8]             GNUC_PACKED; /* = "SCAN_VCD" */
   uint8_t version             GNUC_PACKED; /* = 0x01 */
   uint8_t reserved            GNUC_PACKED; /* Reserved, must be zero */
-  uint16_t data_count         GNUC_PACKED; /* number of 3-byte entries in
+  uint16_t scandata_count     GNUC_PACKED; /* number of 3-byte entries in
                                               the table */
   uint16_t track_count        GNUC_PACKED; /* number of mpeg tracks on disc */
   uint16_t spi_count          GNUC_PACKED; /* number of consecutively recorded
                                               play item segments (as opposed
                                               to the number of segment play
                                               items). */
-  /* msf_t playtimes[track_count]            cumulative playing time up to
-                                              track N. Track time just
-                                              wraps at 99:59:74 */
-  /* uint16_t spi_indexes[spi_count]          Indexes into the following
-                                              scandata table */
-  /* uint16_t mpegtrack_start_index           Index into the following 
-                                              scandata table where the MPEG
-                                              track scan points start */
+  msf_t cum_playtimes[EMPTY_ARRAY_SIZE] GNUC_PACKED; /* cumulative playing
+                                              time up to track
+                                              N. Track time just wraps
+                                              at 99:59:74 */
+} ScandataDat1;
+
+typedef struct {
+  /* ScandataDat head; */
+  uint16_t spi_indexes[EMPTY_ARRAY_SIZE] GNUC_PACKED; /* Indexes into
+                                              the following scandata
+                                              table */
+} ScandataDat2;
+
+typedef struct {
+  /* ScandataDat2 head; */
+  uint16_t mpegtrack_start_index GNUC_PACKED; /* Index into the
+                                              following scandata table
+                                              where the MPEG track
+                                              scan points start */
+  
   /* The scandata table starts here */
-  /* struct {
-       uint8_t track_num;                     Track number as in TOC
-       uint16_t table_offset;                 Index into scandata table
-     } mpeg_track_offsets[track_count]                                  */
-  /* msf_t spi_item_points[spi_count][time(item)/0.5s] scan points for spis */
-  /* msf_t mpeg_track_points[track_count][time(item)/0.5s] scan points */
-} ScandataDat;
-#endif
+  struct {
+    uint8_t track_num          GNUC_PACKED;   /* Track number as in TOC */
+    uint16_t table_offset      GNUC_PACKED;   /* Index into scandata table */
+  } mpeg_track_offsets[EMPTY_ARRAY_SIZE] GNUC_PACKED;
+} ScandataDat3;
+
+typedef struct {
+  /* ScandataDat3 head; */
+  msf_t scandata_table[EMPTY_ARRAY_SIZE];
+} ScandataDat4;
+
 
 #ifdef __MWERKS__
 #pragma options align=reset

@@ -22,24 +22,25 @@
 #define __VCD_OBJ_H__
 
 #include "vcd_data_structures.h"
-#include "vcd_mpeg.h"
+#include "vcd_mpeg_stream.h"
 #include "vcd_iso9660.h"
 #include "vcd_files.h"
 #include "vcd_salloc.h"
 #include "vcd_directory.h"
 
 typedef struct {
-  VcdDataSource *source;
+  VcdMpegSource *source;
+  const struct vcd_mpeg_source_info *info;
   unsigned relative_start_extent; /* relative to iso data end */
-  unsigned length_sectors;
-  double playtime; /* playtime in secs based on timecode */
-  mpeg_info_t mpeg_info;
-  VcdList *scanpoints;
 } mpeg_track_t;
 
 struct _VcdObj {
   vcd_type_t type;
   bool broken_svcd_mode_flag;
+
+  unsigned pre_track_gap;
+  unsigned pre_data_gap;
+  unsigned post_data_gap;
 
   /* output */
   bool bin_file_2336_flag;

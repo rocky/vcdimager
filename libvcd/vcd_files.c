@@ -33,6 +33,7 @@
 #include "vcd_obj.h"
 #include "vcd_logging.h"
 #include "vcd_util.h"
+#include "vcd_mpeg_stream.h"
 
 static const char _rcsid[] = "$Id$";
 
@@ -239,9 +240,16 @@ set_info_vcd(VcdObj *obj, void *buf)
         {
           mpeg_track_t *track = _vcd_list_node_data (node);
           
-          if(track->mpeg_info.norm == MPEG_NORM_PAL 
-             || track->mpeg_info.norm == MPEG_NORM_PAL_S)
+          if(track->info->norm == MPEG_NORM_PAL 
+             || track->info->norm == MPEG_NORM_PAL_S)
             _set_bit(info_vcd.pal_flags, n);
+          else if (track->info->vsize == 288 || track->info->vsize == 576)
+            {
+              vcd_warn ("INFO.{VCD,SVD}: assuming PAL resolution type for track #%d"
+                        " -- are we creating a X(S)VCD?", n);
+              _set_bit(info_vcd.pal_flags, n);
+            }
+           
         }
       
       info_vcd.psd_size = UINT32_TO_BE(get_psd_size (obj));
@@ -288,9 +296,9 @@ set_tracks_svd (VcdObj *obj, void *buf)
        n++, node = _vcd_list_node_next (node))
     {
       mpeg_track_t *track = _vcd_list_node_data (node);
-      double playtime = track->playtime;
+      double playtime = track->info->playing_time;
        
-      switch (track->mpeg_info.norm)
+      switch (track->info->norm)
         {
         case MPEG_NORM_PAL:
         case MPEG_NORM_PAL_S:
@@ -303,11 +311,24 @@ set_tracks_svd (VcdObj *obj, void *buf)
           break;
           
         default:
-          vcd_warn("SVCD/TRACKS.SVCD: No MPEG video?");
+          if (track->info->vsize == 240 || track->info->vsize == 480)
+            {
+              vcd_warn ("TRACKS.SVD: assuming NTSC resolution type for track #%d"
+                        " -- are we creating a X(S)VCD?", n);
+              tracks_svd2->contents[n].video = 0x03;
+            }
+          else if (track->info->vsize == 288 || track->info->vsize == 576)
+            {
+              vcd_warn ("TRACKS.SVD: assuming PAL resolution type for track #%d"
+                        " -- are we creating a X(S)VCD?", n);
+              tracks_svd2->contents[n].video = 0x07;
+            }
+          else
+            vcd_warn("SVCD/TRACKS.SVCD: No MPEG video for track #%d?", n);
           break;
         }
 
-      tracks_svd2->contents[n].audio = 0x01; /* fixme -- assumption */
+      tracks_svd2->contents[n].audio = (int) track->info->audio_type;
 
       /* setting playtime */
       
@@ -316,25 +337,26 @@ set_tracks_svd (VcdObj *obj, void *buf)
 
         f = modf(playtime, &i);
 
-        if (i > 99*60)
+        if (playtime >= 6000.0)
           {
             vcd_warn ("SVCD/TRACKS.SVD: playing time value (%d seconds) to great,"
-                      " clipping to 99 minutes", (int) i);
-            i = 99*60;
+                      " clipping to 100 minutes", (int) i);
+            i = 5999.0;
+            f = 74.0 / 75.0;
           }
 
         lba_to_msf (i * 75, &(tracks_svd1->playing_time[n]));
-        tracks_svd1->playing_time[n].f = to_bcd8 (rint (f * 75));
+        tracks_svd1->playing_time[n].f = to_bcd8 (floor (f * 75.0));
       }
     }  
   
   memcpy (buf, &tracks_svd, sizeof(tracks_svd));
 }
 
-static unsigned 
-_get_scanpoint_count (const VcdObj *obj)
+static double
+_get_cumulative_playing_time (const VcdObj *obj, unsigned up_to_track_no)
 {
-  int count = 0;
+  double result = 0;
   VcdListNode *node;
 
   for (node = _vcd_list_begin (obj->mpeg_track_list);
@@ -343,10 +365,27 @@ _get_scanpoint_count (const VcdObj *obj)
     {
       mpeg_track_t *track = _vcd_list_node_data (node);
 
-      count += _vcd_list_length (track->scanpoints);
-    }
+      if (!up_to_track_no)
+        break;
 
-  return count;
+      result += track->info->playing_time;
+      up_to_track_no--;
+    }
+  
+  if (up_to_track_no)
+    vcd_warn ("internal error...");
+
+  return result;
+}
+
+static unsigned 
+_get_scanpoint_count (const VcdObj *obj)
+{
+  double total_playing_time;
+
+  total_playing_time = _get_cumulative_playing_time (obj, _vcd_list_length (obj->mpeg_track_list));
+
+  return ceil (total_playing_time * 2.0);
 }
 
 uint32_t 
@@ -356,9 +395,89 @@ get_search_dat_size (const VcdObj *obj)
     + (_get_scanpoint_count (obj) * sizeof (msf_t));
 }
 
+static VcdList *
+_make_track_scantable (const VcdObj *obj)
+{
+  VcdList *all_aps = _vcd_list_new ();
+  VcdList *scantable = _vcd_list_new ();
+  unsigned scanpoints = _get_scanpoint_count (obj);
+  unsigned track_no;
+  VcdListNode *node;
+
+  for (node = _vcd_list_begin (obj->mpeg_track_list), track_no = 0;
+       node != NULL;
+       node = _vcd_list_node_next (node), track_no++)
+    {
+      mpeg_track_t *track = _vcd_list_node_data (node);
+      VcdListNode *node = _vcd_list_begin (vcd_mpeg_source_get_info (track->source)->aps_list);
+      
+      for (; node; node = _vcd_list_node_next (node))
+        {
+          struct aps_data *_data = _vcd_malloc (sizeof (struct aps_data));
+          
+          _data->timestamp = ((struct aps_data *)_vcd_list_node_data (node))-> timestamp;
+          _data->packet_no = ((struct aps_data *)_vcd_list_node_data (node))-> packet_no;
+
+          _data->timestamp += _get_cumulative_playing_time (obj, track_no);
+          _data->packet_no += obj->iso_size + track->relative_start_extent;
+          _data->packet_no += obj->pre_data_gap;
+
+          _vcd_list_append (all_aps, _data);
+        }
+    }
+  
+  {
+    VcdListNode *aps_node = _vcd_list_begin (all_aps);
+    VcdListNode *n;
+    struct aps_data *_data;
+    double aps_time;
+    double playing_time;
+    int aps_packet;
+    double t;
+
+    playing_time = scanpoints;
+    playing_time /= 2;
+
+    _data = _vcd_list_node_data (aps_node);
+    aps_time = _data->timestamp;
+    aps_packet = _data->packet_no;
+
+    for (t = 0; t <= playing_time; t += 0.5)
+      {
+	for(n = _vcd_list_node_next (aps_node); n; n = _vcd_list_node_next (n))
+	  {
+	    _data = _vcd_list_node_data (n);
+
+	    if (fabs (_data->timestamp - t) < fabs (aps_time - t))
+	      {
+		aps_node = n;
+		aps_time = _data->timestamp;
+		aps_packet = _data->packet_no;
+	      }
+	    else 
+	      break;
+	  }
+
+        {
+          uint32_t *lsect = _vcd_malloc (sizeof (uint32_t));
+          *lsect = aps_packet;
+          _vcd_list_append (scantable, lsect);
+          /* vcd_debug ("%f %f %d", t, aps_time, aps_packet); */
+        }
+        
+      }
+
+  }
+
+  _vcd_list_free (all_aps, true);
+
+  return scantable;
+}
+
 void
 set_search_dat (VcdObj *obj, void *buf)
 {
+  VcdList *scantable;
   VcdListNode *node;
   SearchDat search_dat;
   unsigned n;
@@ -376,84 +495,196 @@ set_search_dat (VcdObj *obj, void *buf)
 
   memcpy (buf, &search_dat, sizeof (search_dat));
   
-  n = 0;
+  scantable = _make_track_scantable (obj);
 
-  for (node = _vcd_list_begin (obj->mpeg_track_list);
+  for (node = _vcd_list_begin (scantable), n = 0;
        node != NULL;
-       node = _vcd_list_node_next (node))
+       node = _vcd_list_node_next (node), n++)
     {
-      mpeg_track_t *track = _vcd_list_node_data (node);
       SearchDat *search_dat2 = buf;
-      VcdListNode *node2;
-      
-      for (node2 = _vcd_list_begin (track->scanpoints);
-           node2 != NULL;
-           node2 = _vcd_list_node_next (node2))
-        {
-          uint32_t sect = *(uint32_t*)_vcd_list_node_data (node2);
+      uint32_t sect = *(uint32_t *) _vcd_list_node_data (node);
           
-          sect += track->relative_start_extent;
-          sect += obj->iso_size;
-
-          sect += 30 + 150; /* pre-data padding + msf-offset */
-
-          lba_to_msf(sect, &(search_dat2->points[n]));
-          n++;
-        }
+      lba_to_msf(sect + 150, &(search_dat2->points[n]));
     }
+
+  assert (n = _get_scanpoint_count (obj));
+
+  _vcd_list_free (scantable, true);
 }
 
+static uint32_t 
+_get_scandata_count (const struct vcd_mpeg_source_info *info)
+{ 
+  return ceil (info->playing_time * 2.0);
+}
+
+static uint32_t *
+_get_scandata_table (const struct vcd_mpeg_source_info *info)
+{
+  VcdListNode *n, *aps_node = _vcd_list_begin (info->aps_list);
+  struct aps_data *_data;
+  double aps_time, t;
+  int aps_packet;
+  uint32_t *retval;
+  unsigned i;
+  
+  retval = _vcd_malloc (_get_scandata_count (info) * sizeof (uint32_t));
+
+  _data = _vcd_list_node_data (aps_node);
+  aps_time = _data->timestamp;
+  aps_packet = _data->packet_no;
+
+  for (t = 0, i = 0; t <= info->playing_time; t += 0.5, i++)
+    {
+      for(n = _vcd_list_node_next (aps_node); n; n = _vcd_list_node_next (n))
+        {
+          _data = _vcd_list_node_data (n);
+
+          if (fabs (_data->timestamp - t) < fabs (aps_time - t))
+            {
+              aps_node = n;
+              aps_time = _data->timestamp;
+              aps_packet = _data->packet_no;
+            }
+          else 
+            break;
+        }
+
+      /* vcd_debug ("%f %f %d", t, aps_time, aps_packet); */
+
+      assert (i < _get_scandata_count (info));
+
+      retval[i] = aps_packet;
+    }
+
+  assert (i = _get_scandata_count (info));
+
+  return retval;
+}
 
 uint32_t 
 get_scandata_dat_size (const VcdObj *obj)
 {
-  return sizeof (ScandataDat_v2) 
-    + (_get_scanpoint_count (obj) * sizeof (msf_t));
+  uint32_t retval = 0;
+
+  /* struct 1 */
+  retval += sizeof (ScandataDat1);
+  retval += sizeof (msf_t) * _vcd_list_length (obj->mpeg_track_list);
+
+  /* struct 2 */
+  assert (sizeof (ScandataDat2) == 0);
+  retval += sizeof (ScandataDat2);
+  retval += sizeof (uint16_t) * 0;
+
+  /* struct 3 */
+  retval += sizeof (ScandataDat3);
+  retval += (sizeof (uint8_t) + sizeof (uint16_t)) * _vcd_list_length (obj->mpeg_track_list);
+
+  /* struct 4 */
+  assert (sizeof (ScandataDat4) == 0);
+  retval += sizeof (ScandataDat4);
+  {
+    VcdListNode *node;
+    for (node = _vcd_list_begin (obj->mpeg_track_list);
+         node != NULL;
+         node = _vcd_list_node_next (node))
+      {
+        const mpeg_track_t *track = _vcd_list_node_data (node);
+        
+        retval += sizeof (msf_t) * _get_scandata_count (track->info);
+      }
+    
+  }
+
+  return retval;
 }
 
 void
 set_scandata_dat (VcdObj *obj, void *buf)
 {
+  unsigned tracks = _vcd_list_length (obj->mpeg_track_list);
   VcdListNode *node;
-  ScandataDat_v2 scandata_dat;
+  ScandataDat1 *scandata_dat1 = (ScandataDat1 *) buf;
+  ScandataDat2 *scandata_dat2 = (ScandataDat2 *) &(scandata_dat1->cum_playtimes[tracks]);
+  ScandataDat3 *scandata_dat3 = (ScandataDat3 *) &(scandata_dat2->spi_indexes[0]);
+  ScandataDat4 *scandata_dat4 = (ScandataDat4 *) &(scandata_dat3->mpeg_track_offsets[tracks]);
   unsigned n;
+  uint16_t _tmp_offset;
 
-  assert (obj->type == VCD_TYPE_VCD2);
+  assert (obj->type == VCD_TYPE_SVCD);
 
-  memset (&scandata_dat, 0, sizeof (scandata_dat));
+  /* memset (buf, 0, get_scandata_dat_size (obj)); */
 
-  strncpy (scandata_dat.file_id, SCANDATA_FILE_ID, sizeof (SCANDATA_FILE_ID));
+  /* struct 1 */
+  strncpy (scandata_dat1->file_id, SCANDATA_FILE_ID, sizeof (SCANDATA_FILE_ID));
   
-  scandata_dat.version = SCANDATA_VERSION;
-  scandata_dat.scan_points = UINT16_TO_BE (_get_scanpoint_count (obj));
+  scandata_dat1->version = 0x01;
+  scandata_dat1->reserved = 0x00;
+  scandata_dat1->scandata_count = UINT16_TO_BE (_get_scanpoint_count (obj));
 
-  memcpy (buf, &scandata_dat, sizeof (scandata_dat));
-  
-  n = 0;
+  scandata_dat1->track_count = UINT16_TO_BE (tracks);
+  scandata_dat1->spi_count = UINT16_TO_BE (0);
 
-  for (node = _vcd_list_begin (obj->mpeg_track_list);
-       node != NULL;
-       node = _vcd_list_node_next (node))
+  for (n = 0; n < tracks; n++)
     {
-      mpeg_track_t *track = _vcd_list_node_data (node);
-      ScandataDat_v2 *scandata_dat2 = buf;
-      VcdListNode *node2;
-      
-      for (node2 = _vcd_list_begin (track->scanpoints);
-           node2 != NULL;
-           node2 = _vcd_list_node_next (node2))
-        {
-          uint32_t sect = *(uint32_t*)_vcd_list_node_data (node2);
-          
-          sect += track->relative_start_extent;
-          sect += obj->iso_size;
+      double playtime = _get_cumulative_playing_time (obj, n + 1);
+      double i = 0, f = 0;
 
-          sect += 30 + 150; /* pre-data padding + msf-offset */
+      f = modf(playtime, &i);
 
-          lba_to_msf(sect, &(scandata_dat2->points[n]));
-          n++;
-        }
+      while (i >= (60 * 100))
+        i -= (60 * 100);
+
+      assert (i >= 0);
+
+      lba_to_msf (i * 75, &(scandata_dat1->cum_playtimes[n]));
+      scandata_dat1->cum_playtimes[n].f = to_bcd8 (floor (f * 75.0));
     }
+
+  /* struct 2 -- nothing */
+
+  /* struct 3/4 */
+
+  scandata_dat3->mpegtrack_start_index = UINT16_TO_BE (0);
+
+  _tmp_offset = 0;
+
+  for (n = 0, node = _vcd_list_begin (obj->mpeg_track_list);
+       node != NULL;
+       n++, node = _vcd_list_node_next (node))
+    {
+      const mpeg_track_t *track = _vcd_list_node_data (node);
+      uint32_t *_table;
+      int point, scanpoints = _get_scandata_count (track->info);
+      
+
+      scandata_dat3->mpeg_track_offsets[n].track_num = n + 2;
+      scandata_dat3->mpeg_track_offsets[n].table_offset 
+        = UINT16_TO_BE (_tmp_offset * sizeof (msf_t));
+
+      _table = _get_scandata_table (track->info);
+
+      for (point = 0; point < scanpoints; point++)
+        {
+          uint32_t lsect = _table[point];
+
+          lsect += track->relative_start_extent;
+          lsect += obj->iso_size;
+          lsect += obj->pre_data_gap;
+
+          /* vcd_debug ("lsect %d %d", point, lsect); */
+
+          lba_to_msf(lsect + 150, &(scandata_dat4->scandata_table[_tmp_offset + point]));
+        }
+
+      free (_table);
+
+      _tmp_offset += scanpoints;
+    }
+
+  /* struct 4 */
+
+  
 }
 
 /* eof */

@@ -22,7 +22,6 @@
 #define VCDFILES_H
 
 #include "vcd.h"
-#include "vcd_mpeg.h"
 
 #define INFO_VCD_SECTOR    150
 #define ENTRIES_VCD_SECTOR 151

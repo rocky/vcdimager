@@ -431,8 +431,14 @@ main (int argc, const char *argv[])
   }
 
   for (n = 0; gl.track_fnames[n] != NULL; n++)
-    vcd_obj_append_mpeg_track (gl_vcd_obj,
-                               vcd_data_source_new_stdio (gl.track_fnames[n]));
+    {
+      VcdDataSource *data_source = vcd_data_source_new_stdio (gl.track_fnames[n]);
+
+      assert (data_source != NULL);
+
+      vcd_obj_append_mpeg_track (gl_vcd_obj,
+                                 vcd_mpeg_source_new (data_source));
+    }
 
   sectors = vcd_obj_begin_output (gl_vcd_obj);
 

@@ -1,3 +1,30 @@
+2001-05-04  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_files.c: fixed some floating point roundings into
+		right direction
+
+	* libvcd/vcd_mpeg.[ch]: emptied since no longer needed in this form
+
+	* heavy coding session
+	* added audio stream configuration detection
+	* added hack to detect NTSC/PAL for non-standard resolutions 
+	 	should improve X(S)VCD support...
+
+2001-05-04  Keith White <Keith.White@site.uottawa.ca>
+
+	* frontends/cli/vcdrip.c (ripspi): fixed end of item detection
+	
+2001-05-03  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* change gap sizes for svcd
+	* revamped scantable generation
+	* remove scandata.dat creation for vcds, and enabled it for svcds
+	* installed abstracted mpeg stream
+
+2001-05-02  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_mpeg_stream.c: started to abstract mpeg stream
+
 2001-05-01  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* configure.in: bumped version up to 0.6.0

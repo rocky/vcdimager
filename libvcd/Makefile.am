@@ -26,6 +26,8 @@ libvcd_a_SOURCES = \
 	vcd_logging.h \
 	vcd_mpeg.c \
 	vcd_mpeg.h \
+	vcd_mpeg_stream.c \
+	vcd_mpeg_stream.h \
 	vcd_obj.h \
 	vcd_salloc.c \
 	vcd_salloc.h \

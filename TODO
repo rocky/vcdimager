@@ -1,26 +1,42 @@
 -*- text -*-
 
 TODO LIST:
+~~~~~~~~~~
 
 - version 1.0
  * check for VideoCD1.1/VideoCD2.0/SuperVideoCD1.0 conformance
  * optimize/improve MPEG detection/scanning/handling code
  * documentation
- * extended pbc/menu support
+ * extended pbc/menu support (support is available as contrib patch on webpage)
+ * XML frontend (DTD prototype already defined)
 
 - version 2.0+
  * C++ rewrite (OOD & OOA already on paper)
- * on-the-fly mpeg padding/realigning
  * releasing libvcd
- * XML frontend (DTD prototype already defined)
  * add support for interactive menus
  * add support for still images
  * add support for audio tracks
  * gtkmm frontend
 
-BUGS:
 
-* see file 'BUGS'
+BUGS:
+~~~~~
+
+ * see file 'BUGS'
+
+
+MISSING INFORMATION (read `INFO WISHLIST'):
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ * VCD 2.0 specification
+
+ * Philips' SVCD specification 
+
+ * is zero sector padding in mpeg tracks really required for VCD 1.1/2.0?
+
+ * how are access point sectors defined for VCD 1.1/2.0?
+
+ * ...so much more... :-)
 
 --
 $Id$
