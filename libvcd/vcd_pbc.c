@@ -572,7 +572,7 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 	_md->flags.CommandListFlag = false;
 
 	vcd_assert (_pbc->lid < 0x8000);
-	_md->lid = UINT16_TO_BE (_pbc->lid | (_pbc->rejected ? 0x8000 : 0));
+	_md->lid = uint16_to_be (_pbc->lid | (_pbc->rejected ? 0x8000 : 0));
 
 	_md->prev_ofs = 
 	  uint16_to_be (_lookup_psd_offset (obj, _pbc->prev_id, extended));
@@ -760,7 +760,7 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 		  vcd_error ("PSD: referenced play item '%s' not found", 
 			     _pbc->item_id);
 
-		_md->change_pic = UINT16_TO_BE (_pin);
+		_md->change_pic = uint16_to_be (_pin);
 
 		/* sanity checks */
 

@@ -1,5 +1,8 @@
 2002-12-25  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* libvcd/vcd_cd_sector.c: replaced 2 endian conversion macros by
+	corresponding inline functions
+
 	* frontends/cli/vcdimager.c, frontends/xml/vcd_xml_build.c: added
 	poptSetOtherOptionHelp for non-option argument(s)
 

@@ -36,6 +36,8 @@
 #include <libvcd/vcd_iso9660_private.h>
 #include <libvcd/vcd_files.h>
 #include <libvcd/vcd_files_private.h>
+#include <libvcd/vcd_cd_sector.h>
+#include <libvcd/vcd_cd_sector_private.h>
 
 #define CHECK_SIZEOF(typnam) { \
   printf ("checking sizeof (%s) ...", #typnam); \
@@ -102,6 +104,12 @@ int main (int argc, const char *argv[])
   CHECK_SIZEOF(ScandataDat2);
   CHECK_SIZEOF(ScandataDat3);
   CHECK_SIZEOF(ScandataDat4);
+
+  /* vcd_cd_sector_private.h */
+  CHECK_SIZEOF(raw_cd_sector_t);
+  CHECK_SIZEOF(mode0_sector_t);
+  CHECK_SIZEOF(mode2_form1_sector_t);
+  CHECK_SIZEOF(mode2_form2_sector_t);
 
   if (fail)
     return 1;

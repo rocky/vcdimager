@@ -46,10 +46,14 @@ typedef struct {
   uint8_t user_data[EMPTY_ARRAY_SIZE];
 } raw_cd_sector_t;
 
+#define raw_cd_sector_t_SIZEOF (SYNC_LEN+HEADER_LEN)
+
 typedef struct {
   raw_cd_sector_t sector_header;
   uint8_t data[2336];
 } mode0_sector_t;
+
+#define mode0_sector_t_SIZEOF CDDA_SIZE
 
 #define SUBHDR_LEN 8
 
@@ -62,6 +66,8 @@ typedef struct {
   uint8_t l2_q[L2_Q];
 } mode2_form1_sector_t;
 
+#define mode2_form1_sector_t_SIZEOF CDDA_SIZE
+
 typedef struct {
   raw_cd_sector_t sector_header;
   uint8_t subheader[SUBHDR_LEN];
@@ -69,8 +75,9 @@ typedef struct {
   uint32_t edc;
 } mode2_form2_sector_t;
 
-const static uint32_t EDC_crctable[256] =
-{
+#define mode2_form2_sector_t_SIZEOF CDDA_SIZE
+
+const static uint32_t EDC_crctable[256] = {
   0x00000000l, 0x90910101l, 0x91210201l, 0x01b00300l,
   0x92410401l, 0x02d00500l, 0x03600600l, 0x93f10701l,
   0x94810801l, 0x04100900l, 0x05a00a00l, 0x95310b01l,

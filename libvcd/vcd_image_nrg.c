@@ -163,7 +163,7 @@ _parse_footer (_img_nrg_src_t *_obj)
     if (buf.v50.ID == UINT32_TO_BE (0x4e45524f)) /* "NERO" */
       {
 	vcd_info ("detected v50 (32bit offsets) NRG magic");
-	footer_start = UINT32_TO_BE (buf.v50.footer_ofs); 
+	footer_start = uint32_to_be (buf.v50.footer_ofs); 
       }
     else if (buf.v55.ID == UINT32_TO_BE (0x4e455235)) /* "NER5" */
       {
@@ -558,7 +558,7 @@ _write_tail (_img_nrg_snk_t *_obj, uint32_t offset)
 
   _size = _obj->tracks * sizeof (_etnf_array_t);
   _chunk.id = UINT32_TO_BE (ETNF_ID);
-  _chunk.len = UINT32_TO_BE (_size);
+  _chunk.len = uint32_to_be (_size);
 
   vcd_data_sink_write (_obj->nrg_snk, &_chunk, sizeof (_chunk_t), 1);
 
@@ -573,10 +573,10 @@ _write_tail (_img_nrg_snk_t *_obj, uint32_t offset)
 	  _etnf_array_t _etnf = { 0, };
 
 	  _etnf.type = UINT32_TO_BE (0x3);
-	  _etnf.start_lsn = UINT32_TO_BE (_map (_obj, _cue->lsn));
-	  _etnf.start = UINT32_TO_BE (_map (_obj, _cue->lsn) * M2RAW_SIZE);
+	  _etnf.start_lsn = uint32_to_be (_map (_obj, _cue->lsn));
+	  _etnf.start = uint32_to_be (_map (_obj, _cue->lsn) * M2RAW_SIZE);
 	  
-	  _etnf.length = UINT32_TO_BE ((_cue2->lsn - _cue->lsn) * M2RAW_SIZE);
+	  _etnf.length = uint32_to_be ((_cue2->lsn - _cue->lsn) * M2RAW_SIZE);
 
 	  vcd_data_sink_write (_obj->nrg_snk, &_etnf, sizeof (_etnf_array_t), 1);
 	}
@@ -584,7 +584,7 @@ _write_tail (_img_nrg_snk_t *_obj, uint32_t offset)
     }
   
   {
-    uint32_t tracks = UINT32_TO_BE (_obj->tracks);
+    uint32_t tracks = uint32_to_be (_obj->tracks);
 
     _chunk.id = UINT32_TO_BE (SINF_ID);
     _chunk.len = UINT32_TO_BE (sizeof (uint32_t));
@@ -598,7 +598,7 @@ _write_tail (_img_nrg_snk_t *_obj, uint32_t offset)
   vcd_data_sink_write (_obj->nrg_snk, &_chunk, sizeof (_chunk_t), 1);
 
   _chunk.id = UINT32_TO_BE (NERO_ID);
-  _chunk.len = UINT32_TO_BE (offset);
+  _chunk.len = uint32_to_be (offset);
   vcd_data_sink_write (_obj->nrg_snk, &_chunk, sizeof (_chunk_t), 1);
 
   return 0;

@@ -36,7 +36,7 @@
 
 static const char _rcsid[] = "$Id$";
 
-const static uint8_t sync_pattern[12] = {
+static const uint8_t sync_pattern[12] = {
   0x00, 0xff, 0xff, 0xff,
   0xff, 0xff, 0xff, 0xff,
   0xff, 0xff, 0xff, 0x00
@@ -212,7 +212,7 @@ do_encode_L2 (void *buf, sectortype_t sectortype, uint32_t address)
     {
       mode2_form1_sector_t *sector = buf;
 
-      sector->edc = UINT32_TO_LE(build_edc(buf, 16, 16+8+2048-1));
+      sector->edc = uint32_to_le(build_edc(buf, 16, 16+8+2048-1));
 
       encode_L2_P((uint8_t*)buf+SYNC_LEN);
       encode_L2_Q((uint8_t*)buf+SYNC_LEN);
@@ -222,7 +222,7 @@ do_encode_L2 (void *buf, sectortype_t sectortype, uint32_t address)
     {
       mode2_form2_sector_t *sector = buf;
 
-      sector->edc = UINT32_TO_LE(build_edc(buf, 16, 16+8+2324-1));
+      sector->edc = uint32_to_le(build_edc(buf, 16, 16+8+2324-1));
     }
     break;
   default:
