@@ -52,7 +52,7 @@ static const char zero[ISO_BLOCKSIZE] = { 0, };
 struct _cust_file_t {
   char *iso_pathname;
   VcdDataSource *file;
-  int raw_flag;
+  bool raw_flag;
   
   uint32_t size;
   uint32_t start_extent;
@@ -68,11 +68,12 @@ struct _dict_t
   uint32_t sector;
   uint32_t length;
   void *buf;
-  int flags;
+  uint8_t flags;
 };
 
 static void
-_dict_insert (VcdObj *obj, const char key[], uint32_t sector, uint32_t length, int end_flags)
+_dict_insert (VcdObj *obj, const char key[], uint32_t sector, uint32_t length, 
+              uint8_t end_flags)
 {
   struct _dict_t *_new_node;
 
@@ -148,7 +149,7 @@ _dict_get_bysector (VcdObj *obj, uint32_t sector)
   return NULL;
 }
 
-static int
+static uint8_t
 _dict_get_sector_flags (VcdObj *obj, uint32_t sector)
 {
   const struct _dict_t *p;
@@ -191,7 +192,7 @@ _dict_clean (VcdObj *obj)
       free (p->key);
       free (p->buf);
 
-      _vcd_list_node_free (node, TRUE);
+      _vcd_list_node_free (node, true);
     }
 }
 
@@ -274,7 +275,7 @@ vcd_obj_remove_mpeg_track (VcdObj *obj, int track_id)
   obj->relative_end_extent -= length;
 
   /* shift up */
-  _vcd_list_node_free (node, TRUE);
+  _vcd_list_node_free (node, true);
 }
 
 int
@@ -406,9 +407,9 @@ vcd_obj_destroy (VcdObj *obj)
       free (p->iso_pathname);
     }
 
-  _vcd_list_free (obj->custom_file_list, TRUE);
+  _vcd_list_free (obj->custom_file_list, true);
 
-  _vcd_list_free (obj->mpeg_track_list, TRUE);
+  _vcd_list_free (obj->mpeg_track_list, true);
 
   free (obj);
 }
@@ -480,10 +481,10 @@ vcd_obj_set_param (VcdObj *obj, vcd_parm_t param, const void *arg)
   case VCD_PARM_SEC_TYPE:
     switch (*(const int *)arg) {
     case 2336:
-      obj->bin_file_2336_flag = TRUE;
+      obj->bin_file_2336_flag = true;
       break;
     case 2352:
-      obj->bin_file_2336_flag = FALSE;
+      obj->bin_file_2336_flag = false;
       break;
     default:
       assert (0);
@@ -497,7 +498,7 @@ vcd_obj_set_param (VcdObj *obj, vcd_parm_t param, const void *arg)
 
 int
 vcd_obj_add_file (VcdObj *obj, const char iso_pathname[],
-                  VcdDataSource *file, int raw_flag)
+                  VcdDataSource *file, bool raw_flag)
 {
   uint32_t size = 0, sectors = 0;
  
@@ -616,20 +617,20 @@ _finalize_vcd_iso_track (VcdObj *obj)
 
     _vcd_directory_mkfile (obj->dir, "VCD/ENTRIES.VCD;1", 
                            _dict_get_bykey (obj, "entries")->sector, 
-                           ISO_BLOCKSIZE, FALSE, 0);    
+                           ISO_BLOCKSIZE, false, 0);    
     _vcd_directory_mkfile (obj->dir, "VCD/INFO.VCD;1",
                            _dict_get_bykey (obj, "info")->sector, 
-                           ISO_BLOCKSIZE, FALSE, 0);
+                           ISO_BLOCKSIZE, false, 0);
 
     /* only for vcd2.0 */
     if (obj->type == VCD_TYPE_VCD2)
       {
         _vcd_directory_mkfile (obj->dir, "VCD/LOT.VCD;1", 
                                _dict_get_bykey (obj, "lot")->sector, 
-                               ISO_BLOCKSIZE*LOT_VCD_SIZE, FALSE, 0);
+                               ISO_BLOCKSIZE*LOT_VCD_SIZE, false, 0);
         _vcd_directory_mkfile (obj->dir, "VCD/PSD.VCD;1", 
                                _dict_get_bykey (obj, "psd")->sector, 
-                               get_psd_size (obj), FALSE, 0);
+                               get_psd_size (obj), false, 0);
       }
     break;
 
@@ -640,22 +641,22 @@ _finalize_vcd_iso_track (VcdObj *obj)
 
     _vcd_directory_mkfile (obj->dir, "SVCD/ENTRIES.SVD;1",
                            _dict_get_bykey (obj, "entries")->sector, 
-                           ISO_BLOCKSIZE, FALSE, 0);    
+                           ISO_BLOCKSIZE, false, 0);    
     _vcd_directory_mkfile (obj->dir, "SVCD/INFO.SVD;1",
                            _dict_get_bykey (obj, "info")->sector, 
-                           ISO_BLOCKSIZE, FALSE, 0);
+                           ISO_BLOCKSIZE, false, 0);
     _vcd_directory_mkfile (obj->dir, "SVCD/LOT.SVD;1",
                            _dict_get_bykey (obj, "lot")->sector, 
-                           ISO_BLOCKSIZE*LOT_VCD_SIZE, FALSE, 0);
+                           ISO_BLOCKSIZE*LOT_VCD_SIZE, false, 0);
     _vcd_directory_mkfile (obj->dir, "SVCD/PSD.SVD;1", 
                            _dict_get_bykey (obj, "psd")->sector, 
-                           get_psd_size (obj), FALSE, 0);
+                           get_psd_size (obj), false, 0);
     _vcd_directory_mkfile (obj->dir, "SVCD/SEARCH.DAT;1", 
                            _dict_get_bykey (obj, "search")->sector, 
-                           sizeof (SearchDat), FALSE, 0);
+                           sizeof (SearchDat), false, 0);
     _vcd_directory_mkfile (obj->dir, "SVCD/TRACKS.SVD;1",
                            _dict_get_bykey (obj, "tracks")->sector, 
-                           ISO_BLOCKSIZE, FALSE, 0);
+                           ISO_BLOCKSIZE, false, 0);
     break;
 
   default:
@@ -726,7 +727,7 @@ _finalize_vcd_iso_track (VcdObj *obj)
 
         _vcd_directory_mkfile (obj->dir, avseq_pathname, extent+PRE_DATA_GAP,
                                track->length_sectors*ISO_BLOCKSIZE,
-                               TRUE, n+1);
+                               true, n + 1);
       }
 
   }
@@ -781,7 +782,7 @@ _write_m2_image_sector (VcdObj *obj, const void *data, uint32_t extent,
 
   obj->sectors_written++;
 
-  return _callback_wrapper (obj, FALSE);
+  return _callback_wrapper (obj, false);
 }
 
 static int
@@ -793,7 +794,7 @@ _write_m2_raw_image_sector (VcdObj *obj, const void *data, uint32_t extent)
                           data, extent);
   obj->sectors_written++;
 
-  return _callback_wrapper (obj, FALSE);
+  return _callback_wrapper (obj, false);
 }
 
 static void
@@ -897,7 +898,7 @@ _write_vcd_iso_track (VcdObj *obj)
   for (n = 0;n < 225; n++)
     {
       const void *content = NULL;
-      int flags = SM_DATA;
+      uint8_t flags = SM_DATA;
 
       content = _dict_get_sector (obj, n);
       flags |= _dict_get_sector_flags (obj, n);
@@ -1084,7 +1085,7 @@ vcd_obj_begin_output (VcdObj *obj)
   assert (_vcd_list_length (obj->mpeg_track_list) > 0);
 
   assert (!obj->in_output);
-  obj->in_output = TRUE;
+  obj->in_output = true;
 
   obj->in_track = 1;
   obj->sectors_written = 0;
@@ -1116,7 +1117,7 @@ vcd_obj_write_image (VcdObj *obj, VcdDataSink *bin_file,
   obj->callback_user_data = user_data;
   obj->bin_file = bin_file;
   
-  if (_callback_wrapper (obj, TRUE))
+  if (_callback_wrapper (obj, true))
     return 1;
 
   if (_write_vcd_iso_track (obj))
@@ -1125,14 +1126,14 @@ vcd_obj_write_image (VcdObj *obj, VcdDataSink *bin_file,
   for (track = 0;track < _vcd_list_length (obj->mpeg_track_list);track++) {
     obj->in_track++;
 
-    if (_callback_wrapper (obj, TRUE))
+    if (_callback_wrapper (obj, true))
       return 1;
 
     if (_write_sectors (obj, track))
       return 1;
   }
 
-  if (_callback_wrapper (obj, TRUE))
+  if (_callback_wrapper (obj, true))
     return 1;
   
   return 0; /* ok */
@@ -1144,13 +1145,13 @@ vcd_obj_end_output (VcdObj *obj)
   assert (obj != NULL);
 
   assert (obj->in_output);
-  obj->in_output = FALSE;
+  obj->in_output = false;
 
   _vcd_directory_destroy (obj->dir);
   _vcd_salloc_destroy (obj->iso_bitmap);
 
   _dict_clean (obj);
-  _vcd_list_free (obj->buffer_dict_list, TRUE);
+  _vcd_list_free (obj->buffer_dict_list, true);
 
   if (obj->bin_file)
     vcd_data_sink_destroy (obj->bin_file); /* fixme -- try moving it to

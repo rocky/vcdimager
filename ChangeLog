@@ -1,3 +1,7 @@
+2000-12-19  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* make use of C99's <stdbool.h> defines
+
 2000-12-18  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* replaced almost every malloc with _vcd_malloc

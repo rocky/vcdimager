@@ -46,7 +46,7 @@ typedef struct
 
 typedef struct 
 {
-  int is_dir;
+  bool is_dir;
   char *name;
   uint8_t xa_type;
   uint8_t xa_filenum;
@@ -298,7 +298,7 @@ _vcd_directory_new (void)
   dir->root = _node_new();
   data = &(dir->root->data);
 
-  data->is_dir = TRUE;
+  data->is_dir = true;
   data->name = _memdup("\0", 2);
   data->xa_type = XA_FORM1_DIR;
   data->xa_filenum = 0x00;
@@ -375,7 +375,7 @@ _vcd_directory_mkdir (VcdDirectory *dir, const char pathname[])
 
     _node_append_node(pdir, newnode);
 
-    newnode->data.is_dir = TRUE;
+    newnode->data.is_dir = true;
     newnode->data.name = strdup(splitpath[level-1]);
     newnode->data.xa_type = XA_FORM1_DIR;
     newnode->data.xa_filenum = 0x00;
@@ -422,7 +422,7 @@ _vcd_directory_mkfile (VcdDirectory *dir, const char pathname[],
 
     _node_append_node (pdir, newnode);
 
-    newnode->data.is_dir = FALSE;
+    newnode->data.is_dir = false;
     newnode->data.name = strdup (splitpath[level-1]);
     newnode->data.xa_type = form2_flag ? XA_FORM2_FILE : XA_FORM1_FILE;
     newnode->data.xa_filenum = filenum;

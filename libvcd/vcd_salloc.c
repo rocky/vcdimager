@@ -61,16 +61,16 @@ _vcd_salloc_set_size (VcdSalloc *bitmap, uint32_t newlen)
   bitmap->len = newlen;
 }
 
-static int
+static bool
 _vcd_salloc_is_set (const VcdSalloc *bitmap, uint32_t sector)
 {
   unsigned _byte = sector / 8;
   unsigned _bit = sector % 8;
 
   if (_byte < bitmap->len)
-    return bitmap->data[_byte] & (1 << _bit);
+    return (bitmap->data[_byte] & (1 << _bit)) != 0;
   else
-    return FALSE;
+    return false;
 }
 
 static void

@@ -66,7 +66,7 @@ vcd_obj_set_param (VcdObj *obj, vcd_parm_t param, const void *arg);
    mode2 subheader, and thus needs to be a multiple of 2336 byte blocksize */
 int
 vcd_obj_add_file (VcdObj *obj, const char iso_pathname[],
-                  VcdDataSource *file, int raw_flag);
+                  VcdDataSource *file, bool raw_flag);
 
 /* this one is for actually adding mpeg tracks to VCD, returns item a
    id, or a negative value for error..  */

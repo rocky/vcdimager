@@ -40,7 +40,7 @@ struct _VcdObj {
   vcd_type_t type;
 
   /* output */
-  int bin_file_2336_flag;
+  bool bin_file_2336_flag;
   VcdDataSink *bin_file;
   /* VcdDataSink* cue_file; */
 
@@ -64,7 +64,7 @@ struct _VcdObj {
   VcdDirectory *dir;
 
   /* state info */
-  int in_output;
+  bool in_output;
 
   unsigned sectors_written;
   unsigned in_track;

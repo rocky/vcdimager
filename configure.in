@@ -51,6 +51,7 @@ dnl headers
 AC_DEFINE(_GNU_SOURCE)
 AC_STDC_HEADERS
 AC_HAVE_HEADERS(stdint.h)
+AC_HAVE_HEADERS(stdbool.h)
 
 if test "x$enable_cli_fe" = "xyes"; then
  AC_CHECK_HEADER(popt.h,, enable_cli_fe=no)

@@ -106,7 +106,7 @@ vcd_mpeg_get_type (const void *packet, mpeg_type_info_t *type_info);
 double
 vcd_mpeg_get_timecode (const void *packet);
 
-int
+bool
 vcd_mpeg_get_info (const void *packet, mpeg_info_t *mpeg_info);
 
 #ifdef __cplusplus

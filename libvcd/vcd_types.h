@@ -23,14 +23,14 @@
 
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
+#else
+#warning ISO/IEC 9899:1999 <stdint.h> missing
 #endif
 
-#ifndef FALSE
-#define FALSE 0
-#endif 
-
-#ifndef TRUE
-#define TRUE 1
+#ifdef HAVE_STDBOOL_H
+#include <stdbool.h>
+#else
+#warning ISO/IEC 9899:1999 <stdbool.h> missing
 #endif
 
 #if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)

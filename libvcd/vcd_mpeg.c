@@ -505,7 +505,7 @@ vcd_mpeg_get_timecode (const void *packet)
   return -1;
 }
 
-int
+bool
 vcd_mpeg_get_info (const void *packet, mpeg_info_t *info)
 {
   mpeg_type_info_t _info;
@@ -533,10 +533,10 @@ vcd_mpeg_get_info (const void *packet, mpeg_info_t *info)
 
       info->norm = _get_norm (info->hsize, info->vsize, info->frate);
 
-      return TRUE;
+      return true;
     }              
 
-  return FALSE;
+  return false;
 }
 
 
