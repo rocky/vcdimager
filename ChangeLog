@@ -1,3 +1,9 @@
+2000-11-15  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_files.c (set_psd_vcd): fixed (missing) setting of itemid 
+		(and a potential buffer overun bug)
+	(set_info_vcd): last_psd_ofs set to end of list descriptor
+
 2000-11-14  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_bytesex.c (msf_to_lba): new function

@@ -74,36 +74,41 @@ set_psd_size(VcdObj *obj)
 }
 
 void
-set_psd_vcd(VcdObj *obj)
+set_psd_vcd (VcdObj *obj)
 {
   int n;
 
-  memset(obj->psd_vcd_buf, 0, sizeof(obj->psd_vcd_buf));
+  memset (obj->psd_vcd_buf, 0, sizeof (obj->psd_vcd_buf));
 
-  for(n = 0;n < obj->mpeg_tracks_num;n++) {
-    PsdPlayListDescriptor _md;
-    memset(&_md, 0, sizeof(_md));
+  for (n = 0; n < obj->mpeg_tracks_num; n++)
+    {
+      const int noi = 1;
+      int descriptor_size = sizeof (PsdPlayListDescriptor) + (noi * sizeof (uint16_t));
+      PsdPlayListDescriptor *_md = malloc (descriptor_size);
 
-    _md.type = PSD_TYPE_PLAY_LIST;
-    _md.noi = 1;
-    _md.lid = UINT16_TO_BE(n+1);
-    _md.prev_ofs = UINT16_TO_BE(n ? (n-1)<<1 : 0xffff);
-    _md.next_ofs = UINT16_TO_BE((n+1) << 1);
-    _md.retn_ofs = UINT16_TO_BE((obj->psd_size-8) >> 3);
-    _md.ptime = UINT16_TO_BE(0x0000);
-    _md.wtime = 0x05;
-    _md.atime = 0x00;
-    _md.itemid[0] = UINT16_TO_BE(n+2);
+      memset(_md, 0, descriptor_size);
 
-    memcpy(obj->psd_vcd_buf+(n << 4), &_md, sizeof(_md));
-  }
+      _md->type = PSD_TYPE_PLAY_LIST;
+      _md->noi = noi;
+      _md->lid = UINT16_TO_BE (n+1);
+      _md->prev_ofs = UINT16_TO_BE (n ? (n - 1) << 1 : 0xffff);
+      _md->next_ofs = UINT16_TO_BE ((n + 1) << 1);
+      _md->retn_ofs = UINT16_TO_BE ((obj->psd_size - 8) >> 3);
+      _md->ptime = UINT16_TO_BE (0x0000);
+      _md->wtime = 0x05;
+      _md->atime = 0x00;
+      _md->itemid[0] = UINT16_TO_BE (n+2);
+
+      memcpy (obj->psd_vcd_buf+(n << 4), _md, descriptor_size);
+      free (_md);
+    }
 
   {
     PsdEndOfListDescriptor _sd;
     
-    memset(&_sd, 0, sizeof(_sd));
+    memset (&_sd, 0, sizeof (_sd));
     _sd.type = PSD_TYPE_END_OF_LIST;
-    memcpy(obj->psd_vcd_buf+(n << 4), &_sd, sizeof(_sd));
+    memcpy (obj->psd_vcd_buf + (n << 4), &_sd, sizeof (_sd));
   }
 }
 
@@ -154,7 +159,7 @@ set_info_vcd(VcdObj *obj)
 
   info_vcd.offset_mult = INFO_OFFSET_MULT;
 
-  info_vcd.last_psd_ofs = UINT16_TO_BE((obj->mpeg_tracks_num+1)<<1);
+  info_vcd.last_psd_ofs = UINT16_TO_BE((obj->mpeg_tracks_num)<<1);
 
   info_vcd.item_count = UINT16_TO_BE(0x0000); /* no items in /SEGMENT supported yet */
 
