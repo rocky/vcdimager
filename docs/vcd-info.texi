@@ -85,19 +85,47 @@ Indices
 * General Index::       Overall index
 * Option Index::        Index for options
 * Sub-Option Index::    Index for sub-options
+
+@detailmenu
+ --- The Detailed Node Listing ---
+
+Command Options
+
+* Where Options::     Options controlling where to read from 
+* What Options::      Options controlling what do you want shown
+* All Options::       A complete list of options
+
+Options controlling where to read from 
+
+* CD Images::             Reading from a file containing a CD disk image
+* CD-ROM Device::         Reading from a CD-ROM device
+* Intelligent Input::     Reading from wherever
+
+Output Sections
+
+* PVD::                 Primary Volume Descriptor (PVD) Section
+* Filesystem::          ISO 9660 Information
+* Entries::             Entries Section
+* Info::                Disc Information
+* LOT::                 LID Offset Table (LOT) Section
+* PSD::                 Program Segment Descriptors (PSD) Section
+* Tracks::              Tracks 
+
+@end detailmenu
 @end menu
+
 @end ifnottex
 
 @contents
 
-@node Introduction
+@node Introduction, Command Options, Top, Top
 @chapter Introduction
 
 Note in the guide, we use the term Video CD to mean some sort of Video
-Compact Disk. There are various formats of Video Compact Disks, the
+Compact Disc. There are various formats of Video Compact Discs, the
 oldest format of which is called ``VCD'' and is followed by a version
 number: 1.0, 1.1 or 2.0. Hopefully it should also be clear by context
-whether we are referring to a class of Video Compact Disks or the
+whether we are referring to a class of Video Compact Discs or the
 specific older format called VCD @emph{version-number}.
 
 @value{program}'s mission in life is to display the contents of a
@@ -107,7 +135,7 @@ display some information about that, perhaps just a list of the
 tracks, with varying degrees of success; However Video CDs are what
 @value{program} understands best and it will you the most detail
 about.  The disk ``image'' does not have to reside on a physical
-Compact Disk; @value{program} understand the BIN/CUE disk-image format
+Compact Disc; @value{program} understand the BIN/CUE disk-image format
 used by a popular DOS/Window mastering tool.
 
 You might use the information from @value{program} as a diagnostic or
@@ -163,7 +191,7 @@ So the last thing that @value{program} may be of useful for is if you
 want to see how to use the vcd-info library; you can consult the source
 program and see how @value{program} gets its information via vcd-info.
 
-@node Command Options
+@node Command Options, Output Sections, Introduction, Top
 @chapter Command Options
 
 There are a number of miscellaneous options, but there are two broad
@@ -177,15 +205,15 @@ which specify where the CD-ROM or CD-ROM disk-image is.
 * All Options::       A complete list of options
 @end menu
 
-@node Where Options
+@node Where Options, What Options, Command Options, Command Options
 @section Options controlling where to read from 
 
 If you don't specify any place to read from @value{program} will try
 to read from the default device that may be appropriate for your OS.
 
 There are two broad categories of input, reading from a device that
-contains a Compact Disk, and reading from a file on the filesystem
-that contains an image that could be burned into a Compact Disk.  The
+contains a Compact Disc, and reading from a file on the filesystem
+that contains an image that could be burned into a Compact Disc.  The
 option for the former category, reading a physical CD, is
 @kbd{--cdrom-device} (@kbd{-C}); options for the latter category,
 reading a file containing a CD disk image, are @kbd{--bin-file}
@@ -198,29 +226,35 @@ from one place, these options are mutually exclusive; use only one
 option from this set.
 
 @menu
-* BIN/CUE or NRG file::   Reading from a file containing a CD disk image
+* CD Images::             Reading from a file containing a CD disk image
 * CD-ROM Device::         Reading from a CD-ROM device
 * Intelligent Input::     Reading from wherever
 @end menu
 
-@node BIN/CUE or NRG file
+@node CD Images, CD-ROM Device, Where Options, Where Options
 @subsection Reading from a file containing a CD disk image
-@cindex Reading, BIN, CUE or NRG CD-ROM disk image
+@cindex Reading, BIN, CUE, NRG or TOC CD-ROM disk image
 
-The option @kbd{--bin-file} and @kbd{--cue-file} (the short forms for
-these are @kbd{-b} and @kbd{-c} respectively) indicate to read from a
-file containing an image what might be burned onto Compact Disk. The
-format is expected to be in the BIN/CUE format that cdrdao uses and is
-used by a popular DOS/Windows CD mastering tool. 
+The option @kbd{--bin-file}, @kbd{--cue-file} or @kbd{--toc-file} (the
+short forms for the first two are these are @kbd{-b} and @kbd{-c}
+respectively) indicate to read from a file containing an image what
+might be burned onto Compact Disc. The format is expected to be in the
+BIN/CUE format that cdrdao uses and is used by a popular DOS/Windows
+CD mastering tool.
 
 If you use the @kbd{--bin-file} option, the file read is expected to
 be the ``.BIN'' part---this is the bulk of the data.  If you use
-@kbd{--cue-file} the file read is a ``cue sheet'' a funny sort of TOC
-(Table of Contents) file. The corresponding BIN file (which again
-contains the bulk of the data) is not taken from the FILE statement
-inside the CUE file, but it is constructed from the CUE file name by
-replacing ".cue" by ".bin".  The CUE file must have exactly one FILE
-statement.
+@kbd{--cue-file} the file read is a ``cue sheet'' a funny sort of CD
+mastering file. The corresponding BIN file (which again contains the
+bulk of the data) is not taken from the FILE statement inside the CUE
+file, but it is constructed from the CUE file name by replacing ".cue"
+by ".bin".  The CUE file must have exactly one FILE statement.
+
+If you do not specify a file name after @kbd{--bin-file}, a default
+name is used ``videocd.bin'' is probably used; likewise if you do not
+specify a filename after --cue-file a default name is used, probably
+``videocd.cue.'' These names I believe are the default output file
+names used when you use @command{vcdimager} or @command{vcdxbuild}.
 
 If you use the @kbd{--nrg-file} option (short form @kbd{-N}), the file
 read is expected to be a CD-ROM disk image using a proprietary and
@@ -229,29 +263,22 @@ proprietary and not published, this code has been reverse engineered
 and we really can't do as good a job as we can with a cue-sheet file.
 It's better not to work with such things when possible.
 
-If you do not specify a file name after @kbd{--bin-file}, a default
-name is used ``videocd.bin'' is probably used; likewise if you do not
-specify a filename after --cue-file a default name is used, probably
-``videocd.cue.'' These names I believe are the default output file
-names used when you use @command{vcdimager} or @command{vcdxbuild}.
+If you use the @kbd{--toc-file} option, the file read is expected to
+be a CD-ROM disk image using for the format @kbd{cdrdao} uses.  
 
-It is preferable to specify a CUE file over a BIN file since this will
-give @value{program} TOC and, in particular, track information that it
-cannot get otherwise.
-
-@node CD-ROM Device
+@node CD-ROM Device, Intelligent Input, CD Images, Where Options
 @subsection Reading from CD-ROM Device
 @cindex Reading, CD-ROM Device
 
 The option @kbd{--cdrom-device} or the short form @kbd{-C} is used
-when you want to read from a Compact Disk. The name given would be the
+when you want to read from a Compact Disc. The name given would be the
 device name. If you don't specify a device, a default will be selected
 based on the Operating System or information that can be gleaned from
 the OS. For example on GNU/Linux, the default device may be
 @kbd{/dev/cdrom}, while on Solaris it might be
 @kbd{/vol/dev/aliases/cdrom0}.
 
-@node Intelligent Input
+@node Intelligent Input,  , CD-ROM Device, Where Options
 @subsection Reading from wherever
 @cindex Reading, wherever
 
@@ -277,7 +304,7 @@ Although this algorithm is subject to change and there may be more
 sophisticated or alternative methods, in practice I think this does
 pretty much what's expected.
 
-@node What Options
+@node What Options, All Options, Where Options, Command Options
 @section Options controlling what do you want shown
 
 @value{program} is pretty flexible about the information it can show
@@ -311,7 +338,7 @@ To see a list of the suboptions available use the sub-option ``help'';
 for example to see the sub-options available for the PVD section, you
 would use the command option @kbd{--show-pvd help}.
 
-@node All Options
+@node All Options,  , What Options, Command Options
 @section A complete list of options
 
 First some general-purpose options. These you might find on other
@@ -398,8 +425,7 @@ controlling where to read from}.
 @item --bin-file @ovar{filename}
 @itemx -b @ovar{filename}
 @kindex @code{--bin-file}
-Specifies a BIN CD-ROM disk image to read from. See @ref{BIN/CUE or NRG
-file, ,Reading from a file containing a CD disk image}.
+Specifies a BIN CD-ROM disk image to read from. See @ref{CD Images, ,Reading from a file containing a CD disk image}.
 
 
 @item --cdrom-device @ovar{device-name}
@@ -412,15 +438,13 @@ Device, ,Reading from CD-ROM Device}.
 @itemx -c @ovar{filename}
 @kindex @code{--cue-file}
 Specifies a CUE file to read from. Preferred over a BIN file if
-available. See @ref{BIN/CUE or NRG file, ,Reading from a file
-containing a CD disk image}.
+available. See @ref{CD Images, ,Reading from a file containing a CD disk image}.
 
 @item --nrg-file @ovar{filename}
 @itemx -N @ovar{filename}
 @kindex @code{--nrg-file}
 Specifies a Nero NRG-format CD-ROM disk image to read from. See
-@ref{BIN/CUE or NRG file, ,Reading from a file containing a CD disk
-image}.
+@ref{CD Images, ,Reading from a file containing a CD disc image}.
 
 @item --input @ovar{file or device name}
 @itemx -i @ovar{file or device name}
@@ -675,7 +699,7 @@ List everything in the Tracks section. See @ref{Tracks, ,Tracks Section}.
 
 @end table
 
-@node Output Sections
+@node Output Sections, Some Examples, Command Options, Top
 @chapter Output Sections
 
 When you run @value{program} to display the contents of an entire disk,
@@ -702,7 +726,7 @@ Note that in example given in these sections, numbers at the beginning
 of a line are line numbers and are not part of the actual output. We
 use these to help refer to parts of the example.
 
-@node PVD
+@node PVD, Filesystem, Output Sections, Output Sections
 @section Primary Volume Descriptor (PVD) Section
 @cindex Primary Volume Descriptor (PVD) 
 
@@ -731,7 +755,7 @@ found from:
 11. XA marker present: yes
 @end smallexample
 
-@node Filesystem
+@node Filesystem, Entries, PVD, Output Sections
 @section ISO-9660 section
 
 This section contains something that looks pretty much like a
@@ -828,7 +852,7 @@ The item in brackets, e.g. @kbd{[LSN 450]} for the AVSEQ01.DAT entry
 is the ``logical sector number'' or the place on the CD where the
 entry starts.
 
-@node Entries
+@node Entries, Info, Filesystem, Output Sections
 @section Entries Section
 
 Here is part of sample output from the Video CD used above.
@@ -870,7 +894,7 @@ that's because the MSF number 00:00:00 is equal to 150 or the ``pregap
 sector size.''
 
 
-@node Info
+@node Info, LOT, Entries, Output Sections
 @section Disc Information
 
 Here is part of sample output from a SVCD. (This is not the same
@@ -909,7 +933,7 @@ example as the Video CD used before.)
 30. volume start time[4]: 0 secs
 @end smallexample
 
-@node LOT
+@node LOT, PSD, Info, Output Sections
 @section LID Offset Table (LOT) Section
 
 Here is part of sample output from a SVCD of this section.
@@ -928,7 +952,7 @@ supposed to be able to jump to that entry directly but may reach it
 through program control.
 
 
-@node PSD
+@node PSD, Tracks, LOT, Output Sections
 @section Program Segment Descriptors (PSD) Section
 @cindex Program Segment Descriptors (PSD) 
 
@@ -1027,7 +1051,7 @@ The XML excerpt that corresponds to this part is this:
    </selection>
 @end smallexample
 
-@node Tracks
+@node Tracks,  , PSD, Output Sections
 @section Tracks
 @cindex Tracks
 
@@ -1087,7 +1111,7 @@ are reading is a disk image, the only way to get this information has
 to come from a ``cue sheet'' which is why it is better to specify a
 CUE file than a BIN file.
 
-@node Some Examples
+@node Some Examples, History and Thanks, Output Sections, Top
 @chapter Some simple command invocations.
 
 Perhaps all you want to do is dump the information about a CD that is
@@ -1181,7 +1205,7 @@ of the entries section, no summary information like a count or ID tag.
   vcd-info --show-entries data
 @end smallexample 
 
-@node History and Thanks
+@node History and Thanks, General Index, Some Examples, Top
 @chapter History and Thanks
 
 This program started its life under the name ``vcddebug'' by Herbert
@@ -1236,15 +1260,15 @@ these two similar programs.
 
 And the rest is history.
 
-@node General Index
+@node General Index, Option Index, History and Thanks, Top
 @unnumbered General Index
 @printindex cp
 
-@node Option Index
+@node Option Index, Sub-Option Index, General Index, Top
 @unnumbered Option Index
 @printindex ky
 
-@node Sub-Option Index
+@node Sub-Option Index,  , Option Index, Top
 @unnumbered Sub-Option Index
 @printindex fn
 
