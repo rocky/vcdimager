@@ -254,7 +254,7 @@ _convert (const char in[], const char encoding[], bool from)
       return strdup(in);
   }
 
-  if (ret || (temp - size + 1))
+  if (ret < 0 || (temp - size + 1))
     {
       free (out);
       vcd_error ("charset conversion failed");
