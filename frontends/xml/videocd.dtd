@@ -1,0 +1,114 @@
+<?xml version="1.0" ?>
+<!-- $Id$ -->
+
+<!-- VideoCD DTD 
+ PUBLIC "-//GNU//DTD VideoCD//EN"
+ SYSTEM "http://www.gnu.org/software/vcdimager/videocd.dtd"
+-->
+
+<!ENTITY % URI "CDATA">
+
+<!ENTITY % itemattrs
+ "id        ID           #REQUIRED
+  src       %URI;        #REQUIRED"
+>
+
+<!ELEMENT videocd (info,pvd,filesystem,items,tracks,pbc)>
+<!ATTLIST videocd
+  type      (vcd1.1|vcd2.0|svcd1.0)  #REQUIRED
+  xmlns     %URI;                    #FIXED 'http://www.gnu.org/software/vcdimager/1.0/'
+>
+
+<!ELEMENT info (album-description?,volume-count?,volume-number?,restriction?)>
+<!ELEMENT album-description (#PCDATA)>
+<!ELEMENT volume-count (#PCDATA)>
+<!ELEMENT volume-number (#PCDATA)>
+<!ELEMENT restriction (#PCDATA)>
+
+<!ELEMENT pvd (volume-id?,system-id?,application-id?,preparer-id?,publisher-id)>
+<!ELEMENT volume-id (#PCDATA)>
+<!ELEMENT system-id (#PCDATA)>
+<!ELEMENT application-id (#PCDATA)>
+<!ELEMENT preparer-id (#PCDATA)>
+<!ELEMENT publisher-id (#PCDATA)>
+
+<!ELEMENT filesystem (folder)*>
+<!ELEMENT folder (name,folder*, file*)>
+<!ELEMENT file (name)>
+<!ATTLIST file 
+  src       %URI;          #REQUIRED
+  format    (form1|mixed)  "form1"
+>
+<!ELEMENT name (#PCDATA)>
+
+<!ELEMENT items (mpeg-item)*>
+<!ELEMENT mpeg-item EMPTY>
+<!ATTLIST mpeg-item 
+  %itemattrs;
+>
+
+<!ELEMENT tracks (mpeg-track*,cdda-track*)>
+
+<!ELEMENT mpeg-track (entry)*>
+<!ATTLIST mpeg-track
+  %itemattrs;
+>
+
+<!ELEMENT entry (#PCDATA)>
+<!ATTLIST entry
+  id        ID           #REQUIRED
+>
+
+<!ELEMENT cdda-track EMPTY>
+<!ATTLIST cdda-track
+  %itemattrs;
+>
+
+<!ELEMENT pbc (selection|playlist)*>
+
+<!ELEMENT selection (bsn?,prev?,next?,return?,default?,timeout?,wait?,item*)>
+<!ATTLIST selection
+  id        ID           #REQUIRED
+  ref       IDREF        #REQUIRED
+>
+
+<!ELEMENT playlist (prev?,next?,return?,playtime?,wait?,autowait?,item*)>
+<!ATTLIST playlist
+  id        ID           #REQUIRED
+>
+
+<!ELEMENT wait (#PCDATA)>
+<!ELEMENT autowait (#PCDATA)>
+<!ELEMENT playtime (#PCDATA)>
+
+<!ELEMENT bsn (#PCDATA)>
+<!ELEMENT prev EMPTY>
+<!ELEMENT next EMPTY>
+<!ELEMENT return EMPTY>
+<!ELEMENT default EMPTY>
+<!ELEMENT timeout EMPTY>
+<!ELEMENT item EMPTY>
+
+<!ATTLIST prev 
+  ref       IDREF       #REQUIRED
+>
+
+<!ATTLIST next
+  ref       IDREF       #REQUIRED
+>
+
+<!ATTLIST return 
+  ref       IDREF       #REQUIRED
+>
+
+<!ATTLIST default
+  ref       IDREF       #REQUIRED
+>
+
+<!ATTLIST timeout
+  ref       IDREF       #REQUIRED
+>
+
+<!ATTLIST item
+  ref       IDREF       #REQUIRED
+>

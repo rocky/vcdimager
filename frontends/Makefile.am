@@ -2,8 +2,10 @@ if BUILD_CLI_FE
 CLI_DIRS = cli
 endif
 
+XML_DIRS = xml
+
 if BUILD_GNOME_FE
 GNOME_DIRS = gnome
 endif
 
-SUBDIRS = $(CLI_DIRS) $(GNOME_DIRS)
+SUBDIRS = $(CLI_DIRS) $(XML_DIRS) $(GNOME_DIRS)
