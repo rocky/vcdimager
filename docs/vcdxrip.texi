@@ -134,10 +134,46 @@ not to dump, these all start @kbd{--no} and another set of options
 which specify where the CD-ROM or CD-ROM disk-image is.
 
 @menu
-* Where Options::     Options controlling where to read from 
-* What Options::      Options controlling what do you want done
-* All Options::       A complete list of options
+* General Options::         Generic options
+* Where Options::           Options controlling where to read from 
+* What Options::            Options controlling what do you want done
+* Miscellaneous Options::   Miscellaneous options
 @end menu
+
+@node General Options
+@section General Options
+
+Here are some general-purpose options. These you might find on other
+programs.
+
+@table @code
+@item --help
+@kindex @code{--help}
+This option give a list of options type @kbd{--help}. @kbd{-?} is an
+abbreviation however you will probably have to ``escape'' the question
+mark so that the shell doesn't interpret this; i.e. you may have to
+type @kbd{-\?}.
+
+@item --usage
+@kindex @code{--usage}
+This option shows an abbreviated usage message
+
+@item --verbose
+@itemx -v
+@kindex @code{--verbose}
+This option gives more verbose, debugging output.
+
+@item --quiet
+@itemx -q
+@kindex @code{--quiet}
+Show only critical messages
+
+@item --version
+@itemx -V
+@kindex @code{--version}
+Display version and copyright information and exit after displaying
+this information. Sometimes, you just wanna know what version you got.
+@end table
 
 @node Where Options
 @section Options controlling where to read from 
@@ -162,6 +198,7 @@ exclusive; use only one option from this set.
 * BIN/CUE or NRG file::   Reading from a file containing a CD disk image
 * CD-ROM Device::         Reading from a CD-ROM device
 * Intelligent Input::     Reading from wherever
+* Input options::         A list of just the input options
 @end menu
 
 @node BIN/CUE or NRG file
@@ -224,54 +261,12 @@ Although this algorithm is subject to change and there may be more
 sophisticated or alternative methods, in practice I think this does
 pretty much what's expected.
 
-@node What Options
-@section Options controlling what do you want done
-
-By default @value{program} will extract everything it can about a VCD
-image. 
-
-However if you specify something in particular you don't want to
-extract, for example you don't want to extract the tracks or
-``segments'' use  @kbd{--nosegments}.
-
-@node All Options
-@section A complete list of options
-
-First some general-purpose options. These you might find on other
-programs.
-
-@table @code
-@item --help
-@kindex @code{--help}
-This option give a list of options type @kbd{--help}. @kbd{-?} is an
-abbreviation however you will probably have to ``escape'' the question
-mark so that the shell doesn't interpret this; i.e. you may have to
-type @kbd{-\?}.
-
-@item --usage
-@kindex @code{--usage}
-This option shows an abbreviated usage message
-
-@item --verbose
-@itemx -v
-@kindex @code{--verbose}
-This option gives more verbose, debugging output.
-
-@item --quiet
-@itemx -q
-@kindex @code{--quiet}
-Show only critical messages
-
-@item --version
-@itemx -V
-@kindex @code{--version}
-Display version and copyright information and exit after displaying
-this information. Sometimes, you just wanna know what version you got.
-@end table
-
 Use at most one option in an invocation from the following list. These
 options are described in general in @ref{Where Options, ,Options
 controlling where to read from}.
+
+@node Input options
+@subsection A list of just input options
 
 @table @code
 @item --bin-file @ovar{filename}
@@ -301,39 +296,42 @@ This option is insensitive to whether the thing reading from is a
 CD-ROM device or a file. See @ref{Intelligent Input, ,Reading from
 wherever}.
 
-@end table
-
-@table @code
 @item --sector-2336
 @kindex @code{--sector-2336}
 This option only makes sense if you are reading from a BIN CD disk
 image This indicates to @value{program} to assume a 2336-byte sector
 mode for image file. @emph{Note: This option is slated to disappear.}
 
-@item --progress
-@itemx -p
-@kindex @code{--progress}
-Show progress.
-
-@item --no-ext-psd
-@kindex @code{--no-ext-psd}
-Ignore extended PSD (located in the ISO-9660 filesystem under
-@kbd{/EXT/PSD_X.VCD}) and use the ``standard'' PSD.
-
-@item --output-file
-@itemx -o
-@kindex @code{--output-file}
-Specify the place to write the output XML description file. The
-default is @kbd{videocd.xml}.
-
 @end table
 
+@node What Options
+@section Options controlling what do you want done
+
+By default @value{program} will extract everything it can about a VCD
+image. 
+
+However if you specify something in particular you don't want to
+extract, for example you don't want to extract the tracks or
+``segments'' use  @kbd{--nosegments}.
+
 The options below reduce what is extracted. 
+
+When you use any of the options @code{--nosequence},
+@code{--nosegments}, @code{--norip} or @code{--tracks} you will get
+the warning:
+
+@quotation
+Some entry point and auto pause locations might not be checked.
+@end quotation
+
+Without looking into the MPEG's we don't know how big they are and
+therefore can't verify if entry points and auto pause lie inside the
+MPEGs.
 
 @table @code
 @item --nofiles
 @kindex @code{--nofiles}
-Video CD's are formatted on an ISO 9660 filesystem. As such they may
+Video CD's are formatted on an ISO-9660 filesystem. As such they may
 have additional files that are not strictly necessary for VCD
 operation. For example, there may be some additional documentation or
 commentary in some sort of text format and these may be put under
@@ -359,11 +357,13 @@ when extracted by this program will start have a name of the form
 Segment items are located in under the /SEGMENT directory on the
 CD. However when extracted these directories do not appear.
 
-If you don't want to extract these MPEG files, use this option. You
-may however might not be able create a CD image back unless some of
-these files are created or the XML description modified.  Another way
-to ``extract'' these file might be to ``mount'' the CD and use your
-OS's file copy commands.
+If you don't want to extract these MPEG files, use this option. To
+extract only a specific track see the @code{--track} option below.
+
+If you use the option @code{--nosegments}, you might not be able
+create a CD image back unless some of these files are created or the
+XML description modified.  Another way to ``extract'' these file might
+be to ``mount'' the CD and use your OS's file copy commands.
 
 @item --nosequences
 @kindex @code{--nosequences}
@@ -389,21 +389,47 @@ Just create an XML description file of the format used by
 @kbd{vcdxbuild}. Using this option is like adding the options
 @kbd{--nofiles}, @kbd{--nosequences}, @kbd{--nosegments}.
 
-When you use this option you will get the warning message:
-
-@smallexample
-Entry point and auto pause locations cannot be
-determined without mpeg extraction -- hope that's ok.
-@end smallexample
-
-Without looking into the MPEG's we don't know how big they are and
-therefore can't verify if entry points and auto pause lie inside the
-MPEGs.
+@item --track @var{track-num}
+@kindex @code{--track}
+If you want to extract only a single track (segment) from a CD rather
+than all of them, use this option. This option does not make sense and
+has no effect if you have also given the option @code{--nosegments}.
 
 @end table
 
+@node Miscellaneous Options
+@section Miscellaneous Options
+
+@table @code
+@item --progress
+@itemx -p
+@kindex @code{--progress}
+Show progress.
+
+@item --no-ext-psd
+@kindex @code{--no-ext-psd}
+Ignore extended PSD (located in the ISO-9660 filesystem under
+@kbd{/EXT/PSD_X.VCD}) and use the ``standard'' PSD.
+
+@item --output-file
+@itemx -o
+@kindex @code{--output-file}
+Specify the place to write the output XML description file. The
+default is @kbd{videocd.xml}.
+
+@end table
+
+
 @node Some Examples
 @chapter Some simple command invocations.
+
+@menu
+* Input Examples::       Examples specifying input
+* Extraction Examples::  Examples specifying what to rip
+@end menu
+
+@node Input Examples
+@section Examples specifying input
 
 Perhaps all you want to do is rip a CD onto your disk to modify it.
 If the CD is in the default location for your OS, then this might
@@ -437,14 +463,14 @@ this will work:
 
 @noindent
 @smallexample
-vcddump -C=/dev/dvd
+vcdxrip -C=/dev/dvd
 @end smallexample 
 
 Or even better, I'll let @value{program} figure out it's a CD-ROM device:
 
 @noindent
 @smallexample
-vcddump -i /dev/dvd
+vcdxrip -i /dev/dvd
 @end smallexample 
 
 The equals sign before @kbd{/dev/dvd} is optional in either format.
@@ -471,7 +497,7 @@ the ``intelligent'' input option again as we did before:
 
 @noindent
 @smallexample
-vcddump -i nausicaa.bin
+vcdxrip -i nausicaa.bin
 @end smallexample 
 
 If I want the XML file that gets created to to ``nausicaa.xml'' rather
@@ -479,14 +505,18 @@ than ``videocd.xml'' then use this:
 
 @noindent
 @smallexample
-vcddump -i nausicaa.bin -o nausicaa.xml
+vcdxrip -i nausicaa.bin -o nausicaa.xml
 @end smallexample 
 
-And if I just want the XML description only for this:
+@node Extraction Examples
+@section Examples specifying what to rip
+
+If I just want the XML description only for the last example in
+the previous section:
 
 @noindent
 @smallexample
-vcddump --norip -i nausicaa.bin --output-file nausicaa.xml
+vcdxrip --norip -i nausicaa.bin --output-file nausicaa.xml
 @end smallexample 
 
 Suppose I want extract only the big MPEGs of the CD in the default CD
@@ -494,7 +524,7 @@ without menus and extra file information. This is probably close:
 
 @noindent
 @smallexample
-vcddump --noseqeunces --nofiles
+vcdxrip --nosequences --nofiles
 @end smallexample 
 
 The above will create an XML description file. Suppose on the other
@@ -503,7 +533,14 @@ in the default CD-ROM drive, then this may work:
 
 @noindent
 @smallexample
-vcddump --noseqeunces --nosegments
+vcdxrip --noseqeunces --nosegments
+@end smallexample 
+
+If you only want to extract track 1 from your CD this might work:
+
+@noindent
+@smallexample
+vcdxrip --track 1
 @end smallexample 
 
 @node History
