@@ -152,6 +152,9 @@ vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps,
 
       if (!pkt_len)
         {
+          if (!pno)
+            vcd_error ("input mpeg stream has been deemed invalid -- aborting");
+
           vcd_warn ("bad packet at packet #%d (stream byte offset %d)"
                     " -- remaining %d bytes of stream will be ignored",
                     pno, pos, length - pos);
@@ -271,8 +274,8 @@ vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps,
 
   if (padpackets)
     vcd_warn ("autopadding requires to insert additional %d zero bytes"
-              " into MPEG stream (due to %d unaligned packets)",
-              padbytes, padpackets);
+              " into MPEG stream (due to %d unaligned packets of %d total)",
+              padbytes, padpackets, state.stream.packets);
 
   {
     int vid_idx = state.stream.first_shdr;

@@ -320,6 +320,11 @@ _vcd_pin_mark_id (const VcdObj *obj, const char _id[])
   mpeg_sequence_t *_seq;
   mpeg_segment_t *_seg;
 
+  vcd_assert (obj != NULL);
+
+  if (!_id)
+    return;
+
   if ((_seq = _vcd_obj_get_sequence_by_id ((VcdObj *) obj, _id)))
     _seq->referenced = true;
 
@@ -612,15 +617,27 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 	if (_pbc->jump_delayed)
 	  _md->loop |= 0x80;
 
-	{
-	  const uint16_t _pin = _vcd_pbc_pin_lookup (obj, _pbc->item_id);
+	/* timeout related sanity checks */
+	if (_pbc->loop_count > 0
+	    && _pbc->timeout_time >= 0
+	    && !_pbc->timeout_id
+	    && !_nos)
+	  vcd_warn ("PSD: selection '%s': neither timeout nor select target available, but neither loop count is infinite nor timeout wait time", _pbc->id);
 
-	  if (!_pin)
-	    vcd_error ("PSD: referenced play item '%s' not found", _pbc->item_id);
+	if (_pbc->timeout_id && (_pbc->timeout_time < 0 || _pbc->loop_count <= 0))
+	  vcd_warn ("PSD: selection '%s': timeout target '%s' is never used due to loop count or timeout wait time given", _pbc->id, _pbc->timeout_id);
 
-	  _md->itemid = uint16_to_be (_pin);
-	}
+	if (_pbc->item_id)
+	  {
+	    const uint16_t _pin = _vcd_pbc_pin_lookup (obj, _pbc->item_id);
+	    
+	    if (!_pin)
+	      vcd_error ("PSD: referenced play item '%s' not found", _pbc->item_id);
 
+	    _md->itemid = uint16_to_be (_pin);
+	  }
+	else
+	  _md->itemid = 0; /* play nothing */
 
 	/* sanity checks */
 	switch (_pbc->selection_type)
@@ -638,6 +655,10 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 			 _pbc->id);
 
 	    /* checking NOS == NOE */
+	    if (!_pbc->item_id)
+	      vcd_error ("selection '%s': play nothing play item not allowed for multidefault list",
+			 _pbc->id);
+
 	    {
 	      mpeg_sequence_t *_seq;
 
@@ -724,15 +745,28 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 	    if (_pbc->image_id)
 	      {
 		uint16_t _pin = _vcd_pbc_pin_lookup (obj, _pbc->image_id);
+		mpeg_segment_t *_segment;
 	  
 		if (!_pin)
 		  vcd_error ("PSD: referenced play item '%s' not found", _pbc->item_id);
 
 		_md->change_pic = UINT16_TO_BE (_pin);
+
+		/* sanity checks */
+
+		_segment = _vcd_obj_get_segment_by_id ((VcdObj *) obj, _pbc->image_id);
+
+		if (!_segment)
+		  vcd_warn ("PSD: endlist '%s': referenced play item '%s'"
+			    " is not a segment play item", _pbc->id, _pbc->image_id);
+		else if (_segment->info->video_type != MPEG_VIDEO_PAL_STILL
+			 && _segment->info->video_type != MPEG_VIDEO_PAL_STILL)
+		  vcd_warn ("PSD: endlist '%s': referenced play item '%s'"
+			    " should be a still picture", _pbc->id, _pbc->image_id);
 	      }
+	    else if (_pbc->next_disc || _pbc->image_id)
+	      vcd_warn ("extended end list attributes ignored for non-SVCD");
 	  }
-	else if (_pbc->next_disc || _pbc->image_id)
-	  vcd_warn ("extended end list attributes ignored for non-SVCD");
       }
       break;
 

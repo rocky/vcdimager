@@ -316,6 +316,7 @@ _parse_pbc_selection (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlN
 
   _pbc = vcd_pbc_new (PBC_SELECTION);
   _pbc->bsn = 1;
+  _pbc->loop_count = 1;
 
   _parse_common_pbcattrs (_pbc, doc, node, ns);
 

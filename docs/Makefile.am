@@ -7,6 +7,8 @@ vcdimager.ps.gz: vcdimager.ps
 vcdimager.pdf: vcdimager.texi
 	texi2pdf $<
 
+pdf: vcdimager.pdf
+
 vcdimager.html: vcdimager.texi
 	texi2html $<
 

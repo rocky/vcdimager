@@ -454,7 +454,8 @@ typedef struct {
 /* SCANDATA.DAT for VCD 2.0 */
 
 #define SCANDATA_FILE_ID "SCAN_VCD"
-#define SCANDATA_VERSION 0x02
+#define SCANDATA_VERSION_VCD2 0x02
+#define SCANDATA_VERSION_SVCD 0x01
 
 typedef struct {
   char file_id[8]             GNUC_PACKED; /* = "SCAN_VCD" */

@@ -299,7 +299,7 @@ Up to 500 @acronym{MPEG} track entry points.
 @end itemize
 
 The Video CD specification requires the multiplex-ed @acronym{MPEG}-1
-stream to have a @acronym{CBR} of about 174300 bytes per
+stream to have a @acronym{CBR} of about 174300 bytes (1394400 bits) per
 second@footnote{2324 bytes of payload per sector * 75 sectors per
 second = 174300 bytes per second} in order to accommodate single speed
 @acronym{CD-ROM} drives. This allows one of the following two
@@ -326,8 +326,8 @@ specification:
 @itemize @bullet
 @item
 Support for (optional) @acronym{MPEG} segment play items (@dfn{SPI}),
-consisting of still pictures, motion pictures or audio streams was
-added.
+consisting of still pictures, motion pictures and/or audio (only)
+streams was added.
 
 @item
 Support for (optional) interactive playback control (@dfn{PBC}) was
@@ -349,6 +349,22 @@ resolutions became available:
 352 x 240 @@ 23.976 Hz (@acronym{FILM}).
 @item
 352 x 288 @@ 25 Hz (@acronym{PAL}).
+@end itemize
+
+For segment play items the following audio encodings became available:
+
+@itemize @bullet
+@item
+Joint stereo, stereo or dual channel audio streams at 128, 192, 224 or 384 kbit/sec bitrate.
+
+@item
+Mono audio streams at 64 or 96 or 192 kbit/sec bitrate.
+@item
+
+Also the possibility to have audio only streams and still pictures was
+provided. The bit-rate of multiplex-ed streams should be kept under 174300
+bytes/sec in order to accommodate single speed drives.
+
 @end itemize
 
 @node Extended Video CD, Super Video CD 1.0, Video CD 2.0, Known Video CD Flavors
@@ -551,7 +567,8 @@ stream is required to have one of the following resolutions:
 @end itemize
 
 The audio stream must be @acronym{MPEG}-1 layer II, fixed to a 224
-kbits/sec @acronym{CBR} with 1 stereo or 2 mono audio channels.
+kbits/sec @acronym{CBR} with 1 joint stereo, stereo or dual channel
+audio stream, with a sampling rate of 44.1.kHz and 16bit.
 
 @node Super Video CD, Common Constraints, Video CD, Constraints on MPEG streams
 @subsection Super Video CD
@@ -1080,6 +1097,7 @@ both A and B, in any order
 @section VideoCD XML Conventions
 @cindex XML, time values in
 @cindex XML Identifiers
+@cindex Play nothing item
 
 All time related entries@footnote{@code{<wait>}, @code{<autowait>},
 @code{<playtime>}, @code{<time-offset>}} are given in seconds.
@@ -1095,7 +1113,7 @@ lookup. A @emph{play item} can be any of the following:
 
 @itemize @bullet
 @item
-play nothing item, (omitted @code{ref} attribute).
+play nothing item, (omitted @code{ref} attribute, e.g.: @code{<play-item />}).
 @item
 sequence item, @code{<sequence-item>}.
 @item
@@ -1109,7 +1127,7 @@ Whereas a @emph{PSD item} is required to be one of:
 
 @itemize @bullet
 @item
-disabled, (omitted @code{ref} attribute).
+disabled, (omitted @code{ref} attribute, e.g.: @code{<select />}).
 @item
 selection list, @code{<selection>}.
 @item
@@ -1176,6 +1194,18 @@ Supported combinations of @var{class} and @var{version} are listed below:
 The @code{xmlns} attribute defines the @acronym{XML} namespace.
 @end table
 
+@smallexample
+@cartouche
+<?xml version="1.0"?>
+<!DOCTYPE videocd PUBLIC "-//GNU//DTD VideoCD//EN"
+          "http://www.gnu.org/software/vcdimager/videocd.dtd">
+<videocd xmlns="http://www.gnu.org/software/vcdimager/1.0/"
+         class="svcd" version="1.0">
+@dots{}
+</videocd>
+@end cartouche
+@end smallexample
+
 @node <option> Element, <info> Container, <videocd> Root, <videocd> Root
 @subsection @code{<option>} Element
 @tgindex @code{option}
@@ -1219,6 +1249,16 @@ Enables adding of 150 empty sectors which are added between tracks after
 the last track as well. Default: @samp{false}.
 
 @end table
+
+@smallexample
+@cartouche
+@dots{}
+<videocd xmlns=@dots{}
+  <option name="relaxed aps" value="true"/>
+  <info>
+@dots{}
+@end cartouche
+@end smallexample
 
 @node  <info> Container, <pvd> Container, <option> Element, <videocd> Root
 @subsection @code{<info>} Container
@@ -1425,11 +1465,12 @@ referenced from the @command{<pbc>} section in order to be accessible at
 all.
 
 @item id
-ID value referenced in @code{ref} attributes.
+Id string to be referenced in @code{ref} attributes.
 
 @item src
-This attribute specifies the external file name of the item,
-i.e. @acronym{MPEG} stream, to be included.
+This attribute specifies the external file name of the item, i.e. the
+location of the file containing the @acronym{MPEG} stream to be
+included.
 
 @item <auto-pause>
 See description in @code{<sequence-item>}.
@@ -1563,22 +1604,26 @@ Play item ID value referenced in @code{ref} attributes.
 ID value referenced in @code{ref} attributes.
 
 @item rejected
+@cindex Rejected list
 Attribute controlling, whether item is not listed, i.e. @emph{rejected},
-in the @acronym{LOT}.
+in the @acronym{LOT}. Lists which are not rejected may be---if supported
+by the playing device---selectable by user input of the automatically
+assigned @emph{List ID Number}. It is recommended to enable the rejected
+property for but the very first PBC list, in order to make the
+@emph{unreferenced item check} work better.  The first PBC Item must not
+be rejected.
 
-@item x1
-@itemx y1
-@itemx x2
-@itemx y2
+@item x1 y1 x2 y2
 Screen Co-ordinates for selection hotspot areas, with @samp{0,0} being
 the upper left and @samp{255,255} being the lower right screen
 point. @code{x1} and @code{y1} are required to be less than @code{x2}
 and @code{y2} respectively.
 
 @item play-item
+@cindex Play nothing item
 This empty element is used to reference play item ids. If the @code{ref}
-attribute is ommited, the @samp{play nothing item} is implicitly
-referenced.
+attribute is ommitted (e.g. @code{<play-item />}, the @emph{play nothing
+item} is implicitly referenced.
 
 @end table
 
@@ -1596,6 +1641,8 @@ referenced.
 @tgindex @code{loop}
 @tgindex @code{play-item}
 @tgindex @code{select}
+@cindex Random selection on timeout
+@cindex Menus
 
 @example
 @cartouche
@@ -1794,6 +1841,71 @@ picture.
 
 @node Examples, Tips and Hints, VideoCD XML Description, Top
 @chapter Examples
+@cindex @command{cdrdao}, How to use
+
+The general procedure for creating a (Super) Video CD involves the
+following steps:
+
+@enumerate
+@item 
+Get an idea for a Video CD.
+
+@item
+Collecting, creating or encoding the required @acronym{MPEG} items for
+inclusion on the Video CD.
+
+@item
+Design some sophisticated @acronym{PBC} flow and create a @acronym{XML}
+description reflecting that or use @command{vcdxgen} to generate a very
+simple Video CD structure.
+
+@item
+Let @command{vcdxbuild} process the @acronym{XML} description created in
+the previous step. If required fix warnings and errors displayed by
+@command{vcdxbuild}.
+
+@item
+Write the created disc image to a @acronym{CD-R}.
+
+@end enumerate
+
+The steps of encoding compliant @acronym{MPEG} program streams are not
+covered in this manual.@footnote{see @uref{http://mjpeg.sourceforge.net/}}
+
+The last step, writing to a @acronym{CD-R}, can be accomplished by
+@command{cdrdao}@footnote{see @uref{http://cdrdao.sourceforge.net/}} as
+simple as:
+
+@example
+@cartouche
+$ cdrdao write --device 0,5,0 --speed 8 videocd.cue 
+Cdrdao version 1.1.5 - (C) Andreas Mueller <andreas@@daneb.de>
+  SCSI interface library - (C) Joerg Schilling
+  L-EC encoding library - (C) Heiko Eissfeldt
+  Paranoia DAE library - (C) Monty
+
+Check http://cdrdao.sourceforge.net/drives.html#dt for current driver 
+tables.
+
+Using libscg version 'schily-0.5'
+
+0,5,0: YAMAHA CRW8424S	Rev: 1.0j
+Using driver: Generic SCSI-3/MMC - Version 1.2 (options 0x0000)
+
+Starting write at speed 8...
+Pausing 10 seconds - hit CTRL-C to abort.
+Process can be aborted with QUIT signal (usually CTRL-\).
+Executing power calibration...
+Power calibration successful.
+Writing track 01 (mode MODE2_RAW/MODE2_RAW)...
+Writing track 02 (mode MODE2_RAW/MODE2_RAW)...
+Wrote 750 of 750 MB (Buffer 100%).
+Wrote 334544 blocks. Buffer fill min 96%/max 100%.
+Flushing cache...
+Writing finished successfully.
+$
+@end cartouche
+@end example
 
 @menu
 * Simple Multitrack Example::   

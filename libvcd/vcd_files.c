@@ -175,7 +175,7 @@ set_entries_vcd (VcdObj *obj, void *buf)
       track_idx++;
     }
 
-  entries_vcd.entry_count = UINT16_TO_BE (idx);
+  entries_vcd.entry_count = uint16_to_be (idx);
 
   memcpy(buf, &entries_vcd, sizeof(entries_vcd));
 }
@@ -254,7 +254,7 @@ set_lot_vcd(VcdObj *obj, void *buf, bool extended)
 
       offset /= INFO_OFFSET_MULT;
 
-      lot_vcd->offset[_pbc->lid - 1] = UINT16_TO_BE (offset);
+      lot_vcd->offset[_pbc->lid - 1] = uint16_to_be (offset);
     }
 
   memcpy(buf, lot_vcd, sizeof(LotVcd));
@@ -315,8 +315,8 @@ set_info_vcd(VcdObj *obj, void *buf)
                     sizeof(info_vcd.album_desc), VCD_DCHARS); 
   /* fixme, maybe it's VCD_ACHARS? */
 
-  info_vcd.vol_count = UINT16_TO_BE (obj->info_volume_count);
-  info_vcd.vol_id = UINT16_TO_BE (obj->info_volume_number);
+  info_vcd.vol_count = uint16_to_be (obj->info_volume_count);
+  info_vcd.vol_id = uint16_to_be (obj->info_volume_number);
 
   if (_vcd_obj_has_cap_p (obj, _CAP_PAL_BITS))
     {
@@ -381,7 +381,7 @@ set_info_vcd(VcdObj *obj, void *buf)
               segments += idx;
             }
 
-          info_vcd.item_count = UINT16_TO_BE (segments); 
+          info_vcd.item_count = uint16_to_be (segments); 
 
           lba_to_msf (obj->mpeg_segment_start_extent + 150, &info_vcd.first_seg_addr);
         }
@@ -747,12 +747,12 @@ set_scandata_dat (VcdObj *obj, void *buf)
   /* struct 1 */
   strncpy (scandata_dat1->file_id, SCANDATA_FILE_ID, sizeof (SCANDATA_FILE_ID));
   
-  scandata_dat1->version = 0x01;
+  scandata_dat1->version = SCANDATA_VERSION_SVCD;
   scandata_dat1->reserved = 0x00;
   scandata_dat1->scandata_count = uint16_to_be (_get_scanpoint_count (obj));
 
-  scandata_dat1->track_count = UINT16_TO_BE (tracks);
-  scandata_dat1->spi_count = UINT16_TO_BE (0);
+  scandata_dat1->track_count = uint16_to_be (tracks);
+  scandata_dat1->spi_count = uint16_to_be (0);
 
   for (n = 0; n < tracks; n++)
     {

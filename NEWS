@@ -12,7 +12,10 @@ version 0.7.9 (unstable/development)
   default
 * new "leadout pause" option
 * implemented <auto-pause> points for segment play items
-* ...
+* implemented SCANDATA.DAT dumping for vcddebug
+* fixed offset bug in SCANDATA.DAT creation for SVCD
+* implemented checking for unreferenced PBC items
+* fixed play nothing item in selections
 
 version 0.7.8 (unstable/development)
 ====================================

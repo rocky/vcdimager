@@ -807,16 +807,15 @@ dump_scandata_dat (const debug_obj_t *obj)
   fprintf (stdout, " reserved: 0x%2.2x\n", _sd1->reserved);
   fprintf (stdout, " scandata_count: %d\n", scandata_count);
 
-  if (_sd1->version == 0x02)
+  if (_sd1->version == SCANDATA_VERSION_VCD2)
     {
-      const msf_t *scandata_table = 
-        (const void *) &_sd1->track_count;
+      const ScandataDat_v2 *_sd_v2 = obj->scandata_buf;
 
       int n;
 
       for (n = 0; n < scandata_count; n++)
         {
-          const msf_t *msf = &scandata_table[n];
+          const msf_t *msf = &_sd_v2->points[n];
 
           if (!gl_verbose_flag 
               && n > PRINTED_POINTS
@@ -832,7 +831,7 @@ dump_scandata_dat (const debug_obj_t *obj)
             fprintf (stdout, " [..skipping...]\n");
         }
     }
-  else if (_sd1->version == 0x01)
+  else if (_sd1->version == SCANDATA_VERSION_SVCD)
     {
       const ScandataDat2 *_sd2 = 
         (const void *) &_sd1->cum_playtimes[track_count];

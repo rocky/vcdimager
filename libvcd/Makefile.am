@@ -11,6 +11,7 @@ libvcd_a_SOURCES = \
 	vcd_bitvec.h \
 	vcd_bytesex.c \
 	vcd_bytesex.h \
+	vcd_bytesex_asm.h \
 	vcd_cd_sector.c \
 	vcd_cd_sector.h \
 	vcd_cd_sector_private.h \

@@ -1,5 +1,14 @@
 2001-08-01  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* libvcd/vcd_mpeg.c (vcd_mpeg_parse_packet): 
+		be more verbose on missing pack headers
+
+	* libvcd/vcd_mpeg_stream.c (vcd_mpeg_source_scan): 
+		abort if the first mpeg packet is already broken
+
+	* libvcd/vcd_pbc.c: added some more sanity checks,
+	(_vcd_pbc_node_write): fixed play nothing item in selection lists
+
 	* libvcd/vcd_bytesex.h, libvcd/vcd_bytesex_asm.h, 
 		libvcd/vcd_types.h: improvements for AMIGA
 	

@@ -663,11 +663,29 @@ vcd_mpeg_parse_packet (const void *_buf, unsigned buflen, bool parse_pes,
 
   if (vcd_bitvec_peek_bits32 (buf, 0) != MPEG_PACK_HEADER_CODE)
     {
+      const uint32_t _code = vcd_bitvec_peek_bits32 (buf, 0);
+
       vcd_warn ("mpeg scan: pack header code (0x%8.8x) expected, "
                 "but 0x%8.8x found (buflen = %d)",
-                MPEG_PACK_HEADER_CODE,
-                vcd_bitvec_peek_bits32 (buf, 0), buflen);
+                MPEG_PACK_HEADER_CODE, _code, buflen);
+
       ctx->stream.packets--;
+
+      if (!ctx->stream.packets)
+        {
+          if (_code == MPEG_SEQUENCE_CODE)
+            vcd_warn ("...this looks like a elementary video stream"
+                      " but a multiplexed program stream was required.");
+
+          if ((0xfff00000 & _code) == 0xfff00000)
+            vcd_warn ("...this looks like a elementary audio stream"
+                      " but a multiplexed program stream was required.");
+
+          if (_code == 0x52494646)
+            vcd_warn ("...this looks like a RIFF header"
+                      " but a plain multiplexed program stream was required.");
+        }
+
       return 0;
     }
 

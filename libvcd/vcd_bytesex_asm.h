@@ -81,7 +81,7 @@ uint16_t uint16_swap_le_be_asm(uint16_t a __asm("d0"))
 #define UINT16_SWAP_LE_BE uint16_swap_le_be_asm
 #define UINT32_SWAP_LE_BE uint32_swap_le_be_asm
 
-#elif defined(__i386__) && defined(__GNUC__)
+#elif 0 && defined(__i386__) && defined(__GNUC__)
 
 inline static 
 uint32_t uint32_swap_le_be_asm(uint32_t a)
