@@ -1249,39 +1249,73 @@ The @code{xmlns} attribute defines the @acronym{XML} namespace.
 @end cartouche
 @end example
 
-The following option @var{name} are recognized.  At the moment only
-@samp{true} or @samp{false} is recognized as @var{value}.
+The following option @var{name} are recognized. 
 
 @table @samp
 @item svcd vcd30 mpegav
 Rename @file{/MPEG2} folder on @acronym{SVCD}s to (non-compliant)
-@file{/MPEGAV}.  Default: @samp{false}.
+@file{/MPEGAV}.
+
+Allowed @code{value} content: @samp{true}, @samp{false}. Default: @samp{false}.
 
 @item svcd vcd30 entrysvd
 Enables the use of the (deprecated) signature @samp{ENTRYSVD} instead of
-@samp{ENTRYVCD} for the file @file{/SVCD/ENTRY.SVD}. Default:
+@samp{ENTRYVCD} for the file @file{/SVCD/ENTRY.SVD}.
+
+Allowed @code{value} content: @samp{true}, @samp{false}. Default: @samp{false}.
 
 @item svcd vcd30 tracksvd
 Enables the use of the (deprecated) chinese @file{/SVCD/TRACKS.SVD}
 format which differs from the format defined in the IEC-62107
-specification.  Default: @samp{false}.
+specification.
+
+Allowed @code{value} content: @samp{true}, @samp{false}. Default: @samp{false}.
+
+@item track pregap
+
+Used to set the track pregap for all tracks at once in sectors. The
+specification requires the pregap to be at least 150 sectors long.
+
+Allowed @code{value} content: [@samp{1}..@samp{300}]. Default: @samp{150}.
+
+@item track front margin
+
+Set's the front margin for sequence items. For Video CD 1.0/1.1/2.0 it
+should be at least 15 sectors long.
+
+Allowed @code{value} content: [@samp{0}..@samp{150}]. Default: @samp{30}
+for Video CD 1.0/1.1/2.0, otherwise @samp{0}.
+
+@item track rear margin
+
+Set's the rear margin for sequence items. For Video CD 1.0/1.1/2.0 it
+should be at least 15 sectors long.
+
+Allowed @code{value} content: [@samp{0}..@samp{150}]. Default: @samp{45}
+for Video CD 1.0/1.1/2.0, otherwise @samp{0}.
 
 @item relaxed aps
 @cindex Relaxed @acronym{APS} constraints
 This controls whether @acronym{APS} constraints are strict or
-relaxed. Default: @samp{false}. @xref{Access Point Sectors}. 
+relaxed @xref{Access Point Sectors}. 
+
+Allowed @code{value} content: @samp{true}, @samp{false}. Default: @samp{false}.
 
 @item update scan offsets
 @cindex @code{update scan offsets}
 This controls whether to update the scan data information contained in
 the @acronym{MPEG}-2 video streams@footnote{It is required, that the
 stream has already user data groups with scan information data, in order
-for this feature to work}. Default: @samp{false}. @xref{Scan Information
+for this feature to work}. @xref{Scan Information
 Data}.
+
+Allowed @code{value} content: @samp{true}, @samp{false}. Default: @samp{false}.
 
 @item leadout pause
 Enables adding of 150 empty sectors which are added between tracks after
-the last track as well. Default: @samp{false}.
+the last track as well.
+
+Allowed @code{value} content: @samp{true}, @samp{false}. Default: @samp{false}.
 
 @end table
 

@@ -51,8 +51,7 @@ VcdObj *
 vcd_obj_new (vcd_type_t vcd_type);
 
 /* VideoCD parameters */
-typedef enum
-{
+typedef enum {
   VCD_PARM_INVALID = 0,
   VCD_PARM_VOLUME_ID,           /* char *          max length 32  */
   VCD_PARM_ALBUM_ID,            /* char *          max length 16  */
@@ -68,9 +67,11 @@ typedef enum
   VCD_PARM_SVCD_VCD3_TRACKSVD,  /* bool */
   VCD_PARM_UPDATE_SCAN_OFFSETS, /* bool */
   VCD_PARM_RELAXED_APS,         /* bool */
-  VCD_PARM_LEADOUT_PAUSE        /* bool */
-}
-vcd_parm_t;
+  VCD_PARM_LEADOUT_PAUSE,       /* bool */
+  VCD_PARM_TRACK_PREGAP,        /* unsigned        [1..300] */
+  VCD_PARM_TRACK_FRONT_MARGIN,  /* unsigned        [0..150] */
+  VCD_PARM_TRACK_REAR_MARGIN    /* unsigned        [0..150] */
+} vcd_parm_t;
 
 /* sets VideoCD parameter */
 int 

@@ -189,7 +189,7 @@ set_entries_vcd (VcdObj *obj, void *buf)
       lba_to_msf(lsect + 150, &(entries_vcd.entry[idx].msf));
 
       idx++;
-      lsect += obj->pre_data_gap;
+      lsect += obj->track_front_margin;
 
       _VCD_LIST_FOREACH (node2, track->entry_list)
         {
@@ -363,7 +363,7 @@ set_info_vcd(VcdObj *obj, void *buf)
           const struct vcd_mpeg_stream_vid_info *_info = &track->info->shdr[0];
 
           if (vcd_mpeg_get_norm (_info) == MPEG_NORM_PAL
-              || vcd_mpeg_get_norm (_info) == MPEG_NORM_PAL)
+              || vcd_mpeg_get_norm (_info) == MPEG_NORM_PAL_S)
             _set_bit(info_vcd.pal_flags, n);
           else if (_info->vsize == 288 || _info->vsize == 576)
             {
@@ -623,7 +623,7 @@ _make_track_scantable (const VcdObj *obj)
 
           _data->timestamp += _get_cumulative_playing_time (obj, track_no);
           _data->packet_no += obj->iso_size + track->relative_start_extent;
-          _data->packet_no += obj->pre_data_gap;
+          _data->packet_no += obj->track_front_margin;
 
           _vcd_list_append (all_aps, _data);
         }
@@ -887,9 +887,9 @@ set_scandata_dat (VcdObj *obj, void *buf)
         {
           uint32_t lsect = _table[point];
 
-          lsect += track->relative_start_extent;
           lsect += obj->iso_size;
-          lsect += obj->pre_data_gap;
+          lsect += track->relative_start_extent;
+          lsect += obj->track_front_margin;
 
           /* vcd_debug ("lsect %d %d", point, lsect); */
 

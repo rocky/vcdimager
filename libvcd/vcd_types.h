@@ -27,7 +27,7 @@
 # include <stdint.h>
 #elif defined(HAVE_INTTYPES_H)
 # include <inttypes.h>
-#elif defined(__CYGWIN__) || defined(AMIGA)
+#elif defined(__CYGWIN__) || defined(AMIGA) || defined(__linux__)
 # include <sys/types.h>
 typedef u_int8_t uint8_t;
 typedef u_int16_t uint16_t;

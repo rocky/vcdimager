@@ -69,8 +69,29 @@ bool vcd_xml_master (const struct vcdxml_t *obj, const char cue_fname[],
 
   _VCD_LIST_FOREACH (node, obj->option_list)
     {
-      struct option_t *_option = _vcd_list_node_data (node);
-      bool _value = false;
+      const struct option_t *_option = _vcd_list_node_data (node);
+
+      struct {
+	const char *str;
+	enum {
+	  OPT_BOOL = 1,
+	  OPT_UINT,
+	  OPT_STR
+	} val_type;
+	vcd_parm_t parm_id;
+      } const _opt_cfg[] = {
+	{ OPT_SVCD_VCD3_MPEGAV, OPT_BOOL, VCD_PARM_SVCD_VCD3_MPEGAV },
+	{ OPT_SVCD_VCD3_ENTRYSVD, OPT_BOOL, VCD_PARM_SVCD_VCD3_ENTRYSVD },
+	{ OPT_SVCD_VCD3_TRACKSVD, OPT_BOOL, VCD_PARM_SVCD_VCD3_TRACKSVD },
+	{ OPT_RELAXED_APS, OPT_BOOL, VCD_PARM_RELAXED_APS },
+	{ OPT_UPDATE_SCAN_OFFSETS, OPT_BOOL, VCD_PARM_UPDATE_SCAN_OFFSETS },
+	{ OPT_LEADOUT_PAUSE, OPT_BOOL, VCD_PARM_LEADOUT_PAUSE },
+
+	{ OPT_TRACK_PREGAP, OPT_UINT, VCD_PARM_TRACK_PREGAP },
+	{ OPT_TRACK_FRONT_MARGIN, OPT_UINT, VCD_PARM_TRACK_FRONT_MARGIN },
+	{ OPT_TRACK_REAR_MARGIN, OPT_UINT, VCD_PARM_TRACK_REAR_MARGIN },
+	{ 0, }
+      }, *_opt_cfg_p = _opt_cfg;
 
       if (!_option->name)
 	{
@@ -84,33 +105,59 @@ bool vcd_xml_master (const struct vcdxml_t *obj, const char cue_fname[],
 	  continue;
 	}
 
-      if (!strcmp (_option->value, "true"))
-	_value = true;
-      else if (!strcmp (_option->value, "false"))
-	_value = false;
-      else
+      for (; _opt_cfg_p->str; _opt_cfg_p++)
+	if (!strcmp (_opt_cfg_p->str, _option->name))
+	  break;
+
+      if (!_opt_cfg_p->str)
 	{
-	  vcd_error ("option value '%s' invalid (use 'true' or 'false')", _option->value);
+	  vcd_error ("unknown option name '%s'", _option->name);
 	  continue;
 	}
 
-      if (!strcmp (_option->name, OPT_SVCD_VCD3_MPEGAV))
-	vcd_obj_set_param_bool (_vcd, VCD_PARM_SVCD_VCD3_MPEGAV, _value);
-      else if (!strcmp (_option->name, OPT_SVCD_VCD3_ENTRYSVD))
-	vcd_obj_set_param_bool (_vcd, VCD_PARM_SVCD_VCD3_ENTRYSVD, _value);
-      else if (!strcmp (_option->name, OPT_SVCD_VCD3_TRACKSVD))
-	vcd_obj_set_param_bool (_vcd, VCD_PARM_SVCD_VCD3_TRACKSVD, _value);
-      else if (!strcmp (_option->name, OPT_RELAXED_APS))
+      switch (_opt_cfg_p->val_type) 
 	{
-	  vcd_obj_set_param_bool (_vcd, VCD_PARM_RELAXED_APS, _value);
-	  _relaxed_aps = _value;
+	case OPT_BOOL:
+	  {
+	    bool _value;
+	    if (!strcmp (_option->value, "true"))
+	      _value = true;
+	    else if (!strcmp (_option->value, "false"))
+	      _value = false;
+	    else
+	      {
+		vcd_error ("option value '%s' invalid (use 'true' or 'false')", _option->value);
+		continue;
+	      }
+
+	    vcd_obj_set_param_bool (_vcd, _opt_cfg_p->parm_id, _value);
+
+	    if (_opt_cfg_p->parm_id == VCD_PARM_RELAXED_APS)
+	      _relaxed_aps = _value;
+	  }
+	  break;
+
+	case OPT_UINT:
+	  {
+	    unsigned _value;
+	    char *endptr;
+
+	    _value = strtol (_option->value, &endptr, 10);
+	    
+	    if (*endptr)
+	      {
+		vcd_error ("error while converting string '%s' to integer", _option->value);
+		_value = 0;
+	      }
+	   
+	    vcd_obj_set_param_uint (_vcd, _opt_cfg_p->parm_id, _value);
+	  }
+	  break;
+
+	case OPT_STR:
+	  vcd_assert_not_reached ();
+	  break;
 	}
-      else if (!strcmp (_option->name, OPT_UPDATE_SCAN_OFFSETS))
-	vcd_obj_set_param_bool (_vcd, VCD_PARM_UPDATE_SCAN_OFFSETS, _value);
-      else if (!strcmp (_option->name, OPT_LEADOUT_PAUSE))
-	vcd_obj_set_param_bool (_vcd, VCD_PARM_LEADOUT_PAUSE, _value);
-      else
-	vcd_error ("unknown option name '%s'", _option->name);
     }  
 
   _VCD_LIST_FOREACH (node, obj->pbc_list)

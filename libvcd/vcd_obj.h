@@ -102,9 +102,9 @@ struct _VcdObj {
   bool relaxed_aps;
   bool leadout_pause;
 
-  unsigned pre_track_gap;
-  unsigned pre_data_gap;
-  unsigned post_data_gap;
+  unsigned track_pregap;
+  unsigned track_front_margin;
+  unsigned track_rear_margin;
 
   /* output */
   VcdImageSink *image_sink;
@@ -177,7 +177,7 @@ enum vcd_capability_t {
   _CAP_MPEG2,
   _CAP_PBC,
   _CAP_PBC_X,
-  _CAP_DATA_GAP,
+  _CAP_TRACK_MARGINS,
   _CAP_4C_SVCD,
   _CAP_PAL_BITS
 };

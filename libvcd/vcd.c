@@ -223,7 +223,7 @@ _vcd_obj_has_cap_p (const VcdObj *obj, enum vcd_capability_t capability)
       return !_vcd_obj_has_cap_p (obj, _CAP_MPEG2); /* for now */
       break;
 
-    case _CAP_DATA_GAP:
+    case _CAP_TRACK_MARGINS:
       return !_vcd_obj_has_cap_p (obj, _CAP_MPEG2); /* for now */
       break;
     }
@@ -286,17 +286,17 @@ vcd_obj_new (vcd_type_t vcd_type)
 
   new_obj->pbc_list = _vcd_list_new ();
 
-  if (_vcd_obj_has_cap_p (new_obj, _CAP_DATA_GAP))
+  if (_vcd_obj_has_cap_p (new_obj, _CAP_TRACK_MARGINS))
     {
-      new_obj->pre_track_gap = 150;
-      new_obj->pre_data_gap = 30;
-      new_obj->post_data_gap = 45;
+      new_obj->track_pregap = 150;
+      new_obj->track_front_margin = 30;
+      new_obj->track_rear_margin = 45;
     }
   else
     {
-      new_obj->pre_track_gap = 150;
-      new_obj->pre_data_gap = 0;
-      new_obj->post_data_gap = 0;
+      new_obj->track_pregap = 150;
+      new_obj->track_front_margin = 0;
+      new_obj->track_rear_margin = 0;
     }
 
   return new_obj;
@@ -328,7 +328,7 @@ _vcd_obj_remove_mpeg_track (VcdObj *obj, int track_id)
   vcd_mpeg_source_destroy (track->source, true);
 
   length = track->info->packets;
-  length += obj->pre_track_gap + obj->pre_data_gap + 0 + obj->post_data_gap;
+  length += obj->track_pregap + obj->track_front_margin + 0 + obj->track_rear_margin;
 
   /* fixup offsets */
   {
@@ -452,10 +452,10 @@ vcd_obj_append_sequence_play_item (VcdObj *obj, VcdMpegSource *mpeg_source,
   sequence->entry_list = _vcd_list_new ();
   sequence->pause_list = _vcd_list_new ();
 
-  obj->relative_end_extent += obj->pre_track_gap;
+  obj->relative_end_extent += obj->track_pregap;
   sequence->relative_start_extent = obj->relative_end_extent;
 
-  obj->relative_end_extent += obj->pre_data_gap + length + obj->post_data_gap;
+  obj->relative_end_extent += obj->track_front_margin + length + obj->track_rear_margin;
 
   if (length < 75)
     vcd_warn ("mpeg stream shorter than 75 sectors");
@@ -701,6 +701,47 @@ vcd_obj_set_param_uint (VcdObj *obj, vcd_parm_t param, unsigned arg)
           vcd_warn ("restriction out of range, clamping to range");
         }
       vcd_debug ("changed restriction number to %u", obj->info_restriction);
+      break;
+
+    case VCD_PARM_TRACK_PREGAP:
+      obj->track_pregap = arg;
+      if (!IN (obj->track_pregap, 1, 300))
+        {
+          obj->track_pregap = CLAMP (obj->track_pregap, 1, 300);
+          vcd_warn ("pregap out of range, clamping to allowed range");
+        }
+      if (obj->track_pregap < 150)
+        vcd_warn ("track pre gap set below 150 sectors; created (s)vcd may be non-working");
+      vcd_debug ("changed pregap to %u", obj->track_pregap);
+      break;
+
+    case VCD_PARM_TRACK_FRONT_MARGIN:
+      obj->track_front_margin = arg;
+      if (!IN (obj->track_front_margin, 0, 150))
+        {
+          obj->track_front_margin = CLAMP (obj->track_front_margin, 0, 150);
+          vcd_warn ("front margin out of range, clamping to allowed range");
+        }
+      if (_vcd_obj_has_cap_p (obj, _CAP_TRACK_MARGINS) 
+          && obj->track_front_margin < 15)
+        vcd_warn ("front margin set smaller than recommended (%d < 15 sectors) for disc type used",
+                  obj->track_front_margin);
+
+      vcd_debug ("changed front margin to %u", obj->track_front_margin);
+      break;
+
+    case VCD_PARM_TRACK_REAR_MARGIN:
+      obj->track_rear_margin = arg;
+      if (!IN (obj->track_rear_margin, 0, 150))
+        {
+          obj->track_rear_margin = CLAMP (obj->track_rear_margin, 0, 150);
+          vcd_warn ("rear margin out of range, clamping to allowed range");
+        }
+      if (_vcd_obj_has_cap_p (obj, _CAP_TRACK_MARGINS) 
+          && obj->track_rear_margin < 15)
+        vcd_warn ("rear margin set smaller than recommended (%d < 15 sectors) for disc type used",
+                  obj->track_rear_margin);
+      vcd_debug ("changed rear margin to %u", obj->track_rear_margin);
       break;
 
     default:
@@ -1237,8 +1278,8 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
     {
       char avseq_pathname[128] = { 0, };
       const char *fmt = NULL;
-      mpeg_sequence_t *track = _vcd_list_node_data (node);
-      uint32_t extent = track->relative_start_extent;
+      mpeg_sequence_t *_sequence = _vcd_list_node_data (node);
+      uint32_t extent = _sequence->relative_start_extent;
       uint8_t file_num = 0;
       
       extent += obj->iso_size;
@@ -1275,12 +1316,20 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
       vcd_assert (n < 98);
       
       snprintf (avseq_pathname, sizeof (avseq_pathname), fmt, n + 1);
-        
-      _vcd_directory_mkfile (obj->dir, avseq_pathname, extent + obj->pre_data_gap,
-                             track->info->packets * ISO_BLOCKSIZE,
+      
+      /*
+      _vcd_directory_mkfile (obj->dir, avseq_pathname, 
+                             extent + obj->track_front_margin,
+                             _sequence->info->packets * ISO_BLOCKSIZE,
+                             true, file_num);
+      */
+
+      _vcd_directory_mkfile (obj->dir, avseq_pathname, extent,
+                             (obj->track_front_margin 
+                              + _sequence->info->packets
+                              + obj->track_rear_margin) * ISO_BLOCKSIZE,
                              true, file_num);
 
-      extent += obj->iso_size;
       n++;
     }
 
@@ -1460,13 +1509,6 @@ _write_sequence (VcdObj *obj, int track_idx)
     int unknown;
   } mpeg_packets = {0, };
 
-  const char *audio_types[] = {
-    "no audio stream",
-    "1 audio stream",
-    "2 audio streams",
-    "ext MC audio stream",
-    0
-  };
 
   {
     char *norm_str = NULL;
@@ -1492,25 +1534,66 @@ _write_sequence (VcdObj *obj, int track_idx)
     case MPEG_NORM_OTHER:
       {
         char buf[1024] = { 0, };
-        snprintf (buf, sizeof (buf), "UNKNOWN (%dx%d/%2.2ffps)",
-                  _info->hsize, _info->vsize, _info->frate);
+        switch (_info->hsize)
+          {
+          case 480:
+          case 240:
+            snprintf (buf, sizeof (buf), "NTSC UNKNOWN (%dx%d/%2.2ffps)",
+                      _info->hsize, _info->vsize, _info->frate);
+            break;
+          case 288:
+          case 576:
+            snprintf (buf, sizeof (buf), "PAL UNKNOWN (%dx%d/%2.2ffps)",
+                      _info->hsize, _info->vsize, _info->frate);
+            break;
+          default:
+            snprintf (buf, sizeof (buf), "UNKNOWN (%dx%d/%2.2ffps)",
+                      _info->hsize, _info->vsize, _info->frate);
+            break;
+          }
         norm_str = strdup (buf);
       }
       break;
     }
 
-#warning FIXME
-    vcd_info ("writing track %d, %s, %s, %s...", track_idx + 2,
-              (track->info->version == MPEG_VERS_MPEG1 ? "MPEG1" : "MPEG2"),
-              norm_str, /* audio_types[track->info->audio_type] */ "FIXME");
+    {
+      char buf[1024] = { 0, }, buf2[1024] = { 0, };
+      int i;
+
+      for (i = 0; i < 3; i++)
+        if (track->info->ahdr[i].seen)
+          {
+            const char *_mode_str[] = {
+              0,
+              "stereo",
+              "jstereo",
+              "dual",
+              "single",
+              0
+            };
+
+            snprintf (buf, sizeof (buf), "audio[%d]: l%d/%2.1fkHz/%dkbps/%s ", 
+                      i,
+                      track->info->ahdr[i].layer,
+                      track->info->ahdr[i].sampfreq / 1000.0,
+                      track->info->ahdr[i].bitrate / 1024,
+                      _mode_str[track->info->ahdr[i].mode]);
+                    
+            strncat (buf2, buf, sizeof(buf));
+          }      
+
+      vcd_info ("writing track %d, %s, %s, %s...", track_idx + 2,
+                (track->info->version == MPEG_VERS_MPEG1 ? "MPEG1" : "MPEG2"),
+                norm_str, buf2);
+    }
 
     free (norm_str);
   }
 
-  for (n = 0; n < obj->pre_track_gap; n++)
+  for (n = 0; n < obj->track_pregap; n++)
     _write_m2_image_sector (obj, zero, lastsect++, 0, 0, SM_FORM2, 0);
 
-  for (n = 0; n < obj->pre_data_gap;n++)
+  for (n = 0; n < obj->track_front_margin;n++)
     _write_m2_image_sector (obj, zero, lastsect++, track_idx + 1,
                             0, SM_FORM2|SM_REALT, 0);
 
@@ -1613,7 +1696,7 @@ _write_sequence (VcdObj *obj, int track_idx)
 
   vcd_mpeg_source_close (track->source);
 
-  for (n = 0; n < obj->post_data_gap; n++)
+  for (n = 0; n < obj->track_rear_margin; n++)
     _write_m2_image_sector (obj, zero, lastsect++, track_idx + 1,
                             0, SM_FORM2|SM_REALT, 0);
 
@@ -1999,7 +2082,7 @@ vcd_obj_begin_output (VcdObj *obj)
   image_size = obj->relative_end_extent + obj->iso_size;
 
   if (obj->leadout_pause)
-    image_size += obj->pre_track_gap;
+    image_size += obj->track_pregap;
 
   if (image_size > CD_MAX_SECTORS)
     vcd_error ("image too big (%d sectors > %d sectors)", 
@@ -2091,7 +2174,7 @@ vcd_obj_write_image (VcdObj *obj, VcdImageSink *image_sink,
         _vcd_list_append (cue_list, (_cue = _vcd_malloc (sizeof (vcd_cue_t))));
         
         _cue->lsn = track->relative_start_extent + obj->iso_size;
-        _cue->lsn -= obj->pre_track_gap;
+        _cue->lsn -= obj->track_pregap;
         _cue->type = VCD_CUE_PREGAP_START;
 
         _vcd_list_append (cue_list, (_cue = _vcd_malloc (sizeof (vcd_cue_t))));
@@ -2107,7 +2190,7 @@ vcd_obj_write_image (VcdObj *obj, VcdImageSink *image_sink,
             
             _cue->lsn = obj->iso_size;
             _cue->lsn += track->relative_start_extent;
-            _cue->lsn += obj->pre_data_gap;
+            _cue->lsn += obj->track_front_margin;
             _cue->lsn += _entry->aps.packet_no;
 
             _cue->type = VCD_CUE_SUBINDEX;
@@ -2121,7 +2204,7 @@ vcd_obj_write_image (VcdObj *obj, VcdImageSink *image_sink,
     _cue->lsn = obj->relative_end_extent + obj->iso_size;
 
     if (obj->leadout_pause)
-      _cue->lsn += obj->pre_track_gap;
+      _cue->lsn += obj->track_pregap;
 
     _cue->type = VCD_CUE_END;
 
@@ -2172,7 +2255,7 @@ vcd_obj_write_image (VcdObj *obj, VcdImageSink *image_sink,
 
         vcd_debug ("writting leadout pause...");
         
-        for (n = 0; n < obj->pre_track_gap; n++)
+        for (n = 0; n < obj->track_pregap; n++)
           _write_m2_image_sector (obj, zero, lastsect++, 0, 0, SM_FORM2, 0);
       }
 

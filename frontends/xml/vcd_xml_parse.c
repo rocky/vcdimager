@@ -771,11 +771,13 @@ _parse_videocd (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr n
   FOR_EACH (cur, node)
     {
       bool rc = false;
-
+      
       if (cur->ns != ns)
 	continue;
 
-      if (!xmlStrcmp (cur->name, "option")) 
+      if (!xmlStrcmp (cur->name, "meta")) 
+	{ /* NOOP */ }
+      else if (!xmlStrcmp (cur->name, "option")) 
 	rc = _parse_option (obj, doc, cur, ns);
       else if (!xmlStrcmp (cur->name, "info")) 
 	rc = _parse_info (obj, doc, cur, ns);

@@ -66,12 +66,15 @@ struct vcdxml_t {
   VcdList *filesystem;
 };
 
-#define OPT_SVCD_VCD3_MPEGAV        "svcd vcd30 mpegav"
-#define OPT_SVCD_VCD3_ENTRYSVD      "svcd vcd30 entrysvd"
-#define OPT_SVCD_VCD3_TRACKSVD      "svcd vcd30 tracksvd"
-#define OPT_RELAXED_APS             "relaxed aps"
-#define OPT_UPDATE_SCAN_OFFSETS     "update scan offsets"
 #define OPT_LEADOUT_PAUSE           "leadout pause"
+#define OPT_RELAXED_APS             "relaxed aps"
+#define OPT_SVCD_VCD3_ENTRYSVD      "svcd vcd30 entrysvd"
+#define OPT_SVCD_VCD3_MPEGAV        "svcd vcd30 mpegav"
+#define OPT_SVCD_VCD3_TRACKSVD      "svcd vcd30 tracksvd"
+#define OPT_TRACK_FRONT_MARGIN      "track front margin"
+#define OPT_TRACK_PREGAP            "track pregap"
+#define OPT_TRACK_REAR_MARGIN       "track rear margin"
+#define OPT_UPDATE_SCAN_OFFSETS     "update scan offsets"
 
 struct option_t {
   char *name;

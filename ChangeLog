@@ -1,3 +1,18 @@
+2001-08-25  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd.c (_write_sequence): 
+		spit out more information about mpeg stream
+
+2001-08-24  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* frontends/xml/vcd_xml_master.c (vcd_xml_master): 
+		more generic option intepretation implemented
+
+	* libvcd/vcd.c (vcd_obj_set_param_uint): 3 new option added;
+	  	VCD_PARM_TRACK_PREGAP,
+		VCD_PARM_TRACK_FRONT_MARGIN,
+		VCD_PARM_TRACK_REAR_MARGIN
+
 2001-08-23  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_files.c: set ogt fields

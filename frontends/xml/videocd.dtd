@@ -22,17 +22,20 @@
   src       %URI;        #REQUIRED"
 >
 
-<!ELEMENT videocd (option*,info,pvd,filesystem?,segment-items?,sequence-items,pbc?)>
+<!ELEMENT videocd (meta*,option*,info,pvd,filesystem?,segment-items?,sequence-items,pbc?)>
 <!ATTLIST videocd
   class     CDATA                    #REQUIRED
   version   CDATA                    #REQUIRED
   xmlns     %URI;                    #FIXED 'http://www.gnu.org/software/vcdimager/1.0/'
 >
 
+<!ELEMENT meta ANY>
+<!ATTLIST meta>
+
 <!ELEMENT option EMPTY>
 <!ATTLIST option 
-  name		CDATA	#REQUIRED
-  value 	CDATA   #IMPLIED
+  name	    CDATA	             #REQUIRED
+  value     CDATA                    #IMPLIED
 >
 
 <!--======================================================================-->
