@@ -24,7 +24,7 @@ vcdxbuild_SOURCES = \
 	vcd_xml_parse.c \
 	vcd_xml_parse.h 
 
-vcdxrip_LDADD = $(XML_LIBS) $(LIBVCD_LIBS) $(LIBPOPT_LIBS)
+vcdxrip_LDADD = $(XML_LIBS) $(LIBVCDINFO_LIBS) $(LIBVCD_LIBS) $(LIBPOPT_LIBS)
 vcdxrip_SOURCES = \
 	vcd_xml_rip.c \
 	vcd_xml_common.c \

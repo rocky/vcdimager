@@ -46,6 +46,8 @@
 #include <libvcd/vcd_types.h>
 #include <libvcd/vcd_util.h>
 #include <libvcd/vcd_xa.h>
+#include <libvcd/vcdinfo.h>
+#include <libvcd/vcdinf.h>
 
 #include "vcdxml.h"
 #include "vcd_xml_dtd.h"
@@ -56,28 +58,6 @@ static const char _rcsid[] = "$Id$";
 
 static int _verbose_flag = 0;
 static int _quiet_flag = 0;
-
-static const char *
-_strip_trail (const char str[], size_t n)
-{
-  static char buf[1024];
-  int j;
-
-  vcd_assert (n < 1024);
-
-  strncpy (buf, str, n);
-  buf[n] = '\0';
-
-  for (j = strlen (buf) - 1; j >= 0; j--)
-    {
-      if (buf[j] != ' ')
-        break;
-
-      buf[j] = '\0';
-    }
-
-  return buf;
-}
 
 static void
 _register_file (struct vcdxml_t *obj, const char *pathname,
@@ -233,12 +213,11 @@ _parse_pvd (struct vcdxml_t *obj, VcdImageSource *img)
       return -1;
     }
  
-  obj->pvd.volume_id = strdup (_strip_trail (pvd.volume_id, 32));
-  obj->pvd.system_id = strdup (_strip_trail (pvd.system_id, 32));
-
-  obj->pvd.publisher_id = strdup (_strip_trail (pvd.publisher_id, 128));
-  obj->pvd.preparer_id = strdup (_strip_trail (pvd.preparer_id, 128));
-  obj->pvd.application_id = strdup (_strip_trail (pvd.application_id, 128));
+  obj->pvd.volume_id      = strdup (vcdinf_get_volume_id(&pvd));
+  obj->pvd.system_id      = strdup (vcdinf_get_system_id(&pvd));
+  obj->pvd.publisher_id   = strdup (vcdinf_get_publisher_id(&pvd));
+  obj->pvd.preparer_id    = strdup (vcdinf_get_preparer_id(&pvd));
+  obj->pvd.application_id = strdup (vcdinf_get_application_id(&pvd));
 
   return 0;
 }
@@ -261,19 +240,11 @@ _parse_info (struct vcdxml_t *obj, VcdImageSource *img)
   switch (_vcd_type)
     {
     case VCD_TYPE_VCD:
-      vcd_debug ("VCD 1.0 detected\n");
-      break;
     case VCD_TYPE_VCD11:
-      vcd_debug ("VCD 1.1 detected");
-      break;
     case VCD_TYPE_VCD2:
-      vcd_debug ("VCD 2.0 detected");
-      break;
     case VCD_TYPE_SVCD:
-      vcd_debug ("SVCD detected");
-      break;
     case VCD_TYPE_HQVCD:
-      vcd_debug ("HQ-VCD detected\n");
+      vcd_debug ("%s detected", vcdinf_get_format_version_str(_vcd_type));
       break;
     case VCD_TYPE_INVALID:
       vcd_error ("unknown ID encountered -- maybe not a proper (S)VCD?");
@@ -284,16 +255,16 @@ _parse_info (struct vcdxml_t *obj, VcdImageSource *img)
       break;
     }
 
-  obj->info.album_id = strdup (_strip_trail (info.album_desc, 16));
-  obj->info.volume_count = uint16_from_be (info.vol_count);
-  obj->info.volume_number = uint16_from_be (info.vol_id);
+  obj->info.album_id = strdup (vcdinf_get_album_id(&info));
+  obj->info.volume_count = vcdinf_get_volume_count(&info);
+  obj->info.volume_number = vcdinf_get_volume_num(&info);
 
   obj->info.restriction = info.flags.restriction;
   obj->info.use_lid2 = info.flags.use_lid2;
   obj->info.use_sequence2 = info.flags.use_track3;
 
-  obj->info.psd_size = uint32_from_be (info.psd_size);
-  obj->info.max_lid = uint16_from_be (info.lot_entries);
+  obj->info.psd_size = vcdinf_get_psd_size(&info);
+  obj->info.max_lid = vcdinf_get_num_LIDs(&info);
 
   {
     unsigned segment_start;
