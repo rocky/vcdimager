@@ -624,7 +624,7 @@ dump_pvd (const void *data)
            from_723 (pvd->logical_block_size));
   
   fprintf (stdout, " XA marker present: %s\n", 
-           bool_str (!strncmp (data + ISO_XA_MARKER_OFFSET, 
+           bool_str (!strncmp ((char *) data + ISO_XA_MARKER_OFFSET, 
                                ISO_XA_MARKER_STRING, 
                                strlen (ISO_XA_MARKER_STRING))));
 }
