@@ -158,6 +158,15 @@ _parse_sequence_header (uint8_t streamid, const void *buf,
   if (!state->stream.first_shdr)
     state->stream.first_shdr = vid_idx + 1;
 
+  /* ++KSW (Keith White), for stills with both stream ids, the higher
+     resolution takes precedence */
+  if (state->stream.first_shdr == 2 && vid_idx == 2)
+    {
+      vcd_debug ("got still image with hires sequence header "
+                 "coming later. declaring this still to be hires.");
+      state->stream.first_shdr = vid_idx + 1;
+    }
+
   hsize = vcd_bitvec_read_bits (data, &offset, 12);
 
   vsize = vcd_bitvec_read_bits (data, &offset, 12);

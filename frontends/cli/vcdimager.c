@@ -125,6 +125,7 @@ _progress_callback (const progress_info_t * info, void *user_data)
            info->in_track, info->total_tracks, info->sectors_written,
            info->total_sectors,
            (double) info->sectors_written / info->total_sectors * 100);
+  fflush (stdout);
 
   return 0;
 }

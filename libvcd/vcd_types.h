@@ -25,6 +25,10 @@
 # include <stdint.h>
 #elif defined(HAVE_INTTYPES_H)
 # include <inttypes.h>
+# if defined(__FreeBSD__)
+#  define UINT32_C(c)   c ## U
+#  define UINT64_C(c)   c ## ULL
+# endif
 #elif defined(__CYGWIN__)
 # include <sys/types.h>
 typedef u_int8_t uint8_t;

@@ -1,4 +1,10 @@
+if BUILD_CLI_FE_POPT
+POPT_SUBDIR = popt
+POPT_INCLUDES = -I $(srcdir)/../cli/popt/
+POPT_LIBS = ../cli/popt/libpopt.a
+else
 POPT_LIBS = -lpopt
+endif
 
 bin_PROGRAMS = vcdxbuild vcdxgen vcdxrip
 

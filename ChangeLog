@@ -1,5 +1,16 @@
-2001-05-28  Herbert Valerio Riedel  <hvr@gnu.org>
+2001-05-28  Keith White <Keith.White@site.uottawa.ca>
 
+	* libvcd/vcd_mpeg.c (_parse_sequence_header): hires in stills takes
+		precedence..
+
+	* libvcd/vcd_types.h: add UINT32_C and UINT64_C macros for freebsd
+
+	* frontends/xml/Makefile.am: use included popt if needed
+
+	* frontends/cli/vcdimager.c (_progress_callback): fflush on stdout
+
+2001-05-28  Herbert Valerio Riedel  <hvr@gnu.org>
+	
 	* libvcd/vcd_image_linuxcd.c (_read_mode2_sector): make less debugging output
 
 	* libvcd/vcd.c: write subheader information for non-svcds
