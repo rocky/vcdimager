@@ -104,19 +104,21 @@ _vcd_source_init (_img_cd_src_t *_obj)
       return;
     }
 
-  /*
-   * CDROMCDXA/CDROMREADMODE2 are broken on IDE/ATAPI devices.
-   * Try to send MMC3 SCSI commands via the uscsi interface on
-   * ATAPI devices.
-   */
-  if ( ioctl(_obj->fd, DKIOCINFO, &cinfo) == 0
-       && ((strcmp(cinfo.dki_cname, "ide") == 0) 
-	   || (strncmp(cinfo.dki_cname, "pci", 3) == 0)) ) {
+  if (_obj->access_mode == _AM_NONE) {
+    /*
+     * CDROMCDXA/CDROMREADMODE2 are broken on IDE/ATAPI devices.
+     * Try to send MMC3 SCSI commands via the uscsi interface on
+     * ATAPI devices.
+     */
+    if ( ioctl(_obj->fd, DKIOCINFO, &cinfo) == 0
+	 && ((strcmp(cinfo.dki_cname, "ide") == 0) 
+	     || (strncmp(cinfo.dki_cname, "pci", 3) == 0)) ) {
       _obj->access_mode = _AM_SUN_CTRL_ATAPI;
-  } else {
+    } else {
       _obj->access_mode = _AM_SUN_CTRL_SCSI;    
+    }
   }
-
+  
   _obj->init = true;
   _obj->toc_init = false;
 }
@@ -330,6 +332,15 @@ _vcd_source_set_arg (void *user_data, const char key[], const char value[])
       free (_obj->device);
       
       _obj->device = strdup (value);
+    }
+  else if (!strcmp (key, "access-mode"))
+    {
+      if (!strcmp(value, "ATAPI"))
+	_obj->access_mode = _AM_IOCTL;
+      else if (!strcmp(value, "SCSI"))
+	_obj->access_mode = _AM_READ_CD;
+      else
+	vcd_error ("unknown access type: %s. ignored.", value);
     }
   else 
     return -1;
@@ -553,6 +564,7 @@ vcd_image_source_new_cd (void)
 
   _data = _vcd_malloc (sizeof (_img_cd_src_t));
   _data->device = _vcd_get_default_device();
+  _data->access_mode = _AM_NONE;
   _data->fd = -1;
 
   return vcd_image_source_new (_data, &_funcs);
