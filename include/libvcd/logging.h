@@ -116,7 +116,7 @@ vcd_warn (const char format[], ...) GNUC_PRINTF(1,2);
 /**
  * Handle an error message.
  *
- * @see vcd_log for a more generic routine.
+ * @see vcd_log for a more generic routine. Execution is terminated.
  */
 void
 vcd_error (const char format[], ...) GNUC_PRINTF(1,2);
