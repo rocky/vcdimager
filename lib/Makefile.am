@@ -124,10 +124,8 @@ libvcdinfo.la.ver: $(libvcdinfo_la_OBJECTS)
 	echo 'VCDINFO_$(libvcdinfo_la_MAJOR) {' > $@
 	echo "  global:" >> $@
 	nm $(patsubst %lo,%o,$(libvcdinfo_la_OBJECTS)) | sed -n -e 's/^.*[ 	][ABCDGIRSTW][ABCDGIRSTW]*[ 	][ 	]*\([_A-Za-z][_A-Za-z0-9]*\)$$/    \1;/p' | sort | uniq >> $@
-	echo "  local:" >> $@
-	echo "    *;" >> $@
 	echo '};' >> $@
 
-MOSTLYCLEANFILES = libvcdinfo.la.ver libiso9660.la
+MOSTLYCLEANFILES = libvcdinfo.la.ver
 
 # EOF
