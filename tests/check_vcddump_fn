@@ -1,0 +1,30 @@
+# $Id$
+# Pssst.... This file is intended to be sourced...
+
+test_vcddump() {
+  if [ ! -x "../frontends/cli/vcddump" ]; then
+    echo "$0: No vcddump test skipped"
+    return 1
+  fi
+
+  VCDDUMP="../frontends/cli/vcddump"
+  opts="$1"
+  outfile="$2"
+  rightfile="$3"
+  if ! ${VCDDUMP} ${opts} >${outfile} 2>&1 ; then 
+    echo "$0: ${VCDDUMP} ${opts} failed"
+    return 2
+  fi
+
+  if ! diff -u ${outfile} ${rightfile} ; then
+    return 3
+  fi
+
+  rm ${outfile}
+  return 0
+}
+
+#;;; Local Variables: ***
+#;;; mode:shell-script ***
+#;;; eval: (sh-set-shell "bash") ***
+#;;; End: ***
