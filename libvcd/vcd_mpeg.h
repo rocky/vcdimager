@@ -24,14 +24,13 @@
 #include "vcd_types.h"
 
 typedef enum {
-  MPEG_INVALID = 0,
-  MPEG_VIDEO,
-  MPEG_AUDIO,
-  MPEG_NULL,
-  MPEG_END,
-  MPEG_UNKNOWN
+  MPEG_TYPE_INVALID = 0,
+  MPEG_TYPE_VIDEO,
+  MPEG_TYPE_AUDIO,
+  MPEG_TYPE_NULL,
+  MPEG_TYPE_END,
+  MPEG_TYPE_UNKNOWN
 } mpeg_type_t;
-
 
 typedef enum {
   MPEG_NORM_OTHER,
@@ -47,9 +46,9 @@ typedef enum {
   MPEG_VERS_MPEG1,
   MPEG_VERS_MPEG2
 } mpeg_vers_t;
-  
 
-typedef struct {
+typedef struct 
+{
   unsigned hsize;
   unsigned vsize;
   double aratio;
@@ -58,15 +57,53 @@ typedef struct {
   unsigned vbvsize;
   int constrained_flag;
   
-  mpeg_vers_t vers;
+  mpeg_vers_t version;
   mpeg_norm_t norm;
 } mpeg_info_t;
 
+typedef struct 
+{
+  mpeg_type_t type;
+
+  mpeg_vers_t version;
+
+#if ANON_UNION
+  union {
+#endif
+
+    struct
+    {
+      unsigned hsize;
+      unsigned vsize;
+      double aratio;
+      double frate;
+      unsigned bitrate;
+      unsigned vbvsize;
+      int constrained_flag;
+    
+      double timecode; /* linear timecode given in seconds */
+      int rel_timecode; /* relative timecode offset to last gop given
+                           in frames */
+
+      /* flags to be set if corresponding element was present */
+      int gop_flag:1; /* if set then timecode was set too */
+
+      int i_frame_flag:1; /* if set then rel_timecode was set too */
+      
+    } video;
+#ifdef ANON_UNION
+  };
+#endif
+} mpeg_type_info_t;
+
 mpeg_type_t 
-mpeg_type(const void *mpeg_block);
+vcd_mpeg_get_type (const void *packet, mpeg_type_info_t *type_info);
+
+double
+vcd_mpeg_get_timecode (const void *packet);
 
 int
-mpeg_analyze_start_seq(const void *packet, mpeg_info_t *info);
+vcd_mpeg_get_info (const void *packet, mpeg_info_t *mpeg_info);
 
 #endif /* _MPEG_H_ */
 

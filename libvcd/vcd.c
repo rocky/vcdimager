@@ -109,6 +109,8 @@ vcd_obj_append_mpeg_track (VcdObj *obj, VcdDataSource *mpeg_file)
   unsigned length;
   int j;
   struct mpeg_track_t *track;
+  double begin = -1, end = -1;
+  int got_info = 0;
 
   assert (obj != NULL);
   assert (mpeg_file != NULL);
@@ -116,7 +118,7 @@ vcd_obj_append_mpeg_track (VcdObj *obj, VcdDataSource *mpeg_file)
   length = vcd_data_source_stat (mpeg_file);
 
   if (length % 2324)
-    vcd_warn ("track# %d not a multiple 2324...", obj->mpeg_tracks_num);
+    vcd_warn ("track# %d not a multiple of 2324 bytes", obj->mpeg_tracks_num);
 
   track = &(obj->mpeg_tracks[obj->mpeg_tracks_num]);
 
@@ -129,31 +131,83 @@ vcd_obj_append_mpeg_track (VcdObj *obj, VcdDataSource *mpeg_file)
 
   obj->relative_end_extent += PRE_DATA_GAP + length / 2324 + POST_DATA_GAP;
 
-  for (j = 0;;j++) {
-    char buf[M2F2_SIZE] = { 0, };
+  for (j = 0;;j++) 
+    {
+      char buf[M2F2_SIZE] = { 0, };
+      
+      vcd_data_source_read (mpeg_file, buf, sizeof (buf), 1);
 
-    vcd_data_source_read (mpeg_file, buf, sizeof (buf), 1);
+      /* find beginning timecode */
+      if (begin < 0)
+        begin = vcd_mpeg_get_timecode (buf);
+      
+      if (!got_info && vcd_mpeg_get_info (buf, &(track->mpeg_info)))
+        {
+          if (obj->type == VCD_TYPE_SVCD
+              && track->mpeg_info.version == MPEG_VERS_MPEG1)
+            vcd_warn ("SVCD should not contain MPEG1 tracks!");
+          
+          if (obj->type == VCD_TYPE_VCD2
+              && track->mpeg_info.version == MPEG_VERS_MPEG2)
+            vcd_warn ("VCD should not contain MPEG2 tracks!");
+          
+          got_info = 1;
+          break;
+        }
 
-    if (mpeg_analyze_start_seq (buf, &(track->mpeg_info)))
-      {
-        if (obj->type == VCD_TYPE_SVCD
-            && track->mpeg_info.vers == MPEG_VERS_MPEG1)
-          vcd_warn ("SVCD should not contain MPEG1 tracks!");
-
-        if (obj->type == VCD_TYPE_VCD2
-            && track->mpeg_info.vers == MPEG_VERS_MPEG2)
-          vcd_warn ("VCD should not contain MPEG2 tracks!");
-
+      if (got_info && begin >= 0)
         break;
-      }
 
-    if (j > 16) {
-      vcd_warn ("could not determine mpeg format -- assuming it is ok nevertheless");
-      break;
-    }
+      if (j > 75)
+        break;
   }
 
+  if (!got_info) 
+    {
+      vcd_warn ("could not determine mpeg format"
+                " -- assuming it is ok nevertheless");
+    }
+
+  if (begin < 0)
+    vcd_warn ("couldn't determine starting timecode");
+
+  /* find ending timecode */
+
+  for(j = 1;;j++) 
+    {
+      char buf[M2F2_SIZE] = { 0, };
+
+      vcd_data_source_seek (mpeg_file, (track->length_sectors - j) * 2324); 
+
+      vcd_data_source_read (mpeg_file, buf, sizeof (buf), 1);
+      
+      if (end < 0)
+        end = vcd_mpeg_get_timecode (buf);
+      
+      if (end >= 0)
+        break;
+
+      if (j > 150) 
+        {
+          vcd_warn ("could not determine ending timecode");
+          break;
+        }
+    }
+
   vcd_data_source_close (mpeg_file);
+
+  if (begin < 0 || end < 0 || begin >= end) 
+    {
+      vcd_warn ("track# %d: timecode begin with %f / end at %f " 
+                "-- setting playtime to 0", 
+                obj->mpeg_tracks_num, begin, end);
+      track->playtime = 0;
+    }
+
+  track->playtime = (double) (0.5 + end - begin);
+
+  vcd_debug ("track# %d's estimated playtime: %d seconds", 
+             obj->mpeg_tracks_num, track->playtime);
   
   return obj->mpeg_tracks_num++;
 }
@@ -755,7 +809,9 @@ _write_sectors (VcdObj *obj, int track)
       break;
     }
 
-    vcd_debug ("writing track %d, %s...", track+2, norm_str);
+    vcd_debug ("writing track %d, %s, %s...", track+2,
+               (info->version == MPEG_VERS_MPEG1 ? "MPEG1" : "MPEG2"),
+               norm_str);
 
     free (norm_str);
   }
@@ -771,37 +827,38 @@ _write_sectors (VcdObj *obj, int track)
 
   for (n = 0; n < obj->mpeg_tracks[track].length_sectors;n++) {
     int ci = 0, sm = 0;
+
     vcd_data_source_read (obj->mpeg_tracks[track].source, buf, 2324, 1);
 
-    switch (mpeg_type (buf)) {
-    case MPEG_VIDEO:
+    switch (vcd_mpeg_get_type (buf, NULL)) {
+    case MPEG_TYPE_VIDEO:
       mpeg_packets.video++;
       sm = SM_FORM2|SM_REALT|SM_VIDEO;
       ci = CI_NTSC;
       break;
-    case MPEG_AUDIO:
+    case MPEG_TYPE_AUDIO:
       mpeg_packets.audio++;
       sm = SM_FORM2|SM_REALT|SM_AUDIO;
       ci = CI_AUD;
       break;
-    case MPEG_NULL:
+    case MPEG_TYPE_NULL:
       mpeg_packets.null++;
       sm = SM_FORM2|SM_REALT;
       ci = 0;
       break;
-    case MPEG_UNKNOWN:
+    case MPEG_TYPE_UNKNOWN:
       mpeg_packets.unknown++;
       sm = SM_FORM2|SM_REALT;
       ci = 0;
       break;
-    case MPEG_END:
+    case MPEG_TYPE_END:
       if (n < obj->mpeg_tracks[track].length_sectors)
         vcd_warn ("Program end marker seen at packet %d"
                   " -- before actual end of stream", n);
       sm = SM_FORM2|SM_REALT;
       ci = 0;
       break;
-    case MPEG_INVALID:
+    case MPEG_TYPE_INVALID:
       vcd_error ("invalid mpeg packet found at packet# %d"
                  " -- please fix this mpeg file!", n);
       vcd_data_source_close (obj->mpeg_tracks[track].source);

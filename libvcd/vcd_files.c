@@ -220,7 +220,8 @@ set_tracks_svd (VcdObj *obj)
 
   for (n = 0; n < obj->mpeg_tracks_num; n++) 
     {
-      
+      unsigned playtime = obj->mpeg_tracks[n].playtime;
+       
       switch (obj->mpeg_tracks[n].mpeg_info.norm)
         {
         case MPEG_NORM_PAL:
@@ -238,16 +239,14 @@ set_tracks_svd (VcdObj *obj)
           break;
         }
 
-      tracks_svd.tracks_info[n].contents.audio = 0x02; /* fixme -- assumption */
+      tracks_svd.tracks_info[n].contents.audio = 0x02; /* fixme 
+                                                          -- assumption */
 
-      tracks_svd.tracks_info[n].playing_time.m = 0;
-      tracks_svd.tracks_info[n].playing_time.s = 0;
-      tracks_svd.tracks_info[n].playing_time.f = 0;
-
-      vcd_warn("SVCD/TRACKS.SVCD: cannot determine playing time yet...");
+      /* setting playtime */
+      
+      lba_to_msf (playtime * 75, &(tracks_svd.tracks_info[n].playing_time));
+      tracks_svd.tracks_info[n].playing_time.f = 0; /* fixme */
     }
-
-  /* tracks_svd.tracks_info[0] = */
   
   memcpy (obj->tracks_svd_buf, &tracks_svd, sizeof(tracks_svd));
 }

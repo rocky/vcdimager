@@ -44,6 +44,7 @@ struct _VcdObj {
     VcdDataSource *source;
     unsigned relative_start_extent; /* relative to iso data end */
     unsigned length_sectors;
+    unsigned playtime; /* estimated playtime in secs based on timecode */
     mpeg_info_t mpeg_info;
   } mpeg_tracks[100]; /* fixme */
   int mpeg_tracks_num;

@@ -21,6 +21,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* #define STREAM_DEBUG */
+
 #include "vcd_stream.h"
 #include "vcd_logging.h"
 
@@ -135,7 +137,9 @@ vcd_data_source_seek(VcdDataSource* obj, long offset)
   _vcd_data_source_open_if_necessary(obj);
 
   if(obj->position != offset) {
+#ifdef STREAM_DEBUG
     vcd_warn("had to reposition DataSource from %ld to %ld!", obj->position, offset);
+#endif
     obj->position = offset;
     return obj->op.seek(obj->user_data, offset);
   }

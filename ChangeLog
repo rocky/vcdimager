@@ -1,3 +1,23 @@
+2000-11-26  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_mpeg.h (struct mpeg_type_info_t): workaround for 
+		anonymous union 
+
+2000-11-25  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_mpeg.c: major reorganisation of functions -- based on
+		code contributed by mike@blk.org
+		(vcd_mpeg_get_timecode): new convenience function
+
+	* libvcd/vcd_mpeg.c (vcd_mpeg_get_info): do norm detection by means
+		of vcd_mpeg_get_type ()
+
+	* added estimation of playtime
+	
+2000-11-24  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_mpeg.c (mpeg_type): added extended_type_info arg
+
 2000-11-23  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd.c (vcd_obj_append_mpeg_track): cleanup, added warnings 
