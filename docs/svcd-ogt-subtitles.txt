@@ -4,6 +4,9 @@ The following information is culled from information from
 Julio Sanchez Fernandez (http://subhandler.sourceforge.net)
 by Rocky Bernstein. 
 
+If you have any corrections or additions to make, please send them
+to rocky@panix.com.
+
 SVCD subtitles are transported in private streams with id 0x70 (AC3
 has 0,x80+, CVD subs 0+)
 
