@@ -1,5 +1,10 @@
 2001-05-25  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* libvcd/vcd.c: disabled psd_x/lot_x stuff since not needed for SVCDs, 
+		new investigations needed for VCD2.0...
+
+	* some naming fixes were done
+
 	* frontends/cli/vcd_debug.c: got rid of vcdrip in favour of vcddebug
 
 	* frontends/cli/Makefile.am: renamed vcdrip to vcddebug

@@ -245,7 +245,8 @@ typedef enum {
   PSD_TYPE_PLAY_LIST = 0x10,        /* Play List */
   PSD_TYPE_SELECTION_LIST = 0x18,   /* Selection List -- (jbj1: more
                                        on list later) */
-  PSD_TYPE_END_OF_LIST = 0x1f       /* End of List */
+  PSD_TYPE_END_LIST = 0x1f,         /* End List */
+  PSD_TYPE_COMMAND_LIST = 0x20      /* Command List */
 } psd_descriptor_types;
 
 typedef struct {
@@ -253,17 +254,30 @@ typedef struct {
   uint8_t reserved[7]        GNUC_PACKED;
 } PsdEndOfListDescriptor;
 
+/* (0,0) == upper left , (255,255) == lower right */
 struct psd_area_t
 {
-  uint8_t x1;
-  uint8_t y1;
-  uint8_t x2;
-  uint8_t y2;
+  uint8_t x1                 GNUC_PACKED; /* upper left */
+  uint8_t y1                 GNUC_PACKED; /* upper left */
+  uint8_t x2                 GNUC_PACKED; /* lower right */
+  uint8_t y2                 GNUC_PACKED; /* lower right */
 };
 
 typedef struct {
+#if defined(BITFIELD_LSBF)
+  uint8_t SelectionAreaFlag : 1;
+  uint8_t CommandListFlag : 1;
+  uint8_t reserved : 6;
+#else
+  uint8_t reserved : 6;
+  uint8_t CommandListFlag : 1;
+  uint8_t SelectionAreaFlag : 1;
+#endif  
+} PsdSelectionListFlags;
+
+typedef struct {
   uint8_t type               GNUC_PACKED;
-  uint8_t reserved           GNUC_PACKED;
+  PsdSelectionListFlags flags GNUC_PACKED;
   uint8_t nos                GNUC_PACKED;
   uint8_t bsn                GNUC_PACKED;
   uint16_t lid               GNUC_PACKED;
@@ -286,6 +300,13 @@ typedef struct {
   struct psd_area_t default_area   GNUC_PACKED;
   struct psd_area_t area[EMPTY_ARRAY_SIZE] GNUC_PACKED; /* variable length */
 } PsdSelectionListDescriptorExtended;
+
+typedef struct {
+  uint8_t type               GNUC_PACKED;
+  uint16_t command_count     GNUC_PACKED;
+  uint16_t lid               GNUC_PACKED;
+  uint16_t command[EMPTY_ARRAY_SIZE] GNUC_PACKED; /* variable length */
+} PsdCommandListDescriptor;
 
 typedef struct {
   uint8_t type               GNUC_PACKED;

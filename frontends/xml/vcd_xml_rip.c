@@ -433,7 +433,7 @@ _pbc_node_read (const void *buf, const struct _pbc_ctx *_ctx)
       }
       break;
 
-    case PSD_TYPE_END_OF_LIST:
+    case PSD_TYPE_END_LIST:
       _pbc = vcd_pbc_new (PBC_END);
       break;
 

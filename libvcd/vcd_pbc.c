@@ -403,7 +403,10 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 	_md->default_ofs = UINT16_TO_BE (0xffff);
 
 	_md->type = PSD_TYPE_SELECTION_LIST;
-	_md->reserved = 0x00;
+
+	vcd_assert (sizeof (PsdSelectionListFlags) == 1);
+	_md->flags.SelectionAreaFlag = false;
+	_md->flags.CommandListFlag = false;
 
 	vcd_assert (_pbc->lid < 0x8000);
 	_md->lid = UINT16_TO_BE (_pbc->lid | (_pbc->rejected ? 0x8000 : 0));
@@ -514,7 +517,7 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
       {
 	PsdEndOfListDescriptor *_md = buf;
 
-	_md->type = PSD_TYPE_END_OF_LIST;
+	_md->type = PSD_TYPE_END_LIST;
       }
       break;
 
