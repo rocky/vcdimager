@@ -29,10 +29,38 @@
 #include "vcd_directory.h"
 
 typedef struct {
+  double time;
+  char *id;
+} entry_t;
+
+typedef struct {
   VcdMpegSource *source;
+  char *id;
   const struct vcd_mpeg_source_info *info;
+  VcdList *entry_list; /* entry_t */
   unsigned relative_start_extent; /* relative to iso data end */
-} mpeg_track_t;
+} mpeg_sequence_t;
+
+/* work in progress -- fixme rename all occurences */
+#define mpeg_track_t mpeg_sequence_t
+#define mpeg_track_list mpeg_sequence_list 
+
+typedef struct {
+  VcdMpegSource *source;
+  char *id;
+  const struct vcd_mpeg_source_info *info;
+  unsigned segment_count;
+} mpeg_segment_t;
+
+typedef struct {
+  char *iso_pathname;
+  VcdDataSource *file;
+  bool raw_flag;
+  
+  uint32_t size;
+  uint32_t start_extent;
+  uint32_t sectors;
+} custom_file_t;
 
 struct _VcdObj {
   vcd_type_t type;
@@ -56,13 +84,15 @@ struct _VcdObj {
   unsigned info_volume_number;
 
   /* input */
-  VcdList *mpeg_track_list; /* mpeg_track_t */
+  VcdList *mpeg_segment_list; /* mpeg_segment_t */
 
-  unsigned relative_end_extent; /* last mpeg end extent */
+  VcdList *mpeg_sequence_list; /* mpeg_sequence_t */
+
+  unsigned relative_end_extent; /* last mpeg sequence track end extent */
 
   /* custom files */
   unsigned custom_file_start_extent; 
-  VcdList *custom_file_list;
+  VcdList *custom_file_list; /* custom_file_t */
 
   /* dictionary */
   VcdList *buffer_dict_list;

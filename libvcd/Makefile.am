@@ -14,6 +14,7 @@ libvcd_a_SOURCES = \
 	vcd_cd_sector_private.h \
 	vcd_data_structures.c \
 	vcd_data_structures.h \
+	vcd_dict.h \
 	vcd_directory.c \
 	vcd_directory.h \
 	vcd_files.c \
@@ -29,6 +30,8 @@ libvcd_a_SOURCES = \
 	vcd_mpeg_stream.c \
 	vcd_mpeg_stream.h \
 	vcd_obj.h \
+	vcd_pbc.h \
+b	vcd_pbc.c \
 	vcd_salloc.c \
 	vcd_salloc.h \
 	vcd_stream.c \

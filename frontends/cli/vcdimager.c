@@ -36,11 +36,11 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "vcd_types.h"
-#include "vcd.h"
-#include "vcd_stream_stdio.h"
-#include "vcd_logging.h"
-#include "vcd_cd_sector.h"
+#include <libvcd/vcd.h>
+#include <libvcd/vcd_types.h>
+#include <libvcd/vcd_stream_stdio.h>
+#include <libvcd/vcd_logging.h>
+#include <libvcd/vcd_cd_sector.h>
 
 static const char _rcsid[] = "$Id$";
 
@@ -463,8 +463,9 @@ main (int argc, const char *argv[])
 
       assert (data_source != NULL);
 
-      vcd_obj_append_mpeg_track (gl_vcd_obj,
-                                 vcd_mpeg_source_new (data_source));
+      vcd_obj_append_sequence_play_item (gl_vcd_obj,
+                                         vcd_mpeg_source_new (data_source),
+                                         NULL);
     }
 
   sectors = vcd_obj_begin_output (gl_vcd_obj);

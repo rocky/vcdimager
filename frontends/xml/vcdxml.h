@@ -45,18 +45,28 @@ struct vcdxml_t {
     xmlChar *publisher_id;
   } pvd;
 
-  unsigned mpeg_tracks_count;
-  struct mpeg_tracks_t {
-    xmlChar *id;
-    xmlChar *src;
-    unsigned entry_points_count;
-    struct entry_points_t {
-      xmlChar *id;
-      xmlChar *timestamp;
-    } *entry_points;
-  } *mpeg_tracks;
+  VcdList *mpeg_track_list;
+
+  VcdList *mpeg_item_list;
 
   VcdList *filesystem;
+};
+
+struct mpeg_track_t {
+  xmlChar *id;
+  xmlChar *src;
+  VcdList *entry_point_list;
+};
+
+struct entry_point_t {
+  xmlChar *id;
+  xmlChar *timestamp;
+};
+
+struct mpeg_item_t
+{
+  xmlChar *id;
+  xmlChar *src;
 };
 
 struct filesystem_t

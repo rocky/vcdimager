@@ -23,8 +23,8 @@
 #ifndef __VCD_H__
 #define __VCD_H__
 
-#include "vcd_stream.h"
-#include "vcd_mpeg_stream.h"
+#include <libvcd/vcd_stream.h>
+#include <libvcd/vcd_mpeg_stream.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -76,14 +76,25 @@ vcd_obj_add_file (VcdObj *obj, const char iso_pathname[],
 int
 vcd_obj_add_dir (VcdObj *obj, const char iso_pathname[]);
 
-/* this one is for actually adding mpeg tracks to VCD, returns a track
-   id, or a negative value for error..  */
-int 
-vcd_obj_append_mpeg_track (VcdObj *obj, VcdMpegSource *mpeg_source);
+/* this is for actually adding mpeg items to VCD, returns 
+   a negative value for error..  */
 
-/* removes mpeg tracks by track id */
-void 
-vcd_obj_remove_mpeg_track (VcdObj *obj, int track_id);
+int 
+vcd_obj_append_sequence_play_item (VcdObj *obj, VcdMpegSource *mpeg_source, 
+                                   const char item_id[]);
+
+int 
+vcd_obj_add_sequence_entry (VcdObj *obj, const char sequence_id[], 
+                            double entry_time, const char entry_id[]);
+
+int 
+vcd_obj_append_segment_play_item (VcdObj *obj, VcdMpegSource *mpeg_source, 
+                                  const char item_id[]);
+
+/* removes item (sequence, entry, segment, ...) by id, returns
+   negative value on error */
+int 
+vcd_obj_remove_item (VcdObj *obj, const char id[]);
 
 /* returns image size in sectors */
 long 

@@ -108,7 +108,37 @@ _parse_pvd (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 static bool
 _parse_items (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
-  printf ("sorry, segment items not supported yet\n");
+  xmlNodePtr cur;
+
+  assert (obj->mpeg_item_list == NULL);
+  
+  obj->mpeg_item_list = _vcd_list_new ();
+
+  FOR_EACH (cur, node)
+    {
+      bool rc = false;
+
+      if (!xmlStrcmp (cur->name, "mpeg-item")) 
+	{
+	  struct mpeg_item_t *_item = malloc (sizeof (struct mpeg_item_t));
+	  memset (_item, 0, sizeof (sizeof (struct mpeg_item_t)));
+	  
+	  GET_PROP_STR (_item->id, "id", doc, cur, ns);
+	  GET_PROP_STR (_item->src, "src", doc, cur, ns);
+
+	  _vcd_list_append (obj->mpeg_item_list, _item);
+	}
+      else
+	{
+	  printf ("unexpected element: %s\n", cur->name);
+	  rc = true;
+	}
+
+      if (rc)
+	return rc;
+      
+    }  
+
   return false;
 }
 
@@ -137,42 +167,29 @@ _parse_cdda_track (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPt
 static bool
 _parse_mpeg_track (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
-  struct mpeg_tracks_t *track;
+  struct mpeg_track_t *track;
   xmlNodePtr cur;
 
-  if (obj->mpeg_tracks_count >= 98) /* fixme -- check should be done in backend */
-    {
-      printf ("too many tracks\n");
-      return true;
-    }
+  track = malloc (sizeof (struct mpeg_track_t));
+  memset (track, 0, sizeof (struct mpeg_track_t));
 
-  obj->mpeg_tracks_count++;
-  obj->mpeg_tracks = realloc (obj->mpeg_tracks,
-				 obj->mpeg_tracks_count 
-				 * sizeof (struct mpeg_tracks_t));
-
-  track = &obj->mpeg_tracks[obj->mpeg_tracks_count - 1];
-  memset (track, 0, sizeof (struct mpeg_tracks_t));
+  _vcd_list_append (obj->mpeg_track_list, track);
 
   GET_PROP_STR (track->id, "id", doc, node, ns);
   GET_PROP_STR (track->src, "src", doc, node, ns);
 
+  track->entry_point_list = _vcd_list_new ();
+
   FOR_EACH (cur, node)
     if (!xmlStrcmp (cur->name, "entry"))
       {
-	struct entry_points_t *entry;
-	
-	track->entry_points_count++;
-
-	track->entry_points = realloc (track->entry_points,
-				       track->entry_points_count
-				       * sizeof (struct entry_points_t));
-
-	entry = &track->entry_points[track->entry_points_count - 1];
-	memset (entry, 0, sizeof (struct entry_points_t));
+	struct entry_point_t *entry = malloc (sizeof (struct entry_point_t));
+	memset (entry, 0, sizeof (struct entry_point_t));
 
 	GET_PROP_STR (entry->id, "id", doc, cur, ns);
 	GET_ELEM_STR (entry->timestamp, "entry", doc, cur, ns);
+
+	_vcd_list_append (track->entry_point_list, entry);
       }
     else
       printf ("??? %s\n", cur->name);
@@ -184,6 +201,10 @@ static bool
 _parse_tracks (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
   xmlNodePtr cur;
+
+  assert (obj->mpeg_track_list == NULL);
+
+  obj->mpeg_track_list = _vcd_list_new ();
 
   FOR_EACH (cur, node)
     {
@@ -328,6 +349,8 @@ _parse_filesystem (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPt
   xmlNodePtr cur;
 
   printf ("%s\n", __PRETTY_FUNCTION__);
+
+  assert (obj->filesystem == NULL);
 
   obj->filesystem = _vcd_list_new ();
 

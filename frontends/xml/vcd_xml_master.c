@@ -110,13 +110,15 @@ vcd_xml_master (const struct vcdxml_t *obj)
   if (obj->pvd.application_id)
     vcd_obj_set_param (_vcd, VCD_PARM_APPLICATION_ID, obj->pvd.application_id);
 
-  _VCD_LIST_FOREACH (node, obj->filesystem)
+  if (obj->filesystem)
+    _VCD_LIST_FOREACH (node, obj->filesystem)
     {
       struct filesystem_t *dentry = _vcd_list_node_data (node);
       
       if (dentry->file_src) 
 	{
-	  VcdDataSource *_source = vcd_data_source_new_stdio (dentry->file_src);
+	  VcdDataSource *_source = 
+	    vcd_data_source_new_stdio (dentry->file_src);
 	  
 	  assert (_source != NULL);
 
@@ -124,20 +126,64 @@ vcd_xml_master (const struct vcdxml_t *obj)
 	}
       else
 	vcd_obj_add_dir (_vcd, dentry->name);
-	  
+      
     }
 
-  printf ("track count %d\n", obj->mpeg_tracks_count);
-  for (idx = 0; idx < obj->mpeg_tracks_count; idx++)
+  idx = 0;
+  if (obj->mpeg_item_list)
+    _VCD_LIST_FOREACH (node, obj->mpeg_item_list)
     {
+      struct mpeg_item_t *item = _vcd_list_node_data (node);
+      VcdDataSource *_source = vcd_data_source_new_stdio (item->src);
+
+      printf ("adding item #%d, %s\n", idx, item->src);
+
+      assert (_source != NULL);
+
+      vcd_obj_append_segment_play_item (_vcd,
+					vcd_mpeg_source_new (_source),
+					item->id);
+
+      
+
+      idx++;
+    }
+
+  printf ("track count %d\n", _vcd_list_length (obj->mpeg_track_list));
+  
+  idx = 0;
+  if (obj->mpeg_track_list)
+    _VCD_LIST_FOREACH (node, obj->mpeg_track_list)
+    {
+      struct mpeg_track_t *track = _vcd_list_node_data (node);
       VcdDataSource *data_source;
+      VcdListNode *node2;
 
-      printf ("adding track #%d, %s\n", idx,  obj->mpeg_tracks[idx].src);
+      printf ("adding track #%d, %s\n", idx, track->src);
 
-      data_source = vcd_data_source_new_stdio (obj->mpeg_tracks[idx].src);
+      data_source = vcd_data_source_new_stdio (track->src);
       assert (data_source != NULL);
 
-      vcd_obj_append_mpeg_track (_vcd, vcd_mpeg_source_new (data_source));
+      vcd_obj_append_sequence_play_item (_vcd,
+					 vcd_mpeg_source_new (data_source),
+					 track->id);
+
+      _VCD_LIST_FOREACH (node2, track->entry_point_list)
+	{
+	  struct entry_point_t *entry = _vcd_list_node_data (node2);
+	  double _time = 0;
+	  char *endptr = NULL;
+
+	  _time = strtod (entry->timestamp, &endptr);
+
+	  if (*endptr)
+	    {
+	      printf ("ERROR -- broken value...\n");
+	      continue;
+	    }
+
+	  vcd_obj_add_sequence_entry (_vcd, track->id, _time, entry->id);
+	}
     }
 
   /****************************************************************************

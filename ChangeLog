@@ -1,5 +1,10 @@
 2001-05-11  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* libvcd/vcd.c: changed api to enable PBC/SPI/entry points,
+		replaced some foreach loops by _VCD_LIST_FOREACH macro...
+
+	* frontends/cli/vcdimager.c: adapted to api changes
+
 	* libvcd/vcd_files.c (_get_scandata_table): use '<' instead of
   		'<=' comparison for floating point.
 		(_make_track_scantable): see above
