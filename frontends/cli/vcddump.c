@@ -583,7 +583,7 @@ dump_tracks_svd (const vcdinfo_obj_t *obj)
     }
 
 
-  fprintf (stdout, "\n(VCD3.0 interpretation)\n");
+  fprintf (stdout, "\nCVD interpretation (probably)\n");
   for (j = 0;j < tracks->tracks; j++)
     {
       fprintf (stdout, "(track[%.2d]: %2.2x:%2.2x:%2.2x (cumulated),"
@@ -595,7 +595,6 @@ dump_tracks_svd (const vcdinfo_obj_t *obj)
                tracks_v30->track[j].audio_info,
                tracks_v30->track[j].ogt_info);
     }
-
 }
 
 /* 
