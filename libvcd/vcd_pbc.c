@@ -126,7 +126,7 @@ _vcd_pbc_lookup (const VcdObj *obj, const char item_id[])
       else if (id < 2980)
 	return ITEM_TYPE_SEGMENT;
       else 
-	assert (1);
+	assert (0);
     }
   else if (_vcd_pbc_lid_lookup (obj, item_id))
     return ITEM_TYPE_PBC;
@@ -222,7 +222,7 @@ _vcd_pbc_available (const VcdObj *obj)
       break;
 
     default:
-      assert (1);
+      assert (0);
       break;
     }
 
@@ -298,7 +298,7 @@ _vcd_pbc_node_length (const pbc_t *_pbc, bool extended)
       break;
 
     default:
-      assert (1);
+      assert (0);
       break;
     }
 
@@ -500,7 +500,7 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 	    break;
 
 	  default:
-	    assert (1);
+	    assert (0);
 	  }
       }
       break;
@@ -514,7 +514,7 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
       break;
 
     default:
-      assert (1);
+      assert (0);
       break;
     }
 }
@@ -542,7 +542,7 @@ vcd_pbc_new (enum pbc_type_t type)
       break;
 
     default:
-      assert (1);
+      assert (0);
       break;
     }
 

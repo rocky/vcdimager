@@ -109,6 +109,23 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
   xmlNewChild (section, ns, "preparer-id", obj->pvd.preparer_id);
   xmlNewChild (section, ns, "publisher-id", obj->pvd.publisher_id);
 
+  /* segments */
+
+  if (_vcd_list_length (obj->segment_list))
+    {
+      section = xmlNewChild (vcd_node, ns, "segment-items", NULL);
+
+      _VCD_LIST_FOREACH (node, obj->segment_list)
+	{
+	  struct segment_t *_segment =  _vcd_list_node_data (node);
+	  xmlNodePtr seg_node;
+	  
+	  seg_node = xmlNewChild (section, ns, "segment-item", NULL);
+	  xmlSetProp (seg_node, "src", _segment->src);
+	  xmlSetProp (seg_node, "id", _segment->id);
+	}
+    }
+
   /* sequences */
     
   section = xmlNewChild (vcd_node, ns, "sequence-items", NULL);
@@ -141,19 +158,85 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
     {
       section = xmlNewChild (vcd_node, ns, "pbc", NULL);
 
-      _VCD_LIST_FOREACH (node, obj->sequence_list)
+      _VCD_LIST_FOREACH (node, obj->pbc_list)
 	{
 	  pbc_t *_pbc = _vcd_list_node_data (node);
 	  xmlNodePtr pl = NULL;
-
+	  
 	  switch (_pbc->type)
 	    {
+	      char buf[80];
+	      VcdListNode *node2;
+
 	    case PBC_PLAYLIST:
 	      pl = xmlNewChild (section, ns, "playlist", NULL);
+	      if (_pbc->next_id)
+		xmlSetProp (xmlNewChild (pl, ns, "next", NULL), "ref", _pbc->next_id);
+	      if (_pbc->prev_id)
+		xmlSetProp (xmlNewChild (pl, ns, "prev", NULL), "ref", _pbc->prev_id);
+	      if (_pbc->retn_id)
+		xmlSetProp (xmlNewChild (pl, ns, "return", NULL), "ref", _pbc->retn_id);
+
+	      if (_pbc->playing_time)
+		{
+		  snprintf (buf, sizeof (buf), "%f", _pbc->playing_time);
+		  xmlNewChild (pl, ns, "playtime", buf);
+		}
+
+	      snprintf (buf, sizeof (buf), "%d", _pbc->wait_time);
+	      xmlNewChild (pl, ns, "wait", buf);
+
+	      snprintf (buf, sizeof (buf), "%d", _pbc->auto_pause_time);
+	      xmlNewChild (pl, ns, "autowait", buf);
+
+	      _VCD_LIST_FOREACH (node2, _pbc->item_id_list)
+		{
+		  char *_id = _vcd_list_node_data (node2);
+
+		  xmlNewChild (pl, ns, "play-item", _id);
+		}
+
 	      break;
 
 	    case PBC_SELECTION:
 	      pl = xmlNewChild (section, ns, "selection", NULL);
+
+	      snprintf (buf, sizeof (buf), "%d", _pbc->bsn);
+	      xmlNewChild (pl, ns, "bsn", buf);
+
+	      if (_pbc->next_id)
+		xmlSetProp (xmlNewChild (pl, ns, "next", NULL), "ref", _pbc->next_id);
+	      if (_pbc->prev_id)
+		xmlSetProp (xmlNewChild (pl, ns, "prev", NULL), "ref", _pbc->prev_id);
+	      if (_pbc->retn_id)
+		xmlSetProp (xmlNewChild (pl, ns, "return", NULL), "ref", _pbc->retn_id);
+
+	      _VCD_LIST_FOREACH (node2, _pbc->default_id_list)
+		{
+		  char *_id = _vcd_list_node_data (node2);
+
+		  xmlSetProp (xmlNewChild (pl, ns, "default", NULL), "ref", _id);
+		}
+
+	      if (_pbc->timeout_id)
+		xmlSetProp (xmlNewChild (pl, ns, "timeout", NULL), "ref", _pbc->timeout_id);
+
+	      snprintf (buf, sizeof (buf), "%d", _pbc->timeout_time);
+	      xmlNewChild (pl, ns, "wait", buf);
+
+	      snprintf (buf, sizeof (buf), "%d", _pbc->loop_count);
+	      xmlSetProp (xmlNewChild (pl, ns, "loop", buf), "jump-timing", 
+			  (_pbc->jump_delayed ? "delayed" : "immediate"));
+
+	      if (_pbc->item_id)
+		xmlSetProp (xmlNewChild (pl, ns, "play-item", NULL), "ref", _pbc->item_id);
+
+	      _VCD_LIST_FOREACH (node2, _pbc->select_id_list)
+		{
+		  char *_id = _vcd_list_node_data (node2);
+
+		  xmlSetProp (xmlNewChild (pl, ns, "select", NULL), "ref", _id);
+		}
 	      break;
 	      
 	    case PBC_END:

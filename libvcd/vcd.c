@@ -679,7 +679,7 @@ _finalize_vcd_iso_track_allocation (VcdObj *obj)
                                      ISO_BLOCKSIZE),
                     SM_EOF);
     default:
-      assert (1);
+      assert (0);
       break;
     }
 
@@ -819,7 +819,7 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
           fmt = "SEGMENT/ITEM%4.4d.MPG";
           break;
         default:
-          assert(1);
+          assert(0);
         }
 
       assert (n < 500);
@@ -876,7 +876,7 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
       break;
 
     default:
-      assert (1);
+      assert (0);
     }
 
 
@@ -914,7 +914,7 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
           file_num = 0;
           break;
         default:
-          assert(1);
+          assert(0);
         }
 
       assert (n < 98);
@@ -963,7 +963,7 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
           vcd_error ("directory section to big for a SVCD");
         break;
       default:
-        assert(1);
+        assert(0);
       }
     
     /* un-alloc small area */

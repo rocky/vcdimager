@@ -214,7 +214,7 @@ _parse_info (struct vcdxml_t *obj, VcdImageSource *img)
 	    char buf[80];
 	    _segment = _vcd_malloc (sizeof (struct segment_t));
 
-	    snprintf (buf, sizeof (buf), "segment-%3.3d", n);
+	    snprintf (buf, sizeof (buf), "segment-%4.4d", idx);
 	    _segment->id = strdup (buf);
 
 	    snprintf (buf, sizeof (buf), "item%4.4d.mpg", n);
@@ -296,7 +296,7 @@ _parse_entries (struct vcdxml_t *obj, VcdImageSource *img)
 
 	  struct entry_point_t *_entry = _vcd_malloc (sizeof (struct entry_point_t));
 
-	  snprintf (buf, sizeof (buf), "entry-%3.3d", idx - track - 1);
+	  snprintf (buf, sizeof (buf), "entry-%3.3d", idx);
 	  _entry->id = strdup (buf);
 
 	  _entry->extent = extent;
@@ -306,6 +306,191 @@ _parse_entries (struct vcdxml_t *obj, VcdImageSource *img)
 
       vcd_debug ("%d %d %d %d", idx, track, extent, newtrack);
     }
+
+  return 0;
+}
+
+struct _pbc_ctx {
+  
+};
+
+static char *
+_xstrdup(const char *s)
+{
+  if (s)
+    return strdup (s);
+  
+  return NULL;
+}
+
+static const char *
+_pin2id (unsigned pin, const struct _pbc_ctx *_ctx)
+{
+  static char buf[80];
+
+  if (pin < 2)
+    return NULL;
+
+  if (pin < 100)
+    snprintf (buf, sizeof (buf), "sequence-%2.2d", pin - 2);
+  else if (pin < 600)
+    snprintf (buf, sizeof (buf), "entry-%3.3d", pin - 100);
+  else if (pin < 1000)
+    return NULL;
+  else if (pin < 2980)
+    snprintf (buf, sizeof (buf), "segment-%4.4d", pin - 1000);
+  else 
+    return NULL;
+
+  return buf;
+}
+
+static const char *
+_ofs2id (unsigned ofs, const struct _pbc_ctx *_ctx)
+{
+  static char buf[80];
+
+  if (ofs == 0xffff)
+    return NULL;
+
+  snprintf (buf, sizeof (buf), "ofs-%4.4x", ofs);
+
+  return buf;
+}
+
+static int
+_calc_time (uint16_t wtime)
+{
+  if (wtime < 61)
+    return wtime;
+  else if (wtime < 255)
+    return (wtime - 60) * 10 + 60;
+  else
+    return -1;
+}
+
+static pbc_t *
+_pbc_node_read (const void *buf, const struct _pbc_ctx *_ctx)
+{
+  pbc_t *_pbc = NULL;
+  const uint8_t *_buf = buf;
+
+  switch (*_buf)
+    {
+      int n;
+
+    case PSD_TYPE_PLAY_LIST:
+      _pbc = vcd_pbc_new (PBC_PLAYLIST);
+      {
+	const PsdPlayListDescriptor *d = buf;
+	_pbc->prev_id = _xstrdup (_ofs2id (UINT16_FROM_BE (d->prev_ofs), _ctx));
+	_pbc->next_id = _xstrdup (_ofs2id (UINT16_FROM_BE (d->next_ofs), _ctx));
+	_pbc->retn_id = _xstrdup (_ofs2id (UINT16_FROM_BE (d->return_ofs), _ctx));
+	
+	_pbc->playing_time = (double) (UINT16_FROM_BE (d->ptime)) / 15.0;
+	_pbc->wait_time = _calc_time (d->wtime);
+	_pbc->auto_pause_time =  _calc_time(d->atime);
+
+	for (n = 0; n < d->noi; n++)
+	  {
+	    _vcd_list_append (_pbc->item_id_list, 
+			      _xstrdup (_pin2id (UINT16_FROM_BE (d->itemid[n]), _ctx)));
+	  }
+      }
+      break;
+
+    case PSD_TYPE_SELECTION_LIST:
+      _pbc = vcd_pbc_new (PBC_SELECTION);
+      {
+	const PsdSelectionListDescriptor *d = buf;
+	_pbc->bsn = d->bsn;
+	_pbc->prev_id = _xstrdup (_ofs2id (UINT16_FROM_BE (d->prev_ofs), _ctx));
+	_pbc->next_id = _xstrdup (_ofs2id (UINT16_FROM_BE (d->next_ofs), _ctx));
+	_pbc->retn_id = _xstrdup (_ofs2id (UINT16_FROM_BE (d->return_ofs), _ctx));
+
+	assert (UINT16_FROM_BE (d->default_ofs) != 0xfffe);
+	assert (UINT16_FROM_BE (d->default_ofs) != 0xfffd); /* fixme -- multidef lists
+							       not supported yet */
+	if (_ofs2id (UINT16_FROM_BE (d->default_ofs), _ctx))
+	  _vcd_list_append (_pbc->default_id_list,
+			    _xstrdup (_ofs2id (UINT16_FROM_BE (d->default_ofs), _ctx)));
+
+	_pbc->timeout_id = _xstrdup (_ofs2id (UINT16_FROM_BE (d->timeout_ofs), _ctx));
+	_pbc->timeout_time = _calc_time (d->totime);
+	_pbc->jump_delayed = (0x80 & d->loop) != 0;
+	_pbc->loop_count = (0x7f & d->loop);
+	_pbc->item_id = _xstrdup (_pin2id (UINT16_FROM_BE (d->itemid), _ctx));
+
+	for (n = 0; n < d->nos; n++)
+	  {
+	    _vcd_list_append (_pbc->select_id_list, 
+			      _xstrdup (_ofs2id (UINT16_FROM_BE (d->ofs[n]), _ctx)));
+	  }
+      }
+      break;
+
+    case PSD_TYPE_END_OF_LIST:
+      _pbc = vcd_pbc_new (PBC_END);
+      break;
+
+    default:
+      vcd_warn ("unknown psd type %d", *_buf);
+      break;
+    }
+
+  return _pbc;
+}
+
+  static int
+_parse_pbc (struct vcdxml_t *obj, VcdImageSource *img)
+{
+  VcdList *_offsets;
+  LotVcd *lot = NULL;
+  uint8_t *psd = NULL;
+  int n;
+  struct _pbc_ctx _pctx;
+
+  if (!obj->info.psd_size)
+    {
+      vcd_debug ("no pbc info");
+      return 0;
+    }
+
+  lot = _vcd_malloc (ISO_BLOCKSIZE * LOT_VCD_SIZE);
+  
+  for (n = 0; n < LOT_VCD_SIZE; n++)
+    vcd_image_source_read_mode2_sector (img, ((char *) lot) + (n * ISO_BLOCKSIZE),
+					LOT_VCD_SECTOR + n, false);
+
+  psd = _vcd_malloc (ISO_BLOCKSIZE * _vcd_len2blocks (obj->info.psd_size, ISO_BLOCKSIZE));
+
+  for (n = 0; n < _vcd_len2blocks (obj->info.psd_size, ISO_BLOCKSIZE); n++)
+    vcd_image_source_read_mode2_sector (img, psd + (n * ISO_BLOCKSIZE),
+					PSD_VCD_SECTOR + n, false);
+
+  for (n = 0; n < obj->info.max_lid + 2; n++)
+    {
+      unsigned _ofs = UINT16_FROM_BE (lot->offset[n]);
+      pbc_t *_pbc;
+
+      if (_ofs == 0xffff)
+	continue;
+
+      if ((_ofs << 3) >= obj->info.psd_size)
+	vcd_error ("offset out of range :-(");
+
+      if ((_pbc = _pbc_node_read (&psd[_ofs << 3], &_pctx)))
+	{
+	  char buf[80];
+
+	  snprintf (buf, sizeof (buf), "ofs-%4.4x", _ofs);
+	  _pbc->id = _xstrdup (buf);
+	  _vcd_list_append (obj->pbc_list, _pbc);
+	}
+    }
+
+  /* fixme -- what about 'rejected' PBC lists... */
+  
 
   return 0;
 }
@@ -335,6 +520,9 @@ int main (int argc, const char *argv[])
   /* needs to be parsed in order */
   _parse_info (&obj, img_src);
   _parse_entries (&obj, img_src);
+
+  /* needs to be parsed last! */
+  _parse_pbc (&obj, img_src);
 
   vcd_xml_dump (&obj, "videocd.xml");
 
