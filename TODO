@@ -4,11 +4,11 @@ TODO LIST:
  * get more information on CDROM-XA
  * check for VideoCD2.0/SuperVideoCD1.0 conformance
  * optimize/improve MPEG detection/scanning/handling code
- * on-the-fly mpeg padding/realigning
  * documentation
 
 - version 2.0+
  * C++ rewrite (OOD & OOA already on paper)
+ * on-the-fly mpeg padding/realigning
  * releasing libvcd
  * XML frontend (DTD prototype already defined)
  * add support for interactive menus

@@ -86,8 +86,6 @@ const static double aspect_ratios[16] =
     1.1250, 1.1575, 1.2015, 0.0000
   };
 
-
-
 static mpeg_norm_t 
 _get_norm (unsigned hsize, unsigned vsize, double frate)
 {

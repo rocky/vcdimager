@@ -1,6 +1,6 @@
 AC_REVISION([$Id$])dnl
 AC_INIT(libvcd/vcd.h)
-AM_INIT_AUTOMAKE(vcdimager, 0.5.9beta1)
+AM_INIT_AUTOMAKE(vcdimager, 0.5.9beta2)
 AM_MAINTAINER_MODE
 
 AM_SANITY_CHECK
