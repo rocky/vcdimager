@@ -31,6 +31,7 @@ rm -rf "$RPM_BUILD_ROOT"
 %build
 rm -rf "$RPM_BUILD_ROOT"
 %configure
+make -C frontends/cli vcdimager.ps.gz
 
 %post
 /sbin/install-info \
@@ -51,7 +52,7 @@ rm -rf "$RPM_BUILD_ROOT"
 
 %files
 %defattr(-, root, root)
-%doc AUTHORS COPYING ChangeLog INSTALL NEWS README THANKS
+%doc AUTHORS COPYING ChangeLog INSTALL NEWS README THANKS frontends/cli/vcdimager.ps.gz
 %{_bindir}/vcdrip
 %{_bindir}/vcdimager
 %{_infodir}/vcdimager.info*

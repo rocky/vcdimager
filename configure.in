@@ -28,7 +28,7 @@ if test "x$enable_gnome_fe" = "xyes"; then
  AC_PROG_CXX
 fi
 AM_PROG_CC_STDC
-AC_PROG_RANLIB
+AM_PROG_LIBTOOL
 
 dnl libs
 AC_CHECK_FUNCS(snprintf vsnprintf, , [AC_MSG_ERROR(required function not found)])
