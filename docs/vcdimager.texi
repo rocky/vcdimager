@@ -137,9 +137,9 @@ as conceived by @command{libvcd}.
 
 @item cdxa2mpeg
 @cindex RIFF CDXA files
-Simple tool for converting MPEG streams wrapped in RIFF CDXA files, as
-created by some operating systems, to plain mpeg streams suitable for
-vcdimager input.
+A program to strip the @acronym{RIFF} header on CD-XA format tracks.
+See @xref{cdxa2mpeg}.
+@end table
 
 @end table
 
@@ -1234,11 +1234,29 @@ the stream is supported as well.
 @node cdxa2mpeg, , vcdxminfo, Tools
 @subsection @command{cdxa2mpeg}
 
-Simple tool for converting MPEG streams wrapped in RIFF CDXA files, as
-created by some operating systems, to plain mpeg streams suitable for
-vcdimager input.
+A program to strip the @acronym{RIFF} header on CD-XA format tracks.
 
-@emph{FIXME: write more}
+On Microsoft Windows, people would extract the payload tracks of Video
+CD's (e.g the tracks other than the first one) by simply copying the
+.dat/.mpg files as seen in the filesystem of a (Video) CD.
+
+Since many @acronym{MPEG} players will play tracks copied this way,
+people tend to think of these as an @acronym{MPEG} files, but they are
+not. Instead they have a @acronym{RIFF} container around the
+@acronym{MPEG} stream, including some mode2 sector headers prepended
+to each @acronym{MPEG} "sector". In such a setting @code{cdxa2mpeg}
+will extract the @acronym{MPEG} portion by stripping off the
+@acronym{RIFF} container and mode2 sector headers.
+
+The name cdxa2meg refers to the fact that it reads the XA-format
+tracks of a @acronym{CD} and in such a circumstance described above turns them
+```2'' @acronym{MPEG} .
+
+The ability to see or copy the .dat/.mpg requires some sort of
+filesystem support to read or show the @acronym{CD} Mode2 XA tracks. Depending
+on the Operating System and filesystem hooks, this might not be
+available.  A better, more universal way to extract MPEGs is to use
+the @code{--tracks} option of @xref{vcdxrip}.
 
 @node Video CD XML Description, Examples, Reference, Top
 @chapter Video CD XML Description
