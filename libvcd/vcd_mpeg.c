@@ -20,6 +20,7 @@
 
 #include <string.h>
 #include <assert.h>
+#include <stdio.h>
 
 #include "vcd_types.h"
 #include "vcd_mpeg.h"
@@ -68,8 +69,9 @@ mpeg_type (const void *mpeg_block)
       return MPEG_NULL;
     }
 
-  /* mpeg_block had mpeg_sync */
-
+  /*
+   * data from mpeg-1 stream
+   */
   if ((data[15] == 0xe0) ||
       (data[15] == 0xbb && data[24] == 0xe0))
     return MPEG_VIDEO;
@@ -77,6 +79,21 @@ mpeg_type (const void *mpeg_block)
   if ((data[15] == 0xc0) ||
       (data[15] == 0xbb && data[24] == 0xc0))
     return MPEG_AUDIO;
+
+  /*
+   * data from mpeg-2 stream
+   */
+  if (data[17] == 0xe0)
+	return MPEG_VIDEO;
+
+  if (data[17] == 0xc0)
+	return MPEG_AUDIO;
+
+#ifdef	NEVER
+{int i; for(i=0; i < 32; i++) fprintf(stderr, "%02x ", data[i]);fprintf(stderr, "\n");}
+fprintf(stderr, "unknown: data 15=%x 16=%x 17=%x 18=%x 19=%x 20=%x\n",
+data[15], data[16], data[17], data[18], data[19], data[20]);
+#endif
 
   return MPEG_UNKNOWN;
 }
@@ -125,6 +142,10 @@ mpeg_analyze_start_seq(const void *packet, mpeg_info_t *info)
         info->norm = MPEG_NORM_FILM;
       else if(hsize == 352 && vsize == 240 && frate == 4)
         info->norm = MPEG_NORM_NTSC;
+      else if (hsize == 480 && vsize == 480 && frate == 1)
+	info->norm = MPEG_SVHS_NTSC;
+      else if (hsize == 480 && vsize == 576 && frate == 3)
+	info->norm = MPEG_SVHS_PAL;
       else
         info->norm = MPEG_NORM_OTHER;
 

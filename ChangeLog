@@ -1,3 +1,11 @@
+2000-11-16  Mike Bernson  <mike@mlb.org>
+
+	* libvcd/vcd_mpeg.h: new resolutions
+
+	* libvcd/vcd_mpeg.c: added detection for SHVS resoulutions
+
+	* libvcd/vcd.c (_write_sectors): added  case MPEG_SVHS_PAL/NTSC
+
 2000-11-15  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_files.c (set_psd_vcd): fixed (missing) setting of itemid 

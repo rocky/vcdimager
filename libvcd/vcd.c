@@ -666,6 +666,14 @@ _write_sectors (VcdObj *obj, int track)
     case MPEG_NORM_FILM:
       norm_str = strdup ("FILM (352x240/24fps)");
       break;
+    case MPEG_SVHS_PAL:
+      norm_str = strdup ("PAL (480x576/25fps)");
+      break;
+    case MPEG_SVHS_NTSC:
+      norm_str = strdup ("NTSC (480x480/30fps)");
+      break;
+
+	
     case MPEG_NORM_OTHER:
       {
         char buf[1024] = { 0, };
