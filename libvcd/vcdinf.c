@@ -69,42 +69,81 @@
 
 static const char _rcsid[] = "$Id$";
 
-/* Comparison routine used in sorting. */
+/* Comparison routine used in sorting. We compare LIDs and if those are 
+   equal, use the offset.
+   Note: we assume an unnassigned LID is 0 and this compares as a high value.
+*/
 static int
-_offset_t_cmp (vcdinfo_offset_t *a, vcdinfo_offset_t *b)
+_lid_t_cmp (vcdinfo_offset_t *a, vcdinfo_offset_t *b)
 {
-  if (a->offset > b->offset)
-    return 1;
+  if (a->lid && b->lid)
+    {
+      if (a->lid > b->lid) return +1;
+      if (a->lid < b->lid) return -1;
+      vcd_warn ("LID %d at offset %d has same nunber as LID of offset %d", 
+                a->lid, a->offset, b->offset);
+    } 
+  else if (a->lid) return -1;
+  else if (b->lid) return +1;
 
-  if (a->offset < b->offset)
-    return -1;
+  /* Failed to sort on LID, try offset now. */
+
+  if (a->offset > b->offset) return +1;
+  if (a->offset < b->offset) return -1;
   
+  /* LIDS and offsets are equal. */
   return 0;
 }
 
 /*
-  This fills in the offset table with LIDs.  Due to
+  This fills in unassigned LIDs in the offset table.  Due to
   "rejected" LOT entries, some of these might not have gotten filled
-  in before.
+  in while scanning PBC (if in fact there even was a PBC).
 
-  I believe a requirement for this to work is that the offset_list be
-  sorted beforehand: to get the LIDs we are assuming first in the
-  offset list is LID1, second in the offset LID2 etc.
+  Note: We assume that an unassigned LID is one whose value is 0.
  */
 static void
-vcdinf_update_offset_list(struct _vcdinf_pbc_ctx *obj, bool ext)
+vcdinf_update_offset_list(struct _vcdinf_pbc_ctx *obj, bool extended)
 {
   if (NULL==obj) return;
   {
     VcdListNode *node;
-    unsigned int lid=1;
-    VcdList *offset_list = ext ? obj->offset_x_list : obj->offset_list;
+    VcdList *unused_lids = _vcd_list_new();
+    VcdListNode *next_unused_node = _vcd_list_begin(unused_lids);
     
+    unsigned int last_lid=0;
+    VcdList *offset_list = extended ? obj->offset_x_list : obj->offset_list;
+    
+    lid_t max_seen_lid=0;
+
     _VCD_LIST_FOREACH (node, offset_list)
       {
         vcdinfo_offset_t *ofs = _vcd_list_node_data (node);
-        ofs->lid = lid++;
+        if (!ofs->lid) {
+          /* We have a customer! Assign a LID from the free pool
+             or take one from the end if no skipped LIDs.
+          */
+          VcdListNode *node=_vcd_list_node_next(next_unused_node);
+          if (node != NULL) {
+            lid_t *next_unused_lid=_vcd_list_node_data(node);
+            ofs->lid = *next_unused_lid;
+            next_unused_node=node;
+          } else {
+            max_seen_lid++;
+            ofs->lid = max_seen_lid;
+          }
+        } else {
+          /* See if we've skipped any LID numbers. */
+          last_lid++;
+          while (last_lid != ofs->lid ) {
+            lid_t * lid=_vcd_malloc (sizeof(lid_t));
+            *lid = last_lid;
+            _vcd_list_append(unused_lids, lid);
+          }
+          if (last_lid > max_seen_lid) max_seen_lid=last_lid;
+        }
       }
+    _vcd_list_free(unused_lids, true);
   }
 }
 
@@ -127,7 +166,7 @@ vcdinf_visit_lot (struct _vcdinf_pbc_ctx *obj)
       vcdinf_visit_pbc (obj, n + 1, tmp, true);
 
   _vcd_list_sort (obj->extended ? obj->offset_x_list : obj->offset_list, 
-                  (_vcd_list_cmp_func) _offset_t_cmp);
+                  (_vcd_list_cmp_func) _lid_t_cmp);
 
   /* Now really complete the offset table with LIDs.  This routine
      might obviate the need for vcdinf_visit_pbc() or some of it which is
@@ -195,12 +234,14 @@ vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, unsigned int offset,
           if (in_lot)
             ofs->in_lot = true;
 
-          if (lid) 
+          if (lid) {
             /* Our caller thinks she knows what our LID is.
                This should help out getting the LID for end descriptors
                if not other things as well.
              */
             ofs->lid = lid;
+          }
+          
 
           ofs->ext = obj->extended;
 
@@ -210,10 +251,10 @@ vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, unsigned int offset,
 
   ofs = _vcd_malloc (sizeof (vcdinfo_offset_t));
 
-  ofs->offset = offset;
-  ofs->lid    = lid;
-  ofs->in_lot = in_lot;
   ofs->ext    = obj->extended;
+  ofs->in_lot = in_lot;
+  ofs->lid    = lid;
+  ofs->offset = offset;
 
   switch (psd[_rofs])
     {
@@ -230,9 +271,9 @@ vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, unsigned int offset,
             vcd_warn ("LOT entry assigned LID %d, but descriptor has LID %d",
                       ofs->lid, lid);
 
-        vcdinf_visit_pbc (obj, 0, vcdinfo_get_prev_from_pld(d), false);
-        vcdinf_visit_pbc (obj, 0, vcdinfo_get_next_from_pld(d), false);
-        vcdinf_visit_pbc (obj, 0, vcdinfo_get_return_from_pld(d), false);
+        vcdinf_visit_pbc (obj, 0, vcdinf_get_prev_from_pld(d), false);
+        vcdinf_visit_pbc (obj, 0, vcdinf_get_next_from_pld(d), false);
+        vcdinf_visit_pbc (obj, 0, vcdinf_get_return_from_pld(d), false);
       }
       break;
 
@@ -252,10 +293,10 @@ vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, unsigned int offset,
             vcd_warn ("LOT entry assigned LID %d, but descriptor has LID %d",
                       ofs->lid, uint16_from_be (d->lid) & 0x7fff);
 
-        vcdinf_visit_pbc (obj, 0, vcdinfo_get_prev_from_psd(d), false);
-        vcdinf_visit_pbc (obj, 0, vcdinfo_get_next_from_psd(d), false);
-        vcdinf_visit_pbc (obj, 0, vcdinfo_get_return_from_psd(d), false);
-        vcdinf_visit_pbc (obj, 0, uint16_from_be (d->default_ofs), false);
+        vcdinf_visit_pbc (obj, 0, vcdinf_get_prev_from_psd(d), false);
+        vcdinf_visit_pbc (obj, 0, vcdinf_get_next_from_psd(d), false);
+        vcdinf_visit_pbc (obj, 0, vcdinf_get_return_from_psd(d), false);
+        vcdinf_visit_pbc (obj, 0, vcdinf_get_default_from_psd(d), false);
         vcdinf_visit_pbc (obj, 0, uint16_from_be (d->timeout_ofs), false);
 
         for (idx = 0; idx < d->nos; idx++)
@@ -283,17 +324,43 @@ vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, unsigned int offset,
 const char *
 vcdinf_get_album_id(const InfoVcd *info)
 {
+  if (NULL==info) return NULL;
   return vcdinfo_strip_trail (info->album_desc, MAX_ALBUM_LEN);
 }
 
 /*!
-  Return the VCD ID.
+  Return the VCD application ID.
   NULL is returned if there is some problem in getting this. 
 */
 const char * 
 vcdinf_get_application_id(const pvd_t *pvd)
 {
+  if (NULL==pvd) return NULL;
   return(vcdinfo_strip_trail(pvd->application_id, MAX_APPLICATION_ID));
+}
+
+/*!
+  Return the base selection number. VCD_INVALID_BSN is returned if there
+  is an error.
+*/
+unsigned int
+vcdinf_get_bsn(const PsdSelectionListDescriptor *psd)
+{
+  if (NULL==psd) return VCDINFO_INVALID_BSN;
+  return(psd->bsn);
+}
+
+/**
+ * \fn vcdinfo_get_default_from_psd(const PsdSelectionListDescriptor *psd);
+ * \brief Get next offset for a given PSD selector descriptor. 
+ * \return VCDINFO_INVALID_OFFSET is returned on error or if psd is
+ * NULL. Otherwise the LID offset is returned.
+ */
+lid_t
+vcdinf_get_default_from_psd(const PsdSelectionListDescriptor *psd)
+{
+  if (NULL == psd) return VCDINFO_INVALID_OFFSET;
+  return uint16_from_be (psd->default_ofs);
 }
 
 /*!  Return the starting LBA (logical block address) for sequence
@@ -352,11 +419,47 @@ vcdinf_get_format_version_str (vcd_type_t vcd_type)
 }
 
 /*!
+  Return number of times PLD loops.
+*/
+uint16_t
+vcdinf_get_loop_count (const PsdSelectionListDescriptor *d) 
+{
+  return 0x7f & d->loop;
+}
+
+/**
+ \fn vcdinfo_get_next_from_pld(const PsdPlayListDescriptor *pld); 
+ \brief  Get next offset for a given PSD selector descriptor.  
+ \return  VCDINFO_INVALID_OFFSET is returned on error or if pld has no "next"
+ entry or pld is NULL. Otherwise the LID offset is returned.
+ */
+lid_t
+vcdinf_get_next_from_pld(const PsdPlayListDescriptor *pld)
+{
+  if (NULL == pld) return VCDINFO_INVALID_OFFSET;
+  return uint16_from_be (pld->next_ofs);
+}
+
+/**
+ * \fn vcdinfo_get_next_from_psd(const PsdSelectionListDescriptor *psd);
+ * \brief Get next offset for a given PSD selector descriptor. 
+ * \return VCDINFO_INVALID_OFFSET is returned on error or if psd is
+ * NULL. Otherwise the LID offset is returned.
+ */
+lid_t
+vcdinf_get_next_from_psd(const PsdSelectionListDescriptor *psd)
+{
+  if (NULL == psd) return VCDINFO_INVALID_OFFSET;
+  return uint16_from_be (psd->next_ofs);
+}
+
+/*!
   Return the number of entries in the VCD.
 */
 unsigned int
 vcdinf_get_num_entries(const EntriesVcd *entries)
 {
+  if (NULL==entries) return 0;
   return (uint16_from_be (entries->entry_count));
 }
 
@@ -366,6 +469,7 @@ vcdinf_get_num_entries(const EntriesVcd *entries)
 unsigned int
 vcdinf_get_num_segments(const InfoVcd *info)
 {
+  if (NULL==info) return 0;
   return (uint16_from_be (info->item_count));
 }
 
@@ -375,6 +479,7 @@ vcdinf_get_num_segments(const InfoVcd *info)
 lid_t
 vcdinf_get_num_LIDs (const InfoVcd *info) 
 {
+  if (NULL==info) return 0;
   /* Should probably use _vcd_pbc_max_lid instead? */
   return uint16_from_be (info->lot_entries);
 }
@@ -386,7 +491,34 @@ vcdinf_get_num_LIDs (const InfoVcd *info)
 const char *
 vcdinf_get_preparer_id(const pvd_t *pvd)
 {
+  if (NULL==pvd) return NULL;
   return(vcdinfo_strip_trail(pvd->preparer_id, MAX_PREPARER_ID));
+}
+
+/**
+ \fn vcdinf_get_prev_from_pld(const PsdPlayListDescriptor *pld);
+ \brief Get prev offset for a given PSD selector descriptor. 
+ \return  VCDINFO_INVALID_OFFSET is returned on error or if pld has no "prev"
+ entry or pld is NULL. Otherwise the LID offset is returned.
+ */
+lid_t
+vcdinf_get_prev_from_pld(const PsdPlayListDescriptor *pld)
+{
+  return (pld != NULL) ? 
+    uint16_from_be (pld->prev_ofs) : VCDINFO_INVALID_OFFSET;
+}
+
+/**
+ \fn vcdinf_get_prev_from_psd(const PsdSelectionListDescriptor *psd);
+ \brief Get prev offset for a given PSD selector descriptor. 
+ \return  VCDINFO_INVALID_OFFSET is returned on error or if psd has no "prev"
+ entry or psd is NULL. Otherwise the LID offset is returned.
+ */
+lid_t
+vcdinf_get_prev_from_psd(const PsdSelectionListDescriptor *psd)
+{
+  return (psd != NULL) ? 
+    uint16_from_be (psd->prev_ofs) : VCDINFO_INVALID_OFFSET;
 }
 
 /*!
@@ -395,6 +527,7 @@ vcdinf_get_preparer_id(const pvd_t *pvd)
 uint32_t
 vcdinf_get_psd_size (const InfoVcd *info)
 {
+  if (NULL==info) return 0;
   return uint32_from_be (info->psd_size);
 }
 
@@ -405,7 +538,34 @@ vcdinf_get_psd_size (const InfoVcd *info)
 const char *
 vcdinf_get_publisher_id(const pvd_t *pvd)
 {
+  if (NULL==pvd) return NULL;
   return(vcdinfo_strip_trail(pvd->publisher_id, MAX_PUBLISHER_ID));
+}
+
+/**
+ \fn vcdinf_get_return_from_pld(const PsdPlayListDescriptor *pld);
+ \brief Get return offset for a given PLD selector descriptor. 
+ \return  VCDINFO_INVALID_OFFSET is returned on error or if pld has no 
+ "return" entry or pld is NULL. Otherwise the LID offset is returned.
+ */
+lid_t
+vcdinf_get_return_from_pld(const PsdPlayListDescriptor *pld)
+{
+  return (pld != NULL) ? 
+    uint16_from_be (pld->return_ofs) : VCDINFO_INVALID_OFFSET;
+}
+
+/**
+ * \fn vcdinfo_get_return_from_psd(const PsdSelectionListDescriptor *psd);
+ * \brief Get return offset for a given PSD selector descriptor. 
+ \return  VCDINFO_INVALID_OFFSET is returned on error or if psd has no 
+ "return" entry or psd is NULL. Otherwise the LID offset is returned.
+ */
+uint16_t
+vcdinf_get_return_from_psd(const PsdSelectionListDescriptor *psd)
+{
+  return (psd != NULL) ? 
+    uint16_from_be (psd->return_ofs) : VCDINFO_INVALID_OFFSET;
 }
 
 /*!
@@ -415,6 +575,7 @@ vcdinf_get_publisher_id(const pvd_t *pvd)
 const char *
 vcdinf_get_system_id(const pvd_t *pvd)
 {
+  if (NULL==pvd) return NULL;
   return(vcdinfo_strip_trail(pvd->system_id, MAX_SYSTEM_ID));
 }
 
@@ -439,6 +600,7 @@ vcdinf_get_track(const EntriesVcd *entries, const unsigned int entry_num)
 unsigned int 
 vcdinf_get_volume_count(const InfoVcd *info) 
 {
+  if (NULL==info) return 0;
   return(uint16_from_be( info->vol_count));
 }
 
@@ -448,7 +610,19 @@ vcdinf_get_volume_count(const InfoVcd *info)
 const char *
 vcdinf_get_volume_id(const pvd_t *pvd) 
 {
+  if (NULL == pvd) return NULL;
   return(vcdinfo_strip_trail(pvd->volume_id, MAX_VOLUME_ID));
+}
+
+/*!
+  Return the VCD volumeset ID.
+  NULL is returned if there is some problem in getting this. 
+*/
+const char *
+vcdinf_get_volumeset_id(const pvd_t *pvd)
+{
+  if ( NULL == pvd ) return NULL;
+  return vcdinfo_strip_trail(pvd->volume_set_id, MAX_VOLUMESET_ID);
 }
 
 /*!
@@ -458,7 +632,20 @@ vcdinf_get_volume_id(const pvd_t *pvd)
 unsigned int
 vcdinf_get_volume_num(const InfoVcd *info)
 {
+  if (NULL == info) return 0;
   return uint16_from_be(info->vol_id);
+}
+
+int
+vcdinf_get_wait_time (uint16_t wtime)
+{
+  /* Note: this doesn't agree exactly with _wtime */
+  if (wtime < 61)
+    return wtime;
+  else if (wtime < 255)
+    return (wtime - 60) * 10 + 60;
+  else
+    return -1;
 }
 
 

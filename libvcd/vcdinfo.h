@@ -92,11 +92,12 @@ extern "C" {
 
 /*! 
   Constant for invalid LID. 
-  FIXME: player needs these to be the same. rest of VCDimager
-  uses 0 for INVALID LID.
+  FIXME: player needs these to be the same. 
+  VCDimager code requres 0 for an UNINITIALIZED LID.
   
 */
 #define VCDINFO_INVALID_LID  VCDINFO_INVALID_ENTRY
+#define VCDINFO_UNINIT_LID   0
 
 /*! 
   Constant for invalid itemid
@@ -107,6 +108,11 @@ extern "C" {
   Constant for invalid audio type
 */
 #define VCDINFO_INVALID_AUDIO_TYPE  4
+
+/*! 
+  Constant for invalid itemid
+*/
+#define VCDINFO_INVALID_BSN  200
 
   /* See enum in vcd_files_private.h */
   typedef enum {
@@ -157,13 +163,13 @@ extern "C" {
     InfoVcd info;
     EntriesVcd entries;
     
-    uint8_t *psd;
     VcdList *offset_list;
     VcdList *offset_x_list;
     VcdList *segment_list; /* list data entry is a vcd_image_stat_t */
     
     LotVcd *lot;
     LotVcd *lot_x;
+    uint8_t *psd;
     uint8_t *psd_x;
     unsigned int psd_x_size;
     bool extended;
@@ -253,8 +259,7 @@ extern "C" {
   const char *
   vcdinfo_pin2str (uint16_t itemid);
   
-  int
-  vcdinfo_calc_psd_wait_time (uint16_t wtime);
+  int vcdinf_get_wait_time (uint16_t wtime);
   
   /*!
     \brief Classify itemid_num into the kind of item it is: track #, entry #, 
@@ -286,12 +291,6 @@ extern "C" {
   */
   int
   vcdinfo_get_autowait_time (const PsdPlayListDescriptor *d);
-  
-  /*!
-    Return the base selection number.
-  */
-  unsigned int
-  vcdinfo_get_bsn(const PsdSelectionListDescriptor *psd);
   
   /*!
     Return a string containing the default VCD device if none is specified.
@@ -385,34 +384,10 @@ extern "C" {
   vcdinfo_get_lid_rejected_from_psd(const PsdSelectionListDescriptor *d);
   
   /*!
-    Return true if item is to be looped. 
-  */
-  uint16_t
-  vcdinfo_get_loop_count (const PsdSelectionListDescriptor *d);
-  
-  /*!
     Return Number of LIDs. 
   */
   lid_t
   vcdinfo_get_num_LIDs (const vcdinfo_obj_t *obj);
-  
-  /**
-     \fn vcdinfo_get_next_from_pld(const PsdPlayListDescriptor *pld); 
-     \brief  Get next offset for a given PSD selector descriptor.  
-     \return  VCDINFO_INVALID_OFFSET is returned on error or if pld has no 
-     "next" entry or pld is NULL. Otherwise the LID offset is returned.
-  */
-  lid_t
-  vcdinfo_get_next_from_pld(const PsdPlayListDescriptor *pld);
-  
-  /**
-     \fn vcdinfo_get_next_from_psd(const PsdSelectionListDescriptor *psd);
-     \brief Get next offset for a given PSD selector descriptor. 
-     \return  VCDINFO_INVALID_OFFSET is returned on error or if psd has no 
-     "next" entry or psd is NULL. Otherwise the LID offset is returned.
-  */
-  lid_t
-  vcdinfo_get_next_from_psd(const PsdSelectionListDescriptor *psd);
   
   /*!
     Return the audio type for a given track. 
@@ -485,25 +460,6 @@ extern "C" {
   const char *
   vcdinfo_get_preparer_id(const vcdinfo_obj_t *obj);
   
-  /**
-     \fn vcdinfo_get_prev_from_psd(const PsdSelectionListDescriptor *pld);
-     \brief Get prev offset for a given PSD selector descriptor. 
-     \return  VCDINFO_INVALID_OFFSET is returned on error or if pld has no 
-     "prev" entry or pld is NULL. Otherwise the LID offset is returned.
-  */
-  lid_t
-  vcdinfo_get_prev_from_pld(const PsdPlayListDescriptor *pld);
-  
-  /**
-     \fn vcdinfo_get_prev_from_psd(const PsdPlayListDescriptor *psd);
-     \brief Get prev offset for a given PSD selector descriptor. 
-     \return  VCDINFO_INVALID_OFFSET is returned on error or if psd has no 
-     "prev"
-     entry or psd is NULL. Otherwise the LID offset is returned.
-  */
-  lid_t
-  vcdinfo_get_prev_from_psd(const PsdSelectionListDescriptor *psd);
-  
   /*!
     Return number of bytes in PSD.
   */
@@ -532,22 +488,6 @@ extern "C" {
   */
   lid_t
   vcdinfo_get_return(const vcdinfo_obj_t *obj, unsigned int lid);
-  
-  /*!
-    \brief Get return offset for a given PSD selector descriptor. 
-    \return  VCDINFO_INVALID_OFFSET is returned on error or if pld has 
-    no "return"  entry or pld is NULL. Otherwise the LID offset is returned.
-  */
-  lid_t
-  vcdinfo_get_return_from_pld(const PsdPlayListDescriptor *pld);
-  
-/*!
-  \brief Get return offset for a given PSD selector descriptor. 
-  \return  VCDINFO_INVALID_OFFSET is returned on error or if psd has 
-  no "return" entry or psd is NULL. Otherwise the LID offset is returned.
-*/
-  lid_t
-  vcdinfo_get_return_from_psd(const PsdSelectionListDescriptor *psd);
   
   /*!
     Return the audio type for a given segment. 

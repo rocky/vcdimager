@@ -43,13 +43,27 @@ extern "C" {
   */
   const char * vcdinf_get_application_id(const pvd_t *pvd);
 
+  /*!
+    Return the base selection number. VCD_INVALID_BSN is returned if there
+    is an error.
+  */
+  unsigned int vcdinf_get_bsn(const PsdSelectionListDescriptor *psd);
+  
+  /**
+   * \fn vcdinfo_get_default_from_psd(const PsdSelectionListDescriptor *psd);
+   * \brief Get next offset for a given PSD selector descriptor. 
+   * \return VCDINFO_INVALID_OFFSET is returned on error or if psd is
+   * NULL. Otherwise the LID offset is returned.
+   */
+  lid_t vcdinf_get_default_from_psd(const PsdSelectionListDescriptor *psd);
+
   /*!  Return the starting LBA (logical block address) for sequence
     entry_num in obj.  VCDINFO_NULL_LBA is returned if there is no entry.
     The first entry number is 0.
   */
   lba_t vcdinf_get_entry_lba(const EntriesVcd *entries, 
-			      unsigned int entry_num);
-  
+			     unsigned int entry_num);
+
   /*!  Return the starting MSF (minutes/secs/frames) for sequence
     entry_num in obj.  NULL is returned if there is no entry.
     The first entry number is 0.
@@ -59,6 +73,27 @@ extern "C" {
 
   const char * vcdinf_get_format_version_str (vcd_type_t vcd_type);
 
+  /*!
+    Return true if item is to be looped. 
+  */
+  uint16_t vcdinf_get_loop_count (const PsdSelectionListDescriptor *d);
+  
+  /**
+     \fn vcdinfo_get_next_from_pld(const PsdPlayListDescriptor *pld); 
+     \brief  Get next offset for a given PSD selector descriptor.  
+     \return  VCDINFO_INVALID_OFFSET is returned on error or if pld has no 
+     "next" entry or pld is NULL. Otherwise the LID offset is returned.
+  */
+  lid_t vcdinf_get_next_from_pld(const PsdPlayListDescriptor *pld);
+  
+  /**
+     \fn vcdinfo_get_next_from_psd(const PsdSelectionListDescriptor *psd);
+     \brief Get next offset for a given PSD selector descriptor. 
+     \return  VCDINFO_INVALID_OFFSET is returned on error or if psd has no 
+     "next" entry or psd is NULL. Otherwise the LID offset is returned.
+  */
+  lid_t vcdinf_get_next_from_psd(const PsdSelectionListDescriptor *psd);
+  
   /*!
     Return the number of segments in the VCD. 
   */
@@ -77,23 +112,60 @@ extern "C" {
   /*!
     Return a string containing the VCD publisher id with trailing
     blanks removed.
+    NULL is returned if there is some problem in getting this. 
   */
   const char * vcdinf_get_preparer_id(const pvd_t *pvd);
 
+  /**
+     \fn vcdinf_get_prev_from_psd(const PsdSelectionListDescriptor *pld);
+     \brief Get prev offset for a given PSD selector descriptor. 
+     \return  VCDINFO_INVALID_OFFSET is returned on error or if pld has no 
+     "prev" entry or pld is NULL. Otherwise the LID offset is returned.
+  */
+  lid_t vcdinf_get_prev_from_pld(const PsdPlayListDescriptor *pld);
+  
+  /**
+     \fn vcdinf_get_prev_from_psd(const PsdPlayListDescriptor *psd);
+     \brief Get prev offset for a given PSD selector descriptor. 
+     \return  VCDINFO_INVALID_OFFSET is returned on error or if psd has no 
+     "prev"
+     entry or psd is NULL. Otherwise the LID offset is returned.
+  */
+  lid_t vcdinf_get_prev_from_psd(const PsdSelectionListDescriptor *psd);
+  
   /*!
     Return a string containing the VCD publisher id with trailing
     blanks removed.
+    NULL is returned if there is some problem in getting this. 
   */
   const char * vcdinf_get_publisher_id(const pvd_t *pvd);
-  
+    
   /*!
     Return number of bytes in PSD. 
   */
   uint32_t vcdinf_get_psd_size (const InfoVcd *info);
+       
+
+  /**
+     \fn vcdinfo_get_return_from_pld(const PsdPlayListDescriptor *pld);
+     \brief Get return offset for a given PLD selector descriptor. 
+     \return  VCDINFO_INVALID_OFFSET is returned on error or if pld has no 
+     "return" entry or pld is NULL. Otherwise the LID offset is returned.
+  */
+  lid_t vcdinf_get_return_from_pld(const PsdPlayListDescriptor *pld);
+
+  /**
+   * \fn vcdinfo_get_return_from_psd(const PsdSelectionListDescriptor *psd);
+   * \brief Get return offset for a given PSD selector descriptor. 
+   \return  VCDINFO_INVALID_OFFSET is returned on error or if psd has no 
+   "return" entry or psd is NULL. Otherwise the LID offset is returned.
+  */
+  uint16_t vcdinf_get_return_from_psd(const PsdSelectionListDescriptor *psd);
 
   /*!
     Return a string containing the VCD system id with trailing
     blanks removed.
+    NULL is returned if there is some problem in getting this. 
   */
   const char * vcdinf_get_system_id(const pvd_t *pvd);
   
@@ -108,11 +180,18 @@ extern "C" {
     Return the VCD volume count - the number of CD's in the collection.
   */
   unsigned int vcdinf_get_volume_count(const InfoVcd *info);
-  
+
   /*!
     Return the VCD ID.
+    NULL is returned if there is some problem in getting this. 
   */
   const char * vcdinf_get_volume_id(const pvd_t *pvd);
+
+  /*!
+    Return the VCD volumeset ID.
+    NULL is returned if there is some problem in getting this. 
+  */
+  const char * vcdinf_get_volumeset_id(const pvd_t *pvd);
 
   /*!
     Return the VCD volume num - the number of the CD in the collection.
@@ -120,6 +199,8 @@ extern "C" {
   */
   unsigned int vcdinf_get_volume_num(const InfoVcd *info);
   
+  int vcdinf_get_wait_time (uint16_t wtime);
+
   struct _vcdinf_pbc_ctx {
     unsigned int psd_size;
     lid_t maximum_lid;

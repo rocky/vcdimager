@@ -48,6 +48,7 @@
 
 /* Eventually move above libvcd includes but having vcdinfo including. */
 #include <libvcd/vcdinfo.h>
+#include <libvcd/vcdinf.h>
 
 static const char _rcsid[] = "$Id$";
 
@@ -306,9 +307,9 @@ dump_psd (const vcdinfo_obj_t *obj, bool ext)
                      n, vcdinfo_ofs2str (obj, ofs->offset, ext),
                      pld->noi, lid, 
                      _vcd_bool_str(vcdinfo_is_rejected(uint16_from_be(pld->lid))),
-                     vcdinfo_ofs2str(obj, vcdinfo_get_prev_from_pld(pld), ext),
-                     vcdinfo_ofs2str(obj, vcdinfo_get_next_from_pld(pld), ext),
-                     vcdinfo_ofs2str(obj, vcdinfo_get_return_from_pld(pld),
+                     vcdinfo_ofs2str(obj, vcdinf_get_prev_from_pld(pld), ext),
+                     vcdinfo_ofs2str(obj, vcdinf_get_next_from_pld(pld), ext),
+                     vcdinfo_ofs2str(obj, vcdinf_get_return_from_pld(pld),
                                      ext),
                      vcdinfo_get_play_time(pld), vcdinfo_get_wait_time (pld),
                      vcdinfo_get_autowait_time(pld));
@@ -354,16 +355,16 @@ dump_psd (const vcdinfo_obj_t *obj, bool ext)
                      (type == PSD_TYPE_EXT_SELECTION_LIST ? "extended " : ""),
                      *(uint8_t *) &d->flags,
                      d->nos, 
-                     vcdinfo_get_bsn(d),
+                     vcdinf_get_bsn(d),
                      lid, 
                      _vcd_bool_str (vcdinfo_get_lid_rejected_from_psd(d)),
-                     vcdinfo_ofs2str (obj, vcdinfo_get_prev_from_psd(d), ext),
-                     vcdinfo_ofs2str (obj, vcdinfo_get_next_from_psd(d), ext),
-                     vcdinfo_ofs2str (obj, vcdinfo_get_return_from_psd(d),ext),
-                     vcdinfo_ofs2str (obj, vcdinfo_get_default(obj, lid), ext),
-                     vcdinfo_ofs2str (obj, vcdinfo_get_timeout_LID(d), ext),
+                     vcdinfo_ofs2str(obj, vcdinf_get_prev_from_psd(d), ext),
+                     vcdinfo_ofs2str(obj, vcdinf_get_next_from_psd(d), ext),
+                     vcdinfo_ofs2str(obj, vcdinf_get_return_from_psd(d),ext),
+                     vcdinfo_ofs2str(obj, vcdinf_get_default_from_psd(d), ext),
+                     vcdinfo_ofs2str(obj, vcdinfo_get_timeout_LID(d), ext),
                      vcdinfo_get_timeout_time(d),
-                     vcdinfo_get_loop_count(d), _vcd_bool_str (0x80 & d->loop),
+                     vcdinf_get_loop_count(d), _vcd_bool_str (0x80 & d->loop),
                      vcdinfo_pin2str (vcdinfo_get_itemid_from_psd(d)));
 
             for (i = 0; i < d->nos; i++)
@@ -1160,7 +1161,7 @@ dump (char image_fname[])
           if (psd_size != statbuf.size)
             vcd_warn ("ISO9660 psd size != INFO psd size");
           if (statbuf.lsn != PSD_VCD_SECTOR)
-            vcd_warn ("psd fileentry in ISO9660 not at fixed lsn");
+            vcd_warn ("psd file entry in ISO9660 not at fixed LSN");
         }
           
     }

@@ -443,7 +443,7 @@ vcdinfo_pin2str (uint16_t itemid_num)
 const char *
 vcdinfo_get_album_id(const vcdinfo_obj_t *obj)
 {
-  if ( NULL == obj || NULL == &obj->info ) return (NULL);
+  if ( NULL == obj ) return (NULL);
   return vcdinf_get_album_id(&obj->info);
 }
 
@@ -454,7 +454,7 @@ vcdinfo_get_album_id(const vcdinfo_obj_t *obj)
 const char *
 vcdinfo_get_application_id(const vcdinfo_obj_t *obj)
 {
-  if ( NULL == obj || NULL == &obj->pvd ) return (NULL);
+  if ( NULL == obj ) return (NULL);
   return(vcdinf_get_application_id(&obj->pvd));
 }
 
@@ -465,16 +465,7 @@ vcdinfo_get_application_id(const vcdinfo_obj_t *obj)
 int
 vcdinfo_get_autowait_time (const PsdPlayListDescriptor *d) 
 {
-  return vcdinfo_calc_psd_wait_time (d->atime);
-}
-
-/*!
-   Return the base selection number.
-*/
-unsigned int
-vcdinfo_get_bsn(const PsdSelectionListDescriptor *psd)
-{
-  return(psd->bsn);
+  return vcdinf_get_wait_time (d->atime);
 }
 
 /**
@@ -699,48 +690,14 @@ vcdinfo_get_lid_rejected_from_psd(const PsdSelectionListDescriptor *d)
 }
 
 /*!
-  Return number of times PLD loops.
-*/
-uint16_t
-vcdinfo_get_loop_count (const PsdSelectionListDescriptor *d) 
-{
-  return 0x7f & d->loop;
-}
-
-/*!
   Return number of LIDs. 
 */
 lid_t
 vcdinfo_get_num_LIDs (const vcdinfo_obj_t *obj) 
 {
   /* Should probably use _vcd_pbc_max_lid instead? */
-  return uint16_from_be (obj->info.lot_entries);
-}
-
-/**
- \fn vcdinfo_get_next_from_pld(const PsdPlayListDescriptor *pld); 
- \brief  Get next offset for a given PSD selector descriptor.  
- \return  VCDINFO_INVALID_OFFSET is returned on error or if pld has no "next"
- entry or pld is NULL. Otherwise the LID offset is returned.
- */
-lid_t
-vcdinfo_get_next_from_pld(const PsdPlayListDescriptor *pld)
-{
-  return (pld != NULL) 
-    ? uint16_from_be (pld->next_ofs) : VCDINFO_INVALID_OFFSET;
-}
-
-/**
- * \fn vcdinfo_get_next_from_psd(const PsdSelectionListDescriptor *psd);
- * \brief Get next offset for a given PSD selector descriptor. 
- * \return VCDINFO_INVALID_OFFSET is returned on error or if psd is
- * NULL. Otherwise the LID offset is returned.
- */
-lid_t
-vcdinfo_get_next_from_psd(const PsdSelectionListDescriptor *psd)
-{
-  return (psd != NULL) 
-    ? uint16_from_be (psd->next_ofs) : VCDINFO_INVALID_OFFSET;
+  if (NULL==obj) return 0;
+  return vcdinf_get_num_LIDs(&obj->info);
 }
 
 /*!
@@ -760,7 +717,7 @@ vcdinfo_get_num_entries(const vcdinfo_obj_t *obj)
 unsigned int
 vcdinfo_get_num_segments(const vcdinfo_obj_t *obj)
 {
-  if (NULL==obj || &obj->info==NULL) return 0;
+  if (NULL==obj) return 0;
   return vcdinf_get_num_segments(&obj->info);
 }
 
@@ -865,34 +822,8 @@ vcdinfo_get_play_time (const PsdPlayListDescriptor *d)
 const char *
 vcdinfo_get_preparer_id(const vcdinfo_obj_t *obj)
 {
-  if ( NULL == obj || NULL == &obj->pvd ) return (NULL);
-  return(vcdinfo_strip_trail(obj->pvd.preparer_id, MAX_PREPARER_ID));
-}
-
-/**
- \fn vcdinfo_get_prev_from_pld(const PsdPlayListDescriptor *pld);
- \brief Get prev offset for a given PSD selector descriptor. 
- \return  VCDINFO_INVALID_OFFSET is returned on error or if pld has no "prev"
- entry or pld is NULL. Otherwise the LID offset is returned.
- */
-lid_t
-vcdinfo_get_prev_from_pld(const PsdPlayListDescriptor *pld)
-{
-  return (pld != NULL) ? 
-    uint16_from_be (pld->prev_ofs) : VCDINFO_INVALID_OFFSET;
-}
-
-/**
- \fn vcdinfo_get_prev_from_psd(const PsdSelectionListDescriptor *psd);
- \brief Get prev offset for a given PSD selector descriptor. 
- \return  VCDINFO_INVALID_OFFSET is returned on error or if psd has no "prev"
- entry or psd is NULL. Otherwise the LID offset is returned.
- */
-lid_t
-vcdinfo_get_prev_from_psd(const PsdSelectionListDescriptor *psd)
-{
-  return (psd != NULL) ? 
-    uint16_from_be (psd->prev_ofs) : VCDINFO_INVALID_OFFSET;
+  if ( NULL == obj ) return (NULL);
+  return vcdinf_get_preparer_id(&obj->pvd);
 }
 
 /*!
@@ -901,7 +832,7 @@ vcdinfo_get_prev_from_psd(const PsdSelectionListDescriptor *psd)
 uint32_t
 vcdinfo_get_psd_size (const vcdinfo_obj_t *obj)
 {
-  if ( NULL == obj || NULL == &obj->info ) return 0;
+  if ( NULL == obj ) return 0;
   return vcdinf_get_psd_size(&obj->info);
 }
 
@@ -912,8 +843,8 @@ vcdinfo_get_psd_size (const vcdinfo_obj_t *obj)
 const char *
 vcdinfo_get_publisher_id(const vcdinfo_obj_t *obj)
 {
-  if ( NULL == obj || NULL == &obj->pvd ) return (NULL);
-  return(vcdinf_get_publisher_id(&obj->pvd));
+  if ( NULL == obj ) return (NULL);
+  return vcdinf_get_publisher_id(&obj->pvd);
 }
 
 /*!
@@ -978,7 +909,7 @@ vcdinfo_get_pxd_from_lid(const vcdinfo_obj_t *obj, PsdListDescriptor *pxd,
 }
 
 /**
- \fn vcdinfo_get_return_from_psd(const PsdPlayListDescriptor *pld);
+ \fn vcdinfo_get_return(const vcdinfo_obj_t *obj);
  \brief Get return offset for a given PLD selector descriptor. 
  \return  VCDINFO_INVALID_OFFSET is returned on error or if pld has no 
  "return" entry or pld is NULL. Otherwise the LID offset is returned.
@@ -1009,32 +940,6 @@ vcdinfo_get_return(const vcdinfo_obj_t *obj, unsigned int lid)
   }
   
   return VCDINFO_INVALID_OFFSET;
-}
-
-/**
- \fn vcdinfo_get_return_from_psd(const PsdPlayListDescriptor *pld);
- \brief Get return offset for a given PLD selector descriptor. 
- \return  VCDINFO_INVALID_OFFSET is returned on error or if pld has no 
- "return" entry or pld is NULL. Otherwise the LID offset is returned.
- */
-lid_t
-vcdinfo_get_return_from_pld(const PsdPlayListDescriptor *pld)
-{
-  return (pld != NULL) ? 
-    uint16_from_be (pld->return_ofs) : VCDINFO_INVALID_OFFSET;
-}
-
-/**
- * \fn vcdinfo_get_return_from_psd(const PsdSelectionListDescriptor *psd);
- * \brief Get return offset for a given PSD selector descriptor. 
- \return  VCDINFO_INVALID_OFFSET is returned on error or if psd has no 
- "return" entry or psd is NULL. Otherwise the LID offset is returned.
- */
-uint16_t
-vcdinfo_get_return_from_psd(const PsdSelectionListDescriptor *psd)
-{
-  return (psd != NULL) ? 
-    uint16_from_be (psd->return_ofs) : VCDINFO_INVALID_OFFSET;
 }
 
 /*!
@@ -1157,7 +1062,7 @@ vcdinfo_get_timeout_LID (const PsdSelectionListDescriptor *d)
 int
 vcdinfo_get_timeout_time (const PsdSelectionListDescriptor *d)
 {
-  return vcdinfo_calc_psd_wait_time (d->totime);
+  return vcdinf_get_wait_time (d->totime);
 }
 
 /*!
@@ -1341,7 +1246,7 @@ vcdinfo_get_video_type(const vcdinfo_obj_t *obj, unsigned int seg_num)
 unsigned int
 vcdinfo_get_volume_count(const vcdinfo_obj_t *obj)
 {
-  if ( NULL == obj || NULL == &obj->info ) return 0;
+  if ( NULL == obj ) return 0;
   return vcdinf_get_volume_count(&obj->info);
 }
 
@@ -1375,7 +1280,7 @@ vcdinfo_get_volumeset_id(const vcdinfo_obj_t *obj)
 unsigned int
 vcdinfo_get_volume_num(const vcdinfo_obj_t *obj)
 {
-  if ( NULL == obj || NULL == &obj->info ) return 0;
+  if ( NULL == obj ) return 0;
   return(uint16_from_be( obj->info.vol_id));
 }
 
@@ -1386,7 +1291,7 @@ vcdinfo_get_volume_num(const vcdinfo_obj_t *obj)
 int
 vcdinfo_get_wait_time (const PsdPlayListDescriptor *d) 
 {
-  return vcdinfo_calc_psd_wait_time (d->wtime);
+  return vcdinf_get_wait_time (d->wtime);
 }
 
 /*!
@@ -1607,9 +1512,11 @@ vcdinfo_visit_lot (vcdinfo_obj_t *obj, bool extended)
   pbc_ctx.extended      = extended;
 
   vcdinf_visit_lot(&pbc_ctx);
-  free(obj->offset_x_list);
+  if (NULL != obj->offset_x_list) 
+    _vcd_list_free(obj->offset_x_list, true);
   obj->offset_x_list = pbc_ctx.offset_x_list;
-  free(obj->offset_list);
+  if (NULL != obj->offset_list) 
+    _vcd_list_free(obj->offset_list, true);
   obj->offset_list   = pbc_ctx.offset_list;
 }
 
@@ -1647,18 +1554,6 @@ bool
 vcdinfo_is_rejected(uint16_t offset)
 {
   return (offset & VCDINFO_REJECTED_MASK) != 0;
-}
-
-int
-vcdinfo_calc_psd_wait_time (uint16_t wtime)
-{
-  /* Note: this doesn't agree exactly with _wtime */
-  if (wtime < 61)
-    return wtime;
-  else if (wtime < 255)
-    return (wtime - 60) * 10 + 60;
-  else
-    return -1;
 }
 
 const char *
@@ -1904,8 +1799,13 @@ vcdinfo_close(vcdinfo_obj_t *obj)
 {
   if (obj != NULL) {
     if (obj->segment_list != NULL) 
-      _vcd_list_free(obj->segment_list, 0);
+      _vcd_list_free(obj->segment_list, true);
+    if (obj->offset_list != NULL) 
+      _vcd_list_free(obj->offset_list, true);
+    if (obj->offset_x_list != NULL) 
+      _vcd_list_free(obj->offset_x_list, true);
     free(obj->lot);
+    free(obj->lot_x);
     free(obj->tracks_buf);
     free(obj->search_buf);
     free(obj->source_name);

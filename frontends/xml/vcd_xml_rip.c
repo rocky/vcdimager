@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2001,2003 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -520,19 +520,6 @@ _ofs2id (unsigned offset, const struct _pbc_ctx *_ctx)
   return buf;
 }
 
-static int
-_calc_time (uint16_t wtime)
-{
-  if (wtime < 61)
-    return wtime;
-  else if (wtime < 255)
-    return (wtime - 60) * 10 + 60;
-  else
-    return -1;
-}
-
-
-
 static pbc_t *
 _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
 {
@@ -560,16 +547,16 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
       _pbc = vcd_pbc_new (PBC_PLAYLIST);
       {
 	const PsdPlayListDescriptor *d = (const void *) _buf;
-	_pbc->prev_id = _xstrdup (_ofs2id (vcdinfo_get_prev_from_pld(d), 
+	_pbc->prev_id = _xstrdup (_ofs2id (vcdinf_get_prev_from_pld(d), 
 					   _ctx));
-	_pbc->next_id = _xstrdup (_ofs2id (vcdinfo_get_next_from_pld(d),
+	_pbc->next_id = _xstrdup (_ofs2id (vcdinf_get_next_from_pld(d),
 					   _ctx));
-	_pbc->retn_id = _xstrdup (_ofs2id (vcdinfo_get_return_from_pld(d), 
+	_pbc->retn_id = _xstrdup (_ofs2id (vcdinf_get_return_from_pld(d), 
 					   _ctx));
 	
 	_pbc->playing_time = (double) (uint16_from_be (d->ptime)) / 15.0;
-	_pbc->wait_time = _calc_time (d->wtime);
-	_pbc->auto_pause_time =  _calc_time(d->atime);
+	_pbc->wait_time       = vcdinfo_get_wait_time(d);
+	_pbc->auto_pause_time = vcdinfo_get_autowait_time(d);
 
 	for (n = 0; n < d->noi; n++)
 	  {
@@ -584,15 +571,15 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
       _pbc = vcd_pbc_new (PBC_SELECTION);
       {
 	const PsdSelectionListDescriptor *d = (const void *) _buf;
-	_pbc->bsn = d->bsn;
-	_pbc->prev_id = _xstrdup (_ofs2id (vcdinfo_get_prev_from_psd(d), 
+	_pbc->bsn = vcdinf_get_bsn(d);
+	_pbc->prev_id = _xstrdup (_ofs2id (vcdinf_get_prev_from_psd(d), 
 					   _ctx));
-	_pbc->next_id = _xstrdup (_ofs2id (vcdinfo_get_next_from_psd(d), 
+	_pbc->next_id = _xstrdup (_ofs2id (vcdinf_get_next_from_psd(d), 
 					   _ctx));
-	_pbc->retn_id = _xstrdup (_ofs2id (vcdinfo_get_return_from_psd(d), 
+	_pbc->retn_id = _xstrdup (_ofs2id (vcdinf_get_return_from_psd(d), 
 					   _ctx));
 
-	switch (uint16_from_be (d->default_ofs))
+	switch (vcdinf_get_default_from_psd(d))
 	  {
 	  case PSD_OFS_DISABLED:
 	    _pbc->default_id = NULL;
@@ -617,9 +604,9 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
 
 	_pbc->timeout_id = 
 	  _xstrdup (_ofs2id (uint16_from_be (d->timeout_ofs), _ctx));
-	_pbc->timeout_time = _calc_time (d->totime);
+	_pbc->timeout_time = vcdinfo_get_timeout_time (d);
 	_pbc->jump_delayed = (0x80 & d->loop) != 0;
-	_pbc->loop_count = (0x7f & d->loop);
+	_pbc->loop_count = vcdinf_get_loop_count(d);
 	_pbc->item_id = _xstrdup (_pin2id (uint16_from_be (d->itemid), _ctx));
 
 	for (n = 0; n < d->nos; n++)
@@ -752,9 +739,9 @@ _visit_pbc (struct _pbc_ctx *obj, unsigned lid, unsigned offset, bool in_lot)
             vcd_warn ("LOT entry assigned LID %d, but descriptor has LID %d",
                       ofs->lid, uint16_from_be (d->lid) & 0x7fff);
 
-        _visit_pbc (obj, 0, vcdinfo_get_prev_from_pld(d), false);
-        _visit_pbc (obj, 0, vcdinfo_get_next_from_pld(d), false);
-        _visit_pbc (obj, 0, vcdinfo_get_return_from_pld(d), false);
+        _visit_pbc (obj, 0, vcdinf_get_prev_from_pld(d), false);
+        _visit_pbc (obj, 0, vcdinf_get_next_from_pld(d), false);
+        _visit_pbc (obj, 0, vcdinf_get_return_from_pld(d), false);
       }
       break;
 
@@ -775,10 +762,10 @@ _visit_pbc (struct _pbc_ctx *obj, unsigned lid, unsigned offset, bool in_lot)
             vcd_warn ("LOT entry assigned LID %d, but descriptor has LID %d",
                       ofs->lid, uint16_from_be (d->lid) & 0x7fff);
 
-        _visit_pbc (obj, 0, vcdinfo_get_prev_from_psd(d), false);
-        _visit_pbc (obj, 0, vcdinfo_get_next_from_psd(d), false);
-        _visit_pbc (obj, 0, vcdinfo_get_return_from_psd(d), false);
-        _visit_pbc (obj, 0, uint16_from_be (d->default_ofs), false);
+        _visit_pbc (obj, 0, vcdinf_get_prev_from_psd(d), false);
+        _visit_pbc (obj, 0, vcdinf_get_next_from_psd(d), false);
+        _visit_pbc (obj, 0, vcdinf_get_return_from_psd(d), false);
+        _visit_pbc (obj, 0, vcdinf_get_default_from_psd(d), false);
         _visit_pbc (obj, 0, uint16_from_be (d->timeout_ofs), false);
 
         for (idx = 0; idx < d->nos; idx++)
@@ -1380,14 +1367,14 @@ main (int argc, const char *argv[])
 	case CL_CDROM:
 	  if (_img_type)
 	    {
-	      vcd_error ("only one image (type) supported at once - try --help");
+	      vcd_error ("Only one image (type) supported at once - try --help");
 	      exit (EXIT_FAILURE);
 	    }
 	  _img_type = opt;
 	  break;
 
 	default:
-	  vcd_error ("error while parsing command line - try --help");
+	  vcd_error ("Error while parsing command line - try --help");
 	  exit (EXIT_FAILURE);
 	  break;
       }
@@ -1396,7 +1383,7 @@ main (int argc, const char *argv[])
       vcd_error ("I can't be both, quiet and verbose... either one or another ;-)");
     
     if (poptGetArgs (optCon) != NULL)
-      vcd_error ("why are you giving me non-option arguments? -- try --help");
+      vcd_error ("Why are you giving me non-option arguments? -- try --help");
 
     poptFreeContext (optCon);
   }
@@ -1460,7 +1447,7 @@ main (int argc, const char *argv[])
   _parse_pbc (&obj, img_src, no_ext_psd_flag);
 
   if (norip_flag)
-    vcd_warn ("fyi, entry point and auto pause locations cannot be "
+    vcd_warn ("FYI, entry point and auto pause locations cannot be "
 	      "determined without mpeg extraction -- hope that's ok");
   else
     {
@@ -1474,7 +1461,7 @@ main (int argc, const char *argv[])
 	_rip_sequences (&obj, img_src);
     }
 
-  vcd_info ("writing xml description to `%s'...", xml_fname);
+  vcd_info ("writing XML description to `%s'...", xml_fname);
   vcd_xml_dump (&obj, xml_fname);
 
   vcd_image_source_destroy (img_src);
