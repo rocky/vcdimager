@@ -69,6 +69,7 @@ typedef struct {
     VCD_CUE_PREGAP_START,    /* INDEX = 0 start */
     VCD_CUE_SUBINDEX,        /* INDEX++; sub-index */
     VCD_CUE_END,             /* lead-out start */
+    VCD_CUE_LEADIN,          /* lead-in start */
   } type;
 } vcd_cue_t;
 

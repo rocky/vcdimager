@@ -281,6 +281,9 @@ _set_cuesheet (void *user_data, const VcdList *vcd_cue_list)
 	  vcd_data_sink_close (_obj->cue_snk);
 	  return 0;
 	  break;
+
+	case VCD_CUE_LEADIN:
+	  break;
 	}
 
       _last_cue = _cue;

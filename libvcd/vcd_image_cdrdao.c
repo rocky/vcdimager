@@ -145,6 +145,9 @@ _set_cuesheet (void *user_data, const VcdList *vcd_cue_list)
 	  }
 	  break;
 
+	case VCD_CUE_LEADIN:
+          break;
+
 	case VCD_CUE_END:
 	  vcd_data_sink_printf (toc_snk, "\n// EOF\n");
 

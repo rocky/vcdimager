@@ -366,6 +366,7 @@ _parse_user_data (uint8_t streamid, const void *buf, unsigned len,
           break;
 
         default:
+          vcd_warn ("unknown user data tag id 0x%.2x encountered", udg->tag);
           break;
         }
 
