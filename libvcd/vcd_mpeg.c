@@ -22,6 +22,8 @@
 # include "config.h"
 #endif
 
+#include <stdio.h>
+
 #include <libvcd/vcd_mpeg.h>
 #include <libvcd/vcd_bitvec.h>
 #include <libvcd/vcd_util.h>
@@ -205,7 +207,6 @@ _parse_sequence_header (uint8_t streamid, const void *buf,
   state->stream.shdr[vid_idx].seen = true;
 }
 
-
 static void
 _parse_gop_header (uint8_t streamid, const void *buf, 
 		   VcdMpegStreamCtx *state)
@@ -240,6 +241,103 @@ _parse_gop_header (uint8_t streamid, const void *buf,
   state->packet.gop_timecode.m = minute;
   state->packet.gop_timecode.s = second;
   state->packet.gop_timecode.f = frame;
+}
+
+static inline void
+_check_scan_data (const char str[], const msf_t *msf,
+                  VcdMpegStreamCtx *state)
+{
+  char tmp[16];
+
+  if (state->stream.scan_data_warnings > 20)
+    return;
+
+  if (state->stream.scan_data_warnings == 20)
+    {
+      vcd_warn ("mpeg user scan data: from now on, scan information data errors will not be reported anymore");
+      state->stream.scan_data_warnings++;
+      return;
+    }      
+
+  if (msf->m == 0xff
+      && msf->s == 0xff
+      && msf->f == 0xff)
+    return;
+
+  if ((msf->s & 0x80) == 0
+      || (msf->f & 0x80) == 0)
+    {
+      snprintf (tmp, sizeof (tmp), "%.2x:%.2x.%.2x", msf->m, msf->s, msf->f);
+
+      vcd_warn ("mpeg user scan data: msb of second or frame field "
+                "not set for '%s': [%s]", str, tmp);
+
+      state->stream.scan_data_warnings++;
+
+      return;
+    }
+
+  if ((msf->m >> 4) > 9
+      || ((0x80 ^ msf->s) >> 4) > 9      
+      || ((0x80 ^ msf->f) >> 4) > 9
+      || (msf->m & 0xf) > 9
+      || (msf->s & 0xf) > 9
+      || (msf->f & 0xf) > 9)
+    {
+      snprintf (tmp, sizeof (tmp), "%.2x:%.2x.%.2x",
+                msf->m, 0x80 ^ msf->s, 0x80 ^ msf->f);
+
+      vcd_warn ("mpeg user scan data: one or more BCD fields out of range "
+                "for '%s': [%s]", str, tmp);
+
+      state->stream.scan_data_warnings++;
+    }
+}
+
+static void
+_parse_user_data (uint8_t streamid, const void *buf, unsigned len,
+                  VcdMpegStreamCtx *state)
+{
+  unsigned pos = 0;
+  struct {
+    uint8_t tag GNUC_PACKED;
+    uint8_t len GNUC_PACKED;
+    uint8_t data[EMPTY_ARRAY_SIZE] GNUC_PACKED;
+  } const *udg = buf;
+
+  if (state->stream.version != MPEG_VERS_MPEG2)
+    return;
+
+  while (pos < len && udg->tag)
+    {
+      if (pos + udg->len >= len)
+        break;
+
+      switch (udg->tag)
+        {
+        case 0x10: /* scan information */
+          vcd_assert (udg->len == 14);
+          _check_scan_data ("previous_I_offset", (msf_t *) &udg->data[0], state);
+          _check_scan_data ("next_I_offset", (msf_t *) &udg->data[3], state);
+          _check_scan_data ("backward_I_offset", (msf_t *) &udg->data[6], state);
+          _check_scan_data ("forward_I_offset", (msf_t *) &udg->data[9], state);
+
+          state->stream.scan_data++;
+          break;
+
+        case 0x11: /* closed caption data */
+          break;
+
+        default:
+          break;
+        }
+
+      pos += udg->len;
+      vcd_assert (udg->len >= 2);
+      udg = (void *) &udg->data[udg->len - 2];
+    }
+  
+  vcd_assert (pos <= len);
 }
 
 static void
@@ -436,8 +534,14 @@ _analyze_video_pes (uint8_t streamid, const uint8_t *buf, int len, bool only_pts
 	  state->packet.gop = true;
 	  break;
 
-	case MPEG_EXT_CODE:
 	case MPEG_USER_CODE:
+	  pos += 4;
+          if (pos + 4 > len)
+            break;
+          _parse_user_data (streamid, buf + pos, len - pos, state);
+	  break;
+
+	case MPEG_EXT_CODE:
 	default:
 	  pos += 4;
 	  break;

@@ -24,10 +24,12 @@
 
 #include <ctype.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
-#include <libvcd/vcd_assert.h>
 
-#include "vcd_util.h"
+#include <libvcd/vcd_assert.h>
+#include <libvcd/vcd_bytesex.h>
+#include <libvcd/vcd_util.h>
 
 static const char _rcsid[] = "$Id$";
 
@@ -249,6 +251,19 @@ _vcd_isachar (int c)
     return false;
 
   return true;
+}
+
+char *
+_vcd_lba_to_msf_str (uint32_t lba)
+{
+  char buf[16];
+  msf_t _msf = { 0, };
+
+  lba_to_msf (lba, &_msf);
+
+  snprintf (buf, sizeof (buf), "%.2x:%.2x.%.2x", _msf.m, _msf.s, _msf.f);
+
+  return strdup (buf);
 }
 
 

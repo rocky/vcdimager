@@ -1140,7 +1140,9 @@ help.}
 
 @item
 The @acronym{MPEG}-2 stream does not include the mandatory scan
-information data.
+information data or when included, it doesn't follow the
+specification@footnote{@code{libvcd} warns if scan information is
+missing or syntactically wrong.}
 
 @item
 @emph{more reasons to follow}

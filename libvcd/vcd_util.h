@@ -110,6 +110,10 @@ _vcd_bool_str (bool b)
   return b ? "yes" : "no";
 }
 
+/* warning, returns new allocated string */
+char *
+_vcd_lba_to_msf_str (uint32_t lba);
+
 #endif /* __VCD_UTIL_H__ */
 
 

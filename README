@@ -4,7 +4,8 @@
 *WARNING* this is NOT a stable version *WARNING* 
 *WARNING* this is NOT a stable version *WARNING* 
 
-This is GNU VCDImager, the GNU (Super)VideoCD authoring solution.
+This is GNU VCDImager, the GNU (Super)VideoCD authoring solution for
+mastering, extracting and analyzing Video CDs and Super Video CDs.
 
 This package contains 'vcdimager', an image authoring tool, and
 'vcdrip', a VideoCD ripping tool. 'vcdrip' can be used to rip mpeg

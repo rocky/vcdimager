@@ -232,6 +232,9 @@ vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps)
 
   vcd_debug ("playing time %f", obj->info.playing_time);
 
+  if (!state.stream.scan_data && state.stream.version == MPEG_VERS_MPEG2)
+    vcd_warn ("mpeg stream contained no scan information (user) data");
+
   for(n = _vcd_list_begin (aps_list);
       n; n = _vcd_list_node_next (n))
     {

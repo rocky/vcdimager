@@ -1,5 +1,14 @@
 2001-06-07  Herbert Valerio Riedel  <hvr@gnu.org>
 
+ 	* configure.in: bumped version up to 0.7.4
+	
+	* libvcd/vcd_mpeg.c (_check_scan_data): added scan info data syntax checking
+
+	* frontends/cli/vcdimager.c: see below
+
+	* frontends/xml/vcd_xml_master.c (vcd_xml_master): output sectors written 
+		in msf notation
+
 	* frontends/xml/vcd_xml_dump.c (_make_xml): implemented dumping of 
 		area
 

@@ -80,6 +80,9 @@ typedef struct {
     double max_pts;
 
     double last_aps_pts[3];
+
+    unsigned scan_data;
+    unsigned scan_data_warnings;
   } stream;
 } VcdMpegStreamCtx;
 

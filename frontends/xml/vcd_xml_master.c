@@ -32,6 +32,7 @@
 #include <libvcd/vcd_logging.h>
 #include <libvcd/vcd_stream_stdio.h>
 #include <libvcd/vcd_image_bincue.h>
+#include <libvcd/vcd_bytesex.h>
 
 static const char _rcsid[] = "$Id$";
 
@@ -182,6 +183,7 @@ bool vcd_xml_master (const struct vcdxml_t *obj, const char cue_fname[],
   {
     unsigned sectors;
     VcdImageSink *image_sink;
+    char *_tmp;
 
     image_sink = 
       vcd_image_sink_new_bincue (vcd_data_sink_new_stdio (bin_fname),
@@ -200,7 +202,11 @@ bool vcd_xml_master (const struct vcdxml_t *obj, const char cue_fname[],
 
     vcd_obj_end_output (_vcd);
 
-    fprintf (stdout, "finished ok, image created with %d sectors\n", sectors);
+    fprintf (stdout, 
+	     "finished ok, image created with %d sectors [%s]\n",
+	     sectors, _tmp = _vcd_lba_to_msf_str (sectors));
+
+    free (_tmp);
   }
 
   vcd_obj_destroy (_vcd);

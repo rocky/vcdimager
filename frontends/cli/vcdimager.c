@@ -37,11 +37,12 @@
 
 #include <libvcd/vcd.h>
 #include <libvcd/vcd_assert.h>
-#include <libvcd/vcd_types.h>
-#include <libvcd/vcd_stream_stdio.h>
-#include <libvcd/vcd_logging.h>
+#include <libvcd/vcd_bytesex.h>
 #include <libvcd/vcd_cd_sector.h>
 #include <libvcd/vcd_image_bincue.h>
+#include <libvcd/vcd_logging.h>
+#include <libvcd/vcd_stream_stdio.h>
+#include <libvcd/vcd_types.h>
 
 static const char _rcsid[] = "$Id$";
 
@@ -489,8 +490,16 @@ main (int argc, const char *argv[])
 
     vcd_obj_end_output (gl_vcd_obj);
 
-    fprintf (stdout, "finished ok, image created with %d sectors (%d bytes)\n",
-             sectors, sectors * (gl.sector_2336_flag ? M2RAW_SIZE : CDDA_SIZE));
+    {
+      unsigned _bytes = sectors * (gl.sector_2336_flag ? M2RAW_SIZE : CDDA_SIZE);
+      char *_msfstr = _vcd_lba_to_msf_str (sectors);
+
+      fprintf (stdout, 
+               "finished ok, image created with %d sectors [%s] (%d bytes)\n",
+               sectors, _msfstr, _bytes);
+      
+      free (_msfstr);
+    }
   }
 
   return EXIT_SUCCESS;

@@ -4,8 +4,9 @@ see ChangeLog for more information
 
 version 0.7.4 (unstable/development)
 ====================================
-2001-06-..
+2001-06-07
 
+* added checks for scan information data in mpeg2 streams
 * create extended PBC including selection areas
 * fixed creation of invalid XML
 * parsing of selection areas in vcdxrip implemented
