@@ -47,6 +47,53 @@
 
 #define GET_ELSE else
 
+static long
+_get_elem_long (const char id[], xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+{
+  long retval = 0;
+  xmlChar *_tmp = NULL;
+  char *endptr;
+  
+  GET_ELEM_STR (_tmp, id, doc, node, ns);
+
+  if (!_tmp)
+    {
+      printf ("empty element??\n");
+      return retval;
+    }
+
+  retval = strtol (_tmp, &endptr, 10);
+
+  if (*endptr)
+    printf ("error while converting string to integer?\n");
+
+  return retval;
+}
+
+static double
+_get_elem_double (const char id[], xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+{
+  double retval = 0;
+  xmlChar *_tmp = NULL;
+  char *endptr;
+  
+  GET_ELEM_STR (_tmp, id, doc, node, ns);
+
+  if (!_tmp)
+    {
+      printf ("empty element??\n");
+      return retval;
+    }
+
+  retval = strtod (_tmp, &endptr);
+
+  if (*endptr)
+    printf ("error while converting string to floating point?\n");
+
+  return retval;
+}
+
+
 /*
  * options 
  */
@@ -169,6 +216,23 @@ _parse_pbc_selection (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlN
 	{ GET_PROP_STR (_pbc->next_id, "ref", doc, cur, ns); }
       else if (!xmlStrcmp (cur->name, "return"))
 	{ GET_PROP_STR (_pbc->retn_id, "ref", doc, cur, ns); }
+      else if (!xmlStrcmp (cur->name, "timeout"))
+	{ GET_PROP_STR (_pbc->timeout_id, "ref", doc, cur, ns); }
+      else if (!xmlStrcmp (cur->name, "bsn"))
+	{ _pbc->bsn = _get_elem_long ("bsn", doc, cur, ns); }
+      else if (!xmlStrcmp (cur->name, "loop"))
+	{ 
+	  xmlChar *_tmp = NULL;
+	  
+	  _pbc->loop_count = _get_elem_long ("loop", doc, cur, ns); 
+
+	  GET_PROP_STR (_tmp, "jump-timing", doc, cur, ns);
+	  
+	  if (_tmp && !xmlStrcmp (_tmp, "delayed"))
+	    _pbc->jump_delayed = true;
+	}
+      else if (!xmlStrcmp (cur->name, "wait"))
+	{ _pbc->timeout_time = _get_elem_long ("wait", doc, cur, ns); }
       else if (!xmlStrcmp (cur->name, "play-item"))
 	{ GET_PROP_STR (_pbc->item_id, "ref", doc, cur, ns); }
       else if (!xmlStrcmp (cur->name, "default"))
@@ -219,6 +283,12 @@ _parse_pbc_playlist (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNs
 	{ GET_PROP_STR (_pbc->next_id, "ref", doc, cur, ns); }
       else if (!xmlStrcmp (cur->name, "return"))
 	{ GET_PROP_STR (_pbc->retn_id, "ref", doc, cur, ns); }
+      else if (!xmlStrcmp (cur->name, "wait"))
+	{ _pbc->wait_time = _get_elem_long ("wait", doc, cur, ns); }
+      else if (!xmlStrcmp (cur->name, "autowait"))
+	{ _pbc->auto_pause_time = _get_elem_long ("autowait", doc, cur, ns); }
+      else if (!xmlStrcmp (cur->name, "playtime"))
+	{ _pbc->playing_time = _get_elem_double ("playtime", doc, cur, ns); }
       else if (!xmlStrcmp (cur->name, "play-item"))
 	{
 	  xmlChar *_item_ref = NULL;

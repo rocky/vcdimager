@@ -2,8 +2,16 @@ $Id$
 
 see ChangeLog for more information
 
-version 0.6.2
-=============
+version 0.7.0 (development)
+===========================
+2001-....
+
+* support for additional entry points added
+* (full) PBC support added
+* new XML based frontend added
+
+version 0.6.2 (stable)
+======================
 2001-05-..
 
 * made album set parameters configurable by commandline
@@ -13,8 +21,8 @@ version 0.6.2
 * mpeg scanning code rewritten
 * minor XVCD & XSVCD support improvements
 
-version 0.6.1
-=============
+version 0.6.1 (stable)
+======================
 2001-05-01
 
 * compilation fixes
@@ -23,8 +31,8 @@ version 0.6.1
 * minor SVCD related conformance fixes
 * minor vcdrip improvements
 
-version 0.6.0
-=============
+version 0.6.0 (stable)
+======================
 2001-04-15
 
 * implemented --rip-spi operation  
@@ -180,6 +188,6 @@ version 0.1
 ===========
 2000-08-13
 
-* initial release
+* initial public release
 
 --

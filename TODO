@@ -28,13 +28,24 @@ BUGS:
 MISSING INFORMATION (read `INFO WISHLIST'):
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
- * VCD 2.0 specification
+ * VideoCD 2.0 (aka White Book) specification
 
- * Philips' SVCD specification 
+ * Philips' 4C SVCD 1.0 specification 
 
- * is zero sector padding in mpeg tracks really required for VCD 1.1/2.0?
+ * is pre/post zero sector padding in mpeg tracks really required for
+   VCD 1.1/2.0?
+
+ * is the extended sel list structure correct?
 
  * how are access point sectors defined for VCD 1.1/2.0?
+
+ * what does the enhanced end list (4C SVCD spec) look like exactly?
+
+ * where is INFO.SVD's playing time offset field?
+ 
+ * what about command lists?
+
+ * SCANDATA.DAT for VCD2.0?
 
  * ...so much more... :-)
 
