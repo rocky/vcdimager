@@ -72,9 +72,9 @@ AC_C_CONST
 AC_C_INLINE
 
 dnl system
-WARN_CFLAGS="-Wall -ansi -Wmissing-prototypes -Wunused -Wpointer-arith -Wwrite-strings"
+WARN_CFLAGS="-Wall -Wmissing-prototypes -Wunused -Wpointer-arith -Wwrite-strings"
 LIBS="$LIBS -lm"
-CFLAGS="$CFLAGS -ansi $WARN_CFLAGS"
+CFLAGS="$CFLAGS $WARN_CFLAGS"
 
 AM_CONDITIONAL(BUILD_CLI_FE, test "x$enable_cli_fe" = "xyes")
 AM_CONDITIONAL(BUILD_GNOME_FE, test "x$enable_gnome_fe" = "xyes")

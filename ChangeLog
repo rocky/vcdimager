@@ -1,3 +1,10 @@
+2001-01-03  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd.c (vcd_obj_begin_output): image oversize warning
+
+	* frontends/cli/vcdrip.c: major improvements for SVCD dumping,
+		added some short options
+
 2001-01-02  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_types.h: fixes for cygwin environment

@@ -40,6 +40,9 @@
 #include "vcd_iso9660.h"
 #include "vcd_logging.h"
 #include "vcd_transfer.h"
+#include "vcd_util.h"
+
+static const char _rcsid[] = "$Id$";
 
 static const char DELIM[] = \
 "----------------------------------------" \
@@ -81,7 +84,6 @@ _read_mode2_sector_file (FILE *fd, void *data, uint32_t lba, bool form2)
   return 0;
 }
 
-
 static uint32_t 
 _get_image_size_file (FILE *fd)
 {
@@ -107,7 +109,6 @@ _get_image_size_file (FILE *fd)
   return size;
 }
 
-
 /* device */
 
 static void
@@ -117,10 +118,10 @@ _hexdump_full (FILE *fd, char *buf, int len)
 
   for (i = 0; i < len; i++)
     {
-      if (i && i % 16)
+      if (i && !(i % 16))
         fprintf (fd, "\n");
 
-      if (i % 16)
+      if (!(i % 16))
         fprintf (fd, "%.4x  ", i);
 
       fprintf (fd, "%.2x ", buf[i]);
@@ -228,7 +229,10 @@ dump_lot_and_psd_vcd (const void *data, const void *data2,
   const uint8_t *psd_data = data2;
   uint32_t n, tmp;
 
-  fprintf (stdout, "VCD/LOT.VCD\n");
+  fprintf (stdout, 
+           gl_vcd_type == VCD_TYPE_SVCD 
+           ? "SVCD/LOT.SVD\n"
+           : "VCD/LOT.VCD\n");
 
   n = 0;
   while ((tmp = UINT16_FROM_BE (lot->offset[n])) != 0xFFFF)
@@ -236,7 +240,10 @@ dump_lot_and_psd_vcd (const void *data, const void *data2,
 
   fprintf (stdout, DELIM);
 
-  fprintf (stdout, "VCD/PSD.VCD\n");
+  fprintf (stdout, 
+           gl_vcd_type == VCD_TYPE_SVCD 
+           ? "SVCD/PSD.SVD\n"
+           : "VCD/PSD.VCD\n");
 
   assert (psd_size % 8 == 0);
 
@@ -285,9 +292,14 @@ dump_lot_and_psd_vcd (const void *data, const void *data2,
             fprintf (stdout, ")\n");
           }
           break;
+        case PSD_TYPE_SELECTION_LIST:
+          fprintf (stdout, " [%2d]: selection list descriptor (", n -1);
+          _hexdump (&psd_data[tmp], 24);
+          fprintf (stdout, ")\n");
+          break;
         default:
-          fprintf (stdout, " [%2d] unkown descriptor type (0x%2.2x) at %d\n", n - 1,
-                   type, tmp);
+          fprintf (stdout, " [%2d] unkown descriptor type (0x%2.2x) at %d\n", 
+                   n - 1, type, tmp);
 
           fprintf (stdout, "  hexdump: ");
           _hexdump (&psd_data[tmp], 24);
@@ -361,7 +373,10 @@ dump_info_vcd (const void *data)
       break;
     }
 
-  fprintf (stdout, "VCD/INFO.VCD\n");
+  fprintf (stdout, 
+           gl_vcd_type == VCD_TYPE_SVCD 
+           ? "SVCD/INFO.SVD\n" 
+           : "VCD/INFO.VCD\n");
 
   fprintf (stdout, " ID: `%.8s'\n", info.ID);
   fprintf (stdout, " version: 0x%2.2x\n", info.version);
@@ -414,7 +429,11 @@ dump_entries_vcd (const void *data)
 
   ntracks = UINT16_FROM_BE (entries.tracks);
 
-  fprintf (stdout, "VCD/ENTRIES.VCD\n");
+  fprintf (stdout, 
+           gl_vcd_type == VCD_TYPE_SVCD 
+           ? "SVCD/ENTRIES.SVD\n"
+           : "VCD/ENTRIES.VCD\n");
+
   fprintf (stdout, " ID: `%.8s'\n", entries.ID);
   fprintf (stdout, " version: 0x%2.2x\n", entries.version);
 
@@ -434,9 +453,75 @@ dump_entries_vcd (const void *data)
 
 }
 
+
+static void
+dump_tracks_svd (const void *data)
+{
+  const TracksSVD *tracks = data;
+  unsigned j;
+
+  fprintf (stdout, "SVCD/TRACKS.SVD\n");
+  fprintf (stdout, " ID: `%.8s'\n", tracks->file_id);
+  fprintf (stdout, " version: 0x%2.2x\n", tracks->version);
+  
+  fprintf (stdout, " tracks: %d\n", tracks->tracks);
+  
+  for (j = 0;j < tracks->tracks; j++)
+    {
+      fprintf (stdout, " track[%.2d]: %2.2x:%2.2x:%2.2x  audio: %d  video: %d\n",
+               j,
+               tracks->tracks_info[j].playing_time.m,
+               tracks->tracks_info[j].playing_time.s,
+               tracks->tracks_info[j].playing_time.f,
+               tracks->tracks_info[j].contents.audio,
+               tracks->tracks_info[j].contents.video);
+    }
+}
+
+static void
+dump_search_dat (const void *data)
+{
+  const int _printed_points = 15;
+  const SearchDat *searchdat = data;
+  unsigned m;
+  uint32_t scan_points = UINT16_FROM_BE (searchdat->scan_points);
+
+  fprintf (stdout, "/SVCD/SEARCH.DAT\n");
+  fprintf (stdout, " ID: `%.8s'\n", searchdat->file_id);
+  fprintf (stdout, " version: 0x%2.2x\n", searchdat->version);
+  fprintf (stdout, " scanpoints: %d\n", scan_points);
+  fprintf (stdout, " scaninterval: %d (in 0.5sec units -- must be `1')\n", 
+           searchdat->time_interval);
+
+  for (m = 0; m < scan_points;m++)
+    {
+      unsigned hh, mm, ss, ss2;
+
+      if (m > _printed_points && m < scan_points - _printed_points)
+        continue;
+      
+      ss2 = m * searchdat->time_interval;
+
+      hh = ss2 / (2 * 60 * 60);
+      mm = (ss2 / (2 * 60)) % 60;
+      ss = (ss2 / 2) % 60;
+      ss2 = (ss2 % 2) * 5;
+
+      fprintf (stdout, " scanpoint[%.4d]: (real time: %.2d:%.2d:%.2d.%.1d) "
+               " sector: %.2x:%.2x:%.2x \n", m, hh, mm, ss, ss2,
+               searchdat->points[m].m,
+               searchdat->points[m].s,
+               searchdat->points[m].f);
+      
+      if (m == _printed_points && scan_points > (_printed_points * 2))
+        fprintf (stdout, " [..skipping...]\n");
+    }
+}
+
 static void
 dump_all (const void *info_p, const void *entries_p,
-          const void *lot_p, const void *psd_p)
+          const void *lot_p, const void *psd_p,
+          const void *tracks_buf, const void *search_buf)
 {
   fprintf (stdout, DELIM);
   dump_info_vcd (info_p);
@@ -447,7 +532,40 @@ dump_all (const void *info_p, const void *entries_p,
       fprintf (stdout, DELIM);
       dump_lot_and_psd_vcd (lot_p, psd_p, _get_psd_size (info_p));
     }
+
+  if (tracks_buf)
+    {
+      fprintf (stdout, DELIM);
+      dump_tracks_svd (tracks_buf);
+    }
+
+  if (search_buf)
+    {
+      fprintf (stdout, DELIM);
+      dump_search_dat (search_buf);
+    }
+
   fprintf (stdout, DELIM);
+}
+
+static uint32_t
+find_sect_by_fileid (FILE *fd, uint32_t start, uint32_t end, 
+                     const char file_id[])
+{
+  uint32_t sect;
+
+  assert (strlen (file_id) == 8);
+
+  for (sect = start; sect < end; sect++)
+    {
+      char _buf[ISO_BLOCKSIZE] = { 0, };
+      
+      gl_read_mode2_sector (fd, _buf, sect, false);
+      if (!strncmp (_buf, file_id, 8))
+        return sect;
+    }
+  
+  return SECTOR_NIL;
 }
 
 static void
@@ -457,6 +575,7 @@ dump (const char image_fname[])
   char info_buf[ISO_BLOCKSIZE] = { 0, };
   char entries_buf[ISO_BLOCKSIZE] = { 0, };
   char *lot_buf = NULL, *psd_buf = NULL;
+  char *search_buf = NULL, *tracks_buf = NULL;
   uint32_t size, psd_size;
 
   if (!fd)
@@ -475,10 +594,11 @@ dump (const char image_fname[])
   
   if (psd_size)
     {
-      int n;
+      uint32_t n;
 
-      lot_buf = malloc (ISO_BLOCKSIZE * 32);
-      psd_buf = malloc (ISO_BLOCKSIZE * (((psd_size - 1) / ISO_BLOCKSIZE) + 1));
+      lot_buf = _vcd_malloc (ISO_BLOCKSIZE * 32);
+      psd_buf = _vcd_malloc (ISO_BLOCKSIZE 
+                             * (((psd_size - 1) / ISO_BLOCKSIZE) + 1));
 
       for (n = LOT_VCD_SECTOR; n < PSD_VCD_SECTOR; n++)
         {
@@ -496,15 +616,62 @@ dump (const char image_fname[])
         }
     }
 
+  {
+    char tmp[ISO_BLOCKSIZE] = { 0, };
+    
+    uint32_t n = LOT_VCD_SECTOR;
+
+    n = find_sect_by_fileid (fd, LOT_VCD_SECTOR, 225, SEARCH_FILE_ID);
+    
+    if (n != SECTOR_NIL)
+      {
+        uint32_t m;
+
+        uint32_t size;
+        uint32_t sectors;
+
+        gl_read_mode2_sector (fd, tmp, n, false);
+
+        size = (3 * UINT16_FROM_BE (((SearchDat *)tmp)->scan_points)) 
+          + sizeof (SearchDat);
+
+        sectors = _len2blocks (size, ISO_BLOCKSIZE);
+
+        vcd_debug ("found SEARCH.DAT signature at sector %d", n);
+
+        search_buf = _vcd_malloc (sectors * ISO_BLOCKSIZE);
+
+        for (m = 0; m < sectors;m++)
+          gl_read_mode2_sector (fd, &(search_buf[ISO_BLOCKSIZE*m]),
+                                m + n, false);
+      }
+    else
+      vcd_debug ("no SEARCH.DAT signature found");
+
+    n = find_sect_by_fileid (fd, LOT_VCD_SECTOR, 225, TRACKS_SVD_FILE_ID);
+
+    if (n != SECTOR_NIL)
+      {
+        tracks_buf = _vcd_malloc (ISO_BLOCKSIZE);
+        
+        gl_read_mode2_sector (fd, tracks_buf, n, false);
+      }
+    else
+      vcd_debug ("no TRACKS.SVD signature found");
+    
+  }
+  
   fprintf (stdout, DELIM);
 
   fprintf (stdout, "Source: image file `%s'\n", image_fname);
   fprintf (stdout, "Image size: %d sectors\n", size);
 
-  dump_all (info_buf, entries_buf, lot_buf, psd_buf);
+  dump_all (info_buf, entries_buf, lot_buf, psd_buf, tracks_buf, search_buf);
 
   free (lot_buf);
   free (psd_buf);
+  free (tracks_buf);
+  free (search_buf);
 
   fclose (fd);
 }
@@ -531,12 +698,12 @@ rip (const char device_fname[])
   gl_read_mode2_sector (fd, &entries, ENTRIES_VCD_SECTOR, false);
 
   if (!strncmp (entries.ID, ENTRIES_ID_VCD, sizeof (entries.ID)))
-    vcd_debug ("found ENTRIES.VCD");
+    vcd_debug ("found ENTRIES.VCD/SVD");
   else if (!strncmp (entries.ID, "ENTRYSVD", sizeof (entries.ID)))
-    vcd_warn ("found (non-compliant) SVCD ENTRIES.VCD signature");
+    vcd_warn ("found (non-compliant) SVCD ENTRIES.SVD signature");
   else
     {
-      vcd_error ("ENTRIES.VCD signature not found");
+      vcd_error ("ENTRIES.VCD/SVD signature not found");
     }
 
   for (i = 0; i < UINT16_FROM_BE (entries.tracks); i++)
@@ -641,7 +808,7 @@ main (int argc, const char *argv[])
 
   struct poptOption optionsTable[] = {
 
-    {"bin-file", '\0', POPT_ARG_STRING, &gl_source_name, SOURCE_FILE,
+    {"bin-file", 'b', POPT_ARG_STRING, &gl_source_name, SOURCE_FILE,
      "set image file as source", "FILE"},
 
 #ifdef __linux__
@@ -649,7 +816,7 @@ main (int argc, const char *argv[])
      "set CDROM device as source (only linux)", "DEVICE"},
 #endif
 
-    {"dump", '\0', POPT_ARG_NONE, NULL, OP_DUMP,
+    {"dump", 'd', POPT_ARG_NONE, NULL, OP_DUMP,
      "dump information about VideoCD"},
 
     {"rip", '\0', POPT_ARG_NONE, NULL, OP_RIP,
