@@ -30,6 +30,8 @@
 
 #include "vcd_xml_common.h"
 
+static const char _rcsid[] = "$Id$";
+
 bool vcd_xml_gui_mode = false;
 
 log_level_t vcd_xml_verbosity = LOG_INFO;

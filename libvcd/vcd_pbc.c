@@ -34,6 +34,8 @@
 #include <libvcd/vcd_files_private.h>
 #include <libvcd/vcd_bytesex.h>
 
+static const char _rcsid[] = "$Id$";
+
 static uint8_t
 _wtime (int seconds)
 {

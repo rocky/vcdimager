@@ -30,6 +30,8 @@
 #include <libvcd/vcd_logging.h>
 #include <libvcd/vcd_util.h>
 
+static const char _rcsid[] = "$Id$";
+
 #if defined(__linux__)
 
 #include <stdio.h>

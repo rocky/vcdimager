@@ -35,6 +35,8 @@
 #include <libvcd/vcd_assert.h>
 #include <string.h>
 
+static const char _rcsid[] = "$Id$";
+
 /* reader */
 
 /****************************************************************************

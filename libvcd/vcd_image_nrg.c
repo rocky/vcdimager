@@ -34,6 +34,8 @@
 #include <libvcd/vcd_assert.h>
 #include <string.h>
 
+static const char _rcsid[] = "$Id$";
+
 /* structures used */
 
 /* this ugly image format is typical for lazy win32 programmers... at
