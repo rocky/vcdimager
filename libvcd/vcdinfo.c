@@ -146,6 +146,74 @@ _init_fs_segment (const vcdinfo_obj_t *obj, const char pathname[],
   _vcd_list_free (dirlist, true);
 }
 
+static bool
+_vcdinfo_find_fs_lsn_recurse (const vcdinfo_obj_t *obj, const char pathname[], 
+                              /*out*/ vcd_image_stat_t *statbuf, lsn_t lsn)
+{
+  VcdList *entlist = vcd_image_source_fs_readdir (obj->img, pathname);
+  VcdList *dirlist =  _vcd_list_new ();
+  VcdListNode *entnode;
+    
+  vcd_assert (entlist != NULL);
+
+  /* just iterate */
+  
+  _VCD_LIST_FOREACH (entnode, entlist)
+    {
+      char *_name = _vcd_list_node_data (entnode);
+      char _fullname[4096] = { 0, };
+
+      snprintf (_fullname, sizeof (_fullname), "%s%s", pathname, _name);
+  
+      if (vcd_image_source_fs_stat (obj->img, _fullname, statbuf))
+        vcd_assert_not_reached ();
+
+      strncat (_fullname, "/", sizeof (_fullname));
+
+      if (statbuf->type == _STAT_DIR
+          && strcmp (_name, ".") 
+          && strcmp (_name, ".."))
+        _vcd_list_append (dirlist, strdup (_fullname));
+
+      if (statbuf->lsn == lsn) {
+        _vcd_list_free (entlist, true);
+        _vcd_list_free (dirlist, true);
+        return true;
+      }
+      
+    }
+
+  _vcd_list_free (entlist, true);
+
+  /* now recurse */
+
+  _VCD_LIST_FOREACH (entnode, dirlist)
+    {
+      char *_fullname = _vcd_list_node_data (entnode);
+
+      if (_vcdinfo_find_fs_lsn_recurse (obj, _fullname, statbuf, lsn)) {
+        _vcd_list_free (dirlist, true);
+        return true;
+      }
+    }
+
+  _vcd_list_free (dirlist, true);
+  return false;
+}
+
+static bool
+_vcdinfo_find_fs_lsn(const vcdinfo_obj_t *obj, /*out*/ vcd_image_stat_t *buf, 
+                    lsn_t lsn)
+{
+  struct iso_primary_descriptor const *pvd = &obj->pvd;
+  struct iso_directory_record *idr = (void *) pvd->root_directory_record;
+  uint32_t extent;
+
+  extent = from_733 (idr->extent);
+
+  return _vcdinfo_find_fs_lsn_recurse (obj, "/", buf, lsn);
+}
+
 /*!
    Return the number of audio channels implied by "audio_type".
    0 is returned on error.
@@ -579,10 +647,24 @@ vcdinfo_get_entry_sect_count (const vcdinfo_obj_t *obj, unsigned int entry_num)
          way to do it. 
          Below we get the track of the current entry and then the LBA of the
          beginning of the following (leadout?) track.
+
+         Wait! It's uglier than that! Since VCD's can be created
+         *without* a pregap to the leadout track, we try not to use
+         that if we can get the entry from the ISO 9660 filesystem.
       */
       unsigned int track = vcdinfo_get_track(obj, entry_num);
       if (track != VCDINFO_INVALID_TRACK) {
-        next_lba = vcdinfo_get_track_lba(obj, track+1);
+        vcd_image_stat_t statbuf;
+        const lsn_t lsn = vcdinfo_lba2lsn(vcdinfo_get_track_lba(obj, track));
+
+        /* Try to get the sector count from the ISO 9660 filesystem */
+        if (_vcdinfo_find_fs_lsn(obj, &statbuf, lsn)) {
+          const lsn_t next_lsn=lsn + statbuf.secsize;
+          next_lba = vcdinfo_lsn2lba(next_lsn);
+        } else {
+          /* Failed on ISO 9660 filesystem. Use LEADOUT track.  */
+          next_lba = vcdinfo_get_track_lba(obj, track+1);
+        }
         if (next_lba == VCDINFO_NULL_LBA)
           return 0;
       } else {
@@ -1245,14 +1327,54 @@ vcdinfo_get_track_msf(const vcdinfo_obj_t *obj, unsigned int track_num,
 }
 
 /*!
+  Return the size in sectors for track n. The first track is 1.
+*/
+unsigned int
+vcdinfo_get_track_sec_count(const vcdinfo_obj_t *obj, 
+                            const unsigned int track_num)
+{
+  if (NULL == obj || VCDINFO_INVALID_TRACK == track_num) 
+    return 0;
+  
+  {
+    vcd_image_stat_t statbuf;
+    const lba_t lba = vcdinfo_get_track_lba(obj, track_num);
+    const lsn_t lsn = vcdinfo_lba2lsn(lba);
+    
+    /* Try to get the sector count from the ISO 9660 filesystem */
+    if (_vcdinfo_find_fs_lsn(obj, &statbuf, lsn)) {
+      return statbuf.secsize;
+    } else {
+      const lba_t next_lba=vcdinfo_get_track_lba(obj, track_num+1);
+      /* Failed on ISO 9660 filesystem. Use track information.  */
+      return next_lba > lba ? next_lba - lba : 0;
+    }
+  }
+  return 0;
+}
+
+/*!
   Return the size in bytes for track n. The first track is 1.
 */
 unsigned int
 vcdinfo_get_track_size(const vcdinfo_obj_t *obj, const unsigned int track_num)
 {
-  if (obj != NULL && obj->img != NULL && 
-      obj->img->op.get_track_size != NULL) 
-    return obj->img->op.get_track_size(obj->img->user_data, track_num);
+  if (NULL == obj || VCDINFO_INVALID_TRACK == track_num) 
+    return 0;
+  
+  {
+    vcd_image_stat_t statbuf;
+    const lsn_t lsn = vcdinfo_lba2lsn(vcdinfo_get_track_lba(obj, track_num));
+    
+    /* Try to get the sector count from the ISO 9660 filesystem */
+    if (_vcdinfo_find_fs_lsn(obj, &statbuf, lsn)) {
+      return statbuf.size;
+    } else {
+      /* Failed on ISO 9660 filesystem. Use track information.  */
+      if (obj->img != NULL &&  obj->img->op.get_track_size != NULL) 
+        return obj->img->op.get_track_size(obj->img->user_data, track_num);
+    }
+  }
   return 0;
 }
 
