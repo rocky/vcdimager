@@ -257,7 +257,7 @@ _convert (const char in[], const char encoding[], bool from)
   if (ret < 0 || (temp - size + 1))
     {
       free (out);
-      vcd_error ("charset conversion failed");
+      vcd_error ("charset conversion failed for encoding '%s'", encoding);
       return 0;
     }
 
