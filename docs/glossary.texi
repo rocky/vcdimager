@@ -6,7 +6,7 @@ See also @uref{http://www.dvdrhelp.com/glossary}.
 Access Point Sector
 
 @item CBR
-Constant Bit Rate. Used in MPEG1's.
+Constant Bit Rate. Used in MPEG-1's.
 
 @item CD
 Compact Disc
@@ -40,7 +40,9 @@ Free Software Foundation, @uref{http://www.fsf.org/}
 List ID Offset Table.
 
 @item MPEG
-Movie Picture Experts Group @uref{http://mpeg.telecomitalialab.com}
+Movie Picture Experts Group @uref{http://mpeg.telecomitalialab.com}.
+Two sub formats used by Video CD's are MPEG-1 for VCD 1.0, 1.1 and 2.0
+and MPEG-2. For SVCD, and HQVCD.
 
 @item NTSC
 National Television Standards Committee. The NTSC is responsible for
@@ -48,7 +50,7 @@ setting television and video standards in the United.  States
 
 @item OGT
 Overlay Graphics & Text. A run-length encoded subtitle format devised
-by Phillips.
+by Philips.
 
 @item PAL
 Phase Alternating Line, the dominant television standard in Europe. 
