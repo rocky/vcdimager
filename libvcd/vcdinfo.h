@@ -91,7 +91,7 @@ extern "C" {
 /*! 
   Constant for invalid LID
 */
-#define VCDINFO_INVALID_LID  0xFFFF
+#define VCDINFO_INVALID_LID  0
 
 /*! 
   Constant for invalid itemid
