@@ -1,8 +1,11 @@
 vcdimager (0.7.14-1) unstable; urgency=low
 
   * New upstream release.
+  * Since manpages are no longer built, there's no need to depend on
+    help2man any more.
+  * Do a regression test at buid time. (since 0.7.13-1)
 
- -- Nicolas Boullis <nboullis@debian.org>  Tue, 25 Feb 2003 00:34:31 +0100
+ -- Nicolas Boullis <nboullis@debian.org>  Tue, 25 Feb 2003 23:23:52 +0100
 
 vcdimager (0.7.13-1) unstable; urgency=low
 
