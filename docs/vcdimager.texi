@@ -87,158 +87,8 @@ instead of in the original English.
 * Character Sets::              
 * Acronym Expansions::          
 * GNU General Public License::  
-
-@detailmenu
- --- The Detailed Node Listing ---
-
-Introduction
-
-* Supplied Tools::              
-* Features::                    
-
-Video CD Concepts
-
-* Overview::                    
-* Anatomy of Video CDs::        
-* Known Video CD Flavors::      
-* The ISO9660 Track::           
-* Constraints on @acronym{MPEG} streams::  
-* Play Items::                  
-* Playback Control::            
-
-Known Video CD Flavors
-
-* Video CD 1.1::                
-* Video CD 2.0::                
-* Extended Video CD::           
-* Super Video CD 1.0::          
-* Extended Super Video CD::     
-
-The ISO9660 Track
-
-* Primary Volume Descriptor::   
-* Directory Structure::         
-
-Directory Structure
-
-* @file{/VCD} & @file{/SVCD} Directory::  
-* @file{/MPEGAV} & @file{/MPEG2} Directory::  
-* @file{/CDDA} Directory::      
-* @file{/SEGMENT} Directory::   
-* @file{/EXT} Directory::       
-* @file{/CDI} Directory::       
-
-Constraints on @acronym{MPEG} streams
-
-* Video CD::                    
-* Super Video CD::              
-* Common Constraints::          
-
-Super Video CD
-
-* Scan Information Data::       
-
-Common Constraints
-
-* Alignment::                   
-* Access Point Sectors::        
-
-Play Items
-
-* Sequence Items::              
-* Segment Items::               
-
-Sequence Items
-
-* Advantages::                  
-* Disadvantages::               
-
-Segment Items
-
-* Advantages2::                 
-* Disadvantages2::              
-
-Playback Control
-
-* Function Keys for Interaction::  
-* Linear Playback::             
-* PBC Lists::                   
-* Applications::                
-
-PBC Lists
-
-* Play List::                   
-* Selection List::              
-* End List::                    
-* Command List::                
-
-Reference
-
-* Tools::                       
-
-Tools
-
-* @command{vcdimager}::         
-* @command{vcddebug}::          
-* @command{vcdxgen}::           
-* @command{vcdxbuild}::         
-* @command{vcdxrip}::           
-
-@command{vcdxgen}
-
-* Adding Files to the Video CD ::  
-* CD-i Support::                
-
-VideoCD XML Description
-
-* Common Rules::                
-* @code{<videocd>} Root::       
-
-@code{<videocd>} Root
-
-* @code{<option>} Element::     
-* @code{<info>} Container::     
-* @code{<pvd>} Container::      
-* @code{<filesystem>} Container::  
-* @code{<segment-items>} Container::  
-* @code{<sequence-items>} Container::  
-* @code{<pbc>} Container::      
-
-@code{<filesystem>} Container
-
-* @code{<folder>} Element/Container::  
-* @code{<file>} Element/Container::  
-
-@code{<segment-items>} Container
-
-* @code{<segment-item>} Element::  
-
-@code{<sequence-items>} Container
-
-* @code{<sequence-item>} Element::  
-
-@code{<pbc>} Container
-
-* @code{<selection>} Element::  
-* @code{<playlist>} Element::   
-* @code{<endlist>} Element::    
-
-Examples
-
-* Simple Multitrack Example::   
-* Video CD Disassembling::      
-
-Tips and Hints
-
-* SVCD Player Compatibility::   
-* Fast Forward & Fast Rewind with Super Video CDs::  
-
-Character Sets
-
-* ISO646 d-Characters::         
-* ISO646 a-Characters::         
-
-@end detailmenu
+* XML Tag Index::               
+* Concept Index::               
 @end menu
 
 @node Introduction, Video CD Concepts, Top, Top
@@ -335,7 +185,7 @@ use the @option{--sector-2336} option for images longer than 80
 minutes}.
 
 @item 
-Image input support for GNU/Linux ioctl()-based cdrom devices,
+Image input support for GNU/Linux @code{ioctl()}-based cdrom devices,
 @acronym{BIN/CUE} images and @acronym{NRG} images.
 
 @end itemize
@@ -356,7 +206,7 @@ corrections and improvements for this manual to
 * Anatomy of Video CDs::        
 * Known Video CD Flavors::      
 * The ISO9660 Track::           
-* Constraints on @acronym{MPEG} streams::  
+* Constraints on MPEG streams::  
 * Play Items::                  
 * Playback Control::            
 @end menu
@@ -373,6 +223,7 @@ multimedia support.
 
 @node Anatomy of Video CDs, Known Video CD Flavors, Overview, Video CD Concepts
 @section Anatomy of Video CD's
+@cindex Video CD layout
 
 In general, the layout of a Video CD is as follows:
 
@@ -412,6 +263,7 @@ embedded in lead-in and lead-out empty sectors.
 
 @node Known Video CD Flavors, The ISO9660 Track, Anatomy of Video CDs, Video CD Concepts
 @section Known Video CD Flavors
+@cindex Video CD variants
 
 There are different Video CD flavors commonly used. The following
 sections tries to explain the differences amongst them.
@@ -552,7 +404,7 @@ Just like the XVCD, and thus also known as @dfn{XSVCD}, this is not an
 official standard and may not work with all playing devices supporting
 SVCD's.
 
-@node The ISO9660 Track, Constraints on @acronym{MPEG} streams, Known Video CD Flavors, Video CD Concepts
+@node The ISO9660 Track, Constraints on MPEG streams, Known Video CD Flavors, Video CD Concepts
 @section The ISO9660 Track
 
 @menu
@@ -569,17 +421,18 @@ IDs, filesystem size, etc.
 
 @node Directory Structure,  , Primary Volume Descriptor, The ISO9660 Track
 @subsection Directory Structure
+@cindex Video CD filesystem
 
 @menu
-* @file{/VCD} & @file{/SVCD} Directory::  
-* @file{/MPEGAV} & @file{/MPEG2} Directory::  
-* @file{/CDDA} Directory::      
-* @file{/SEGMENT} Directory::   
-* @file{/EXT} Directory::       
-* @file{/CDI} Directory::       
+* /VCD & /SVCD Directory::      
+* /MPEGAV & /MPEG2 Directory::  
+* /CDDA Directory::             
+* /SEGMENT Directory::          
+* /EXT Directory::              
+* /CDI Directory::              
 @end menu
 
-@node @file{/VCD} & @file{/SVCD} Directory, @file{/MPEGAV} & @file{/MPEG2} Directory, Directory Structure, Directory Structure
+@node /VCD & /SVCD Directory, /MPEGAV & /MPEG2 Directory, Directory Structure, Directory Structure
 @subsubsection @file{/VCD} & @file{/SVCD} Directory
 
 This directories (@file{/SVCD} is used on Super Video CD's) contain file
@@ -620,24 +473,24 @@ characteristics) about each sequence track is recorded.
 
 @end table
 
-@node @file{/MPEGAV} & @file{/MPEG2} Directory, @file{/CDDA} Directory, @file{/VCD} & @file{/SVCD} Directory, Directory Structure
+@node /MPEGAV & /MPEG2 Directory, /CDDA Directory, /VCD & /SVCD Directory, Directory Structure
 @subsubsection @file{/MPEGAV} & @file{/MPEG2} Directory
 
 This file contains file entries pointing to the sequence items contained
 in the tracks after the ISO9660 track.
 
-@node @file{/CDDA} Directory, @file{/SEGMENT} Directory, @file{/MPEGAV} & @file{/MPEG2} Directory, Directory Structure
+@node /CDDA Directory, /SEGMENT Directory, /MPEGAV & /MPEG2 Directory, Directory Structure
 @subsubsection @file{/CDDA} Directory
 
 This file contains file entries pointing to optional CDDA tracks after
 the ISO9660 track. This feature is not available for Super Video CD's.
 
-@node @file{/SEGMENT} Directory, @file{/EXT} Directory, @file{/CDDA} Directory, Directory Structure
+@node /SEGMENT Directory, /EXT Directory, /CDDA Directory, Directory Structure
 @subsubsection @file{/SEGMENT} Directory
 
 This directory contains file entries to segment play items.
 
-@node @file{/EXT} Directory, @file{/CDI} Directory, @file{/SEGMENT} Directory, Directory Structure
+@node /EXT Directory, /CDI Directory, /SEGMENT Directory, Directory Structure
 @subsubsection @file{/EXT} Directory
 
 @table @file
@@ -659,19 +512,21 @@ Closed caption data file entries.
 
 @end table
 
-@node @file{/CDI} Directory,  , @file{/EXT} Directory, Directory Structure
+@node /CDI Directory,  , /EXT Directory, Directory Structure
 @subsubsection @file{/CDI} Directory
 
 This directory is provided for @acronym{CD-i} player applications. (Only
 useful for Video CD's)
 
-@node Constraints on @acronym{MPEG} streams, Play Items, The ISO9660 Track, Video CD Concepts
+@node Constraints on MPEG streams, Play Items, The ISO9660 Track, Video CD Concepts
 @section Constraints on @acronym{MPEG} streams
+@cindex MPEG input streams
 
 GNU VCDImager expects @acronym{MPEG} streams in a format suitable for
 (Super) Video CD production. Only a few cases where the @acronym{MPEG}
 streams fail to adhere to this requirement are detected, thus it's up to
-the user to ensure that the constraints are fulfilled.
+the user to ensure that the constraints are fulfilled. All
+@acronym{MPEG} streams are expected to be packetized program streams.
 
 @menu
 * Video CD::                    
@@ -679,7 +534,7 @@ the user to ensure that the constraints are fulfilled.
 * Common Constraints::          
 @end menu
 
-@node Video CD, Super Video CD, Constraints on @acronym{MPEG} streams, Constraints on @acronym{MPEG} streams
+@node Video CD, Super Video CD, Constraints on MPEG streams, Constraints on MPEG streams
 @subsection Video CD
 
 The Video CD specification requires the multiplex-ed @acronym{MPEG}-1
@@ -698,7 +553,7 @@ stream is required to have one of the following resolutions:
 The audio stream must be @acronym{MPEG}-1 layer II, fixed to a 224
 kbits/sec @acronym{CBR} with 1 stereo or 2 mono audio channels.
 
-@node Super Video CD, Common Constraints, Video CD, Constraints on @acronym{MPEG} streams
+@node Super Video CD, Common Constraints, Video CD, Constraints on MPEG streams
 @subsection Super Video CD
 
 When creating Super Video CD images @acronym{MPEG}-2 @acronym{VBR}
@@ -725,6 +580,7 @@ multichannel (5+1) surround sound stream.
 
 @node Scan Information Data,  , Super Video CD, Super Video CD
 @subsubsection Scan Information Data
+@cindex MPEG scan information user data
 
 According to the specification, it is mandatory to encode scan
 information data into user data blocks in the picture layer of all intra
@@ -734,7 +590,7 @@ fast forward & fast reverse scanning.
 The already existing scan information data can be updated by enabling
 the @code{update scan offsets} option.
 
-@node Common Constraints,  , Super Video CD, Constraints on @acronym{MPEG} streams
+@node Common Constraints,  , Super Video CD, Constraints on MPEG streams
 @subsection Common Constraints
 
 @menu
@@ -744,6 +600,7 @@ the @code{update scan offsets} option.
 
 @node Alignment, Access Point Sectors, Common Constraints, Common Constraints
 @subsubsection Alignment
+@cindex MPEG padding
 
 The @acronym{MPEG} program streams should be aligned to 2324
 byte @acronym{MPEG} packet boundaries@footnote{i.e. pack headers must be
@@ -762,16 +619,18 @@ re-encoding or re-multiplexing may help.
 
 @node Access Point Sectors,  , Alignment, Common Constraints
 @subsubsection Access Point Sectors
+@cindex MPEG Access point sector
+@cindex Entry points
 
 An @dfn{Access Point Sector}, @acronym{APS}, is an @acronym{MPEG} video
 sector on the @acronym{VCD}/@acronym{SVCD} which is suitable to be
 jumped to directly. @acronym{APS} are required for entry points and
 scantables.
 
-@acronym{APS} have to fullfill the requirement to precede every I
-picture by a GOP header which shall be preceded by a sequence header in
-its turn and begin all in the same packet, thus forming a so called
-access point sector. 
+@acronym{APS} have to fullfill the requirement to precede every
+I-frame by a GOP header which shall be preceded by a sequence header
+in its turn and begin all in the same packet, thus forming a so called
+access point sector.
 
 This requirement can be relaxed by enabling the @code{relaxed aps}
 option. @strong{Warning:} The sequence header is needed for a playing
@@ -779,7 +638,7 @@ device to figure out display parameters, such as display resoulution and
 frame rate, relaxing the aps requirement may lead to non-working entry
 points.
 
-@node Play Items, Playback Control, Constraints on @acronym{MPEG} streams, Video CD Concepts
+@node Play Items, Playback Control, Constraints on MPEG streams, Video CD Concepts
 @section Play Items
 
 @dfn{Play items} are the @acronym{MPEG} payload on (Super) Video
@@ -798,12 +657,6 @@ applications.
 Each @dfn{sequence} is put in its own @acronym{CD} track. Motion video
 stream is required, with optionally up to 2 audio streams.
 
-@menu
-* Advantages::                  
-* Disadvantages::               
-@end menu
-
-@node Advantages, Disadvantages, Sequence Items, Sequence Items
 @subsubheading Advantages
 
 @itemize @bullet
@@ -818,7 +671,6 @@ Auto pause points.
 
 @end itemize
 
-@node Disadvantages,  , Advantages, Sequence Items
 @subsubheading Disadvantages
 
 @itemize @bullet
@@ -849,12 +701,6 @@ A segment item can be
 @acronym{MPEG} audio only.@footnote{which allows for several hours of audio play back}
 @end itemize
 
-@menu
-* Advantages2::                 
-* Disadvantages2::              
-@end menu
-
-@node Advantages2, Disadvantages2, Segment Items, Segment Items
 @subsubheading Advantages
 
 @itemize @bullet
@@ -869,7 +715,6 @@ No pre-gaps.
 
 @end itemize
 
-@node Disadvantages2,  , Advantages2, Segment Items
 @subsubheading Disadvantages
 
 @itemize @bullet
@@ -883,11 +728,14 @@ Segement item size limited by @acronym{SPI} area size.
 
 @node Playback Control,  , Play Items, Video CD Concepts
 @section Playback Control
+@cindex PBC (Playback control)
+@cindex Interactivity
 
-@dfn{Playback control}, @acronym{PBC}, is available for Video CD 2.0
-and Super Video CD 1.0 disc formats. @acronym{PBC} allows control of the
+@dfn{Playback control}, @acronym{PBC}, is available for Video CD 2.0 and
+Super Video CD 1.0 disc formats. @acronym{PBC} allows control of the
 playback of play items@footnote{sequence items and segment items} and
-the possibility of interaction with the user through the remote control.
+the possibility of interaction with the user through the remote control
+or some other input device available.
 
 @menu
 * Function Keys for Interaction::  
@@ -898,6 +746,7 @@ the possibility of interaction with the user through the remote control.
 
 @node Function Keys for Interaction, Linear Playback, Playback Control, Playback Control
 @subsection Function Keys for Interaction
+@cindex Keys, on the remote control
 
 The following keys are usually found on the remote control belonging to
 the playing device.
@@ -955,6 +804,7 @@ remote control.
 
 @node Selection List, End List, Play List, PBC Lists
 @subsubsection Selection List
+@cindex Menus
 
 @dfn{Selection lists} are used to offer a user selection based on
 numeric (@key{NUMERIC}) input or---if available---pointer device based
@@ -1000,14 +850,14 @@ interactivity.
 @section Tools
 
 @menu
-* @command{vcdimager}::         
-* @command{vcddebug}::          
-* @command{vcdxgen}::           
-* @command{vcdxbuild}::         
-* @command{vcdxrip}::           
+* vcdimager::         
+* vcddebug::          
+* vcdxgen::           
+* vcdxbuild::         
+* vcdxrip::           
 @end menu
 
-@node @command{vcdimager}, @command{vcddebug}, Tools, Tools
+@node vcdimager, vcddebug, Tools, Tools
 @subsection @command{vcdimager}
 
 This is the classic frontend, which is maintained only for ease of use
@@ -1021,20 +871,19 @@ There are a few command-line options for @command{vcdimager} at the
 moment, please issue @samp{vcdimager --help} for an actual list of
 available options.
 
-@node @command{vcddebug}, @command{vcdxgen}, @command{vcdimager}, Tools
+@node vcddebug, vcdxgen, vcdimager, Tools
 @subsection @command{vcddebug}
 
 While this project went along, @command{vcddebug} was used to analyze
 and reverse engineer existing Video CD's and later Super Video CD's. It
 has grown into a valuable debugging tool and report generator for
-(Super) Video CD's. 
+(Super) Video CD's.
 
 It is recommended to make use of this tool if compatibility problems
 arise, to identify what the difference between working discs and
 non-working discs are, and thus help to improve GNU VCDImager.
 
-
-@node @command{vcdxgen}, @command{vcdxbuild}, @command{vcddebug}, Tools
+@node vcdxgen, vcdxbuild, vcddebug, Tools
 @subsection @command{vcdxgen}
 
 This tool works almost like the @command{vcdimager} tool, except that it
@@ -1052,7 +901,7 @@ building the actual image file(s).
 * CD-i Support::                
 @end menu
 
-@node Adding Files to the Video CD , CD-i Support, @command{vcdxgen}, @command{vcdxgen}
+@node Adding Files to the Video CD , CD-i Support, vcdxgen, vcdxgen
 @subsubsection Adding Files to the Video CD 
 
 Files can be added to the @acronym{ISO} file-system, that is the first
@@ -1092,7 +941,7 @@ slashes following directly each other.
 If the parent directory for a file entry does not exist it will be
 created automatically on demand.
 
-@node CD-i Support,  , Adding Files to the Video CD , @command{vcdxgen}
+@node CD-i Support,  , Adding Files to the Video CD , vcdxgen
 @subsubsection CD-i Support
 There is no specific CD-i support in GNU VCDImager. But you
 can use the general facilities for adding a custom CD-i player
@@ -1108,14 +957,14 @@ the setting should be available system-wide}
 
 @example
 vcdimager alias --cdi \
-	--iso-application-id "CDI/CDI_VCD.APP;1" \
-	--add-file-2336 /usr/share/cdi/cdi_imag.rtf,CDI/CDI_IMAG.RTF \
-	--add-file      /usr/share/cdi/cdi_text.fnt,CDI/CDI_TEXT.FNT \
-	--add-file      /usr/share/cdi/cdi_vcd.app,CDI/CDI_VCD.APP \
-	--add-file      /usr/share/cdi/cdi_vcd.cfg,CDI/CDI_VCD.CFG 
+    --iso-application-id "CDI/CDI_VCD.APP;1" \
+    --add-file-2336 /usr/share/cdi/cdi_imag.rtf,CDI/CDI_IMAG.RTF \
+    --add-file      /usr/share/cdi/cdi_text.fnt,CDI/CDI_TEXT.FNT \
+    --add-file      /usr/share/cdi/cdi_vcd.app,CDI/CDI_VCD.APP \
+    --add-file      /usr/share/cdi/cdi_vcd.cfg,CDI/CDI_VCD.CFG 
 @end example
 
-@node @command{vcdxbuild}, @command{vcdxrip}, @command{vcdxgen}, Tools
+@node vcdxbuild, vcdxrip, vcdxgen, Tools
 @subsection @command{vcdxbuild}
 
 This program allows to actually build a disc image, based on a given
@@ -1125,7 +974,7 @@ Video CD's.
 
 @emph{FIXME: write more}
 
-@node @command{vcdxrip},  , @command{vcdxbuild}, Tools
+@node vcdxrip,  , vcdxbuild, Tools
 @subsection @command{vcdxrip}
 
 This tool implements the inverse operation to @command{vcdxbuild}, i.e.,
@@ -1148,6 +997,7 @@ actually extracting any files or mpeg streams contained.
 
 @node VideoCD XML Description, Examples, Reference, Top
 @chapter VideoCD XML Description
+@cindex DTD of VideoCD XML
 
 The @acronym{DTD} the @acronym{XML} description conforms to, can be
 downloaded from @uref{http://www.gnu.org/software/vcdimager/videocd.dtd}.
@@ -1163,11 +1013,10 @@ with me at @email{<hvr@@gnu.org>}.}
 
 @menu
 * Common Rules::                
-* @code{<videocd>} Root::       
+* <videocd> Root::              
 @end menu
 
-@node Common Rules, @code{<videocd>} Root, VideoCD XML Description, VideoCD XML Description
-
+@node Common Rules, <videocd> Root, VideoCD XML Description, VideoCD XML Description
 @section XML Simplified Rules
 
 @itemize @bullet
@@ -1229,6 +1078,8 @@ both A and B, in any order
 @end table
 
 @section VideoCD XML Conventions
+@cindex XML, time values in
+@cindex XML Identifiers
 
 All time related entries@footnote{@code{<wait>}, @code{<autowait>},
 @code{<playtime>}, @code{<time-offset>}} are given in seconds.
@@ -1267,17 +1118,20 @@ play list, @code{<playlist>}.
 end list, @code{<endlist>}.
 @end itemize
 
-@node @code{<videocd>} Root,  , Common Rules, VideoCD XML Description
+@defindex tg
+
+@node <videocd> Root,  , Common Rules, VideoCD XML Description
 @section @code{<videocd>} Root
+@tgindex @code{videocd}
 
 @menu
-* @code{<option>} Element::     
-* @code{<info>} Container::     
-* @code{<pvd>} Container::      
-* @code{<filesystem>} Container::  
-* @code{<segment-items>} Container::  
-* @code{<sequence-items>} Container::  
-* @code{<pbc>} Container::      
+* <option> Element::            
+* <info> Container::            
+* <pvd> Container::             
+* <filesystem> Container::      
+* <segment-items> Container::   
+* <sequence-items> Container::  
+* <pbc> Container::             
 @end menu
 
 @example
@@ -1322,8 +1176,9 @@ Supported combinations of @var{class} and @var{version} are listed below:
 The @code{xmlns} attribute defines the @acronym{XML} namespace.
 @end table
 
-@node @code{<option>} Element, @code{<info>} Container, @code{<videocd>} Root, @code{<videocd>} Root
+@node <option> Element, <info> Container, <videocd> Root, <videocd> Root
 @subsection @code{<option>} Element
+@tgindex @code{option}
 
 @example
 @cartouche
@@ -1365,8 +1220,16 @@ the last track as well. Default: @samp{false}.
 
 @end table
 
-@node @code{<info>} Container, @code{<pvd>} Container, @code{<option>} Element, @code{<videocd>} Root
+@node  <info> Container, <pvd> Container, <option> Element, <videocd> Root
 @subsection @code{<info>} Container
+@tgindex @code{info}
+@tgindex @code{album-id}
+@tgindex @code{volume-count}
+@tgindex @code{volume-number}
+@tgindex @code{next-volume-use-sequence2}
+@tgindex @code{next-volume-use-lid2}
+@tgindex @code{restriction}
+@tgindex @code{start-time-offset}
 
 @example
 @cartouche
@@ -1426,8 +1289,14 @@ an album. @emph{not implemented yet}
 
 @end table
 
-@node @code{<pvd>} Container, @code{<filesystem>} Container, @code{<info>} Container, @code{<videocd>} Root
+@node <pvd> Container, <filesystem> Container, <info> Container, <videocd> Root
 @subsection @code{<pvd>} Container
+@tgindex @code{pvd}
+@tgindex @code{volume-id}
+@tgindex @code{system-id}
+@tgindex @code{application-id}
+@tgindex @code{preparer-id}
+@tgindex @code{publisher-id}
 
 @example
 @cartouche
@@ -1470,12 +1339,13 @@ regardless of the content given in the XML description.
 @emph{not implemented yet}.
 @end table
 
-@node @code{<filesystem>} Container, @code{<segment-items>} Container, @code{<pvd>} Container, @code{<videocd>} Root
+@node <filesystem> Container, <segment-items> Container, <pvd> Container, <videocd> Root
 @subsection @code{<filesystem>} Container
+@tgindex @code{filesystem}
 
 @menu
-* @code{<folder>} Element/Container::  
-* @code{<file>} Element/Container::  
+* <folder> Element/Container::  
+* <file> Element/Container::    
 @end menu
 
 @example
@@ -1489,8 +1359,9 @@ This section of the @acronym{XML} description allows for the creation of
 additional folders and files into the ISO9660 filesystem on the Video
 CD.
 
-@node @code{<folder>} Element/Container, @code{<file>} Element/Container, @code{<filesystem>} Container, @code{<filesystem>} Container
+@node <folder> Element/Container, <file> Element/Container, <filesystem> Container, <filesystem> Container
 @subsubsection @code{<folder>} Element/Container
+@tgindex @code{folder}
 
 @example
 @cartouche
@@ -1502,8 +1373,9 @@ CD.
 @end cartouche
 @end example
 
-@node @code{<file>} Element/Container,  , @code{<folder>} Element/Container, @code{<filesystem>} Container
+@node <file> Element/Container,  , <folder> Element/Container, <filesystem> Container
 @subsubsection @code{<file>} Element
+@tgindex @code{file}
 
 @example
 @cartouche
@@ -1516,11 +1388,12 @@ CD.
 @end cartouche
 @end example
 
-@node @code{<segment-items>} Container, @code{<sequence-items>} Container, @code{<filesystem>} Container, @code{<videocd>} Root
+@node <segment-items> Container, <sequence-items> Container, <filesystem> Container, <videocd> Root
 @subsection @code{<segment-items>} Container
+@tgindex @code{segment-items}
 
 @menu
-* @code{<segment-item>} Element::  
+* <segment-item> Element::      
 @end menu
 
 @example
@@ -1529,8 +1402,9 @@ CD.
 @end cartouche
 @end example
 
-@node @code{<segment-item>} Element,  , @code{<segment-items>} Container, @code{<segment-items>} Container
+@node <segment-item> Element,  , <segment-items> Container, <segment-items> Container
 @subsubsection @code{<segment-item>} Element
+@tgindex @code{segment-item}
 
 @example
 @cartouche
@@ -1562,11 +1436,12 @@ See description in @code{<sequence-item>}.
 
 @end table
 
-@node @code{<sequence-items>} Container, @code{<pbc>} Container, @code{<segment-items>} Container, @code{<videocd>} Root
+@node <sequence-items> Container, <pbc> Container, <segment-items> Container, <videocd> Root
 @subsection @code{<sequence-items>} Container
+@tgindex @code{sequence-items}
 
 @menu
-* @code{<sequence-item>} Element::  
+* <sequence-item> Element::     
 @end menu
 
 @example
@@ -1575,8 +1450,12 @@ See description in @code{<sequence-item>}.
 @end cartouche
 @end example
 
-@node @code{<sequence-item>} Element,  , @code{<sequence-items>} Container, @code{<sequence-items>} Container
+@node <sequence-item> Element,  , <sequence-items> Container, <sequence-items> Container
 @subsubsection @code{<sequence-item>} Element
+@tgindex @code{sequence-item}
+@tgindex @code{auto-pause}
+@tgindex @code{default-entry}
+@tgindex @code{entry}
 
 @example
 @cartouche
@@ -1640,13 +1519,15 @@ Play item ID value referenced in @code{ref} attributes.
 
 @end table
 
-@node @code{<pbc>} Container,  , @code{<sequence-items>} Container, @code{<videocd>} Root
+@node <pbc> Container,  , <sequence-items> Container, <videocd> Root
 @subsection @code{<pbc>} Container
+@tgindex @code{pbc}
+@tgindex @code{play-item}
 
 @menu
-* @code{<selection>} Element::  
-* @code{<playlist>} Element::   
-* @code{<endlist>} Element::    
+* <selection> Element::         
+* <playlist> Element::          
+* <endlist> Element::           
 @end menu
 
 @example
@@ -1701,8 +1582,20 @@ referenced.
 
 @end table
 
-@node @code{<selection>} Element, @code{<playlist>} Element, @code{<pbc>} Container, @code{<pbc>} Container
+@node <selection> Element, <playlist> Element, <pbc> Container, <pbc> Container
 @subsubsection @code{<selection>} Element
+@tgindex @code{selection}
+@tgindex @code{bsn}
+@tgindex @code{next}
+@tgindex @code{prev}
+@tgindex @code{return}
+@tgindex @code{multi-default}
+@tgindex @code{default}
+@tgindex @code{timeout}
+@tgindex @code{wait}
+@tgindex @code{loop}
+@tgindex @code{play-item}
+@tgindex @code{select}
 
 @example
 @cartouche
@@ -1807,8 +1700,16 @@ up to 99 select choices. The sum of @code{<bsn>} and the number of
 
 @end table
 
-@node @code{<playlist>} Element, @code{<endlist>} Element, @code{<selection>} Element, @code{<pbc>} Container
+@node <playlist> Element, <endlist> Element, <selection> Element, <pbc> Container
 @subsubsection @code{<playlist>} Element
+@tgindex @code{playlist}
+@tgindex @code{next}
+@tgindex @code{prev}
+@tgindex @code{return}
+@tgindex @code{playtime}
+@tgindex @code{wait}
+@tgindex @code{autowait}
+@tgindex @code{play-item}
 
 @example
 @cartouche
@@ -1861,8 +1762,11 @@ elements may be defined per @code{<playlist>}.
 
 @end table
 
-@node @code{<endlist>} Element,  , @code{<playlist>} Element, @code{<pbc>} Container
+@node <endlist> Element,  , <playlist> Element, <pbc> Container
 @subsubsection @code{<endlist>} Element
+@tgindex @code{endlist}
+@tgindex @code{next-volume}
+@tgindex @code{play-item}
 
 @example
 @cartouche
@@ -2081,18 +1985,20 @@ f |     / ? O _
 
 @include glossary.texi
 
-@iftex
+@node GNU General Public License, XML Tag Index, Acronym Expansions, Top
 @appendix GNU General Public License
 @center Version 2, June 1991
 @include gpl.texi
-@end iftex
 
-@ifinfo
-@node GNU General Public License,  , Acronym Expansions, Top
-@appendix GNU GENERAL PUBLIC LICENSE
-@center Version 2, June 1991
-@include gpl.texi
-@end ifinfo
+@node XML Tag Index, Concept Index, GNU General Public License, Top
+@unnumbered XML Tag Index
+
+@printindex tg
+
+@node Concept Index,  , XML Tag Index, Top
+@unnumbered Concept Index
+
+@printindex cp
 
 @bye
 
