@@ -22,6 +22,7 @@
 #define __VCD_UTIL_H__
 
 #include <stdlib.h>
+#include <libvcd/vcd_types.h>
 
 #undef  MAX
 #define MAX(a, b)  (((a) > (b)) ? (a) : (b))
@@ -34,6 +35,12 @@
 
 #undef  CLAMP
 #define CLAMP(x, low, high)  (((x) > (high)) ? (high) : (((x) < (low)) ? (low) : (x)))
+
+static inline bool
+_vcd_bit_set_p (uint32_t n, unsigned bit)
+{
+  return ((n >> bit) & 0x1) == 0x1;
+}
 
 unsigned
 _vcd_len2blocks (unsigned len, int blocksize);

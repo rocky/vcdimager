@@ -86,12 +86,6 @@ struct _VcdMpegSource
   struct vcd_mpeg_source_info info;
 };
 
-static inline bool
-_bit_set_p (uint32_t n, int bit)
-{
-  return ((n >> bit) & 0x1) == 0x1;
-}
-
 #define _bitvec_peek_bits32(bitvec, offset) _bitvec_peek_bits ((bitvec), (offset), 32)
 #define _bitvec_peek_bits16(bitvec, offset) _bitvec_peek_bits ((bitvec), (offset), 16)
 
@@ -113,7 +107,7 @@ _bitvec_peek_bits (const uint8_t bitvec[], int offset, int bits)
     for (i = offset; i < (offset + bits); i++)
       {
         result <<= 1;
-        if (_bit_set_p (bitvec[i / 8], 7 - (i % 8)))
+        if (_vcd_bit_set_p (bitvec[i / 8], 7 - (i % 8)))
           result |= 0x1;
       }
   

@@ -83,7 +83,16 @@ vcd_obj_new (vcd_type_t vcd_type)
   
   if (_first)
     {
+#if defined(_DEVELOPMENT_)      
+      vcd_warn ("initializing libvcd %s [%s]", VERSION, HOST_ARCH);
+      vcd_warn (" ");
+      vcd_warn (" this is the UNSTABLE development branch!");
+      vcd_warn (" use only if you know what you are doing");
+      vcd_warn (" see http://www.hvrlab.org/~hvr/vcdimager/ for more information");
+      vcd_warn (" ");
+#else
       vcd_debug ("initializing libvcd %s [%s]", VERSION, HOST_ARCH);
+#endif
       _first = false;
     }
 
@@ -359,7 +368,6 @@ vcd_obj_destroy (VcdObj *obj)
 
   free (obj);
 }
-
 
 int 
 vcd_obj_set_param_uint (VcdObj *obj, vcd_parm_t param, unsigned arg)

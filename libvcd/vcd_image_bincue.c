@@ -47,8 +47,11 @@ _source_free (void *user_data)
 {
   _img_bincue_src_t *_obj = user_data;
 
-  vcd_data_source_destroy (_obj->bin_src);
-  vcd_data_source_destroy (_obj->cue_src);
+  if (_obj->bin_src)
+    vcd_data_source_destroy (_obj->bin_src);
+
+  if (_obj->cue_src)
+    vcd_data_source_destroy (_obj->cue_src);
   free (_obj);
 }
 

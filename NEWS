@@ -9,7 +9,7 @@ version 0.7.0 (development)
 * support for segment items added
 * support for additional entry points added
 * (full) PBC support added
-* new XML based frontend(s) added
+* new XML based frontend(s) added (vcdxgen, vcdxbuild, vcdxrip)
 
 version 0.6.2 (stable)
 ======================

@@ -40,6 +40,11 @@ struct vcdxml_t {
     bool use_sequence2;
     bool use_lid2;
     double time_offset;
+
+    /* used for restoring vcd */
+    unsigned psd_size;
+    unsigned max_lid;
+    unsigned segments_start;
   } info;
 
   struct {
@@ -80,6 +85,9 @@ struct segment_t
 {
   xmlChar *id;
   xmlChar *src;
+  
+  /* used for restoring vcds */
+  unsigned segments_count;
 };
 
 struct filesystem_t

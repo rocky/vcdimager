@@ -24,6 +24,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 /* #define STREAM_DEBUG  */
 
@@ -47,6 +48,8 @@ struct _VcdDataSink {
 static void
 _vcd_data_sink_open_if_necessary(VcdDataSink *obj)
 {
+  assert (obj != NULL);
+
   if(!obj->is_open) {
     if(obj->op.open(obj->user_data))
       vcd_error("could not opening output stream...");
@@ -73,6 +76,8 @@ vcd_data_sink_new(void *user_data, const vcd_data_sink_io_functions *funcs)
 long
 vcd_data_sink_seek(VcdDataSink* obj, long offset)
 {
+  assert (obj != NULL);
+
   _vcd_data_sink_open_if_necessary(obj);
 
   if(obj->position != offset) {
@@ -88,6 +93,8 @@ long
 vcd_data_sink_write(VcdDataSink* obj, const void *ptr, long size, long nmemb)
 {
   long written;
+
+  assert (obj != NULL);
   
   _vcd_data_sink_open_if_necessary(obj);
 
@@ -100,6 +107,8 @@ vcd_data_sink_write(VcdDataSink* obj, const void *ptr, long size, long nmemb)
 void
 vcd_data_sink_close(VcdDataSink* obj)
 {
+  assert (obj != NULL);
+
   if(obj->is_open) {
     obj->op.close(obj->user_data);
     obj->is_open = 0;
@@ -110,6 +119,8 @@ vcd_data_sink_close(VcdDataSink* obj)
 void
 vcd_data_sink_destroy(VcdDataSink* obj)
 {
+  assert (obj != NULL);
+
   vcd_data_sink_close(obj);
 
   obj->op.free(obj->user_data);
@@ -129,6 +140,8 @@ struct _VcdDataSource {
 static void
 _vcd_data_source_open_if_necessary(VcdDataSource *obj)
 {
+  assert (obj != NULL);
+
   if(!obj->is_open) {
     if(obj->op.open(obj->user_data))
       vcd_error ("could not opening input stream...");
@@ -145,6 +158,8 @@ _vcd_data_source_open_if_necessary(VcdDataSource *obj)
 long
 vcd_data_source_seek(VcdDataSource* obj, long offset)
 {
+  assert (obj != NULL);
+
   _vcd_data_source_open_if_necessary(obj);
 
   if(obj->position != offset) {
@@ -176,6 +191,8 @@ vcd_data_source_read(VcdDataSource* obj, void *ptr, long size, long nmemb)
 {
   long read_bytes;
 
+  assert (obj != NULL);
+
   _vcd_data_source_open_if_necessary(obj);
 
   read_bytes = obj->op.read(obj->user_data, ptr, size*nmemb);
@@ -187,6 +204,8 @@ vcd_data_source_read(VcdDataSource* obj, void *ptr, long size, long nmemb)
 long
 vcd_data_source_stat(VcdDataSource* obj)
 {
+  assert (obj != NULL);
+
   _vcd_data_source_open_if_necessary(obj);
 
   return obj->op.stat(obj->user_data);
@@ -195,6 +214,8 @@ vcd_data_source_stat(VcdDataSource* obj)
 void
 vcd_data_source_close(VcdDataSource* obj)
 {
+  assert (obj != NULL);
+
   if(obj->is_open) {
 #ifdef STREAM_DEBUG
     vcd_debug ("closed source...");
@@ -208,6 +229,8 @@ vcd_data_source_close(VcdDataSource* obj)
 void
 vcd_data_source_destroy(VcdDataSource* obj)
 {
+  assert (obj != NULL);
+
   vcd_data_source_close(obj);
 
   obj->op.free(obj->user_data);
