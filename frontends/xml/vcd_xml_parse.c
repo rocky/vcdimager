@@ -211,9 +211,144 @@ _parse_tracks (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns
  */
 
 static bool
+_parse_file (struct vcdxml_t *obj, const char path[], xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+{
+  xmlNodePtr cur;
+  xmlChar *_name = NULL;
+  xmlChar *_src = NULL;
+  xmlChar *_format = NULL;
+
+  printf ("%s\n", __PRETTY_FUNCTION__);
+  assert (path != NULL);
+
+  GET_PROP_STR (_src, "src", doc, node, ns);
+  assert (_src != NULL);
+
+  GET_PROP_STR (_format, "format", doc, node, ns);
+
+  FOR_EACH (cur, node)
+    {
+      GET_ELEM_STR (_name, "name", doc, cur, ns);
+      GET_ELSE printf ("??? %s\n", cur->name); 
+    }
+
+  if (!_name)
+    return true;
+
+  {
+
+    struct filesystem_t *_data;
+    char *_tmp;
+
+    _tmp = malloc (strlen (path) + strlen (_name) + 1);
+    
+    strcpy (_tmp, path);
+    strcat (_tmp, _name);
+
+	    
+    _data = malloc (sizeof (struct filesystem_t));
+    _data->name = _tmp;
+    _data->file_src = strdup (_src);
+    _data->file_raw = (_format && !xmlStrcmp (_format, "mixed"));
+
+    _vcd_list_append (obj->filesystem, _data);
+  }
+
+  return false;
+}
+
+static bool
+_parse_folder (struct vcdxml_t *obj, const char path[], xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+{
+  xmlNodePtr cur;
+  char *new_path = NULL;
+
+  assert (path != NULL);
+
+  printf ("%s\n", __PRETTY_FUNCTION__);
+
+  FOR_EACH (cur, node)
+    {
+      bool rc = true;
+
+      if (cur->ns != ns) 
+	continue; 
+
+      if (!xmlStrcmp (cur->name, "name")) 
+	{
+	  xmlChar *_tmp;
+
+	  assert (new_path == NULL);
+
+	  _tmp = xmlNodeListGetString (doc, cur->xmlChildrenNode, 1);
+
+	  assert (_tmp != NULL);
+
+	  new_path = malloc (strlen (path) + strlen (_tmp) + 1 + 1);
+	  strcpy (new_path, path);
+	  strcat (new_path, _tmp);
+
+	  {
+	    struct filesystem_t *_data;
+	    
+	    _data = malloc (sizeof (struct filesystem_t));
+	    _data->name = strdup (new_path);
+	    _data->file_src = NULL;
+
+	    _vcd_list_append (obj->filesystem, _data);
+	  }
+	  
+
+	  strcat (new_path, "/");
+    
+	  rc = false;
+	  
+	  /* fixme, free _tmp?? */
+	}
+      else if (!xmlStrcmp (cur->name, "folder")) 
+	rc = _parse_folder (obj, new_path, doc, cur, ns);
+      else if (!xmlStrcmp (cur->name, "file"))
+	rc = _parse_file (obj, new_path, doc, cur, ns);
+      else 
+	printf ("?????\n");
+
+      if (new_path == NULL)
+	rc = true;
+
+      if (rc)
+	return rc;
+    }
+
+  return false;
+}
+
+static bool
 _parse_filesystem (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
-  printf ("sorry, filesystem not supported yet\n");
+  xmlNodePtr cur;
+
+  printf ("%s\n", __PRETTY_FUNCTION__);
+
+  obj->filesystem = _vcd_list_new ();
+
+  FOR_EACH (cur, node)
+    {
+      bool rc = true;
+
+      if (cur->ns != ns) 
+	continue; 
+
+      if (!xmlStrcmp (cur->name, "folder")) 
+	rc = _parse_folder (obj, "", doc, cur, ns);
+      else if (!xmlStrcmp (cur->name, "file"))
+	rc = _parse_file (obj, "", doc, cur, ns);
+      else 
+	printf ("?????\n");
+
+      if (rc)
+	return rc;
+    }
+
   return false;
 }
 
@@ -227,6 +362,8 @@ _parse_videocd (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr n
   xmlNodePtr cur;
 
   assert (obj != NULL);
+
+  printf ("%s\n", __PRETTY_FUNCTION__);
 
   GET_PROP_STR (obj->class, "class", doc, node, ns);
   GET_PROP_STR (obj->version, "version", doc, node, ns);

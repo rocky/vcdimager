@@ -73,6 +73,9 @@ int
 vcd_obj_add_file (VcdObj *obj, const char iso_pathname[],
                   VcdDataSource *file, bool raw_flag);
 
+int
+vcd_obj_add_dir (VcdObj *obj, const char iso_pathname[]);
+
 /* this one is for actually adding mpeg tracks to VCD, returns a track
    id, or a negative value for error..  */
 int 

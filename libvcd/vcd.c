@@ -490,6 +490,14 @@ vcd_obj_set_param (VcdObj *obj, vcd_parm_t param, const void *arg)
 }
 
 int
+vcd_obj_add_dir (VcdObj *obj, const char iso_pathname[])
+{
+  vcd_warn ("vcd_obj_add_dir('%s') not implemented yet!", iso_pathname);
+
+  return 0;
+}
+
+int
 vcd_obj_add_file (VcdObj *obj, const char iso_pathname[],
                   VcdDataSource *file, bool raw_flag)
 {

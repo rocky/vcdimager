@@ -50,8 +50,8 @@
 <!ELEMENT preparer-id (#PCDATA)>
 <!ELEMENT publisher-id (#PCDATA)>
 
-<!ELEMENT filesystem (folder)*>
-<!ELEMENT folder (name,folder*, file*)>
+<!ELEMENT filesystem (folder*,file*)>
+<!ELEMENT folder (name,folder*,file*)>
 <!ELEMENT file (name)>
 <!ATTLIST file 
   src       %URI;          #REQUIRED

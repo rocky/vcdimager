@@ -65,6 +65,7 @@ bool
 vcd_xml_master (const struct vcdxml_t *obj)
 {
   VcdObj *_vcd;
+  VcdListNode *node;
   int idx;
 
   assert (obj != NULL);
@@ -106,6 +107,26 @@ vcd_xml_master (const struct vcdxml_t *obj)
   if (obj->pvd.volume_id)
     vcd_obj_set_param (_vcd, VCD_PARM_VOLUME_LABEL, obj->pvd.volume_id);
 
+  if (obj->pvd.application_id)
+    vcd_obj_set_param (_vcd, VCD_PARM_APPLICATION_ID, obj->pvd.application_id);
+
+  _VCD_LIST_FOREACH (node, obj->filesystem)
+    {
+      struct filesystem_t *dentry = _vcd_list_node_data (node);
+      
+      if (dentry->file_src) 
+	{
+	  VcdDataSource *_source = vcd_data_source_new_stdio (dentry->file_src);
+	  
+	  assert (_source != NULL);
+
+	  vcd_obj_add_file (_vcd, dentry->name, _source, dentry->file_raw);
+	}
+      else
+	vcd_obj_add_dir (_vcd, dentry->name);
+	  
+    }
+
   printf ("track count %d\n", obj->mpeg_tracks_count);
   for (idx = 0; idx < obj->mpeg_tracks_count; idx++)
     {
@@ -118,6 +139,25 @@ vcd_xml_master (const struct vcdxml_t *obj)
 
       vcd_obj_append_mpeg_track (_vcd, vcd_mpeg_source_new (data_source));
     }
+
+  /****************************************************************************
+   *
+   */
+
+  {
+    unsigned sectors = vcd_obj_begin_output (_vcd);
+
+    vcd_obj_write_image (_vcd,
+			 vcd_data_sink_new_stdio ("videocd.bin"),
+			 NULL, NULL);
+
+    vcd_obj_write_cuefile (_vcd, vcd_data_sink_new_stdio ("videocd.cue"),
+			   "videocd.bin");
+
+    vcd_obj_end_output (_vcd);
+
+    fprintf (stdout, "finished ok, image created with %d sectors\n", sectors);
+  }
 
   vcd_obj_destroy (_vcd);
 

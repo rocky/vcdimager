@@ -21,7 +21,8 @@
 #ifndef __VCDXML_H__
 #define __VCDXML_H__
 
-#include <vcd_types.h>
+#include <libvcd/vcd_types.h>
+#include <libvcd/vcd_data_structures.h>
 
 #include <libxml/tree.h>
 
@@ -54,6 +55,15 @@ struct vcdxml_t {
       xmlChar *timestamp;
     } *entry_points;
   } *mpeg_tracks;
+
+  VcdList *filesystem;
+};
+
+struct filesystem_t
+{
+  char *name;
+  char *file_src; /* if NULL then dir */
+  bool file_raw;
 };
 
 #endif /* __VCDXML_H__ */

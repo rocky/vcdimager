@@ -48,6 +48,9 @@ void _vcd_list_foreach (VcdList *list, _vcd_list_iterfunc func, void *user_data)
 
 VcdListNode *_vcd_list_find (VcdList *list, _vcd_list_iterfunc cmp_func, void *user_data);
 
+#define _VCD_LIST_FOREACH(node, list) \
+ for (node = _vcd_list_begin (list); node; node = _vcd_list_node_next (node))
+
 /* node ops */
 
 VcdListNode *_vcd_list_at (VcdList *list, int idx);

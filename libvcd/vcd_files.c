@@ -442,7 +442,7 @@ _make_track_scantable (const VcdObj *obj)
     aps_time = _data->timestamp;
     aps_packet = _data->packet_no;
 
-    for (t = 0; t <= playing_time; t += 0.5)
+    for (t = 0; t < playing_time; t += 0.5)
       {
 	for(n = _vcd_list_node_next (aps_node); n; n = _vcd_list_node_next (n))
 	  {
@@ -460,9 +460,9 @@ _make_track_scantable (const VcdObj *obj)
 
         {
           uint32_t *lsect = _vcd_malloc (sizeof (uint32_t));
+          
           *lsect = aps_packet;
           _vcd_list_append (scantable, lsect);
-          /* vcd_debug ("%f %f %d", t, aps_time, aps_packet); */
         }
         
       }
@@ -470,6 +470,8 @@ _make_track_scantable (const VcdObj *obj)
   }
 
   _vcd_list_free (all_aps, true);
+
+  assert (scanpoints == _vcd_list_length (scantable));
 
   return scantable;
 }
@@ -534,7 +536,7 @@ _get_scandata_table (const struct vcd_mpeg_source_info *info)
   aps_time = _data->timestamp;
   aps_packet = _data->packet_no;
 
-  for (t = 0, i = 0; t <= info->playing_time; t += 0.5, i++)
+  for (t = 0, i = 0; t < info->playing_time; t += 0.5, i++)
     {
       for(n = _vcd_list_node_next (aps_node); n; n = _vcd_list_node_next (n))
         {
