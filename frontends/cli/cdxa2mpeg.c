@@ -24,6 +24,10 @@
 # include "config.h"
 #endif
 
+#if defined ( WIN32 )
+#define ftruncate chsize
+#endif
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
