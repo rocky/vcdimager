@@ -209,6 +209,13 @@ VcdObj *
 vcd_obj_new (vcd_type_t vcd_type)
 {
   VcdObj *new_obj = NULL;
+  static bool _first = true;
+  
+  if (_first)
+    {
+      vcd_debug ("initializing libvcd %s [%s]", VERSION, HOST_ARCH);
+      _first = false;
+    }
 
   switch (vcd_type) 
     {
@@ -353,12 +360,18 @@ _make_scantable (mpeg_track_t *track)
               last_gop_timecode = timecode;
             }
 
-          if (ti.video.i_frame_flag)
+          if (ti.video.i_frame_flag && !ti.video.gop_flag)
+            {
+              vcd_warn ("GOP is not in the same sector as I-frame "
+                        "-- ignoring as access point sector (@%d)", sect);
+            }
+          else if (ti.video.i_frame_flag && ti.video.gop_flag)
             {
               double timecode;
 
               if (!got_first_gop)
                 vcd_warn ("ups... got I-frame before GOP");
+
 
               timecode = ti.video.rel_timecode;
               
@@ -368,6 +381,7 @@ _make_scantable (mpeg_track_t *track)
 
               if (timecode <= last_i_timecode)
                 {
+                  vcd_debug ("timecode going backward (%6f <= %6f)", timecode, last_i_timecode);
                   /* break */
                 }
               else
@@ -827,6 +841,7 @@ _finalize_vcd_iso_track (VcdObj *obj)
 
   case VCD_TYPE_SVCD:
     _vcd_directory_mkdir (obj->dir, "EXT");
+    _vcd_directory_mkdir (obj->dir, "SEGMENT");
     _vcd_directory_mkdir (obj->dir, "MPEG2");
     if (obj->broken_svcd_mode_flag)
       {
@@ -928,6 +943,7 @@ _finalize_vcd_iso_track (VcdObj *obj)
         const char *fmt = NULL;
         mpeg_track_t *track = _vcd_list_node_data (node);
         uint32_t extent = track->relative_start_extent;
+        uint8_t file_num = 0;
       
         extent += obj->iso_size;
 
@@ -936,9 +952,11 @@ _finalize_vcd_iso_track (VcdObj *obj)
           case VCD_TYPE_VCD11:
           case VCD_TYPE_VCD2:
             fmt = "MPEGAV/AVSEQ%2.2d.DAT";
+            file_num = n + 1;
             break;
           case VCD_TYPE_SVCD:
             fmt = "MPEG2/AVSEQ%2.2d.MPG";
+            file_num = 0;
             break;
           default:
             assert(1);
@@ -946,16 +964,16 @@ _finalize_vcd_iso_track (VcdObj *obj)
 
         assert (n < 98);
       
-        snprintf (avseq_pathname, sizeof (avseq_pathname), fmt, n+1);
+        snprintf (avseq_pathname, sizeof (avseq_pathname), fmt, n + 1);
         
-        _vcd_directory_mkfile (obj->dir, avseq_pathname, extent+PRE_DATA_GAP,
-                               track->length_sectors*ISO_BLOCKSIZE,
-                               true, n + 1);
+        _vcd_directory_mkfile (obj->dir, avseq_pathname, extent + PRE_DATA_GAP,
+                               track->length_sectors * ISO_BLOCKSIZE,
+                               true, file_num);
 
         if (obj->broken_svcd_mode_flag)
           {
             snprintf (avseq_pathname, sizeof (avseq_pathname), 
-                      "MPEGAV/AVSEQ%2.2d.MPG", n+1);
+                      "MPEGAV/AVSEQ%2.2d.MPG", n + 1);
 
             vcd_warn ("broken svcd mode: adding additional `%s' entry", 
                       avseq_pathname);
@@ -1027,7 +1045,7 @@ _write_m2_image_sector (VcdObj *obj, const void *data, uint32_t extent,
                                : CDDA_SIZE));
 
   if(obj->bin_file_2336_flag) 
-    vcd_data_sink_write(obj->bin_file, buf+12, M2RAW_SIZE, 1);
+    vcd_data_sink_write(obj->bin_file, buf + 12 + 4, M2RAW_SIZE, 1);
   else
     vcd_data_sink_write(obj->bin_file, buf, CDDA_SIZE, 1);
   
@@ -1296,7 +1314,7 @@ _write_sectors (VcdObj *obj, int track_idx)
   vcd_data_source_seek (track->source, 0);
 
   for (n = 0; n < track->length_sectors;n++) {
-    int ci = 0, sm = 0, cnum = 0;
+    int ci = 0, sm = 0, cnum = 0, fnum = 0;
 
     vcd_data_source_read (track->source, buf, 2324, 1);
 
@@ -1305,7 +1323,7 @@ _write_sectors (VcdObj *obj, int track_idx)
       mpeg_packets.video++;
       sm = SM_FORM2|SM_REALT|SM_VIDEO;
       ci = CI_VIDEO;
-      cnum = 1;
+      cnum = CN_VIDEO;
       break;
     case MPEG_TYPE_AUDIO:
       mpeg_packets.audio++;
@@ -1329,22 +1347,22 @@ _write_sectors (VcdObj *obj, int track_idx)
       mpeg_packets.null++;
       sm = SM_FORM2|SM_REALT;
       ci = CI_OTHER;
-      cnum = 0;
+      cnum = CN_OTHER;
       break;
     case MPEG_TYPE_UNKNOWN:
       mpeg_packets.unknown++;
       vcd_warn ("unknown packet @%d encounterd", n);
       sm = SM_FORM2|SM_REALT;
       ci = CI_OTHER;
-      cnum = 0;
+      cnum = CN_OTHER;
       break;
     case MPEG_TYPE_END:
-      if (n < track->length_sectors)
+      if (n + 1 < track->length_sectors)
         vcd_warn ("Program end marker seen at packet %d"
                   " -- before actual end of stream", n);
       sm = SM_FORM2|SM_REALT;
       ci = CI_OTHER;
-      cnum = 0;
+      cnum = CN_OTHER;
       break;
     case MPEG_TYPE_INVALID:
       vcd_error ("invalid mpeg packet found at packet# %d"
@@ -1359,7 +1377,15 @@ _write_sectors (VcdObj *obj, int track_idx)
     if (n == track->length_sectors-1)
       sm |= SM_EOR;
 
-    if (_write_m2_image_sector (obj, buf, lastsect++, track_idx + 1, cnum, sm, ci))
+    fnum = track_idx + 1;
+      
+    if (obj->type == VCD_TYPE_SVCD) /* svcds have a simplified subheader */
+      {
+        fnum = 1;
+        ci = 0x80;
+      }
+
+    if (_write_m2_image_sector (obj, buf, lastsect++, fnum, cnum, sm, ci))
       break;
   }
 

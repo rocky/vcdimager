@@ -1,5 +1,7 @@
 SUBDIRS = libvcd frontends 
 
+EXTRA_DIST = BUGS
+
 dist-hook: vcdimager.spec
 	cp vcdimager.spec $(distdir)
 

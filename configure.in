@@ -113,6 +113,25 @@ else
 fi
 dnl empty_array_size
 
+dnl bitfield order
+AC_MSG_CHECKING(bitfield ordering in structs)
+AC_TRY_RUN([ int main() {
+  struct { char bit_0:1, bit_12:2, bit_345:3, bit_67:2; } bf = { 1,1,1,1 };
+  if (sizeof (bf) != 1) return 1;
+  return *((unsigned char*) &bf) != 0x4b; }
+], bf_lsbf=1, AC_TRY_RUN([ int main() {
+  struct { char bit_0:1, bit_12:2, bit_345:3, bit_67:2; } bf = { 1,1,1,1 };
+  if (sizeof (bf) != 1) return 1;
+  return *((unsigned char*) &bf) != 0xa5; }
+], bf_lsbf=0, AC_MSG_ERROR([unsupported bitfield ordering])))
+if test "x$bf_lsbf" = "x1"; then
+ AC_MSG_RESULT(LSBF)
+ AC_DEFINE(BITFIELD_LSBF, [], [compiler does lsbf in struct bitfields])
+else
+ AC_MSG_RESULT(MSBF)
+fi
+dnl
+
 dnl system
 if test "x$GCC" = "xyes"
 then

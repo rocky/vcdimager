@@ -1,3 +1,65 @@
+2001-05-01  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* configure.in: bumped version up to 0.6.0
+
+2001-04-29  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd.c (_make_scantable): ignore APS where iframe header is
+		not in the same sector as the gop header
+
+	* frontends/cli/vcdrip.c (dump_search_dat): dump all scanpoints
+		if verbose operation is given
+
+	* libvcd/vcd.c (_finalize_vcd_iso_track): set file number for svcd to 0
+	(_write_sectors): dont warn if PEM in last packet :),
+		set filenumber for svcd mpeg form2 sectors to 1 (not 0!)
+
+	* libvcd/vcd_files.c (set_tracks_svd): assume 1 audio chan instead of 2
+
+2001-04-28  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd.c (_write_m2_image_sector): fix 2336 mode output
+
+	* frontends/cli/vcdimager.c (main): _really_ set the sectorsize...
+
+2001-04-27  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd.c (vcd_obj_new): log libvcd version on first invocation
+
+	* libvcd/vcd_files.c (set_tracks_svd): fixed playing time msf to
+		have 1/75 sec frames
+
+2001-04-26  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* frontends/cli/vcdrip.c: minor cleanups
+
+	* configure.in: added check for bitfield ordering in structs
+
+	* libvcd/vcd_files_private.h: replaced !WORDS_BIGENDIAN ifdef's
+		by BITFIELD_LSBF
+
+2001-04-25  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_directory.c: filled in some knowledge gaps regarding XA
+
+	* frontends/cli/vcdrip.c (dump_tracks_svd): see below
+
+	* libvcd/vcd_files.c (set_tracks_svd): see below
+
+	* libvcd/vcd_files_private.h: fixed TracksSVD interpretation for
+		multi track discs
+
+2001-04-20  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd.c (_finalize_vcd_iso_track): 
+		add SEGMENT dir to SVCDs too
+
+2001-04-16  Carsten Koch <ckoch@ptc.com>
+
+	* libvcd/vcd_files_private.h: fixed typo
+
+	* frontends/cli/vcdimager.c: missing #include
+
 2001-04-15  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* configure.in: bumped version up to 0.6.0

@@ -1,7 +1,8 @@
+-*- text -*-
+
 TODO LIST:
 
 - version 1.0
- * get more information on CDROM-XA
  * check for VideoCD1.1/VideoCD2.0/SuperVideoCD1.0 conformance
  * optimize/improve MPEG detection/scanning/handling code
  * documentation
@@ -19,7 +20,7 @@ TODO LIST:
 
 BUGS:
 
-* find them...
+* see file 'BUGS'
 
 --
 $Id$

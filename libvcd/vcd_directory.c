@@ -30,22 +30,25 @@
 #include "vcd_iso9660.h"
 #include "vcd_logging.h"
 #include "vcd_util.h"
+#include "vcd_bytesex.h"
 
 static const char _rcsid[] = "$Id$";
 
 /* CD-ROM XA */
 
-#define XA_FORM1_DIR    0x8d
-#define XA_FORM1_FILE   0x0d
-#define XA_FORM2_FILE   0x15
+/* don't know why it is or'ed by 0x0555... */
+
+#define XA_FORM1_DIR    (UINT16_TO_BE (0x8800 | 0x0555))
+#define XA_FORM1_FILE   (UINT16_TO_BE (0x0800 | 0x0555))
+#define XA_FORM2_FILE   (UINT16_TO_BE (0x1000 | 0x0555))
 
 typedef struct 
 {
-  uint8_t unknown1[4]; /* zero */
-  uint8_t type;        /* XA_... */
-  uint8_t magic[3];    /* { 'U', 'X', 'A' } */
-  uint8_t filenum;     /* filenum */
-  uint8_t unknown2[5]; /* zero */
+  uint32_t owner_id      GNUC_PACKED;   /* zero */
+  uint16_t attributes    GNUC_PACKED;   /* XA_... */
+  uint8_t  signature[2]  GNUC_PACKED;   /* { 'X', 'A' } */
+  uint8_t  filenum       GNUC_PACKED;   /* filenum(?) */
+  uint8_t  reserved[5]   GNUC_PACKED;   /* zero */
 } xa_t;
 
 /* tree data structure */
@@ -55,7 +58,7 @@ typedef struct
   bool is_dir;
   char *name;
   uint16_t version;
-  uint8_t xa_type;
+  uint16_t xa_attributes;
   uint8_t xa_filenum;
   uint32_t extent;
   uint32_t size;
@@ -195,7 +198,7 @@ _vcd_directory_new (void)
 
   data->is_dir = true;
   data->name = _vcd_memdup("\0", 2);
-  data->xa_type = XA_FORM1_DIR;
+  data->xa_attributes = XA_FORM1_DIR;
   data->xa_filenum = 0x00;
 
   return dir;
@@ -285,7 +288,7 @@ _vcd_directory_mkdir (VcdDirectory *dir, const char pathname[])
 
     data->is_dir = true;
     data->name = strdup(splitpath[level-1]);
-    data->xa_type = XA_FORM1_DIR;
+    data->xa_attributes = XA_FORM1_DIR;
     data->xa_filenum = 0x00;
     /* .. */
   }
@@ -362,7 +365,7 @@ _vcd_directory_mkfile (VcdDirectory *dir, const char pathname[],
     data->is_dir = false;
     data->name = strdup (splitpath[level-1]);
     data->version = file_version;
-    data->xa_type = form2_flag ? XA_FORM2_FILE : XA_FORM1_FILE;
+    data->xa_attributes = form2_flag ? XA_FORM2_FILE : XA_FORM1_FILE;
     data->xa_filenum = filenum;
     data->size = size;
     data->extent = start;
@@ -389,7 +392,7 @@ static void
 traverse_vcd_directory_dump_entries (VcdDirNode *node, void *data)
 {
   data_t *d = DATAP(node);
-  xa_t tmp = { { 0, }, 0, { 'U', 'X', 'A' }, 0, { 0, } };
+  xa_t tmp = { 0, 0, { 'X', 'A' }, 0, { 0, } };
   
   uint32_t root_extent = EXTENT(_vcd_tree_node_root (node));
   uint32_t parent_extent = 
@@ -403,7 +406,7 @@ traverse_vcd_directory_dump_entries (VcdDirNode *node, void *data)
 
   void *dirbufp = (char*) data + ISO_BLOCKSIZE * (parent_extent - root_extent);
 
-  tmp.type = d->xa_type;
+  tmp.attributes = d->xa_attributes;
   tmp.filenum = d->xa_filenum;
 
   if (!_vcd_tree_node_is_root (node))
@@ -422,7 +425,7 @@ traverse_vcd_directory_dump_entries (VcdDirNode *node, void *data)
   if (d->is_dir) 
     {
       void *dirbuf = (char*)data + ISO_BLOCKSIZE * (d->extent - root_extent);
-      xa_t tmp2 = {{ 0, }, XA_FORM1_DIR, { 'U', 'X', 'A' }, 0, { 0, }};
+      xa_t tmp2 = { 0, XA_FORM1_DIR, { 'X', 'A' }, 0, { 0, } };
       
       dir_init_new_su (dirbuf, 
                        d->extent, d->size, &tmp2, sizeof (tmp2),

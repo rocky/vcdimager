@@ -22,6 +22,8 @@
 # include "config.h"
 #endif
 
+#include <sys/types.h>
+
 #include <assert.h>
 #include <dirent.h>
 #include <errno.h>
@@ -31,7 +33,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mman.h>
-#include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 #include "vcd_types.h"
@@ -397,6 +399,11 @@ main (int argc, const char *argv[])
 
   vcd_obj_set_param (gl_vcd_obj, VCD_PARM_VOLUME_LABEL, gl.volume_label);
   vcd_obj_set_param (gl_vcd_obj, VCD_PARM_APPLICATION_ID, gl.application_id);
+
+  {
+    int sect_size = gl.sector_2336_flag ? M2RAW_SIZE : CDDA_SIZE;
+    vcd_obj_set_param (gl_vcd_obj, VCD_PARM_SEC_TYPE, &sect_size);
+  }
 
   if (type_id == VCD_TYPE_SVCD)
     {

@@ -267,21 +267,21 @@ set_info_vcd(VcdObj *obj, void *buf)
 void
 set_tracks_svd (VcdObj *obj, void *buf)
 {
-  TracksSVD tracks_svd;
+  char tracks_svd[ISO_BLOCKSIZE] = { 0, };
+  TracksSVD *tracks_svd1 = (void *) tracks_svd;
+  TracksSVD2 *tracks_svd2;
   VcdListNode *node;
   int n;
   
   assert (obj->type == VCD_TYPE_SVCD);
   assert (sizeof (SVDTrackContent) == 1);
-  assert (sizeof (TracksSVD) == ISO_BLOCKSIZE);
 
-  memset (&tracks_svd, 0, sizeof (tracks_svd));
+  strncpy (tracks_svd1->file_id, TRACKS_SVD_FILE_ID, sizeof (TRACKS_SVD_FILE_ID));
+  tracks_svd1->version = TRACKS_SVD_VERSION;
 
-  strncpy (tracks_svd.file_id, TRACKS_SVD_FILE_ID, sizeof (TRACKS_SVD_FILE_ID));
-  tracks_svd.version = TRACKS_SVD_VERSION;
+  tracks_svd1->tracks = _vcd_list_length (obj->mpeg_track_list);
 
-
-  tracks_svd.tracks = _vcd_list_length (obj->mpeg_track_list);
+  tracks_svd2 = (void *) &(tracks_svd1->playing_time[tracks_svd1->tracks]);
 
   for (n = 0, node = _vcd_list_begin (obj->mpeg_track_list);
        node != NULL;
@@ -294,12 +294,12 @@ set_tracks_svd (VcdObj *obj, void *buf)
         {
         case MPEG_NORM_PAL:
         case MPEG_NORM_PAL_S:
-          tracks_svd.tracks_info[n].contents.video = 0x07;
+          tracks_svd2->contents[n].video = 0x07;
           break;
 
         case MPEG_NORM_NTSC:
         case MPEG_NORM_NTSC_S:
-          tracks_svd.tracks_info[n].contents.video = 0x03;
+          tracks_svd2->contents[n].video = 0x03;
           break;
           
         default:
@@ -307,8 +307,7 @@ set_tracks_svd (VcdObj *obj, void *buf)
           break;
         }
 
-      tracks_svd.tracks_info[n].contents.audio = 0x02; /* fixme 
-                                                          -- assumption */
+      tracks_svd2->contents[n].audio = 0x01; /* fixme -- assumption */
 
       /* setting playtime */
       
@@ -324,9 +323,8 @@ set_tracks_svd (VcdObj *obj, void *buf)
             i = 99*60;
           }
 
-        lba_to_msf (i * 75, &(tracks_svd.tracks_info[n].playing_time));
-        tracks_svd.tracks_info[n].playing_time.f = 
-          to_bcd8 (rint (f * track->mpeg_info.frate));
+        lba_to_msf (i * 75, &(tracks_svd1->playing_time[n]));
+        tracks_svd1->playing_time[n].f = to_bcd8 (rint (f * 75));
       }
     }  
   

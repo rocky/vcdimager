@@ -2,6 +2,16 @@ $Id$
 
 see ChangeLog for more information
 
+version 0.6.1
+=============
+2001-05-01
+
+* compilation fixes
+* fixed wrong SVCD/TRACKS.SVD creation for multitrack SVCDs
+* fixed support for writing 2336 based images
+* minor SVCD related conformance fixes
+* minor vcdrip improvements
+
 version 0.6.0
 =============
 2001-04-15

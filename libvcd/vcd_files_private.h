@@ -79,7 +79,7 @@ typedef struct {
 
 /* This one-byte field describes certain characteristics of the disc */
 typedef struct {
-#if !defined(WORDS_BIGENDIAN)
+#if defined(BITFIELD_LSBF)
   uint8_t reserved1 : 1;                   /* Reserved, must be zero */
   uint8_t restriction : 2;                 /* restriction, eg. "unsuitable
                                               for kids":
@@ -107,7 +107,7 @@ typedef struct {
 #else
   uint8_t reserved2 : 1;
   uint8_t use_track3 : 1;
-  uint8_t use_lid1 : 1;
+  uint8_t use_lid2 : 1;
   uint8_t user_data_cc : 1;
   uint8_t special_info : 1;
   uint8_t restriction : 2;
@@ -117,7 +117,7 @@ typedef struct {
 
 typedef struct 
 {
-#if !defined(WORDS_BIGENDIAN)
+#if defined(BITFIELD_LSBF)
   uint8_t audio_type : 2;                /* Audio characteristics:
                                             0x0 - No MPEG audio stream
                                             0x1 - One MPEG1 or MPEG2 audio
@@ -287,7 +287,7 @@ typedef struct {
                                              (0xffff disables) */
   uint16_t next_ofs          GNUC_PACKED; /* next list offset
                                              (0xffff disables) */
-  uint16_t return_ofs          GNUC_PACKED; /* return list offset
+  uint16_t return_ofs        GNUC_PACKED; /* return list offset
                                              (0xffff disables) */
   uint16_t ptime             GNUC_PACKED; /* play time in 1/15 s,
                                              0x0000 meaning full item */
@@ -321,7 +321,7 @@ typedef struct {
 /* SVDTrackContent indicates the audio/video content of an MPEG Track */
 
 typedef struct {
-#if !defined(WORDS_BIGENDIAN)
+#if defined(BITFIELD_LSBF)
   uint8_t audio : 2;                      /* Audio Content
                                              0x00 : No MPEG audio stream
                                              0x01 : One MPEG{1|2} audio stream
@@ -355,13 +355,15 @@ typedef struct {
   uint8_t version               GNUC_PACKED; /* == 0x01 */
   uint8_t reserved              GNUC_PACKED; /* Reserved, must be zero */
   uint8_t tracks                GNUC_PACKED; /* number of MPEG tracks */
-  struct {
-    msf_t playing_time          GNUC_PACKED; /* BCD coded mm:ss:ff */
-    SVDTrackContent contents    GNUC_PACKED; /* indicates track contents */
-  } tracks_info[98]             GNUC_PACKED; /* track info, one per track */
-
-  uint8_t reserved2[1645]       GNUC_PACKED; /* padding to 2k block */
+  msf_t playing_time[EMPTY_ARRAY_SIZE] GNUC_PACKED; /* per track, BCD coded
+                                                       mm:ss:ff */
 } TracksSVD;
+
+typedef struct {
+  /* TracksSVD tracks_svd; */
+  SVDTrackContent contents[EMPTY_ARRAY_SIZE] GNUC_PACKED; /* indicates track
+                                                             contents */
+} TracksSVD2;
 
 /* SEARCH.DAT
    This file defines where the scan points are. It covers all mpeg tracks

@@ -263,6 +263,10 @@ _get_image_size_device (FILE *fd)
 #endif
 }
 
+/******************************************************************************/
+
+static int gl_verbose_flag = false;
+static int gl_quiet_flag = false;
 
 /******************************************************************************/
 
@@ -659,6 +663,8 @@ static void
 dump_tracks_svd (const void *data)
 {
   const TracksSVD *tracks = data;
+  const TracksSVD2 *tracks2 = (const void *) &(tracks->playing_time[tracks->tracks]);
+ 
   unsigned j;
 
   fprintf (stdout, "SVCD/TRACKS.SVD\n");
@@ -691,11 +697,11 @@ dump_tracks_svd (const void *data)
 
       fprintf (stdout, " track[%.2d]: %2.2x:%2.2x:%2.2x, audio: %s, video: %s\n",
                j,
-               tracks->tracks_info[j].playing_time.m,
-               tracks->tracks_info[j].playing_time.s,
-               tracks->tracks_info[j].playing_time.f,
-               audio_types[tracks->tracks_info[j].contents.audio],
-               video_types[tracks->tracks_info[j].contents.video]);
+               tracks->playing_time[j].m,
+               tracks->playing_time[j].s,
+               tracks->playing_time[j].f,
+               audio_types[tracks2->contents[j].audio],
+               video_types[tracks2->contents[j].video]);
     }
 }
 
@@ -718,7 +724,8 @@ dump_search_dat (const void *data)
     {
       unsigned hh, mm, ss, ss2;
 
-      if (m > _printed_points && m < scan_points - _printed_points)
+      if (!gl_verbose_flag 
+          && m > _printed_points && m < scan_points - _printed_points)
         continue;
       
       ss2 = m * searchdat->time_interval;
@@ -734,7 +741,8 @@ dump_search_dat (const void *data)
                searchdat->points[m].s,
                searchdat->points[m].f);
       
-      if (m == _printed_points && scan_points > (_printed_points * 2))
+      if (!gl_verbose_flag
+          && m == _printed_points && scan_points > (_printed_points * 2))
         fprintf (stdout, " [..skipping...]\n");
     }
 }
@@ -935,13 +943,6 @@ dump (const char image_fname[])
     else
       vcd_debug ("no TRACKS.SVD signature found");
 
-    n = find_sect_by_fileid (fd, LOT_VCD_SECTOR, 225, SPICONTX_FILE_ID);
-    
-    if (n != SECTOR_NIL)
-      vcd_debug ("found SPICONTX.SVD signature at sector %d", n);
-    else
-      vcd_debug ("no SPICONTX.SVD signature found");
-
     n = find_sect_by_fileid (fd, LOT_VCD_SECTOR, 225, SEARCH_FILE_ID);
     
     if (n != SECTOR_NIL)
@@ -1061,16 +1062,15 @@ ripspi (const char device_fname[])
 
           fwrite (buf.data, 2324, 1, outfd);
 
-          if (buf.subheader[2] & SM_EOR)
+          if (buf.subheader[2] & (SM_EOF | SM_EOR))
             break;
         }
 
       fclose (outfd);
 
       assert (!info.spi_contents[n].item_cont);
+      /* fixme -- add support for spi larger than one segment */
     }
-
-  fprintf (stdout, __FUNCTION__ "\n");
 
   fclose (fd);
 }
@@ -1114,6 +1114,8 @@ rip (const char device_fname[])
       uint32_t pos;
       FILE *outfd = NULL;
       char fname[80] = { 0, };
+
+      /* fixme -- handle multiple entry points into track */
 
       bool in_data = false;
 
@@ -1215,9 +1217,6 @@ static enum
   OP_VERSION  = 1 << 7
 }
 gl_operation = OP_NOOP;
-
-static int gl_verbose_flag = false;
-static int gl_quiet_flag = false;
 
 /* end of vars */
 
