@@ -430,7 +430,10 @@ Higher resolutions (see below) for video stream resolution.
 
 @item
 Up to 4 overlay graphics and text (@dfn{OGT}) sub-channels for user
-switchable subtitle displaying.
+switchable subtitle displaying.@footnote{There is also a non-compliant
+subtitle format widely used, having its origins in the forgotten
+@dfn{CVD} specification, which was a competitor for the Video CD 2.0
+successor. vcdimager supports both formats.}
 
 @item
 Command lists for controlling the @acronym{SVCD} virtual machine.

@@ -35,28 +35,39 @@
 
 static const char _rcsid[] = "$Id$";
 
+#define VCD_STREAM_STDIO_BUFSIZE (128*1024)
+
 typedef struct {
   char *pathname;
   FILE *fd;
+  char *fd_buf;
 } _UserData;
 
 static int
-_stdio_open_source(void *user_data) 
+_stdio_open_source (void *user_data) 
 {
   _UserData *ud = user_data;
   
-  ud->fd = fopen(ud->pathname, "rb");
+  if ((ud->fd = fopen (ud->pathname, "rb")))
+    {
+      ud->fd_buf = _vcd_malloc (VCD_STREAM_STDIO_BUFSIZE);
+      setvbuf (ud->fd, ud->fd_buf, _IOFBF, VCD_STREAM_STDIO_BUFSIZE);
+    }
 
   return (ud->fd == NULL);
 }
 
 static int
-_stdio_open_sink(void *user_data) 
+_stdio_open_sink (void *user_data) 
 {
   _UserData *ud = user_data;
-  
-  ud->fd = fopen(ud->pathname, "wb");
 
+  if ((ud->fd = fopen (ud->pathname, "wb")))
+    {
+      ud->fd_buf = _vcd_malloc (VCD_STREAM_STDIO_BUFSIZE);
+      setvbuf (ud->fd, ud->fd_buf, _IOFBF, VCD_STREAM_STDIO_BUFSIZE);
+    }
+  
   return (ud->fd == NULL);
 }
 
@@ -69,6 +80,9 @@ _stdio_close(void *user_data)
     vcd_error ("fclose (): %s", strerror (errno));
  
   ud->fd = NULL;
+
+  free (ud->fd_buf);
+  ud->fd_buf = NULL;
 
   return 0;
 }
