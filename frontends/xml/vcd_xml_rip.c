@@ -1065,11 +1065,6 @@ _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img, int tracknum)
       uint32_t start_lsn, end_lsn, n, last_nonzero, first_data;
       double last_pts = 0;
 
-      if (tracknum && tracknum!=counter++) {
-	vcd_info("Track %d selected, skipping track %d", tracknum,counter-1);
-	continue;
-      }
-	  
       _read_progress_t _progress;
 
       struct m2f2sector
@@ -1080,6 +1075,11 @@ _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img, int tracknum)
       }
       buf[15];
 
+      if (tracknum && tracknum!=counter++) {
+	vcd_info("Track %d selected, skipping track %d", tracknum,counter-1);
+	continue;
+      }
+	  
       memset (&mpeg_ctx, 0, sizeof (VcdMpegStreamCtx));
 
       start_lsn = _seq->start_extent;
