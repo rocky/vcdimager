@@ -297,14 +297,60 @@ dump_lot_and_psd_vcd (const void *data, const void *data2,
             const PsdEndOfListDescriptor *d =
               (const void *) (psd_data + tmp);
             fprintf (stdout, " [%2d]: end of list descriptor (", n - 1);
-            _hexdump (d->unknown, 7);
+            _hexdump (d->reserved, 7);
             fprintf (stdout, ")\n");
           }
           break;
         case PSD_TYPE_SELECTION_LIST:
-          fprintf (stdout, " [%2d]: selection list descriptor (", n -1);
-          _hexdump (&psd_data[tmp], 24);
-          fprintf (stdout, ")\n");
+          {
+            const PsdSelectionListDescriptor *d =
+              (const void *) (psd_data + tmp);
+            const PsdSelectionListDescriptor2 *d2 =
+              (const void *) &(d->bsn_ofs[d->nos]);
+            int i;
+            fprintf (stdout, " [%2d]: selection list descriptor (", n -1);
+            fprintf (stdout, " NOS: %d | BSN: %d | LID: %d | prev: %4.4x "
+                     "| next: %4.4x | retn: %4.4x | unk1: %4.4x | unk2: %4.4x "
+                     "| u3: %d | u4: %d | itemid: %d ",
+                     d->nos, 
+                     d->bsn,
+                     UINT16_FROM_BE (d->lid),
+                     UINT16_FROM_BE (d->prev_ofs),
+                     UINT16_FROM_BE (d->next_ofs),
+                     UINT16_FROM_BE (d->retn_ofs),
+                     UINT16_FROM_BE (d->unk1_ofs),
+                     UINT16_FROM_BE (d->unk2_ofs),
+                     d->unknown3,
+                     d->unknown4,
+                     UINT16_FROM_BE (d->itemid));
+
+            for (i = 0; i < d->nos; i++)
+              fprintf (stdout, "| bsn_ofs[%d]: %4.4x ", i,
+                       UINT16_FROM_BE (d->bsn_ofs[i]));
+
+            fprintf (stdout, "| prev_area: (%d,%d) (%d,%d) ",
+                     d2->prev_area.x1, d2->prev_area.y1, 
+                     d2->prev_area.x2, d2->prev_area.y2);
+
+            fprintf (stdout, "| next_area: (%d,%d) (%d,%d) ",
+                     d2->next_area.x1, d2->next_area.y1, 
+                     d2->next_area.x2, d2->next_area.y2);
+
+            fprintf (stdout, "| retn_area: (%d,%d) (%d,%d) ",
+                     d2->retn_area.x1, d2->retn_area.y1, 
+                     d2->retn_area.x2, d2->retn_area.y2);
+
+            fprintf (stdout, "| unk1_area: (%d,%d) (%d,%d) ",
+                     d2->unk1_area.x1, d2->unk1_area.y1, 
+                     d2->unk1_area.x2, d2->unk1_area.y2);
+
+            for (i = 0; i < d->nos; i++)
+              fprintf (stdout, "| bsn_area[%d]: (%d,%d) (%d,%d) ", i,
+                       d2->bsn_area[i].x1, d2->bsn_area[i].y1, 
+                       d2->bsn_area[i].x2, d2->bsn_area[i].y2);
+
+            fprintf (stdout, ")\n");
+          }
           break;
         default:
           fprintf (stdout, " [%2d] unkown descriptor type (0x%2.2x) at %d\n", 
@@ -963,7 +1009,7 @@ main (int argc, const char *argv[])
       {
       case OP_VERSION:
         fprintf (stdout, "GNU VCDRip " VERSION "\n\n"
-                 "Copyright (c) 2000 Herbert Valerio Riedel <hvr@gnu.org>\n\n"
+                 "Copyright (c) 2001 Herbert Valerio Riedel <hvr@gnu.org>\n\n"
                  "VCDImager may be distributed under the terms of the GNU General Public Licence;\n"
                  "For details, see the file `COPYING', which is included in the VCDImager\n"
                  "distribution. There is no warranty, to the extent permitted by law.\n");

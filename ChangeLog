@@ -1,5 +1,10 @@
 2001-01-06  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* frontends/cli/vcdrip.c (dump_lot_and_psd_vcd): display more info 
+		about selection lists...
+
+	* libvcd/vcd_files_private.h: started filling psd selection list
+
 	* configure.in: bumped version up to 0.5.9alpha2
 	
 	* frontends/cli/vcdrip.c (dump_pvd): new function for dumping

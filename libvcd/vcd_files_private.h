@@ -232,8 +232,43 @@ typedef enum {
 
 typedef struct {
   uint8_t type               GNUC_PACKED;
-  uint8_t unknown[7]         GNUC_PACKED;
+  uint8_t reserved[7]        GNUC_PACKED;
 } PsdEndOfListDescriptor;
+
+struct psd_area_t
+{
+  uint8_t x1;
+  uint8_t y1;
+  uint8_t x2;
+  uint8_t y2;
+};
+
+typedef struct {
+  uint8_t type               GNUC_PACKED;
+  uint8_t reserved           GNUC_PACKED;
+  uint8_t nos                GNUC_PACKED;
+  uint8_t bsn                GNUC_PACKED;
+  uint16_t lid               GNUC_PACKED;
+  uint16_t prev_ofs          GNUC_PACKED;
+  uint16_t next_ofs          GNUC_PACKED;
+  uint16_t retn_ofs          GNUC_PACKED;
+  uint16_t unk1_ofs          GNUC_PACKED; /* unknown */
+  uint16_t unk2_ofs          GNUC_PACKED; /* unknown */
+  uint8_t unknown3           GNUC_PACKED;
+  uint8_t unknown4           GNUC_PACKED;
+  uint16_t itemid            GNUC_PACKED;
+  uint16_t bsn_ofs[0]        GNUC_PACKED; /* variable length */
+  /* PsdSelectionListDescriptor2 */
+} PsdSelectionListDescriptor;
+
+typedef struct {
+  struct psd_area_t prev_area;
+  struct psd_area_t next_area;
+  struct psd_area_t retn_area;
+  struct psd_area_t unk1_area;
+  struct psd_area_t bsn_area[0]; /* variable length */
+} PsdSelectionListDescriptor2;
+
 
 typedef struct {
   uint8_t type               GNUC_PACKED;

@@ -223,7 +223,7 @@ main (int argc, const char *argv[])
         {
         case CL_VERSION:
           fprintf (stdout, "GNU VCDImager " VERSION "\n\n"
-                   "Copyright (c) 2000 Herbert Valerio Riedel <hvr@gnu.org>\n\n"
+                   "Copyright (c) 2001 Herbert Valerio Riedel <hvr@gnu.org>\n\n"
                    "VCDImager may be distributed under the terms of the GNU General Public Licence;\n"
                    "For details, see the file `COPYING', which is included in the VCDImager\n"
                    "distribution. There is no warranty, to the extent permitted by law.\n");
