@@ -1,0 +1,9 @@
+if BUILD_CLI_FE
+CLI_DIRS = cli
+endif
+
+if BUILD_GNOME_FE
+GNOME_DIRS = gnome
+endif
+
+SUBDIRS = $(CLI_DIRS) $(GNOME_DIRS)

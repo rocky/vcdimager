@@ -1,0 +1,177 @@
+\input texinfo @c -*-texinfo-*-
+
+
+@c %**start of header
+@setfilename vcdimager.info
+@settitle The GNU VideoCD Image Maker
+@setchapternewpage off
+@c %**end of header
+
+@afourpaper
+
+@include version.texi
+
+@ifinfo
+This file documents GNU VCDImager, The GNU VideoCD Image Maker
+
+Copyright (C) Herbert Valerio Riedel @email{hvr@@gnu.org}
+
+@sp 2
+Permission is granted to make and distributed verbatim copies of this
+manual, provided the copyright notice and this permission notice are
+preserved on all copies. 
+
+@ignore
+Permission is granted to process this file through TeX and print the 
+results, provided the printed document carries copying permission notice 
+identical to this one except for the removal of this paragraph (this 
+paragraph not being relevant to the printed manual).
+
+@end ignore
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for verbatim copying, provided that the
+entire resulting derived work is distributed under the terms of a
+permission notice identical to this one.
+
+Permission is granted to copy and distribute translations of this manual
+into another language, under the above conditions for modified versions,
+except that this permission notice may be stated in a translation
+approved by Herbert Valerio Riedel.
+@end ifinfo
+
+@titlepage
+@title GNU VCDImager
+@subtitle $Id$
+@subtitle The GNU VideoCD Image Maker
+@subtitle for version @value{VERSION}, @value{UPDATED}
+@author Herbert Valerio Riedel
+
+@page
+@vskip 0pt plus 1filll
+@c @acronym{VideoCD} is a registered trademark of ?
+@sp 4
+Copyright @copyright{} 2000 Herbert Valerio Riedel @email{<hvr@@gnu.org>}
+@sp 1
+Permission is granted to make and distribute verbatim copies of this
+manual provided the copyright notice and this permission notice are
+preserved on all copies.
+
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for verbatim copying, provided also that the
+section entitled ``GNU General Public License'' are included exactly as
+in the original, and provided that the entire resulting derived work is
+distributed under the terms of a permission notice identical to this
+one.
+
+Permission is granted to copy and distribute translations of this manual
+into another language, under the above conditions for modified versions,
+except that the sections entitled ``GNU General Public License'' may be
+included in a translation approved by the Free Software Foundation
+instead of in the original English.
+@end titlepage
+
+@c @summarycontents
+@c @contents
+
+@dircategory Miscellaneous
+@direntry
+* GNU VCDImager: (vcdimager).      The GNU VideoCD Image Maker
+@end direntry
+
+@node Top, , (dir), (dir)
+
+@unnumbered Introduction
+
+@c fixme add node structure
+
+@dfn{GNU VCDImager}@footnote{see
+@url{http://www.gnu.org/software/vcdimager/}} is a
+tool for pre-mastering @acronym{CDROM} images suitable for being burned to CD
+recordables. It takes @acronym{MPEG} movie files as input and generates
+an image file and a cuesheet file which can be fed to any CD-recording
+program which understands the BIN/CUE-format, e.g. cdrdao@footnote{see
+@url{http://www.ping.de/sites/daneb/cdrdao.html}}.
+
+@c fixme write much more :-)
+
+@unnumbered Commandline Options
+
+There aren't many commandline options at the moment:
+
+@example
+@cartouche
+$ vcdimager --help
+Usage: /home/hvr/bin/vcdimager [OPTION...]
+  -l, --volume-label=LABEL   specify volume label for video cd 
+                             (default: 'VideoCD')
+  -c, --cue-file=FILE        specify cue file for output 
+                             (default: 'videocd.cue')
+  -b, --bin-file=FILE        specify bin file for output 
+                             (default: 'videocd.bin')
+  --cdi-dir=DIR              find CD-i support files in DIR 
+                             (default: `/usr/share/cdi')
+  -e, --disable-cdi          disable CD-i support (enabled by default)
+  --add-files=DIR            add files from given DIR directory to 
+                             ISO9660 fs track
+  -v, --verbose              be verbose
+  -V, --version              display version and copyright information 
+                             and exit
+
+Help options
+  -?, --help                 Show this help message
+  --usage                    Display brief usage message
+$
+@end cartouche
+@end example
+
+@unnumbered Example
+
+In the following example session, the files @file{track1.mpg},
+@file{track2.mpg} and @file{track3.mpg} are mastered into the default
+output files @file{videocd.cue} and @file{videocd.bin}. The volume label
+is set to `My Test VCD'.
+
+@example
+@cartouche
+$ vcdimager --volume-label="My Test VCD" track@{1,2,3@}.mpg 
+finished ok, image created with 13421 sectors (31566192 bytes)
+$
+@end cartouche
+@end example
+
+@unnumbered Requirements For MPEG Files
+
+GNU VCDImager expects @acronym{MPEG} streams in a format suitable for
+VideoCD production.
+
+The Video-CD 2.0 specification requires the @acronym{MPEG}-1 stream to
+have a maximum bitrate of 1151929.1 bits/sec and to have one of the
+following resolution:
+
+@itemize @bullet
+@item
+352 x 240 @ 29.97 Hz (@acronym{NTSC})
+@item
+352 x 240 @ 23.976 Hz (@acronym{FILM})
+@item
+352 x 288 @ 25 Hz (@acronym{PAL})
+@end itemize
+
+Furthermore the @acronym{MPEG} files need to be padded to 2324 byte
+blocks. So if GNU VCDImager complains, try fixing those files with
+VCDpad @footnote{see @url{http://www.nocrew.org/?part=vcdpad}} or any
+other program capable of aligning or fixing @acronym{MPEG} blocks.
+
+@unnumbered CD-i Support
+
+The support files needed in order to be able to play Video-CDs on
+@acronym{CD-i} players are @file{cdi_imag.rtf}, @file{cdi_text.fnt} and
+@file{cdi_vcd.app}.
+
+GNU VCDImager expects them to be in some build-time configured default
+directory which may be overidden by the @option{--cdi-dir=}
+option. @acronym{CD-i} support can be disabled with the
+@option{--disable-cdi} option if those files are missing or
+@acronym{CD-i} support needs to be omitted.
+
+@bye
