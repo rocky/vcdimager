@@ -973,8 +973,9 @@ _finalize_vcd_iso_track (VcdObj *obj)
   {
     uint32_t dirs_size = _vcd_directory_get_size (obj->dir);
     
-    if (dirs_size+2 >= 75)
-      vcd_error ("directory section to big");
+    /* be sure to stay within first 75 sectors */
+    if (16 + 2 + dirs_size + 2 >= 75) 
+      vcd_error ("directory section to big for a VCD");
     
     _vcd_salloc_free (obj->iso_bitmap, 18, dirs_size + 2);
     

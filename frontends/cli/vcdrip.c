@@ -319,8 +319,8 @@ dump_lot_and_psd_vcd (const void *data, const void *data2,
   for (n = 0; n < LOT_VCD_OFFSETS; n++)
     {
       if ((tmp = UINT16_FROM_BE (lot->offset[n])) != 0xFFFF)
-        fprintf (stdout, " offset[%d]: 0x%4.4x (real offset = %d)\n", 
-                 n, tmp, tmp << 3);
+        fprintf (stdout, " LID[%d]: 0x%4.4x (real offset = %d)\n", 
+                 n + 1, tmp, tmp << 3);
     }
 
   fprintf (stdout, DELIM);
@@ -965,6 +965,88 @@ dump (const char image_fname[])
 }
 
 static void
+ripspi (const char device_fname[])
+{
+  FILE *fd = fopen (device_fname, "rb");
+  InfoVcd info;
+  uint32_t first_spi_lba = 0;
+  int n;
+
+  if (!fd)
+    {
+      perror ("fopen()");
+      exit (EXIT_FAILURE);
+    }
+
+  memset (&info, 0, sizeof (InfoVcd));
+  assert (sizeof (InfoVcd) == ISO_BLOCKSIZE);
+
+  gl_read_mode2_sector (fd, &info, INFO_VCD_SECTOR, false);
+
+  first_spi_lba = msf_to_lba ((msf_t *) info.first_seg_addr);
+
+  if (first_spi_lba < 150)
+    {
+      fprintf (stdout, "no segment play items available\n");
+      return;
+    }
+
+  first_spi_lba -= 150;
+
+  assert (first_spi_lba >= 225);
+
+  fprintf (stdout, " first segment addr: %d\n", first_spi_lba);
+
+  fprintf (stdout, " item count: %d\n", UINT16_FROM_BE (info.item_count));
+
+  for (n = 0; n < UINT16_FROM_BE (info.item_count); n++)
+    {
+      char fname[80] = { 0, };
+      uint32_t pos;
+      uint32_t start_lba = first_spi_lba + (n * 150);
+      FILE *outfd = NULL;
+
+      snprintf (fname, sizeof (fname), "item_%3.3d.mpg", n);
+      
+      if (!(outfd = fopen (fname, "wb")))
+        {
+          perror ("fopen()");
+          exit (EXIT_FAILURE);
+        }
+
+      fprintf (stdout, "item %d...\n", n);
+
+      for (pos = start_lba; pos < start_lba + 150; pos++)
+        {
+          struct m2f2sector
+          {
+            uint8_t subheader[8];
+            uint8_t data[2324];
+            uint8_t spare[4];
+          }
+          buf;
+
+          memset (&buf, 0, sizeof (buf));
+
+          gl_read_mode2_sector (fd, &buf, pos, true);
+
+          fwrite (buf.data, 2324, 1, outfd);
+
+          if (buf.subheader[2] & SM_EOR)
+            break;
+        }
+
+      fclose (outfd);
+
+      assert (!info.spi_contents[n].item_cont);
+    }
+
+  fprintf (stdout, __FUNCTION__ "\n");
+
+  fclose (fd);
+}
+
+static void
 rip (const char device_fname[])
 {
   FILE *fd = fopen (device_fname, "rb");
@@ -1095,10 +1177,11 @@ gl_source_type = SOURCE_NONE;
 
 static enum
 {
-  OP_NOOP = 0,
-  OP_DUMP = 1 << 4,
-  OP_RIP = 1 << 5,
-  OP_VERSION = 1 << 6
+  OP_NOOP     = 0,
+  OP_DUMP     = 1 << 4,
+  OP_RIP      = 1 << 5,
+  OP_RIPSPI   = 1 << 6,
+  OP_VERSION  = 1 << 7
 }
 gl_operation = OP_NOOP;
 
@@ -1145,6 +1228,9 @@ main (int argc, const char *argv[])
     {"rip", '\0', POPT_ARG_NONE, NULL, OP_RIP,
      "rip mpeg tracks"},
 
+    {"rip-spi", '\0', POPT_ARG_NONE, NULL, OP_RIPSPI,
+     "rip segment play items"},
+
     {"verbose", 'v', POPT_ARG_NONE, &gl_verbose_flag, 0, 
      "be verbose"},
     
@@ -1183,6 +1269,7 @@ main (int argc, const char *argv[])
         break;
 
       case OP_RIP:
+      case OP_RIPSPI:
       case OP_DUMP:
         gl_operation |= opt;
         break;
@@ -1225,6 +1312,9 @@ main (int argc, const char *argv[])
 
   if (gl_operation & OP_RIP)
     rip (gl_source_name);
+
+  if (gl_operation & OP_RIPSPI)
+    ripspi (gl_source_name);
 
   return EXIT_SUCCESS;
 }
