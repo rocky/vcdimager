@@ -18,13 +18,17 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include "vcd_xml_dtd.h"
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
 
-#include "videocd_dtd.inc"
-
-#include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+
+#include <libvcd/vcd_assert.h>
+
+#include "vcd_xml_dtd.h"
+#include "videocd_dtd.inc"
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
@@ -39,7 +43,7 @@ static xmlParserInputPtr
 _xmlExternalEntityLoader (const char *sysid, const char *pubid, 
 			  xmlParserCtxtPtr context)
 {
-  assert (vcd_xml_dtd_loaded >= 0);
+  vcd_assert (vcd_xml_dtd_loaded >= 0);
 
   if ((pubid && !strcmp (pubid, VIDEOCD_DTD_PUBID))
       || (sysid && !strcmp (sysid, VIDEOCD_DTD_SYSID)))
@@ -67,7 +71,7 @@ _xmlExternalEntityLoader (const char *sysid, const char *pubid,
 void 
 vcd_xml_dtd_init (void)
 {
-  assert (vcd_xml_dtd_loaded == -1);
+  vcd_assert (vcd_xml_dtd_loaded == -1);
   
   _xmlExternalEntityLoaderDefault = xmlGetExternalEntityLoader (); 
   xmlSetExternalEntityLoader (_xmlExternalEntityLoader);

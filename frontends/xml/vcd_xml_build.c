@@ -22,7 +22,6 @@
 # include "config.h"
 #endif
 
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -52,7 +51,7 @@ _init_xml (void)
 {
   static bool _init_done = false;
 
-  assert (!_init_done);
+  vcd_assert (!_init_done);
   _init_done = true;
 
   xmlKeepBlanksDefaultValue = false;

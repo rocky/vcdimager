@@ -24,7 +24,6 @@
 
 #include <sys/types.h>
 
-#include <assert.h>
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -37,6 +36,7 @@
 #include <unistd.h>
 
 #include <libvcd/vcd.h>
+#include <libvcd/vcd_assert.h>
 #include <libvcd/vcd_types.h>
 #include <libvcd/vcd_stream_stdio.h>
 #include <libvcd/vcd_logging.h>
@@ -172,8 +172,8 @@ _add_dir (const char pathname[], const char iso_pathname[])
   DIR *dir = NULL;
   struct dirent *dentry = NULL;
 
-  assert (pathname != NULL);
-  assert (iso_pathname != NULL);
+  vcd_assert (pathname != NULL);
+  vcd_assert (iso_pathname != NULL);
 
   dir = opendir (pathname);
 
@@ -336,7 +336,7 @@ main (int argc, const char *argv[])
           {
             const char *arg = poptGetOptArg (optCon);
 
-            assert (arg != NULL);
+            vcd_assert (arg != NULL);
             
             _add_dir (arg, "");
           }
@@ -348,7 +348,7 @@ main (int argc, const char *argv[])
             const char *arg = poptGetOptArg (optCon);
             char *fname1 = NULL, *fname2 = NULL;
 
-            assert (arg != NULL);
+            vcd_assert (arg != NULL);
 
             if(!_parse_file_arg (arg, &fname1, &fname2)) 
               gl_add_file (fname1, fname2, (opt == CL_ADD_FILE_RAW));
@@ -457,7 +457,7 @@ main (int argc, const char *argv[])
     {
       VcdDataSource *data_source = vcd_data_source_new_stdio (gl.track_fnames[n]);
 
-      assert (data_source != NULL);
+      vcd_assert (data_source != NULL);
 
       vcd_obj_append_sequence_play_item (gl_vcd_obj,
                                          vcd_mpeg_source_new (data_source),

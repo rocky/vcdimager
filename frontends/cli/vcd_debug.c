@@ -22,13 +22,13 @@
 # include "config.h"
 #endif
 
-#include <assert.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
+
 #include <popt.h>
-#include <errno.h>
 
 #include <libvcd/vcd_assert.h>
 #include <libvcd/vcd_bitvec.h>
@@ -223,12 +223,12 @@ _visit_pbc (debug_obj_t *obj, unsigned lid, unsigned offset, bool in_lot)
   unsigned psd_size = _get_psd_size (obj);
   unsigned _rofs = offset * obj->info.offset_mult;
 
-  assert (psd_size % 8 == 0);
+  vcd_assert (psd_size % 8 == 0);
 
   if (offset == 0xffff)
     return;
 
-  assert (_rofs < psd_size);
+  vcd_assert (_rofs < psd_size);
 
   if (!obj->offset_list)
     obj->offset_list = _vcd_list_new ();
@@ -777,7 +777,7 @@ _strip_trail (const char str[], size_t n)
   static char buf[1024];
   int j;
 
-  assert (n < 1024);
+  vcd_assert (n < 1024);
 
   strncpy (buf, str, n);
   buf[n] = '\0';
@@ -870,7 +870,7 @@ find_sect_by_fileid (VcdImageSource *img, uint32_t start, uint32_t end,
 {
   uint32_t sect;
 
-  assert (strlen (file_id) == 8);
+  vcd_assert (strlen (file_id) == 8);
 
   for (sect = start; sect < end; sect++)
     {
@@ -1133,7 +1133,7 @@ main (int argc, const char *argv[])
           VcdDataSource *bin_source;
 
           bin_source = vcd_data_source_new_stdio (gl_source_name);
-          assert (bin_source != NULL);
+          vcd_assert (bin_source != NULL);
 
           img_src = vcd_image_source_new_bincue (bin_source, NULL, gl_sector_2336_flag);
         }
@@ -1143,7 +1143,7 @@ main (int argc, const char *argv[])
         exit (EXIT_FAILURE);
       }
 
-    assert (img_src != NULL);
+    vcd_assert (img_src != NULL);
 
     dump (img_src, gl_source_name);
 

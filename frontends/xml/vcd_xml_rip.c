@@ -22,7 +22,6 @@
 # include "config.h"
 #endif
 
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -59,7 +58,7 @@ _strip_trail (const char str[], size_t n)
   static char buf[1024];
   int j;
 
-  assert (n < 1024);
+  vcd_assert (n < 1024);
 
   strncpy (buf, str, n);
   buf[n] = '\0';
@@ -81,7 +80,7 @@ _parse_pvd (struct vcdxml_t *obj, VcdImageSource *img)
   struct iso_primary_descriptor pvd;
 
   memset (&pvd, 0, sizeof (struct iso_primary_descriptor));
-  assert (sizeof (struct iso_primary_descriptor) == ISO_BLOCKSIZE);
+  vcd_assert (sizeof (struct iso_primary_descriptor) == ISO_BLOCKSIZE);
 
   vcd_image_source_read_mode2_sector (img, &pvd, ISO_PVD_SECTOR, false);
 
@@ -115,7 +114,7 @@ _parse_info (struct vcdxml_t *obj, VcdImageSource *img)
   vcd_type_t _vcd_type = VCD_TYPE_INVALID;
 
   memset (&info, 0, sizeof (InfoVcd));
-  assert (sizeof (InfoVcd) == ISO_BLOCKSIZE);
+  vcd_assert (sizeof (InfoVcd) == ISO_BLOCKSIZE);
 
   vcd_image_source_read_mode2_sector (img, &info, INFO_VCD_SECTOR, false);
 
@@ -174,7 +173,7 @@ _parse_info (struct vcdxml_t *obj, VcdImageSource *img)
       return -1;
       break;
     default:
-      assert (0);
+      vcd_assert_not_reached ();
       break;
     }
 
@@ -204,7 +203,7 @@ _parse_info (struct vcdxml_t *obj, VcdImageSource *img)
 
     segment_start -= 150;
 
-    assert (segment_start % 75 == 0);
+    vcd_assert (segment_start % 75 == 0);
 
     obj->info.segments_start = segment_start;
 
@@ -229,7 +228,7 @@ _parse_info (struct vcdxml_t *obj, VcdImageSource *img)
 	    n++;
 	  }
 
-	assert (_segment != NULL);
+	vcd_assert (_segment != NULL);
 
 	_segment->segments_count++;
       }
@@ -246,7 +245,7 @@ _parse_entries (struct vcdxml_t *obj, VcdImageSource *img)
   uint8_t ltrack;
 
   memset (&entries, 0, sizeof (EntriesVcd));
-  assert (sizeof (EntriesVcd) == ISO_BLOCKSIZE);
+  vcd_assert (sizeof (EntriesVcd) == ISO_BLOCKSIZE);
 
   vcd_image_source_read_mode2_sector (img, &entries, ENTRIES_VCD_SECTOR, false);
 
@@ -270,10 +269,10 @@ _parse_entries (struct vcdxml_t *obj, VcdImageSource *img)
       bool newtrack = (track != ltrack);
       ltrack = track;
       
-      assert (extent >= 150);
+      vcd_assert (extent >= 150);
       extent -= 150;
 
-      assert (track >= 2);
+      vcd_assert (track >= 2);
       track -= 2;
 
       if (newtrack)
@@ -489,8 +488,8 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
 	_pbc->next_id = _xstrdup (_ofs2id (UINT16_FROM_BE (d->next_ofs), _ctx));
 	_pbc->retn_id = _xstrdup (_ofs2id (UINT16_FROM_BE (d->return_ofs), _ctx));
 
-	assert (UINT16_FROM_BE (d->default_ofs) != 0xfffe);
-	assert (UINT16_FROM_BE (d->default_ofs) != 0xfffd); /* fixme -- multidef lists
+	vcd_assert (UINT16_FROM_BE (d->default_ofs) != 0xfffe);
+	vcd_assert (UINT16_FROM_BE (d->default_ofs) != 0xfffd); /* fixme -- multidef lists
 							       not supported yet */
 	if (_ofs2id (UINT16_FROM_BE (d->default_ofs), _ctx))
 	  _vcd_list_append (_pbc->default_id_list,
@@ -535,12 +534,12 @@ _visit_pbc (struct _pbc_ctx *obj, unsigned lid, unsigned offset, bool in_lot)
   offset_t *ofs;
   unsigned _rofs = offset * obj->offset_mult;
 
-  assert (obj->psd_size % 8 == 0);
+  vcd_assert (obj->psd_size % 8 == 0);
 
   if (offset == 0xffff)
     return;
 
-  assert (_rofs < obj->psd_size);
+  vcd_assert (_rofs < obj->psd_size);
 
   if (!obj->offset_list)
     obj->offset_list = _vcd_list_new ();
@@ -714,7 +713,7 @@ _rip_segments (struct vcdxml_t *obj, VcdImageSource *img)
 
   start_extent = obj->info.segments_start;
 
-  assert (start_extent % 75 == 0);
+  vcd_assert (start_extent % 75 == 0);
 
   _VCD_LIST_FOREACH (node, obj->segment_list)
     {
@@ -722,7 +721,7 @@ _rip_segments (struct vcdxml_t *obj, VcdImageSource *img)
       uint32_t n;
       FILE *outfd = NULL;
 
-      assert (_seg->segments_count > 0);
+      vcd_assert (_seg->segments_count > 0);
 
       vcd_info ("extracting %s... (start lsn %d, %d segments)",
 		_seg->src, start_extent, _seg->segments_count);
@@ -1048,7 +1047,7 @@ main (int argc, const char *argv[])
       VcdDataSource *bin_source;
 
       bin_source = vcd_data_source_new_stdio (img_fname);
-      assert (bin_source != NULL);
+      vcd_assert (bin_source != NULL);
 
       img_src = vcd_image_source_new_bincue (bin_source, NULL, sector_2336_flag);
     }
@@ -1057,7 +1056,7 @@ main (int argc, const char *argv[])
   else
     vcd_assert_not_reached ();
 
-  assert (img_src != NULL);
+  vcd_assert (img_src != NULL);
 
   /* start with ISO9660 PVD */
   _parse_pvd (&obj, img_src);

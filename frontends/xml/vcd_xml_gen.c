@@ -24,7 +24,6 @@
 
 #include <sys/types.h>
 
-#include <assert.h>
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -134,8 +133,8 @@ _add_dir (struct vcdxml_t *obj, const char pathname[],
   DIR *dir = NULL;
   struct dirent *dentry = NULL;
 
-  assert (pathname != NULL);
-  assert (iso_pathname != NULL);
+  vcd_assert (pathname != NULL);
+  vcd_assert (iso_pathname != NULL);
 
   dir = opendir (pathname);
 
@@ -318,7 +317,7 @@ main (int argc, const char *argv[])
           {
             const char *arg = poptGetOptArg (optCon);
 
-            assert (arg != NULL);
+            vcd_assert (arg != NULL);
             
             _add_dir (&obj, arg, "");
           }
@@ -330,7 +329,7 @@ main (int argc, const char *argv[])
             const char *arg = poptGetOptArg (optCon);
             char *fname1 = NULL, *fname2 = NULL;
 
-            assert (arg != NULL);
+            vcd_assert (arg != NULL);
 
             if(!_parse_file_arg (arg, &fname1, &fname2)) 
               {

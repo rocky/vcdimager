@@ -23,7 +23,6 @@
 #endif
 
 #include <string.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -43,7 +42,7 @@ bool vcd_xml_master (const struct vcdxml_t *obj, const char cue_fname[],
   VcdListNode *node;
   int idx;
 
-  assert (obj != NULL);
+  vcd_assert (obj != NULL);
 
   _vcd = vcd_obj_new (obj->vcd_type);
 
@@ -80,7 +79,7 @@ bool vcd_xml_master (const struct vcdxml_t *obj, const char cue_fname[],
 	  VcdDataSource *_source = 
 	    vcd_data_source_new_stdio (dentry->file_src);
 	  
-	  assert (_source != NULL);
+	  vcd_assert (_source != NULL);
 
 	  vcd_obj_add_file (_vcd, dentry->name, _source, dentry->file_raw);
 	}
@@ -97,7 +96,7 @@ bool vcd_xml_master (const struct vcdxml_t *obj, const char cue_fname[],
 
       vcd_debug ("adding item #%d, %s", idx, item->src);
 
-      assert (_source != NULL);
+      vcd_assert (_source != NULL);
 
       vcd_obj_append_segment_play_item (_vcd,
 					vcd_mpeg_source_new (_source),
@@ -118,7 +117,7 @@ bool vcd_xml_master (const struct vcdxml_t *obj, const char cue_fname[],
       vcd_debug ("adding sequence #%d, %s", idx, sequence->src);
 
       data_source = vcd_data_source_new_stdio (sequence->src);
-      assert (data_source != NULL);
+      vcd_assert (data_source != NULL);
 
       vcd_obj_append_sequence_play_item (_vcd,
 					 vcd_mpeg_source_new (data_source),

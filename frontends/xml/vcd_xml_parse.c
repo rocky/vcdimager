@@ -26,7 +26,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
@@ -147,7 +146,7 @@ _parse_info (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 	obj->info.use_sequence2 = true;
       GET_ELSE GET_ELEM_ ("next-volume-use-lid2", doc, cur, ns)
 	obj->info.use_lid2 = true;
-      GET_ELSE assert (0);
+      GET_ELSE vcd_assert_not_reached ();
     }
 
   return false;
@@ -172,7 +171,7 @@ _parse_pvd (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
       GET_ELSE GET_ELEM_STR (obj->pvd.application_id, "application-id", doc, cur, ns);
       GET_ELSE GET_ELEM_STR (obj->pvd.preparer_id, "preparer-id", doc, cur, ns);
       GET_ELSE GET_ELEM_STR (obj->pvd.publisher_id, "publisher-id", doc, cur, ns);
-      GET_ELSE assert (0);
+      GET_ELSE vcd_assert_not_reached ();
     }
 
   return false;
@@ -204,7 +203,7 @@ _parse_segments (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr 
 	  _vcd_list_append (obj->segment_list, _item);
 	}
       else
-	assert (0);
+	vcd_assert_not_reached ();
 
       if (rc)
 	return rc;
@@ -278,7 +277,7 @@ _parse_pbc_selection (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlN
 	  xmlChar *_default_ref = NULL;
 
 	  GET_PROP_STR (_default_ref, "ref", doc, cur, ns); 
-	  assert (_default_ref != NULL);
+	  vcd_assert (_default_ref != NULL);
 	  _vcd_list_append (_pbc->default_id_list, _default_ref);
 	}
       else if (!xmlStrcmp (cur->name, "select"))
@@ -286,11 +285,11 @@ _parse_pbc_selection (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlN
 	  xmlChar *_select_ref = NULL;
 
 	  GET_PROP_STR (_select_ref, "ref", doc, cur, ns); 
-	  assert (_select_ref != NULL);
+	  vcd_assert (_select_ref != NULL);
 	  _vcd_list_append (_pbc->select_id_list, _select_ref);
 	}
       else
-	assert (0);
+	vcd_assert_not_reached ();
     }
 
   _vcd_list_append (obj->pbc_list, _pbc);
@@ -330,11 +329,11 @@ _parse_pbc_playlist (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNs
 	  xmlChar *_item_ref = NULL;
 
 	  GET_PROP_STR (_item_ref, "ref", doc, cur, ns); 
-	  assert (_item_ref != NULL);
+	  vcd_assert (_item_ref != NULL);
 	  _vcd_list_append (_pbc->item_id_list, _item_ref);
 	}
       else
-	assert (0);
+	vcd_assert_not_reached ();
     }
 
   _vcd_list_append (obj->pbc_list, _pbc);
@@ -358,7 +357,7 @@ _parse_pbc_endlist (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsP
 	continue; 
       
       printf ("%s %s -- sorry, not fully implemented yet\n", __PRETTY_FUNCTION__, cur->name);
-      assert (0);
+      vcd_assert_not_reached ();
     }
 
   _vcd_list_append (obj->pbc_list, _pbc);
@@ -385,7 +384,7 @@ _parse_pbc (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
       else if (!xmlStrcmp (cur->name, "endlist")) 
 	rc = _parse_pbc_endlist (obj, doc, cur, ns);
       else 
-	assert (0);
+	vcd_assert_not_reached ();
 
       if (rc)
 	return rc;
@@ -438,7 +437,7 @@ _parse_mpeg_sequence (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlN
 	  _vcd_list_append (sequence->autopause_list, _ap_ts);
 	}
       else
-	assert (0);
+	vcd_assert_not_reached ();
     }
 
   return false;
@@ -460,7 +459,7 @@ _parse_sequences (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr
       if (!xmlStrcmp (cur->name, "sequence-item")) 
 	rc = _parse_mpeg_sequence (obj, doc, cur, ns);
       else
-	assert (0);
+	vcd_assert_not_reached ();
 
       if (rc)
 	return rc;
@@ -481,10 +480,10 @@ _parse_file (struct vcdxml_t *obj, const char path[], xmlDocPtr doc, xmlNodePtr 
   xmlChar *_src = NULL;
   xmlChar *_format = NULL;
 
-  assert (path != NULL);
+  vcd_assert (path != NULL);
 
   GET_PROP_STR (_src, "src", doc, node, ns);
-  assert (_src != NULL);
+  vcd_assert (_src != NULL);
 
   GET_PROP_STR (_format, "format", doc, node, ns);
 
@@ -495,7 +494,7 @@ _parse_file (struct vcdxml_t *obj, const char path[], xmlDocPtr doc, xmlNodePtr 
 
 
       GET_ELEM_STR (_name, "name", doc, cur, ns);
-      GET_ELSE assert (0);
+      GET_ELSE vcd_assert_not_reached ();
     }
 
   if (!_name)
@@ -527,7 +526,7 @@ _parse_folder (struct vcdxml_t *obj, const char path[], xmlDocPtr doc, xmlNodePt
   xmlNodePtr cur;
   char *new_path = NULL;
 
-  assert (path != NULL);
+  vcd_assert (path != NULL);
 
   FOR_EACH (cur, node)
     {
@@ -540,11 +539,11 @@ _parse_folder (struct vcdxml_t *obj, const char path[], xmlDocPtr doc, xmlNodePt
 	{
 	  xmlChar *_tmp;
 
-	  assert (new_path == NULL);
+	  vcd_assert (new_path == NULL);
 
 	  _tmp = xmlNodeListGetString (doc, cur->xmlChildrenNode, 1);
 
-	  assert (_tmp != NULL);
+	  vcd_assert (_tmp != NULL);
 
 	  new_path = malloc (strlen (path) + strlen (_tmp) + 1 + 1);
 	  strcpy (new_path, path);
@@ -572,7 +571,7 @@ _parse_folder (struct vcdxml_t *obj, const char path[], xmlDocPtr doc, xmlNodePt
       else if (!xmlStrcmp (cur->name, "file"))
 	rc = _parse_file (obj, new_path, doc, cur, ns);
       else 
-	assert (0);
+	vcd_assert_not_reached ();
       
       if (new_path == NULL)
 	rc = true;
@@ -601,7 +600,7 @@ _parse_filesystem (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPt
       else if (!xmlStrcmp (cur->name, "file"))
 	rc = _parse_file (obj, "", doc, cur, ns);
       else 
-	assert (0);
+	vcd_assert_not_reached ();
 
       if (rc)
 	return rc;
@@ -647,7 +646,7 @@ _parse_videocd (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr n
   xmlChar *_class = NULL;
   xmlChar *_version = NULL;
 
-  assert (obj != NULL);
+  vcd_assert (obj != NULL);
 
   GET_PROP_STR (_class, "class", doc, node, ns);
   GET_PROP_STR (_version, "version", doc, node, ns);
@@ -692,9 +691,9 @@ _parse_videocd (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr n
 bool
 vcd_xml_parse (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
-  assert (obj != NULL);
-  assert (node != NULL);
-  assert (doc != NULL);
+  vcd_assert (obj != NULL);
+  vcd_assert (node != NULL);
+  vcd_assert (doc != NULL);
 
   if (xmlStrcmp (node->name, "videocd") || (node->ns != ns))
     {

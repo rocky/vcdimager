@@ -1,5 +1,7 @@
 2001-05-26  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* frontends: s/assert/vcd_assert/g
+	
 	* libvcd/vcd_image_linuxcd.c: added image source implementation for linux cdrom
 
 	* frontends/xml/vcd_xml_rip.c: detect rejected pbc nodes, 

@@ -22,7 +22,6 @@
 # include "config.h"
 #endif
 
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -61,7 +60,7 @@ _get_file_node (xmlDocPtr doc, xmlNodePtr cur, xmlNsPtr ns, const char pathname[
           if (xmlStrcmp (n->name, (const xmlChar *) "folder"))
             continue;
 
-          assert (!xmlStrcmp (n->children->name, "name"));
+          vcd_assert (!xmlStrcmp (n->children->name, "name"));
 
           tmp = xmlNodeListGetString (doc, n->children->children, 1);
 
@@ -129,10 +128,9 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
       xmlSetProp (vcd_node, "version", "1.1");
       break;
     default:
-      assert (0);
+      vcd_assert_not_reached ();
       break;
     }
-
 
   /* options */
 
@@ -339,7 +337,7 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 	      break;
 
 	    default:
-	      assert (0);
+	      vcd_assert_not_reached ();
 	    }
 	  
 	  xmlSetProp (pl, "id", _pbc->id);
