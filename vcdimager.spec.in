@@ -4,7 +4,7 @@
 %define  RELEASE 1
 %define  rel     %{?CUSTOM_RELEASE} %{!?CUSTOM_RELEASE:%RELEASE}
 
-Summary:        A VideoCD (VCD) image mastering and ripping tool
+Summary:        (Super)Video CD image mastering and ripping tool
 Name:           @PACKAGE@
 Version:        @VERSION@
 Release:        %rel
@@ -15,7 +15,7 @@ Source:         http://www.gnu.org/pub/gnu/%{name}/%{name}-%{version}.tar.gz
 URL:            http://www.gnu.org/software/vcdimager/
 BuildRoot:      %{_tmppath}/%{name}-root
 Requires:	libxml2 >= 2.3.8
-BuildPrereq:	libxml2-devel >= 2.3.8, popt >= 1.6
+BuildPrereq:	libxml2-devel >= 2.3.8, popt >= 1.6, texinfo
 
 %description 
 GNU VCDImager is a full-featured mastering suite for authoring,
@@ -39,12 +39,11 @@ vcdxminfo   Debugging tool for displaying MPEG stream properties.
 cdxa2mpeg   Simple tool for converting RIFF CDXA file to plain mpeg.
 
 %prep
-rm -rf "$RPM_BUILD_ROOT"
 %setup -q
 
 %build
-rm -rf "$RPM_BUILD_ROOT"
 %configure
+make all
 make -C docs/ vcdimager.ps.gz
 
 %post
@@ -58,12 +57,12 @@ if [ $1 = 0 ]; then
 fi
 
 %install
-rm -rf "$RPM_BUILD_ROOT"
-make DESTDIR="$RPM_BUILD_ROOT" install
-rm -vf "$RPM_BUILD_ROOT/%{_infodir}/dir"
+rm -rf %{buildroot}
+%makeinstall
+rm -vf "%{buildroot}/%{_infodir}/dir"
 
 %clean
-rm -rf "$RPM_BUILD_ROOT"
+rm -rf %{buildroot}
 
 %files
 %defattr(-, root, root)
@@ -74,6 +73,9 @@ rm -rf "$RPM_BUILD_ROOT"
 %{_mandir}/man1/*
 
 %changelog
+* Sat Jan 04 2001 Herbert Valerio Riedel <hvr@gnu.org>
+- minor spec cleanups
+
 * Sat Jan 20 2001 Herbert Valerio Riedel <hvr@gnu.org>
 - added THANKS file as doc
 
