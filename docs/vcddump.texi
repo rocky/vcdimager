@@ -70,7 +70,7 @@ Copyright (C) 2003 Rocky Bernstein
 * Introduction::        What is the program and why would I use it? 
 * Command Options::     How do I get this to do anything? 
 * Output Sections::     How do interpret the output? 
-* Some examples::       Okay, enough talk. How about some simple examples?
+* Some Examples::       Okay, enough talk. How about some simple examples?
 @end menu
 @end ifnottex
 
@@ -162,8 +162,8 @@ which specify where the CD-ROM or CD-ROM disk-image is.
 * Other Options::     Other miscellaneous options
 @end menu
 
-@node Where options
-@section `Options controlling where to read from 
+@node Where Options
+@section Options controlling where to read from 
 
 @subsection BIN or CUE file
 
@@ -227,7 +227,7 @@ Althought this algorithm is subject to change and there may be more
 sophisticated or alternative methods, in practice I think this does
 pretty much what's expected. 
 
-@node Where options
+@node What Options
 @section Options controlling what do you want shown
 
 @value{program} is pretty flexible about the information it can show
@@ -627,7 +627,7 @@ get this information has to come from the CUE file which is why it is
 better to specify a CUE file than a BIN file.
 
 @node Some Examples
-@section Some simple command invocations.
+@chapter Some simple command invocations.
 
 Perhaps you want to dump all information about the CD that is
 currently sitting in your CD-ROM drive. If this location has a name
