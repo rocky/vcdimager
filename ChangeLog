@@ -1,3 +1,8 @@
+2001-08-31  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_image_bsdicd.c: integrated fixes by
+		Steven M. Schultz <sms@TO.GD-ES.COM>
+
 2001-08-30  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_image_bsdicd.c: new driver for BSD/OS CDROM devices

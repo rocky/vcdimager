@@ -35,8 +35,8 @@ static const char _rcsid[] = "$Id$";
 #if defined(__bsdi__)
 /* && defined(SCSIRAWCDB) */
 
-#include <dev/scsi/scsi.h>
-#include <dev/scsi/scsi_ioctl.h>
+#include </sys/dev/scsi/scsi.h>
+#include </sys/dev/scsi/scsi_ioctl.h>
 
 #include <sys/stat.h>
 #include <sys/ioctl.h>
@@ -48,8 +48,6 @@ static const char _rcsid[] = "$Id$";
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
-
-#include <linux/cdrom.h>
 
 /* reader */
 
@@ -118,17 +116,17 @@ _set_bsize (int fd, unsigned bsize)
     uint8_t block_length_lo;
   } mh;
 
-  struct  scsi_user_cdb suc; 
+  struct scsi_user_cdb suc; 
 
   memset (&mh, 0, sizeof (mh));
-  memset (&suc, 0, sizeof (struct  scsi_user_cdb));
+  memset (&suc, 0, sizeof (struct scsi_user_cdb));
   
   suc.suc_cdb[0] = 0x15;
   suc.suc_cdb[1] = 1 << 4;
   suc.suc_cdb[4] = 12;
   suc.suc_cdblen = 6;;
 
-  suc.suc_data = &mh;
+  suc.suc_data = (u_char *)&mh;
   suc.suc_datalen = sizeof (mh);
 
   suc.suc_timeout = 500;
@@ -146,12 +144,9 @@ static int
 _read_mode2 (int fd, void *buf, uint32_t lba, unsigned nblocks, 
 	     bool _workaround)
 {
-  struct  scsi_user_cdb suc; 
-  uint8_t buf[12] = { 0, };
+  struct scsi_user_cdb suc; 
 
-  uint32_t retval;
-
-  memset (&suc, 0, sizeof (struct  scsi_user_cdb));
+  memset (&suc, 0, sizeof (struct scsi_user_cdb));
 
   suc.suc_cdb[0] = (_workaround 
 		    ? 0x28 /* CMD_READ_10 */
@@ -180,7 +175,7 @@ _read_mode2 (int fd, void *buf, uint32_t lba, unsigned nblocks,
   suc.suc_timeout = 500;
   suc.suc_flags = SUC_READ;
 
-  if (ioctl (_obj->fd, SCSIRAWCDB, &suc))
+  if (ioctl (fd, SCSIRAWCDB, &suc))
     {
       vcd_error ("ioctl (SCSIRAWCDB): %s", strerror (errno));
       return 0;
@@ -269,12 +264,14 @@ _stat_size (void *user_data)
 {
   _img_bsdicd_src_t *_obj = user_data;
 
-  struct  scsi_user_cdb suc; 
+  struct scsi_user_cdb suc; 
   uint8_t buf[12] = { 0, };
 
   uint32_t retval;
 
-  memset (&suc, 0, sizeof (struct  scsi_user_cdb));
+  _source_init(_obj);
+
+  memset (&suc, 0, sizeof (struct scsi_user_cdb));
 
   suc.suc_cdb[0] = 0x43; /* CMD_READ_TOC_PMA_ATIP */
   suc.suc_cdb[1] = 0; /* lba; msf: 0x2 */

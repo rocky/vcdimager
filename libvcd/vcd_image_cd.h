@@ -31,7 +31,7 @@ vcd_image_source_new_cd (void)
 #if defined(__linux__)
   return vcd_image_source_new_linuxcd ();
 #elif defined(__bsdi__)
-  return vcd_image_source_new_bsdcd ();
+  return vcd_image_source_new_bsdicd ();
 #else
   vcd_error ("no CD-ROM image driver available for this architecture (%s)",
 	     HOST_ARCH);
