@@ -2131,8 +2131,8 @@ _write_vcd_iso_track (VcdObj *obj, const time_t *create_time)
     {
       custom_file_t *p = _vcd_list_node_data (node);
         
-      vcd_info ("writing file `%s' (%d bytes%s)", 
-                p->iso_pathname, p->size, 
+      vcd_info ("writing file `%s' (%lu bytes%s)", 
+                p->iso_pathname, (unsigned long) p->size, 
                 p->raw_flag ? ", raw sectors file": "");
       if (p->raw_flag)
         _write_source_mode2_raw (obj, p->file, p->start_extent);
