@@ -149,7 +149,7 @@ SVCD/TRACKS.SVD
  track[02]: 00:01:06, audio: 1 stream, video: PAL stream, OGT stream: None
  track[03]: 00:01:06, audio: 1 stream, video: PAL stream, OGT stream: None
 
-(VCD3.0 interpretation)
+CVD interpretation (probably)
 (track[00]: 00:01:06 (cumulated), audio: 01, ogt: 00)
 (track[01]: 06:00:01 (cumulated), audio: 00, ogt: 06)
 (track[02]: 01:06:1d (cumulated), audio: 1d, ogt: 1d)
