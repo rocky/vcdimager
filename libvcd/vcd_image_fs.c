@@ -52,7 +52,6 @@ _idr2statbuf (const struct iso_directory_record *idr, vcd_image_stat_t *buf)
   buf->secsize = _vcd_len2blocks (buf->size, ISO_BLOCKSIZE);
 
   su_length = idr->length - sizeof (struct iso_directory_record);
-  vcd_debug ("%d", su_length);
   su_length -= idr->name_len;
 
   if (su_length % 2)
@@ -61,7 +60,7 @@ _idr2statbuf (const struct iso_directory_record *idr, vcd_image_stat_t *buf)
   if (su_length < 0 || su_length < sizeof (vcd_xa_t))
     return;
 
-  xa_data = ((char *) idr) + (idr->length - su_length);
+  xa_data = (void *) (((char *) idr) + (idr->length - su_length));
 
   if (xa_data->signature[0] != 'X' 
       || xa_data->signature[1] != 'A')

@@ -1,6 +1,10 @@
 2001-06-06  Herbert Valerio Riedel  <hvr@gnu.org>
 
-	* frontends/cli/vcd_debug.c (dump_fs): make use of vcd_image_fs api
+	* frontends/xml/vcd_xml_dump.c (_get_node): fixed special case of
+		top-level filesystem
+
+	* frontends/cli/vcd_debug.c: make use of vcd_image_fs api, 
+		various cleanups
 
 	* libvcd/vcd_data_structures.c (_vcd_tree_node_traverse_bf): 
 		new breadth-first tree traversal implemented

@@ -560,13 +560,13 @@ detect_type (debug_obj_t *obj)
       {
       case INFO_VERSION_VCD2:
         if (obj->info.sys_prof_tag != INFO_SPTAG_VCD2)
-          vcd_warn ("unexpected system profile tag encountered");
+          vcd_warn ("INFO.VCD: unexpected system profile tag encountered");
         obj->vcd_type = VCD_TYPE_VCD2;
         break;
 
       case INFO_VERSION_VCD11:
         if (obj->info.sys_prof_tag != INFO_SPTAG_VCD11)
-          vcd_warn ("unexpected system profile tag encountered");
+          vcd_warn ("INFO.VCD: unexpected system profile tag encountered");
         obj->vcd_type = VCD_TYPE_VCD11;
         break;
 
@@ -579,12 +579,12 @@ detect_type (debug_obj_t *obj)
       {
       case INFO_VERSION_SVCD:
         if (obj->info.sys_prof_tag != INFO_SPTAG_VCD2)
-          vcd_warn ("unexpected system profile tag value -- assuming svcd");
+          vcd_warn ("INFO.SVD: unexpected system profile tag value -- assuming svcd");
         obj->vcd_type = VCD_TYPE_SVCD;
         break;
         
       default:
-        vcd_warn ("unexpected svcd version...");
+        vcd_warn ("INFO.SVD: unexpected version value seen -- still assuming svcd");
         obj->vcd_type = VCD_TYPE_SVCD;
         break;
       }
@@ -1023,33 +1023,12 @@ dump_all (const debug_obj_t *obj)
   fprintf (stdout, DELIM);
 }
 
-static uint32_t
-find_sect_by_fileid (VcdImageSource *img, uint32_t start, uint32_t end, 
-                     const char file_id[])
-{
-  uint32_t sect;
-
-  vcd_assert (strlen (file_id) == 8);
-
-  for (sect = start; sect < end; sect++)
-    {
-      char _buf[ISO_BLOCKSIZE] = { 0, };
-      
-      if (vcd_image_source_read_mode2_sector (img, _buf, sect, false)) 
-        break; 
-
-      if (!strncmp (_buf, file_id, 8))
-        return sect;
-    }
-  
-  return SECTOR_NIL;
-}
-
 static void
 dump (VcdImageSource *img, const char image_fname[])
 {
   unsigned size, psd_size;
   debug_obj_t obj;
+  vcd_image_stat_t statbuf;
 
   fprintf (stdout, DELIM);
 
@@ -1100,60 +1079,110 @@ dump (VcdImageSource *img, const char image_fname[])
       if (vcd_image_source_read_mode2_sectors (img, (void *) obj.psd, PSD_VCD_SECTOR, false,
                                                _vcd_len2blocks (psd_size, ISO_BLOCKSIZE)))
         exit (EXIT_FAILURE);
+
+      /* ISO9660 crosscheck */
+      if (vcd_image_source_fs_stat (img, 
+                                    (obj.vcd_type == VCD_TYPE_SVCD 
+                                     ? "/SVCD/PSD.SVD;1" 
+                                     : "/VCD/PSD.VCD;1"),
+                                    &statbuf))
+        vcd_warn ("no PSD file entry found in ISO9660 fs");
+      else
+        {
+          if (psd_size != statbuf.size)
+            vcd_warn ("ISO9660 psd size != INFO psd size");
+          if (statbuf.lsn != PSD_VCD_SECTOR)
+            vcd_warn ("psd fileentry in ISO9660 not at fixed lsn");
+        }
+          
     }
 
-  {
-    char tmp[ISO_BLOCKSIZE] = { 0, };
-    uint32_t n;
+  if (obj.vcd_type == VCD_TYPE_SVCD)
+    {
+      if (!vcd_image_source_fs_stat (img, "MPEGAV", &statbuf))
+        vcd_warn ("non compliant /MPEGAV folder detected!");
 
-    n = find_sect_by_fileid (img, LOT_VCD_SECTOR, 225, TRACKS_SVD_FILE_ID);
+      if (vcd_image_source_fs_stat (img, "SVCD/TRACKS.SVD;1", &statbuf))
+        vcd_warn ("mandatory /SVCD/TRACKS.SVD not found!");
+      else
+        {
+          vcd_debug ("found TRACKS.SVD signature at sector %d", statbuf.lsn);
 
-    if (n != SECTOR_NIL)
-      {
-        obj.tracks_buf = _vcd_malloc (ISO_BLOCKSIZE);
+          if (statbuf.size != ISO_BLOCKSIZE)
+            vcd_warn ("TRACKS.SVD filesize != 2048!");
+
+          obj.tracks_buf = _vcd_malloc (ISO_BLOCKSIZE);
         
-        if (vcd_image_source_read_mode2_sector (img, obj.tracks_buf, n, false))
-          exit (EXIT_FAILURE);
+          if (vcd_image_source_read_mode2_sector (img, obj.tracks_buf, 
+                                                  statbuf.lsn, false))
+            exit (EXIT_FAILURE);
+        }
 
-        vcd_debug ("found TRACKS.SVD signature at sector %d", n);
-      }
-    else
-      vcd_debug ("no TRACKS.SVD signature found");
+      if (vcd_image_source_fs_stat (img, "SVCD/SEARCH.DAT;1", &statbuf))
+        vcd_warn ("mandatory /SVCD/SEARCH.DAT not found!");
+      else
+        {
+          uint32_t size;
 
-    n = find_sect_by_fileid (img, LOT_VCD_SECTOR, 225, SEARCH_FILE_ID);
-    
-    if (n != SECTOR_NIL)
-      {
-        uint32_t m;
+          vcd_debug ("found SEARCH.DAT at sector %d", statbuf.lsn);
 
-        uint32_t size;
-        uint32_t sectors;
+          obj.search_buf = _vcd_malloc (ISO_BLOCKSIZE * statbuf.secsize);
 
-        if (vcd_image_source_read_mode2_sector (img, tmp, n, false))
-          exit (EXIT_FAILURE);
+          if (vcd_image_source_read_mode2_sectors (img, obj.search_buf,
+                                                   statbuf.lsn, false, statbuf.secsize))
+            exit (EXIT_FAILURE);
 
-        size = (3 * UINT16_FROM_BE (((SearchDat *)tmp)->scan_points)) 
-          + sizeof (SearchDat);
+          size = (3 * UINT16_FROM_BE (((SearchDat *)obj.search_buf)->scan_points)) 
+            + sizeof (SearchDat);
+          
+          if (size > statbuf.size)
+            {
+              vcd_warn ("number of scanpoints leads to bigger size than "
+                        "file size of SEARCH.DAT! -- rereading");
 
-        sectors = _vcd_len2blocks (size, ISO_BLOCKSIZE);
+              free (obj.search_buf);
+              obj.search_buf = _vcd_malloc (ISO_BLOCKSIZE * _vcd_len2blocks (size, ISO_BLOCKSIZE));
+          
+              if (vcd_image_source_read_mode2_sectors (img, obj.search_buf,
+                                                       statbuf.lsn, false, statbuf.secsize))
+                exit (EXIT_FAILURE);
+            }
+        }
+    }
 
-        vcd_debug ("found SEARCH.DAT signature at sector %d", n);
+  if (!vcd_image_source_fs_stat (img, "EXT/SCANDATA.DAT;1", &statbuf))
+    {
+      vcd_debug ("found /EXT/SCANDATA.DAT at sector %d", statbuf.lsn);
+    }
 
-        obj.search_buf = _vcd_malloc (sectors * ISO_BLOCKSIZE);
+  if (obj.vcd_type == VCD_TYPE_VCD2)
+    {
+      if (!vcd_image_source_fs_stat (img, "EXT/PSD_X.VCD;1", &statbuf))
+        {
+          vcd_debug ("found /EXT/PSD_X.VCD at sector %d", statbuf.lsn);
 
-        for (m = 0; m < sectors;m++)
-          {
-            char *p = obj.search_buf;
-            p += ISO_BLOCKSIZE * m;
-            
-            if (vcd_image_source_read_mode2_sector (img, p, m + n, false))
-              exit (EXIT_FAILURE);
-          }
-      }
-    else
-      vcd_debug ("no SEARCH.DAT signature found");
-  }
-  
+          obj.psd_x = _vcd_malloc (ISO_BLOCKSIZE * statbuf.secsize);
+          obj.psd_x_size = statbuf.size;
+
+          if (vcd_image_source_read_mode2_sectors (img, obj.psd_x,
+                                                   statbuf.lsn, false, statbuf.secsize))
+            exit (EXIT_FAILURE);
+        }
+
+      if (!vcd_image_source_fs_stat (img, "EXT/LOT_X.VCD;1", &statbuf))
+        {
+          vcd_debug ("found /EXT/LOT_X.VCD at sector %d", statbuf.lsn);
+
+          obj.lot_x = _vcd_malloc (ISO_BLOCKSIZE * statbuf.secsize);
+
+          if (vcd_image_source_read_mode2_sectors (img, obj.lot_x,
+                                                   statbuf.lsn, false, statbuf.secsize))
+            exit (EXIT_FAILURE);
+
+          if (statbuf.size != LOT_VCD_SIZE * ISO_BLOCKSIZE)
+            vcd_warn ("LOT_X.VCD size != 65535");
+        }
+    }
 
   dump_all (&obj);
 

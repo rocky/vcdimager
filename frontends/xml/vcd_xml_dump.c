@@ -65,13 +65,17 @@ _get_node (xmlDocPtr doc, xmlNodePtr cur, xmlNsPtr ns,
       n = xmlNewNode (ns, _node_id);
       xmlNewChild (n, ns, "name", nodename);
 
-      if (!folder || !cur->xmlChildrenNode) /* file or first folder */
+      if (!folder || !cur->xmlChildrenNode) /* file or first entry */
 	xmlAddChild (cur, n);
       else /* folder */
 	{
-	  vcd_assert (!xmlStrcmp (n->children->name, "name"));
-
-	  xmlAddNextSibling (cur->xmlChildrenNode, n);
+	  if (!xmlStrcmp (cur->children->name, "name"))
+	    xmlAddNextSibling (cur->xmlChildrenNode, n);
+	  else
+	    {
+	      vcd_assert (!xmlStrcmp (cur->name, "filesystem"));
+	      xmlAddPrevSibling (cur->xmlChildrenNode, n); /* special case for <filesystem> */
+	    }
 	}
     }
 
