@@ -69,6 +69,7 @@ typedef enum {
   VCD_PARM_UPDATE_SCAN_OFFSETS, /* bool */
   VCD_PARM_RELAXED_APS,         /* bool */
   VCD_PARM_LEADOUT_PAUSE,       /* bool */
+  VCD_PARM_LEADOUT_PREGAP,      /* unsigned        [0..300] */
   VCD_PARM_TRACK_PREGAP,        /* unsigned        [1..300] */
   VCD_PARM_TRACK_FRONT_MARGIN,  /* unsigned        [0..150] */
   VCD_PARM_TRACK_REAR_MARGIN    /* unsigned        [0..150] */

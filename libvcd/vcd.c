@@ -706,16 +706,26 @@ vcd_obj_set_param_uint (VcdObj *obj, vcd_parm_t param, unsigned arg)
       vcd_debug ("changed restriction number to %u", obj->info_restriction);
       break;
 
+    case VCD_PARM_LEADOUT_PREGAP:
+      obj->leadout_pregap = arg;
+      if (!IN (obj->leadout_pregap, 0, 300))
+        {
+          obj->leadout_pregap = CLAMP (obj->leadout_pregap, 1, 300);
+          vcd_warn ("ledout pregap out of range, clamping to allowed range");
+        }
+      vcd_debug ("changed leadout pregap to %u", obj->leadout_pregap);
+      break;
+
     case VCD_PARM_TRACK_PREGAP:
       obj->track_pregap = arg;
       if (!IN (obj->track_pregap, 1, 300))
         {
           obj->track_pregap = CLAMP (obj->track_pregap, 1, 300);
-          vcd_warn ("pregap out of range, clamping to allowed range");
+          vcd_warn ("track pregap out of range, clamping to allowed range");
         }
       if (obj->track_pregap < 150)
         vcd_warn ("track pre gap set below 150 sectors; created (s)vcd may be non-working");
-      vcd_debug ("changed pregap to %u", obj->track_pregap);
+      vcd_debug ("changed track pregap to %u", obj->track_pregap);
       break;
 
     case VCD_PARM_TRACK_FRONT_MARGIN:
@@ -881,8 +891,9 @@ vcd_obj_set_param_bool (VcdObj *obj, vcd_parm_t param, bool arg)
       break;
 
     case VCD_PARM_LEADOUT_PAUSE:
-      obj->leadout_pause = arg ? true : false;
-      vcd_debug ("changing 'leadout pause' to %d", obj->leadout_pause);
+      vcd_warn ("use of 'leadout pause' is deprecated and may be removed in later releases;"
+                " use 'leadout pregap' instead");
+      vcd_obj_set_param_uint (obj, VCD_PARM_LEADOUT_PREGAP, (arg ? 150 : 0));
       break;
 
     default:
@@ -2096,8 +2107,7 @@ vcd_obj_begin_output (VcdObj *obj)
 
   image_size = obj->relative_end_extent + obj->iso_size;
 
-  if (obj->leadout_pause)
-    image_size += obj->track_pregap;
+  image_size += obj->leadout_pregap;
 
   if (image_size > CD_MAX_SECTORS)
     vcd_error ("image too big (%d sectors > %d sectors)", 
@@ -2218,8 +2228,7 @@ vcd_obj_write_image (VcdObj *obj, VcdImageSink *image_sink,
 
     _cue->lsn = obj->relative_end_extent + obj->iso_size;
 
-    if (obj->leadout_pause)
-      _cue->lsn += obj->track_pregap;
+    _cue->lsn += obj->leadout_pregap;
 
     _cue->type = VCD_CUE_END;
 
@@ -2264,13 +2273,13 @@ vcd_obj_write_image (VcdObj *obj, VcdImageSink *image_sink,
           return 1;
       }
 
-    if (obj->leadout_pause)
+    if (obj->leadout_pregap)
       {
         int n, lastsect = obj->sectors_written;
 
-        vcd_debug ("writting leadout pause...");
+        vcd_debug ("writting leadout pregap...");
         
-        for (n = 0; n < obj->track_pregap; n++)
+        for (n = 0; n < obj->leadout_pregap; n++)
           _write_m2_image_sector (obj, zero, lastsect++, 0, 0, SM_FORM2, 0);
       }
 

@@ -66,6 +66,7 @@ struct vcdxml_t {
   VcdList *filesystem;
 };
 
+#define OPT_LEADOUT_PREGAP          "leadout pregap"
 #define OPT_LEADOUT_PAUSE           "leadout pause"
 #define OPT_RELAXED_APS             "relaxed aps"
 #define OPT_SVCD_VCD3_ENTRYSVD      "svcd vcd30 entrysvd"

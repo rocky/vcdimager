@@ -4,10 +4,14 @@ see ChangeLog for more information
 
 version 0.7.11 (unstable/development)
 =====================================
-2001-0...
+2001-..-.. (unreleased)
 
 * improved linux cdrom support by adding support for the generic packet
   cdrom interface
+* added native BSD/OS CDROM support
+* fixed libxml2 external entity loader
+* fixed minor subheader bug
+* be more tolerant when ripping faulty PBCs
 * ...
 
 version 0.7.10 (unstable/development)

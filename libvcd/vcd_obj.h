@@ -100,8 +100,8 @@ struct _VcdObj {
 
   bool update_scan_offsets;
   bool relaxed_aps;
-  bool leadout_pause;
 
+  unsigned leadout_pregap;
   unsigned track_pregap;
   unsigned track_front_margin;
   unsigned track_rear_margin;

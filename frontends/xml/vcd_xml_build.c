@@ -65,11 +65,13 @@ _init_xml (void)
   vcd_xml_dtd_init ();
 }
 
+#if 0
 static void
 _dummy_error (void *ctx, const char *msg, ...)
 {
   fputs (msg, stdout);
 }
+#endif
 
 static xmlDocPtr
 _xmlParseFile(const char *filename)

@@ -1,5 +1,14 @@
 2001-09-28  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* frontends/xml/vcd_xml_build.c: added support for the
+		new 'leadout pregap' option
+
+	* libvcd/vcd.c (vcd_obj_begin_output): 
+	(vcd_obj_write_image): 
+	(vcd_obj_set_param_bool): 
+	(vcd_obj_set_param_uint): make use of new leadout_pregap parameter, 
+		declared VCD_PARM_LEADOUT_PAUSE obsolete...
+
 	* frontends/xml/vcd_xml_rip.c: renamed offset_t to psd_offset_t
 		to avoid conflicts with system headers
 
