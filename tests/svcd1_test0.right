@@ -47,7 +47,7 @@ SVCD/INFO.SVD
  ID: `SUPERVCD'
  version: 0x01
  system profile tag: 0x00
- album id: `                '
+ album id: `'
  volume count: 1
  volume number: 1
  pal flags: 10000000 00000000 00000000 00000000 00000000 00000000

@@ -44,7 +44,7 @@ VCD/INFO.VCD
  ID: `VIDEO_CD'
  version: 0x01
  system profile tag: 0x01
- album id: `                '
+ album id: `'
  volume count: 1
  volume number: 1
  pal flags: 00000000 00000000 00000000 00000000 00000000 00000000

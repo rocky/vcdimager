@@ -59,7 +59,7 @@ VCD/INFO.VCD
  ID: `VIDEO_CD'
  version: 0x02
  system profile tag: 0x00
- album id: `CHECK           '
+ album id: `CHECK'
  volume count: 1
  volume number: 4
  pal flags: 11110000 00000000 00000000 00000000 00000000 00000000
