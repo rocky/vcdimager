@@ -1,5 +1,8 @@
 2001-06-04  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* frontends/xml/vcd_xml_parse.c: implemented parsing of area
+  		attributes for selection lists
+
 	* libvcd/vcd_pbc.c (_vcd_pbc_node_write): implemented writing of
 		area positions
 

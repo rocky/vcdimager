@@ -588,6 +588,7 @@ vcd_pbc_new (enum pbc_type_t type)
     case PBC_SELECTION:
       _pbc->default_id_list = _vcd_list_new ();
       _pbc->select_id_list = _vcd_list_new ();
+      _pbc->select_area_list = _vcd_list_new ();
       break;
       
     case PBC_END:

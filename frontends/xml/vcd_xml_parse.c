@@ -243,6 +243,43 @@ _parse_common_pbcattrs (pbc_t *pbc, xmlDocPtr doc, xmlNodePtr node,
   pbc->rejected = (_tmp && !xmlStrcmp (_tmp, "true"));
 }
 
+static long
+_get_prop_long (const char _prop_name[], xmlDocPtr doc, xmlNodePtr node, 
+		xmlNsPtr ns)
+{
+  if (xmlHasProp (node, _prop_name)) 
+    {
+      xmlChar *str = xmlGetProp (node, _prop_name);
+      long retval = 0;
+      char *endptr;
+
+      if (!str)
+	return retval;
+
+      retval = strtol (str, &endptr, 10);
+
+      if (*endptr)
+	{
+	  printf ("error while converting string to integer?\n");
+	  retval = 0;
+	}
+
+      return retval;
+    }
+  
+  return 0;
+}
+
+static void
+_get_area_props (pbc_area_t **_area,
+		 xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+{
+  *_area = vcd_pbc_area_new (_get_prop_long ("x1", doc, node, ns),
+			     _get_prop_long ("y1", doc, node, ns),
+			     _get_prop_long ("x2", doc, node, ns),
+			     _get_prop_long ("y2", doc, node, ns));
+}
+
 static bool
 _parse_pbc_selection (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
@@ -259,13 +296,24 @@ _parse_pbc_selection (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlN
 	continue; 
       
       if (!xmlStrcmp (cur->name, "prev"))
-	{ GET_PROP_STR (_pbc->prev_id, "ref", doc, cur, ns); }
+	{ 
+	  GET_PROP_STR (_pbc->prev_id, "ref", doc, cur, ns); 
+	  _get_area_props (&_pbc->prev_area, doc, cur, ns);
+	}
       else if (!xmlStrcmp (cur->name, "next"))
-	{ GET_PROP_STR (_pbc->next_id, "ref", doc, cur, ns); }
+	{ 
+	  GET_PROP_STR (_pbc->next_id, "ref", doc, cur, ns); 
+	  _get_area_props (&_pbc->next_area, doc, cur, ns);
+	}
       else if (!xmlStrcmp (cur->name, "return"))
-	{ GET_PROP_STR (_pbc->retn_id, "ref", doc, cur, ns); }
+	{
+	  GET_PROP_STR (_pbc->retn_id, "ref", doc, cur, ns); 
+	  _get_area_props (&_pbc->return_area, doc, cur, ns);
+	}
       else if (!xmlStrcmp (cur->name, "timeout"))
-	{ GET_PROP_STR (_pbc->timeout_id, "ref", doc, cur, ns); }
+	{ 
+	  GET_PROP_STR (_pbc->timeout_id, "ref", doc, cur, ns); 
+	}
       else if (!xmlStrcmp (cur->name, "bsn"))
 	{ _pbc->bsn = _get_elem_long ("bsn", doc, cur, ns); }
       else if (!xmlStrcmp (cur->name, "loop"))
@@ -290,6 +338,9 @@ _parse_pbc_selection (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlN
 	  GET_PROP_STR (_default_ref, "ref", doc, cur, ns); 
 	  vcd_assert (_default_ref != NULL);
 	  _vcd_list_append (_pbc->default_id_list, _default_ref);
+
+	  if (!_pbc->default_area)
+	    _get_area_props (&_pbc->default_area, doc, cur, ns);
 	}
       else if (!xmlStrcmp (cur->name, "select"))
 	{
@@ -298,6 +349,13 @@ _parse_pbc_selection (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlN
 	  GET_PROP_STR (_select_ref, "ref", doc, cur, ns); 
 	  vcd_assert (_select_ref != NULL);
 	  _vcd_list_append (_pbc->select_id_list, _select_ref);
+
+	  {
+	    pbc_area_t *_area;
+
+	    _get_area_props (&_area, doc, cur, ns);
+	    _vcd_list_append (_pbc->select_area_list, _area);
+	  }
 	}
       else
 	vcd_assert_not_reached ();
