@@ -33,6 +33,7 @@ platforms by cdrdao, e.g. freeBSD, Irix, Solaris and even win32)
 
 vcdimager   generates simple pbc-less VCD and SVCD disc images directly
 vcddebug    Analyzing tool and report generator for VCD and SVCD discs.
+vcddump     Enhanced vcddebug tool.
 vcdxgen     XML VCD-description generator
 vcdxbuild   Builds a VCD/SVCD according to a supplied XML control file.
 vcdxrip     Reverses the process for a given VCD or SVCD disc.

@@ -4,13 +4,14 @@ see ChangeLog for more information
 
 version 0.7.13 (unstable/development)
 =====================================
-2002-12-..
+2003-0.-..
 
 * maintainance release
 * fixes for gcc on linux/arm
 * removed internal popt and gnome frontend code from distribution
 * added --dump-dtd option to vcdxbuild
 * added testsuite to distribution
+* added vcddump tool
 
 version 0.7.12 (unstable/development)
 =====================================

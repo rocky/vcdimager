@@ -62,6 +62,7 @@ in the section entitled ``GNU Free Documentation License''.
 * VCDImager: (vcdimager).                       GNU Video CD imaging utilities
 * vcdimager: (vcdimager)vcdimager.              Video CD simple formatter
 * vcddebug: (vcdimager)vcddebug.                Video CD debugging tool
+* vcddump: (vcdimager)vcddump.                  Video CD dump tool
 * cdxa2mpeg: (vcdimager)cdxa2mpeg.              Strip CDXA RIFF container
 * vcdxminfo: (vcdimager)vcdxminfo.              Display MPEG stream properties
 * vcdxgen: (vcdimager)vcdxgen.                  Video CD XML template generator
@@ -113,6 +114,9 @@ intermediate @acronym{XML} description.
 @item vcddebug
 Analyzing tool and report generator for @acronym{VCD} and
 @acronym{SVCD} discs.
+
+@item vcddump
+Enhanced vcddebug tool.
 
 @item vcdxgen
 @acronym{XML} @acronym{VCD}-description generator, with a command-line
@@ -1038,6 +1042,7 @@ interactivity.
 @menu
 * vcdimager::                   
 * vcddebug::                    
+* vcddump::                    
 * vcdxgen::                     
 * vcdxbuild::                   
 * vcdxrip::                     
@@ -1059,7 +1064,7 @@ There are a few command-line options for @command{vcdimager} at the
 moment, please issue @samp{vcdimager --help} for an actual list of
 available options.
 
-@node vcddebug, vcdxgen, vcdimager, Tools
+@node vcddebug, vcddump, vcdimager, Tools
 @subsection @command{vcddebug}
 
 While this project went along, @command{vcddebug} was used to analyze
@@ -1071,7 +1076,12 @@ It is recommended to make use of this tool if compatibility problems
 arise, to identify what the difference between working discs and
 non-working discs are, and thus help to improve GNU VCDImager.
 
-@node vcdxgen, vcdxbuild, vcddebug, Tools
+@node vcddump, vcdxgen, vcddebug, Tools
+@subsection @command{vcddump}
+
+@emph{FIXME: write more}
+
+@node vcdxgen, vcdxbuild, vcddump, Tools
 @subsection @command{vcdxgen}
 
 This tool works almost like the @command{vcdimager} tool, except that it
