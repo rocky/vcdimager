@@ -238,12 +238,12 @@ fi
 dnl
 
 dnl system
-PKG_CHECK_MODULES(LIBCDIO, libcdio >= 0.69, [], 
+PKG_CHECK_MODULES(LIBCDIO, libcdio >= 0.70, [], 
 	[AC_MSG_ERROR(Required libcdio library not found. Please get libcdio from http://www.gnu.org/software/libcdio/ and install it.)])
 AC_SUBST(LIBCDIO_LIBS)
 AC_SUBST(LIBCDIO_CFLAGS)
 
-PKG_CHECK_MODULES(LIBISO9660, libiso9660 >= 0.65, [], 
+PKG_CHECK_MODULES(LIBISO9660, libiso9660 >= 0.70, [], 
 	[AC_MSG_ERROR(Required libiso9660 library (part of libcdio) not found. Please get libcdio from http://www.gnu.org/software/libcdio/ and install it.)])
 AC_SUBST(LIBISO9660_CFLAGS)
 AC_SUBST(LIBISO9660_LIBS)
@@ -253,7 +253,7 @@ case $host_os in
 	AC_DEFINE([CYGWIN], [1], 
                   [Define 1 if you are compiling using cygwin])
 	;;
-     darwin6*)
+     darwin*)
        AC_CHECK_HEADERS(IOKit/IOKitLib.h CoreFoundation/CFBase.h, 
                         [have_iokit_h="yes"])
        if test "x$have_iokit_h" = "xyes" ; then 
