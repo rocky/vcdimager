@@ -1,14 +1,19 @@
 \input texinfo @c -*-texinfo-*-
 
+@paragraphindent 2
+@exampleindent 0
+
 @c %**start of header
 @setfilename vcddump.info
-@settitle The GNU Video CD Dump Program (vcddump)
+@set program @kbd{vcddump}
+
+@settitle The GNU Video CD Dump Program (@value{program})
 @setchapternewpage on
 @c %**end of header
 
 @include version-vcddump.texi
 @ifinfo
-This file documents GNU Video CD Dump Program.
+This file documents GNU Video CD Dump Program (@value{program})
 
 Copyright (C) Rocky Bernstein @email{<rocky@@panix.com>}
 
@@ -26,7 +31,7 @@ development.''
 @end ifinfo
 
 @titlepage
-@title GNU Video CD Dump Program
+@title GNU Video CD Dump Program (@value{program})
 @subtitle $Id$
 @subtitle The GNU Video CD Authoring Tools.
 @subtitle for version @value{VERSION}, @value{UPDATED}
@@ -54,7 +59,7 @@ development.''
 @ifnottex
 @node Top, Introduction, (dir), (dir)
 
-@top The GNU Video CD Dump Program (vcddump)
+@top The GNU Video CD Dump Program (@value{program})
 
 This file documents GNU Video CD Dump Program.
 
@@ -65,6 +70,7 @@ Copyright (C) 2003 Rocky Bernstein
 * Introduction::        What is the program and why would I use it? 
 * Command Options::     How do I get this to do anything? 
 * Output Sections::     How do interpret the output? 
+* Some examples::       Okay, enough talk. How about some simple examples?
 @end menu
 @end ifnottex
 
@@ -80,35 +86,37 @@ oldest format of which is called VCD followed by a version number:
 are referring to a class of Video Compact Disks or the specific older
 format called VCD @emph{version-number}.
 
-vcddump's mission in life is to display the contents of a VCD
+@value{program}'s mission in life is to display the contents of a VCD
 image. Well, that's not actually true---if given an audio CD (CD-DA)
-or some other kind of CD, vcddump will try to display some information
-about that that with varying degress of success; However VCDs are what
-vcddump understands best and it will you the most detail about.  The
-disk ``image'' does not have to reside on a physical Compact Disk;
-vcddump understand the BIN/CUE disk-image format used by a popular
-DOS/Window mastering tool. 
+or some other kind of CD, @value{program} will try to display some
+information about that, perhaps just a list of the tracks, with
+varying degrees of success; However VCDs are what @value{program}
+understands best and it will you the most detail about.  The disk
+``image'' does not have to reside on a physical Compact Disk;
+@value{program} understand the BIN/CUE disk-image format used by a
+popular DOS/Window mastering tool.
 
-You might use the information from vcddump as a diagnostic or
+You might use the information from @value{program} as a diagnostic or
 analytical tool. It may help you understand a particular VCD that you
 have. Or it might be useful in conjunction with or in debugging a VCD
 you are creating (``authoring''). But debugging is probably best left
-for another tool; vcddump will only let you display information, you
-can't modify anything with this tool.
+for another tool; @value{program} will only let you display information, you
+can't modify anything with this tool and it is not interactive.
 
-Although I imagine most of the time this is how you will use vcddump,
-there are some subsidiary uses. 
+Although I imagine most of the time this is how you will use
+@value{program}, there are some subsidiary uses.
 
-vcddump shows information about a VCD and as such the information
-shown reflects, sort of, the way the information is stored. So in a
-sense vcddump can teach you a little bit about how a VCD is layed out.
+@value{program} shows information about a VCD and as such the
+information shown reflects, sort of, the way the information is
+stored. So in a sense @value{program} can teach you a little bit about
+how a VCD is laid out.
 
-In writing an VCD input plugin for a media player, I wanted to
-get bits of information about the VCD to display in the media player,
-such as the VCD format used or the volume name. Before writing a C
-library for such purposes, a lower-tech, and more loosely-coupled way
-to do this was used. The program ran vcddump with the specific
-information request and parsed the output. For example, to get just
+In writing an VCD input plugin for a media player, I wanted to get
+bits of information about the VCD to display in the media player, such
+as the VCD format used and the volume name. Before writing a C library
+for such purposes, a lower-tech, and more loosely-coupled way to do
+this was used. The program ran @value{program} with the specific
+information request and parsed the text output. For example, to get just
 the format that the VCD on the``default'' CD-ROM device is in you
 might run:
 
@@ -123,32 +131,41 @@ To get the album information you might run:
 @end smallexample 
 
 After doing this for a while and seeing this was useful, I then wrote
-a VCD ``info'' libarary. A library is much faster and furthermore much
+a VCD ``info'' library. A library is much faster and furthermore much
 of the information is saved away in memory reducing the amount of disk
 I/O. Later it turned out that I could shift the I/O completely from my
-program and use vcdinfo's I/O, but that's a different story. What's
-relevant is that after creating this library, I then modified vcddump
-to use this library. The vcddump code then got shorter (as some of it
-getting moved inside the vcdinfo library), and this program served as
-a test bed for the library. (It so happens that the input plugin was
-much harder and slower to debug since it is a ``shared object'')
+program and use the I/O from that or another library, but that's a
+different story. What's relevant is that after creating this library,
+I then modified @value{program} to use this library. The
+@value{program} code then got shorter (as some of it getting moved
+inside the vcdinfo library), and this program served as a test bed for
+the library. (It also happens that the input plugin was much harder
+and slower to debug than @value{program} since it is a ``shared
+object'' and part of a larger program with many other such shared
+objects.)
 
-So the last thing that vcddump may be of useful for is if you want to
-see how to use the vcdinfo library; you can consult the source program
-and see how vcddump gets its information via vcdinfo.
+So the last thing that @value{program} may be of useful for is if you
+want to see how to use the vcdinfo library; you can consult the source
+program and see how @value{program} gets its information via vcdinfo.
 
 @node Command Options
 @chapter Command Options
 
-To get a list of options type @kbd{--help}. There are a number of
-miscellaneous options, but there are two broad categories of
-options. There is a set of options for specifying what to dump, these
-all start @kbd{--show-} and another set of options which specify where
-the CD-ROM or CD-ROM disk-image is.
+There are a number of miscellaneous options, but there are two broad
+categories of options. There is a set of options for specifying what
+to dump, these all start @kbd{--show-} and another set of options
+which specify where the CD-ROM or CD-ROM disk-image is.
 
-@subsection ``Where'' options
+@menu
+* Where Options::     Options controlling where to read from 
+* What Options::      Options controlling what do you want shown
+* Other Options::     Other miscellaneous options
+@end menu
 
---bin-cue-
+@node Where options
+@section `Options controlling where to read from 
+
+@subsection BIN or CUE file
 
 Options controlling where the CD-ROM or CD disk image are
 @kbd{--bin-file} (@kbd{-b}), @kbd{--cue-file} (@kbd{-c}),
@@ -156,41 +173,41 @@ Options controlling where the CD-ROM or CD disk image are
 @kbd{--input}. These options are mutually exclusive, use only one
 option from this set.
 
-The option @kbd{--bin-file} and @kbd{--cue-file} indicatate to read from a file
-containing an image what might be burned onto Compact Disk. The format
-is expected to be in the BIN/CUE format that cdrdao uses and is used
-by a popular DOS/Windows CD mastering tool. If you use the --bin-file
-option, the file read is expected to be the ``.BIN'' part---this is
-the bulk of the data.  If you use @kbd{--cue-file} the file read is a funny
-sort of TOC (Table of Contents) file. The corresponding BIN file
-(which again contains the bulk of the data) is not taken from the FILE
-statement inside the CUE file, but it is constructed from the CUE file
-name by replacing ".cue" by ".bin".  The CUE file must have exactly
-one FILE statement.
+The option @kbd{--bin-file} and @kbd{--cue-file} indicate to read
+from a file containing an image what might be burned onto Compact
+Disk. The format is expected to be in the BIN/CUE format that cdrdao
+uses and is used by a popular DOS/Windows CD mastering tool. If you
+use the --bin-file option, the file read is expected to be the
+``.BIN'' part---this is the bulk of the data.  If you use
+@kbd{--cue-file} the file read is a funny sort of TOC (Table of
+Contents) file. The corresponding BIN file (which again contains the
+bulk of the data) is not taken from the FILE statement inside the CUE
+file, but it is constructed from the CUE file name by replacing ".cue"
+by ".bin".  The CUE file must have exactly one FILE statement.
 
-If you do not specify a file name after @kbd{--bin-file}, a default name is
-used ``VIDEOCD.BIN'' is probably used; likewise if you do not specify
-a filename after --cue-file a default name is used, probably
+If you do not specify a file name after @kbd{--bin-file}, a default
+name is used ``VIDEOCD.BIN'' is probably used; likewise if you do not
+specify a filename after --cue-file a default name is used, probably
 ``VIDEOCD.CUE.'' These names I believe are the default output file
 names used when you use vcdimager or vcdxbuild.
 
 It is preferable to specify a CUE file over a BIN file since this will
-give vcddump TOC and, in particular, track information that it cannot
-get otherwise. 
+give @value{program} TOC and, in particular, track information that it
+cannot get otherwise.
 
---cdrom-device-
+@subsection CD-ROM Device
 
-The option @kbd{--cdrom-device} is used when you want to read from a Compact
-Disk. The name given would be the device name. If you don't specify a
-device, a default will be selected based on the Operating System or
-information that can be gleaned from the OS. For example on Linux, the
-default device may be @kbd{/dev/cdrom}, while on Solaris it might be
-@kbd{/vol/dev/aliases/cdrom0}.
+The option @kbd{--cdrom-device} is used when you want to read from a
+Compact Disk. The name given would be the device name. If you don't
+specify a device, a default will be selected based on the Operating
+System or information that can be gleaned from the OS. For example on
+Linux, the default device may be @kbd{/dev/cdrom}, while on Solaris it
+might be @kbd{/vol/dev/aliases/cdrom0}.
 
---input-
+@subsection Intelligent Input
 
 The kind of where option tries to be intelligent by trying to figure
-out whether the thing you are referring to is a device or a bin/cue 
+out whether the thing you are referring to is a device or a bin/cue
 disk image of a CD.
 
 Currently the algorithm it uses is pretty simple. If the thing
@@ -210,66 +227,485 @@ Althought this algorithm is subject to change and there may be more
 sophisticated or alternative methods, in practice I think this does
 pretty much what's expected. 
 
-@subsection ``What'' options
+@node Where options
+@section Options controlling what do you want shown
 
---OTHER MISCELLANEOUS OPTIONS
+@value{program} is pretty flexible about the information it can show
+you.
 
-  -?, --help                  Show this help message
-  --usage                     Display brief usage message
+By default @value{program} will show just about everything it can
+about a VCD image. There is additional information you can get using
+the option @kbd{--verbose}, but this is of a debugging nature. 
 
-  --sector-2336
+However if you specify something in particular to dump, for example to
+dump track information via command option @kbd{--show-tracks},
+@value{program} switches behavior and shows you almost nothing except
+what you asked for. You don't have to ask for just one item at a time,
+you can list many individual items.
 
+Most of the individual items that can be shown are part of a larger
+group listed in @ref{Output Sections,,Output Sections}. For example to
+show the volume id of the VCD image which resides in the PVD
+sections of output you would use the option @kbd{--show-pvd vol}.
+
+@cindex suboptions
+To show everything in one of these large sections you give the section
+name followed by ``-all.'' So to see the entire PVD section you would
+use the command option @kbd{--show-pvd-all}.
+
+@node Other Options
+@section Other Miscellaneous options
+
+@table @code
+@item --help
+@cindex @code{--help}
+This option give a list of options type @kbd{--help}. @kbd{-?} is an
+abbreviation however you will probably have to ``escape'' the question
+mark so that the shell doesn't interpret this; i.e. you may have to
+type @kbd{-\?}.
+
+@item --usage
+@cindex @code{--usage}
+This option shows an abbreviated usage message
+
+@item --sector-2336
+@cindex @code{--2336}
 This option only makes sense if you are reading from a file CD-image.
-This assumes somruse 2336 byte sector mode for image file.
+This indicated to @value{program} to assume a 2336-byte sector mode
+for image file.
 
-  -v, --verbose               
+@item --verbose
+@itemx -v
+This opton gives more verbose, debugging  output.
 
-verbose output
+@item --terse
+@itemx -t
+This option is the same as giving the combined options
+@kbd{--no-header --no-banner --no-delimiter}.  This option can be
+useful if this program is getting called for information from another
+program and you don't want to have filter this information out.
 
-  -t, --terse                 
+@item --no-banner
+@itemx -B
+Do not show program banner header and CVS Id line. This would be
+useful in a regression test program where you want to check the output
+but know that the version information is going to change over time.
 
-same as --no-header --no-banner --no-delimiter
-
-  -B, --no-banner 
-
-  -D, --no-delimiter          do not show delimiter lines around various
-                              sections of output
+@item --no-delimiter
+@itemx -D
+Do not show delimiter lines around various the sections of @ref{Output
+Sections,,Output Sections}.
 
   -q, --quiet                 show only critical messages
-  -V, --version               display version and copyright information and
-                              exit
 
-
-do not show program banner header and RCS. This can be useful if
-this program is getting called for information from another program
-and you don't want to have
-
-
+@item --version
+@itemx -V
+Display version and copyright information (the stuff that is
+suppressed by @kbd{--no-banner} and exit after displaying this
+information. Sometimes, you just wanna know what version you got.
+@end table
 
 @node Output Sections
 @chapter Output Sections
 
-When you run vcddump to display the contents of an entire disk,
+When you run @value{program} to display the contents of an entire disk,
 unless you use the option @kbd{--no-delimiter} (@kbd{-D}) you'll notice large
 sections of output separated by a string of dashes like this:
 
 @smallexample
--------------------------------------------------------------------------------
+------------------------------------------------------------------------
 @end smallexample 
 
 These separate the major logical sections of a VCD
 
-@c @menu
+@menu
 @c * Source Information::  Overall disk information
-@c * Filesystem::          ISO 9660 Information
-@c * Entries::             Entries Section
-@c * Info::                Info Section
-@c * LOT::                 List of Tracks (LOT) Section
-@c * PSD::                 Program Segment Descriptors (PSD) Section
-@c * PVD::                 Primary Volume Descriptor (PVD) Section
-@c * Output Sections::     How do interpret the output? 
-@c @end menu
+* PVD::                 Primary Volume Descriptor (PVD) Section
+* Filesystem::          ISO 9660 Information
+* Entries::             Entries Section
+* Info::                Info Section
+* LOT::                 List of Tracks (LOT) Section
+* PSD::                 Program Segment Descriptors (PSD) Section
+* Tracks::              Tracks 
+@end menu
 
+@node PVD
+@section Primary Volume Descriptor (PVD) Section
+
+@smallexample
+ISO9660 primary volume descriptor
+ ID: `CD001'
+ version: 1
+ system id: `CD-RTOS CD-BRIDGE'
+ volume id: `PAL_TEST_SVCD'
+ volumeset id: `'
+ publisher id: `Herbert Valerio Riedel'
+ preparer id: `GNU VCDIMAGER 0.7.10 LINUX-GNU/I386'
+ application id: `'
+ ISO size: 1426 blocks (logical blocksize: 2048 bytes)
+ XA marker present: yes
+@end smallexample
+
+@node Filesystem
+@section ISO-9660 section
+
+This section contains something that looks pretty much like a
+directory listing. Here's a sample: 
+
+@smallexample
+ /:
+  d d---1xrxrxr 0 0 [fn 00] [lsn     18]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [lsn     18]      2048  ..
+  d d---1xrxrxr 0 0 [fn 00] [lsn     19]      2048  EXT
+  d d---1xrxrxr 0 0 [fn 00] [lsn     20]      2048  MPEGAV
+  d d---1xrxrxr 0 0 [fn 00] [lsn     21]      2048  VCD
+
+ /EXT/:
+  d d---1xrxrxr 0 0 [fn 00] [lsn     19]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [lsn     18]      2048  ..
+  - ----1xrxrxr 0 0 [fn 01] [lsn    225]     65536  LOT_X.VCD;1
+  - ----1xrxrxr 0 0 [fn 01] [lsn    257]      6800  PSD_X.VCD;1
+
+ /MPEGAV/:
+  d d---1xrxrxr 0 0 [fn 00] [lsn     20]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [lsn     18]      2048  ..
+  - ---2-xrxrxr 0 0 [fn 01] [lsn    450] 639546208 (563593216)  AVSEQ01.DAT;1
+
+ /VCD/:
+  d d---1xrxrxr 0 0 [fn 00] [lsn     21]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [lsn     18]      2048  ..
+  - ----1xrxrxr 0 0 [fn 00] [lsn    151]      2048  ENTRIES.VCD;1
+  - ----1xrxrxr 0 0 [fn 00] [lsn    150]      2048  INFO.VCD;1
+  - ----1xrxrxr 0 0 [fn 00] [lsn    152]     65536  LOT.VCD;1
+  - ----1xrxrxr 0 0 [fn 00] [lsn    184]      2456  PSD.VCD;1
+@end smallexample
+
+A little about the funny ``attribute'' characters at the beginning of
+left-hand side of the listing. For the most part it looks like what
+you would get in a Unix listing. Except there are these 1's and 2's
+before what in unix would be the user/group/other mode attribibutes.
+Those numbers indicate whether the track is ``mode2 form1'' or ``mode2
+form2.'' So the example above, AVSEQ01.DAT is in a mode2 form2 track
+while every other entry listed is in a mode2 form1 track.  The movie
+part is is this mode2 form2 track while the remaining meta-data part
+is in a mode2 form1 track.
+
+Another unusal thing about that single mode2 form2 track containing
+AVSEQ01.DAT, is that there seem to be two numbers listed before the
+AVSEQ01.DAT entry. All the other mode2 form1 entries have a single
+number listed beforehand. The first number (63954208) is the number of
+bytes that is occupied on the disk proper. The second number in
+parenthesis (563593216) is the number of bytes if you assumed the file
+had 2048-byte blocks rather than the 2334-byte mode2 format2
+blocksize. If you were to mount the CD filesystem you might see the
+second smaller number in a listing there.
+
+The exact meaning of the attributes section is listed below:
+
+@itemize @bullet
+@item
+The 1st character is either "d" if the entry is a directory, or "-" if
+not.
+@item
+The 2nd character is either "a" if the entry is CDDA (audio), or "-"
+if not.
+@item
+The 3rd character is either "i" if the entry is interleaved, or "-" if
+not.
+@item
+The 4th character is either "2" if the entry is mode2 form2 or "-" if
+not.
+@item
+The 5th character is either "1" if the entry is mode2 form1 or "-" if
+not.Note that an entry will either be in mode2 form1 or mode form2. That
+is you will either see "2-" or "-1" in the 4th & 5th positions.
+@item
+The 6th and 7th characters refer to permissions for everyone while the
+@item
+the 8th and 9th characters refer to permissions for a group while, and
+@item
+the 10th and 11th characters refer to permissions for a user.
+@end itemize
+ 
+In each of these pairs the first character (6, 8, 10) is "x" if the
+entry is executable. For a directory this means the directory is
+allowed to be listed or "searched".  The second character of a pair
+(7, 9, 11) is "r" if the entry is allowed to be read.
+
+The item in brackets, e.g. @kbd{[lsn 450]} for the AVSEQ01.DAT entry
+is the ``logical sector number'' or the place on the CD where the
+entry starts.
+
+@node Entries
+@section Entries Section
+
+Here is part of sample output from the VCD used above.
+
+@smallexample
+VCD/ENTRIES.VCD
+ ID: `ENTRYVCD'
+ version: 0x02
+ system profile tag: 0x00
+ entries: 31
+ ENTRY[00]: track# 1 (SEQUENCE[0]), LSN 450 (msf 00:08:00)
+ ENTRY[01]: track# 1 (SEQUENCE[0]), LSN 482 (msf 00:08:32)
+ ENTRY[02]: track# 1 (SEQUENCE[0]), LSN 5888 (msf 01:20:38)
+ ENTRY[03]: track# 1 (SEQUENCE[0]), LSN 8925 (msf 02:01:00)
+ ...
+@end smallexample
+
+In the above example, in the first line corresponds the ``filename''
+in the files section that starts at logical sector number 151. If this
+VCD were in SVCD format that line would probably say
+``SVCD/ENTRIES.SVD.'' As is indicated above I made 31 entries for the
+VCD; only the first 4 are shown. Depending on how playback control is
+set up you should be able to randomly access up to 31 different
+playback locations on this VCD. If you use a media player like xine
+and my plugin for it, there is a way jump to the beginning of each of
+these entries.
+
+The ``track #'' and SEQUENCE number are about the same thing, the
+track being one more than the SEQUENCE number. Note the first entry is
+also at logical sector number 450, the same as AVSEQ01.DAT. In other
+words ``Entry 0'' is the start of the movie.
+
+The minutes, seconds, frames number (msf 00:08:00) is equivalent to
+the LSN number. For those who wonder how to from the MSF to the LSN
+you basically multiply the seconds (8) by 75 since there are 75 frames
+in a second (note this has nothing to do with how fast this is
+displayed). If you get this you get 600 which is a bit large. But
+that's because the MSF number 00:00:00 is equal to 150 or the ``pregap
+sector size.''
+
+
+@node Info
+@section Info Section
+
+Here is part of sample output from a SVCD. (This is not the same
+example as the VCD used before.)
+
+@smallexample
+SVCD/INFO.SVD
+ ID: `SUPERVCD'
+ version: 0x01
+ system profile tag: 0x00
+ album desc: `                '
+ volume count: 3
+ volume number: 2
+ pal flags: 00000000 00000000 00000000 00000000 00000000 00000000
+  (bslbf)   00000000 00000000 00000000 00000000 00000000 00000000 00
+ flags:
+  reserved1: no
+  restriction: 0
+  special info: no
+  user data cc: no
+  start lid #2: no
+  start track #2: no
+  reserved2: no
+ psd size: 2376
+ first segment addr: 00:05:00
+ offset multiplier: 0x08
+ maximum lid: 15
+ maximum segment number: 3
+ SEGMENT[1]: audio: no stream, video: NTSC still, continuation no, OGT substream: None
+ SEGMENT[2]: audio: no stream, video: NTSC still, continuation no, OGT substream: None
+ SEGMENT[3]: audio: no stream, video: NTSC still, continuation no, OGT substream: None
+ volume start time[0]: 0 secs
+ volume start time[1]: 0 secs
+ volume start time[2]: 0 secs
+ volume start time[3]: 0 secs
+ volume start time[4]: 0 secs
+@end smallexample
+
+@node LOT
+@section List of Tracks (LOT) Section
+
+Here is part of sample output from a SVCD of this section.
+
+@smallexample
+SVCD/LOT.SVD
+ LID[1]: offset = 0 (0x0000)
+ LID[2]: offset = 216 (0x001b)
+ LID[3]: rejected
+@end smallexample
+
+We have list id's (LIDs). The offset are offsets into the Program
+Segment descriptors given in the next section. LID 3 is rejected which
+means that you are not supposed to be able to jump to that entry
+directly but may reach it through program control.
+
+
+@node PSD
+@section Program Segment Descriptors (PSD) Section
+
+@smallexample
+SVCD/PSD.SVD
+ PSD[00] (LID[1] @@0x0000): play list descriptor
+  NOI: 2 | LID#: 1 (rejected: no)
+  prev: disabled | next: LID[2] @@0x0003 | return: disabled
+  playtime: 0/15s | wait: 0s | autowait: 0s
+  play-item[0]: SEGMENT[8] (0x03ef)
+  play-item[1]: SEGMENT[7] (0x03ee)
+
+ PSD[01] (LID[2] @@0x0003): play list descriptor
+  NOI: 1 | LID#: 2 (rejected: yes)
+  prev: disabled | next: LID[3] @@0x0005 | return: disabled
+  playtime: 0/15s | wait: 5s | autowait: 0s
+  play-item[0]: SEGMENT[5] (0x03ec)
+
+ PSD[02] (LID[3] @@0x0005): play list descriptor
+  NOI: 1 | LID#: 3 (rejected: yes)
+  prev: disabled | next: LID[4] @@0x0007 | return: disabled
+  playtime: 0/15s | wait: 0s | autowait: 0s
+  play-item[0]: SEGMENT[7] (0x03ee)
+
+  PSD[03] (LID[4] @@0x0007): selection list descriptor
+  Flags: 0x01 | NOS: 9 | BSN: 1 | LID: 4 (rejected: yes)
+  prev: disabled | next: disabled | return: disabled
+  default: LID[12] @@0x0029 | timeout: LID[2] @@0x0003
+  totime: 10s | loop: 1 (delayed: no)
+  play-item: SEGMENT[1] (0x03e8)
+  ofs[0]: LID[6] @@0x0015
+  ofs[1]: LID[7] @@0x0017
+  ofs[2]: LID[8] @@0x0019
+  ofs[3]: LID[9] @@0x001b
+  ofs[4]: LID[11] @@0x0026
+  ofs[5]: LID[10] @@0x001d
+  ofs[6]: LID[13] @@0x002b
+  ofs[7]: disabled
+  ofs[8]: LID[14] @@0x002e
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+  area[0]: disabled
+  area[1]: disabled
+  area[2]: disabled
+  area[3]: disabled
+  area[4]: disabled
+  area[5]: disabled
+  area[6]: disabled
+  area[7]: disabled
+  area[8]: disabled
+@end smallexample
+
+@node Tracks
+@section Tracks
+
+Here is part of sample output from the test PAL SVCD that can be found
+from:
+@url{http://www.vcdimager.org/pub/vcdimager/examples/test_svcd/test_svcd_pal.zip}
+
+@smallexample
+
+SVCD/TRACKS.SVD
+ ID: `TRACKSVD'
+ version: 0x01
+ tracks: 1
+ track[00]: 00:59:61, audio: 2 streams, video: PAL stream, OGT stream: all available
+
+(VCD3.0 interpretation)
+(track[00]: 00:59:61 (cumulated), audio: 00, ogt: de)
+----------------------------------------------------------------------------
+CDROM TRACKS
+ tracks:  1
+ track #  1: 00:23:01, size:   13547520
+ leadout   : 01:39:61
+@end smallexample
+
+There is one track on this SVCD with two audio streams (channel 0 is
+in German and stream 1 is in English but the language information
+can't be determined from information on the dist). The video stream is
+in PAL format and there is a subtitle as OGT (Overlay Graphics
+Text). The subtitle's a private stream id in the MPEG file ahs
+hexidecimal number 0xde.
+
+The bottom part of the display shows track info obtained in a
+lower-level way. Most of the information above comes from metadata
+read in that IS09660 filesystem. If you are reading from a device this
+information comes from comes requsts from the device to give track
+information. If what you are reading is a disk image, the only way to
+get this information has to come from the CUE file which is why it is
+better to specify a CUE file than a BIN file.
+
+@node Some Examples
+@section Some simple command invocations.
+
+Perhaps you want to dump all information about the CD that is
+currently sitting in your CD-ROM drive. If this location has a name
+that is ``default'' for that OS then this might work:
+
+@smallexample
+  vcddump
+@end smallexample 
+
+It means the same thing as:
+@smallexample
+  vcddump --cdrom-device
+@end smallexample 
+
+I have a combined CD-ROM and DVD drive; my CD-ROM drive also can write
+and seems to draw more power; so I prefer to read from the DVD
+drive. Since that is not the ``default'' (@kbd{/dev/cdrom}) on my
+Linux box, I have to give a location. So this will work: 
+
+@smallexample
+  vcddump --cdrom-device=/dev/dvd
+@end smallexample 
+
+Or even better, I'll let @value{program} figure out it's a CD-ROM device:
+@smallexample
+  vcddump -i /dev/dvd
+@end smallexample 
+The equals sign before @kbd{/dev/dvd} is optional in either format.
+
+Let's say you just used vcdimager or vcdxbuild it created output to
+its ``default'' location (probably @kbd{videocd.cue} and
+@kbd{videocd.bin}. To dump out this out:
+@smallexample
+  vcddump -c
+@end smallexample 
+
+But if you specified the output to go to say @kbd{nausicaa.bin} and
+@kbd{nausicaa.cue} you would have to specify that location like this:
+@smallexample
+  vcddump -c nausicaa.cue
+@end smallexample 
+
+Or again not having to worry about what type of file you could use 
+the ``intelligent'' input option again as we did before:
+@smallexample
+  vcddump -i nausicaa.cue
+@end smallexample 
+
+Okay, now for for some more obscure stuff. Let's say I'm writing a
+front-end GUI to do all sorts of stuff and I just need something to
+pick out the format (VCD 1.1, VCD 2.0, SVCD, HQVCD) that a VCD in
+drive is located. Since I have to read in this output, I don't want
+any extra lines not relevant other than the version. 
+
+@smallexample
+  vcddump --no-banner --show-format
+@end smallexample 
+
+Or even shorter:
+@smallexample
+  vcddump -t -f
+@end smallexample 
+
+I want to see the filesystem info and track info for the CD
+in my default drive
+
+@smallexample
+  vcddump --show-tracks --show-filesystem
+@end smallexample 
+
+I want to see the filesystem info and track info for the CD
+in my default drive
+
+And finally I want to see just the ``data'' part --- that is the list
+of the entries section, no summary information like a count or ID tag.
+@smallexample
+  vcddump --show-entries data
+@end smallexample 
 
 @tex
 % I think something like @colophon should be in texinfo.  In the
