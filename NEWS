@@ -22,6 +22,10 @@ version 0.7.20 (unstable/development)
 
 * library symbol versioning (from Nicolas Boullis)
 
+* libvcd is private once again.
+
+* Go over documentation. (CD image info has been moved to libcdio doc)
+
 version 0.7.19 (unstable/development)
 =====================================
 * Use VCD CD-drive auto scanning in vcdxrip and vcd-info that is 
