@@ -94,6 +94,11 @@ extern "C" {
 */
 #define VCDINFO_INVALID_ITEMID  0xFFFF
 
+/*! 
+  Constant for invalid audio type
+*/
+#define VCDINFO_INVALID_AUDIO_TYPE  4
+
 /* See enum in vcd_files_private.h */
 typedef enum {
   VCDINFO_FILES_VIDEO_NOSTREAM = 0,
@@ -209,10 +214,19 @@ void
 vcdinfo_classify_itemid (uint16_t itemid_num, vcdinfo_itemid_t *itemid);
 
 /*!
-  Note first seg_num is 0!
+   Return the number of audio channels implied by "audio_type".
+   0 is returned on error.
 */
-const char * 
-vcdinfo_audio_type2str(const vcdinfo_obj_t *obj, unsigned int seg_num);
+unsigned int
+vcdinfo_audio_type_num_channels(const vcdinfo_obj_t *obj, 
+				unsigned int audio_type);
+  
+/*!
+  Return a string describing an audio type.
+*/
+const char * vcdinfo_audio_type2str(const vcdinfo_obj_t *obj,
+				    unsigned int audio_type);
+  
 
 /*!
   Note first seg_num is 0!
@@ -236,6 +250,13 @@ vcdinfo_pin2str (uint16_t itemid);
 */
 const char *
 vcdinfo_get_album_description(vcdinfo_obj_t *obj);
+
+/*!
+  Return the VCD application ID.
+  NULL is returned if there is some problem in getting this. 
+*/
+const char *
+vcdinfo_get_application_id(const vcdinfo_obj_t *obj);
 
 /*!
   Get autowait time value for PsdPlayListDescriptor *d.
@@ -373,6 +394,14 @@ vcdinfo_get_num_entries(const vcdinfo_obj_t *obj);
 unsigned int
 vcdinfo_get_num_segments(const vcdinfo_obj_t *obj);
 
+/*!  
+  Return the number of tracks in the current medium. Note this is
+  one less than the track number reported in vcddump.  We don't count
+  the track that contains ISO9660 and metadata information.
+*/
+unsigned int
+vcdinfo_get_num_tracks(const vcdinfo_obj_t *obj);
+
 /*!
   FIXME: THIS NEEDS TO BE RETHOUGHT! 
 
@@ -408,12 +437,12 @@ uint16_t
 vcdinfo_get_play_time (const PsdPlayListDescriptor *d);
 
 /*!
-  Get the PSD Selection List Descriptor for a given list id.
-  NULL is returned if error or not found.
+   Return a string containing the VCD preparer id with trailing
+   blanks removed, or NULL if there is some problem in getting this.
 */
-void
-vcdinfo_get_pxd_from_lid(const vcdinfo_obj_t *obj, PsdListDescriptor *pxd,
-			 uint16_t lid, bool ext);
+const char *
+vcdinfo_get_preparer_id(const vcdinfo_obj_t *obj);
+
 /**
  * \fn vcdinfo_get_prev_from_psd(const PsdSelectionListDescriptor *pld);
  * \brief Get prev offset for a given PSD selector descriptor. 
@@ -439,6 +468,20 @@ uint32_t
 vcdinfo_get_psd_size (const vcdinfo_obj_t *obj);
 
 /*!
+   Return a string containing the VCD publisher id with trailing
+   blanks removed, or NULL if there is some problem in getting this.
+*/
+const char *
+vcdinfo_get_publisher_id(const vcdinfo_obj_t *obj);
+
+/*!
+  Get the PSD Selection List Descriptor for a given list id.
+  NULL is returned if error or not found.
+*/
+void
+vcdinfo_get_pxd_from_lid(const vcdinfo_obj_t *obj, PsdListDescriptor *pxd,
+			 uint16_t lid, bool ext);
+/*!
   \brief Get return offset for a given PSD selector descriptor. 
   \return VCDINFO_INVALID_OFFSET is returned if d on error or d is
   NULL. Otherwise the LID offset is returned.
@@ -453,6 +496,13 @@ vcdinfo_get_return_from_pld(const PsdPlayListDescriptor *pld);
 */
 uint16_t
 vcdinfo_get_return_from_psd(const PsdSelectionListDescriptor *psd);
+
+/*!
+   Return the audio type for a given segment. 
+   VCDINFO_INVALID_AUDIO_TYPE is returned on error.
+*/
+unsigned int 
+vcdinfo_get_seg_audio_type(const vcdinfo_obj_t *obj, unsigned int seg_num);
 
 /*!  Return the starting LBA (logical block address) for segment
   entry_num in obj.  VCDINFO_NULL_LBA is returned if there is no entry.
@@ -498,6 +548,13 @@ vcdinfo_get_seg_sector_count(const vcdinfo_obj_t *obj,
 			     const unsigned int seg_num);
 
 /*!
+   Return a string containing the VCD system id with trailing
+   blanks removed, or NULL if there is some problem in getting this.
+*/
+const char *
+vcdinfo_get_system_id(const vcdinfo_obj_t *obj);
+
+/*!
   Get timeout LID for PsdPlayListDescriptor *d.
 */
 int
@@ -518,13 +575,21 @@ vcdinfo_get_timeout_time (const PsdSelectionListDescriptor *d);
 unsigned int
 vcdinfo_get_track(const vcdinfo_obj_t *obj, const unsigned int entry_num);
 
-/*!  
-  Return the number of tracks in the current medium. Note this is
-  one less than the track number reported in vcddump.  We don't count
-  the track that contains ISO9660 and metadata information.
+/*!
+   Return the audio type for a given track. 
+   VCDINFO_INVALID_AUDIO_TYPE is returned on error.
+
+   Note: track 1 is usually the first track.
 */
 unsigned int
-vcdinfo_get_num_tracks(const vcdinfo_obj_t *obj);
+vcdinfo_get_track_audio_type(const vcdinfo_obj_t *obj, unsigned int track_num);
+
+/*!
+   Return the audio type for a given track. 
+   VCDINFO_INVALID_AUDIO_TYPE is returned on error.
+*/
+unsigned int
+vcdinfo_get_num_audio_channels(unsigned int audio_type);
 
 /*!  
   Return the starting LBA (logical block address) for track number
@@ -571,11 +636,18 @@ unsigned int
 vcdinfo_get_volume_count(const vcdinfo_obj_t *obj);
 
 /*!
-  Return a string containing the VCD volume id, or NULL if there is 
-  some problem in getting this. 
+  Return the VCD ID.
+  NULL is returned if there is some problem in getting this. 
 */
 const char *
 vcdinfo_get_volume_id(const vcdinfo_obj_t *obj);
+
+/*!
+  Return the VCD volumeset ID.
+  NULL is returned if there is some problem in getting this. 
+*/
+const char *
+vcdinfo_get_volumeset_id(const vcdinfo_obj_t *obj);
 
 /*!
   Return the VCD volume num - the number of the CD in the collection.

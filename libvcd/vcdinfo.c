@@ -147,22 +147,106 @@ _init_fs_segment (const vcdinfo_obj_t *obj, const char pathname[],
 }
 
 /*!
-  Note first seg_num is 0!
+   Return the number of audio channels implied by "audio_type".
+   0 is returned on error.
+*/
+unsigned int
+vcdinfo_audio_type_num_channels(const vcdinfo_obj_t *obj, 
+                                 unsigned int audio_type) 
+{
+  const int audio_types[2][5] =
+    {
+      { /* VCD 2.0 */
+        0,   /* no audio*/
+        1,   /* single channel */
+        1,   /* stereo */
+        2,   /* dual channel */
+        0},  /* error */
+
+      { /* SVCD, HQVCD */
+        0,   /* no stream */ 
+        1,   /*  1 stream */ 
+        2,   /*  2 streams */
+        1,   /*  1 multi-channel stream (surround sound) */
+        0}   /*  error */
+    };
+
+  /* We should also check that the second index is in range too. */
+  if (audio_type > 4) {
+    return 0;
+  }
+  
+  /* Get first index entry into above audio_type array from vcd_type */
+  switch (obj->vcd_type) {
+
+  case VCD_TYPE_VCD:
+  case VCD_TYPE_VCD11:
+    return 1;
+
+  case VCD_TYPE_VCD2:
+    return 3;
+    break;
+
+  case VCD_TYPE_HQVCD:
+  case VCD_TYPE_SVCD:
+    return audio_types[1][audio_type];
+    break;
+
+  case VCD_TYPE_INVALID:
+  default:
+    /* We have an invalid entry. Set to handle below. */
+    return 0;
+  }
+}
+
+/*!
+  Return a string describing an audio type.
 */
 const char * 
-vcdinfo_audio_type2str(const vcdinfo_obj_t *obj, unsigned int seg_num)
+vcdinfo_audio_type2str(const vcdinfo_obj_t *obj, unsigned int audio_type)
 {
-  const InfoVcd *info = &obj->info;
-  const char *audio_types[2][4] =
+  const char *audio_types[3][5] =
     {
-      { "no stream", "1 stream", "2 streams",
-        "1 multi-channel stream (surround sound)" },
-      { "no audio", "single channel", "stereo", "dual channel" }
+      /* INVALID, VCD 1.0, or VCD 1.1 */
+      { "unknown", "invalid", "", "", "" },  
+      
+      /*VCD 2.0 */
+      { "no audio", "single channel", "stereo", "dual channel", "error" }, 
+      
+      /* SVCD, HQVCD */
+      { "no stream", "1 stream", "2 streams", 
+        "1 multi-channel stream (surround sound)", "error"}, 
     };
-  
-  return audio_types[obj->vcd_type == VCD_TYPE_VCD2 ? 1 : 0]
-    [info->spi_contents[seg_num].audio_type];
 
+  unsigned int first_index; 
+
+  /* Get first index entry into above audio_type array from vcd_type */
+  switch (obj->vcd_type) {
+
+  case VCD_TYPE_VCD:
+  case VCD_TYPE_VCD11:
+  case VCD_TYPE_VCD2:
+    first_index=1;
+    break;
+
+  case VCD_TYPE_HQVCD:
+  case VCD_TYPE_SVCD:
+    first_index=2;
+    break;
+
+  case VCD_TYPE_INVALID:
+  default:
+    /* We have an invalid entry. Set to handle below. */
+    audio_type=4;
+  }
+  
+  /* We should also check that the second index is in range too. */
+  if (audio_type > 3) {
+    first_index=0;
+    audio_type=1;
+  }
+  
+  return audio_types[first_index][audio_type];
 }
 
 /*!
@@ -422,12 +506,14 @@ vcdinfo_get_album_description(vcdinfo_obj_t *obj)
 }
 
 /*!
-   Return the base selection number.
+  Return the VCD ID.
+  NULL is returned if there is some problem in getting this. 
 */
-unsigned int
-vcdinfo_get_bsn(const PsdSelectionListDescriptor *psd)
+const char *
+vcdinfo_get_application_id(const vcdinfo_obj_t *obj)
 {
-  return(psd->bsn);
+  if ( NULL == obj || NULL == &obj->pvd ) return (NULL);
+  return(vcdinfo_strip_trail(obj->pvd.application_id, 128));
 }
 
 /*!
@@ -438,6 +524,15 @@ int
 vcdinfo_get_autowait_time (const PsdPlayListDescriptor *d) 
 {
   return vcdinfo_calc_psd_wait_time (d->atime);
+}
+
+/*!
+   Return the base selection number.
+*/
+unsigned int
+vcdinfo_get_bsn(const PsdSelectionListDescriptor *psd)
+{
+  return(psd->bsn);
 }
 
 /*!
@@ -789,6 +884,63 @@ vcdinfo_get_play_time (const PsdPlayListDescriptor *d)
 }
 
 /*!
+   Return a string containing the VCD publisher id with trailing
+   blanks removed, or NULL if there is some problem in getting this.
+*/
+const char *
+vcdinfo_get_preparer_id(const vcdinfo_obj_t *obj)
+{
+  if ( NULL == obj || NULL == &obj->pvd ) return (NULL);
+  return(vcdinfo_strip_trail(obj->pvd.preparer_id, 128));
+}
+
+/**
+ * \fn vcdinfo_get_prev_from_pld(const PsdPlayListDescriptor *d);
+ * \brief Get prev offset for a given PSD selector descriptor. 
+ * \return VCDINFO_INVALID_OFFSET is returned if d on error or d is
+ * NULL. Otherwise the LID offset is returned.
+ */
+uint16_t
+vcdinfo_get_prev_from_pld(const PsdPlayListDescriptor *pld)
+{
+  return (pld != NULL) ? 
+    uint16_from_be (pld->prev_ofs) : VCDINFO_INVALID_OFFSET;
+}
+
+/**
+ * \fn vcdinfo_get_prev_from_psd(const PsdSelectionListDescriptor *psd);
+ * \brief Get prev offset for a given PSD selector descriptor. 
+ * \return VCDINFO_INVALID_OFFSET is returned if d on error or psd is
+ * NULL. Otherwise the LID offset is returned.
+ */
+uint16_t
+vcdinfo_get_prev_from_psd(const PsdSelectionListDescriptor *psd)
+{
+  return (psd != NULL) ? 
+    uint16_from_be (psd->prev_ofs) : VCDINFO_INVALID_OFFSET;
+}
+
+/*!
+  Return number of bytes in PSD. 
+*/
+uint32_t
+vcdinfo_get_psd_size (const vcdinfo_obj_t *obj)
+{
+  return uint32_from_be (obj->info.psd_size);
+}
+
+/*!
+   Return a string containing the VCD publisher id with trailing
+   blanks removed, or NULL if there is some problem in getting this.
+*/
+const char *
+vcdinfo_get_publisher_id(const vcdinfo_obj_t *obj)
+{
+  if ( NULL == obj || NULL == &obj->pvd ) return (NULL);
+  return(vcdinfo_strip_trail(obj->pvd.publisher_id, 128));
+}
+
+/*!
   Get the PSD Selection List Descriptor for a given lid.
   NULL is returned if error or not found.
 */
@@ -837,41 +989,6 @@ vcdinfo_get_pxd_from_lid(const vcdinfo_obj_t *obj, PsdListDescriptor *pxd,
 }
 
 /**
- * \fn vcdinfo_get_prev_from_pld(const PsdPlayListDescriptor *d);
- * \brief Get prev offset for a given PSD selector descriptor. 
- * \return VCDINFO_INVALID_OFFSET is returned if d on error or d is
- * NULL. Otherwise the LID offset is returned.
- */
-uint16_t
-vcdinfo_get_prev_from_pld(const PsdPlayListDescriptor *pld)
-{
-  return (pld != NULL) ? 
-    uint16_from_be (pld->prev_ofs) : VCDINFO_INVALID_OFFSET;
-}
-
-/**
- * \fn vcdinfo_get_prev_from_psd(const PsdSelectionListDescriptor *psd);
- * \brief Get prev offset for a given PSD selector descriptor. 
- * \return VCDINFO_INVALID_OFFSET is returned if d on error or psd is
- * NULL. Otherwise the LID offset is returned.
- */
-uint16_t
-vcdinfo_get_prev_from_psd(const PsdSelectionListDescriptor *psd)
-{
-  return (psd != NULL) ? 
-    uint16_from_be (psd->prev_ofs) : VCDINFO_INVALID_OFFSET;
-}
-
-/*!
-  Return number of bytes in PSD. 
-*/
-uint32_t
-vcdinfo_get_psd_size (const vcdinfo_obj_t *obj)
-{
-  return uint32_from_be (obj->info.psd_size);
-}
-
-/**
  * \fn vcdinfo_get_return_from_psd(const PsdPlayListDescriptor *pld);
  * \brief Get return offset for a given PLD selector descriptor. 
  * \return VCDINFO_INVALID_OFFSET is returned if pld on error or pld is
@@ -895,6 +1012,17 @@ vcdinfo_get_return_from_psd(const PsdSelectionListDescriptor *psd)
 {
   return (psd != NULL) ? 
     uint16_from_be (psd->return_ofs) : VCDINFO_INVALID_OFFSET;
+}
+
+/*!
+   Return the audio type for a given segment. 
+   VCDINFO_INVALID_AUDIO_TYPE is returned on error.
+*/
+unsigned int
+vcdinfo_get_seg_audio_type(const vcdinfo_obj_t *obj, unsigned int seg_num)
+{
+  if ( NULL == obj || NULL == &obj->info ) return VCDINFO_INVALID_AUDIO_TYPE;
+  return(obj->info.spi_contents[seg_num].audio_type);
 }
 
 /*!  Return the starting LBA (logical block address) for segment
@@ -979,6 +1107,17 @@ vcdinfo_get_seg_sector_count(const vcdinfo_obj_t *obj,
 }
 
 /*!
+   Return a string containing the VCD system id with trailing
+   blanks removed, or NULL if there is some problem in getting this.
+*/
+const char *
+vcdinfo_get_system_id(const vcdinfo_obj_t *obj)
+{
+  if ( NULL == obj || NULL == &obj->pvd ) return (NULL);
+  return(vcdinfo_strip_trail(obj->pvd.system_id, 32));
+}
+
+/*!
   Get timeout wait time value for PsdPlayListDescriptor *d.
   Time is in seconds unless it is -1 (unlimited).
 */
@@ -1012,6 +1151,25 @@ vcdinfo_get_track(const vcdinfo_obj_t *obj, const unsigned int entry_num)
   return entry_num < entry_count ?
     from_bcd8 (entries->entry[entry_num].n)-1:
     VCDINFO_INVALID_TRACK;
+}
+
+/*!
+   Return the audio type for a given track. 
+   VCDINFO_INVALID_AUDIO_TYPE is returned on error.
+
+   Note: track 1 is usually the first track.
+*/
+unsigned int
+vcdinfo_get_track_audio_type(const vcdinfo_obj_t *obj, unsigned int track_num)
+{
+  TracksSVD *tracks;
+  TracksSVD2 *tracks2;
+  if ( NULL == obj || NULL == &obj->info ) return VCDINFO_INVALID_AUDIO_TYPE;
+  tracks = obj->tracks_buf;
+
+  if ( NULL == tracks ) return 0;
+  tracks2 = (TracksSVD2 *) &(tracks->playing_time[tracks->tracks]);
+  return(tracks2->contents[track_num-1].audio);
 }
 
 /*!
@@ -1126,14 +1284,25 @@ vcdinfo_get_volume_count(const vcdinfo_obj_t *obj)
 }
 
 /*!
-   Return a string containing the VCD volume id, or NULL if there is 
-   some problem in getting this. 
+  Return the VCD ID.
+  NULL is returned if there is some problem in getting this. 
 */
 const char *
 vcdinfo_get_volume_id(const vcdinfo_obj_t *obj)
 {
   if ( NULL == obj || NULL == &obj->pvd ) return (NULL);
   return(vcdinfo_strip_trail(obj->pvd.volume_id, 32));
+}
+
+/*!
+  Return the VCD volumeset ID.
+  NULL is returned if there is some problem in getting this. 
+*/
+const char *
+vcdinfo_get_volumeset_id(const vcdinfo_obj_t *obj)
+{
+  if ( NULL == obj || NULL == &obj->pvd ) return (NULL);
+  return(vcdinfo_strip_trail(obj->pvd.volume_set_id, 128));
 }
 
 /*!
@@ -1587,6 +1756,26 @@ vcdinfo_open(vcdinfo_obj_t *obj, char source_name[],
     free(source_name);
   }
 
+  if (obj->vcd_type == VCD_TYPE_SVCD || obj->vcd_type == VCD_TYPE_HQVCD) {
+
+    vcd_image_stat_t statbuf;
+    
+    if (!vcd_image_source_fs_stat (obj->img, "MPEGAV", &statbuf))
+      vcd_warn ("non compliant /MPEGAV folder detected!");
+    
+    if (!vcd_image_source_fs_stat (obj->img, "SVCD/TRACKS.SVD;1", &statbuf))
+      {
+        if (statbuf.size != ISO_BLOCKSIZE)
+          vcd_warn ("TRACKS.SVD filesize != %d!", ISO_BLOCKSIZE);
+        
+        obj->tracks_buf = _vcd_malloc (ISO_BLOCKSIZE);
+        
+        if (vcd_image_source_read_mode2_sector (obj->img, obj->tracks_buf, 
+                                                statbuf.lsn, false))
+          return(false);
+      }
+  }
+      
   _init_fs_segment (obj, "/", true);
 
   return(true);
