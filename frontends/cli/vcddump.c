@@ -311,14 +311,13 @@ dump_psd (const vcdinfo_obj_t *obj, bool ext)
                      vcdinfo_ofs2str(obj, vcdinf_get_next_from_pld(pld), ext),
                      vcdinfo_ofs2str(obj, vcdinf_get_return_from_pld(pld),
                                      ext),
-                     vcdinfo_get_play_time(pld), vcdinfo_get_wait_time (pld),
+                     vcdinf_get_play_time(pld), vcdinfo_get_wait_time (pld),
                      vcdinfo_get_autowait_time(pld));
 
-            for (i = 0; i < pld->noi; i++)
-              {
-                fprintf (stdout, "  play-item[%d]: %s\n",
-                         i, vcdinfo_pin2str (uint16_from_be (pld->itemid[i])));
-              }
+            for (i = 0; i < pld->noi; i++) {
+              fprintf (stdout, "  play-item[%d]: %s\n", i, 
+                       vcdinfo_pin2str(vcdinf_get_play_item_from_pld(pld,i)));
+            }
             fprintf (stdout, "\n");
           }
           break;
@@ -364,7 +363,8 @@ dump_psd (const vcdinfo_obj_t *obj, bool ext)
                      vcdinfo_ofs2str(obj, vcdinf_get_default_from_psd(d), ext),
                      vcdinfo_ofs2str(obj, vcdinfo_get_timeout_LID(d), ext),
                      vcdinfo_get_timeout_time(d),
-                     vcdinf_get_loop_count(d), _vcd_bool_str (0x80 & d->loop),
+                     vcdinf_get_loop_count(d), 
+                     _vcd_bool_str (vcdinf_has_jump_delay(d)),
                      vcdinfo_pin2str (vcdinfo_get_itemid_from_psd(d)));
 
             for (i = 0; i < d->nos; i++)
