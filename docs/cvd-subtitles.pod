@@ -1,7 +1,7 @@
-$Id$
+=head1 SVCD Subtitle Information - Philips Overlay Graphics Text (OGT)
 
 The following information is culled from information from 
-Julio Sanchez Fernandez (http://subhandler.sourceforge.net)
+Julio Sanchez Fernandez (L<http://subhandler.sourceforge.net>)
 by Rocky Bernstein. 
 
 We do not have information on the subtitle format used on CVD's except
@@ -17,7 +17,7 @@ CVD subtitles are different in several ways from SVCD OGT subtitles
 
 The image data comes first and meta data is at the end.  So that the
 metadata can be found easily, the subtitle packet starts with two
-bytes (everything is big-endian again) that gives the total size of
+bytes (everything is Big Endian again) that gives the total size of
 the subtitle data and the offset to the metadata - i.e. size of the
 image data plus the four bytes at the beginning.
 
@@ -40,52 +40,47 @@ fill-line general case above is not as described and the zero repeat
 count means fill line.  But since this hasn't been ever seen, the
 preceding is only conjecture.
 
+=head2 Format of a Subtitle Header
+
 Here is information given at the start of a subtitle:
 
-SPU size        2 bytes
-metadata offset 2 bytes
+  SPU size        2 bytes
+  metadata offset 2 bytes
 
 Although metadata information does come in a fixed field order, every
 metadata field consists of a tag byte followed by parameters. In all
 cases seen, the size including the tag byte is exactly four bytes.
 
-code    Meaning 
-----    -------
-0x0c 	Unknown
+  code    Meaning 
+  ----    -------
+  0x0c 	Unknown
+  
+  0x04 	24-bit subtitle duration in 1/90000ths of a second
 
-0x04 	24-bit subtitle duration in 1/90000ths of a second
-
-0x17	upper left x, y position, each a 10-bit value, encoded:
+  0x17	upper left x, y position, each a 10-bit value, encoded:
            x = ((p[1]&0x0f)<<6) + (p[2]>>2)
            y = ((p[2]&0x03)<<8) + p[3];
 
-0x1f	lower right x, y position, each a 10-bit (0-1023) value,
+  0x1f	lower right x, y position, each a 10-bit (0-1023) value,
         encoded as above 
 
-0x24    3 bytes primary palette 0 - 1 byte for each of y, u, and v 
-0x25    3 bytes primary palette 1 - 1 byte for each of y, u, and v
-0x26    3 bytes primary palette 2 - 1 byte for each of y, u, and v
-0x27    3 bytes primary palette 3 - 1 byte for each of y, u, and v
+  0x24    3 bytes primary palette 0 - 1 byte for each of y, u, and v 
+  0x25    3 bytes primary palette 1 - 1 byte for each of y, u, and v
+  0x26    3 bytes primary palette 2 - 1 byte for each of y, u, and v
+  0x27    3 bytes primary palette 3 - 1 byte for each of y, u, and v
 
-0x2c    3 bytes highlight palette 0 - 1 byte for each of y, u, and v 
-0x2d    3 bytes highlight palette 1 - 1 byte for each of y, u, and v
-0x2e    3 bytes highlight palette 2 - 1 byte for each of y, u, and v
-0x2f    3 bytes highlight palette 3 - 1 byte for each of y, u, and v
+  0x2c    3 bytes highlight palette 0 - 1 byte for each of y, u, and v 
+  0x2d    3 bytes highlight palette 1 - 1 byte for each of y, u, and v
+  0x2e    3 bytes highlight palette 2 - 1 byte for each of y, u, and v
+  0x2f    3 bytes highlight palette 3 - 1 byte for each of y, u, and v
 
-0x37    3 bytes transparency for primary palette - 1 byte for each 
-	of y, u  and v
+  0x37    3 bytes transparency for primary palette - 1 byte for each 
+  	  of y, u  and v
 
-0x3f    3 bytes transparency for highlight palette - 1 byte for each 
-	of y, u  and v
+  0x3f    3 bytes transparency for highlight palette - 1 byte for each 
+  	  of y, u  and v
 
-0x47    Offset to start of even rows of interlaced image.
-0x4f    Offset to start of odd rows of interlaced image.
+  0x47    Offset to start of even rows of interlaced image.
+  0x4f    Offset to start of odd rows of interlaced image.
 
-
-
-
-
-
-
-
-
+I<$Id$>
