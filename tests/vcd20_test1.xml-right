@@ -42,7 +42,7 @@
       <return ref="end-1" x1="10" y1="20" x2="30" y2="40"/>
       <wait>-1</wait>
       <loop jump-timing="immediate">1</loop>
-      <play-item ref="segment-0002"/>
+      <play-item ref="segment-0000"/>
       <select ref="playlist-01" x1="0" y1="0" x2="0" y2="0"/>
       <select ref="playlist-02" x1="0" y1="0" x2="0" y2="0"/>
       <select ref="end-1" x1="0" y1="0" x2="0" y2="0"/>
@@ -54,7 +54,7 @@
       <autowait>0</autowait>
       <play-item ref="sequence-00"/>
       <play-item ref="sequence-01"/>
-      <play-item ref="segment-0003"/>
+      <play-item ref="segment-0001"/>
       <play-item ref="entry-000"/>
     </playlist>
     <playlist id="playlist-02">
@@ -64,7 +64,7 @@
       <autowait>0</autowait>
       <play-item ref="sequence-02"/>
       <play-item ref="sequence-03"/>
-      <play-item ref="segment-0004"/>
+      <play-item ref="segment-0002"/>
       <play-item ref="entry-004"/>
     </playlist>
     <endlist id="end-1" rejected="true"/>

@@ -447,7 +447,7 @@ _pin2id (unsigned pin, const struct _pbc_ctx *_ctx)
     snprintf (buf, sizeof (buf), "entry-%3.3d", itemid.num);
     break;
   case VCDINFO_ITEM_TYPE_SEGMENT:
-    snprintf (buf, sizeof (buf), "segment-%4.4d", itemid.num+1);
+    snprintf (buf, sizeof (buf), "segment-%4.4d", itemid.num-1);
     break;
   case VCDINFO_ITEM_TYPE_SPAREID2:
   default:
