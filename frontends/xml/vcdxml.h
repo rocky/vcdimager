@@ -21,6 +21,9 @@
 #ifndef __VCDXML_H__
 #define __VCDXML_H__
 
+#include <string.h>
+
+#include <libvcd/vcd_assert.h>
 #include <libvcd/vcd_types.h>
 #include <libvcd/vcd_data_structures.h>
 #include <libvcd/vcd_pbc.h>
@@ -101,5 +104,19 @@ struct filesystem_t
   char *file_src; /* if NULL then dir */
   bool file_raw;
 };
+
+static inline void
+vcd_xml_init (struct vcdxml_t *obj)
+{
+  vcd_assert (obj != NULL);
+
+  memset (obj, 0, sizeof (struct vcdxml_t));
+
+  obj->option_list = _vcd_list_new ();
+  obj->segment_list = _vcd_list_new ();
+  obj->filesystem = _vcd_list_new ();
+  obj->sequence_list = _vcd_list_new ();
+  obj->pbc_list = _vcd_list_new ();
+}
 
 #endif /* __VCDXML_H__ */

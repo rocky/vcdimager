@@ -647,8 +647,6 @@ _parse_videocd (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr n
   if ((obj->vcd_type = _type_id_by_str (_class, _version)) == VCD_TYPE_INVALID)
     return true;
 
-  vcd_xml_init (obj);
-
   FOR_EACH (cur, node)
     {
       bool rc = false;
@@ -695,8 +693,6 @@ vcd_xml_parse (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns
       printf ("root element not videocd...\n");
       return true;
     }
-
-  memset (obj, 0, sizeof (struct vcdxml_t));
 
   return _parse_videocd (obj, doc, node, ns);
 }

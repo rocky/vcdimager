@@ -242,6 +242,8 @@ main (int argc, const char *argv[])
     xmlNsPtr ns;
     struct vcdxml_t obj;
     
+    vcd_xml_init (&obj);
+
     if (!(root = xmlDocGetRootElement (vcd_doc)))
       vcd_error ("XML document seems to be empy (no root node found)");
 

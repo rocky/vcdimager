@@ -739,7 +739,7 @@ main (int argc, const char *argv[])
   int norip_flag = 0;
   int sector_2336_flag = 0;
 
-  memset (&obj, 0, sizeof (struct vcdxml_t));
+  vcd_xml_init (&obj);
 
   obj.comment = vcd_xml_dump_cl_comment (argc, argv);
 
@@ -823,12 +823,6 @@ main (int argc, const char *argv[])
 
   if (!img_fname)
     vcd_error ("bug: only file sources supported so far...");
-
-  obj.segment_list = _vcd_list_new ();
-  obj.sequence_list = _vcd_list_new ();
-  obj.pbc_list = _vcd_list_new ();
-  obj.filesystem = _vcd_list_new ();
-  obj.option_list = _vcd_list_new ();
 
   bin_source = vcd_data_source_new_stdio (img_fname);
   assert (bin_source != NULL);
