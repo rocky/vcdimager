@@ -61,6 +61,9 @@ bool vcd_xml_master (const struct vcdxml_t *obj, VcdImageSink *image_sink)
   if (obj->pvd.volume_id)
     vcd_obj_set_param_str (_vcd, VCD_PARM_VOLUME_ID, obj->pvd.volume_id);
 
+  if (obj->pvd.publisher_id)
+    vcd_obj_set_param_str (_vcd, VCD_PARM_PUBLISHER_ID, obj->pvd.publisher_id);
+
   if (obj->pvd.application_id)
     vcd_obj_set_param_str (_vcd, VCD_PARM_APPLICATION_ID, obj->pvd.application_id);
 

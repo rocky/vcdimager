@@ -150,6 +150,8 @@ main (int argc, const char *argv[])
 
   char *_output_file = 0;
 
+  vcd_xml_progname = "vcdxminfo";
+
   vcd_xml_log_init ();
 
   /* command line processing */

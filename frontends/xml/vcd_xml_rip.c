@@ -1268,6 +1268,8 @@ main (int argc, const char *argv[])
     CL_NRG
   } _img_type = 0;
 
+  vcd_xml_progname = "vcdxrip";
+
   vcd_xml_init (&obj);
 
   vcd_xml_log_init ();

@@ -1433,7 +1433,7 @@ main (int argc, const char *argv[])
     switch (opt)
       {
       case OP_VERSION:
-        fputs (vcd_version_string (true), stdout);
+        fprintf (stdout, vcd_version_string (true), "vcddebug");
         fflush (stdout);
         exit (EXIT_SUCCESS);
         break;

@@ -29,6 +29,8 @@ extern bool vcd_xml_show_progress;
 
 extern log_level_t vcd_xml_verbosity;
 
+extern const char *vcd_xml_progname;
+
 void vcd_xml_log_init (void);
 
 int vcd_xml_scan_progress_cb (const vcd_mpeg_prog_info_t *info, void *user_data);

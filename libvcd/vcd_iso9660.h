@@ -54,6 +54,7 @@ _vcd_iso_pathname_isofy (const char pathname[], uint16_t version);
 
 void
 set_iso_pvd (void *pd, const char volume_id[], const char application_id[],
+             const char publisher_id[],
              uint32_t iso_size, const void *root_dir, 
              uint32_t path_table_l_extent, uint32_t path_table_m_extent,
              uint32_t path_table_size);

@@ -40,7 +40,6 @@ static const char _rcsid[] = "$Id$";
 #define SYSTEM_ID         "CD-RTOS CD-BRIDGE"
 
 #define VOLUME_SET_ID     ""
-#define PUBLISHER_ID      ""
 #define PREPARER_ID       "GNU VCDImager " VERSION " " HOST_ARCH
 
 static void
@@ -105,6 +104,7 @@ const time_t _time = 269222400L;
 void
 set_iso_pvd(void *pd,
             const char volume_id[],
+            const char publisher_id[],
             const char application_id[],
             uint32_t iso_size,
             const void *root_dir,
@@ -148,7 +148,7 @@ set_iso_pvd(void *pd,
 
   _vcd_strncpy_pad (ipd.volume_set_id, VOLUME_SET_ID, 128, VCD_DCHARS);
 
-  _vcd_strncpy_pad (ipd.publisher_id, PUBLISHER_ID, 128, VCD_ACHARS);
+  _vcd_strncpy_pad (ipd.publisher_id, publisher_id, 128, VCD_ACHARS);
   {
     char *_tmpstr = _vcd_strdup_upper (PREPARER_ID);
     _vcd_strncpy_pad (ipd.preparer_id, _tmpstr, 128, VCD_ACHARS);

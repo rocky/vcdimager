@@ -72,7 +72,11 @@ instead of in the original English.
 
 @dircategory Miscellaneous
 @direntry
-* GNU VCDImager: (vcdimager).  The GNU Video CD Authoring Tools
+* GNU VCDImager: (vcdimager).                   GNU Video CD imaging utilities
+* vcddebug: (vcdimager).                        Video CD debugging tool
+* vcdxgen: (vcdimager).                         Video CD XML template generator
+* vcdxbuild: (vcdimager).                       Video CD XML formatter
+* vcdxrip: (vcdimager).                         Video CD XML disassembler
 @end direntry
 
 @node Top, Introduction, (dir), (dir)
@@ -81,7 +85,7 @@ instead of in the original English.
 * Introduction::                
 * Video CD Concepts::           
 * Reference::                   
-* VideoCD XML Description::     
+* Video CD XML Description::     
 * Examples::                    
 * Tips and Hints::              
 * Character Sets::              
@@ -155,14 +159,14 @@ rely, include:
 Support for Video CD 1.1 and 2.0 disc format.
 
 @item
-Support for Super Video CD 1.0@footnote{based on the IEC-62107
-specification with some extensions defined in the so-called `4C SVCD
-System Specification 1.0'. Some support for the @emph{deprecated}
-Chinese SVCD format is available through switches.} disc format.
+Support for Super Video CD 1.0 and HQ Video CD 1.0@footnote{based on the
+IEC-62107 specification with some extensions defined in the super-set
+SVCD System Specification 1.0. Some support for the @emph{deprecated}
+Chinese SVCD format is available through option switches.} disc format.
 
 @item 
-Full @acronym{PBC} support, including customizable play lists, selection
-lists and end lists.
+Full @acronym{PBC} support, including fully customizable play lists,
+(multi default) selection lists and end lists.
 
 @item
 Support for segment (play) items (@acronym{SPI}).
@@ -174,15 +178,16 @@ Support for up to 98 sequence items (@acronym{MPEG} tracks) per (Super) Video CD
 Support for additional entry points into sequence items.
 
 @item
-Support for defining auto pause points in sequence items.
+Support for defining auto pause points in sequence items and segment
+items.
 
 @item
-General facility for adding files as mode 2 form 1 and 2 sectors to the
-@acronym{ISO9660} file-system and setting some labels in the
-@acronym{ISO9660} @acronym{PVD}
+General facility for adding files as mode 2 form 1 and mixed form
+@acronym{XA} sectors to the @acronym{ISO9660} file-system and setting
+some labels in the @acronym{ISO9660} @acronym{PVD}
 
 @item
-Supports 99 minute @acronym{CD-R} media@footnote{...though most devices
+Supports 99 minute @acronym{CD-R} media@footnote{@dots{}though most devices
 will have problems with such an out-of-specification media. You may want
 use the @option{--sector-2336} option for images longer than 80
 minutes}.
@@ -244,7 +249,7 @@ pointers to @acronym{MPEG}/@acronym{CD-DA} tracks following the
 ISO9660 data track.
 
 @item
-Karaoke area at @code{00:03:00}.
+Optional karaoke area at @code{00:03:00}.
 
 @item
 Video CD information area at @code{00:04:00}.
@@ -304,45 +309,53 @@ divisions.
 @end itemize
 
 The Video CD specification requires the multiplex-ed @acronym{MPEG}-1
-stream to have a @acronym{CBR} of less than 174300 bytes (1394400 bits) per
-second@footnote{2324 bytes of payload per sector * 75 sectors per second
-= 174300 bytes per second} in order to accommodate single speed
+stream to have a @acronym{CBR} of less than 174300 bytes (1394400 bits)
+per second@footnote{2324 bytes of payload per sector * 75 sectors per
+second = 174300 bytes per second} in order to accommodate single speed
 @acronym{CD-ROM} drives. The specification allows for the following two
-resolutions:
+resolutions@footnote{Actually even @acronym{PAL} resolution works
+depending on the playing device}:
 
 @itemize @bullet
 @item
-352 x 240 @@ 29.97 Hz (@acronym{NTSC}).
+352 x 240 @@ 29.97 Hz (@acronym{NTSC} @acronym{SIF}).
 @item
-352 x 240 @@ 23.976 Hz (@acronym{FILM}).
+352 x 240 @@ 23.976 Hz (@acronym{FILM} @acronym{SIF}).
 @end itemize
 
 The @acronym{CBR} @acronym{MPEG}-1, layer II audio stream is fixed at
-224 kbps with 1 stereo or 2 mono channels.
-It is recommended to keep the video bit-rate under 1151929.1 bps@footnote{It
-should be noted, that in addition to the audio stream and the video stream, there are also bits consumed by the program stream encapsulation which have to be taken into account for bit-rate calculations}.
+224 kbps with 1 stereo or 2 mono channels.  It is recommended to keep
+the video bit-rate under 1151929.1 bps@footnote{It should be noted, that
+in addition to the audio stream and the video stream, there are also
+bits consumed by the program stream encapsulation which have to be taken
+into account for bit-rate calculations}.
 
 @node Video CD 2.0, Extended Video CD, Video CD 1.1, Known Video CD Flavors
 @subsection Video CD 2.0
 
 About two years after the Video CD 1.1 specification came out, an
-improved Video CD 2.0 standard was published. This one added the
-following items to the features already available in the 1.1
+improved Video CD 2.0 standard was published in 1995. This one added the
+following items to the features already available in the Video CD 1.1
 specification:
 
 @itemize @bullet
 @item
-Support for (optional) @acronym{MPEG} segment play items (@dfn{SPI}),
-consisting of still pictures, motion pictures and/or audio (only)
-streams was added. @xref{Segment Items}.
+Support for @acronym{MPEG} segment play items (@dfn{SPI}), consisting of
+still pictures, motion pictures and/or audio (only) streams was
+added. @xref{Segment Items}.
 
 @item
-Support for (optional) interactive playback control (@dfn{PBC}) was
-added.
+Support for interactive playback control (@dfn{PBC}) was added.
 
 @item
-Support for (optional) playing related access by providing a scan point
-index file was added. (@file{/EXT/SCANDATA.DAT})
+Support for playing related access by providing a scan point index file
+was added. (@file{/EXT/SCANDATA.DAT})
+
+@item 
+Support for closed captions.
+
+@item
+Support for mixing @acronym{NTSC} and @acronym{PAL} content.
 
 @end itemize
 
@@ -351,11 +364,11 @@ By adding PAL support to the Video CD 1.1 specification, the following
 resolutions became available:
 @itemize @bullet
 @item
-352 x 240 @@ 29.97 Hz (@acronym{NTSC}).
+352 x 240 @@ 29.97 Hz (@acronym{NTSC} @acronym{SIF}).
 @item
-352 x 240 @@ 23.976 Hz (@acronym{FILM}).
+352 x 240 @@ 23.976 Hz (@acronym{FILM} @acronym{SIF}).
 @item
-352 x 288 @@ 25 Hz (@acronym{PAL}).
+352 x 288 @@ 25 Hz (@acronym{PAL} @acronym{SIF}).
 @end itemize
 
 For segment play items the following audio encodings became available:
@@ -372,9 +385,10 @@ Mono audio streams at 64, 96 or 192 kbit/sec bitrate.
 Also the possibility to have audio only streams and still
 pictures@footnote{in addition to the resolutions already defined for
 motion video, also high resolutions are available for still pictures,
-which are 704 x 480 (@acronym{NTSC}) and 704 x 576 (@acronym{PAL})} was
-provided. The bit-rate of multiplex-ed streams should be kept under
-174300 bytes/sec in order to accommodate single speed drives.
+which are 704 x 480 (@acronym{NTSC} Full @acronym{D-2}) and 704 x 576
+(@acronym{PAL} Full @acronym{D-2})} was provided. The bit-rate of
+multiplex-ed streams should be kept under 174300 bytes/sec in order to
+accommodate single speed drives.
 
 @node Extended Video CD, Super Video CD 1.0, Video CD 2.0, Known Video CD Flavors
 @subsection Extended Video CD
@@ -388,12 +402,16 @@ XVCD may be unsupported by many available stand-alone playing devices.
 @node Super Video CD 1.0, Extended Super Video CD, Extended Video CD, Known Video CD Flavors
 @subsection Super Video CD 1.0
 
-With the upcoming of the @acronym{DVD} media, a new VCD standard had to
-be published in order to be able to keep up with technology, so the
-Super Video CD specification was called into life. Most notably a switch
-from @acronym{MPEG}-1 CBR to @acronym{MPEG}-2 VBR encoding for the video
-stream was performed. The following new features---based upon the Video
-CD 2.0 specification---are:
+With the upcoming of the @acronym{DVD-V} media, a new VCD standard had
+to be published in order to be able to keep up with technology, so the
+Super Video CD specification was called into life 1999. In the midst of
+2000 a full subset of this Super Video CD specification was published as
+IEC-62107.
+
+As the most notable change over Video CD 2.0 is a switch from
+@acronym{MPEG}-1 CBR to @acronym{MPEG}-2 VBR encoding for the video
+stream was performed. The following new features---building upon the
+Video CD 2.0 specification---are:
 
 @itemize @bullet 
 @item 
@@ -407,8 +425,12 @@ Allowed VBR encoding of @acronym{MPEG}-1 audio stream.
 Higher resolutions (see below) for video stream resolution.
 
 @item
-Overlay graphics and text (@dfn{OGT}) sub-channel coding for user
+Up to 4 overlay graphics and text (@dfn{OGT}) sub-channels for user
 switchable subtitle displaying.
+
+@item
+Command lists for controlling the @acronym{SVCD} virtual machine.
+
 @end itemize
 
 @noindent
@@ -418,9 +440,9 @@ high resolutions as defined for Video CD 2.0 apply for Super Video CD's}:
 
 @itemize @bullet
 @item
-480 x 480 @@ 29.97 Hz (@acronym{NTSC}).
+480 x 480 @@ 29.97 Hz (@acronym{NTSC} 2/3 @acronym{D-2}).
 @item
-480 x 576 @@ 25 Hz (@acronym{PAL}).
+480 x 576 @@ 25 Hz (@acronym{PAL} 2/3 @acronym{D-2}).
 @end itemize
 
 @node Extended Super Video CD,  , Super Video CD 1.0, Known Video CD Flavors
@@ -443,7 +465,7 @@ SVCD's.
 
 This ISO9660 sector located at sector @acronym{LSN} 16 contains general
 information about the ISO9660 filesystem, such as volume label, various
-IDs, filesystem size, etc.
+IDs, filesystem size, pointer to the root directory and so on@dots{}
 
 @node Directory Structure,  , Primary Volume Descriptor, The ISO9660 Track
 @subsection Directory Structure
@@ -578,7 +600,7 @@ stream is required to have one of the following resolutions:
 
 The audio stream must be @acronym{MPEG}-1 layer II, fixed to a 224
 kbits/sec @acronym{CBR} with 1 joint stereo, stereo or dual channel
-audio stream, with a sampling rate of 44.1.kHz and 16bit.
+audio stream, and a sampling rate of 44.1 kHz at 16 bit resolution.
 
 @node Super Video CD, Common Constraints, Video CD, Constraints on MPEG streams
 @subsection Super Video CD
@@ -587,7 +609,7 @@ When creating Super Video CD images @acronym{MPEG}-2 @acronym{VBR}
 streams are expected with a maximum allowed bit-rate of approximately
 2.6 mbits/sec.  The following video resolutions are (officially)
 supported@footnote{actually you can try other resolutions as well,
-but then you are leaving the SVCD specification behind you...}:
+but then you are leaving the SVCD specification behind you@dots{}}:
 
 @itemize @bullet
 @item
@@ -611,8 +633,8 @@ multichannel (5+1) surround sound stream.
 
 According to the specification, it is mandatory to encode scan
 information data into user data blocks in the picture layer of all intra
-coded picture. It may be used by some playing devices for implementing
-fast forward & fast reverse scanning.
+coded picture. It can be used by playing devices for implementing fast
+forward & fast reverse scanning.
 
 The already existing scan information data can be updated by enabling
 the @code{update scan offsets} option. @xref{<option> Element}.
@@ -631,7 +653,7 @@ the @code{update scan offsets} option. @xref{<option> Element}.
 
 The @acronym{MPEG} program streams should be aligned to 2324
 byte @acronym{MPEG} packet boundaries@footnote{i.e. pack headers must be
-repeated every 2324 bytes, starting on byte 0}. If they pack headers
+repeated every 2324 bytes, starting on byte 0}. If the pack headers
 should happen not be aligned on 2324 byte boundaries, GNU VCDImager will
 try@footnote{aligning only works, if @acronym{MPEG} packets are
 @emph{not} bigger than 2324 bytes.} to align them on the fly while
@@ -653,10 +675,11 @@ sector on the @acronym{VCD}/@acronym{SVCD} which is suitable to be
 jumped to directly. @acronym{APS} are required for entry points and
 scantables.
 
-@acronym{APS} have to fullfill the requirement to precede every
-I-frame by a GOP header which shall be preceded by a sequence header
-in its turn and begin all in the same packet, thus forming a so called
-access point sector.
+@acronym{APS} have to fullfill the requirement to precede every I-frame
+by a GOP header which shall be preceded by a sequence header in its
+turn. The start codes of these 3 items are required to be contained all
+in the same mpeg pack/sector, thus forming a so-called @dfn{access
+point sector}.
 
 This requirement can be relaxed by enabling the @code{relaxed aps}
 option. @strong{Warning:} The sequence header is needed for a playing
@@ -698,7 +721,7 @@ Entry points.
 
 @itemize @bullet
 @item
-Pre-pause of 150 empty sectors.
+Pregap of 150 empty sectors.
 
 @item
 Limit of 98 sequences.
@@ -798,7 +821,7 @@ This key may be mapped to the @key{STOP} key.
 
 @item NUMERIC
 This is actually a pseudo key, representing the numeric keys @key{0},
-@key{1}, ..., @key{9}.
+@key{1}, @dots{}, @key{9}.
 
 @end table
 
@@ -875,7 +898,7 @@ interactivity.
 
 @emph{...to be written...}
 
-@node Reference, VideoCD XML Description, Video CD Concepts, Top
+@node Reference, Video CD XML Description, Video CD Concepts, Top
 @chapter Reference
 
 @menu
@@ -1041,9 +1064,9 @@ the stream is supported as well.
 
 @emph{FIXME: write more}
 
-@node VideoCD XML Description, Examples, Reference, Top
-@chapter VideoCD XML Description
-@cindex DTD of VideoCD XML
+@node Video CD XML Description, Examples, Reference, Top
+@chapter Video CD XML Description
+@cindex DTD of Video CD XML
 
 The @acronym{DTD} the @acronym{XML} description conforms to, can be
 downloaded from @uref{http://www.gnu.org/software/vcdimager/videocd.dtd}.
@@ -1062,7 +1085,7 @@ with me at @email{<hvr@@gnu.org>}.}
 * <videocd> Root::              
 @end menu
 
-@node Common Rules, <videocd> Root, VideoCD XML Description, VideoCD XML Description
+@node Common Rules, <videocd> Root, Video CD XML Description, Video CD XML Description
 @section XML Simplified Rules
 
 @itemize @bullet
@@ -1089,8 +1112,8 @@ are two different entities.
 
 @section DTD Notation Reference
 
-Each section of the description of the VideoCD XML format begins with a
-fragment from the VideoCD DTD. The following table gives a simplified
+Each section of the description of the Video CD XML format begins with a
+fragment from the Video CD DTD. The following table gives a simplified
 (and incomplete) reference for the notational syntax.
 
 @table @code
@@ -1123,17 +1146,46 @@ both A and B, in any order
 
 @end table
 
-@section VideoCD XML Conventions
+@section Video CD XML Conventions
+
+@subheading Time Values
 @cindex XML, time values in
+
+All time related values---@code{<wait>}, @code{<autowait>},
+@code{<playtime>}, @code{<start-time-offset>}, @code{<entry>} and
+@code{<auto-pause>}---are given in seconds.
+
+For the @code{<wait>} and @code{<autowait>} time entries the values
+given are rounded to values of the following set:
+
+@table @samp
+@item -1
+meaning an @emph{infinite} wait time. Negative values get rounded to
+@samp{-1}.
+
+@item 0
+meaning no wait time.
+
+@item 1
+ranging from @samp{1} to @samp{60} in steps of 1, representing the time
+to wait in whole seconds.
+
+@item 60
+rangin from @samp{60} to @samp{2000} in steps of 10, representing the
+time to wait in whole seconds.
+
+@item 2000
+maximum wait time of 2000 seconds (33 minutes 20 seconds). Values larger
+will be truncated to this maximum wait time.
+
+@end table
+
+For @code{<loop>} and @code{<playtime>} the value @samp{0} means
+@emph{repeat forever} and @emph{play until end} accordingly.
+
+@subheading Item IDs
 @cindex XML Identifiers
 @cindex Play nothing item
-
-All time related entries@footnote{@code{<wait>}, @code{<autowait>},
-@code{<playtime>}, @code{<time-offset>}} are given in seconds.
-
-For the @code{<wait>} and @code{<autowait>} time entries, @samp{-1}
-means @emph{infinite}. For @code{<loop>} and @code{<playtime>} @samp{0}
-means @emph{repeat forever} and @emph{play until end} accordingly.
 
 Items and their associated IDs fall into two categories, @emph{play
 items} and @emph{PSD items}. Every reference to an ID has to be of the
@@ -1167,7 +1219,7 @@ end list, @code{<endlist>}.
 
 @defindex tg
 
-@node <videocd> Root,  , Common Rules, VideoCD XML Description
+@node <videocd> Root,  , Common Rules, Video CD XML Description
 @section @code{<videocd>} Root
 @tgindex @code{videocd}
 
@@ -1584,6 +1636,24 @@ See description in @code{<sequence-item>}.
 
 @end table
 
+@smallexample
+@cartouche
+@dots{}
+  <segment-items>
+@dots{}
+    <segment-item src="stills/splash.mpg" id="seg-still-splash" />
+
+    <segment-item src="animations/intro.mpg" id="seg-animation-intro" />
+
+    <segment-item src="animations/intra.mpg" id="seg-animation-intra" />
+
+    <segment-item src="animations/extro.mpg" id="seg-animation-extro" />
+@dots{}
+  <segment-items>
+@dots{}
+@end cartouche
+@end smallexample
+
 @node <sequence-items> Container, <pbc> Container, <segment-items> Container, <videocd> Root
 @subsection @code{<sequence-items>} Container
 @tgindex @code{sequence-items}
@@ -1662,12 +1732,39 @@ while only a maximum of 500 entry points@footnote{every sequence point
 has automatically an entry point defined, which must be substracted from
 the maximum of 500 entry points} can be present in the whole disc. The
 entry point time is given in seconds from the beginning of the sequence.
-@xref{Access Point Sectors}.
+If referenced from @acronym{PBC} the sequence which contains the entry
+point is played from the entry point to the end of the sequence
+(@emph{not} to the next entry point!) @xref{Access Point Sectors}.
 
 @item id
 Play item ID value referenced in @code{ref} attributes. 
 
 @end table
+
+@smallexample
+@cartouche
+@dots{}
+  <sequence-items>
+@dots{}
+    <sequence-item src="videos/movie.mpg" id="seq-movie">
+      <default-entry id="ent-movie-0" />
+      <entry id="ent-movie-1">90.32</entry>
+      <entry id="ent-movie-2">710</entry>
+      <entry id="ent-movie-3">1760.5</entry>
+      <entry id="ent-movie-4">3050</entry>
+    </sequence-item>
+
+    <sequence-item src="videos/trailer1.mpg" id="seq-trailer-1" />
+
+    <sequence-item src="videos/trailer2.mpg" id="seq-trailer-2">
+      <auto-pause>15.300</auto-pause>
+      <auto-pause>260.7</auto-pause>
+    </sequence-item>
+@dots{}
+  <sequence-items>
+@dots{}
+@end cartouche
+@end smallexample
 
 @node <pbc> Container,  , <sequence-items> Container, <videocd> Root
 @subsection @code{<pbc>} Container
@@ -1921,8 +2018,11 @@ Target list id jumped to on @key{NEXT} key press.
 Target list id jumped to on @key{RETURN} key press.
 
 @item <playtime>
-The amount of seconds to play of every @code{<play-item>}.  Default:
-@samp{0}, i.e. play each @code{<play-item>} to the end.
+The amount of seconds to play of every @code{<play-item>}. The given
+time value is rounded to 1/15 second units. The allowed range has a
+maximum value of @samp{4369.0} seconds, values equal or less than
+@samp{0} cause each @code{<play-item>} to be played to its end.
+Default: @samp{0}
 
 @item <wait>
 Time in seconds to wait after each playback of @code{<play-item>} before
@@ -1949,13 +2049,13 @@ elements may be defined per @code{<playlist>}.
       <return ref="select-specialfeaturemenu"/>
       <wait>0</wait>
       <autowait>0</autowait>
-      <play-item ref="seq-animation-intro"/>
+      <play-item ref="seg-animation-intro"/>
       <play-item ref="seq-trailer-1"/>
-      <play-item ref="seq-animation-intra"/>
+      <play-item ref="seg-animation-intra"/>
       <play-item ref="seq-trailer-2"/>
-      <play-item ref="seq-animation-intra"/>
+      <play-item ref="seg-animation-intra"/>
       <play-item ref="seq-trailer-3"/>
-      <play-item ref="seq-animation-extro"/>
+      <play-item ref="seg-animation-extro"/>
     </playlist>
 @dots{}
   </pbc>
@@ -2013,7 +2113,7 @@ picture.
 @end cartouche
 @end smallexample
 
-@node Examples, Tips and Hints, VideoCD XML Description, Top
+@node Examples, Tips and Hints, Video CD XML Description, Top
 @chapter Examples
 @cindex @command{cdrdao}, How to use
 

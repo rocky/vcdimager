@@ -239,6 +239,8 @@ main (int argc, const char *argv[])
   int update_scan_offsets_flag = 0;
   int nopbc_flag = 0;
 
+  vcd_xml_progname = "vcdxgen";
+
   vcd_xml_init (&obj);
 
   vcd_xml_log_init ();

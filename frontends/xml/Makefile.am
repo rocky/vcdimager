@@ -7,12 +7,13 @@ POPT_LIBS = -lpopt
 endif
 
 bin_PROGRAMS = vcdxbuild vcdxgen vcdxrip vcdxminfo
+man_MANS = vcdxbuild.1 vcdxgen.1 vcdxrip.1 vcdxminfo.1
 
 INCLUDES = -I$(top_srcdir) $(POPT_INCLUDES) $(LIBVCD_CFLAGS) $(XML_CFLAGS)
 
 VCD_LIBS = $(top_builddir)/libvcd/libvcd.a
 
-EXTRA_DIST = videocd.dtd
+EXTRA_DIST = videocd.dtd $(man_MANS)
 BUILT_SOURCES = videocd_dtd.inc
 MOSTLYCLEANFILES = videocd_dtd.inc
 
@@ -59,6 +60,11 @@ vcdxminfo_SOURCES = \
 
 videocd_dtd.inc: $(srcdir)/videocd.dtd
 	(sed 's/\"/\\"/g' | $(AWK) 'BEGIN { print "char videocd_dtd[] = \\" } { print " \"" $$0 "\\n\" \\" } END { print ";" }') < $< > $@
+
+
+$(man_MANS): %.1: %
+	-$(HELP2MAN) --output=$@ ./$<
+
 
 clean-local:
 	-rm -f *.ps

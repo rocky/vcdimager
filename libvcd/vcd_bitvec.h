@@ -52,10 +52,12 @@ vcd_bitvec_peek_bits (const uint8_t bitvec[],
 		      const unsigned bits)
 {
   uint32_t result = 0;
-  unsigned i = offset, j = 0;
+  unsigned i = offset;
 
   vcd_assert (bits > 0 && bits <= 32);
 
+#if 0
+  j = 0;
   while (j < bits)
     if (i % 8 || (bits - j) < 8)
       {
@@ -70,8 +72,7 @@ vcd_bitvec_peek_bits (const uint8_t bitvec[],
 	result |= bitvec[i >> 3];
 	j += 8, i += 8;
       }
-
-#if 0
+#else
   if (!(offset % 8) && !(bits % 8)) /* optimization */
     for (i = offset; i < (offset + bits); i+= 8)
       {

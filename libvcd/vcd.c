@@ -271,6 +271,7 @@ vcd_obj_new (vcd_type_t vcd_type)
     vcd_warn ("VCD 1.0 support is experimental -- user feedback needed!");
 
   new_obj->iso_volume_label = strdup ("");
+  new_obj->iso_publisher_id = strdup ("");
   new_obj->iso_application_id = strdup ("");
   new_obj->info_album_id = strdup ("");
   new_obj->info_volume_count = 1;
@@ -771,6 +772,17 @@ vcd_obj_set_param_str (VcdObj *obj, vcd_parm_t param, const char *arg)
           vcd_warn ("Volume label too long, will be truncated");
         }
       vcd_debug ("changed volume label to `%s'", obj->iso_volume_label);
+      break;
+
+    case VCD_PARM_PUBLISHER_ID:
+      free (obj->iso_publisher_id);
+      obj->iso_publisher_id = strdup (arg);
+      if (strlen (obj->iso_publisher_id) > 128)
+        {
+          obj->iso_volume_label[128] = '\0';
+          vcd_warn ("Publisher ID too long, will be truncated");
+        }
+      vcd_debug ("changed publisher id to `%s'", obj->iso_publisher_id);
       break;
 
     case VCD_PARM_APPLICATION_ID:
@@ -1926,6 +1938,7 @@ _write_vcd_iso_track (VcdObj *obj)
   /* generate PVD and EVD at last... */
   set_iso_pvd (_dict_get_bykey (obj, "pvd")->buf,
                obj->iso_volume_label, 
+               obj->iso_publisher_id,
                obj->iso_application_id, 
                obj->iso_size, 
                _dict_get_bykey (obj, "dir")->buf, 
@@ -2278,15 +2291,15 @@ vcd_version_string (bool full_text)
   if (!full_text)
     return ("GNU VCDImager " VERSION " [" HOST_ARCH "]");
 
-  return ("GNU VCDImager " VERSION " [" HOST_ARCH "]\n"
+  return ("%s (GNU VCDImager) " VERSION "\n"
+          "Written by Herbert Valerio Riedel\n"
           "\n"
           "http://www.gnu.org/software/vcdimager/\n"
           "\n"
-          "Copyright (c) 2001 Herbert Valerio Riedel <hvr@gnu.org>\n"
-          "\n"         
-          "GNU VCDImager may be distributed under the terms of the GNU General Public\n"
-          "Licence; For details, see the file `COPYING', which is included in the GNU\n"
-          "VCDImager distribution. There is no warranty, to the extent permitted by law.\n");
+          "Copyright (C) 2000, 2001 Herbert Valerio Riedel <hvr@gnu.org>\n"
+          "\n"
+          "This is free software; see the source for copying conditions.  There is NO\n"
+          "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n");
 }
 
 

@@ -112,6 +112,7 @@ struct _VcdObj {
   /* ... */
   unsigned iso_size;
   char *iso_volume_label;
+  char *iso_publisher_id;
   char *iso_application_id;
 
   char *info_album_id;

@@ -34,6 +34,8 @@ static const char _rcsid[] = "$Id$";
 
 bool vcd_xml_gui_mode = false;
 
+const char *vcd_xml_progname = "UNSET";
+
 log_level_t vcd_xml_verbosity = LOG_INFO;
 
 bool vcd_xml_show_progress = false;
@@ -170,11 +172,15 @@ void vcd_xml_print_version (void)
       *micro++ = '\0';
 
       fprintf (stdout,
-	       "<version major=\"%s\" minor=\"%s\" micro=\"%s\""
-	       " platform=\"%s\" />\n", major, minor, micro, HOST_ARCH);
+	       "<version program=\"%s\""
+	       " major=\"%s\" minor=\"%s\" micro=\"%s\""
+	       " platform=\"%s\" />\n",
+	       vcd_xml_progname,
+	       major, minor, micro,
+	       HOST_ARCH);
     }
   else
-    fputs (vcd_version_string (true), stdout);
+    fprintf (stdout, vcd_version_string (true), vcd_xml_progname);
 
   fflush (stdout);
 }

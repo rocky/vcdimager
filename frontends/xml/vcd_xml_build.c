@@ -352,6 +352,8 @@ main (int argc, const char *argv[])
 {
   xmlDocPtr vcd_doc;
 
+  vcd_xml_progname = "vcdxbuild";
+
   _init_xml ();
 
   vcd_xml_log_init ();

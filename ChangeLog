@@ -1,3 +1,10 @@
+2001-08-29  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd.c (vcd_obj_set_param_str): new parameter for setting 
+		publisher ID added
+		(vcd_version_string): changed version string to conform to 
+		GNU format
+
 2001-08-28  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_bitvec.h: optimized code
