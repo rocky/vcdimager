@@ -327,9 +327,8 @@ _parse_gop_header (const void *buf,
   state->packet.gop_timecode = timecode;
 
   if (timecode && state->stream.min_gop_timecode > timecode)
-    vcd_warn ("going backwards... %f %f",
-	      state->stream.min_gop_timecode,
-	      timecode);
+    vcd_debug ("timecode seen smaller than min timecode (%f < %f)",
+               timecode, state->stream.min_gop_timecode);
 
   if (!state->stream.gop_seen)
     {
@@ -338,7 +337,8 @@ _parse_gop_header (const void *buf,
     }
   
   if (timecode && state->stream.max_gop_timecode > timecode)
-    vcd_warn ("going backwards2... %f %f", timecode, state->stream.max_gop_timecode);
+    vcd_debug ("timecode seen smaller than max timecode... (%f < %f)",
+               timecode, state->stream.max_gop_timecode);
 
   state->stream.max_gop_timecode = 
     MAX (timecode, state->stream.max_gop_timecode);
@@ -534,7 +534,10 @@ _analyze (const uint8_t *buf, int len, bool analyze_pes,
 	  pos += 2;
 	  
 	  if (pos + size > len)	  
-	    vcd_error (":-(");
+            {
+              vcd_error ("packet length beyond buffer...");
+              return 0;
+            }
 
 	  switch (code)
 	    {
@@ -632,7 +635,7 @@ _analyze (const uint8_t *buf, int len, bool analyze_pes,
     }
 
   if (pos != len)
-    vcd_warn ("pos != len (%d != %d)", pos, len);
+    vcd_debug ("pos != len (%d != %d)", pos, len); /* fixme? */
 
   return len;
 }

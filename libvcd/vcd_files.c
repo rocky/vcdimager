@@ -221,12 +221,12 @@ set_info_vcd(VcdObj *obj, void *buf)
       break;
     }
   
-  strncpy(info_vcd.album_desc, 
-          "BY_GNU_VCDIMAGER",
-          sizeof(info_vcd.album_desc));
+  _vcd_strncpy_pad (info_vcd.album_desc, 
+                    obj->info_album_id,
+                    sizeof(info_vcd.album_desc));
 
-  info_vcd.vol_count = UINT16_TO_BE(0x0001);
-  info_vcd.vol_id = UINT16_TO_BE(0x0001);
+  info_vcd.vol_count = UINT16_TO_BE(obj->info_volume_count);
+  info_vcd.vol_id = UINT16_TO_BE(obj->info_volume_number);
 
   switch (obj->type)
     {

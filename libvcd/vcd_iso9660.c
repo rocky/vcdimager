@@ -31,6 +31,7 @@
 #include "vcd_iso9660_private.h"
 
 #include "vcd_bytesex.h"
+#include "vcd_util.h"
 
 static const char _rcsid[] = "$Id$";
 
@@ -45,15 +46,6 @@ static void
 pathtable_get_size_and_entries(const void *pt, unsigned *size, 
                                unsigned *entries);
 
-static void 
-strncpy_pad(char dst[], const char src[], size_t len)
-{
-  size_t rlen = strlen(src);
-  strncpy(dst, src, len);
-  if(rlen < len)
-    memset(dst+rlen, ' ', len-rlen);
-}
-
 void 
 set_iso_evd(void *pd)
 {
@@ -66,7 +58,7 @@ set_iso_evd(void *pd)
   memset(&ied, 0, sizeof(ied));
 
   ied.type = to_711(ISO_VD_END);
-  strncpy_pad(ied.id, ISO_STANDARD_ID, sizeof(ied.id));
+  _vcd_strncpy_pad (ied.id, ISO_STANDARD_ID, sizeof(ied.id));
   ied.version = to_711(ISO_VERSION);
 
   memcpy(pd, &ied, sizeof(ied));
@@ -96,11 +88,11 @@ set_iso_pvd(void *pd,
   strcpy(((char*)&ipd)+ISO_XA_MARKER_OFFSET, ISO_XA_MARKER_STRING);
 
   ipd.type = to_711(ISO_VD_PRIMARY);
-  strncpy_pad(ipd.id, ISO_STANDARD_ID, 5);
+  _vcd_strncpy_pad (ipd.id, ISO_STANDARD_ID, 5);
   ipd.version = to_711(ISO_VERSION);
 
-  strncpy_pad(ipd.system_id, SYSTEM_ID, 32);
-  strncpy_pad(ipd.volume_id, volume_id, 32);
+  _vcd_strncpy_pad (ipd.system_id, SYSTEM_ID, 32);
+  _vcd_strncpy_pad (ipd.volume_id, volume_id, 32);
 
   ipd.volume_space_size = to_733(iso_size);
 
@@ -116,14 +108,14 @@ set_iso_pvd(void *pd,
   memcpy(ipd.root_directory_record, root_dir, sizeof(ipd.root_directory_record));
   ipd.root_directory_record[0] = 34;
 
-  strncpy_pad(ipd.volume_set_id, VOLUME_SET_ID, 128);
-  strncpy_pad(ipd.publisher_id, PUBLISHER_ID, 128);
-  strncpy_pad(ipd.preparer_id, PREPARER_ID, 128);
-  strncpy_pad(ipd.application_id, application_id, 128); 
+  _vcd_strncpy_pad (ipd.volume_set_id, VOLUME_SET_ID, 128);
+  _vcd_strncpy_pad (ipd.publisher_id, PUBLISHER_ID, 128);
+  _vcd_strncpy_pad (ipd.preparer_id, PREPARER_ID, 128);
+  _vcd_strncpy_pad (ipd.application_id, application_id, 128); 
 
-  strncpy_pad(ipd.copyright_file_id    , "", 37);
-  strncpy_pad(ipd.abstract_file_id     , "", 37);
-  strncpy_pad(ipd.bibliographic_file_id, "", 37);
+  _vcd_strncpy_pad (ipd.copyright_file_id    , "", 37);
+  _vcd_strncpy_pad (ipd.abstract_file_id     , "", 37);
+  _vcd_strncpy_pad (ipd.bibliographic_file_id, "", 37);
 
   {
     char iso_time[17];

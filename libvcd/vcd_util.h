@@ -53,6 +53,9 @@ _vcd_memdup (const void *mem, size_t count);
 char *
 _vcd_strdup_upper (const char str[]);
 
+char *
+_vcd_strncpy_pad(char dst[], const char src[], size_t len);
+
 #endif /* __VCD_UTIL_H__ */
 
 

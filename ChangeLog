@@ -1,3 +1,23 @@
+2001-05-07  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* frontends/cli/vcdimager.c (main): check bin and cue file 
+		are different
+
+	* libvcd/vcd_stream_stdio.c (vcd_data_sink_new_stdio): warn when
+		overwriting files...
+
+2001-05-06  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd.c (vcd_obj_set_param): 
+		added some boundary checks...
+
+	* libvcd/vcd_util.h (_vcd_strncpy_pad): 
+		moved function here...
+
+	* libvcd/vcd_obj.h: 
+	* libvcd/vcd_files.c (set_info_vcd): 
+	* libvcd/vcd.h: made album id, and volume counts/number configurable
+
 2001-05-04  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_files.c: fixed some floating point roundings into

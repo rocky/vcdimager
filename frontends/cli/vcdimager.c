@@ -49,6 +49,7 @@ static const char _rcsid[] = "$Id$";
 #define DEFAULT_BIN_FILE       "videocd.bin"
 #define DEFAULT_VOLUME_LABEL   "VideoCD"
 #define DEFAULT_APPLICATION_ID ""
+#define DEFAULT_ALBUM_ID       ""
 #define DEFAULT_TYPE           "vcd2"
 
 /* global stuff kept as a singleton makes for less typing effort :-) 
@@ -71,6 +72,10 @@ static struct
 
   const char *volume_label;
   const char *application_id;
+  const char *album_id;
+
+  int volume_number;
+  int volume_count;
 
   int sector_2336_flag;
   int broken_svcd_mode_flag;
@@ -230,6 +235,10 @@ main (int argc, const char *argv[])
 
   gl.volume_label = DEFAULT_VOLUME_LABEL;
   gl.application_id = DEFAULT_APPLICATION_ID;
+  gl.album_id = DEFAULT_ALBUM_ID;
+  
+  gl.volume_count = 1;
+  gl.volume_number = 1;
 
   gl.default_vcd_log_handler = vcd_log_set_handler (_vcd_log_handler);
 
@@ -250,17 +259,6 @@ main (int argc, const char *argv[])
          "select VideoCD type ('vcd11', 'vcd2' or 'svcd') (default: '" DEFAULT_TYPE "')", 
          "TYPE"},
 
-        {"broken-svcd-mode", '\0', POPT_ARG_NONE, &gl.broken_svcd_mode_flag, 0,
-         "enable non-compliant compatibility mode for broken devices"},
-        
-        {"iso-volume-label", 'l', POPT_ARG_STRING, &gl.volume_label, 0,
-         "specify ISO volume label for video cd (default: '" DEFAULT_VOLUME_LABEL
-         "')", "LABEL"},
-
-        {"iso-application-id", '\0', POPT_ARG_STRING, &gl.application_id, 0,
-         "specify ISO application id for video cd (default: '" DEFAULT_APPLICATION_ID
-         "')", "LABEL"},
-
         {"cue-file", 'c', POPT_ARG_STRING, &gl.cue_fname, 0,
          "specify cue file for output (default: '" DEFAULT_CUE_FILE "')",
          "FILE"},
@@ -269,6 +267,27 @@ main (int argc, const char *argv[])
          "specify bin file for output (default: '" DEFAULT_BIN_FILE "')",
          "FILE"},
 
+        {"iso-volume-label", 'l', POPT_ARG_STRING, &gl.volume_label, 0,
+         "specify ISO volume label for video cd (default: '" DEFAULT_VOLUME_LABEL
+         "')", "LABEL"},
+
+        {"iso-application-id", '\0', POPT_ARG_STRING, &gl.application_id, 0,
+         "specify ISO application id for video cd (default: '" DEFAULT_APPLICATION_ID
+         "')", "LABEL"},
+
+        {"info-album-id", '\0', POPT_ARG_STRING, &gl.album_id, 0,
+         "specify album id for video cd set (default: '" DEFAULT_ALBUM_ID
+         "')", "LABEL"},
+
+        {"volume-count", '\0', POPT_ARG_INT, &gl.volume_count, 0,
+         "specify number of volumes in album set", "NUMBER"},
+
+        {"volume-number", '\0', POPT_ARG_INT, &gl.volume_number, 0,
+         "specify album set sequence number (< volume-count)", "NUMBER"},
+
+        {"broken-svcd-mode", '\0', POPT_ARG_NONE, &gl.broken_svcd_mode_flag, 0,
+         "enable non-compliant compatibility mode for broken devices"},
+        
         {"sector-2336", '\0', POPT_ARG_NONE, &gl.sector_2336_flag, 0,
          "use 2336 byte sectors for output"},
 
@@ -395,10 +414,18 @@ main (int argc, const char *argv[])
 
   /* done with argument processing */
 
+  if (!strcmp (gl.image_fname, gl.cue_fname))
+    vcd_warn ("bin and cue file seem to be the same"
+              " -- cue file may get overwritten by bin file!");
+
   gl_vcd_obj = vcd_obj_new (type_id);
 
   vcd_obj_set_param (gl_vcd_obj, VCD_PARM_VOLUME_LABEL, gl.volume_label);
   vcd_obj_set_param (gl_vcd_obj, VCD_PARM_APPLICATION_ID, gl.application_id);
+  vcd_obj_set_param (gl_vcd_obj, VCD_PARM_ALBUM_ID, gl.album_id);
+
+  vcd_obj_set_param (gl_vcd_obj, VCD_PARM_VOLUME_COUNT, &gl.volume_count);
+  vcd_obj_set_param (gl_vcd_obj, VCD_PARM_VOLUME_NUMBER, &gl.volume_number);
 
   {
     int sect_size = gl.sector_2336_flag ? M2RAW_SIZE : CDDA_SIZE;

@@ -16,6 +16,13 @@ Q: I converted the .bin/.cue files to an .iso image and burned it. Why
 A: You must burn the Video CD image in DAO mode, converting it to an
    'ISO Image' destroys important data stored in the cdrom mode 2 type sectors.
 
+- - 
+
+Q: When I double click on the application, a window flashes up and gets closed
+   fast again. What am I doing wrong?
+
+A: 'vcdimager' is the commandline frontend, and as such it is not a GUI.
+
 hvr
 --
 $Id$

@@ -178,6 +178,22 @@ _vcd_strdup_upper (const char str[])
   return new_str;
 }
 
+char *
+_vcd_strncpy_pad(char dst[], const char src[], size_t len)
+{
+  size_t rlen;
+
+  assert (dst != NULL);
+  assert (src != NULL);
+  assert (len > 0);
+
+  rlen = strlen(src);
+  strncpy (dst, src, len);
+  if (rlen < len)
+    memset(dst+rlen, ' ', len-rlen);
+  return dst;
+}
+
 
 /* 
  * Local variables:

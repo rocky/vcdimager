@@ -229,6 +229,9 @@ vcd_obj_new (vcd_type_t vcd_type)
 
   new_obj->iso_volume_label = strdup ("");
   new_obj->iso_application_id = strdup ("");
+  new_obj->info_album_id = strdup ("");
+  new_obj->info_volume_count = 1;
+  new_obj->info_volume_number = 1;
 
   new_obj->custom_file_list = _vcd_list_new ();
 
@@ -431,12 +434,33 @@ vcd_obj_set_param (VcdObj *obj, vcd_parm_t param, const void *arg)
   switch (param) {
   case VCD_PARM_VOLUME_LABEL:
     free (obj->iso_volume_label);
-    obj->iso_volume_label = strdup ((const char *)arg);
+    obj->iso_volume_label = strdup ((const char *) arg);
+    if (strlen (obj->iso_volume_label) > 32)
+      vcd_warn ("Volume label too long, will be truncated");
     break;
+
   case VCD_PARM_APPLICATION_ID:
     free (obj->iso_application_id);
-    obj->iso_application_id = strdup ((const char *)arg);
+    obj->iso_application_id = strdup ((const char *) arg);
+    if (strlen (obj->iso_application_id) > 128)
+      vcd_warn ("Application ID too long, will be truncated");
     break;
+  
+  case VCD_PARM_ALBUM_ID:
+    free (obj->info_album_id);
+    obj->info_album_id = strdup ((const char *) arg);
+    if (strlen (obj->info_album_id) > 16)
+      vcd_warn ("Album ID too long, will be truncated");
+    break;
+
+  case VCD_PARM_VOLUME_COUNT:
+    obj->info_volume_count = (*(const unsigned *) arg);
+    break;
+
+  case VCD_PARM_VOLUME_NUMBER:
+    obj->info_volume_number = (*(const unsigned *) arg);
+    break;
+
   case VCD_PARM_SEC_TYPE:
     switch (*(const int *)arg) {
     case 2336:

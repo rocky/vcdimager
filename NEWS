@@ -6,6 +6,7 @@ version 0.6.2
 =============
 2001-05-..
 
+* made album set parameters configurable by commandline
 * mpeg padding on the fly implemented
 * create /EXT/SCANDATA.DAT for SVCD (disabled for VCD2.0)
 * detect audio streams
@@ -180,3 +181,5 @@ version 0.1
 2000-08-13
 
 * initial release
+
+--

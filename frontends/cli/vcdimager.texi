@@ -90,7 +90,7 @@ which can be fed to any CD-recording program which understands the
 @url{http://www.ping.de/sites/daneb/cdrdao.html}} for instance.
 
 @noindent
-                                                                        Features of the back end library@footnote{the core of the GNU VCDImager
+Features of the back end library@footnote{the core of the GNU VCDImager
 package consists of a library named @code{libvcd}, the front ends are
 just user interfaces to the exported C-API}, on which all front ends
 relay, include:
@@ -112,6 +112,12 @@ volume label and application id fields.
 
 @item
 support for up to 98 @acronym{MPEG} tracks per (Super) Video CD.
+
+@item
+supports 99 minute @acronym{CD-R} media@footnote{...though most devices
+will have problems with such out of specification media. You may want
+use the @option{--sector-2336} option for images longer than 80
+minutes}.
 
 @end itemize
 
@@ -313,31 +319,39 @@ There are a few command-line options for @file{vcdimager} at the moment:
 @cartouche
 $ vcdimager --help
 Usage: vcdimager [OPTION...]
-  -t, --type=TYPE                     select Video CD type ('vcd11', 'vcd2' 
-                                      or 'svcd') (default: 'vcd2')
-  --broken-svcd-mode                  enable non-compliant compatibility
-                                      mode for broken devices
-  -l, --iso-volume-label=LABEL        specify ISO volume label for 
-                                      video cd (default: 'VideoCD')
-  --iso-application-id=LABEL          specify ISO application id for
-                                      video cd (default: '')
-  -c, --cue-file=FILE                 specify cue file for output 
-                                      (default: 'videocd.cue')
-  -b, --bin-file=FILE                 specify bin file for output 
-                                      (default: 'videocd.bin')
-  --sector-2336                       use 2336 byte sectors for output
-  --add-file=FILE,ISO_FILENAME        add file to ISO fs
-  --add-file-2336=FILE,ISO_FILENAME   add file containing full 2336 byte
-                                      sectors to ISO fs
-  -p, --progress                      show progress
-  -v, --verbose                       be verbose
-  -q, --quiet                         show only critical messages
-  -V, --version                       display version and copyright
-                                      information and exit
+  -t, --type=TYPE                       select VideoCD type ('vcd11', 
+                                        'vcd2' or 'svcd') (default: 'vcd2')
+  -c, --cue-file=FILE                   specify cue file for output
+                                        (default: 'videocd.cue')
+  -b, --bin-file=FILE                   specify bin file for output 
+                                        (default: 'videocd.bin')
+  -l, --iso-volume-label=LABEL          specify ISO volume label for video
+                                        cd (default: 'VideoCD')
+  --iso-application-id=LABEL            specify ISO application id for 
+                                        video cd (default: '')
+  --info-album-id=LABEL                 specify album id for video cd set
+                                        (default: '')
+  --volume-count=NUMBER                 specify number of volumes in 
+                                        album set
+  --volume-number=NUMBER                specify album set sequence number
+                                        (< volume-count)
+  --broken-svcd-mode                    enable non-compliant compatibility
+                                        mode for broken devices
+  --sector-2336                         use 2336 byte sectors for output
+  --add-dir=DIR                         add directory contents recursively 
+                                        to ISO fs root
+  --add-file=FILE,ISO_FILENAME          add single file to ISO fs
+  --add-file-2336=FILE,ISO_FILENAME     add file containing full 2336 byte
+                                        sectors to ISO fs
+  -p, --progress                        show progress
+  -v, --verbose                         be verbose
+  -q, --quiet                           show only critical messages
+  -V, --version                         display version and copyright
+                                        information and exit
 
-Help options
-  -?, --help                          Show this help message
-  --usage                             Display brief usage message
+Help options:
+  -?, --help                            Show this help message
+  --usage                               Display brief usage message
 
 $
 @end cartouche
@@ -370,7 +384,9 @@ kbits/sec @acronym{CBR} with 1 stereo or 2 mono audio channels.
 
 When creating Super Video CD images @acronym{MPEG}-2 @acronym{VBR}
 streams are expected with a maximum allowed bit-rate of ~2.6 mbits/sec.
-The following video resolutions are supported:
+The following video resolutions are (officially)
+supported@footnote{actually you can try other resoulutions as well, but
+then you are leaving the SVCD specification behind you...}:
 
 @itemize @bullet
 @item
@@ -379,18 +395,27 @@ The following video resolutions are supported:
 480 x 576 @@ 25 Hz (@acronym{PAL})
 @end itemize
 
+There are a few other requirements imposed the specification, like the
+need to encode scan information as user data in the picture layer of all
+intra pictures, and the requirement to precede every I picture by a GOP
+header which shall be preceded by a sequence header in its turn and
+possibly begin all in the same packet, thus forming a so called access
+point sector.
+
 The audio stream must be @acronym{MPEG}-1 layer II, with a bit-rate
 ranging from 32 to 384 kbps kbits/sec bit-rate with up to 2 stereo or 4
-mono channels.
+mono channels, or 1 extended @acronym{MPEG}-1/2 multichannel (5+1)
+surround sound stream.
 
 @subsubsection Common Constraints
 
-Furthermore the @acronym{MPEG} files need to be aligned to 2324 byte
-@acronym{MPEG} packet boundaries. So if GNU VCDImager complains, try
-fixing those files with VCDpad
-@footnote{see @url{http://www.nocrew.org/?part=vcdpad}} 
-or any other program capable of aligning or fixing @acronym{MPEG}
-packets.
+Furthermore the @acronym{MPEG} files should be aligned to 2324 byte
+@acronym{MPEG} packet boundaries. If they aren't GNU VCDImager will 
+try to align them on the fly while issuing a warning that padding was needed.
+
+If on-the-fly padding should fail, you can try fixing those files with VCDpad
+@footnote{see @url{http://www.nocrew.org/?part=vcdpad}} or any other
+program capable of aligning or fixing @acronym{MPEG} packets.
 
 @subsection Adding Files to the Video CD 
 
@@ -459,16 +484,21 @@ The @file{vcdrip} utility offers just a few command line options:
 @cartouche
 $ vcdrip --help
 Usage: vcdrip [OPTION...]
-  --bin-file=FILE         set image file as source
-  --cdrom-device=DEVICE   set CDROM device as source (linux only)
-  --dump                  dump information about Video CD
-  --rip                   rip mpeg tracks
-  -V, --version           display version and copyright information 
-                          and exit
+  -b, --bin-file=FILE       set image file as source
+  --sector-2336             use 2336 byte sector mode for image file
+  --cdrom-device=DEVICE     set CDROM device as source (Linux only)
+  -d, --dump                dump information about VideoCD
+  --rip                     rip mpeg tracks
+  --rip-spi                 rip segment play items
+  -v, --verbose             be verbose
+  -q, --quiet               show only critical messages
+  -V, --version             display version and copyright information
+                            and exit
 
-Help options
-  -?, --help              Show this help message
-  --usage                 Display brief usage message
+Help options:
+  -?, --help                Show this help message
+  --usage                   Display brief usage message
+
 $
 @end cartouche
 @end example
@@ -499,7 +529,7 @@ number, starting with 0).
 
 @example
 @cartouche
-$ vcdrip-devel --rip --bin-file=test.bin     
+$ vcdrip-devel -v --rip --bin-file=test.bin     
 --DEBUG: found ENTRIES.VCD/SVD
    INFO: track_00.mpg: 1262 -> 2555
 --DEBUG:  stream leadin at 1292

@@ -157,11 +157,11 @@ vcd_data_source_new_stdio(const char pathname[])
   _UserData *ud = NULL;
   struct stat statbuf;
   
-  if(stat(pathname, &statbuf) == -1) {
-    vcd_error("could not stat() file `%s': %s", pathname, strerror(errno));
-    return NULL;
-  }
-
+  if (stat (pathname, &statbuf) == -1) 
+    {
+      vcd_error ("could not stat() file `%s': %s", pathname, strerror (errno));
+      return NULL;
+    }
 
   ud = _vcd_malloc (sizeof (_UserData));
 
@@ -178,7 +178,6 @@ vcd_data_source_new_stdio(const char pathname[])
 
   new_obj = vcd_data_source_new(ud, &funcs);
 
-
   return new_obj;
 }
 
@@ -189,12 +188,16 @@ vcd_data_sink_new_stdio(const char pathname[])
   VcdDataSink *new_obj = NULL;
   vcd_data_sink_io_functions funcs;
   _UserData *ud = NULL;
+  struct stat statbuf;
+
+  if (stat (pathname, &statbuf) != -1) 
+    vcd_warn ("file `%s' exist already, will get overwritten!", pathname);
 
   ud = _vcd_malloc (sizeof (_UserData));
 
-  memset(&funcs, 0, sizeof(funcs));
+  memset (&funcs, 0, sizeof (funcs));
 
-  ud->pathname = strdup(pathname);
+  ud->pathname = strdup (pathname);
 
   funcs.open = _stdio_open_sink;
   funcs.seek = _stdio_seek;
@@ -202,7 +205,7 @@ vcd_data_sink_new_stdio(const char pathname[])
   funcs.close = _stdio_close;
   funcs.free = _stdio_free;
 
-  new_obj = vcd_data_sink_new(ud, &funcs);
+  new_obj = vcd_data_sink_new (ud, &funcs);
 
   return new_obj;
 }

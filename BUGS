@@ -18,6 +18,7 @@ vcdimager
 
 *) scantable creation/playing time detection still not accurate enough
 *) mpeg analyzation doesn't detect all non-conforming parameters
+*) no checking is performed whether charset used for labels and id's is ok
 
 vcdrip
 ~~~~~~
