@@ -25,11 +25,11 @@
 
 #include <libvcd/vcd_mmc_linux.h>
 #include <libvcd/vcd_logging.h>
+#include <libvcd/vcd_assert.h>
 
 #if defined(__linux__)
 
 #include <libvcd/vcd_util.h>
-#include <libvcd/vcd_assert.h>
 
 #include <string.h>
 #include <stdio.h>
@@ -193,8 +193,7 @@ _vcd_mmc_linux_destroy_device (void *user_data)
 #else /* !defined (__linux__) */
 
 int
-_vcd_mmc_linux_generic_packet (void *device,
-			       _vcd_mmc_command_t * cmd, int timeout)
+_vcd_mmc_linux_generic_packet (void *device, _vcd_mmc_command_t * cmd)
 {
   vcd_error ("Tried to access linux packed interface on non-linux system.\n");
   vcd_assert_not_reached ();
@@ -204,7 +203,7 @@ _vcd_mmc_linux_generic_packet (void *device,
 void *
 _vcd_mmc_linux_new_device (const char *device)
 {
-  vcd_log ("Generic packet interface only supported on linux.\n");
+  vcd_info ("Generic packet interface only supported on linux.\n");
   return NULL;
 }
 
