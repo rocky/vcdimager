@@ -4,8 +4,9 @@ vcdimager (0.7.14-1) unstable; urgency=low
   * Since manpages are no longer built, there's no need to depend on
     help2man any more.
   * Do a regression test at buid time. (since 0.7.13-1)
+  * Bumped up Standards-Version to 3.5.9.
 
- -- Nicolas Boullis <nboullis@debian.org>  Tue, 25 Feb 2003 23:23:52 +0100
+ -- Nicolas Boullis <nboullis@debian.org>  Mon, 17 Mar 2003 02:20:35 +0100
 
 vcdimager (0.7.13-1) unstable; urgency=low
 
