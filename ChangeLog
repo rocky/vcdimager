@@ -1,3 +1,14 @@
+2002-12-25  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_iso9660_private.h, libvcd/vcd_xa.h, 
+	libvcd/vcd_files_private.h: improved __attribute__((packed)) usage
+
+	* tests/check_sizeof.c: sizeof integrity check for structs
+
+2002-12-24  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* configure.in: cleaned up, improved libpopt and bitfield check
+
 2002-01-04  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* configure.in: released version 0.7.12

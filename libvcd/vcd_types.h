@@ -133,16 +133,16 @@ typedef enum
 #endif  /* !__GNUC__ */
 
 #ifndef NULL
-#define NULL ((void*) 0)
+# define NULL ((void*) 0)
 #endif
 
 /* In many structures on the disk a sector address is stored as a
    BCD-encoded mmssff in three bytes. */
 typedef struct {
-  uint8_t m  GNUC_PACKED;
-  uint8_t s  GNUC_PACKED;
-  uint8_t f  GNUC_PACKED;
-} msf_t;
+  uint8_t m, s, f;
+} GNUC_PACKED msf_t;
+
+#define msf_t_SIZEOF 3
 
 #ifdef __cplusplus
 }

@@ -32,78 +32,78 @@
 #define ISO_XA_MARKER_STRING    "CD-XA001"
 #define ISO_XA_MARKER_OFFSET    1024
 
-#ifdef __MWERKS__
-#pragma options align=packed
-#endif
-
 struct iso_volume_descriptor {
-  uint8_t  type                        GNUC_PACKED; /* 711 */
-  char     id[5]                       GNUC_PACKED;
-  uint8_t  version                     GNUC_PACKED; /* 711 */
-  char     data[2041]                  GNUC_PACKED;
-};
+  uint8_t  type; /* 711 */
+  char     id[5];
+  uint8_t  version; /* 711 */
+  char     data[2041];
+} GNUC_PACKED;
+
+#define struct_iso_volume_descriptor_SIZEOF ISO_BLOCKSIZE
 
 struct iso_primary_descriptor {
-  uint8_t  type                        GNUC_PACKED; /* 711 */
-  char     id[5]                       GNUC_PACKED;
-  uint8_t  version                     GNUC_PACKED; /* 711 */
-  char     unused1[1]                  GNUC_PACKED;
-  char     system_id[32]               GNUC_PACKED; /* achars */
-  char     volume_id[32]               GNUC_PACKED; /* dchars */
-  char     unused2[8]                  GNUC_PACKED;
-  uint64_t volume_space_size           GNUC_PACKED; /* 733 */
-  char     escape_sequences[32]        GNUC_PACKED;
-  uint32_t volume_set_size             GNUC_PACKED; /* 723 */
-  uint32_t volume_sequence_number      GNUC_PACKED; /* 723 */
-  uint32_t logical_block_size          GNUC_PACKED; /* 723 */
-  uint64_t path_table_size             GNUC_PACKED; /* 733 */
-  uint32_t type_l_path_table           GNUC_PACKED; /* 731 */
-  uint32_t opt_type_l_path_table       GNUC_PACKED; /* 731 */
-  uint32_t type_m_path_table           GNUC_PACKED; /* 732 */
-  uint32_t opt_type_m_path_table       GNUC_PACKED; /* 732 */
-  char     root_directory_record[34]   GNUC_PACKED; /* 9.1 */
-  char     volume_set_id[128]          GNUC_PACKED; /* dchars */
-  char     publisher_id[128]           GNUC_PACKED; /* achars */
-  char     preparer_id[128]            GNUC_PACKED; /* achars */
-  char     application_id[128]         GNUC_PACKED; /* achars */
-  char     copyright_file_id[37]       GNUC_PACKED; /* 7.5 dchars */
-  char     abstract_file_id[37]        GNUC_PACKED; /* 7.5 dchars */
-  char     bibliographic_file_id[37]   GNUC_PACKED; /* 7.5 dchars */
-  char     creation_date[17]           GNUC_PACKED; /* 8.4.26.1 */
-  char     modification_date[17]       GNUC_PACKED; /* 8.4.26.1 */
-  char     expiration_date[17]         GNUC_PACKED; /* 8.4.26.1 */
-  char     effective_date[17]          GNUC_PACKED; /* 8.4.26.1 */
-  uint8_t  file_structure_version      GNUC_PACKED; /* 711 */
-  char     unused4[1]                  GNUC_PACKED;
-  char     application_data[512]       GNUC_PACKED;
-  char     unused5[653]                GNUC_PACKED;
-};
+  uint8_t  type; /* 711 */
+  char     id[5];
+  uint8_t  version; /* 711 */
+  char     unused1[1];
+  char     system_id[32]; /* achars */
+  char     volume_id[32]; /* dchars */
+  char     unused2[8];
+  uint64_t volume_space_size; /* 733 */
+  char     escape_sequences[32];
+  uint32_t volume_set_size; /* 723 */
+  uint32_t volume_sequence_number; /* 723 */
+  uint32_t logical_block_size; /* 723 */
+  uint64_t path_table_size; /* 733 */
+  uint32_t type_l_path_table; /* 731 */
+  uint32_t opt_type_l_path_table; /* 731 */
+  uint32_t type_m_path_table; /* 732 */
+  uint32_t opt_type_m_path_table; /* 732 */
+  char     root_directory_record[34]; /* 9.1 */
+  char     volume_set_id[128]; /* dchars */
+  char     publisher_id[128]; /* achars */
+  char     preparer_id[128]; /* achars */
+  char     application_id[128]; /* achars */
+  char     copyright_file_id[37]; /* 7.5 dchars */
+  char     abstract_file_id[37]; /* 7.5 dchars */
+  char     bibliographic_file_id[37]; /* 7.5 dchars */
+  char     creation_date[17]; /* 8.4.26.1 */
+  char     modification_date[17]; /* 8.4.26.1 */
+  char     expiration_date[17]; /* 8.4.26.1 */
+  char     effective_date[17]; /* 8.4.26.1 */
+  uint8_t  file_structure_version; /* 711 */
+  char     unused4[1];
+  char     application_data[512];
+  char     unused5[653];
+} GNUC_PACKED;
+
+#define struct_iso_primary_descriptor_SIZEOF ISO_BLOCKSIZE
 
 struct iso_path_table {
-  uint8_t  name_len                    GNUC_PACKED; /* 711 */
-  uint8_t  xa_len                      GNUC_PACKED; /* 711 */
-  uint32_t extent                      GNUC_PACKED; /* 731/732 */
-  uint16_t parent                      GNUC_PACKED; /* 721/722 */
-  char     name[EMPTY_ARRAY_SIZE]      GNUC_PACKED;
-};
+  uint8_t  name_len; /* 711 */
+  uint8_t  xa_len; /* 711 */
+  uint32_t extent; /* 731/732 */
+  uint16_t parent; /* 721/722 */
+  char     name[EMPTY_ARRAY_SIZE];
+} GNUC_PACKED;
+
+#define struct_iso_path_table_SIZEOF 8
 
 struct iso_directory_record {
-  uint8_t  length                      GNUC_PACKED; /* 711 */
-  uint8_t  ext_attr_length             GNUC_PACKED; /* 711 */
-  uint64_t extent                      GNUC_PACKED; /* 733 */
-  uint64_t size                        GNUC_PACKED; /* 733 */
-  uint8_t  date[7]                     GNUC_PACKED; /* 7 by 711 */
-  uint8_t  flags                       GNUC_PACKED;
-  uint8_t  file_unit_size              GNUC_PACKED; /* 711 */
-  uint8_t  interleave                  GNUC_PACKED; /* 711 */
-  uint32_t volume_sequence_number      GNUC_PACKED; /* 723 */
-  uint8_t  name_len                    GNUC_PACKED; /* 711 */
-  char     name[EMPTY_ARRAY_SIZE]      GNUC_PACKED;
-};
+  uint8_t  length; /* 711 */
+  uint8_t  ext_attr_length; /* 711 */
+  uint64_t extent; /* 733 */
+  uint64_t size; /* 733 */
+  uint8_t  date[7]; /* 7 by 711 */
+  uint8_t  flags;
+  uint8_t  file_unit_size; /* 711 */
+  uint8_t  interleave; /* 711 */
+  uint32_t volume_sequence_number; /* 723 */
+  uint8_t  name_len; /* 711 */
+  char     name[EMPTY_ARRAY_SIZE];
+} GNUC_PACKED;
 
-#ifdef __MWERKS__
-#pragma options align=reset
-#endif
+#define struct_iso_directory_record_SIZEOF 33
 
 #endif /* __VCD_ISO9660_PRIVATE_H__ */
 

@@ -41,13 +41,16 @@ enum pbc_type_t {
    setting all to zero disables area */
 struct psd_area_t
 {
-  uint8_t x1                 GNUC_PACKED; /* upper left */
-  uint8_t y1                 GNUC_PACKED; /* upper left */
-  uint8_t x2                 GNUC_PACKED; /* lower right */
-  uint8_t y2                 GNUC_PACKED; /* lower right */
-};
+  uint8_t x1; /* upper left */
+  uint8_t y1; /* upper left */
+  uint8_t x2; /* lower right */
+  uint8_t y2; /* lower right */
+} GNUC_PACKED;
+
+#define struct_psd_area_t_SIZEOF 4
 
 typedef struct psd_area_t pbc_area_t; /* fixme */
+#define pbc_area_t_SIZEOF struct_psd_area_t_SIZEOF
 
 static inline pbc_area_t *
 vcd_pbc_area_new (uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2)

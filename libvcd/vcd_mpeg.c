@@ -321,10 +321,10 @@ _parse_user_data (uint8_t streamid, const void *buf, unsigned len,
 {
   unsigned pos = 0;
   struct {
-    uint8_t tag GNUC_PACKED;
-    uint8_t len GNUC_PACKED;
-    uint8_t data[EMPTY_ARRAY_SIZE] GNUC_PACKED;
-  } const *udg = buf;
+    uint8_t tag;
+    uint8_t len;
+    uint8_t data[EMPTY_ARRAY_SIZE];
+  } GNUC_PACKED const *udg = buf;
 
   if (udg->tag == 0x00) /* if first tag's already 0x00 */
     {

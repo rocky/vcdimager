@@ -54,13 +54,15 @@
 
 typedef struct /* big endian!! */
 {
-  uint16_t user_id       GNUC_PACKED;   /* 0 */
-  uint16_t group_id      GNUC_PACKED;   /* 0 */
-  uint16_t attributes    GNUC_PACKED;   /* XA_ATTR_ */ 
-  uint8_t  signature[2]  GNUC_PACKED;   /* { 'X', 'A' } */
-  uint8_t  filenum       GNUC_PACKED;   /* file number, see also XA subheader */
-  uint8_t  reserved[5]   GNUC_PACKED;   /* zero */
-} vcd_xa_t;
+  uint16_t user_id;       /* 0 */
+  uint16_t group_id;      /* 0 */
+  uint16_t attributes;    /* XA_ATTR_ */ 
+  uint8_t  signature[2];  /* { 'X', 'A' } */
+  uint8_t  filenum;       /* file number, see also XA subheader */
+  uint8_t  reserved[5];   /* zero */
+} GNUC_PACKED vcd_xa_t;
+
+#define vcd_xa_t_SIZEOF 14
 
 static inline vcd_xa_t *
 vcd_xa_new (void)
@@ -74,9 +76,9 @@ vcd_xa_init (vcd_xa_t *_xa, uint16_t uid, uint16_t gid, uint16_t attr, uint8_t f
   vcd_assert (_xa != NULL);
   
   
-  _xa->user_id = UINT16_TO_BE (uid);
-  _xa->group_id = UINT16_TO_BE (gid);
-  _xa->attributes = UINT16_TO_BE (attr);
+  _xa->user_id = uint16_to_be (uid);
+  _xa->group_id = uint16_to_be (gid);
+  _xa->attributes = uint16_to_be (attr);
 
   _xa->signature[0] = 'X';
   _xa->signature[1] = 'A';

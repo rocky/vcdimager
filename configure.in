@@ -1,5 +1,6 @@
 AC_REVISION([$Id$])dnl
 AC_INIT(libvcd/vcd.h)
+dnl AM_ACLOCAL_INCLUDE(.)
 AM_CONFIG_HEADER(config.h)
 AM_INIT_AUTOMAKE(vcdimager, 0.7.12)
 AM_MISSING_PROG(HELP2MAN, help2man, $missing_dir)
@@ -38,39 +39,20 @@ then
 fi
 
 AC_PROG_CPP
-AC_PROG_CXX
-AC_PROG_CXXCPP
 AM_PROG_CC_STDC
-AM_PROG_LIBTOOL
 AC_PROG_AWK
+AC_PROG_RANLIB
 
 dnl libs
 AC_CHECK_FUNCS(snprintf vsnprintf, , [AC_MSG_ERROR(required function not found)])
 
-enable_cli_fe_popt=no
-
-if test "x$enable_cli_fe" = "xyes"; then
- AC_CHECK_LIB(popt, poptGetContext, POPT_LIBS="-lpopt", enable_cli_fe_popt=yes)
+if test "x$enable_cli_fe" = "xyes" -o "x$enable_xml_fe" = "xyes"; then
+  AM_PATH_LIBPOPT(, [enable_cli_fe=no; enable_xml_fe=no])
 fi
-
 
 if test "x$enable_xml_fe" = "xyes"; then
   AM_PATH_XML2(2.3.8, , enable_xml_fe=no)
 fi
-
-dnl if test "x$enable_gnome_fe" = "xyes"; then
-dnl gnome_avail=no
-dnl GNOME_INIT_HOOK(gnome_avail=yes,,)
-dnl enable_gnome_fe="${gnome_avail}" 
-dnl fi
-
-dnl if test "x$enable_gnome_fe" = "xyes"; then
-dnl AM_PATH_LIBGLADE(, enable_gnome_fe=no, gnome)
-dnl fi
-
-dnl if test "x$enable_gnome_fe" = "xyes"; then
-dnl AM_PATH_GNOMEMM(,, enable_gnome_fe=no)
-dnl fi
 
 dnl headers
 
@@ -85,34 +67,6 @@ if test "x$ac_cv_header_stdint_h" != "xyes"
    AC_CHECK_SIZEOF(int, 4)
    AC_CHECK_SIZEOF(long, 4)
    AC_CHECK_SIZEOF(long long, 8)
-fi
-
-if test "x$enable_cli_fe" = "xyes" \
-	-a "x$enable_cli_fe_popt" != "xyes"
-then
- AC_CHECK_HEADER(popt.h, , enable_cli_fe_popt=yes)
-fi
-
-if test "x$enable_cli_fe" = "xyes" \
-	-a "x$enable_cli_fe_popt" != "xyes"
-then
- AC_MSG_CHECKING([checking whether popt is new enough])
- AC_EGREP_HEADER(poptHelpOptions, popt.h, , enable_cli_fe_popt=yes)
-
- if test "x$enable_cli_fe_popt" = "xyes"; then
-  AC_MSG_RESULT([no])
- else
-  AC_MSG_RESULT([seems so])
- fi
-fi
-
-dnl GNOME_COMPILE_WARNINGS
-
-if test "x$enable_gnome_fe" = "xyes"; then
- GNOME_X_CHECKS
- dnl Subst PACKAGE_PIXMAPS_DIR.
- PACKAGE_PIXMAPS_DIR="`gnome-config --datadir`/pixmaps/${PACKAGE}"
- AC_SUBST(PACKAGE_PIXMAPS_DIR)
 fi
 
 dnl compiler
@@ -145,12 +99,24 @@ dnl empty_array_size
 
 dnl bitfield order
 AC_MSG_CHECKING(bitfield ordering in structs)
-AC_TRY_RUN([ int main() {
-  struct { char bit_0:1, bit_12:2, bit_345:3, bit_67:2; } bf = { 1,1,1,1 };
+AC_TRY_RUN([
+int
+ main() {
+  struct { char bit_0:1, bit_12:2, bit_345:3, bit_67:2; }
+#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)
+  __attribute__((packed))
+#endif
+  bf = { 1,1,1,1 };
   if (sizeof (bf) != 1) return 1;
   return *((unsigned char*) &bf) != 0x4b; }
-], bf_lsbf=1, AC_TRY_RUN([ int main() {
-  struct { char bit_0:1, bit_12:2, bit_345:3, bit_67:2; } bf = { 1,1,1,1 };
+], bf_lsbf=1, AC_TRY_RUN([ 
+int
+main() {
+  struct { char bit_0:1, bit_12:2, bit_345:3, bit_67:2; }
+#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)
+  __attribute__((packed))
+#endif
+  bf = { 1,1,1,1 };
   if (sizeof (bf) != 1) return 1;
   return *((unsigned char*) &bf) != 0xa5; }
 ], bf_lsbf=0, AC_MSG_ERROR([unsupported bitfield ordering])))
@@ -173,18 +139,9 @@ LIBS="$LIBS -lm"
 CFLAGS="$CFLAGS $WARN_CFLAGS"
 
 AM_CONDITIONAL(CYGWIN, test "x$CYGWIN" = "xyes")
-AM_CONDITIONAL(BUILD_CLI_FE_POPT, test "x$enable_cli_fe_popt" = "xyes")
 AM_CONDITIONAL(BUILD_CLI_FE, test "x$enable_cli_fe" = "xyes")
 AM_CONDITIONAL(BUILD_GNOME_FE, test "x$enable_gnome_fe" = "xyes")
 AM_CONDITIONAL(BUILD_XML_FE, test "x$enable_xml_fe" = "xyes")
-
-if test "x$enable_cli_fe_popt" = "xyes"; then
-  POPT_LIBS='-L$(top_builddir)/frontends/cli/popt/ -lpopt'  
-  POPT_CFLAGS='-I$(top_srcdir)/frontends/cli/popt/'
-fi
-
-AC_SUBST(POPT_LIBS)
-AC_SUBST(POPT_CFLAGS)
 
 LIBVCD_CFLAGS='-I$(top_srcdir)/libvcd/'
 LIBVCD_LIBS='$(top_builddir)/libvcd/libvcd.a'
@@ -197,41 +154,19 @@ AC_OUTPUT([ \
 	frontends/Makefile \
 	frontends/xml/Makefile \
 	frontends/cli/Makefile \
-	frontends/cli/popt/Makefile \
 	docs/Makefile \
 	tests/Makefile \
 	vcdimager.spec \
 ])
 
-dnl	frontends/gnome/Makefile \
-dnl	frontends/gnome/macros/Makefile \
-dnl	frontends/gnome/src/Makefile \
-
 echo "
 Setup:
   Install path:     ${prefix}
   Build CLI FE:	    $enable_cli_fe
-  Use own popt lib: $enable_cli_fe_popt
   Build XML FE:	    $enable_xml_fe
-  Build Gnome FE:   $enable_gnome_fe
 "
 
-if test "x$enable_gnome_fe" = "xyes"
-then
-  cat <<EOM
-****************************************************************************
-****************************************************************************
-***                                                                      ***
-***       WARNING: THE GNOME FRONTEND IS NOT USABLE YET                  ***
-***                                                                      ***
-****************************************************************************
-****************************************************************************
-EOM
-fi
-
-if test "x$enable_cli_fe" != "xyes" \
- 	-a "x$enable_xml_fe" != "xyes" \
- 	-a "x$enable_gnome_fe" != "xyes"
+if test "x$enable_cli_fe" != "xyes" -a "x$enable_xml_fe" != "xyes"
 then
   cat <<EOF
 ****************************************************************************

@@ -35,13 +35,15 @@ typedef enum {
 } mpeg_vers_t;
 
 struct vcd_mpeg_scan_data_t {
-  uint8_t tag        GNUC_PACKED;
-  uint8_t len        GNUC_PACKED;
-  msf_t prev_ofs     GNUC_PACKED;
-  msf_t next_ofs     GNUC_PACKED;
-  msf_t back_ofs     GNUC_PACKED;
-  msf_t forw_ofs     GNUC_PACKED;
-};
+  uint8_t tag;
+  uint8_t len;
+  msf_t prev_ofs;
+  msf_t next_ofs;
+  msf_t back_ofs;
+  msf_t forw_ofs;
+} GNUC_PACKED;
+
+#define struct_vcd_mpeg_scan_data_t_SIZEOF 14
 
 #define VCD_MPEG_SCAN_DATA_WARNS 8
 
