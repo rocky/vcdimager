@@ -89,9 +89,12 @@ extern "C" {
 #define VCDINFO_INVALID_ENTRY  0xFFFF
 
 /*! 
-  Constant for invalid LID
+  Constant for invalid LID. 
+  FIXME: player needs these to be the same. rest of VCDimager
+  uses 0 for INVALID LID.
+  
 */
-#define VCDINFO_INVALID_LID  0
+#define VCDINFO_INVALID_LID  VCDINFO_INVALID_ENTRY
 
 /*! 
   Constant for invalid itemid
@@ -105,12 +108,12 @@ extern "C" {
 
 /* See enum in vcd_files_private.h */
 typedef enum {
-  VCDINFO_FILES_VIDEO_NOSTREAM = 0,
-  VCDINFO_FILES_VIDEO_NTSC_STILL = 1,
-  VCDINFO_FILES_VIDEO_NTSC_STILL2 = 2,
+  VCDINFO_FILES_VIDEO_NOSTREAM = 0,   
+  VCDINFO_FILES_VIDEO_NTSC_STILL = 1,   
+  VCDINFO_FILES_VIDEO_NTSC_STILL2 = 2,  /* lo+hires*/
   VCDINFO_FILES_VIDEO_NTSC_MOTION = 3,
-  VCDINFO_FILES_VIDEO_PAL_STILL = 5,
-  VCDINFO_FILES_VIDEO_PAL_STILL2 = 6,
+  VCDINFO_FILES_VIDEO_PAL_STILL = 5,    
+  VCDINFO_FILES_VIDEO_PAL_STILL2 = 6,   /* lo+hires*/
   VCDINFO_FILES_VIDEO_PAL_MOTION = 7,
   VCDINFO_FILES_VIDEO_INVALID = 8
 } vcdinfo_video_segment_type_t;
