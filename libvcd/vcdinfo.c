@@ -1594,7 +1594,7 @@ vcdinfo_open(vcdinfo_obj_t *obj, char *source_name[],
         
         if (vcd_image_source_read_mode2_sector (obj->img, obj->tracks_buf, 
                                                 statbuf.lsn, false))
-          return(false);
+          return VCDINFO_OPEN_ERROR;
       }
   }
       

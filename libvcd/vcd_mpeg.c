@@ -397,7 +397,7 @@ _analyze_pes_header (const uint8_t *buf, int len,
   bool _has_pts = false;
   bool _has_dts = false;
   int64_t pts = 0;
-  mpeg_vers_t pes_mpeg_ver = 0;
+  mpeg_vers_t pes_mpeg_ver = MPEG_VERS_INVALID;
 
   int pos;
 
@@ -1160,7 +1160,7 @@ vcd_mpeg_packet_get_type (const struct vcd_mpeg_packet_info *_info)
   else if (_info->system_header || _info->padding)
     return PKT_TYPE_EMPTY;
 
-  return 0;
+  return PKT_TYPE_INVALID;
 }
 
 
