@@ -37,16 +37,50 @@
 
 static const char _rcsid[] = "$Id$";
 
+
+static uint32_t
+_get_closest_aps (const struct vcd_mpeg_source_info *_mpeg_info, double t,
+                  struct aps_data *_best_aps)
+{
+  VcdListNode *node;
+  struct aps_data best_aps;
+  bool first = true;
+
+  assert (_mpeg_info != NULL);
+  assert (_mpeg_info->aps_list != NULL);
+
+  _VCD_LIST_FOREACH (node, _mpeg_info->aps_list)
+    {
+      struct aps_data *_aps = _vcd_list_node_data (node);
+  
+      if (first)
+        {
+          best_aps = *_aps;
+          first = false;
+        }
+      else if (fabs (_aps->timestamp - t) < fabs (best_aps.timestamp - t))
+        best_aps = *_aps;
+      else 
+        break;
+    }
+
+  if (_best_aps)
+    *_best_aps = best_aps;
+
+  return best_aps.packet_no;
+}
+
 void
 set_entries_vcd (VcdObj *obj, void *buf)
 {
   VcdListNode *node = NULL;
-  int n = 0;
+  int idx = 0;
+  int track_idx = 0;
   EntriesVcd entries_vcd;
 
   assert(sizeof(EntriesVcd) == 2048);
 
-  assert(_vcd_list_length (obj->mpeg_track_list) <= 509);
+  assert(_vcd_list_length (obj->mpeg_track_list) <= 500);
   assert(_vcd_list_length (obj->mpeg_track_list) > 0);
 
   memset(&entries_vcd, 0, sizeof(entries_vcd)); /* paranoia / fixme */
@@ -81,21 +115,46 @@ set_entries_vcd (VcdObj *obj, void *buf)
       break;
     }
 
-  entries_vcd.tracks = UINT16_TO_BE(_vcd_list_length (obj->mpeg_track_list));
 
-  for (n = 0, node = _vcd_list_begin (obj->mpeg_track_list);
-       node != NULL;
-       n++, node = _vcd_list_node_next (node))
+  idx = 0;
+  track_idx = 2;
+  _VCD_LIST_FOREACH (node, obj->mpeg_sequence_list)
     {
-      mpeg_track_t *track = _vcd_list_node_data (node);
+      mpeg_sequence_t *track = _vcd_list_node_data (node);
       uint32_t lsect = track->relative_start_extent;
+      VcdListNode *node2;
 
       lsect += obj->iso_size;
 
-      entries_vcd.entry[n].n = to_bcd8(n+2);
+      entries_vcd.entry[idx].n = to_bcd8(track_idx);
+      lba_to_msf(lsect + 150, &(entries_vcd.entry[idx].msf));
 
-      lba_to_msf(lsect + 150, &(entries_vcd.entry[n].msf));
+      idx++;
+      lsect += obj->pre_data_gap;
+
+      _VCD_LIST_FOREACH (node2, track->entry_list)
+        {
+          entry_t *_entry = _vcd_list_node_data (node2);
+          /* additional entries */
+          struct aps_data _closest_aps;
+
+          _get_closest_aps (vcd_mpeg_source_get_info (track->source),
+                            _entry->time, &_closest_aps);
+
+          entries_vcd.entry[idx].n = to_bcd8(track_idx);
+          lba_to_msf(lsect + _closest_aps.packet_no + 150,
+                     &(entries_vcd.entry[idx].msf));
+
+          vcd_debug ("requested entry point at %f, closest possible entry point at %f",
+                     _entry->time, _closest_aps.timestamp);
+
+          idx++;
+        }
+
+      track_idx++;
     }
+
+  entries_vcd.entry_count = UINT16_TO_BE(idx);
 
   memcpy(buf, &entries_vcd, sizeof(entries_vcd));
 }

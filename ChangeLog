@@ -1,5 +1,7 @@
 2001-05-11  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* libvcd/vcd_files.c (set_entries_vcd): added support for additional entry points
+
 	* libvcd/vcd.c: changed api to enable PBC/SPI/entry points,
 		replaced some foreach loops by _VCD_LIST_FOREACH macro...
 

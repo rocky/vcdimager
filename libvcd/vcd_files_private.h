@@ -51,7 +51,7 @@ typedef struct {
                                              INFO.SVD */
   uint8_t sys_prof_tag       GNUC_PACKED; /* 0x01 if VCD1.1
                                              0x00 else */
-  uint16_t tracks            GNUC_PACKED; /* 1 <= tracks <= 500 */
+  uint16_t entry_count       GNUC_PACKED; /* 1 <= tracks <= 500 */
   struct { /* all fields are BCD */
     uint8_t n                GNUC_PACKED; /* cd track no 2 <= n <= 99 */
     msf_t msf                GNUC_PACKED;

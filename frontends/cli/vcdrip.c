@@ -624,7 +624,7 @@ dump_entries_vcd (const void *data)
 
   memcpy (&entries, data, 2048);
 
-  ntracks = UINT16_FROM_BE (entries.tracks);
+  ntracks = UINT16_FROM_BE (entries.entry_count);
 
   fprintf (stdout, 
            gl_vcd_type == VCD_TYPE_SVCD 
@@ -1106,10 +1106,10 @@ rip (const char device_fname[])
       vcd_error ("ENTRIES.VCD/SVD signature not found");
     }
 
-  for (i = 0; i < UINT16_FROM_BE (entries.tracks); i++)
+  for (i = 0; i < UINT16_FROM_BE (entries.entry_count); i++)
     {
       uint32_t startlba = msf_to_lba (&(entries.entry[i].msf)) - 150;
-      uint32_t endlba = (i + 1 == UINT16_FROM_BE (entries.tracks))
+      uint32_t endlba = (i + 1 == UINT16_FROM_BE (entries.entry_count))
         ? size : (msf_to_lba (&(entries.entry[i + 1].msf)) - 150);
       uint32_t pos;
       FILE *outfd = NULL;
