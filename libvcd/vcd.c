@@ -2369,11 +2369,12 @@ vcd_version_string (bool full_text)
     return ("GNU VCDImager " VERSION " [" HOST_ARCH "]");
 
   return ("%s (GNU VCDImager) " VERSION "\n"
-          "Written by Herbert Valerio Riedel\n"
+          "Written by Herbert Valerio Riedel and Rocky Bernstein.\n"
           "\n"
           "http://www.gnu.org/software/vcdimager/\n"
           "\n"
-          "Copyright (C) 2000, 2001 Herbert Valerio Riedel <hvr@gnu.org>\n"
+          "Copyright (C) 2000-2003 Herbert Valerio Riedel <hvr@gnu.org>\n"
+	  "                   2003 Rocky Bernstein <rocky@panix.com>\n"
           "\n"
           "This is free software; see the source for copying conditions.  There is NO\n"
           "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n");
