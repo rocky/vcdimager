@@ -2,7 +2,7 @@
     $Id$
 
     Copyright (C) 2001, 2002 Herbert Valerio Riedel <hvr@gnu.org>
-    Copyright (C) 2002 ,2003, 2004 Rocky Bernstein <rocky@panix.com>
+    Copyright (C) 2002, 2003, 2004 Rocky Bernstein <rocky@panix.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -317,7 +317,7 @@ dump_psd (const vcdinfo_obj_t *obj, bool ext)
                      vcdinf_get_autowait_time(pld));
 
             for (i = 0; i < pld->noi; i++) {
-              fprintf (stdout, "  play-item[%d]: %s\n", i, 
+              fprintf (stdout, "  play-item[%d]: %s\n", i,
                        vcdinfo_pin2str(vcdinf_pld_get_play_item(pld,i)));
             }
             fprintf (stdout, "\n");
@@ -595,7 +595,7 @@ dump_entries (vcdinfo_obj_t *obj)
         fprintf (stdout, " ENTRY[%2.2d]: track# %2d (SEQUENCE[%d]), LSN %6u "
                  "(MSF %2.2x:%2.2x:%2.2x)\n",
                  n, vcdinfo_get_track(obj, n),
-                 vcdinfo_get_track(obj, n) - 1,               
+                 vcdinfo_get_track(obj, n) - 1,
                  (unsigned int) lsn, msf.m, msf.s, msf.f);
       }
 }

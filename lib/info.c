@@ -356,7 +356,7 @@ vcdinfo_pin2str (uint16_t itemid_num)
     snprintf (buf, BUF_SIZE, "play nothing (0x%4.4x)", itemid.num);
     break;
   case VCDINFO_ITEM_TYPE_TRACK:
-    snprintf (buf, BUF_SIZE, "SEQUENCE[%d] (0x%4.4x)", itemid.num, 
+    snprintf (buf, BUF_SIZE, "SEQUENCE[%d] (0x%4.4x)", itemid.num-1, 
               itemid_num);
     break;
   case VCDINFO_ITEM_TYPE_ENTRY:

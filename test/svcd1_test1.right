@@ -126,16 +126,16 @@ SVCD/PSD.SVD
   NOI: 3 | LID#: 2 (rejected: no)
   prev: disabled | next: LID[3] @0x000a | return: LID[4] @0x000d
   playtime: 0/15s | wait: 5s | autowait: 0s
-  play-item[0]: SEQUENCE[1] (0x0002)
-  play-item[1]: SEQUENCE[2] (0x0003)
+  play-item[0]: SEQUENCE[0] (0x0002)
+  play-item[1]: SEQUENCE[1] (0x0003)
   play-item[2]: SEGMENT[1] (0x03e9)
 
  PSD[02] (LID[3] @0x000a): play list descriptor
   NOI: 3 | LID#: 3 (rejected: no)
   prev: disabled | next: LID[4] @0x000d | return: LID[4] @0x000d
   playtime: 0/15s | wait: 5s | autowait: 0s
-  play-item[0]: SEQUENCE[3] (0x0004)
-  play-item[1]: SEQUENCE[4] (0x0005)
+  play-item[0]: SEQUENCE[2] (0x0004)
+  play-item[1]: SEQUENCE[3] (0x0005)
   play-item[2]: SEGMENT[2] (0x03ea)
 
  PSD[03] (LID[4] @0x000d): end list descriptor
