@@ -317,6 +317,15 @@ _vcd_mpeg_parse_video (const void *packet, int *offsetp, mpeg_type_info_t *info)
   size <<= 3;
   offset_end = offset + size;
 
+  if (offset_end > MPEG_PACKET_SIZE_BITS)
+    {
+      vcd_warn ("video block ends beyond packet boundary (%d bit > %d bit)"
+                " -- truncating...",
+                offset_end, MPEG_PACKET_SIZE_BITS);
+
+      offset_end = MPEG_PACKET_SIZE_BITS;
+    }
+
   assert (offset_end <= MPEG_PACKET_SIZE_BITS);
   assert (offset % 8 == 0);
 

@@ -1,3 +1,8 @@
+2001-03-11  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_mpeg.c (_vcd_mpeg_parse_video): handle 
+		boundary check more gracefully...
+
 2001-03-10  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* switched to HAVE_CONFIG_H system

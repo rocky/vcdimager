@@ -2,6 +2,15 @@ $Id$
 
 see ChangeLog for more information
 
+version 0.5.9beta3
+==================
+2001-03-11
+
+* improved packaging
+* minor portability fixes for non-gcc compiler
+* included popt library
+* minor fixes
+
 version 0.5.9beta2
 ==================
 2001-01-21
