@@ -149,7 +149,8 @@ case $host in
      *-bsdi*)
 	LIBVCD_SYSDEP='vcd_image_cd-bsdi.$(OBJEXT)' 
 	;;
-     *-sunos*)
+     *-sunos*|*-sun-*)
+        AC_CHECK_HEADERS(sys/cdio.h)
 	LIBVCD_SYSDEP='vcd_image_cd-sunos.$(OBJEXT)' 
 	;;
      *)

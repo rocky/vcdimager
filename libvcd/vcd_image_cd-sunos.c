@@ -53,6 +53,49 @@ static const char _rcsid[] = "$Id$";
 #include <sys/types.h>
 #include <sys/ioctl.h>
 
+/* FIXME!!!!!
+   The below two functions will be in libcdio's cdio_sector.h
+   REMOVE THEM FROM HERE.
+*/
+
+#define CDIO_PREGAP_SECTORS 150
+
+static void
+cdio_lba_to_msf (uint32_t lba, msf_t *msf)
+{
+  vcd_assert (msf != 0);
+
+  msf->m = to_bcd8 (lba / (60 * 75));
+  msf->s = to_bcd8 ((lba / 75) % 60);
+  msf->f = to_bcd8 (lba % 75);
+}
+
+static uint32_t
+cdio_msf_to_lba (const msf_t *msf)
+{
+  uint32_t lba = 0;
+
+  vcd_assert (msf != 0);
+
+  lba = from_bcd8 (msf->m);
+  lba *= 60;
+
+  lba += from_bcd8 (msf->s);
+  lba *= 75;
+  
+  lba += from_bcd8 (msf->f);
+
+  return lba;
+}
+
+static inline lba_t
+cdio_lsn_to_lba (lsn_t lsn)
+{
+  return lsn + CDIO_PREGAP_SECTORS; 
+}
+
+/* END FIXME HACK. */
+
 #define DEFAULT_VCD_DEVICE "/vol/dev/aliases/cdrom0"
 
 /* reader */
@@ -157,7 +200,7 @@ _read_mode2_sector (void *user_data, void *data, lsn_t lsn,
 
   _vcd_source_init (_obj);
   
-  lba_to_msf (_vcd_lsn_to_lba(lsn), &_msf);
+  cdio_lba_to_msf (cdio_lsn_to_lba(lsn), &_msf);
   msf->cdmsf_min0 = from_bcd8(_msf.m);
   msf->cdmsf_sec0 = from_bcd8(_msf.s);
   msf->cdmsf_frame0 = from_bcd8(_msf.f);
@@ -336,9 +379,9 @@ _vcd_source_set_arg (void *user_data, const char key[], const char value[])
   else if (!strcmp (key, "access-mode"))
     {
       if (!strcmp(value, "ATAPI"))
-	_obj->access_mode = _AM_IOCTL;
+	_obj->access_mode = _AM_SUN_CTRL_ATAPI;
       else if (!strcmp(value, "SCSI"))
-	_obj->access_mode = _AM_READ_CD;
+	_obj->access_mode = _AM_SUN_CTRL_SCSI;
       else
 	vcd_error ("unknown access type: %s. ignored.", value);
     }
@@ -495,7 +538,7 @@ _vcd_get_track_msf(void *user_data, unsigned int track_num, msf_t *msf)
   if (!_obj->init) _vcd_source_init(_obj);
   if (!_obj->toc_init) _vcd_read_toc (_obj) ;
 
-  if (track_num == VCD_LEADOUT_TRACK) track_num = _obj->total_tracks+1;
+  if (track_num == CDROM_LEADOUT) track_num = _obj->total_tracks+1;
 
   if (track_num == 0 || track_num > _obj->total_tracks+1) {
     return 1;
@@ -523,19 +566,31 @@ _vcd_get_track_size (void *user_data, const unsigned int track)
   if (track == 0 || track > _obj->total_tracks) {
     return 0;
   } else {
-    struct cdrom_tocentry *start_msf = &_obj->tocent[track];
-    struct cdrom_tocentry *end_msf   = &_obj->tocent[track+1];
-    uint32_t len = 75 - start_msf->cdte_addr.msf.frame;
+    struct cdrom_tocentry *start_msf0 = &_obj->tocent[track];
+    struct cdrom_tocentry *end_msf0   = &_obj->tocent[track+1];
+    msf_t start_msf, end_msf;
+    lba_t start_lba, end_lba;
+    start_msf.m = to_bcd8(start_msf0->cdte_addr.msf.minute);
+    start_msf.s = to_bcd8(start_msf0->cdte_addr.msf.second);
+    start_msf.f = to_bcd8(start_msf0->cdte_addr.msf.frame);
+    start_lba = cdio_msf_to_lba(&start_msf);
 
-    if (start_msf->cdte_addr.msf.second<60)
-      len += (59 - start_msf->cdte_addr.msf.second) * 75;
+    end_msf.m = to_bcd8(end_msf0->cdte_addr.msf.minute);
+    end_msf.s = to_bcd8(end_msf0->cdte_addr.msf.second);
+    end_msf.f = to_bcd8(end_msf0->cdte_addr.msf.frame);
+    end_lba = cdio_msf_to_lba(&end_msf);
+    
+    /* debug
+    printf("lba len: %d msf: %2d:%2d:%2d\n", 
+	   end_lba - start_lba, start_msf.m, start_msf.s, start_msf.f);
 
-    if (end_msf->cdte_addr.msf.minute > start_msf->cdte_addr.msf.minute) {
-      len += (end_msf->cdte_addr.msf.minute - start_msf->cdte_addr.msf.minute-1) * 60 * 75;
-      len += end_msf->cdte_addr.msf.second * 60;
-      len += end_msf->cdte_addr.msf.frame ;
-    }
-    return len * M2F2_SECTOR_SIZE;
+    printf("start_lba: %d end_lba: %2d\n", start_lba, end_lba);
+    */
+    
+    if (end_lba > start_lba + PREGAP_SECTORS) 
+      return (end_lba - start_lba - PREGAP_SECTORS) * M2F2_SECTOR_SIZE;
+    else 
+      return 0;
   }
 }
 
