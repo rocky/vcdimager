@@ -1804,10 +1804,10 @@ vcdinfo_open(vcdinfo_obj_t **obj_p, char *source_name[],
    */
   if (NULL == *source_name && source_type == DRIVER_UNKNOWN) {
     char **cd_drives=NULL;
-    cd_drives = cdio_get_devices_with_cap(NULL, 
+    cd_drives = cdio_get_devices_with_cap_ret(NULL, 
                 (CDIO_FS_ANAL_SVCD|CDIO_FS_ANAL_CVD|CDIO_FS_ANAL_VIDEOCD
                 |CDIO_FS_UNKNOWN),
-                                          true);
+                                              true, &source_type);
     if ( NULL == cd_drives || NULL == cd_drives[0] ) {
       return VCDINFO_OPEN_ERROR;
     }
