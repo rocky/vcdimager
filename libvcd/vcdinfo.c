@@ -1584,9 +1584,9 @@ vcdinfo_init(vcdinfo_obj_t *obj)
 }
 
 /*!
-   Set up vcdinfo structure "obj" for reading and writing from a
-   particular medium. This should be done before after initialization
-   but before any routines that need to retrieve or write data.
+   Set up vcdinfo structure "obj" for reading from a particular
+   medium. This should be done before after initialization but before
+   any routines that need to retrieve data.
  
    source_name is the device or file to use for inspection, and
    source_type indicates if this is a device or a file.
@@ -1600,108 +1600,19 @@ vcdinfo_open_return_t
 vcdinfo_open(vcdinfo_obj_t *obj, char source_name[], 
              vcdinfo_source_t source_type, const char access_mode[])
 {
-
   VcdImageSource *img;
-  char is_sector_2352 = true;
   bool null_source = NULL == source_name;
 
-  if (VCDINFO_SOURCE_AUTO == source_type) {
-    if (null_source) 
-      source_type = VCDINFO_SOURCE_DEVICE;
-    else {
-      struct stat buf;
-      if (0 != stat(source_name, &buf)) {
-        vcd_error ("Can't stat file %s:", strerror(errno));
-        return VCDINFO_OPEN_ERROR;
-      }
-      if (S_ISBLK(buf.st_mode) || S_ISCHR(buf.st_mode)) {
-        source_type = VCDINFO_SOURCE_DEVICE;
-      } else if (S_ISREG(buf.st_mode)) {
-        /* FIXME: check to see if is a text file. If so, then 
-           set VCDINFO_SOURCE_CUE. */
-        int i=strlen(source_name)-strlen("bin");
-        if (i > 0
-            && (source_name[i] =='c' || source_name[i+1] =='C')
-            && (source_name[i+1] =='u' || source_name[i+1] =='U')
-            && (source_name[i+2] =='e' || source_name[i+2] =='E') ) 
-          source_type = VCDINFO_SOURCE_CUE;
-        else if (i > 0
-            && (source_name[i] =='n' || source_name[i+1] =='N')
-            && (source_name[i+1] =='r' || source_name[i+1] =='R')
-            && (source_name[i+2] =='g' || source_name[i+2] =='G') ) 
-          source_type = VCDINFO_SOURCE_NRG;
-        else
-          source_type = VCDINFO_SOURCE_BIN;
-      } else {
-        vcd_error ("Source file `%s' should either be a block device "
-                   "or a regular file", source_name);
-        return VCDINFO_OPEN_ERROR;
-      }
-    }
-  }
-  
-  switch (source_type) {
-  case VCDINFO_SOURCE_DEVICE:
-    img = vcd_image_source_new_cd ();
-    if (null_source) {
-      source_name=vcd_image_source_get_default_device(img);
-    }
-    vcd_image_source_set_arg (img, "device", source_name);
-    if (access_mode != NULL) 
-      vcd_image_source_set_arg (img, "access-mode", access_mode);
-    break;
-  case VCDINFO_SOURCE_SECTOR_2336:
-    is_sector_2352 = false;
-    /* Fall through to next case */
-  case VCDINFO_SOURCE_BIN:
-    img = vcd_image_source_new_bincue ();
-    if (null_source) {
-      source_name=vcd_image_source_get_default_device(img);
-    }
-    vcd_image_source_set_arg (img, "bin", source_name);
-    vcd_image_source_set_arg (img, "sector", is_sector_2352 ? "2352": "2336");
-    break;
-  case VCDINFO_SOURCE_CUE:
-    img = vcd_image_source_new_bincue ();
-    if (null_source) {
-      source_name=vcd_image_source_get_default_device(img);
-    } else {
-      int i=strlen(source_name)-strlen("cue");
-      if (i>0) {
-        char *bin_name=strdup(source_name);
-        if (bin_name[i]=='c') {
-          bin_name[i++]='b'; bin_name[i++]='i'; bin_name[i++]='n';
-          vcd_image_source_set_arg (img, "bin", bin_name);
-        } else if (bin_name[i]=='C') {
-          bin_name[i++]='B'; bin_name[i++]='I'; bin_name[i++]='N';
-          vcd_image_source_set_arg (img, "bin", bin_name);
-        }
-        vcd_image_source_set_arg (img, "cue", source_name);
-      } else {
-        return VCDINFO_OPEN_ERROR;
-      }
-      
-    }
-    vcd_image_source_set_arg (img, "sector", is_sector_2352 ? "2352": "2336");
-    break;
-  case VCDINFO_SOURCE_NRG:
-    img = vcd_image_source_new_nrg ();
-    if (null_source) {
-      source_name=vcd_image_source_get_default_device(img);
-    }
-    vcd_image_source_set_arg (img, "nrg", source_name);
-    break;
-  default: 
+  if (!vcdinf_open(&img, source_name, source_type, access_mode)) 
     return VCDINFO_OPEN_ERROR;
-  }
-  
+    
   memset (obj, 0, sizeof (vcdinfo_obj_t));
   obj->img = img;  /* Note we do this after the above wipeout! */
   obj->segment_list = _vcd_list_new ();
   
   if (vcd_image_source_read_mode2_sector (obj->img, &(obj->pvd), 
                                           ISO_PVD_SECTOR, false))
-    return(false);
+    return VCDINFO_OPEN_ERROR;
 
   /* Determine if VCD has XA attributes. */
   {
@@ -1715,7 +1626,7 @@ vcdinfo_open(vcdinfo_obj_t *obj, char source_name[],
     
   if (vcd_image_source_read_mode2_sector (obj->img, &(obj->info), 
                                           INFO_VCD_SECTOR, false))
-    return(false);
+    return VCDINFO_OPEN_ERROR;
 
   if (vcdinfo_get_format_version (obj) == VCD_TYPE_INVALID)
     return VCDINFO_OPEN_OTHER;
@@ -1756,7 +1667,7 @@ vcdinfo_open(vcdinfo_obj_t *obj, char source_name[],
       
   _init_fs_segment (obj, "/", true);
 
-  return(true);
+  return VCDINFO_OPEN_VCD;
   
 }
 

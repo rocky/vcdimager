@@ -751,9 +751,9 @@ vcdinfo_get_seg_size(const vcdinfo_obj_t *obj, const unsigned int seg_num);
   bool vcdinfo_init(vcdinfo_obj_t *obj);
   
   /*!
-    Set up vcdinfo structure "obj" for reading and writing from a
-    particular medium. This should be done before after initialization
-    but before any routines that need to retrieve or write data.
+    Set up vcdinfo structure "obj" for reading from a particular
+    medium. This should be done before after initialization but before
+    any routines that need to retrieve data.
     
     source_name is the device or file to use for inspection, and
     source_type indicates if this is a device or a file.

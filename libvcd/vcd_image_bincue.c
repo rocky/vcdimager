@@ -38,6 +38,8 @@ static const char _rcsid[] = "$Id$";
 
 /* reader */
 
+#define DEFAULT_VCD_DEVICE "videocd.bin"
+
 typedef struct {
   bool sector_2336_flag;
 
@@ -151,16 +153,37 @@ _source_set_arg (void *user_data, const char key[], const char value[])
   return 0;
 }
 
+/*!
+  Eject media -- there's nothing to do here. We always return 2.
+  also free obj.
+ */
+static int 
+_vcd_eject_media (void *user_data) {
+  /* Sort of a stub here. Perhaps log a message? */
+  return 2;
+}
+
+/*!
+  Return a string containing the default VCD device if none is specified.
+ */
+static char *
+_vcd_get_default_device()
+{
+  return strdup(DEFAULT_VCD_DEVICE);
+}
+
 VcdImageSource *
 vcd_image_source_new_bincue (void)
 {
   _img_bincue_src_t *_data;
 
   vcd_image_source_funcs _funcs = {
-    .read_mode2_sector = _read_mode2_sector,
-    .stat_size         = _stat_size,
+    .eject_media       = _vcd_eject_media,
     .free              = _source_free,
-    .set_arg           = _source_set_arg  
+    .get_default_device= _vcd_get_default_device,
+    .read_mode2_sector = _read_mode2_sector,
+    .set_arg           = _source_set_arg,
+    .stat_size         = _stat_size
   };
 
   _data = _vcd_malloc (sizeof (_img_bincue_src_t));

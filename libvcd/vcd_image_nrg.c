@@ -494,6 +494,7 @@ vcd_image_source_new_nrg (void)
   vcd_image_source_funcs _funcs = {
     .eject_media       = _vcd_eject_media,
     .free              = _source_free,
+    .get_default_device= _vcd_get_default_device,
     .read_mode2_sector = _read_mode2_sector,
     .set_arg           = _source_set_arg,
     .stat_size         = _vcd_stat_size,

@@ -222,6 +222,19 @@ extern "C" {
   
   int vcdinf_get_wait_time (uint16_t wtime);
 
+  /*!
+    Set up img structure for reading from a particular medium. 
+    
+    source_name is the device or file to use for inspection, and
+    source_type indicates if this is a device or a file.
+    access_mode gives special access options for reading.
+    
+    True is returned if everything went okay; 
+  */
+
+  bool vcdinf_open(/*out*/ VcdImageSource **img, char source_name[], 
+		   vcdinfo_source_t source_type, const char access_mode[]);
+
   struct _vcdinf_pbc_ctx {
     unsigned int psd_size;
     lid_t maximum_lid;

@@ -683,6 +683,118 @@ vcdinf_has_jump_delay (const PsdSelectionListDescriptor *psd)
   return ((0x80 & psd->loop) != 0);
 }
   
+/*!
+  Set up img structure for reading from a particular medium. 
+ 
+   source_name is the device or file to use for inspection, and
+   source_type indicates if this is a device or a file.
+   access_mode gives special access options for reading.
+    
+   True is returned if everything went okay; 
+ */
+
+bool
+vcdinf_open(/*out*/ VcdImageSource **img, char source_name[], 
+            vcdinfo_source_t source_type, const char access_mode[]) 
+{
+  char is_sector_2352 = true;
+  bool null_source = NULL == source_name;
+  
+  if (VCDINFO_SOURCE_AUTO == source_type) {
+    if (null_source) 
+      source_type = VCDINFO_SOURCE_DEVICE;
+    else {
+      struct stat buf;
+      if (0 != stat(source_name, &buf)) {
+        vcd_error ("Can't stat file %s:", strerror(errno));
+        return false;
+      }
+      if (S_ISBLK(buf.st_mode) || S_ISCHR(buf.st_mode)) {
+        source_type = VCDINFO_SOURCE_DEVICE;
+      } else if (S_ISREG(buf.st_mode)) {
+        /* FIXME: check to see if is a text file. If so, then 
+           set VCDINFO_SOURCE_CUE. */
+        int i=strlen(source_name)-strlen("bin");
+        if (i > 0
+            && (source_name[i] =='n' || source_name[i+1] =='N')
+            && (source_name[i+1] =='r' || source_name[i+1] =='R')
+            && (source_name[i+2] =='g' || source_name[i+2] =='G') ) 
+          source_type = VCDINFO_SOURCE_NRG;
+#ifdef HAVECUE
+        else if (i > 0
+            && (source_name[i] =='c' || source_name[i+1] =='C')
+            && (source_name[i+1] =='u' || source_name[i+1] =='U')
+            && (source_name[i+2] =='e' || source_name[i+2] =='E') ) 
+          source_type = VCDINFO_SOURCE_CUE;
+#endif
+        else
+          source_type = VCDINFO_SOURCE_BIN;
+      } else {
+        vcd_error ("Source file `%s' should either be a block device "
+                   "or a regular file", source_name);
+        return false;
+      }
+    }
+  }
+  
+  switch (source_type) {
+  case VCDINFO_SOURCE_DEVICE:
+    *img = vcd_image_source_new_cd ();
+    if (null_source) {
+      source_name=vcd_image_source_get_default_device(*img);
+    }
+    vcd_image_source_set_arg (*img, "device", source_name);
+    if (access_mode != NULL) 
+      vcd_image_source_set_arg (*img, "access-mode", access_mode);
+    break;
+  case VCDINFO_SOURCE_SECTOR_2336:
+    is_sector_2352 = false;
+    /* Fall through to next case */
+  case VCDINFO_SOURCE_BIN:
+    *img = vcd_image_source_new_bincue ();
+    if (null_source) {
+      source_name=vcd_image_source_get_default_device(*img);
+    }
+    vcd_image_source_set_arg (*img, "bin", source_name);
+    vcd_image_source_set_arg (*img, "sector", is_sector_2352 ? "2352": "2336");
+    break;
+  case VCDINFO_SOURCE_CUE:
+    *img = vcd_image_source_new_bincue ();
+    if (null_source) {
+      source_name=vcd_image_source_get_default_device(*img);
+    } else {
+      int i=strlen(source_name)-strlen("cue");
+      if (i>0) {
+        char *bin_name=strdup(source_name);
+        if (bin_name[i]=='c') {
+          bin_name[i++]='b'; bin_name[i++]='i'; bin_name[i++]='n';
+          vcd_image_source_set_arg (*img, "bin", bin_name);
+        } else if (bin_name[i]=='C') {
+          bin_name[i++]='B'; bin_name[i++]='I'; bin_name[i++]='N';
+          vcd_image_source_set_arg (*img, "bin", bin_name);
+        }
+        vcd_image_source_set_arg (*img, "cue", source_name);
+      } else {
+        return false;
+      }
+      
+    }
+    vcd_image_source_set_arg (*img, "sector", is_sector_2352 ? "2352": "2336");
+    break;
+  case VCDINFO_SOURCE_NRG:
+    *img = vcd_image_source_new_nrg ();
+    if (null_source) {
+      source_name=vcd_image_source_get_default_device(*img);
+    }
+    vcd_image_source_set_arg (*img, "nrg", source_name);
+    break;
+  default: 
+    return false;
+  }
+  return true;
+}
+
+
 
 /* 
  * Local variables:
