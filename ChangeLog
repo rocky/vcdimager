@@ -1,3 +1,20 @@
+2001-01-20  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_files.c (set_search_dat): new function
+	(get_scandata_dat_size): new function
+	(_get_scanpoint_count): renamed function
+
+	* libvcd/vcd_obj.h: added custom_file_start_extent field
+
+	* libvcd/vcd.c: added support for VCD 2.0 extended files in /EXT
+		(extended psd/lot & scandata.dat)
+
+	* libvcd/vcd_salloc.c (_vcd_salloc_get_highest): fixed off by one error
+
+2001-01-19  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_files_private.h: added ScandataDat_v2 structure
+
 2001-01-16  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd.c (_write_sectors): OGT support and secondary 

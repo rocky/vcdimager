@@ -146,7 +146,7 @@ _get_image_size_file (FILE *fd)
   if (size % CDDA_SIZE)
     {
       vcd_warn ("image file not multiple of blocksize");
-      exit (EXIT_FAILURE);
+      /* exit (EXIT_FAILURE); */
     }
 
   size /= CDDA_SIZE;

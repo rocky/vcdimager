@@ -418,7 +418,7 @@ _make_scantable (mpeg_track_t *track)
 
   /* done... */
 
-#if 0
+#ifdef VCD_DEBUG
   {
     unsigned s = 0;
     VcdListNode *n;
@@ -498,10 +498,11 @@ vcd_obj_append_mpeg_track (VcdObj *obj, VcdDataSource *mpeg_file)
                 " -- assuming it is ok nevertheless");
     }
 
-  if (obj->type == VCD_TYPE_SVCD)
+  if (obj->type == VCD_TYPE_SVCD ||
+      obj->type == VCD_TYPE_VCD2)
     {
-      vcd_info ("scanning svcd mpeg track #%d for scanpoints...", 
-                 track_no);
+      vcd_info ("scanning mpeg track #%d for scanpoints...", 
+                track_no);
       _make_scantable (track);
       vcd_debug ("track# %d's estimated playtime: %.2f seconds", 
                  track_no, track->playtime);
@@ -729,7 +730,7 @@ _finalize_vcd_iso_track (VcdObj *obj)
       || obj->type == VCD_TYPE_SVCD)
     {
       _dict_insert (obj, "lot", LOT_VCD_SECTOR, LOT_VCD_SIZE, SM_EOF); /* LOT.VCD */            /* EOF */
-      _dict_insert (obj, "psd", PSD_VCD_SECTOR, 1, SM_EOF);            /* PSD.VCD */            /* EOF */
+      _dict_insert (obj, "psd", PSD_VCD_SECTOR, _vcd_len2blocks (get_psd_size (obj), ISO_BLOCKSIZE), SM_EOF);            /* PSD.VCD */            /* EOF */
     }
 
   if (obj->type == VCD_TYPE_SVCD)
@@ -742,16 +743,42 @@ _finalize_vcd_iso_track (VcdObj *obj)
   /* keep rest of vcd sector blank -- paranoia */
   for(n = 0;n < 225;n++) 
     {
-      uint32_t rc = _vcd_salloc (obj->iso_bitmap, n,1);
-#if 0
+      uint32_t rc = _vcd_salloc (obj->iso_bitmap, n, 1);
+#if VCD_DEBUG
       if (rc != SECTOR_NIL)
         vcd_debug ("blanking... %d", rc);
 #else
       rc = 0; /* dummy */
 #endif
     }
+  
+  assert (_vcd_salloc_get_highest (obj->iso_bitmap) + 1 == 225); /* fixme --
+                                                                momentary
+                                                                limitation */
 
-  assert (_vcd_salloc_get_highest (obj->iso_bitmap) < 255); /* fixme -- momentary limitation */
+  if (obj->type == VCD_TYPE_VCD2)
+    {
+      uint32_t sector = _vcd_salloc_get_highest (obj->iso_bitmap) + 1;
+
+      _dict_insert (obj, "lot_x", sector, LOT_VCD_SIZE, SM_EOF);
+
+      sector = _vcd_salloc_get_highest (obj->iso_bitmap) + 1;
+
+      _dict_insert (obj, "psd_x", sector,
+                    _vcd_len2blocks (get_psd_size (obj), ISO_BLOCKSIZE),
+                    SM_EOF);
+
+      sector = _vcd_salloc_get_highest (obj->iso_bitmap) + 1;
+
+      _dict_insert (obj, "scandata", sector, 
+                    _vcd_len2blocks (get_scandata_dat_size (obj),
+                                     ISO_BLOCKSIZE),
+                    SM_EOF);
+
+    }
+
+  obj->custom_file_start_extent =
+    _vcd_salloc_get_highest (obj->iso_bitmap) + 1;
 
   switch (obj->type) {
   case VCD_TYPE_VCD11:
@@ -818,6 +845,26 @@ _finalize_vcd_iso_track (VcdObj *obj)
     break;
   }
 
+  /* EXT files */
+
+  if (obj->type == VCD_TYPE_VCD2) 
+    {
+      /* psd_x -- extended PSD */
+      _vcd_directory_mkfile (obj->dir, "EXT/PSD_X.VCD",
+                             _dict_get_bykey (obj, "psd_x")->sector, 
+                             get_psd_size (obj), false, 1);
+
+      /* lot_x -- extended LOT */
+      _vcd_directory_mkfile (obj->dir, "EXT/LOT_X.VCD",
+                             _dict_get_bykey (obj, "lot_x")->sector, 
+                             ISO_BLOCKSIZE*LOT_VCD_SIZE, false, 1);
+      
+      /* scandata.dat -- scanpoints */
+      _vcd_directory_mkfile (obj->dir, "EXT/SCANDATA.DAT",
+                             _dict_get_bykey (obj, "scandata")->sector, 
+                             get_scandata_dat_size (obj), false, 1);
+    }
+
   /* custom files */
 
   {
@@ -842,7 +889,7 @@ _finalize_vcd_iso_track (VcdObj *obj)
      allocated anymore */
 
   obj->iso_size =
-    MAX (MIN_ISO_SIZE, _vcd_salloc_get_highest (obj->iso_bitmap));
+    MAX (MIN_ISO_SIZE, _vcd_salloc_get_highest (obj->iso_bitmap) + 1);
 
   vcd_debug ("iso9660: highest alloced sector is %d (using %d as isosize)", 
              _vcd_salloc_get_highest (obj->iso_bitmap), obj->iso_size);
@@ -1075,6 +1122,13 @@ _write_vcd_iso_track (VcdObj *obj)
 
   set_info_vcd (obj, _dict_get_bykey (obj, "info")->buf);
   set_entries_vcd (obj, _dict_get_bykey (obj, "entries")->buf);
+
+  if (obj->type == VCD_TYPE_VCD2)
+    {
+      set_lot_vcd (obj, _dict_get_bykey (obj, "lot_x")->buf);
+      set_psd_vcd (obj, _dict_get_bykey (obj, "psd_x")->buf);
+      set_scandata_dat (obj, _dict_get_bykey (obj, "scandata")->buf);
+    }
   
   if (obj->type == VCD_TYPE_VCD2 
       || obj->type == VCD_TYPE_SVCD) 
@@ -1106,6 +1160,25 @@ _write_vcd_iso_track (VcdObj *obj)
         content = zero;
 
       _write_m2_image_sector (obj, content, n, 0, 0, flags, 0);
+    }
+
+  /* EXT stuff */
+
+  for (n = 225;n < obj->custom_file_start_extent; n++)
+    {
+      const void *content = NULL;
+      uint8_t flags = SM_DATA;
+
+      content = _dict_get_sector (obj, n);
+      flags |= _dict_get_sector_flags (obj, n);
+      
+      if (content == NULL)
+        {
+          vcd_debug ("unexpected empty EXT sector");
+          content = zero;
+        }
+
+      _write_m2_image_sector (obj, content, n, 1, 0, flags, 0);
     }
 
   /* write custom files */

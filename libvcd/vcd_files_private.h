@@ -190,7 +190,6 @@ typedef struct {
   char reserved1[12]         GNUC_PACKED;  /* Reserved, must be zero */
 } InfoVcd;
 
-
 /* LOT.VCD
    This optional file is only necessary if the PSD size is not zero.
    This List ID Offset Table allows you to start playing the PSD from
@@ -277,7 +276,6 @@ typedef struct {
   struct psd_area_t default_area   GNUC_PACKED;
   struct psd_area_t area[0]        GNUC_PACKED; /* variable length */
 } PsdSelectionListDescriptorExtended;
-
 
 typedef struct {
   uint8_t type               GNUC_PACKED;
@@ -403,7 +401,21 @@ typedef struct {
   uint8_t reserved2[126]      GNUC_PACKED; /* 0x00 */
 } SpicontxSvd;
 
-#if 0
+/* SCANDATA.DAT for VCD 2.0 */
+
+#define SCANDATA_FILE_ID "SCAN_VCD"
+#define SCANDATA_VERSION 0x02
+
+typedef struct {
+  char file_id[8]             GNUC_PACKED; /* = "SCAN_VCD" */
+  uint8_t version             GNUC_PACKED; /* = 0x02 */
+  uint8_t reserved            GNUC_PACKED; /* Reserved, must be zero */
+  uint16_t scan_points        GNUC_PACKED; /* the number of scan points */
+  msf_t points[0]             GNUC_PACKED; /* actual scan points 
+                                              points[time(iframe)/0.5] */
+} ScandataDat_v2;
+
+#if 0 
 /* SCANDATA.DAT
    This file fulfills much the same purpose of the SEARCH.DAT file except
    that this file is mandatory only if the System Profile Tag of the

@@ -189,7 +189,7 @@ uint32_t _vcd_salloc_get_highest (const VcdSalloc *bitmap)
     if ((1 << --n) & last)
       break;
 
-  return (bitmap->len - 1) * 8 + n + 1;
+  return (bitmap->len - 1) * 8 + n;
 }
 
 

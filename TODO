@@ -1,16 +1,20 @@
 TODO LIST:
 
 - version 1.0
- * get more information on CDROM-XA and that coding information byte...
+ * get more information on CDROM-XA
  * check for VideoCD2.0/SuperVideoCD1.0 conformance
  * optimize/improve MPEG detection/scanning/handling code
- * gtkmm frontend
- * code cleanup
+ * on-the-fly mpeg padding/realigning
+ * documentation
 
 - version 2.0+
+ * C++ rewrite (OOD & OOA already on paper)
+ * releasing libvcd
+ * XML frontend (DTD prototype already defined)
  * add support for interactive menus
  * add support for still images
  * add support for audio tracks
+ * gtkmm frontend
 
 BUGS:
 

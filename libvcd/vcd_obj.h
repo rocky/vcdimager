@@ -56,6 +56,7 @@ struct _VcdObj {
   unsigned relative_end_extent; /* last mpeg end extent */
 
   /* custom files */
+  unsigned custom_file_start_extent; 
   VcdList *custom_file_list;
 
   /* dictionary */

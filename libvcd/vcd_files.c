@@ -323,7 +323,7 @@ set_tracks_svd (VcdObj *obj, void *buf)
 }
 
 static unsigned 
-_get_search_dat_entry_count (const VcdObj *obj)
+_get_scanpoint_count (const VcdObj *obj)
 {
   int count = 0;
   VcdListNode *node;
@@ -344,7 +344,7 @@ uint32_t
 get_search_dat_size (const VcdObj *obj)
 {
   return sizeof (SearchDat) 
-    + (_get_search_dat_entry_count (obj) * sizeof (msf_t));
+    + (_get_scanpoint_count (obj) * sizeof (msf_t));
 }
 
 void
@@ -362,7 +362,7 @@ set_search_dat (VcdObj *obj, void *buf)
   strncpy (search_dat.file_id, SEARCH_FILE_ID, sizeof (SEARCH_FILE_ID));
   
   search_dat.version = SEARCH_VERSION;
-  search_dat.scan_points = UINT16_TO_BE (_get_search_dat_entry_count (obj));
+  search_dat.scan_points = UINT16_TO_BE (_get_scanpoint_count (obj));
   search_dat.time_interval = SEARCH_TIME_INTERVAL;
 
   memcpy (buf, &search_dat, sizeof (search_dat));
@@ -389,6 +389,59 @@ set_search_dat (VcdObj *obj, void *buf)
           sect += 30 + 150; /* pre-data padding + msf-offset */
 
           lba_to_msf(sect, &(search_dat2->points[n]));
+          n++;
+        }
+    }
+}
+
+
+uint32_t 
+get_scandata_dat_size (const VcdObj *obj)
+{
+  return sizeof (ScandataDat_v2) 
+    + (_get_scanpoint_count (obj) * sizeof (msf_t));
+}
+
+void
+set_scandata_dat (VcdObj *obj, void *buf)
+{
+  VcdListNode *node;
+  ScandataDat_v2 scandata_dat;
+  unsigned n;
+
+  assert (obj->type == VCD_TYPE_VCD2);
+
+  memset (&scandata_dat, 0, sizeof (scandata_dat));
+
+  strncpy (scandata_dat.file_id, SCANDATA_FILE_ID, sizeof (SCANDATA_FILE_ID));
+  
+  scandata_dat.version = SCANDATA_VERSION;
+  scandata_dat.scan_points = UINT16_TO_BE (_get_scanpoint_count (obj));
+
+  memcpy (buf, &scandata_dat, sizeof (scandata_dat));
+  
+  n = 0;
+
+  for (node = _vcd_list_begin (obj->mpeg_track_list);
+       node != NULL;
+       node = _vcd_list_node_next (node))
+    {
+      mpeg_track_t *track = _vcd_list_node_data (node);
+      ScandataDat_v2 *scandata_dat2 = buf;
+      VcdListNode *node2;
+      
+      for (node2 = _vcd_list_begin (track->scanpoints);
+           node2 != NULL;
+           node2 = _vcd_list_node_next (node2))
+        {
+          uint32_t sect = *(uint32_t*)_vcd_list_node_data (node2);
+          
+          sect += track->relative_start_extent;
+          sect += obj->iso_size;
+
+          sect += 30 + 150; /* pre-data padding + msf-offset */
+
+          lba_to_msf(sect, &(scandata_dat2->points[n]));
           n++;
         }
     }

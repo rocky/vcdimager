@@ -58,6 +58,12 @@ get_search_dat_size (const VcdObj *obj);
 void
 set_search_dat (VcdObj *obj, void *buf);
 
+uint32_t 
+get_scandata_dat_size (const VcdObj *obj);
+
+void
+set_scandata_dat (VcdObj *obj, void *buf);
+
 #endif /* VCDFILES_H */
 
 
