@@ -651,7 +651,7 @@ dump_info (const debug_obj_t *obj)
   fprintf (stdout, " first segment addr: %2.2x:%2.2x:%2.2x\n",
            info->first_seg_addr.m, info->first_seg_addr.s, info->first_seg_addr.f);
 
-  fprintf (stdout, " offset multiplier: 0x%2.2x (must be 0x08!)\n", info->offset_mult);
+  fprintf (stdout, " offset multiplier: 0x%2.2x\n", info->offset_mult);
 
   fprintf (stdout, " maximum lid: %d\n",
            uint16_from_be (info->lot_entries));

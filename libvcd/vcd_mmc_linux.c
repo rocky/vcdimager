@@ -195,7 +195,7 @@ _vcd_mmc_linux_destroy_device (void *user_data)
 int
 _vcd_mmc_linux_generic_packet (void *device, _vcd_mmc_command_t * cmd)
 {
-  vcd_error ("Tried to access linux packed interface on non-linux system.\n");
+  vcd_error ("Tried to access linux packed interface on non-linux system.");
   vcd_assert_not_reached ();
   return -1;
 };
@@ -203,14 +203,14 @@ _vcd_mmc_linux_generic_packet (void *device, _vcd_mmc_command_t * cmd)
 void *
 _vcd_mmc_linux_new_device (const char *device)
 {
-  vcd_info ("Generic packet interface only supported on linux.\n");
+  vcd_info ("Generic packet interface only supported on linux.");
   return NULL;
 }
 
 void
 _vcd_mmc_linux_destroy_device (void *user_data)
 {
-  vcd_error ("Tried to access linux packed interface on non-linux system.\n");
+  vcd_error ("Tried to access linux packed interface on non-linux system.");
   vcd_assert_not_reached ();
 }
 

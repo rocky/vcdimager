@@ -1701,7 +1701,11 @@ _write_sequence (VcdObj *obj, int track_idx)
     }
 
     if (n == track->info->packets - 1)
-      sm |= SM_EOR | SM_EOF;
+      {
+        sm |= SM_EOR;
+        if (!obj->track_rear_margin) /* if no rear margin... */
+          sm |= SM_EOF;
+      }
 
     if (set_trigger)
       sm |= SM_TRIG;
@@ -1709,7 +1713,8 @@ _write_sequence (VcdObj *obj, int track_idx)
     fnum = track_idx + 1;
       
     if (_vcd_obj_has_cap_p (obj, _CAP_4C_SVCD)
-        && !obj->svcd_vcd3_mpegav) /* IEC62107 SVCDs have a simplified subheader */
+        && !obj->svcd_vcd3_mpegav) /* IEC62107 SVCDs have a 
+                                      simplified subheader */
       {
         fnum = 1;
         ci = 0x80;
@@ -1722,8 +1727,16 @@ _write_sequence (VcdObj *obj, int track_idx)
   vcd_mpeg_source_close (track->source);
 
   for (n = 0; n < obj->track_rear_margin; n++)
-    _write_m2_image_sector (obj, zero, lastsect++, track_idx + 1,
-                            0, SM_FORM2|SM_REALT, 0);
+    {
+      const uint8_t ci = 0, cnum = 0;
+      uint8_t fnum = track_idx + 1;
+      uint8_t sm = SM_FORM2 | SM_REALT;
+
+      if (n + 1 == obj->track_rear_margin)
+        sm |= SM_EOF;
+
+      _write_m2_image_sector (obj, zero, lastsect++, fnum, cnum, sm, ci);
+    }
 
   vcd_debug ("MPEG packet statistics: %d video, %d audio, %d zero, %d ogt, %d unknown",
              mpeg_packets.video, mpeg_packets.audio, mpeg_packets.zero, mpeg_packets.ogt,

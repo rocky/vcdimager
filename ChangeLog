@@ -1,3 +1,7 @@
+2001-10-10  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd.c (_write_sequence): place EOF bit at end of track...
+
 2001-09-28  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* frontends/xml/vcd_xml_build.c: added support for the
