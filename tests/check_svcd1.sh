@@ -31,13 +31,13 @@ EOF
     echo "$0: md5sum checksum matched :-)"
 
     if ! test_vcddump '--no-banner -i videocd.bin' \
-      svcd1_test1.dump svcd1_test1.right ; then 
+      svcd1_test1.dump ${srcdir}/svcd1_test1.right ; then 
       echo "$0: vcddump test 1 failed "
       exit 1
     fi
     
     if ! test_vcddump '--no-banner --bin-file videocd.bin --show-info-all' \
-      svcd1_test2.dump svcd1_test2.right ; then 
+      svcd1_test2.dump ${srcdir}/svcd1_test2.right ; then 
       echo "$0: vcddump test 2 failed "
       exit 1
     fi
@@ -58,3 +58,8 @@ fi
 echo "$0: md5sum checksums didn't match :-("
 rm -vf core videocd.{bin,cue}
 exit 1
+
+#;;; Local Variables: ***
+#;;; mode:shell-script ***
+#;;; eval: (sh-set-shell "bash") ***
+#;;; End: ***

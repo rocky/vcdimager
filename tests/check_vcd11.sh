@@ -1,4 +1,5 @@
 #!/bin/sh
+#$Id$
 
 #echo ${srcdir}
 
@@ -30,14 +31,14 @@ EOF
     echo "$0: md5sum checksum matched :-)"
 
     if ! test_vcddump '-B -i videocd.bin -I --show-filesystem' \
-      vcd11_test1.dump vcd11_test1.right ; then 
+      vcd11_test1.dump ${srcdir}/vcd11_test1.right ; then 
       echo "$0: vcddump test 1 failed "
       rm -vf core videocd.{bin,cue}
       exit 1
     fi
     
     if ! test_vcddump '-B --bin-file videocd.bin -X -S --show-pvd vol' \
-      vcd11_test2.dump vcd11_test2.right ; then 
+      vcd11_test2.dump ${srcdir}/vcd11_test2.right ; then 
       echo "$0: vcddump test 2 failed "
       rm -vf core videocd.{bin,cue}
       exit 1
@@ -52,3 +53,8 @@ fi
 echo "$0: md5sum checksums didn't match :-("
 rm -vf core videocd.{bin,cue}
 exit 1
+
+#;;; Local Variables: ***
+#;;; mode:shell-script ***
+#;;; eval: (sh-set-shell "bash") ***
+#;;; End: ***
