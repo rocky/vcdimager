@@ -142,8 +142,8 @@ AC_SUBST(LIBVCD_CFLAGS)
 AC_SUBST(LIBVCD_LIBS)
 AC_SUBST(LIBVCDINFO_LIBS)
 
-case $host in
-     *-linux*)
+case $host_os in
+     linux*)
         AC_CHECK_HEADERS(linux/version.h)
         AC_CHECK_HEADERS(linux/cdrom.h, [have_linux_cdrom_h="yes"])
 	if test "x$have_linux_cdrom_h" = "xyes" ; then
@@ -156,14 +156,16 @@ int has_timeout=sizeof(test.timeout);],
 	fi
 	LIBVCD_SYSDEP='vcd_image_cd-linux.$(OBJEXT)' 
 	;;
-     *-bsdi*)
+     bsdi*)
 	LIBVCD_SYSDEP='vcd_image_cd-bsdi.$(OBJEXT)' 
 	;;
-     *-sunos*|*-sun-*)
+     sunos*|sun*|solaris*)
         AC_CHECK_HEADERS(sys/cdio.h)
 	LIBVCD_SYSDEP='vcd_image_cd-sunos.$(OBJEXT)' 
 	;;
      *)
+	AC_MSG_WARN(Don't have OS CD-reading support for ${host_os}...)
+	AC_MSG_WARN(Will use generic support.)
 	LIBVCD_SYSDEP='vcd_image_cd-generic.$(OBJEXT)' 
 	;;
 esac
