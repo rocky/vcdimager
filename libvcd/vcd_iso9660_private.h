@@ -21,6 +21,8 @@
 #ifndef __VCD_ISO9660_PRIVATE_H__
 #define __VCD_ISO9660_PRIVATE_H__
 
+#include <libvcd/vcd_types.h>
+
 #define ISO_VD_PRIMARY          1
 #define ISO_VD_END              255
 
@@ -98,6 +100,7 @@ struct iso_directory_record {
   uint8_t  name_len                    GNUC_PACKED; /* 711 */
   char     name[EMPTY_ARRAY_SIZE]      GNUC_PACKED;
 };
+
 
 #ifdef __MWERKS__
 #pragma options align=reset

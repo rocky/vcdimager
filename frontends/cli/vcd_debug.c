@@ -48,6 +48,7 @@
 #include <libvcd/vcd_image_bincue.h>
 #include <libvcd/vcd_image_linuxcd.h>
 #include <libvcd/vcd_data_structures.h>
+#include <libvcd/vcd_xa.h>
 
 static const char _rcsid[] = "$Id$";
 
@@ -66,6 +67,8 @@ _getbuf (void)
   
   _num++;
   _num %= BUF_COUNT;
+
+  memset (_buf[_num], 0, BUF_SIZE);
 
   return _buf[_num];
 }
@@ -799,14 +802,30 @@ _strip_trail (const char str[], size_t n)
   return buf;
 }
 
-typedef struct 
+static const char *
+_xa_attr_str (uint16_t xa_attr)
 {
-  uint32_t owner_id      GNUC_PACKED;   /* zero */
-  uint16_t attributes    GNUC_PACKED;   /* XA_... */
-  uint8_t  signature[2]  GNUC_PACKED;   /* { 'X', 'A' } */
-  uint8_t  filenum       GNUC_PACKED;   /* filenum(?) */
-  uint8_t  reserved[5]   GNUC_PACKED;   /* zero */
-} xa_t;
+  char *result = _getbuf();
+
+  result[0] = (xa_attr & XA_ATTR_DIRECTORY) ? 'd' : '-';
+  result[1] = (xa_attr & XA_ATTR_CDDA) ? 'a' : '-';
+  result[2] = (xa_attr & XA_ATTR_INTERLEAVED) ? 'i' : '-';
+  result[3] = (xa_attr & XA_ATTR_MODE2FORM2) ? '2' : '-';
+  result[4] = (xa_attr & XA_ATTR_MODE2FORM1) ? '1' : '-';
+
+  result[5] = (xa_attr & XA_ATTR_O_EXEC) ? 'x' : '-';
+  result[6] = (xa_attr & XA_ATTR_O_READ) ? 'r' : '-';
+
+  result[7] = (xa_attr & XA_ATTR_G_EXEC) ? 'x' : '-';
+  result[8] = (xa_attr & XA_ATTR_G_READ) ? 'r' : '-';
+
+  result[9] = (xa_attr & XA_ATTR_U_EXEC) ? 'x' : '-';
+  result[10] = (xa_attr & XA_ATTR_U_READ) ? 'r' : '-';
+
+  result[11] = '\0';
+
+  return result;
+}
 
 static void
 dump_idr (const debug_obj_t *obj, uint32_t lsn, const char pathname[])
@@ -833,14 +852,21 @@ dump_idr (const debug_obj_t *obj, uint32_t lsn, const char pathname[])
 
       if (buf[pos])
         {
-          xa_t *xa_data;
-          int su_len = idr->length - sizeof (struct iso_directory_record);
+          vcd_xa_t *xa_data;
+          uint16_t xa_attr = 0;
+          int su_len;
+
+          su_len = idr->length;
+          su_len -= sizeof (struct iso_directory_record);
           su_len -= idr->name_len;
 
           if (su_len % 2)
             su_len--;
 
-          xa_data = &buf[pos + (idr->length - su_len)];
+          vcd_assert (su_len >= sizeof (vcd_xa_t));
+
+          xa_data = (void *) &buf[pos + (idr->length - su_len)];
+          xa_attr = UINT16_FROM_BE (xa_data->attributes);
 
           if (xa_data->signature[0] != 'X' 
               || xa_data->signature[1] != 'A')
@@ -853,11 +879,14 @@ dump_idr (const debug_obj_t *obj, uint32_t lsn, const char pathname[])
           else
             strncpy (namebuf, idr->name, idr->name_len);
 
-          fprintf (stdout, "  %c (XA: attr 0x%4.4x fnum %.2d) %s %10d %s\n",
+          fprintf (stdout, 
+                   "  %c %s %d %d [fn %.2d] [lsn %6d] %9d  %s\n",
                    (idr->flags & ISO_DIRECTORY) ? 'd' : '-',
-                   UINT16_FROM_BE (xa_data->attributes),
+                   _xa_attr_str (xa_attr),
+                   UINT16_FROM_BE (xa_data->user_id),
+                   UINT16_FROM_BE (xa_data->group_id),
                    xa_data->filenum,
-                   UINT16_FROM_BE (xa_data->attributes) & 0x1000 ? "form2" : "form1",
+                   from_733 (idr->extent),
                    from_733 (idr->size),
                    namebuf);
 

@@ -1,5 +1,13 @@
 2001-05-31  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* frontends/cli/vcd_debug.c: dump XA attributes as well
+
+	* libvcd/vcd_xa.h: found out the meaning of CD-XA records finally!
+
+	* libvcd/vcd.c: set ISO filesize of raw files to 
+		sector * ISO_BLOCKSIZE instead of sector * M2RAW_SIZE,
+		set proper filenum for non-SVCDs
+
 	* frontends/cli/vcd_debug.c: implemented isofs dumping
 
  	* configure.in: bumped version up to 0.7.2

@@ -9,6 +9,7 @@ TODO LIST:
  * documentation/examples (XML!!)
 
 - version 2.0+
+ * support for apple meta info in ISO9660
  * C++ rewrite (OOD & OOA already on paper)
  * releasing libvcd
  * add support for audio tracks

@@ -24,32 +24,22 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <libvcd/vcd_assert.h>
 
-#include "vcd_directory.h"
-#include "vcd_iso9660.h"
-#include "vcd_logging.h"
-#include "vcd_util.h"
-#include "vcd_bytesex.h"
+#include <libvcd/vcd_assert.h>
+#include <libvcd/vcd_bytesex.h>
+#include <libvcd/vcd_directory.h>
+#include <libvcd/vcd_iso9660.h>
+#include <libvcd/vcd_logging.h>
+#include <libvcd/vcd_util.h>
+#include <libvcd/vcd_xa.h>
 
 static const char _rcsid[] = "$Id$";
 
 /* CD-ROM XA */
 
-/* don't know why it is or'ed by 0x0555... */
-
-#define XA_FORM1_DIR    (UINT16_TO_BE (0x8800 | 0x0555))
-#define XA_FORM1_FILE   (UINT16_TO_BE (0x0800 | 0x0555))
-#define XA_FORM2_FILE   (UINT16_TO_BE (0x1000 | 0x0555))
-
-typedef struct 
-{
-  uint32_t owner_id      GNUC_PACKED;   /* zero */
-  uint16_t attributes    GNUC_PACKED;   /* XA_... */
-  uint8_t  signature[2]  GNUC_PACKED;   /* { 'X', 'A' } */
-  uint8_t  filenum       GNUC_PACKED;   /* filenum(?) */
-  uint8_t  reserved[5]   GNUC_PACKED;   /* zero */
-} xa_t;
+#define XA_FORM1_DIR    UINT16_TO_BE(XA_ATTR_DIRECTORY | XA_ATTR_MODE2FORM1 | XA_PERM_ALL_ALL)
+#define XA_FORM1_FILE   UINT16_TO_BE(XA_ATTR_MODE2FORM1 | XA_PERM_ALL_ALL)
+#define XA_FORM2_FILE   UINT16_TO_BE(XA_ATTR_MODE2FORM2 | XA_PERM_ALL_ALL)
 
 /* tree data structure */
 
@@ -145,8 +135,8 @@ traverse_update_sizes(VcdDirNode *node, void *data)
       unsigned blocks = 1;
       unsigned offset = 0;
       
-      offset += dir_calc_record_size (1, sizeof(xa_t)); /* '.' */
-      offset += dir_calc_record_size (1, sizeof(xa_t)); /* '..' */
+      offset += dir_calc_record_size (1, sizeof(vcd_xa_t)); /* '.' */
+      offset += dir_calc_record_size (1, sizeof(vcd_xa_t)); /* '..' */
       
       while (child) 
         {
@@ -158,7 +148,7 @@ traverse_update_sizes(VcdDirNode *node, void *data)
           
           vcd_assert (d != NULL);
           
-          reclen = dir_calc_record_size (strlen (pathname), sizeof (xa_t));
+          reclen = dir_calc_record_size (strlen (pathname), sizeof (vcd_xa_t));
 
           free (pathname);
           
@@ -191,7 +181,7 @@ _vcd_directory_new (void)
   data_t *data;
   VcdDirectory *dir = NULL;
 
-  vcd_assert (sizeof(xa_t) == 14);
+  vcd_assert (sizeof(vcd_xa_t) == 14);
 
   data = _vcd_malloc (sizeof (data_t));
   dir = _vcd_tree_new (data);
@@ -392,7 +382,14 @@ static void
 traverse_vcd_directory_dump_entries (VcdDirNode *node, void *data)
 {
   data_t *d = DATAP(node);
-  xa_t tmp = { 0, 0, { 'X', 'A' }, 0, { 0, } };
+  vcd_xa_t tmp = {
+    user_id: 0,
+    group_id: 0,
+    attributes: 0,
+    signature: { 'X', 'A' },
+    filenum: 0,
+    reserved: { 0, } 
+  };
   
   uint32_t root_extent = EXTENT(_vcd_tree_node_root (node));
   uint32_t parent_extent = 
@@ -425,7 +422,14 @@ traverse_vcd_directory_dump_entries (VcdDirNode *node, void *data)
   if (d->is_dir) 
     {
       void *dirbuf = (char*)data + ISO_BLOCKSIZE * (d->extent - root_extent);
-      xa_t tmp2 = { 0, XA_FORM1_DIR, { 'X', 'A' }, 0, { 0, } };
+      vcd_xa_t tmp2 = {
+        user_id: 0,
+        group_id: 0,
+        attributes: XA_FORM1_DIR,
+        signature: { 'X', 'A' },
+        filenum: 0,
+        reserved: { 0, } 
+      };
       
       dir_init_new_su (dirbuf, 
                        d->extent, d->size, &tmp2, sizeof (tmp2),

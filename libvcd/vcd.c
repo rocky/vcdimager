@@ -898,14 +898,17 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
       mpeg_segment_t *segment = _vcd_list_node_data (node);
       char segment_pathname[128] = { 0, };
       const char *fmt = NULL;
-      
+      uint8_t fnum = 0;
+
       switch (obj->type) 
         {
         case VCD_TYPE_VCD2:
           fmt = "SEGMENT/ITEM%4.4d.DAT";
+          fnum = 1;
           break;
         case VCD_TYPE_SVCD:
           fmt = "SEGMENT/ITEM%4.4d.MPG";
+          fnum = 0;
           break;
         default:
           vcd_assert_not_reached ();
@@ -916,8 +919,8 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
       snprintf (segment_pathname, sizeof (segment_pathname), fmt, n + 1);
         
       _vcd_directory_mkfile (obj->dir, segment_pathname, segment->start_extent,
-                             segment->segment_count * ISO_BLOCKSIZE * 150,
-                             true, 0);
+                             segment->info->packets * ISO_BLOCKSIZE,
+                             true, fnum);
 
       n++;
     }
@@ -964,8 +967,11 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
     {
       custom_file_t *p = _vcd_list_node_data (node);
 
-      _vcd_directory_mkfile(obj->dir, p->iso_pathname, p->start_extent,
-                              p->size, p->raw_flag, 1);
+      _vcd_directory_mkfile (obj->dir, p->iso_pathname, p->start_extent,
+                             (p->raw_flag 
+                              ? (ISO_BLOCKSIZE * (p->size / M2RAW_SIZE))
+                              : p->size), 
+                             p->raw_flag, 1);
     }
 
 

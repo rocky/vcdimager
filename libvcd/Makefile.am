@@ -50,4 +50,5 @@ libvcd_a_SOURCES = \
 	vcd_stream_stdio.h \
 	vcd_util.c \
 	vcd_util.h \
-	vcd_types.h 
+	vcd_types.h \
+	vcd_xa.h
