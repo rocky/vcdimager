@@ -181,15 +181,61 @@ vcd_mpeg_source_get_info (VcdMpegSource *obj)
   return &(obj->info);
 }
 
+static inline int 
+_vid_streamid_idx (uint8_t streamid)
+{
+  switch (streamid | MPEG_START_CODE_PATTERN)
+    {
+    case MPEG_VIDEO_E0_CODE:
+      return 0;
+      break;
+
+    case MPEG_VIDEO_E1_CODE:
+      return 1;
+      break;
+
+    case MPEG_VIDEO_E2_CODE:
+      return 2;
+      break;
+
+    default:
+      assert (0);
+      break;
+    }
+  
+  return -1;
+}
+
+static inline int 
+_aud_streamid_idx (uint8_t streamid)
+{
+  switch (streamid | MPEG_START_CODE_PATTERN)
+    {
+    case MPEG_AUDIO_C0_CODE:
+      return 0;
+      break;
+
+    case MPEG_AUDIO_C1_CODE:
+      return 1;
+      break;
+
+    case MPEG_AUDIO_C2_CODE:
+      return 2;
+      break;
+
+    default:
+      assert (0);
+      break;
+    }
+  
+  return -1;
+}
+
 struct _analyze_state
 {
   struct {
-    bool video;
-    bool audio;
-
-    bool audio_c0;
-    bool audio_c1;
-    bool audio_c2;
+    bool video[3];
+    bool audio[3];
 
     bool ogt;
     bool padding;
@@ -209,36 +255,39 @@ struct _analyze_state
   struct {
     unsigned packets;
 
-    bool video_info;
-    unsigned hsize;
-    unsigned vsize;
-    double aratio;
-    double frate;
-    unsigned bitrate;
-    unsigned vbvsize;
-    bool constrained_flag;
+    int first_shdr;
+    struct {
+      bool seen;
+      unsigned hsize;
+      unsigned vsize;
+      double aratio;
+      double frate;
+      unsigned bitrate;
+      unsigned vbvsize;
+      bool constrained_flag;
+    } shdr[3];
 
-    bool audio_info;
-    bool audio_c0;
-    bool audio_c1;
-    bool audio_c2;
+    bool video[3];
+    bool audio[3];
 
     mpeg_vers_t version;
 
     bool seen_pts;
     double min_pts;
     double max_pts;
-    double last_aps_pts;
+
+    double last_aps_pts[3];
   } stream;
 };
 
 static void
-_parse_sequence_header (const void *buf, 
+_parse_sequence_header (uint8_t streamid, const void *buf, 
 			struct _analyze_state *state)
 {
   int offset = 0;
   unsigned hsize, vsize, aratio, frate, brate, bufsize, constr;
   const uint8_t *data = buf;
+  int vid_idx = _vid_streamid_idx (streamid);
 
   const double aspect_ratios[16] = 
     { 
@@ -247,7 +296,13 @@ _parse_sequence_header (const void *buf,
       0.9375, 0.9815, 1.0255, 1.0695,
       1.1250, 1.1575, 1.2015, 0.0000
     };
+
+  if (state->stream.shdr[vid_idx].seen) /* we have it already */
+    return;
   
+  if (!state->stream.first_shdr)
+    state->stream.first_shdr = vid_idx + 1;
+
   hsize = _bitvec_read_bits (data, &offset, 12);
 
   vsize = _bitvec_read_bits (data, &offset, 12);
@@ -275,18 +330,20 @@ _parse_sequence_header (const void *buf,
   if (_bitvec_read_bits (data, &offset, 1))
     offset += 64 << 3;
   
-  state->stream.hsize = hsize;
-  state->stream.vsize = vsize;
-  state->stream.aratio = aspect_ratios[aratio];
-  state->stream.frate = frame_rates[frate];
-  state->stream.bitrate = 400*brate;
-  state->stream.vbvsize = bufsize * 16 * 1024; 
-  state->stream.constrained_flag = (constr != 0);
+  state->stream.shdr[vid_idx].hsize = hsize;
+  state->stream.shdr[vid_idx].vsize = vsize;
+  state->stream.shdr[vid_idx].aratio = aspect_ratios[aratio];
+  state->stream.shdr[vid_idx].frate = frame_rates[frate];
+  state->stream.shdr[vid_idx].bitrate = 400*brate;
+  state->stream.shdr[vid_idx].vbvsize = bufsize * 16 * 1024; 
+  state->stream.shdr[vid_idx].constrained_flag = (constr != 0);
+
+  state->stream.shdr[vid_idx].seen = true;
 }
 
 
 static void
-_parse_gop_header (const void *buf, 
+_parse_gop_header (uint8_t streamid, const void *buf, 
 		   struct _analyze_state *state)
 {
   const uint8_t *data = buf;
@@ -322,7 +379,7 @@ _parse_gop_header (const void *buf,
 }
 
 static void
-_analyze_video_pes (uint32_t code, const uint8_t *buf, int len,
+_analyze_video_pes (uint8_t streamid, const uint8_t *buf, int len,
 		    struct _analyze_state *state)
 {
   int pos;
@@ -335,9 +392,7 @@ _analyze_video_pes (uint32_t code, const uint8_t *buf, int len,
   int mpeg_ver = 0;
   int _pts_pos = 0;
 
-  assert (code == MPEG_VIDEO_E0_CODE 
-          || code == MPEG_VIDEO_E1_CODE
-          || code == MPEG_VIDEO_E2_CODE);
+  assert (_vid_streamid_idx (streamid) != -1);
 
   switch (_bitvec_peek_bits (buf, 0, 2))
     {
@@ -498,13 +553,7 @@ _analyze_video_pes (uint32_t code, const uint8_t *buf, int len,
 	case MPEG_SEQUENCE_CODE:
 	  pos += 4;
 	  sequence_header_pos = pos;
-
-	  if (!state->stream.video_info)
-	    {
-	      _parse_sequence_header (buf + pos, state);
-	      state->stream.video_info = true;
-	    }
-
+          _parse_sequence_header (streamid, buf + pos, state);
 	  break;
 
 	case MPEG_GOP_CODE:
@@ -512,7 +561,7 @@ _analyze_video_pes (uint32_t code, const uint8_t *buf, int len,
           if (pos + 4 > len)
             break;
 	  gop_header_pos = pos;
-	  _parse_gop_header (buf + pos, state);
+	  _parse_gop_header (streamid, buf + pos, state);
 	  state->packet.gop = true;
 	  break;
 
@@ -555,16 +604,50 @@ _analyze_video_pes (uint32_t code, const uint8_t *buf, int len,
       if (_is_aps) /* if still aps */
         {
           double pts2 = (double) pts / 90000.0;
+          int vid_idx = _vid_streamid_idx (streamid);
 
           state->packet.aps = true;
           state->packet.aps_pts = pts2;
 
-          if (state->stream.last_aps_pts > pts2)
+          if (state->stream.last_aps_pts[vid_idx] > pts2)
             vcd_warn ("aps pts seems out of order (actual pts %f, last seen pts %f)",
-                      pts2, state->stream.last_aps_pts);
+                      pts2, state->stream.last_aps_pts[vid_idx]);
 
-          state->stream.last_aps_pts = pts2;
+          state->stream.last_aps_pts[vid_idx] = pts2;
         }
+    }
+}
+
+static void
+_register_streamid (uint8_t streamid, struct _analyze_state *state)
+{
+  const uint32_t code = MPEG_START_CODE_PATTERN | streamid;
+
+  switch (code)
+    {
+    case MPEG_VIDEO_E0_CODE:
+    case MPEG_VIDEO_E1_CODE: 
+    case MPEG_VIDEO_E2_CODE: 
+      state->packet.video[_vid_streamid_idx (streamid)] = true;
+      break;
+
+    case MPEG_AUDIO_C0_CODE:
+    case MPEG_AUDIO_C1_CODE:
+    case MPEG_AUDIO_C2_CODE:
+      state->packet.audio[_aud_streamid_idx (streamid)] = true;
+      break;
+
+    case MPEG_PAD_CODE:
+      state->packet.padding = true;
+      break;
+
+    case MPEG_OGT_CODE:
+      state->packet.ogt = true;
+      break;
+
+    case MPEG_SYSTEM_HEADER_CODE: 
+      state->packet.system_header = true;
+      break;
     }
 }
 
@@ -664,81 +747,33 @@ _analyze (const uint8_t *buf, int len, bool analyze_pes,
               return 0;
             }
 
+          _register_streamid (code & 0xff, state);
+
 	  switch (code)
 	    {
-	    case MPEG_PAD_CODE:
-	      state->packet.padding = true;
-	      break;
-
 	    case MPEG_SYSTEM_HEADER_CODE: 
-	      state->packet.system_header = true;
-              switch (MPEG_START_CODE_PATTERN | buf[pos + 6]) 
-                {
-                case MPEG_VIDEO_E0_CODE:
-                case MPEG_VIDEO_E1_CODE: 
-                case MPEG_VIDEO_E2_CODE: 
-                  state->packet.video = true;
-                  break;
-                case MPEG_AUDIO_C0_CODE:
-                  state->packet.audio = true;
-                  state->packet.audio_c0 = true;
-                  break;
-                  
-                case MPEG_AUDIO_C1_CODE:
-                  state->packet.audio = true;
-                  state->packet.audio_c1 = true;
-                  break;
-                  
-                case MPEG_AUDIO_C2_CODE:
-                  state->packet.audio = true;
-                  state->packet.audio_c2 = true;
-                  break;
-
-                case MPEG_OGT_CODE:
-                  state->packet.ogt = true;
-                  break;
-                }
-	      break;
+              _register_streamid (buf[pos + 6], state);
+              break;
 
 	    case MPEG_VIDEO_E0_CODE:
 	    case MPEG_VIDEO_E1_CODE: 
 	    case MPEG_VIDEO_E2_CODE: 
-	      state->packet.video = true;
 	      if (analyze_pes)
-		_analyze_video_pes (code, buf + pos, size, state);
-	      break;
-
-	    case MPEG_AUDIO_C0_CODE:
-	      state->packet.audio = true;
-              state->packet.audio_c0 = true;
-              break;
-
-	    case MPEG_AUDIO_C1_CODE:
-	      state->packet.audio = true;
-              state->packet.audio_c1 = true;
-              break;
-
-	    case MPEG_AUDIO_C2_CODE:
-	      state->packet.audio = true;
-              state->packet.audio_c2 = true;
-              break;
-
-            case MPEG_OGT_CODE:
-              state->packet.ogt = true;
+		_analyze_video_pes (code & 0xff, buf + pos, size, state);
               break;
 	    }
 
-          if (state->packet.audio)
-            state->stream.audio_info = true;
+          { 
+            int n;
+            for (n = 0; n < 3; n++)
+              {
+                if (state->packet.audio[n])
+                  state->stream.audio[n] = true;
 
-          if (state->packet.audio_c0)
-            state->stream.audio_c0 = true;
-
-          if (state->packet.audio_c1)
-            state->stream.audio_c1 = true;
-
-          if (state->packet.audio_c2)
-            state->stream.audio_c2 = true;
+                if (state->packet.video[n])
+                  state->stream.video[n] = true;
+              }
+          }
 
 	  pos += size;
 	  break;
@@ -814,6 +849,7 @@ vcd_mpeg_source_scan (VcdMpegSource *obj)
   VcdList *aps_list = 0;
   VcdListNode *n;
   bool _warned_padding = false;
+  bool _pal = false;
 
   assert (obj != NULL);
 
@@ -871,22 +907,26 @@ vcd_mpeg_source_scan (VcdMpegSource *obj)
 
   assert (pos == length);
 
-  obj->info.audio_c0 = state.stream.audio_c0;
-  obj->info.audio_c1 = state.stream.audio_c1;
-  obj->info.audio_c2 = state.stream.audio_c2;
+  obj->info.audio_c0 = state.stream.audio[0];
+  obj->info.audio_c1 = state.stream.audio[1];
+  obj->info.audio_c2 = state.stream.audio[2];
 
-  if (!state.stream.audio_c0 && !state.stream.audio_c1 && !state.stream.audio_c2)
+  obj->info.video_e0 = state.stream.video[0];
+  obj->info.video_e1 = state.stream.video[1];
+  obj->info.video_e2 = state.stream.video[2];
+
+  if (!state.stream.audio[0] && !state.stream.audio[1] && !state.stream.audio[2])
     obj->info.audio_type = MPEG_AUDIO_NOSTREAM;
-  else if (state.stream.audio_c0 && !state.stream.audio_c1 && !state.stream.audio_c2)
+  else if (state.stream.audio[0] && !state.stream.audio[1] && !state.stream.audio[2])
     obj->info.audio_type = MPEG_AUDIO_1STREAM;
-  else if (state.stream.audio_c0 && state.stream.audio_c1 && !state.stream.audio_c2)
+  else if (state.stream.audio[0] && state.stream.audio[1] && !state.stream.audio[2])
     obj->info.audio_type = MPEG_AUDIO_2STREAM;
-  else if (state.stream.audio_c0 && !state.stream.audio_c1 && state.stream.audio_c2)
+  else if (state.stream.audio[0] && !state.stream.audio[1] && state.stream.audio[2])
     obj->info.audio_type = MPEG_AUDIO_EXT_STREAM;
   else
     {
       vcd_warn ("unsupported audio stream aggregation encountered! (c0: %d, c1: %d, c2: %d)",
-                state.stream.audio_c0, state.stream.audio_c1, state.stream.audio_c2);
+                state.stream.audio[0], state.stream.audio[1], state.stream.audio[2]);
       obj->info.audio_type = MPEG_AUDIO_NOSTREAM;
     }
 
@@ -911,19 +951,46 @@ vcd_mpeg_source_scan (VcdMpegSource *obj)
 
   obj->info.aps_list = aps_list;
 
-  obj->info.hsize = state.stream.hsize;
-  obj->info.vsize = state.stream.vsize;
-  obj->info.aratio = state.stream.aratio;
-  obj->info.frate = state.stream.frate;
-  obj->info.bitrate = state.stream.bitrate;
-  obj->info.vbvsize = state.stream.vbvsize;
-  obj->info.constrained_flag = state.stream.constrained_flag;
-  
+  {
+    int vid_idx = state.stream.first_shdr;
+    
+    if (vid_idx)
+      {
+        vid_idx--;
+
+        obj->info.hsize = state.stream.shdr[vid_idx].hsize;
+        obj->info.vsize = state.stream.shdr[vid_idx].vsize;
+        obj->info.aratio = state.stream.shdr[vid_idx].aratio;
+        obj->info.frate = state.stream.shdr[vid_idx].frate;
+        obj->info.bitrate = state.stream.shdr[vid_idx].bitrate;
+        obj->info.vbvsize = state.stream.shdr[vid_idx].vbvsize;
+        obj->info.constrained_flag = state.stream.shdr[vid_idx].constrained_flag;
+      }
+  }  
+
   obj->info.version = state.stream.version;
 
-  obj->info.norm = _get_norm (state.stream.hsize,
-			      state.stream.vsize,
-			      state.stream.frate);
+  obj->info.norm = _get_norm (obj->info.hsize,
+			      obj->info.vsize,
+			      obj->info.frate);
+
+  _pal = (obj->info.vsize == 576 || obj->info.vsize == 288);
+
+  switch (state.stream.first_shdr)
+    {
+    case 0:
+      obj->info.video_type = MPEG_VIDEO_NOSTREAM;
+      break;
+    case 1:
+      obj->info.video_type = _pal ? MPEG_VIDEO_PAL_MOTION : MPEG_VIDEO_NTSC_MOTION;
+      break;
+    case 2:
+      obj->info.video_type = _pal ? MPEG_VIDEO_PAL_STILL : MPEG_VIDEO_NTSC_STILL;
+      break;
+    case 3:
+      obj->info.video_type = _pal ? MPEG_VIDEO_PAL_STILL2 : MPEG_VIDEO_NTSC_STILL2;
+      break;
+    }
 }
 
 int
@@ -982,14 +1049,23 @@ vcd_mpeg_source_get_packet (VcdMpegSource *obj, unsigned long packet_no,
             {
               memset (flags, 0, sizeof (struct vcd_mpeg_packet_flags));
 
-              if (state.packet.video)
-                flags->type = PKT_TYPE_VIDEO;
-              else if (state.packet.audio)
+              if (state.packet.video[0] 
+                  || state.packet.video[1]
+                  || state.packet.video[2])
+                {
+                  flags->type = PKT_TYPE_VIDEO;
+                  flags->video_e0 = state.packet.video[0];
+                  flags->video_e1 = state.packet.video[1];
+                  flags->video_e2 = state.packet.video[2];
+                }
+              else if (state.packet.audio[0] 
+                       || state.packet.audio[1]
+                       || state.packet.audio[2])
                 {
                   flags->type = PKT_TYPE_AUDIO;
-                  flags->audio_c0 = state.packet.audio_c0;
-                  flags->audio_c1 = state.packet.audio_c1;
-                  flags->audio_c2 = state.packet.audio_c2;
+                  flags->audio_c0 = state.packet.audio[0];
+                  flags->audio_c1 = state.packet.audio[1];
+                  flags->audio_c2 = state.packet.audio[2];
                 }
               else if (state.packet.zero)
                 flags->type = PKT_TYPE_ZERO;

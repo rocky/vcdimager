@@ -28,6 +28,7 @@
 #include <libxml/tree.h>
 
 struct vcdxml_t {
+  vcd_type_t vcd_type; /* used for restoring */
   xmlChar *class;
   xmlChar *version;
   VcdList *option_list;
@@ -74,11 +75,17 @@ struct sequence_t {
   xmlChar *src;
   VcdList *entry_point_list; /* entry_point_t */
   VcdList *autopause_list; /* double * */
+
+  /* used for restoring */
+  uint32_t start_extent;
 };
 
 struct entry_point_t {
   xmlChar *id;
   double timestamp;
+  
+  /* used for restoring */
+  uint32_t extent;
 };
 
 struct segment_t

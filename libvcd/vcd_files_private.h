@@ -115,6 +115,16 @@ typedef struct {
 #endif
 } InfoStatusFlags;
 
+enum {
+  VCD_FILES_VIDEO_NOSTREAM = 0,
+  VCD_FILES_VIDEO_NTSC_STILL = 1,
+  VCD_FILES_VIDEO_NTSC_STILL2 = 2,
+  VCD_FILES_VIDEO_NTSC_MOTION = 3,
+  VCD_FILES_VIDEO_PAL_STILL = 5,
+  VCD_FILES_VIDEO_PAL_STILL2 = 6,
+  VCD_FILES_VIDEO_PAL_MOTION = 7
+};
+
 typedef struct 
 {
 #if defined(BITFIELD_LSBF)

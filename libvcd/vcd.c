@@ -296,7 +296,11 @@ vcd_obj_append_sequence_play_item (VcdObj *obj, VcdMpegSource *mpeg_source,
   if ((obj->type == VCD_TYPE_VCD2 || obj->type == VCD_TYPE_VCD11)
       && track->info->version == MPEG_VERS_MPEG2)
     vcd_warn ("VCD should not contain MPEG2 tracks!");
-          
+      
+  if (track->info->video_type != MPEG_VIDEO_PAL_MOTION
+      && track->info->video_type != MPEG_VIDEO_NTSC_MOTION)
+    vcd_warn ("sequence items should contain a motion video stream!");
+    
   vcd_debug ("track# %d's detected playing time: %.2f seconds", 
              track_no, track->info->playing_time);
 

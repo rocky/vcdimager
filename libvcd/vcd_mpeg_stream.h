@@ -61,6 +61,17 @@ typedef enum {
   MPEG_AUDIO_EXT_STREAM = 3
 } mpeg_audio_t;
 
+typedef enum {
+  MPEG_VIDEO_NOSTREAM = 0,
+  MPEG_VIDEO_NTSC_STILL = 1,
+  MPEG_VIDEO_NTSC_STILL2 = 2,
+  MPEG_VIDEO_NTSC_MOTION = 3,
+
+  MPEG_VIDEO_PAL_STILL = 5,
+  MPEG_VIDEO_PAL_STILL2 = 6,
+  MPEG_VIDEO_PAL_MOTION = 7
+} mpeg_video_t;
+
 /* mpeg stream info */
 
 struct vcd_mpeg_source_info
@@ -77,6 +88,11 @@ struct vcd_mpeg_source_info
   bool audio_c1;
   bool audio_c2;
 
+  bool video_e0;
+  bool video_e1;
+  bool video_e2;
+
+  mpeg_video_t video_type;
   mpeg_audio_t audio_type;
   mpeg_vers_t version;
   mpeg_norm_t norm; 
@@ -102,6 +118,10 @@ struct vcd_mpeg_packet_flags
   bool audio_c0;
   bool audio_c1;
   bool audio_c2;
+
+  bool video_e0;
+  bool video_e1;
+  bool video_e2;
 
   bool pem;
 };

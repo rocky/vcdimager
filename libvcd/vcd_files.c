@@ -317,12 +317,7 @@ set_info_vcd(VcdObj *obj, void *buf)
               InfoSpiContents contents = { 0, };
 
               contents.audio_type = (int) segment->info->audio_type;
-
-              /* fixme -- we need to detect whether still picture or motion picture */
-              if (segment->info->vsize == 240 || segment->info->vsize == 480)
-                contents.video_type = 0x01;
-              else if (segment->info->vsize == 288 || segment->info->vsize == 576)
-                contents.video_type = 0x05;
+              contents.video_type = (int) segment->info->video_type;
 
               for (idx = 0; idx < segment->segment_count; idx++)
                 {

@@ -33,11 +33,14 @@
 #include <libvcd/vcd_stream_stdio.h>
 #include <libvcd/vcd_logging.h>
 #include <libvcd/vcd_iso9660.h>
+#include <libvcd/vcd_iso9660_private.h>
 #include <libvcd/vcd_bytesex.h>
 #include <libvcd/vcd_util.h>
 
 #include "vcdxml.h"
 #include "vcd_xml_dtd.h"
+#include "vcd_xml_dump.h"
+
 
 static const char *
 _strip_trail (const char str[], size_t n)
@@ -59,6 +62,39 @@ _strip_trail (const char str[], size_t n)
     }
 
   return buf;
+}
+
+static int
+_parse_pvd (struct vcdxml_t *obj, VcdImageSource *img)
+{
+  struct iso_primary_descriptor pvd;
+
+  memset (&pvd, 0, sizeof (struct iso_primary_descriptor));
+  assert (sizeof (struct iso_primary_descriptor) == ISO_BLOCKSIZE);
+
+  vcd_image_source_read_mode2_sector (img, &pvd, ISO_PVD_SECTOR, false);
+
+  if (pvd.type != ISO_VD_PRIMARY)
+    {
+      vcd_error ("unexcected descriptor type");
+      return -1;
+    }
+  
+  if (strncmp (pvd.id, ISO_STANDARD_ID, strlen (ISO_STANDARD_ID)))
+    {
+      vcd_error ("unexpected ID encountered (expected `"
+		 ISO_STANDARD_ID "', got `%.5s'", pvd.id);
+      return -1;
+    }
+ 
+  obj->pvd.volume_id = strdup (_strip_trail (pvd.volume_id, 32));
+  obj->pvd.system_id = strdup (_strip_trail (pvd.system_id, 32));
+
+  obj->pvd.publisher_id = strdup (_strip_trail (pvd.publisher_id, 128));
+  obj->pvd.preparer_id = strdup (_strip_trail (pvd.preparer_id, 128));
+  obj->pvd.application_id = strdup (_strip_trail (pvd.application_id, 128));
+
+  return 0;
 }
 
 static int
@@ -109,7 +145,8 @@ _parse_info (struct vcdxml_t *obj, VcdImageSource *img)
       }
   else
     vcd_error ("INFO signature not found");
-    
+
+  obj->vcd_type = _vcd_type;
   switch (_vcd_type)
     {
     case VCD_TYPE_VCD11:
@@ -196,6 +233,83 @@ _parse_info (struct vcdxml_t *obj, VcdImageSource *img)
   return 0;
 }
 
+static int
+_parse_entries (struct vcdxml_t *obj, VcdImageSource *img)
+{
+  EntriesVcd entries;
+  int idx;
+  uint8_t ltrack;
+
+  memset (&entries, 0, sizeof (EntriesVcd));
+  assert (sizeof (EntriesVcd) == ISO_BLOCKSIZE);
+
+  vcd_image_source_read_mode2_sector (img, &entries, ENTRIES_VCD_SECTOR, false);
+
+  /* analyze signature/type */
+
+  if (!strncmp (entries.ID, ENTRIES_ID_VCD, sizeof (entries.ID)))
+    {}
+  else if (!strncmp (entries.ID, "ENTRYSVD", sizeof (entries.ID)))
+    vcd_warn ("found (non-compliant) SVCD ENTRIES.SVD signature");
+  else
+    {
+      vcd_error ("unexpected ID signature encountered `%.8s'", entries.ID);
+      return -1;
+    }
+
+  ltrack = 0;
+  for (idx = 0; idx < UINT16_FROM_BE (entries.entry_count); idx++)
+    {
+      uint32_t extent = msf_to_lba(&(entries.entry[idx].msf));
+      uint8_t track = from_bcd8 (entries.entry[idx].n);
+      bool newtrack = (track != ltrack);
+      ltrack = track;
+      
+      assert (extent >= 150);
+      extent -= 150;
+
+      assert (track >= 2);
+      track -= 2;
+
+      if (newtrack)
+	{
+	  char buf[80];
+	  struct sequence_t *_new_sequence = _vcd_malloc (sizeof (struct sequence_t));
+
+	  snprintf (buf, sizeof (buf), "sequence-%2.2d", track);
+	  _new_sequence->id = strdup (buf);
+
+	  snprintf (buf, sizeof (buf), "avseq%2.2d.mpg", track);
+	  _new_sequence->src = strdup (buf);
+
+	  _new_sequence->entry_point_list = _vcd_list_new ();
+	  _new_sequence->autopause_list = _vcd_list_new ();
+	  _new_sequence->start_extent = extent;
+
+	  _vcd_list_append (obj->sequence_list, _new_sequence);
+	}
+      else
+	{
+	  char buf[80];
+	  struct sequence_t *_seq =
+	    _vcd_list_node_data (_vcd_list_end (obj->sequence_list));
+
+	  struct entry_point_t *_entry = _vcd_malloc (sizeof (struct entry_point_t));
+
+	  snprintf (buf, sizeof (buf), "entry-%3.3d", idx - track - 1);
+	  _entry->id = strdup (buf);
+
+	  _entry->extent = extent;
+
+	  _vcd_list_append (_seq->entry_point_list, _entry);
+	}
+
+      vcd_debug ("%d %d %d %d", idx, track, extent, newtrack);
+    }
+
+  return 0;
+}
+
 int main (int argc, const char *argv[])
 {
   VcdDataSource *bin_source;
@@ -215,9 +329,14 @@ int main (int argc, const char *argv[])
   img_src = vcd_image_source_new_bincue (bin_source, NULL, false);
   assert (img_src != NULL);
 
-  _parse_info (&obj, img_src);
+  /* start with ISO9660 PVD */
+  _parse_pvd (&obj, img_src);
 
-  /* _dump_xml (&obj, xml_file); */
+  /* needs to be parsed in order */
+  _parse_info (&obj, img_src);
+  _parse_entries (&obj, img_src);
+
+  vcd_xml_dump (&obj, "videocd.xml");
 
   vcd_image_source_destroy (img_src);
 
