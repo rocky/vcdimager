@@ -79,7 +79,8 @@ in the section entitled ``GNU Free Documentation License''.
 * Examples::                    
 * Tips and Hints::              
 * Character Sets::              
-* Acronym Expansions::          
+* CD Image Formats::            
+* Glossary::          
 * GNU General Public License::  
 * GNU Free Documentation License::  
 * XML Tag Index::               
@@ -292,9 +293,10 @@ ISO-9660 track.
 @item
 Up to 98 @acronym{MPEG} mode 2 form 2 tracks wrapped in front and rear
 margin@footnote{Margins seem to be used, in order to compensate for
-inaccurate sector addressing issues on CD-ROM media. Interestingly, they
-have been abandoned for the Super Video CD.} empty sectors and preceded
-by (at least) 150 empty sector pre-gaps.
+inaccurate sector addressing issues on @acronym{CD-ROM}
+media. Interestingly, they have been abandoned for the Super Video
+CD.} empty sectors and preceded by (at least) 150 empty sector
+pre-gaps.
 
 @item
 150 sector post-gap after the last mpeg track, as required by the
@@ -1094,10 +1096,10 @@ Files can be added to the @acronym{ISO} file-system, that is the first
 track of the Video CD, by making use of the command-line options
 @option{--add-file=@var{FILE},@var{ISO_FILENAME}} and
 @option{--add-file-2336=@var{FILE},@var{ISO_FILENAME}}.  The latter
-option allows you to include files containing the complete user data of
-mode 2 CD-ROM sectors @footnote{8 bytes for sub-header, 2324 bytes
-payload (which contains 276 bytes @acronym{ECC} for form 1) and finally
-4 bytes for @acronym{EDC}}.
+option allows you to include files containing the complete user data
+of mode 2 @acronym{CD-ROM} sectors @footnote{8 bytes for sub-header,
+2324 bytes payload (which contains 276 bytes @acronym{ECC} for form 1)
+and finally 4 bytes for @acronym{EDC}}.
 
 @cindex ISO-9660 filename constraints
 The path name given as @var{ISO_FILENAME} determines where to link the
@@ -2539,7 +2541,7 @@ header. @xref{Access Point Sectors}.
 
 @end itemize
 
-@node Character Sets, Acronym Expansions, Tips and Hints, Top
+@node Character Sets, CD Image Formats, Tips and Hints, Top
 @appendix Character Sets
 
 @menu
@@ -2595,12 +2597,87 @@ e |     . > N
 f |     / ? O _                    
 @end example
 
-@node Acronym Expansions, GNU General Public License, Character Sets, Top
+@node CD Image Formats, Acronym Expansions, Character Sets, Top
+@appendix CD Image Formats 
+
+@menu
+* CDRDAO TOC Format::           
+* BIN/CUE Format::              
+@end menu
+
+@node CDRDAO TOC Format, BIN/CUE Format, CD Image Formats, CD Image Formats
+@appendixsec CDRDAO TOC Format
+
+This is @command{cdrdao}'s own cd image description format. A snippet
+from the @cite{cdrdao(1) manual page}, which you should refer to for
+more information about this format:
+
+@quotation
+The @emph{toc}-file describes what data is written to the
+@acronym{CD-R} and allows control over track/index positions, pre-gaps
+and sub-channel information.  It is a simple text file, use your
+favorite text editor to create it.
+@end quotation
+
+@node  BIN/CUE Format,  , CDRDAO TOC Format, CD Image Formats
+@appendixsec BIN/CUE Format
+@cindex BIN/CUE, CD Image Format
+
+The format referred to as @emph{BIN/CUE Format} in this manual is a
+popular CD image format used in the @acronym{PC} world. Not unlike
+@command{cdrdao}'s toc file, the @emph{cue} file describes the track
+layout, i.e. how the sectors are to be placed on the CD media. The
+@emph{cue} file usually contains a reference to a file traditionally
+having the @file{.bin} extension in its filename, the @emph{bin}
+file. This @emph{bin} file contains the sector data payload which is
+to be written to the CD medium according to the description in the
+@emph{cue} file.
+
+The following is an attempt to describe the subset of the @file{.cue} 
+file syntax as used in vcdimager in an EBNF-like notation:
+
+@example
+@cartouche
+<cue-document> ::= +( <file-line> +<track-expr> )
+
+<digit> ::= "0" | "1" ... "8" | "9"
+<number> ::= +<digit>
+<msf> ::= <digit><digit> ":" <digit><digit> ":" <digit><digit>
+
+<file-line> ::= "FILE" <pathname-expr> <file-type> <EOL>
+
+<pathname-expr> ::= [ "\"" ] <pathname-str-without-spaces> [ "\"" ] 
+                  | "\"" <pathname-str> "\""  
+
+<file-type> ::= "BINARY" 
+
+<track-expr> ::= <track-line> [ <flag-line> ]
+                 [ <pregap-line> ] *<index-line> [ <postgap-line> ]
+
+<flag-line> ::= "FLAGS" *<flag-type> <EOL>
+<flag-type> ::= "DCP"
+
+<track-line> ::= "TRACK" <number> <track-type> <EOL>
+
+<pregap-line> ::= "PREGAP" <msf> <EOL>
+
+<index-line> ::= "INDEX" <number> <msf> <EOL>
+
+<postgap-line> ::= "POSTGAP" <msf> <EOL>
+
+<track-type> ::= "AUDIO" | "MODE1/2048" | "MODE1/2352" 
+               | "MODE2/2336" | "MODE2/2352"
+
+<comment-line> ::= "REM" *<char> <EOL>
+@end cartouche
+@end example
+
+@node Glossary, GNU General Public License, CD Image Formats, Top
 @appendix Glossary
 
 @include glossary.texi
 
-@node GNU General Public License, GNU Free Documentation License, Acronym Expansions, Top
+@node GNU General Public License, GNU Free Documentation License, Glossary, Top
 @appendix GNU General Public License
 @cindex GPL, GNU General Public License
 @center Version 2, June 1991
