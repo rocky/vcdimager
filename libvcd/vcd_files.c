@@ -520,6 +520,8 @@ _make_track_scantable (const VcdObj *obj)
     playing_time = scanpoints;
     playing_time /= 2;
 
+    vcd_assert (aps_node != NULL);
+
     _data = _vcd_list_node_data (aps_node);
     aps_time = _data->timestamp;
     aps_packet = _data->packet_no;

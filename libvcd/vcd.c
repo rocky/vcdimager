@@ -748,7 +748,6 @@ _finalize_vcd_iso_track_allocation (VcdObj *obj)
       /* noop */
       break;
     case VCD_TYPE_VCD2:
-#if 0
       if (_vcd_pbc_available (obj))
         {
           _dict_insert (obj, "lot_x", SECTOR_NIL, LOT_VCD_SIZE, SM_EOF);
@@ -758,7 +757,7 @@ _finalize_vcd_iso_track_allocation (VcdObj *obj)
                         SM_EOF);
         }
       /* scantable.dat */
-#endif
+
       break;
     case VCD_TYPE_SVCD:
       _dict_insert (obj, "scandata", SECTOR_NIL, 
@@ -930,7 +929,6 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
   switch (obj->type) 
     {
     case VCD_TYPE_VCD2:
-#if 0
       if (_vcd_pbc_available (obj))
         {
           /* psd_x -- extended PSD */
@@ -943,7 +941,6 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
                                  _dict_get_bykey (obj, "lot_x")->sector, 
                                  ISO_BLOCKSIZE*LOT_VCD_SIZE, false, 1);
         }
-#endif
       break;
 
     case VCD_TYPE_SVCD:
@@ -1207,13 +1204,11 @@ _write_vcd_iso_track (VcdObj *obj)
 
   if (_vcd_pbc_available (obj))
     {
-#if 0
       if (obj->type == VCD_TYPE_VCD2)
         {
           set_lot_vcd (obj, _dict_get_bykey (obj, "lot_x")->buf, true);
           set_psd_vcd (obj, _dict_get_bykey (obj, "psd_x")->buf, true);
         }
-#endif
   
       set_lot_vcd (obj, _dict_get_bykey (obj, "lot")->buf, false);
       set_psd_vcd (obj, _dict_get_bykey (obj, "psd")->buf, false);

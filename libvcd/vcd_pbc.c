@@ -241,7 +241,7 @@ _vcd_pbc_max_lid (const VcdObj *obj)
 }
 
 static size_t
-_vcd_pbc_node_length (const pbc_t *_pbc, bool extended)
+_vcd_pbc_node_length (const VcdObj *obj, const pbc_t *_pbc, bool extended)
 {
   size_t retval = 0;
 
@@ -288,7 +288,7 @@ _vcd_pbc_node_length (const pbc_t *_pbc, bool extended)
 
       n = _vcd_list_length (_pbc->select_id_list);
 
-      if (extended)
+      if (extended || obj->type == VCD_TYPE_SVCD)
 	retval += offsetof (PsdSelectionListDescriptorExtended, area[n]);
 
       break;
@@ -335,6 +335,9 @@ void
 _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 		     bool extended)
 {
+  if (extended)
+    vcd_assert (obj->type == VCD_TYPE_VCD2);
+
   switch (_pbc->type)
     {
     case PBC_PLAYLIST:
@@ -386,23 +389,20 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 
 	_mode = _get_sel_mode (_pbc);
 
-	if (_vcd_list_length (_pbc->default_id_list) > 1)
-	  _mode = _SEL_MODE_MULTI_ONLY;
+	if (obj->type != VCD_TYPE_SVCD)
+	  vcd_assert (_mode == _SEL_MODE_NORMAL);
 
-	if (_mode == _SEL_MODE_MULTI_ONLY 
-	    && _vcd_list_length (_pbc->select_id_list))
-	  {
-	    vcd_assert (_vcd_list_length (_pbc->default_id_list)
-		    == _vcd_list_length (_pbc->select_id_list));
-
-	    _mode = _SEL_MODE_MULTI;
-	  }
+	if (extended)
+	  _md->type = PSD_TYPE_EXT_SELECTION_LIST;
+	else
+	  _md->type = PSD_TYPE_SELECTION_LIST;
+	
+	if (obj->type == VCD_TYPE_SVCD)
+	  _md->flags.SelectionAreaFlag = true;
 
 	_md->bsn = _pbc->bsn;
 	_md->nos = _vcd_list_length (_pbc->select_id_list);
 	_md->default_ofs = UINT16_TO_BE (0xffff);
-
-	_md->type = PSD_TYPE_SELECTION_LIST;
 
 	vcd_assert (sizeof (PsdSelectionListFlags) == 1);
 	_md->flags.SelectionAreaFlag = false;
@@ -573,8 +573,8 @@ _vcd_pbc_finalize (VcdObj *obj)
       pbc_t *_pbc = _vcd_list_node_data (node);
       unsigned length, length_ext;
 
-      length = _vcd_pbc_node_length (_pbc, false);
-      length_ext = _vcd_pbc_node_length (_pbc, true);
+      length = _vcd_pbc_node_length (obj, _pbc, false);
+      length_ext = _vcd_pbc_node_length (obj, _pbc, true);
 
       /* round them up to... */
       length = _vcd_ceil2block (length, INFO_OFFSET_MULT);

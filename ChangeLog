@@ -1,5 +1,7 @@
 2001-06-03  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* libvcd/vcd.c: re-enabled generation of extended PBC
+
 	* libvcd/vcd_util.h: made block related functions inline
 
 	* libvcd/vcd_iso9660.c, libvcd/vcd_directory.c: various cleanups
