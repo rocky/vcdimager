@@ -25,10 +25,6 @@
 
 #include <libvcd/vcd_types.h>
 
-#ifdef __MWERKS__
-#pragma options align=packed
-#endif
-
 /* Multimedia Commands, see [mmc], table N.1 */
 enum mmc_command 
 {
@@ -127,7 +123,7 @@ static int data_block_size[16] = {
 
 struct disc_info 
 {
-  uint16_t length		GNUC_PACKED;
+  uint16_t length;
 #if defined(BITFIELD_MSBF)
   uint8_t  reserved1		: 3;
   uint8_t  erasable		: 1;
@@ -139,10 +135,10 @@ struct disc_info
   uint8_t  erasable		: 1;
   uint8_t  reserved1		: 3;
 #endif
-  uint8_t  n_first_track	GNUC_PACKED;	/* number of first track on d */
-  uint8_t  n_sessions_l		GNUC_PACKED;	/* number of sessions */
-  uint8_t  first_track_l	GNUC_PACKED;	/* first track in last session*/
-  uint8_t  last_track_l		GNUC_PACKED;	/* last track in last session */
+  uint8_t  n_first_track;	/* number of first track on d */
+  uint8_t  n_sessions_l;	/* number of sessions */
+  uint8_t  first_track_l;	/* first track in last session*/
+  uint8_t  last_track_l;	/* last track in last session */
 #if defined(BITFIELD_MSBF)
   uint8_t  did_v		: 1;
   uint8_t  dbc_v		: 1;
@@ -155,23 +151,25 @@ struct disc_info
   uint8_t  did_v 		: 1;
 #endif
   enum session_format disc_type : 8;	/* disc type */
-  uint8_t  n_sessions_m		GNUC_PACKED;
-  uint8_t  first_track_m	GNUC_PACKED;
-  uint8_t  last_track_m		GNUC_PACKED;
-  uint32_t disc_id		GNUC_PACKED;
-  uint32_t lead_in		GNUC_PACKED;
-  uint32_t lead_out		GNUC_PACKED;
-  char     disc_bar_code[8]	GNUC_PACKED;
-  uint8_t  reserved3		GNUC_PACKED;
-  uint8_t  opc_entries		GNUC_PACKED;
-};
+  uint8_t  n_sessions_m;
+  uint8_t  first_track_m;
+  uint8_t  last_track_m;
+  uint32_t disc_id;
+  uint32_t lead_in;
+  uint32_t lead_out;
+  char     disc_bar_code[8];
+  uint8_t  reserved3;
+  uint8_t  opc_entries;
+} GNUC_PACKED;
+
+#define struct_disc_info_SIZEOF 34
 
 struct track_info 
 {
-  uint16_t info_length		GNUC_PACKED;
-  uint8_t  track_number_l	GNUC_PACKED;
-  uint8_t  session_number_l	GNUC_PACKED;
-  uint8_t  reserved1		GNUC_PACKED;
+  uint16_t info_length;
+  uint8_t  track_number_l;
+  uint8_t  session_number_l;
+  uint8_t  reserved1;
 #if defined(BITFIELD_MSBF)
   uint8_t  reserved2		: 2;
   uint8_t  damage		: 1;
@@ -199,17 +197,19 @@ struct track_info
   uint8_t  lra_v		: 1;
   uint8_t  reserved3		: 6;
 #endif
-  uint32_t track_start		GNUC_PACKED;
-  uint32_t next_writable	GNUC_PACKED;
-  uint32_t free_blocks		GNUC_PACKED;
-  uint32_t packet_size		GNUC_PACKED;
-  uint32_t track_size		GNUC_PACKED;
-  uint32_t last_recorded	GNUC_PACKED;
-  uint8_t  track_number_m	GNUC_PACKED;
-  uint8_t  session_number_m	GNUC_PACKED;
-  uint8_t  reserved4		GNUC_PACKED;
-  uint8_t  reserved5		GNUC_PACKED;
-};
+  uint32_t track_start;
+  uint32_t next_writable;
+  uint32_t free_blocks;
+  uint32_t packet_size;
+  uint32_t track_size;
+  uint32_t last_recorded;
+  uint8_t  track_number_m;
+  uint8_t  session_number_m;
+  uint8_t  reserved4;
+  uint8_t  reserved5;
+} GNUC_PACKED;
+
+#define struct_track_info_SIZEOF 36
 
 enum write_type
 {
@@ -237,6 +237,8 @@ struct mode_page_header
   uint8_t  reserved2[8]		GNUC_PACKED;
 };
 
+#define struct_mode_page_header_SIZEOF 16
+
 struct write_parameters_mode_page
 {
 #if defined(BITFIELD_MSBF)
@@ -248,7 +250,7 @@ struct write_parameters_mode_page
   uint8_t reserved1		: 1;
   uint8_t ps 			: 1;
 #endif
-  uint8_t page_length		GNUC_PACKED;	/* 0x32 or 0x36 */
+  uint8_t page_length;				/* 0x32 or 0x36 */
 #if defined(BITFIELD_MSBF)
   uint8_t reserved2		: 3;
   uint8_t test_write		: 1;		/* 1 => dummy write */
@@ -274,7 +276,7 @@ struct write_parameters_mode_page
   enum data_block_type data_block_type : 4;
   uint8_t reserved3		: 4;
 #endif
-  uint16_t reserved4		GNUC_PACKED;
+  uint16_t reserved4;
 #if defined(BITFIELD_MSBF)
   uint8_t reserved5		: 2;
   uint8_t host_appl_code	: 6;		/* host application code */
@@ -283,19 +285,21 @@ struct write_parameters_mode_page
   uint8_t reserved5		: 2;
 #endif
   enum session_format session_format : 8;	/* session format */
-  uint8_t reserved6		GNUC_PACKED;
-  uint32_t packet_size		GNUC_PACKED;	/* for fixed length packets*/
-  uint16_t audio_pause_len	GNUC_PACKED;	/* */
-  char media_catalog_no[16]	GNUC_PACKED;	/* text with catalog number */
-  char isrc[16]			GNUC_PACKED;	/* international stardard
+  uint8_t reserved6;
+  uint32_t packet_size;		/* for fixed length packets*/
+  uint16_t audio_pause_len;	/* */
+  char media_catalog_no[16];	/* text with catalog number */
+  char isrc[16];		/* international stardard
   						   recording code */
-  uint8_t sub_header[4]		GNUC_PACKED;	/* four sub header bytes */
-  uint32_t vendor_specific	GNUC_PACKED;	/* may be omitted */
-};
+  uint8_t sub_header[4];	/* four sub header bytes */
+  uint32_t vendor_specific;	/* may be omitted */
+} GNUC_PACKED;
+
+#define struct_write_parameters_mode_page_SIZEOF 56
 
 struct cd_capabilities_mode_page
 {
-  uint8_t page_header[16]	GNUC_PACKED;	/* XXX have to look this up */
+  uint8_t page_header[16];			/* XXX have to look this up */
 #if defined(BITFIELD_MSBF)
   uint8_t ps 			: 1;		/* page savable */
   uint8_t reserved1		: 1;
@@ -305,7 +309,7 @@ struct cd_capabilities_mode_page
   uint8_t reserved1		: 1;
   uint8_t ps 			: 1;
 #endif
-  uint8_t page_length		GNUC_PACKED;	/* 0x32 or 0x36 */
+  uint8_t page_length;				/* 0x32 or 0x36 */
 #if defined(BITFIELD_MSBF)
   uint8_t reserved2		: 5;
   bool    method_2		: 1;	/* can read fixed packet
@@ -392,12 +396,12 @@ struct cd_capabilities_mode_page
   uint8_t reserved6		: 4;
 #endif
 
-  uint16_t max_read_speed	GNUC_PACKED; /* maximum speed in kBps   */
-  uint16_t vol_levels		GNUC_PACKED; /* number of volume levels */
-  uint16_t bufsize		GNUC_PACKED; /* buffer size in kbytes   */
-  uint16_t cur_read_speed	GNUC_PACKED; /* current speed in kBps   */
+  uint16_t max_read_speed; /* maximum speed in kBps   */
+  uint16_t vol_levels; /* number of volume levels */
+  uint16_t bufsize; /* buffer size in kbytes   */
+  uint16_t cur_read_speed; /* current speed in kBps   */
 
-  uint8_t reserved7		GNUC_PACKED;
+  uint8_t reserved7;
   
 #if defined(BITFIELD_MSBF)
  /* digital audio output */
@@ -416,21 +420,27 @@ struct cd_capabilities_mode_page
   uint8_t reserved8		: 2;
 #endif
   
-  uint16_t max_write_speed	GNUC_PACKED; /* maximum write speed in kBps */
-  uint16_t cur_write_speed	GNUC_PACKED; /* current write speed in kBps */
-};
+  uint16_t max_write_speed; /* maximum write speed in kBps */
+  uint16_t cur_write_speed; /* current write speed in kBps */
+} GNUC_PACKED;
+
+#define struct_cd_capabilities_mode_page_SIZEOF 38
 
 struct opc_table
 {
-  uint16_t speed		GNUC_PACKED;
-  uint8_t  opc_value[6]		GNUC_PACKED;
-};
+  uint16_t speed;
+  uint8_t  opc_value[6];
+} GNUC_PACKED;
+
+#define struct_opc_table_SIZEOF 8
  
 struct disc_capacity
 {
-  uint32_t lba			GNUC_PACKED;
-  uint32_t block_length		GNUC_PACKED;
-};
+  uint32_t lba;
+  uint32_t block_length;
+} GNUC_PACKED;
+
+#define struct_disc_capacity_SIZEOF 8
 
 enum cue_sheet_adr
 {
@@ -484,8 +494,8 @@ struct cue_sheet_data
   uint8_t data 		: 1;
   uint8_t channels 	: 1;
 #endif
-  uint8_t tno	GNUC_PACKED;	/* track number */
-  uint8_t index GNUC_PACKED;	/* index; 0 to 0x63 */
+  uint8_t tno;		/* track number */
+  uint8_t index;	/* index; 0 to 0x63 */
 #if defined(BITFIELD_MSBF)
   enum data_form_sub data_form_sub
 	  		: 2;	/* Data form of sub channel */
@@ -505,10 +515,12 @@ struct cue_sheet_data
   uint8_t reserved	: 7;
   uint8_t alt_copy	: 1;
 #endif 
-  uint8_t min	GNUC_PACKED;	/* absolute time: minute  */
-  uint8_t sec	GNUC_PACKED;	/* absolute time: second  */
-  uint8_t frame	GNUC_PACKED;	/* absolute time: frame	  */
-};
+  uint8_t min;	/* absolute time: minute  */
+  uint8_t sec;	/* absolute time: second  */
+  uint8_t frame;	/* absolute time: frame	  */
+} GNUC_PACKED;
+
+#define struct_cue_sheet_data_SIZEOF 8
 
 typedef struct
 {
@@ -530,10 +542,6 @@ typedef struct
 void
 _vcd_recorder_mmc_dump_sense (const char *name, _vcd_mmc_command_t *cmd,
                               uint32_t sense_key);
-
-#ifdef __MWERKS__
-#pragma options align=reset
-#endif
 
 #endif /* IMAGE_PRIVATE_H__ */
 

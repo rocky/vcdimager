@@ -157,10 +157,10 @@ vcd_image_source_new_bincue (void)
   _img_bincue_src_t *_data;
 
   vcd_image_source_funcs _funcs = {
-    read_mode2_sector: _read_mode2_sector,
-    stat_size: _stat_size,
-    free: _source_free,
-    set_arg: _source_set_arg  
+    .read_mode2_sector = _read_mode2_sector,
+    .stat_size         = _stat_size,
+    .free              = _source_free,
+    .set_arg           = _source_set_arg  
   };
 
   _data = _vcd_malloc (sizeof (_img_bincue_src_t));
@@ -359,10 +359,10 @@ vcd_image_sink_new_bincue (void)
   _img_bincue_snk_t *_data;
 
   vcd_image_sink_funcs _funcs = {
-    set_cuesheet: _set_cuesheet,
-    write: _write,
-    free: _sink_free,
-    set_arg: _sink_set_arg
+    .set_cuesheet = _set_cuesheet,
+    .write        = _write,
+    .free         = _sink_free,
+    .set_arg      = _sink_set_arg
   };
 
   _data = _vcd_malloc (sizeof (_img_bincue_snk_t));

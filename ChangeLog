@@ -1,5 +1,16 @@
 2003-01-19  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* libvcd/vcd_mmc_private.h: fixed packed attributes (note2myself;
+	disc_info got smaller by 2 bytes...)
+
+	* libvcd/vcd_mpeg.c: fixed changing signedness for pointer args
+
+	* libvcd/vcd_mmc_private.h: added SIZEOF defines for regression checks
+
+	* libvcd/vcd_mmc_linux.c, libvcd/vcd_image_vpkt.c,
+	libvcd/vcd_image_linuxcd.c, libvcd/vcd_image_bincue.c: use C99
+	designated initializer syntax
+	
 	* frontends/cli/vcddump.c: added Bernstein's vcddump tool
 
 	* libvcd/vcd_assert.h, libvcd/vcd_types.h: added branch prediction

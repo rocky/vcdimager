@@ -91,13 +91,13 @@ _vcd_mmc_linux_generic_packet (void *device, _vcd_mmc_command_t * cmd)
   struct request_sense sense;
 
   struct cdrom_generic_command cgc = {
-    buffer:(cmd->buflen) ? (void *) cmd->buffer : 0,
-    buflen:cmd->buflen,
-    stat:0,
-    sense:&sense,
-    data_direction:CGC_DATA_UNKNOWN,
-    quiet:0,
-    timeout:cmd->timeout,
+    .buffer = (cmd->buflen) ? (void *) cmd->buffer : 0,
+    .buflen = cmd->buflen,
+    .stat = 0,
+    .sense = &sense,
+    .data_direction = CGC_DATA_UNKNOWN,
+    .quiet = 0,
+    .timeout = cmd->timeout,
   };
 
   memcpy (&cgc.cmd, &cmd->cdb, 12);

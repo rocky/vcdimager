@@ -92,7 +92,7 @@ static inline bool
 _start_code_p (uint32_t code)
 {
   return (code & MPEG_START_CODE_MASK) == MPEG_START_CODE_PATTERN;
-};
+}
 
 static inline int 
 _vid_streamid_idx (uint8_t streamid)
@@ -146,7 +146,7 @@ _aud_streamid_idx (uint8_t streamid)
 
 /* used for SCR, PTS and DTS */
 static inline uint64_t
-_parse_timecode (const void *buf, int *offset)
+_parse_timecode (const uint8_t *buf, unsigned *offset)
 {
   uint64_t _retval;
 
@@ -168,10 +168,10 @@ _parse_timecode (const void *buf, int *offset)
 }
 
 static void
-_parse_sequence_header (uint8_t streamid, const void *buf, 
+_parse_sequence_header (uint8_t streamid, const uint8_t *buf, 
 			VcdMpegStreamCtx *state)
 {
-  int offset = 0;
+  unsigned offset = 0;
   unsigned hsize, vsize, aratio, frate, brate, bufsize, constr;
   const uint8_t *data = buf;
   const int vid_idx = _vid_streamid_idx (streamid);
@@ -225,11 +225,11 @@ _parse_sequence_header (uint8_t streamid, const void *buf,
 }
 
 static void
-_parse_gop_header (uint8_t streamid, const void *buf, 
+_parse_gop_header (uint8_t streamid, const uint8_t *buf, 
 		   VcdMpegStreamCtx *state)
 {
   const uint8_t *data = buf;
-  int offset = 0;
+  unsigned offset = 0;
   
   bool drop_flag; 
   /* bool close_gop; */
@@ -401,7 +401,7 @@ _analyze_pes_header (const uint8_t *buf, int len,
 
   if (vcd_bitvec_peek_bits (buf, 0, 2) == 2) /* %10 - ISO13818-1 */
     {
-      int pos2 = 0;
+      unsigned pos2 = 0;
 
       pes_mpeg_ver = MPEG_VERS_MPEG2;
 
@@ -462,7 +462,7 @@ _analyze_pes_header (const uint8_t *buf, int len,
     }
   else /* ISO11172-1 */
     {
-      int pos2 = 0;
+      unsigned pos2 = 0;
 
       pes_mpeg_ver = MPEG_VERS_MPEG1;
 
@@ -788,7 +788,7 @@ static void
 _analyze_system_header (const uint8_t *buf, int len, 
                         VcdMpegStreamCtx *state)
 {
-  int bitpos = 0;
+  unsigned bitpos = 0;
 
   MARKER (buf, &bitpos);
 
@@ -830,7 +830,7 @@ static void
 _analyze_private_1_stream (const uint8_t *buf, int len, 
                            VcdMpegStreamCtx *state)
 {
-  int bitpos = _analyze_pes_header (buf, len, state);
+  unsigned bitpos = _analyze_pes_header (buf, len, state);
   int ogt_idx = -1;
 
   uint8_t private_data_id;
@@ -960,7 +960,7 @@ vcd_mpeg_parse_packet (const void *_buf, unsigned buflen, bool parse_pes,
 	{
 	  uint16_t size;
           int bits;
-          int bitpos;
+          unsigned bitpos;
           
 	case MPEG_PACK_HEADER_CODE:
 	  if (pos)

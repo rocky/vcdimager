@@ -38,6 +38,7 @@
 #include <libvcd/vcd_files_private.h>
 #include <libvcd/vcd_cd_sector.h>
 #include <libvcd/vcd_cd_sector_private.h>
+#include <libvcd/vcd_mmc_private.h>
 
 #define CHECK_SIZEOF(typnam) { \
   printf ("checking sizeof (%s) ...", #typnam); \
@@ -110,6 +111,16 @@ int main (int argc, const char *argv[])
   CHECK_SIZEOF(mode0_sector_t);
   CHECK_SIZEOF(mode2_form1_sector_t);
   CHECK_SIZEOF(mode2_form2_sector_t);
+
+  /* vcd_mmc_private.h */
+  CHECK_SIZEOF_STRUCT(disc_info);
+  CHECK_SIZEOF_STRUCT(track_info);
+  CHECK_SIZEOF_STRUCT(mode_page_header);
+  CHECK_SIZEOF_STRUCT(write_parameters_mode_page);
+  CHECK_SIZEOF_STRUCT(cd_capabilities_mode_page);
+  CHECK_SIZEOF_STRUCT(opc_table);
+  CHECK_SIZEOF_STRUCT(disc_capacity);
+  CHECK_SIZEOF_STRUCT(cue_sheet_data);
 
   if (fail)
     return 1;

@@ -8,7 +8,7 @@
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
     (at your option) any later version.
-
+    
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -86,13 +86,13 @@ _mode_sense (_mmc_recorder_t * obj, void *buffer, int buflen,
 	     enum mode_sense_type mode_sense_type, int page)
 {
   _vcd_mmc_command_t cmd = {
-    cdb:{
+    .cdb = {
 	 CMD_MODE_SENSE_10, 0, mode_sense_type << 6 | (page & 0x3f),
 	 0, 0, 0, 0, (buflen >> 8) & 0xff, buflen & 0xff, 0, 0},
-  data_direction:_VCD_MMC_DIR_READ,
-  buffer:buffer,
-  buflen:buflen,
-  timeout:500
+  .data_direction = _VCD_MMC_DIR_READ,
+  .buffer = buffer,
+  .buflen = buflen,
+  .timeout = 500
   };
 
   return obj->wait_command (obj->device, &cmd);
@@ -120,13 +120,13 @@ static int
 _mode_select (_mmc_recorder_t * obj, void *buffer, int buflen)
 {
   _vcd_mmc_command_t cmd = {
-    cdb:{
+    .cdb = {
 	 CMD_MODE_SELECT_10, 1 << 4, 0, 0, 0,
 	 0, 0, (buflen >> 8) & 0xff, buflen & 0xff, 0, 0},
-  data_direction:_VCD_MMC_DIR_WRITE,
-  buffer:buffer,
-  buflen:buflen,
-  timeout:100
+  .data_direction = _VCD_MMC_DIR_WRITE,
+  .buffer = buffer,
+  .buflen = buflen,
+  .timeout = 100
   };
 
   return obj->wait_command (obj->device, &cmd);
@@ -211,11 +211,11 @@ _get_track_information (_mmc_recorder_t * obj, struct track_info *track_info,
 {
   int buflen = sizeof (struct track_info);
   _vcd_mmc_command_t cmd = {
-    cdb:{CMD_READ_TRACK_INFO,},
-  data_direction:_VCD_MMC_DIR_READ,
-  buffer:track_info,
-  buflen:buflen,
-  timeout:500,
+    .cdb = {CMD_READ_TRACK_INFO,},
+  .data_direction = _VCD_MMC_DIR_READ,
+  .buffer = track_info,
+  .buflen = buflen,
+  .timeout = 500,
   };
 
   cmd.cdb[1] = 1; /* information for track number not sector number */
@@ -231,11 +231,11 @@ _get_disc_information (_mmc_recorder_t * obj, struct disc_info *disc_info)
 {
   int buflen = sizeof (struct disc_info);
   _vcd_mmc_command_t cmd = {
-    cdb:{CMD_READ_DISC_INFO,},
-  data_direction:_VCD_MMC_DIR_READ,
-  buffer:disc_info,
-  buflen:buflen,
-  timeout:500,
+    .cdb = {CMD_READ_DISC_INFO,},
+  .data_direction = _VCD_MMC_DIR_READ,
+  .buffer = disc_info,
+  .buflen = buflen,
+  .timeout = 500,
   };
 
   cmd.cdb[7] = (buflen >> 8) & 0xff;
@@ -248,9 +248,9 @@ static int
 _synchronize_cache (_mmc_recorder_t * obj)
 {
   _vcd_mmc_command_t cmd = {
-    cdb:{CMD_SYNC_CACHE,},
-  data_direction:_VCD_MMC_DIR_WRITE,
-  timeout:2000,
+    .cdb = {CMD_SYNC_CACHE,},
+  .data_direction = _VCD_MMC_DIR_WRITE,
+  .timeout = 2000,
   };
 
   return obj->wait_command (obj->device, &cmd);
@@ -261,15 +261,15 @@ _reserve_track (void *user_data, unsigned int sectors)
 {
   _mmc_recorder_t *obj = user_data;
   _vcd_mmc_command_t cmd = {
-    cdb:{
+    .cdb = {
          CMD_RESERVE_TRACK, 0, 0, 0, 0,
          (sectors >> 24) & 0xff,
          (sectors >> 16) & 0xff,
          (sectors >>  8) & 0xff,
          (sectors      ) & 0xff,
          },
-    data_direction:_VCD_MMC_DIR_NONE,
-    timeout:10000,
+    .data_direction = _VCD_MMC_DIR_NONE,
+    .timeout = 10000,
   };
 
   return obj->wait_command (obj->device, &cmd);
@@ -280,9 +280,9 @@ _close_track (void *user_data, int track)
 {
   _mmc_recorder_t *obj = user_data;
   _vcd_mmc_command_t cmd = {
-    cdb:{CMD_CLOSE_TRACK,},
-  data_direction:_VCD_MMC_DIR_NONE,
-  timeout:track ? 2000 : 20000,
+    .cdb = {CMD_CLOSE_TRACK,},
+  .data_direction = _VCD_MMC_DIR_NONE,
+  .timeout = track ? 2000 : 20000,
   };
 
   int ret = _synchronize_cache (obj);
@@ -395,11 +395,11 @@ _send_cue_sheet (void *user_data, const VcdList * vcd_cue_list)
   struct cue_sheet_data cue_sheet[cue_sheet_size];
 
   _vcd_mmc_command_t cmd = {
-    cdb:{CMD_SEND_CUE_SHEET,},
-  data_direction:_VCD_MMC_DIR_WRITE,
-  buffer:cue_sheet,
-  buflen:buflen,
-  timeout:1000,
+    .cdb = {CMD_SEND_CUE_SHEET,},
+  .data_direction = _VCD_MMC_DIR_WRITE,
+  .buffer = cue_sheet,
+  .buflen = buflen,
+  .timeout = 1000,
   };
 
   VcdListNode *node = _vcd_list_begin (vcd_cue_list);
@@ -431,7 +431,7 @@ _send_cue_sheet (void *user_data, const VcdList * vcd_cue_list)
   obj->wait_command (obj->device, &cmd);
 
   return 0;
-};
+}
 
 static int
 _set_simulate (void *user_data, bool simulate)
@@ -525,7 +525,7 @@ _set_speed (void *user_data, int read_speed, int write_speed)
   int wspeed = (1764 * write_speed + 5) / 10;
 
   _vcd_mmc_command_t cmd = {
-    cdb:{
+    .cdb = {
 	 CMD_SET_CD_SPEED,
 	 0,
 	 (rspeed >> 8) & 0xff,
@@ -533,8 +533,8 @@ _set_speed (void *user_data, int read_speed, int write_speed)
 	 (wspeed >> 8) & 0xff,
 	 wspeed & 0xff,
 	 },
-  data_direction:_VCD_MMC_DIR_NONE,
-  timeout:100,
+  .data_direction = _VCD_MMC_DIR_NONE,
+  .timeout = 100,
   };
 
   return obj->wait_command (obj->device, &cmd);
@@ -654,7 +654,7 @@ _write_sectors (void *user_data, const uint8_t * buffer,
 {
   _mmc_recorder_t *obj = user_data;
   _vcd_mmc_command_t cmd = {
-    cdb:{
+    .cdb = {
 	 CMD_WRITE_10,
 	 0,
 	 (lsn >> 24) & 0xff,
@@ -665,10 +665,10 @@ _write_sectors (void *user_data, const uint8_t * buffer,
 	 0,
 	 count,
 	 },
-  data_direction:_VCD_MMC_DIR_WRITE,
-  buffer:buffer,
-  buflen:buflen,
-  timeout:10000,
+  .data_direction = _VCD_MMC_DIR_WRITE,
+  .buffer = buffer,
+  .buflen = buflen,
+  .timeout = 10000,
   };
 
   return obj->wait_command (obj->device, &cmd);
@@ -741,18 +741,18 @@ vcd_recorder_new_mmc (const char *device)
   void *mmc_device;
 
   vcd_recorder_funcs funcs = {
-    set_simulate:_set_simulate,
-    set_write_type:_set_write_type,
-    set_data_block_type:_set_data_block_type,
-    set_speed:_set_speed,
-    get_next_writable:_get_next_writable,
-    get_next_track:_get_next_track,
-    get_size:_get_size,
-    send_cue_sheet:_send_cue_sheet,
-    write_sectors:_write_sectors,
-    reserve_track:_reserve_track,
-    close_track:_close_track,
-    free:_free
+    .set_simulate = _set_simulate,
+    .set_write_type = _set_write_type,
+    .set_data_block_type = _set_data_block_type,
+    .set_speed = _set_speed,
+    .get_next_writable = _get_next_writable,
+    .get_next_track = _get_next_track,
+    .get_size = _get_size,
+    .send_cue_sheet = _send_cue_sheet,
+    .write_sectors = _write_sectors,
+    .reserve_track = _reserve_track,
+    .close_track = _close_track,
+    .free = _free
   };
 
   obj = _vcd_malloc (sizeof (_mmc_recorder_t));

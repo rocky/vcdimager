@@ -201,10 +201,10 @@ vcd_image_sink_new_vpkt (VcdRecorder * recorder)
   _img_vpkt_snk_t *obj;
 
   vcd_image_sink_funcs funcs = {
-    set_cuesheet:_set_cuesheet,
-    write:_write,
-    free:_sink_free,
-    set_arg: _sink_set_arg
+    .set_cuesheet = _set_cuesheet,
+    .write        = _write,
+    .free         = _sink_free,
+    .set_arg      = _sink_set_arg
   };
 
   if (!recorder)
