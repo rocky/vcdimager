@@ -28,68 +28,6 @@
 
 static const char _rcsid[] = "$Id$";
 
-uint16_t 
-to_721(uint16_t i)
-{
-  return UINT16_TO_LE(i);
-}
-
-uint16_t 
-from_721(uint16_t p)
-{
-  return UINT16_FROM_LE(p);
-}
-
-uint16_t
-to_722(uint16_t i)
-{
-  return UINT16_TO_BE(i);
-}
-
-uint16_t 
-from_722(uint16_t p)
-{
-  return UINT16_FROM_BE(p);
-}
-
-uint32_t
-to_723(uint16_t i)
-{
-  return UINT32_SWAP_LE_BE(i) | i;
-}
-
-uint32_t
-to_731(uint32_t i)
-{
-  return UINT32_TO_LE(i);
-}
-
-uint32_t
-to_732(uint32_t i)
-{
-  return UINT32_TO_BE(i);
-}
-
-uint64_t
-to_733(uint32_t i)
-{
-  return UINT64_SWAP_LE_BE(i) | i;
-}
-
-/* reverse path... */
-
-uint16_t 
-from_723 (uint32_t p)
-{
-  return (0xFFFF & p);
-}
-
-uint32_t 
-from_733 (uint64_t p)
-{
-  return (UINT32_C(0xFFFFFFFF) & p);
-}
-
 uint8_t
 to_bcd8 (uint8_t n)
 {

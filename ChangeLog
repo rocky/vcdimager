@@ -1,3 +1,8 @@
+2001-06-07  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_bytesex.h (from_723): make more use of inline functions 
+		instead of macros
+
 2001-06-06  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* frontends/xml/vcd_xml_dump.c (_get_node): fixed special case of

@@ -148,7 +148,7 @@ _parse_footer (_img_nrg_src_t *_obj)
     else if (buf.v55.ID == UINT32_TO_BE (0x4e455235)) /* "NER5" */
       {
 	vcd_info ("detected v55 (64bit offsets) NRG magic");
-	footer_start = UINT64_FROM_BE (buf.v55.footer_ofs);
+	footer_start = uint64_from_be (buf.v55.footer_ofs);
       }
     else
       {
@@ -272,13 +272,13 @@ _parse_footer (_img_nrg_src_t *_obj)
 
 	  case 0x45544e32: /* "ETN2", same as above, but with 64bit stuff instead */
 	    {
-	      unsigned entries = UINT32_FROM_BE (chunk->len);
+	      unsigned entries = uint32_from_be (chunk->len);
 	      _etn2_array_t *_entries = (void *) chunk->data;
 
 	      vcd_assert (_obj->mapping == NULL);
 
 	      vcd_assert (sizeof (_etn2_array_t) == 32);
-	      vcd_assert (UINT32_FROM_BE (chunk->len) % sizeof (_etn2_array_t) == 0);
+	      vcd_assert (uint32_from_be (chunk->len) % sizeof (_etn2_array_t) == 0);
 
 	      entries /= sizeof (_etn2_array_t);
 
@@ -288,11 +288,11 @@ _parse_footer (_img_nrg_src_t *_obj)
 		int idx;
 		for (idx = 0; idx < entries; idx++)
 		  {
-		    uint32_t _len = UINT64_FROM_BE (_entries[idx].length);
-		    uint32_t _start = UINT32_FROM_BE (_entries[idx].start_lsn);
-		    uint32_t _start2 = UINT64_FROM_BE (_entries[idx].start);
+		    uint32_t _len = uint64_from_be (_entries[idx].length);
+		    uint32_t _start = uint32_from_be (_entries[idx].start_lsn);
+		    uint32_t _start2 = uint64_from_be (_entries[idx].start);
 
-		    vcd_assert (UINT32_FROM_BE (_entries[idx].type) == 3);
+		    vcd_assert (uint32_from_be (_entries[idx].type) == 3);
 
 		    vcd_assert (_len % 2336 == 0);
 
