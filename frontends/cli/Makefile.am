@@ -1,7 +1,7 @@
 bin_PROGRAMS = vcdimager vcddebug cdxa2mpeg vcddump
 man_MANS = vcdimager.1 vcddebug.1 cdxa2mpeg.1 vcddump.1
 #man_MANS = $(patsubst %,%.1,$(bin_PROGRAMS))
-DISTCLEANFILES = $(man_MANS)
+MAINTAINERCLEANFILES = $(man_MANS)
 
 INCLUDES = -I$(top_srcdir) $(LIBPOPT_CFLAGS) $(LIBVCD_CFLAGS)
 
@@ -17,7 +17,9 @@ cdxa2mpeg_LDADD = $(LIBVCD_LIBS) $(LIBPOPT_LIBS)
 vcddump_SOURCES = vcddump.c
 vcddump_LDADD = $(LIBVCDINFO_LIBS) $(LIBVCD_LIBS) $(LIBPOPT_LIBS)
 
+if MAINTAINER_MODE
 $(man_MANS): %.1: %
 	-$(HELP2MAN) --output=$@ ./$<
+endif
 
 EXTRA_DIST = $(man_MANS)

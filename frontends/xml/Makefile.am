@@ -6,7 +6,7 @@ INCLUDES = -I$(top_srcdir) $(LIBPOPT_CFLAGS) $(LIBVCD_CFLAGS) $(XML_CFLAGS)
 BUILT_SOURCES = videocd_dtd.inc
 MOSTLYCLEANFILES = videocd_dtd.inc
 
-DISTCLEANFILES = $(man_MANS)
+MAINTAINERCLEANFILES = $(man_MANS)
 EXTRA_DIST = videocd.dtd $(man_MANS)
 
 Makefile: $(BUILT_SOURCES)
@@ -53,7 +53,7 @@ vcdxminfo_SOURCES = \
 videocd_dtd.inc: $(srcdir)/videocd.dtd
 	(sed 's/\"/\\"/g' | $(AWK) 'BEGIN { print "char videocd_dtd[] = \\" } { print " \"" $$0 "\\n\" \\" } END { print ";" }') < $(srcdir)/videocd.dtd > $@
 
+if MAINTAINER_MODE
 $(man_MANS): %.1: %
 	-$(HELP2MAN) --output=$@ ./$<
-
-
+endif
