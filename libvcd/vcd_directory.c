@@ -50,6 +50,7 @@ typedef struct
 {
   bool is_dir;
   char *name;
+  uint16_t version;
   uint8_t xa_type;
   uint8_t xa_filenum;
   uint32_t extent;
@@ -144,12 +145,17 @@ traverse_update_sizes(VcdDirNode *node, void *data)
         {
           data_t *d = DATAP(child);
           unsigned reclen;
+          char *pathname = (d->is_dir 
+                            ? strdup (d->name)
+                            : _vcd_iso_pathname_isofy (d->name, d->version));
           
           assert(d != NULL);
           
-          reclen = dir_calc_record_size(strlen(d->name), sizeof(xa_t));
+          reclen = dir_calc_record_size (strlen (pathname), sizeof (xa_t));
+
+          free (pathname);
           
-          if(offset + reclen > ISO_BLOCKSIZE) 
+          if (offset + reclen > ISO_BLOCKSIZE) 
             {
               blocks++;
               offset = reclen;
@@ -157,9 +163,9 @@ traverse_update_sizes(VcdDirNode *node, void *data)
           else
             offset += reclen;
           
-          child = _vcd_tree_node_next_sibling(child);
+          child = _vcd_tree_node_next_sibling (child);
         }
-      dirdata->size = blocks*ISO_BLOCKSIZE;
+      dirdata->size = blocks * ISO_BLOCKSIZE;
     }
 }
 
@@ -228,6 +234,18 @@ lookup_child (VcdDirNode* node, const char name[])
   return child; /* NULL */
 }
 
+static int
+_iso_dir_cmp (VcdDirNode *node1, VcdDirNode *node2)
+{
+  data_t *d1 = DATAP(node1);
+  data_t *d2 = DATAP(node2);
+  int result = 0;
+
+  result = strcmp (d1->name, d2->name);
+
+  return result;
+}
+
 int
 _vcd_directory_mkdir (VcdDirectory *dir, const char pathname[])
 {
@@ -268,6 +286,8 @@ _vcd_directory_mkdir (VcdDirectory *dir, const char pathname[])
     /* .. */
   }
 
+  _vcd_tree_node_sort_children (pdir, _iso_dir_cmp);
+  
   _vcd_strfreev (splitpath);
 
   return 0;
@@ -280,7 +300,9 @@ _vcd_directory_mkfile (VcdDirectory *dir, const char pathname[],
 {
   char **splitpath;
   unsigned level, n;
-  VcdDirNode* pdir = _vcd_tree_root (dir);
+  const int file_version = 1;
+
+  VcdDirNode* pdir = NULL;
 
   assert (dir != NULL);
   assert (pathname != NULL);
@@ -289,18 +311,43 @@ _vcd_directory_mkfile (VcdDirectory *dir, const char pathname[],
 
   level = _vcd_strlenv (splitpath);
 
-  for (n = 0; n < level-1; n++) 
-    if (!(pdir = lookup_child (pdir, splitpath[n]))) 
-      {
-        vcd_error ("mkdfile: parent dir `%s' (level=%d) for `%s' missing!", 
-                   splitpath[n], n, pathname);
-        assert (0);
-      }
+  while (!pdir)
+    {
+      pdir = _vcd_tree_root (dir);
+      
+      for (n = 0; n < level-1; n++) 
+        if (!(pdir = lookup_child (pdir, splitpath[n]))) 
+          {
+            char *newdir = _vcd_strjoin (splitpath, n+1, "/");
+
+            vcd_debug ("mkfile: autocreating directory `%s' for `%s'",
+                       newdir, pathname);
+            
+            _vcd_directory_mkdir (dir, newdir);
+            
+            free (newdir);
+        
+            assert (pdir == NULL);
+
+            break;
+          }
+        else if (!DATAP(pdir)->is_dir)
+          {
+            char *newdir = _vcd_strjoin (splitpath, n+1, "/");
+
+            vcd_error ("mkfile: `%s' not a directory", newdir);
+
+            free (newdir);
+
+            return -1;
+          }
+
+    }
 
   if (lookup_child (pdir, splitpath[level-1])) 
     {
       vcd_error ("mkfile: `%s' already exists", pathname);
-      assert (0);
+      return -1;
     }
   
   {
@@ -310,12 +357,15 @@ _vcd_directory_mkfile (VcdDirectory *dir, const char pathname[],
 
     data->is_dir = false;
     data->name = strdup (splitpath[level-1]);
+    data->version = file_version;
     data->xa_type = form2_flag ? XA_FORM2_FILE : XA_FORM1_FILE;
     data->xa_filenum = filenum;
     data->size = size;
     data->extent = start;
     /* .. */
   }
+
+  _vcd_tree_node_sort_children (pdir, _iso_dir_cmp);
 
   _vcd_strfreev (splitpath);
 
@@ -353,10 +403,18 @@ traverse_vcd_directory_dump_entries (VcdDirNode *node, void *data)
   tmp.filenum = d->xa_filenum;
 
   if (!_vcd_tree_node_is_root (node))
-    dir_add_entry_su (dirbufp, d->name, d->extent, d->size, 
-                      d->is_dir ? ISO_DIRECTORY : ISO_FILE,
-                      &tmp, sizeof (tmp));
-  
+    {
+      char *pathname = (d->is_dir 
+                        ? strdup (d->name)
+                        : _vcd_iso_pathname_isofy (d->name, d->version));
+
+      dir_add_entry_su (dirbufp, pathname, d->extent, d->size, 
+                        d->is_dir ? ISO_DIRECTORY : ISO_FILE,
+                        &tmp, sizeof (tmp));
+
+      free (pathname);
+    }  
+
   if (d->is_dir) 
     {
       void *dirbuf = (char*)data + ISO_BLOCKSIZE * (d->extent - root_extent);

@@ -27,6 +27,8 @@
 typedef struct _VcdList VcdList;
 typedef struct _VcdListNode VcdListNode;
 
+typedef int (*_vcd_list_cmp_func) (void *data1, void *data2);
+
 typedef int (*_vcd_list_iterfunc) (void *data, void *user_data);
 
 /* methods */
@@ -35,6 +37,8 @@ VcdList *_vcd_list_new (void);
 void _vcd_list_free (VcdList *list, int free_data);
 
 unsigned _vcd_list_length (VcdList *list);
+
+void _vcd_list_sort (VcdList *list, _vcd_list_cmp_func cmp_func);
 
 void _vcd_list_prepend (VcdList *list, void *data);
 
@@ -64,6 +68,9 @@ void *_vcd_list_node_data (VcdListNode *node);
 typedef struct _VcdTree VcdTree;
 typedef struct _VcdTreeNode VcdTreeNode;
 
+typedef int (*_vcd_tree_node_cmp_func) (VcdTreeNode *node1, 
+                                        VcdTreeNode *node2);
+
 typedef void (*_vcd_tree_node_traversal_func) (VcdTreeNode *node, 
                                                void *user_data);
 
@@ -73,6 +80,8 @@ void _vcd_tree_destroy (VcdTree *tree, bool free_data);
 
 VcdTreeNode *_vcd_tree_root (VcdTree *tree);
 
+void _vcd_tree_node_sort_children (VcdTreeNode *node,
+                                   _vcd_tree_node_cmp_func cmp_func);
 
 void *_vcd_tree_node_data (VcdTreeNode *node);
 

@@ -3,7 +3,7 @@
 @c %**start of header
 @setfilename vcdimager.info
 @settitle The GNU VideoCD Image Maker
-@setchapternewpage on
+@setchapternewpage off
 @c %**end of header
 
 @afourpaper
@@ -95,13 +95,13 @@ Features (so far) include:
 
 @itemize @bullet
 @item
-VideoCD 1.1 image output support
+Video CD 1.1 image output support
 
 @item
-VideoCD 2.0 image output support
+Video CD 2.0 image output support
 
 @item
-Super VideoCD 1.0 image output support (preliminary, needs testing)
+Super Video CD 1.0 image output support (preliminary, needs testing)
 
 @item
 general facility for adding files as form 1 and form 2 sectors to
@@ -109,12 +109,12 @@ the @acronym{ISO9660} filesystem and setting the @acronym{ISO9660}
 volume label and application id fields.
 
 @item
-support for up to 98 @acronym{MPEG} tracks per VideoCD.
+support for up to 98 @acronym{MPEG} tracks per (Super) Video CD.
 
 @end itemize
 
 This packages comes with @dfn{GNU VCDRip}, a tool for showing
-information about VideoCD images and extracting the contained
+information about (Super) Video CD images and extracting the contained
 @acronym{MPEG}-streams.
 
 @c fixme write much more :-)
@@ -187,7 +187,7 @@ $
 @end cartouche
 @end example
 
-The following shows how to display information of a given VideoCD image
+The following shows how to display information of a given Video CD image
 file @file{test.bin}.
 
 @example
@@ -251,7 +251,7 @@ $
 
 Finally, the last example show how to extract the mpeg streams contained
 in the same image file @file{test.bin} (the resulting streams are
-stored in files named @file{track_##.mpg} with @file{##} being the track
+stored in files named @file{track_##.mpg} with @samp{##} being the track
 number, starting with 0).
 
 @example
@@ -274,12 +274,14 @@ $
 @end cartouche
 @end example
 
-@unnumbered Requirements For MPEG Files
+@unnumbered Requirements For MPEG Streams
 
 GNU VCDImager expects @acronym{MPEG} streams in a format suitable for
-VideoCD production.
+(Super) Video CD production.
 
-The Video-CD 2.0 specification requires the @acronym{MPEG}-1 stream to
+@unnumberedsec Video CD 2.0
+
+The Video CD 2.0 specification requires the @acronym{MPEG}-1 stream to
 have a maximum bitrate of 1151929.1 bits/sec and to have one of the
 following resolution:
 
@@ -292,15 +294,75 @@ following resolution:
 352 x 288 @ 25 Hz (@acronym{PAL})
 @end itemize
 
-Furthermore the @acronym{MPEG} files need to be padded to 2324 byte
-blocks. So if GNU VCDImager complains, try fixing those files with
-VCDpad @footnote{see @url{http://www.nocrew.org/?part=vcdpad}} or any
-other program capable of aligning or fixing @acronym{MPEG} blocks.
+The audio stream must be @acronym{MPEG}-1 layer II, fixed to a 224
+kbits/sec bitrate with 1 stereo or 2 mono channels.
+
+@unnumberedsec Super Video CD
+
+When creating Super Video CD images @acronym{MPEG}-2 @acronym{VBR}
+streams are expected with a maximum allowed bitrate of ~2.6 mbits/sec.
+The following video resolutions are supported:
+
+@itemize @bullet
+@item
+480 x 480 @ 29.97 Hz (@acronym{NTSC})
+@item
+480 x 576 @ 25 Hz (@acronym{PAL})
+@end itemize
+
+The audio stream must be @acronym{MPEG}-1 layer II, with a bitrate
+ranging from 32 to 384 kbps kbits/sec bitrate with up to 2 stereo or 4
+mono channels.
+
+@unnumberedsec Common Constraints
+
+Furthermore the @acronym{MPEG} files need to be aligned to 2324 byte
+@acronym{MPEG} packets. So if GNU VCDImager complains, try fixing those
+files with VCDpad
+@footnote{see @url{http://www.nocrew.org/?part=vcdpad}} 
+or any other program capable of aligning or fixing @acronym{MPEG}
+packets.
+
+@unnumbered Adding Files to the VideoCD 
+
+Files can be added to the @acronym{ISO} filesystem, that is track 0 of
+the VideoCD, by making use of the commandline options
+@code{--add-file=@var{FILE},@var{ISO_FILENAME}} and
+@code{--add-file-2336=@var{FILE},@var{ISO_FILENAME}}.
+The latter option allows you to include files containing the complete
+user data of mode2 cdrom sectors. 
+
+The pathname given as @var{ISO_FILENAME} determines where to link the
+file in the filesystem of the VideoCD. The given pathname must be a
+valid ISO9660 filename with the following restrictions:
+@itemize @bullet
+@item
+The Character set restricted to upper case letters, numbers, the
+underscore @samp{_}, the dot @samp{.} and the slash @samp{/}.
+
+@item
+The maximum filename length is restricted to 31 characters, the
+directory nesting level is restricted to 8 and the maximum path length
+is limited to 255 characters.
+
+@item
+Filenames must contain exactly one dot.@footnote{If no filename
+extension is supposed to exist the dot must be placed as a trailing
+dot.}
+
+@item
+The pathname must not begin or end with a slash. Nor should it contain
+slashes following directly each other.
+
+@end itemize
+
+If the parent directory for a file entry does not exist it will be
+created automatically on demand.
 
 @unnumbered CD-i Support
 
 There is no specific CD-i support in GNU VCDImager. But you
-can use the general facilites for adding some custom CD-i player
+can use the general facilites for adding a custom CD-i player
 application. 
 
 Say you had a CD-i application consisting of the files
@@ -314,12 +376,10 @@ the setting should be available system-wide}
 @example
 vcdimager alias --cdi \
 	--iso-application-id "CDI/CDI_VCD.APP;1" \
-	--add-file-2336 /usr/share/cdi/cdi_imag.rtf,/CDI/CDI_IMAG.RTF \
-	--add-file      /usr/share/cdi/cdi_text.fnt,/CDI/CDI_TEXT.FNT \
-	--add-file      /usr/share/cdi/cdi_vcd.app,/CDI/CDI_VCD.APP \
-	--add-file      /usr/share/cdi/cdi_vcd.app,/CDI/CDI_VCD.CFG 
+	--add-file-2336 /usr/share/cdi/cdi_imag.rtf,CDI/CDI_IMAG.RTF \
+	--add-file      /usr/share/cdi/cdi_text.fnt,CDI/CDI_TEXT.FNT \
+	--add-file      /usr/share/cdi/cdi_vcd.app,CDI/CDI_VCD.APP \
+	--add-file      /usr/share/cdi/cdi_vcd.app,CDI/CDI_VCD.CFG 
 @end example
-
-
 
 @bye

@@ -652,8 +652,8 @@ vcd_obj_add_file (VcdObj *obj, const char iso_pathname[],
 
   {
     struct _cust_file_t *p;
-    char *_iso_pathname = _vcd_iso_pathname_isofy (iso_pathname);
-
+    char *_iso_pathname = _vcd_strdup_upper (iso_pathname);
+    
     if (!_vcd_iso_pathname_valid_p (_iso_pathname))
       {
         vcd_error("pathname `%s' is not a valid iso pathname", 
@@ -747,20 +747,20 @@ _finalize_vcd_iso_track (VcdObj *obj)
     _vcd_directory_mkdir (obj->dir, "SEGMENT");
     _vcd_directory_mkdir (obj->dir, "VCD");
 
-    _vcd_directory_mkfile (obj->dir, "VCD/ENTRIES.VCD;1", 
+    _vcd_directory_mkfile (obj->dir, "VCD/ENTRIES.VCD", 
                            _dict_get_bykey (obj, "entries")->sector, 
                            ISO_BLOCKSIZE, false, 0);    
-    _vcd_directory_mkfile (obj->dir, "VCD/INFO.VCD;1",
+    _vcd_directory_mkfile (obj->dir, "VCD/INFO.VCD",
                            _dict_get_bykey (obj, "info")->sector, 
                            ISO_BLOCKSIZE, false, 0);
 
     /* only for vcd2.0 */
     if (obj->type == VCD_TYPE_VCD2)
       {
-        _vcd_directory_mkfile (obj->dir, "VCD/LOT.VCD;1", 
+        _vcd_directory_mkfile (obj->dir, "VCD/LOT.VCD", 
                                _dict_get_bykey (obj, "lot")->sector, 
                                ISO_BLOCKSIZE*LOT_VCD_SIZE, false, 0);
-        _vcd_directory_mkfile (obj->dir, "VCD/PSD.VCD;1", 
+        _vcd_directory_mkfile (obj->dir, "VCD/PSD.VCD", 
                                _dict_get_bykey (obj, "psd")->sector, 
                                get_psd_size (obj), false, 0);
       }
@@ -771,22 +771,22 @@ _finalize_vcd_iso_track (VcdObj *obj)
     _vcd_directory_mkdir (obj->dir, "MPEG2");
     _vcd_directory_mkdir (obj->dir, "SVCD");
 
-    _vcd_directory_mkfile (obj->dir, "SVCD/ENTRIES.SVD;1",
+    _vcd_directory_mkfile (obj->dir, "SVCD/ENTRIES.SVD",
                            _dict_get_bykey (obj, "entries")->sector, 
                            ISO_BLOCKSIZE, false, 0);    
-    _vcd_directory_mkfile (obj->dir, "SVCD/INFO.SVD;1",
+    _vcd_directory_mkfile (obj->dir, "SVCD/INFO.SVD",
                            _dict_get_bykey (obj, "info")->sector, 
                            ISO_BLOCKSIZE, false, 0);
-    _vcd_directory_mkfile (obj->dir, "SVCD/LOT.SVD;1",
+    _vcd_directory_mkfile (obj->dir, "SVCD/LOT.SVD",
                            _dict_get_bykey (obj, "lot")->sector, 
                            ISO_BLOCKSIZE*LOT_VCD_SIZE, false, 0);
-    _vcd_directory_mkfile (obj->dir, "SVCD/PSD.SVD;1", 
+    _vcd_directory_mkfile (obj->dir, "SVCD/PSD.SVD", 
                            _dict_get_bykey (obj, "psd")->sector, 
                            get_psd_size (obj), false, 0);
-    _vcd_directory_mkfile (obj->dir, "SVCD/SEARCH.DAT;1", 
+    _vcd_directory_mkfile (obj->dir, "SVCD/SEARCH.DAT", 
                            _dict_get_bykey (obj, "search")->sector, 
                            get_search_dat_size (obj), false, 0);
-    _vcd_directory_mkfile (obj->dir, "SVCD/TRACKS.SVD;1",
+    _vcd_directory_mkfile (obj->dir, "SVCD/TRACKS.SVD",
                            _dict_get_bykey (obj, "tracks")->sector, 
                            ISO_BLOCKSIZE, false, 0);
     break;
@@ -844,10 +844,10 @@ _finalize_vcd_iso_track (VcdObj *obj)
           {
           case VCD_TYPE_VCD11:
           case VCD_TYPE_VCD2:
-            fmt = "MPEGAV/AVSEQ%2.2d.DAT;1";
+            fmt = "MPEGAV/AVSEQ%2.2d.DAT";
             break;
           case VCD_TYPE_SVCD:
-            fmt = "MPEG2/AVSEQ%2.2d.MPG;1";
+            fmt = "MPEG2/AVSEQ%2.2d.MPG";
             break;
           default:
             assert(1);

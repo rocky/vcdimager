@@ -72,6 +72,45 @@ _vcd_list_length (VcdList *list)
   return list->length;
 }
 
+static bool
+_bubble_sort_iteration (VcdList *list, _vcd_list_cmp_func cmp_func)
+{
+  VcdListNode **pnode;
+  bool changed = false;
+  
+  for (pnode = &(list->begin);
+       (*pnode) != NULL && (*pnode)->next != NULL;
+       pnode = &((*pnode)->next))
+    {
+      VcdListNode *node = *pnode;
+      
+      if (cmp_func (node->data, node->next->data) <= 0)
+        continue; /* n <= n->next */
+      
+      /* exch n n->next */
+      *pnode = node->next;
+      node->next = node->next->next;
+      (*pnode)->next = node;
+      
+      changed = true;
+
+      if (node->next == NULL)
+        list->end = node;
+    }
+
+  return changed;
+}
+
+void _vcd_list_sort (VcdList *list, _vcd_list_cmp_func cmp_func)
+{
+  /* fixme -- this is bubble sort -- worst sorting algo... */
+
+  assert (list != NULL);
+  assert (cmp_func != 0);
+  
+  while (_bubble_sort_iteration (list, cmp_func));
+}
+
 void
 _vcd_list_prepend (VcdList *list, void *data)
 {
@@ -392,18 +431,25 @@ _vcd_tree_node_next_sibling (VcdTreeNode *node)
   return _vcd_list_node_data (_vcd_list_node_next (node->listnode));
 }
 
-/* pre-order */
+void
+_vcd_tree_node_sort_children (VcdTreeNode *node, _vcd_tree_node_cmp_func cmp_func)
+{
+  assert (node != NULL);
+
+  if (node->children)
+    _vcd_list_sort (node->children, (_vcd_list_cmp_func) cmp_func);
+}
 
 void
 _vcd_tree_node_traverse (VcdTreeNode *node, 
                          _vcd_tree_node_traversal_func trav_func,
-                         void *user_data)
+                         void *user_data) /* pre-order */
 {
   VcdTreeNode *child;
 
-  assert(node != NULL);
+  assert (node != NULL);
 
-  trav_func(node, user_data);
+  trav_func (node, user_data);
 
   child = _vcd_tree_node_first_child (node);
   while(child) {

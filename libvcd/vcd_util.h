@@ -35,6 +35,9 @@ _vcd_len2blocks (unsigned len, int blocksize);
 size_t
 _vcd_strlenv(char **str_array);
 
+char *
+_vcd_strjoin (char *strv[], unsigned count, const char delim[]);
+
 char **
 _vcd_strsplit(const char str[], char delim);
 
@@ -46,6 +49,9 @@ _vcd_malloc (size_t size);
 
 void *
 _vcd_memdup (const void *mem, size_t count);
+
+char *
+_vcd_strdup_upper (const char str[]);
 
 #endif /* __VCD_UTIL_H__ */
 

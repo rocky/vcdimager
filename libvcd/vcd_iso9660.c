@@ -186,7 +186,7 @@ dir_add_entry_su(void *dir,
   assert(dir != NULL);
   assert(extent > 17);
   assert(name != NULL);
-  assert(strlen(name) <= MAX_ISONAME);
+  assert(strlen(name) <= MAX_ISOPATHNAME);
 
   length = sizeof(struct iso_directory_record);
   length += strlen(name);
@@ -390,63 +390,65 @@ is_isochar(char c)
     || c == ';';
 }
 
-int
+bool
 _vcd_iso_pathname_valid_p (const char pathname[])
 {
   const char *p = pathname;
-
+  int dots;
+  
   assert (pathname != NULL);
 
-  if (*p == ';' || *p == '.')
-    return 0;
+  if (strlen (pathname) > (MAX_ISOPATHNAME - 6))
+    return false;
+
+  if (*p == '/' || *p == '.' || *p == '\0')
+    return false;
+
+  dots = 0;
 
   while (*p) 
     {
       if (!is_isochar (*p))
-        return 0;
+        return false;
 
-      if (*p == ';') 
+      switch (*p)
         {
-          p++;
+        case ';':
+          return false;
+          break;
 
-          if(!*p)
-            return 0;
+        case '/':
+          dots = 0;
+          if (*(p-1) == '/' || *(p-1) == '.' || *(p-1) == '\0')
+            return false;
+          break;
 
-          while (*p)
-            {
-              if (!isdigit (*p))
-                return 0;
-
-              p++;
-            }
+        case '.':
+          dots++;
+          if (dots > 1)
+            return false;
+          if (*(p-1) == '/' || *(p-1) == '\0')
+            return false;
           break;
         }
-
+      
       p++;
     }
 
-  return 1;
+  if (!dots)
+    return false;
+
+  return true;
 }
 
 char *
-_vcd_iso_pathname_isofy (const char pathname[])
+_vcd_iso_pathname_isofy (const char pathname[], uint16_t version)
 {
   char tmpbuf[1024] = { 0, };
-  const char *p = pathname;
-  char *p2 = tmpbuf;
     
   assert (strlen (pathname) < (sizeof (tmpbuf) - sizeof (";65535")));
 
-  while (*p == '/')
-    p++;
-
-  snprintf (tmpbuf, sizeof(tmpbuf), "%s;1", p);
-
-  while (*p2)
-    {
-      *p2 = toupper(*p2);
-      p2++;
-    }
+  snprintf (tmpbuf, sizeof(tmpbuf), "%s;%d", pathname, version);
 
   return strdup (tmpbuf);
 }

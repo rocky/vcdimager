@@ -18,6 +18,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
@@ -64,8 +65,38 @@ _vcd_strfreev(char **strv)
   free(strv);
 }
 
+char *
+_vcd_strjoin (char *strv[], unsigned count, const char delim[])
+{
+  size_t len;
+  char *new_str;
+  unsigned n;
+
+  assert (strv != NULL);
+  assert (delim != NULL);
+
+  len = (count-1) * strlen (delim);
+
+  for (n = 0;n < count;n++)
+    len += strlen (strv[n]);
+
+  len++;
+
+  new_str = _vcd_malloc (len);
+  new_str[0] = '\0';
+
+  for (n = 0;n < count;n++)
+    {
+      if (n)
+        strcat (new_str, delim);
+      strcat (new_str, strv[n]);
+    }
+  
+  return new_str;
+}
+
 char **
-_vcd_strsplit(const char str[], char delim)
+_vcd_strsplit(const char str[], char delim) /* fixme -- non-reentrant */
 {
   int n;
   char **strv = NULL;
@@ -113,12 +144,34 @@ _vcd_memdup (const void *mem, size_t count)
 {
   void *new_mem = NULL;
 
-  if (mem) {
-    new_mem = _vcd_malloc (count);
-    memcpy (new_mem, mem, count);
-  }
+  if (mem)
+    {
+      new_mem = _vcd_malloc (count);
+      memcpy (new_mem, mem, count);
+    }
   
   return new_mem;
+}
+
+char *
+_vcd_strdup_upper (const char str[])
+{
+  char *new_str = NULL;
+
+  if (str)
+    {
+      char *p;
+
+      p = new_str = strdup (str);
+
+      while (*p)
+        {
+          *p = toupper (*p);
+          p++;
+        }
+    }
+
+  return new_str;
 }
 
 

@@ -32,15 +32,17 @@
 #define LEN_ISONAME     31
 #define MAX_ISONAME     37
 
+#define MAX_ISOPATHNAME 255
+
 #define ISO_FILE        0       
 #define ISO_DIRECTORY   2
 
 /* file/dirname's */
-int
+bool
 _vcd_iso_pathname_valid_p (const char pathname[]);
 
 char *
-_vcd_iso_pathname_isofy (const char pathname[]);
+_vcd_iso_pathname_isofy (const char pathname[], uint16_t version);
 
 /* volume descriptors */
 

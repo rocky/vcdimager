@@ -1,5 +1,18 @@
 2001-01-05  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* libvcd/vcd_iso9660.c (_vcd_iso_pathname_valid_p): 
+		do strict checking
+
+	* libvcd/vcd_util.c (_vcd_strjoin): new function
+	(_vcd_strdup_upper): new function
+
+	* libvcd/vcd_directory.c: make sure, files in ISO fs are ordered
+	(_vcd_directory_mkfile): implemented directory autocreation
+
+	* libvcd/vcd_data_structures.c (_vcd_tree_node_sort_children):
+		new function
+		(_vcd_list_sort): new function
+
 	* libvcd/vcd_directory.c: make use of new tree implementation
 
 	* libvcd/vcd_data_structures.c: added n-way tree implementation
