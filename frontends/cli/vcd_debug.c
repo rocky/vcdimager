@@ -45,6 +45,7 @@
 #include <libvcd/vcd_stream_stdio.h>
 #include <libvcd/vcd_image.h>
 #include <libvcd/vcd_image_bincue.h>
+#include <libvcd/vcd_image_linuxcd.h>
 #include <libvcd/vcd_data_structures.h>
 
 static const char _rcsid[] = "$Id$";
@@ -1116,29 +1117,32 @@ main (int argc, const char *argv[])
       exit (EXIT_FAILURE);
     }
 
-  switch (gl_source_type)
-    {
-    case SOURCE_DEVICE:
-      fprintf (stderr, "device not supported yet\n");
-      exit (EXIT_FAILURE);
-      break;
-    case SOURCE_FILE:
-      break;
-    default:
-      fprintf (stderr, "no source given -- can't do anything...\n");
-      exit (EXIT_FAILURE);
-    }
 
   gl_default_vcd_log_handler = vcd_log_set_handler (_vcd_log_handler);
 
   {
-    VcdDataSource *bin_source;
     VcdImageSource *img_src;
 
-    bin_source = vcd_data_source_new_stdio (gl_source_name);
-    assert (bin_source != NULL);
+    switch (gl_source_type)
+      {
+      case SOURCE_DEVICE:
+        img_src = vcd_image_source_new_linuxcd (gl_source_name);
+        break;
+      case SOURCE_FILE:
+        {
+          VcdDataSource *bin_source;
 
-    img_src = vcd_image_source_new_bincue (bin_source, NULL, gl_sector_2336_flag);
+          bin_source = vcd_data_source_new_stdio (gl_source_name);
+          assert (bin_source != NULL);
+
+          img_src = vcd_image_source_new_bincue (bin_source, NULL, gl_sector_2336_flag);
+        }
+        break;
+      default:
+        fprintf (stderr, "no source given -- can't do anything...\n");
+        exit (EXIT_FAILURE);
+      }
+
     assert (img_src != NULL);
 
     dump (img_src, gl_source_name);

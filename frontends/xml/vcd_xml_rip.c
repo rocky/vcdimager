@@ -30,18 +30,19 @@
 
 #include <popt.h>
 
-#include <libvcd/vcd_types.h>
+#include <libvcd/vcd_bytesex.h>
+#include <libvcd/vcd_cd_sector.h>
 #include <libvcd/vcd_files.h>
 #include <libvcd/vcd_files_private.h>
 #include <libvcd/vcd_image_bincue.h>
-#include <libvcd/vcd_stream_stdio.h>
-#include <libvcd/vcd_logging.h>
+#include <libvcd/vcd_image_linuxcd.h>
 #include <libvcd/vcd_iso9660.h>
 #include <libvcd/vcd_iso9660_private.h>
-#include <libvcd/vcd_bytesex.h>
-#include <libvcd/vcd_util.h>
-#include <libvcd/vcd_cd_sector.h>
+#include <libvcd/vcd_logging.h>
 #include <libvcd/vcd_mpeg.h>
+#include <libvcd/vcd_stream_stdio.h>
+#include <libvcd/vcd_types.h>
+#include <libvcd/vcd_util.h>
 
 #include "vcdxml.h"
 #include "vcd_xml_dtd.h"
@@ -950,8 +951,7 @@ _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img)
 int
 main (int argc, const char *argv[])
 {
-  VcdDataSource *bin_source;
-  VcdImageSource *img_src;
+  VcdImageSource *img_src = NULL;
   struct vcdxml_t obj;
 
   /* cl params */
@@ -1043,13 +1043,20 @@ main (int argc, const char *argv[])
   if (!img_dname && !img_fname)
     img_fname = strdup (DEFAULT_IMG_FNAME);
 
-  if (!img_fname)
-    vcd_error ("bug: only file sources supported so far...");
+  if (img_fname)
+    {
+      VcdDataSource *bin_source;
 
-  bin_source = vcd_data_source_new_stdio (img_fname);
-  assert (bin_source != NULL);
+      bin_source = vcd_data_source_new_stdio (img_fname);
+      assert (bin_source != NULL);
 
-  img_src = vcd_image_source_new_bincue (bin_source, NULL, false);
+      img_src = vcd_image_source_new_bincue (bin_source, NULL, sector_2336_flag);
+    }
+  else if (img_dname)
+    img_src = vcd_image_source_new_linuxcd (img_dname);
+  else
+    vcd_assert_not_reached ();
+
   assert (img_src != NULL);
 
   /* start with ISO9660 PVD */
