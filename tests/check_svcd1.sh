@@ -8,17 +8,21 @@
 BASE=`basename $0 .sh`
 RC=0
 
-if ! test_vcdxbuild ${srcdir}/$BASE.xml; then
+if test_vcdxbuild ${srcdir}/$BASE.xml; then
+    :
+else
     echo vcdxbuild failed 
     test_vcdxbuild_cleanup
     exit $RC
 fi
 
-if ! do_cksum <<EOF
+if do_cksum <<EOF
 4104676060 4059552 videocd.bin
 669873986 424 videocd.cue
 EOF
     then
+    :
+else
     echo "$0: cksum(1) checksums didn't match :-("
 
     cksum videocd.bin videocd.cue
@@ -29,15 +33,19 @@ fi
 
 echo "$0: cksum(1) checksums matched :-)"
 
-if ! test_vcddump '--no-banner -i videocd.bin' \
+if test_vcddump '--no-banner -i videocd.bin' \
     svcd1_test1.dump ${srcdir}/svcd1_test1.right ; then 
+    :
+else
     echo "$0: vcddump test 1 failed "
     test_vcdxbuild_cleanup
     exit 1
 fi
 
-if ! test_vcddump '--no-banner --bin-file videocd.bin --show-info-all' \
+if test_vcddump '--no-banner --bin-file videocd.bin --show-info-all' \
     svcd1_test2.dump ${srcdir}/svcd1_test2.right ; then 
+    :
+else
     echo "$0: vcddump test 2 failed "
     test_vcdxbuild_cleanup
     exit 1

@@ -1,7 +1,10 @@
 # $Id$
 
 have_cmp() {
-    if ! cmp /dev/null /dev/null > /dev/null 2>&1; then
+    if cmp /dev/null /dev/null > /dev/null 2>&1; then
+	:
+    else
+
 	return 1;
     fi
 
@@ -39,7 +42,9 @@ do_cksum() {
 }
 
 have_cksum() {
-    if ! cksum /dev/null > /dev/null 2>&1; then
+    if cksum /dev/null > /dev/null 2>&1; then
+	:
+    else
 	return 1;
     fi
 

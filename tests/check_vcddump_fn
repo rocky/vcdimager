@@ -7,7 +7,9 @@ test_vcddump() {
     return 77
   fi
 
-  if ! have_cmp; then
+  if have_cmp; then
+      :
+  else
     echo "$0: No cmp(1) found - cannot test vcddump"
     return 77
   fi
@@ -17,12 +19,16 @@ test_vcddump() {
   outfile="$2"
   rightfile="$3"
 
-  if ! ${VCDDUMP} ${opts} >${outfile} 2>&1 ; then 
+  if ${VCDDUMP} ${opts} >${outfile} 2>&1 ; then 
+    :
+  else
     echo "$0: ${VCDDUMP} ${opts} failed"
     return 2
   fi
 
-  if ! cmp ${outfile} ${rightfile} ; then
+  if cmp ${outfile} ${rightfile} ; then
+      :
+  else
     return 3
   fi
 

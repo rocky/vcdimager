@@ -15,13 +15,17 @@ test_vcdxbuild() {
 	return $RC
     fi
 
-    if ! have_cksum; then
+    if have_cksum; then
+	:
+    else
 	echo "$0: md5sum not found, check not possible";
 	RC=77
 	return $RC
     fi
 
-    if ! ${VCDXBUILD} --check --file-prefix `dirname $1`/ $1; then
+    if ${VCDXBUILD} --check --file-prefix `dirname $1`/ $1; then
+	:
+    else
 	echo "$0: execution failed"
 	RC=1
 	return $RC
