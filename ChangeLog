@@ -1,3 +1,7 @@
+2001-08-21  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_mpeg.c (_analyze_audio_pes): implemented mpeg audio header interpretation
+
 2001-08-20  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd.c (_get_closest_aps): moved from vcd_files.c

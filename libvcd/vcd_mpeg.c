@@ -546,28 +546,113 @@ static void
 _analyze_audio_pes (uint8_t streamid, const uint8_t *buf, int len, bool only_pts,
 		    VcdMpegStreamCtx *state)
 {
-  vcd_assert (_aud_streamid_idx (streamid) != -1);
+  unsigned bitpos;
+  const int aud_idx = _aud_streamid_idx (streamid);
 
-  _analyze_pes_header (buf, len, state);
+  vcd_assert (aud_idx != -1);
+
+  bitpos = _analyze_pes_header (buf, len, state);
 
   /* if only pts extraction was needed, we are done here... */
   if (only_pts)
     return;
-  
+
+  if (state->stream.ahdr[aud_idx].seen)
+    return;
+
+  bitpos <<= 3;
+
+  while (bitpos <= (len << 3))
+    {
+      unsigned syncword = vcd_bitvec_peek_bits (buf, bitpos, 12);
+
+      if (syncword != 0xfff)
+        {
+          bitpos += 8;
+          continue;
+        }
+
+      bitpos += 12;
+
+      if (!vcd_bitvec_read_bits (buf, &bitpos, 1))
+        {
+          vcd_warn ("non-MPEG1 audio stream header seen");
+          break;
+        }
+
+      switch (vcd_bitvec_read_bits (buf, &bitpos, 2)) /* layer */
+        {
+        case 3: /* %11 */
+          state->stream.ahdr[aud_idx].layer = 1;
+          break;
+        case 2: /* %10 */
+          state->stream.ahdr[aud_idx].layer = 2;
+          break;
+        case 1: /* %01 */
+          state->stream.ahdr[aud_idx].layer = 3;
+          break;
+        case 0: /* %00 */
+          state->stream.ahdr[aud_idx].layer = 0;
+          break;
+        }
+
+      bitpos++; /* protection_bit */
+
+      {
+        const int bits = vcd_bitvec_read_bits (buf, &bitpos, 4);
+
+        const unsigned bit_rates[4][16] = { 
+          {0, },
+          {0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 0},
+          {0, 32, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 384, 0},
+          {0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 0}
+        };
+
+        vcd_assert (IN(state->stream.ahdr[aud_idx].layer, 0, 3));
+        vcd_assert (IN(bits, 0, 15));
+
+        state->stream.ahdr[aud_idx].bitrate = bit_rates[state->stream.ahdr[aud_idx].layer][bits];
+      }
+
+      switch (vcd_bitvec_read_bits (buf, &bitpos, 2)) /* sampling_frequency */
+        {
+        case 0: /* %00 */
+          state->stream.ahdr[aud_idx].sampfreq = 44100;
+          break;
+        case 1: /* %01 */
+          state->stream.ahdr[aud_idx].sampfreq = 48000;
+          break;
+        case 2: /* %10 */
+          state->stream.ahdr[aud_idx].sampfreq = 32000;
+          break;
+        case 3: /* %11 */
+          state->stream.ahdr[aud_idx].sampfreq = 0;
+          break;
+        }
+      
+      bitpos++; /* padding_bit */
+
+      bitpos++; /* private_bit */
+
+      state->stream.ahdr[aud_idx].seen = true;
+      
+      /* we got the info, let's jump outta here */
+      break;
+    }
 }
 
 static void
 _analyze_video_pes (uint8_t streamid, const uint8_t *buf, int len, bool only_pts,
 		    VcdMpegStreamCtx *state)
 {
-  int pos = 0;
+  int pos;
   int sequence_header_pos = -1;
   int gop_header_pos = -1;
   int ipicture_header_pos = -1;
   
   vcd_assert (_vid_streamid_idx (streamid) != -1);
 
-  _analyze_pes_header (buf, len, state);
+  pos = _analyze_pes_header (buf, len, state);
 
   /* if only pts extraction was needed, we are done here... */
   if (only_pts)

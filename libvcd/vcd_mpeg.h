@@ -86,6 +86,19 @@ typedef struct {
       bool constrained_flag;
     } shdr[3];
 
+    struct {
+      bool seen;
+      unsigned layer;
+      unsigned bitrate;
+      unsigned sampfreq;
+      enum {
+        MPEG_STEREO,
+        MPEG_JOINT_STEREO,
+        MPEG_DUAL_CHANNEL,
+        MPEG_SINGLE_CHANNEL
+      } mode;
+    } ahdr[3];
+
     bool video[3];
     bool audio[3];
 
