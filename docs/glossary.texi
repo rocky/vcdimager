@@ -17,6 +17,17 @@ Compact Disc
 @item CD-ROM
 @acronym{CD} Read Only Memory
 
+@item CD-ROM XA
+CD-ROM EXtended Architecture. A modificattion to the CD-ROM
+specification that defines two new types of sectors.  CD-ROM XA was
+developed jointly by Sony, Philips, and Microsoft, and its
+specifications were published in an extension to the Yellow Book.
+CD-i, Photo CD, Video CD and CD-EXTRA have all subsequently been based
+on CD-ROM XA.
+
+@item CD-XA
+See @acronym{CD-ROM XA}.
+
 @item CVD
 Chaoji VCD or China Video Disc @*
 @uref{http://www.dvdrhelp.com/forum/userguides/98177.php}
@@ -67,6 +78,14 @@ Play Sequence Descriptor. A section of a Video CD.
 @item PVD
 Primary Volume Descriptor. A section of a Video CD.
 
+@item RIFF
+Resource Interchange File Format. A way to tag multimedia files
+developed by Microsoft. Inside a RIFF is a 4-letter character code
+(which fits nicely in a 32-bit word) for each type of object called
+@acronym{FOURCC}. This idea was taken Electronic Arts which used in
+Amigia's @acronym{IFF} (Interchange File Format) and copied by Apple in their 
+@acronym{AIFF}.
+
 @item SIF
 Source Interchange Format. A video resolution standard.
 
@@ -81,6 +100,9 @@ Variable Bit Rate. Used in MPEG-2's
 
 @item VCD
 Video @acronym{CD} @uref{http://www.dvdrhelp.com/vcd}
+
+@item XA
+See @acronym{CD-ROM XA}
 
 @item XML
 eXtensible Markup Language, @uref{http://www.w3.org/XML/}.

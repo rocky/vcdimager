@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2001,2003 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -35,13 +35,13 @@
 #include <libxml/xmlmemory.h>
 #include <libxml/xmlerror.h>
 
-#include <libvcd/vcd_image_bincue.h>
-#include <libvcd/vcd_image_cdrdao.h>
-#include <libvcd/vcd_image_nrg.h>
-#include <libvcd/vcd_logging.h>
-#include <libvcd/vcd_stream_stdio.h>
-#include <libvcd/vcd_types.h>
-#include <libvcd/vcd_util.h>
+#include <libvcd/logging.h>
+#include <libvcd/types.h>
+
+/* Private headers */
+#include "image_sink.h"
+#include "stream_stdio.h"
+#include "util.h"
 
 #include "vcdxml.h"
 #include "vcd_xml_parse.h"
@@ -136,6 +136,7 @@ static struct {
 
   char *xml_fname;
   char *file_prefix;
+  char *create_timestr;
 
   int verbose_flag;
   int check_flag;
@@ -208,7 +209,8 @@ _do_cl (int argc, const char *argv[])
       {"sector-2336", '\0', POPT_ARG_NONE, NULL, CL_2336_FLAG,
        "use 2336 byte sectors for output"},
 
-      
+      {"create-time", 'T', POPT_ARG_STRING, &gl.create_timestr, 0,
+       "specify creation date on files in CD image (default: current date)"},
 
       {"progress", 'p', POPT_ARG_NONE, &gl.progress_flag, 0,  
        "show progress"}, 
@@ -390,6 +392,7 @@ _create_sink (void)
 int 
 main (int argc, const char *argv[])
 {
+  time_t create_time;
   xmlDocPtr vcd_doc;
 
   vcd_xml_progname = "vcdxbuild";
@@ -399,16 +402,17 @@ main (int argc, const char *argv[])
   vcd_xml_log_init ();
 
   gl.img_options = _vcd_list_new ();
+  gl.create_timestr = NULL;
 
   if (_do_cl (argc, argv))
     return EXIT_FAILURE;
 
   if (gl.quiet_flag)
-    vcd_xml_verbosity = LOG_WARN;
+    vcd_xml_verbosity = VCD_LOG_WARN;
   else if (gl.verbose_flag)
-    vcd_xml_verbosity = LOG_DEBUG;
+    vcd_xml_verbosity = VCD_LOG_DEBUG;
   else
-    vcd_xml_verbosity = LOG_INFO;
+    vcd_xml_verbosity = VCD_LOG_INFO;
 
   if (gl.gui_flag)
     vcd_xml_gui_mode = true;
@@ -461,7 +465,28 @@ main (int argc, const char *argv[])
 
     obj.file_prefix = gl.file_prefix;
     
-    if (vcd_xml_master (&obj, image_sink))
+    create_time = time(NULL);
+    if (gl.create_timestr != NULL) {
+      if (!strcmp (gl.create_timestr, "TESTING")) 
+	create_time = 269236800L;
+      else {
+#ifdef HAVE_STRPTIME
+	struct tm tm;
+	
+	if (NULL == strptime(gl.create_timestr, "%Y-%m-%d %H:%M:%S", &tm)) {
+	  vcd_warn("Trouble converting date string %s using strptime.", 
+		   gl.create_timestr);
+	  vcd_warn("String should match %%Y-%%m-%%d %%H:%%M:%%S");
+	} else {
+	  create_time = mktime(&tm);
+	}
+#else 
+	create_time = 269236800L;
+#endif
+      }
+    }
+  
+    if (vcd_xml_master (&obj, image_sink, &create_time))
       vcd_error ("building videocd failed");
   } 
 

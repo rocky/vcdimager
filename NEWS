@@ -2,6 +2,50 @@ $Id$
 
 see ChangeLog for more information
 
+version 0.7.20 (unstable/development)
+=====================================
+* Join in libcdio branch (forked after 0.7.14)
+
+version 0.7.19 (unstable/development)
+=====================================
+* Use VCD CD-drive auto scanning in vcdxrip and vcd-info that is 
+  now part of in libcdio
+* doc changes, clarification of cdxa2mpeg
+* error checking in cdxa2mpeg (from Nicolas Boullis)
+* Changes dicted by those in libcdio, libiso9660
+
+version 0.7.18 (unstable/development)
+=====================================
+* Move iso9660 stuff into libcdio. 
+* More private files are private. 
+
+version 0.7.17 (unstable/development)
+=====================================
+
+* Complete interface with ..._lsn routines for the corresponding
+  ..._lba routines.
+
+* Install pkginfo files
+
+version 0.7.16 (unstable/development)
+=====================================
+* Better use of updated cdio API. Removed vcd_inf_open. Uses cdio_open now.
+* Regression tests use diff -u if that's available and revert to cmp of no
+  diff found.
+* Changes for Cygwin compatibility
+
+
+2003-04-18
+version 0.7.15 (unstable/development)
+=====================================
+2003-04-18
+
+* CD reading and control routines split off
+* vcddump renamed vcd-info (to match libvcdinfo and cd-info)
+* Give error message if corresponding bin/cue for a cue/bin can't be found
+* Bug: was not returning invalid LID selection when invalid.
+* vcdxrip: add --cue-file option.
+
 version 0.7.14 (unstable/development)
 =====================================
 2003-03-16

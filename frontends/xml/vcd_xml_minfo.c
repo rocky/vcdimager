@@ -30,14 +30,11 @@
 
 #include <popt.h>
 
-#include <libvcd/vcd.h>
-#include <libvcd/vcd_assert.h>
-#include <libvcd/vcd_data_structures.h>
-#include <libvcd/vcd_types.h>
-#include <libvcd/vcd_logging.h>
-#include <libvcd/vcd_mpeg_stream.h>
-#include <libvcd/vcd_util.h>
-#include <libvcd/vcd_stream_stdio.h>
+/* Private headers */
+#include "mpeg_stream.h"
+#include "stream_stdio.h"
+#include "util.h"
+#include "vcd.h"
 
 #include "vcd_xml_common.h"
 
@@ -228,11 +225,11 @@ main (int argc, const char *argv[])
   } /* command line processing */
 
   if (_quiet_flag)
-    vcd_xml_verbosity = LOG_WARN;
+    vcd_xml_verbosity = VCD_LOG_WARN;
   else if (_verbose_flag)
-    vcd_xml_verbosity = LOG_DEBUG;
+    vcd_xml_verbosity = VCD_LOG_DEBUG;
   else
-    vcd_xml_verbosity = LOG_INFO;
+    vcd_xml_verbosity = VCD_LOG_INFO;
 
   if (_gui_flag)
     vcd_xml_gui_mode = true;
@@ -319,8 +316,9 @@ main (int argc, const char *argv[])
                     struct aps_data *_data = _vcd_list_node_data (n);
                     
                     _TAG_INDENT ();
-                    fprintf (_TAG_FD, "<aps packet-no=\"%d\">%f</aps>\n",
-                             _data->packet_no, _data->timestamp);
+                    fprintf (_TAG_FD, "<aps packet-no=\"%u\">%f</aps>\n",
+                             (unsigned int) _data->packet_no, 
+                             _data->timestamp);
                   }
 
                 _TAG_CLOSE ();

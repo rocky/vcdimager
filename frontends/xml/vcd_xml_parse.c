@@ -1,5 +1,9 @@
 /*
+<<<<<<< vcd_xml_parse.c
     $Id$
+=======
+    $Id$
+>>>>>>> 1.29.2.5
 
     Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
 
@@ -31,8 +35,11 @@
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
 
-#include <libvcd/vcd_util.h>
-#include <libvcd/vcd_logging.h>
+#include <libvcd/logging.h>
+
+/* Private headers */
+#include "util.h"
+#include "vcd_xml_parse.h"
 
 static const char _rcsid[] = "$Id$";
 
@@ -208,6 +215,7 @@ _parse_mpeg_segment (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNs
   _vcd_list_append (obj->segment_list, segment);
 
   GET_PROP_STR (segment->id, "id", doc, node, ns);
+  segment->src = vcd_xml_utf8_to_filename ((unsigned char *)segment->src); // memleak
   GET_PROP_STR (segment->src, "src", doc, node, ns);
   segment->src = vcd_xml_utf8_to_filename ((unsigned char *)segment->src); // memleak
 
@@ -520,6 +528,7 @@ _parse_mpeg_sequence (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlN
   _vcd_list_append (obj->sequence_list, sequence);
 
   GET_PROP_STR (sequence->id, "id", doc, node, ns);
+  sequence->src = vcd_xml_utf8_to_filename ((unsigned char *)sequence->src); // memleak
   GET_PROP_STR (sequence->src, "src", doc, node, ns);
   sequence->src = vcd_xml_utf8_to_filename ((unsigned char *)sequence->src); // memleak
 
@@ -600,6 +609,7 @@ _parse_file (struct vcdxml_t *obj, const char path[], xmlDocPtr doc, xmlNodePtr 
   vcd_assert (path != NULL);
 
   GET_PROP_STR (_src, "src", doc, node, ns);
+  _src = vcd_xml_utf8_to_filename ((unsigned char *) _src); // memleak
   vcd_assert (_src != NULL);
   _src = vcd_xml_utf8_to_filename ((unsigned char *) _src); // memleak
 

@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2001,2003 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,25 +18,28 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifdef HAVE_CONFIG_H
-# include "config.h"
-#endif
+/* Private includes */
+#include "vcd.h"
+#include "vcd_assert.h"
+#include "bytesex.h"
+#include "image_sink.h"
+#include "stream_stdio.h"
+#include "util.h"
+
+/* Public includes */
+#include <libvcd/logging.h>
+#include <libvcd/sector.h>
 
 #include <stdio.h>
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
+#ifdef HAVE_STRING_H
 #include <string.h>
+#endif
+#include <time.h>
 
 #include <popt.h>
-
-#include <libvcd/vcd.h>
-#include <libvcd/vcd_assert.h>
-#include <libvcd/vcd_util.h>
-#include <libvcd/vcd_bytesex.h>
-#include <libvcd/vcd_cd_sector.h>
-#include <libvcd/vcd_image_bincue.h>
-#include <libvcd/vcd_logging.h>
-#include <libvcd/vcd_stream_stdio.h>
-#include <libvcd/vcd_types.h>
 
 static const char _rcsid[] = "$Id$";
 
@@ -61,6 +64,7 @@ static struct {
   const char *type;
   const char *image_fname;
   const char *cue_fname;
+  const char *create_timestr;
   char **track_fnames;
 
   VcdList *add_files;
@@ -108,12 +112,12 @@ gl_add_dir (char *iso_fname)
 static VcdObj *gl_vcd_obj = NULL;
 
 static void 
-_vcd_log_handler (log_level_t level, const char message[])
+_vcd_log_handler (vcd_log_level_t level, const char message[])
 {
-  if (level == LOG_DEBUG && !gl.verbose_flag)
+  if (level == VCD_LOG_DEBUG && !gl.verbose_flag)
     return;
 
-  if (level == LOG_INFO && gl.quiet_flag)
+  if (level == VCD_LOG_INFO && gl.quiet_flag)
     return;
   
   gl.default_vcd_log_handler (level, message);
@@ -162,10 +166,12 @@ main (int argc, const char *argv[])
   int n = 0;
   vcd_type_t type_id;
   VcdListNode *node;
+  time_t create_time;
 
   /* g_set_prgname (argv[0]); */
 
   gl.cue_fname = DEFAULT_CUE_FILE;
+  gl.create_timestr = NULL;
   gl.image_fname = DEFAULT_BIN_FILE;
   gl.track_fnames = NULL;
 
@@ -244,6 +250,9 @@ main (int argc, const char *argv[])
          "add file containing full 2336 byte sectors to ISO fs",
          "FILE,ISO_FILENAME"},
 
+        {"create-time", 'T', POPT_ARG_STRING, &gl.create_timestr, 0,
+         "specify creation date on files in CD image (default: current date)"},
+      
         {"progress", 'p', POPT_ARG_NONE | POPT_ARGFLAG_DOC_HIDDEN,
          NULL, 0, "show progress"},
 
@@ -319,9 +328,9 @@ main (int argc, const char *argv[])
 
     for (n = 0; args[n]; n++);
 
-    if (n > CD_MAX_TRACKS - 1)
+    if (n > CDIO_CD_MAX_TRACKS - 1)
       vcd_error ("error: maximal number of supported mpeg tracks (%d) reached",
-                 CD_MAX_TRACKS - 1);
+                 CDIO_CD_MAX_TRACKS - 1);
 
     gl.track_fnames = _vcd_malloc (sizeof (char *) * (n + 1));
 
@@ -391,6 +400,27 @@ main (int argc, const char *argv[])
                               gl.update_scan_offsets);
     }
 
+  create_time = time(NULL);
+  if (gl.create_timestr != NULL) {
+    if (!strcmp (gl.create_timestr, "TESTING")) 
+      create_time = 269236800L;
+    else {
+#ifdef HAVE_STRPTIME
+      struct tm tm;
+      
+      if (NULL == strptime(gl.create_timestr, "%Y-%m-%d %H:%M:%S", &tm)) {
+        vcd_warn("Trouble converting date string %s using strptime.", 
+                 gl.create_timestr);
+        vcd_warn("String should match %%Y-%%m-%%d %%H:%%M:%%S");
+      } else {
+        create_time = mktime(&tm);
+      }
+#else 
+      create_time = 269236800L;
+#endif
+    }
+  }
+
   _VCD_LIST_FOREACH (node, gl.add_files)
   {
     struct add_files_t *p = _vcd_list_node_data (node);
@@ -456,13 +486,13 @@ main (int argc, const char *argv[])
 
     sectors = vcd_obj_begin_output (gl_vcd_obj);
 
-    vcd_obj_write_image (gl_vcd_obj, image_sink, NULL, NULL);
+    vcd_obj_write_image (gl_vcd_obj, image_sink, NULL, NULL, &create_time);
 
     vcd_obj_end_output (gl_vcd_obj);
 
     {
-      unsigned _bytes = sectors * (gl.sector_2336_flag ? M2RAW_SECTOR_SIZE : CDDA_SECTOR_SIZE);
-      char *_msfstr = _vcd_lba_to_msf_str (sectors);
+      unsigned _bytes = sectors * (gl.sector_2336_flag ? M2RAW_SECTOR_SIZE : CDIO_CD_FRAMESIZE_RAW);
+      char *_msfstr = cdio_lba_to_msf_str (sectors);
 
       fprintf (stdout, 
                "finished ok, image created with %d sectors [%s] (%d bytes)\n",

@@ -21,7 +21,7 @@
 #ifndef __VCD_XML_COMMON_H__
 #define __VCD_XML_COMMON_H__
 
-#include <libvcd/vcd_logging.h>
+#include <libvcd/logging.h>
 
 extern bool vcd_xml_gui_mode;
 
@@ -29,7 +29,7 @@ extern bool vcd_xml_show_progress;
 
 extern bool vcd_xml_check_mode;
 
-extern log_level_t vcd_xml_verbosity;
+extern vcd_log_level_t vcd_xml_verbosity;
 
 extern const char *vcd_xml_progname;
 

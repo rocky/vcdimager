@@ -25,14 +25,17 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <libvcd/vcd_logging.h>
-#include <libvcd/vcd_assert.h>
+#include <libxml/parser.h>
+#include <libxml/tree.h>
+
+/* Public headers */
+#include <libvcd/logging.h>
+
+/* Public headers */
+#include "vcd_assert.h"
 
 #include "vcd_xml_dtd.h"
 #include "videocd_dtd.inc"
-
-#include <libxml/parser.h>
-#include <libxml/tree.h>
 
 static const char _rcsid[] = "$Id$";
 

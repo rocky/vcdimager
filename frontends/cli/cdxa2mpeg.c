@@ -1,4 +1,4 @@
-/* -*- c -*-
+/* -*- c -*- 
    $Id$
 
    Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
@@ -18,7 +18,7 @@
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-/* quick'n'dirty RIFF CDXA 2 MPEG converter */
+/* quick'n'dirty RIFF CD-XA 2 MPEG converter */
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -29,15 +29,15 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
+#include <cdio/sector.h>
 
 #include <popt.h>
 
-#include <libvcd/vcd.h>
-#include <libvcd/vcd_assert.h>
-#include <libvcd/vcd_types.h>
-#include <libvcd/vcd_logging.h>
-#include <libvcd/vcd_bytesex.h>
-#include <libvcd/vcd_util.h>
+/* Private includes */
+#include "vcd_assert.h"
+#include "bytesex.h"
+#include "util.h"
+#include "vcd.h"
 
 static struct {
   int quiet_flag;
@@ -47,12 +47,12 @@ static struct {
 } gl = { 0, }; /* global */
 
 static void
-_vcd_log_handler (log_level_t level, const char message[])
+_vcd_log_handler (vcd_log_level_t level, const char message[])
 {
-  if (level == LOG_DEBUG && !gl.verbose_flag)
+  if (level == VCD_LOG_DEBUG && !gl.verbose_flag)
     return;
 
-  if (level == LOG_INFO && gl.quiet_flag)
+  if (level == VCD_LOG_INFO && gl.quiet_flag)
     return;
 
   gl.default_vcd_log_handler (level, message);
@@ -95,7 +95,7 @@ handler_RIFF (riff_context *ctxt)
 {
   const uint32_t size = read_le_u32 (ctxt);
 
-  vcd_info ("RIFF data[%d]", size);
+  vcd_info ("RIFF data[%u]", (unsigned int) size);
 
   ctxt->lsize = ctxt->size = size;
 
@@ -105,7 +105,7 @@ handler_RIFF (riff_context *ctxt)
 static int
 handler_CDXA (riff_context *ctxt)
 {
-  vcd_info ("CDXA RIFF detected");
+  vcd_info ("CD-XA RIFF detected");
 
   next_id (ctxt); /* fmt */
   next_id (ctxt); /* data */
@@ -119,36 +119,37 @@ handler_data (riff_context *ctxt)
   const uint32_t size = read_le_u32 (ctxt);
   uint32_t sectors;
 
-  if (size % 2352)
-    vcd_warn ("size not a multiple of 2352 bytes!!");
-  sectors = size / 2352;
+  if (size % CDIO_CD_FRAMESIZE_RAW)
+    vcd_warn ("size not a multiple of %u bytes!!", CDIO_CD_FRAMESIZE_RAW);
+  sectors = size / CDIO_CD_FRAMESIZE_RAW;
 
-  vcd_info ("CDXA data[%d] (%d sectors)", size, sectors);
+  vcd_info ("CD-XA data[%u] (%u sectors)", (unsigned int) size, 
+            (unsigned int) sectors);
 
   if (ctxt->fd_out)
     {
       long first_nzero = -1, last_nzero = -1, s;
       struct {
-	uint8_t sync[12];
-	uint8_t header[4];
-	uint8_t subheader[8];
-	uint8_t data[2324];
-	uint8_t edc[4];
+	uint8_t sync[CDIO_CD_SYNC_SIZE];
+	uint8_t header[CDIO_CD_HEADER_SIZE];
+	uint8_t subheader[CDIO_CD_SUBHEADER_SIZE];
+	uint8_t data[M2F2_SECTOR_SIZE];
+	uint8_t edc[CDIO_CD_EDC_SIZE];
       } GNUC_PACKED sbuf;
 
-      vcd_assert (sizeof (sbuf) == 2352);
+      vcd_assert (sizeof (sbuf) == CDIO_CD_FRAMESIZE_RAW);
 
       vcd_info ("...converting...");
 
       for (s = 0; s < sectors; s++)
 	{
-	  int r = fread (&sbuf, 2352, 1, ctxt->fd);
+	  int r = fread (&sbuf, CDIO_CD_FRAMESIZE_RAW, 1, ctxt->fd);
 	  bool empty = true;
 
 	  {
 	    int i;
-	    for (i = 0; (i < 2324) && !sbuf.data[i]; i++);
-	    empty = i == 2324;
+	    for (i = 0; (i < M2F2_SECTOR_SIZE) && !sbuf.data[i]; i++);
+	    empty = i == M2F2_SECTOR_SIZE;
 	  }
 
 	  if (!r)
@@ -177,14 +178,14 @@ handler_data (riff_context *ctxt)
 		first_nzero = s;
 	    }
 
-	  fwrite (&sbuf.data, 2324, 1, ctxt->fd_out);
+	  fwrite (&sbuf.data, M2F2_SECTOR_SIZE, 1, ctxt->fd_out);
 	}
 
       fflush (ctxt->fd_out);
 
       {
 	const long allsecs = (last_nzero - first_nzero + 1);
-	ftruncate (fileno (ctxt->fd_out), allsecs * 2324);
+	ftruncate (fileno (ctxt->fd_out), allsecs * M2F2_SECTOR_SIZE);
 
 	vcd_info ("...stripped %ld leading and %ld trailing empty sectors...",
 		first_nzero, (sectors - last_nzero - 1));
@@ -230,7 +231,7 @@ handler_fmt (riff_context *ctxt)
         strcat (strbuf, _buf);
       }
 
-    vcd_info ("CDXA fmt[%d] = 0x%s", size, strbuf);
+    vcd_info ("CD-XA fmt[%u] = 0x%s", (unsigned int) size, strbuf);
 
     free (strbuf);
   }
@@ -329,7 +330,7 @@ main (int argc, const char *argv[])
       vcd_error ("I can't be both, quiet and verbose... either one or another ;-)");
 
     if ((args = poptGetArgs (optCon)) == NULL)
-      vcd_error ("error: need at least one argument -- try --help");
+      vcd_error ("error: need at least an input argument -- try --help");
 
     vcd_assert (args[0] != 0);
 

@@ -5,12 +5,13 @@ stamp-1
 stamp-2
 vcdimager.info*
 vcdimager.pdf
-vcddump.info*
-vcddump.pdf
+vcd-info.info*
+vcd-info.pdf
 vcdxrip.info*
 vcdxrip.pdf
 version-vcdxrip.texi
-version-vcddump.texi
+version-vcd-info.texi
+version.texi
 stamp-vti
 *.aux
 *.cp
@@ -32,3 +33,5 @@ stamp-vti
 *.tp
 *.txt
 *.vr
+*.gz
+

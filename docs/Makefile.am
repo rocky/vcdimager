@@ -1,13 +1,13 @@
-info_TEXINFOS = vcdimager.texi vcddump.texi vcdxrip.texi
+info_TEXINFOS = vcdimager.texi vcd-info.texi vcdxrip.texi
 vcdimager_TEXINFOS = fdl.texi gpl.texi glossary.texi
 
-pdf: vcdimager.pdf vcddump.pdf vcdxrip.pdf
+pdf: vcdimager.pdf vcd-info.pdf vcdxrip.pdf
 
-txt: vcdimager.txt vcddump.txt vcdxrip.txt
+txt: vcdimager.txt vcd-info.txt vcdxrip.txt
 
-ps: vcdimager.ps vcddump.ps vcdxrip.html
+ps: vcdimager.ps vcd-info.ps vcdxrip.html
 
-html: vcdimager.html vcddump.html vcdxrip.html
+html: vcdimager.html vcd-info.html vcdxrip.html
 
 %.ps.gz: %.ps
 	gzip -9c $< > $@
@@ -23,4 +23,4 @@ html: vcdimager.html vcddump.html vcdxrip.html
 
 all-formats: pdf dvi txt ps html
 
-MOSTLYCLEANFILES = vcdimager.tgs vcdimager.ps.gz vcdimager.pdf vcdimager.html vcdimager_toc.html vcdimager_foot.html vcddump.cps vcddump.kys vcddump.html vcddump.fns vcddump.ps.gz vcddump.pdf vcdxrip.cps vcdxrip.kys vcdxrip.html vcdxrip.fns vcdxrip.ps.gz vcdxrip.pdf
+MOSTLYCLEANFILES = vcdimager.tgs vcdimager.ps.gz vcdimager.pdf vcdimager.html vcdimager_toc.html vcdimager_foot.html vcd-info.cps vcd-info.kys vcd-info.html vcd-info.fns vcd-info.ps.gz vcd-info.pdf vcdxrip.cps vcdxrip.kys vcdxrip.html vcdxrip.fns vcdxrip.ps.gz vcdxrip.pdf

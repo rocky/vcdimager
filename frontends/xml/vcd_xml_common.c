@@ -25,10 +25,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <libvcd/vcd.h>
-#include <libvcd/vcd_assert.h>
-
+/* Private includes */
+#include "vcd_assert.h"
+#include "vcd.h"
 #include <libxml/parser.h>
+
 
 #include "vcd_xml_common.h"
 
@@ -37,10 +38,9 @@ static const char _rcsid[] = "$Id$";
 bool vcd_xml_gui_mode = false;
 
 const char *vcd_xml_progname = "UNSET";
-
 const char *vcd_xml_filename_charset = "UTF-8";
 
-log_level_t vcd_xml_verbosity = LOG_INFO;
+vcd_log_level_t vcd_xml_verbosity = VCD_LOG_INFO;
 
 bool vcd_xml_show_progress = false;
 
@@ -49,7 +49,7 @@ bool vcd_xml_check_mode = false;
 static vcd_log_handler_t __default_vcd_log_handler = 0;
 
 static void 
-_vcd_xml_log_handler (log_level_t level, const char message[])
+_vcd_xml_log_handler (vcd_log_level_t level, const char message[])
 {
 
   if (level < vcd_xml_verbosity)
@@ -61,19 +61,19 @@ _vcd_xml_log_handler (log_level_t level, const char message[])
 
       switch (level)
 	{
-	case LOG_DEBUG:
+	case VCD_LOG_DEBUG:
 	  _level_str = "debug";
 	  break;
-	case LOG_WARN:
+	case VCD_LOG_WARN:
 	  _level_str = "warning";
 	  break;
-	case LOG_INFO:
+	case VCD_LOG_INFO:
 	  _level_str = "information";
 	  break;
-	case LOG_ASSERT:
+	case VCD_LOG_ASSERT:
 	  _level_str = "assertion";
 	  break;
-	case LOG_ERROR:
+	case VCD_LOG_ERROR:
 	  _level_str = "error";
 	  break;
 	}
@@ -84,8 +84,8 @@ _vcd_xml_log_handler (log_level_t level, const char message[])
   else
     __default_vcd_log_handler (level, message);
 
-  if (level == LOG_ERROR
-      || level == LOG_ASSERT)
+  if (level == VCD_LOG_ERROR
+      || level == VCD_LOG_ASSERT)
     exit (EXIT_FAILURE);
 }
 
@@ -218,7 +218,6 @@ void vcd_xml_print_version (void)
   else
     fprintf (stdout, vcd_version_string (true), vcd_xml_progname);
 
-  fflush (stdout);
 }
 
 static char *
@@ -226,11 +225,10 @@ _convert (const char in[], const char encoding[], bool from)
 {
   unsigned char *out;
   int ret, size, out_size, temp;
+  xmlCharEncodingHandlerPtr handler = 0;
 
   if (!in)
     return 0;
-
-  xmlCharEncodingHandlerPtr handler = 0;
 
   if (!(handler = xmlFindCharEncodingHandler (encoding))) {
     vcd_error ("could not find charset conversion handler for '%s'", encoding);
@@ -244,7 +242,17 @@ _convert (const char in[], const char encoding[], bool from)
   vcd_assert (out != 0);
 
   temp = size - 1;
-  ret = (from ? handler->output : handler->input) (out, &out_size, (const unsigned char *) in, &temp);
+  if (from) {
+    if (NULL != handler->output)  
+      ret = handler->output (out, &out_size, (const unsigned char *) in, &temp);
+    else
+      return strdup(in);
+  } else {
+    if (NULL != handler->input)  
+      ret = handler->input (out, &out_size, (const unsigned char *) in, &temp);
+    else
+      return strdup(in);
+  }
 
   if (ret || (temp - size + 1))
     {
@@ -270,4 +278,5 @@ char *
 vcd_xml_utf8_to_filename (const unsigned char fname[])
 {
   return _convert ((const char *) fname, vcd_xml_filename_charset, true);
+  fflush (stdout);
 }

@@ -61,8 +61,8 @@ in the section entitled ``GNU Free Documentation License''.
 @direntry
 * VCDImager: (vcdimager).                       GNU Video CD imaging utilities
 * vcdimager: (vcdimager)vcdimager.              Video CD simple formatter
-* vcddebug: (vcdimager)vcddebug.                Video CD debugging tool
-* cdxa2mpeg: (vcdimager)cdxa2mpeg.              Strip CDXA RIFF container
+* vcd-info:  (vcdimager)vcd-info.               Video CD diagnostic tool
+* cdxa2mpeg: (vcdimager)cdxa2mpeg.              Strip RIFF/CD-XA container
 * vcdxminfo: (vcdimager)vcdxminfo.              Display MPEG stream properties
 * vcdxgen: (vcdimager)vcdxgen.                  Video CD XML template generator
 * vcdxbuild: (vcdimager)vcdxbuild.              Video CD XML formatter
@@ -109,39 +109,37 @@ Simple front-end, allowing for easy command-line controlled generation of
 basic @acronym{VCD} and @acronym{SVCD} disc images without an
 intermediate @acronym{XML} description.
 
-@item vcddebug
-Analyzing tool and report generator for @acronym{VCD} and
-@acronym{SVCD} discs.
-
-@item vcddump
-Enhanced vcddebug tool. @xref{Top, , Introduction, vcddump, The GNU
-Video CD Dump Program}.
+@item vcd-info
+Selectively shows detailed information about the structure a Video CD.
+See @xref{Top, , Introduction, vcd-info, The GNU Video CD Dump Program}.
 
 @item vcdxgen
 @acronym{XML} @acronym{VCD}-description generator, with a command-line
-interface similar to the classic @command{vcdimager} front-end.
+interface similar to the classic @command{vcdimager} front-end. See
+@ref{vcdxgen}.
 
 @item vcdxbuild
 Builds a @acronym{VCD}/@acronym{SVCD} according to a supplied
 @acronym{XML} description and files containing the @acronym{MPEG}
 program streams referred to in the @acronym{XML} description.
+See @xref{vcdxbuild}.
 
 @item vcdxrip
 Disassembles a given @acronym{VCD} or @acronym{SVCD} disc into a
 @acronym{XML} description and the contained @acronym{MPEG} program
-streams.
+streams. See @xref{vcdxrip}.
 
 @item vcdxminfo
 This is a debugging tool for displaying some @acronym{MPEG} properties,
-as conceived by @command{libvcd}.
+as conceived by @command{libvcd}. See @xref{vcdxminfo}.
 
 @item cdxa2mpeg
-@cindex RIFF CDXA files
-A program to strip the @acronym{RIFF} header on CD-XA format tracks.
-See @xref{cdxa2mpeg}.
+@cindex RIFF CD-XA files
+A program to strip the @acronym{RIFF} header on @acronym{CD-XA}-format
+tracks.  See @xref{cdxa2mpeg}.
 @end table
 
-The generated @acronym{CD-ROM} images created are suitable for being
+The generated @acronym{CD} images created are suitable for being
 burnt on to @acronym{CD-R}, by the use of a CD-recording program which
 recognizes the @acronym{BIN/CUE}-format, such as cdrdao@footnote{see
 @uref{http://www.ping.de/sites/daneb/cdrdao.html}}, for instance.
@@ -833,9 +831,11 @@ non-working entry points.
 @section Play Items
 
 @dfn{Play items} are the @acronym{MPEG} payload on (Super) Video
-CD's. Sequences are useful for seamless play of larger video sections,
-whereas segments are better for smaller items in interactive
-applications.
+CD's. Sequences are useful for seamless play of larger video
+sections. However they can't be used for playing still frames.
+Segments on the other hand, are better for smaller items in
+interactive applications and can be used for still frames which are
+often used in menus.
 
 @menu
 * Sequence Items::              
@@ -854,8 +854,13 @@ stream is required, with optionally up to 2 audio streams.
 @item 
 Can be directly accessed without requiring @acronym{PBC}.
 
+@item 
+Size of of sequence is not broken up into 150-sector units as it is
+with a segment.
+
 @item
-Entry points.
+Entry points which allow access to ``Chapters'' or ``Scenes'' within
+the larger segment unit.
 
 @end itemize
 
@@ -869,7 +874,7 @@ Pre-gap of 150 empty sectors.
 Limit of 98 sequences.
 
 @item
-Must contain motion video (and audio for Video CD 2.0).
+Must contain motion video (and audio for Video CD 2.0) --- no still frames!
 
 @end itemize
 
@@ -916,10 +921,21 @@ No pre-gaps.
 
 @itemize @bullet
 @item
-Only @acronym{PBC} accessible through @acronym{PBC}.
+Only accessible through @acronym{PBC}.
 
 @item
 Segment item size limited by @acronym{SPI} area size.
+
+@item
+Segment item size is fixed to 150 sectors (the same as the gap between
+tracks) which may be wasteful of space. If you have a large number of
+small motion videos, it might be advantageous to combine them into a
+track and use entry points into the track. ``Continued'' segments
+allow for logical segments (something you refer to as a segment in
+authoring) to be larger than 150 segments. However breaking a logical
+segments up into many small physical segments is not as clean as
+having one physical unit for one logical unit. And there may be
+additional fragmentation in the form of internal sector padding. 
 
 @end itemize
 
@@ -1074,17 +1090,16 @@ interactivity.
 @section Tools
 
 @menu
-* vcdimager::                   
-* vcddebug::                    
-* vcddump::                    
-* vcdxgen::                     
-* vcdxbuild::                   
-* vcdxrip::                     
-* vcdxminfo::                   
-* cdxa2mpeg::                   
+* vcdimager::             vcdimager - build VCD image for burning
+* vcd-info::              vcd-info  - show information about a VCD image
+* vcdxgen::               vcdxgen   - Video CD XML template generator
+* vcdxbuild::             vcdxbuild - build VCD image via an XML file
+* vcdxrip::               vcdxrip   - rip/extract a VCD 
+* vcdxminfo::             vcdxminfo - Display MPEG stream properties
+* cdxa2mpeg::             cdxa2mpeg - Strip RIFF/CDXA container
 @end menu
 
-@node vcdimager, vcddebug, Tools, Tools
+@node vcdimager, vcd-info, Tools, Tools
 @subsection @command{vcdimager}
 
 This is the classic front-end, which is maintained only for ease of use
@@ -1098,27 +1113,15 @@ There are a few command-line options for @command{vcdimager} at the
 moment, please issue @samp{vcdimager --help} for an actual list of
 available options.
 
-@node vcddebug, vcddump, vcdimager, Tools
-@subsection @command{vcddebug}
+@node vcd-info, vcdxgen, vcdimager, Tools
+@subsection @command{vcd-info}
 
-While this project went along, @command{vcddebug} was used to analyze
-and reverse engineer existing Video CD's and later Super Video CD's. It
-has grown into a valuable debugging tool and report generator for
-(Super) Video CD's.
+Selectively shows detailed information about the structure a Video CD.
+This might be helpful in diagnosing problems. This program was
+originally called @code{vcddebug}. @xref{Top, , Introduction,
+vcd-info, The GNU Video CD Dump Program}.
 
-It is recommended to make use of this tool if compatibility problems
-arise, to identify what the difference between working discs and
-non-working discs are, and thus help to improve GNU VCDImager.
-
-@xref{Top, , Introduction, vcddump, The GNU Video CD Dump Program}.
-
-@node vcddump, vcdxgen, vcddebug, Tools
-@subsection @command{vcddump}
-
-This is an expanded version of vcddebug. @xref{Top, , Introduction,
-vcddump, The GNU Video CD Dump Program}.
-
-@node vcdxgen, vcdxbuild, vcddump, Tools
+@node vcdxgen, vcdxbuild, vcd-info, Tools
 @subsection @command{vcdxgen}
 
 This tool works almost like the @command{vcdimager} tool, except that it
@@ -1224,15 +1227,16 @@ Program}.
 @subsection @command{vcdxminfo}
 
 This tool allows to show basic properties of @acronym{MPEG} streams as
-seen by the back-end library. Dumping of all @acronym{APS} contained in
-the stream is supported as well.
+seen by the back-end library. Dumping of all @acronym{APS} contained
+in the stream is supported as well.
 
 @emph{FIXME: write more}
 
 @node cdxa2mpeg, , vcdxminfo, Tools
 @subsection @command{cdxa2mpeg}
 
-A program to strip the @acronym{RIFF} header on CD-XA format tracks.
+A program to strip the @acronym{RIFF} header on CD-XA format tracks
+containing a @acronym{RIFF} header.
 
 On Microsoft Windows, people would extract the payload tracks of Video
 CD's (e.g the tracks other than the first one) by simply copying the
@@ -1242,19 +1246,27 @@ Since many @acronym{MPEG} players will play tracks copied this way,
 people tend to think of these as an @acronym{MPEG} files, but they are
 not. Instead they have a @acronym{RIFF} container around the
 @acronym{MPEG} stream, including some mode2 sector headers prepended
-to each @acronym{MPEG} "sector". In such a setting @code{cdxa2mpeg}
-will extract the @acronym{MPEG} portion by stripping off the
-@acronym{RIFF} container and mode2 sector headers.
+to each @acronym{MPEG} ``sector''. Presumably the @acronym{RIFF}
+container is automatically inserted by the Operating System or
+filesystem; it isn't part of a Video CD.
 
-The name cdxa2meg refers to the fact that it reads the XA-format
-tracks of a @acronym{CD} and in such a circumstance described above turns them
-``2'' @acronym{MPEG} .
+In such a setting, @code{cdxa2mpeg} will extract the @acronym{MPEG}
+portion by stripping off the (inserted) @acronym{RIFF} container and
+mode2 sector headers.
+
+The name cdxa2meg refers to the fact that the program reads the
+@acronym{CD-XA} format tracks and in such a circumstance where there
+is a @acronym{RIFF} header, strips that off ``2'' make an
+@acronym{MPEG} file.
 
 The ability to see or copy the .dat/.mpg requires some sort of
-filesystem support to read or show the @acronym{CD} Mode2 XA tracks. Depending
-on the Operating System and filesystem hooks, this might not be
-available.  A better, more universal way to extract MPEGs is to use
-the @code{--tracks} option of @xref{vcdxrip}.
+filesystem support to read or show the @acronym{CD} Mode2 XA
+tracks. Depending on the Operating System and filesystem support, seeing
+@acronym{MPEG} tracks or having the contained in a @acronym{RIFF}
+might not available or applicable.
+
+A better, more universal way to extract MPEGs from a Video CD is to
+use the @code{--tracks} option of @xref{vcdxrip}.
 
 @node Video CD XML Description, Examples, Reference, Top
 @chapter Video CD XML Description

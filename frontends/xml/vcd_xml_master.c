@@ -18,25 +18,31 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifdef HAVE_CONFIG_H
-# include "config.h"
-#endif
-
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
+/* Private headers */
+#include "image_sink.h"
+#include "bytesex.h"
+#include "stream_stdio.h"
+#include "vcd.h"
 
 #include "vcd_xml_master.h"
 #include "vcd_xml_common.h"
 
-#include <libvcd/vcd.h>
-#include <libvcd/vcd_logging.h>
-#include <libvcd/vcd_image.h>
-#include <libvcd/vcd_bytesex.h>
-#include <libvcd/vcd_stream_stdio.h>
+/* Public headers */
+#include <libvcd/logging.h>
+
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#include <stdio.h>
 
 static const char _rcsid[] = "$Id$";
 
+/* important date to celebrate (for me at least =)
+   -- until user customization is implemented... */
+static const time_t _vcd_time = 269222400L;
 
 static VcdDataSource *
 mk_dsource (const char prefix[], const char pathname[])
@@ -57,7 +63,8 @@ mk_dsource (const char prefix[], const char pathname[])
   return vcd_data_source_new_stdio (pathname);
 }
 
-bool vcd_xml_master (const struct vcdxml_t *obj, VcdImageSink *image_sink)
+bool vcd_xml_master (const struct vcdxml_t *obj, VcdImageSink *image_sink,
+		     time_t *create_time)
 {
   VcdObj *_vcd;
   VcdListNode *node;
@@ -293,12 +300,13 @@ bool vcd_xml_master (const struct vcdxml_t *obj, VcdImageSink *image_sink)
     sectors = vcd_obj_begin_output (_vcd);
 
     vcd_obj_write_image (_vcd, image_sink, 
-			 vcd_xml_show_progress ? vcd_xml_write_progress_cb : NULL, NULL);
+			 vcd_xml_show_progress ? vcd_xml_write_progress_cb : NULL, 
+			 NULL, &_vcd_time);
 
     vcd_obj_end_output (_vcd);
 
     vcd_info ("finished ok, image created with %d sectors [%s]",
-	      sectors, _tmp = _vcd_lba_to_msf_str (sectors));
+	      sectors, _tmp = cdio_lba_to_msf_str (sectors));
 
     free (_tmp);
   }

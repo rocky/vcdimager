@@ -1,13 +1,40 @@
+dnl Copyright (C) 2003 Herbert Valerio Riedel <hvr@gnu.org>
+dnl Copyright (C) 2003 Rocky Bernstein <rocky@panix.com>
+dnl
+dnl This program is free software; you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation; either version 2, or (at your option)
+dnl any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program; if not, write to the Free Software
+dnl Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+dnl 02111-1307, USA.
+
+AC_PREREQ(2.52)
 AC_REVISION([$Id$])dnl
-AC_INIT(libvcd/vcd.h)
+
+AC_INIT([GNU VCDimager],0.7.20-cvs, [bugs-vcdimager@gnu.org], [vcdimager])
+AC_CONFIG_SRCDIR([lib/vcd.c])
+AM_INIT_AUTOMAKE(1.6.0)
+
+SPEC_VERSION=0.7.20_cvs
+AC_SUBST(SPEC_VERSION)
+
 dnl AM_ACLOCAL_INCLUDE(.)
+dnl AM_CONFIG_HEADER(include/libvcd/acconfig.h)
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(vcdimager, 0.7.14)
+
 AM_MISSING_PROG(HELP2MAN, help2man, $missing_dir)
 AM_MAINTAINER_MODE
 
 AM_SANITY_CHECK
-AC_CANONICAL_HOST
+dnl AC_CANONICAL_HOST
 
 AC_DEFINE_UNQUOTED(HOST_ARCH, "$host_os/$host_cpu", [host os/cpu identifier])
 
@@ -30,7 +57,7 @@ then
   echo "*** This package has not been tested very well with non GNU compilers"
   echo "*** you should try to use 'gcc' for compiling this package."
 else
-  WARN_CFLAGS="-Wall -Wchar-subscripts -Wmissing-prototypes -Wmissing-declarations -Wunused -Wpointer-arith -Wwrite-strings -Wnested-externs -Wsign-promo -Wno-sign-compare"
+  WARN_CFLAGS="-Wall -Wchar-subscripts -Wmissing-prototypes -Wmissing-declarations -Wunused -Wpointer-arith -Wwrite-strings -Wnested-externs -Wno-sign-compare"
 
   warning_flags=""
 
@@ -67,10 +94,32 @@ fi
 AC_PROG_CPP
 AM_PROG_CC_STDC
 AC_PROG_AWK
-AC_PROG_RANLIB
+AC_PROG_LIBTOOL
+
+dnl We use a diff in regression testing
+AC_PATH_PROG(DIFF, diff, no)
+DIFF_OPTS=
+
+if test "$DIFF" = no ; then
+   AC_PATH_PROG(DIFF, cmp, no)
+else 
+   dnl Try for GNU diff options.
+  # MSDOG output uses \r\n rather than \n in tests
+  for diff_opt in -w --unified ; do 
+    if $DIFF $diff_opt ./configure ./configure > /dev/null 2>&1; then
+      AC_MSG_RESULT([adding $diff_opt to diff in regression tests])
+      DIFF_OPTS="$DIFF_OPTS $diff_opt"
+    fi
+  done
+fi
+AC_SUBST(DIFF)
+AC_SUBST(DIFF_OPTS)
 
 dnl libs
 AC_CHECK_FUNCS(snprintf vsnprintf, , [AC_MSG_ERROR(required function not found)])
+
+dnl For vcdimager and vcdxbuild to be able to set creation time of VCD
+AC_CHECK_FUNCS(getdate strptime, , )
 
 if test "x$enable_cli_fe" = "xyes" -o "x$enable_xml_fe" = "xyes"; then
   AM_PATH_LIBPOPT(, [enable_cli_fe=no; enable_xml_fe=no])
@@ -162,8 +211,30 @@ fi
 dnl
 
 dnl system
-AC_CYGWIN
+PKG_CHECK_MODULES(LIBCDIO, libcdio >= 0.64, [], 
+	[AC_MSG_ERROR(required libcdio library not found)])
+AC_SUBST(LIBCDIO_LIBS)
+AC_SUBST(LIBCDIO_CFLAGS)
 
+PKG_CHECK_MODULES(LIBCDIO, libiso9660 >= 0.64, [], 
+	[AC_MSG_ERROR(required libiso9660 library not found)])
+AC_SUBST(LIBISO9660_CFLAGS)
+AC_SUBST(LIBISO9660_LIBS)
+
+case $host_os in
+     cygwin*)
+	AC_DEFINE([CYGWIN], [1], 
+                  [Define 1 if you are compiling using cygwin])
+ 	LIBS="$LIBS -mcygwin"
+	;;
+     darwin6*)
+       AC_CHECK_HEADERS(IOKit/IOKitLib.h CoreFoundation/CFBase.h, 
+                        [have_iokit_h="yes"])
+       if test "x$have_iokit_h" = "xyes" ; then 
+	 LIBS="$LIBS  -framework CoreFoundation -framework IOKit"
+       fi
+     ;;
+esac
 
 LIBS="$LIBS -lm"
 CFLAGS="$CFLAGS $WARN_CFLAGS"
@@ -172,54 +243,31 @@ AM_CONDITIONAL(CYGWIN, test "x$CYGWIN" = "xyes")
 AM_CONDITIONAL(BUILD_CLI_FE, test "x$enable_cli_fe" = "xyes")
 AM_CONDITIONAL(BUILD_XML_FE, test "x$enable_xml_fe" = "xyes")
 
-LIBVCD_CFLAGS='-I$(top_srcdir)/libvcd/'
-LIBVCD_LIBS='$(top_builddir)/libvcd/libvcd.a'
-LIBVCDINFO_LIBS='$(top_builddir)/libvcd/libvcdinfo.a'
+LIBVCD_CFLAGS='-I$(top_srcdir)/include/ -I$(top_srcdir)/lib/'
+LIBVCD_LIBS='$(top_builddir)/lib/libvcd.la'
+LIBVCDINFO_LIBS='$(top_builddir)/lib/libvcdinfo.la'
 AC_SUBST(LIBVCD_CFLAGS)
 AC_SUBST(LIBVCD_LIBS)
 AC_SUBST(LIBVCDINFO_LIBS)
 
-case $host_os in
-     linux*)
-        AC_CHECK_HEADERS(linux/version.h)
-        AC_CHECK_HEADERS(linux/cdrom.h, [have_linux_cdrom_h="yes"])
-	if test "x$have_linux_cdrom_h" = "xyes" ; then
-	   AC_TRY_COMPILE(,[
-#include <linux/cdrom.h>
-struct cdrom_generic_command test;
-int has_timeout=sizeof(test.timeout);],
-            [AC_DEFINE([HAVE_LINUX_CDROM_TIMEOUT], [1], 
-               [Define 1 if timeout is in cdrom_generic_command struct])])
-	fi
-	LIBVCD_SYSDEP='vcd_image_cd-linux.$(OBJEXT)' 
-	;;
-     bsdi*)
-	LIBVCD_SYSDEP='vcd_image_cd-bsdi.$(OBJEXT)' 
-	;;
-     sunos*|sun*|solaris*)
-        AC_CHECK_HEADERS(sys/cdio.h)
-	LIBVCD_SYSDEP='vcd_image_cd-sunos.$(OBJEXT)' 
-	;;
-     *)
-	AC_MSG_WARN(Don't have OS CD-reading support for ${host_os}...)
-	AC_MSG_WARN(Will use generic support.)
-	LIBVCD_SYSDEP='vcd_image_cd-generic.$(OBJEXT)' 
-	;;
-esac
-AC_SUBST(LINUX_CDROM_TIMEOUT)
-AC_SUBST(LIBVCD_SYSDEP)
-
-AC_OUTPUT([ \
+AC_CONFIG_FILES([ \
 	Makefile \
+	libvcd.pc \
+	libvcdinfo.pc \
 	amiga/Makefile \
-	libvcd/Makefile \
+	include/Makefile \
+	include/libvcd/Makefile \
+	include/libvcd/version.h \
+	lib/Makefile \
 	frontends/Makefile \
 	frontends/xml/Makefile \
 	frontends/cli/Makefile \
 	docs/Makefile \
-	tests/Makefile \
+	test/check_common_fn \
+	test/Makefile \
 	vcdimager.spec \
 ])
+AC_OUTPUT
 
 if test -z "$enable_maintainer_mode"; then
   enable_maintainer_mode="no"

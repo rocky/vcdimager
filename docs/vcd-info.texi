@@ -4,8 +4,8 @@
 @exampleindent 0
 
 @c %**start of header
-@setfilename vcddump.info
-@set program @kbd{vcddump}
+@setfilename vcd-info.info
+@set program @kbd{vcd-info}
 @c A simple macro for optional variables.
 @macro ovar{varname}
 @r{[}@var{\varname\}@r{]}
@@ -15,7 +15,7 @@
 @setchapternewpage on
 @c %**end of header
 
-@include version-vcddump.texi
+@include version-vcd-info.texi
 @ifinfo
 This file documents GNU Video CD Dump Program (@value{program})
 
@@ -63,7 +63,7 @@ development.''
 @ifnottex
 @dircategory Video CD Tools
 @direntry
-* vcddump: (vcddump).                           Video CD dump tool
+* vcd-info: (vcd-info).                           Video CD dump tool
 @end direntry
 
 @node Top, Introduction, (dir), (dir)
@@ -136,13 +136,13 @@ text output. For example, to get just the format that the Video CD on
 the``default'' CD-ROM device is in you might run:
 
 @smallexample
-  vcddump --no-banner --show-format
+  vcd-info --no-banner --show-format
 @end smallexample 
 
 To get the album information you might run:
 
 @smallexample
-  vcddump --no-banner --show-info album
+  vcd-info --no-banner --show-info album
 @end smallexample 
 
 After doing this for a while and seeing this was useful, I then wrote
@@ -153,15 +153,15 @@ program and use the I/O from that or another library, but that's a
 different story. What's relevant is that after creating this library,
 I then modified @value{program} to use this library. The
 @value{program} code then got shorter (as some of it getting moved
-inside the vcdinfo library), and this program served as a test bed for
+inside the library), and this program served as a test bed for
 the library. (It also happens that the input plugin was much harder
 and slower to debug than @value{program} since it is a ``shared
 object'' and part of a larger program with many other such shared
 objects.)
 
 So the last thing that @value{program} may be of useful for is if you
-want to see how to use the vcdinfo library; you can consult the source
-program and see how @value{program} gets its information via vcdinfo.
+want to see how to use the vcd-info library; you can consult the source
+program and see how @value{program} gets its information via vcd-info.
 
 @node Command Options
 @chapter Command Options
@@ -285,7 +285,7 @@ you.
 
 By default @value{program} will show just about everything it can
 about a Video CD image. There is additional information you can get using
-the option @kbd{--verbose}, but this is of a debugging nature. 
+the option @kbd{--debug}, but this is of a debugging nature. 
 
 However if you specify something in particular to dump, for example to
 dump track information via command option @kbd{--show-tracks},
@@ -329,10 +329,13 @@ type @kbd{-\?}.
 @kindex @code{--usage}
 This option shows an abbreviated usage message
 
-@item --verbose
-@itemx -v
-@kindex @code{--vebose}
-This opton gives more verbose, debugging output.
+@item --debug @var{debug level}
+@itemx -d @var{debug level}
+@kindex @code{--debug}
+This option gives more verbose, debugging output. The higher the
+number given, the more the output. A value of 3 or greater includes
+library informative messages and a value of 4 or greater includes
+library debugging messages.
 
 @item --terse
 @itemx -t
@@ -432,10 +435,18 @@ The options below control how much output you get and described in
 general in @ref{Output Sections, ,Output Sections}.
 
 @table @code
+@item --no-ext-psd
+@kindex @code{--no-ext-psd}
+If the Video CD is in format VCD 2.0, there can be an optional
+``extended'' PSD which contains information in the PSD and area
+highlighting and selection information. To suppress reading and
+printing this information use this option. The option is only
+meaningfull if the VCD format is 2.0.
+
 @item --show-entries-all
 @itemx -E
 @kindex @code{--show-entries-all}
-List everything in the PVD section. See @ref{Entries, ,Entries Section}.
+List everything in the Entries section. See @ref{Entries, ,Entries Section}.
 
 @item --show-entries @var{sub-option}
 @kindex @code{--show-entries}
@@ -469,7 +480,7 @@ A 2-hex digit version number. See line 3 of the example in
 @item --show-filesystem
 @itemx -F 
 @kindex @code{--show-filesystem}
-List everything in the PVD section.  For information about what is in
+List everything in the filesystem section.  For information about what is in
 this section,  see @ref{Filesystem, ,ISO-9660 section}.
 
 @item --show-format
@@ -483,7 +494,7 @@ conform to.
 
 @item --show-info-all
 @kindex @code{--show-info-all}
-List everything in the PVD section. See @ref{Info, ,Disc Information}.
+List everything in the Info section. See @ref{Info, ,Disc Information}.
 
 @item --show-info @var{suboption}
 @itemx -I @ovar{sub-option}
@@ -524,7 +535,7 @@ bitset of 98 PAL(=set)/NTSC flags. See lines 8--9 of the example in
 Show the field called ``extended pbc'' or ``reserved2'' A boolean
 value. If the image format is SVCD or HQVCD, this will be labled
 ``reserved2'' rather than ``extended pbc.'' Furthermore if the format
-is VCD2.0, checks for for extended playback control files
+is VCD 2.0, checks for for extended playback control files
 (EXT/LOT_X.VCD and EXT_PSD_X.VCD) will be made. If both files exist
 then VCD2.0 extended playback is probably used.  See line 17 of
 @ref{Info, ,Disc Information}.
@@ -694,8 +705,14 @@ use these to help refer to parts of the example.
 @section Primary Volume Descriptor (PVD) Section
 @cindex Primary Volume Descriptor (PVD) 
 
-This section which comes first has overall information about the Video
-CD.  Here is part of sample output from the test PAL SVCD that can be
+The first track of a Video CD is an ISO-9660 formatted track. As such
+it contains information defined by the ISO 9660 specification. The
+starting point for information from an ISO 9660 track is the PVD or
+Primary Volume Descriptor found at sector 16. A PVD is sort of like a
+``superblock'' for a filesystem.
+
+Here is part of sample output from the test PAL SVCD that can be
+
 found from:
 @url{http://www.vcdimager.org/pub/vcdimager/examples/test_svcd/test_svcd_pal.zip}
 
@@ -717,7 +734,8 @@ found from:
 @section ISO-9660 section
 
 This section contains something that looks pretty much like a
-directory listing. Here's a sample: 
+directory listing obtained by interpretting the ISO-9660 filesystem
+information. Here's a sample:
 
 @smallexample
  /:
@@ -747,19 +765,21 @@ directory listing. Here's a sample:
   - ----1xrxrxr 0 0 [fn 00] [LSN    184]      2456  PSD.VCD;1
 @end smallexample
 
-Note that all the filenames seem to end with @kbd{;1}. ISO 9660
-filename translation is not performaed; if it were, this would be
-stripped. 
+Note that all the filenames seem to end with @kbd{;1}. This is a
+``version'' number of the file. ISO-9660 filename translation as might
+be found if the filesystem were mounted is not performed here; if it
+were, this would be stripped and probably the filenames would be in
+lowercase letters.
 
-A little about the funny ``attribute'' characters at the beginning of
-left-hand side of the listing. For the most part it looks like what
-you would get in a Unix listing. Except there are these 1's and 2's
-before what in unix would be the user/group/other mode attribibutes.
-Those numbers indicate whether the track is ``mode2 form1'' or ``mode2
-form2.'' So the example above, AVSEQ01.DAT is in a mode2 form2 track
-while every other entry listed is in a mode2 form1 track.  The movie
-part is is this mode2 form2 track while the remaining meta-data part
-is in a mode2 form1 track.
+The ``attribute'' characters at the beginning of left-hand side of the
+listing, for the most part, looks like what you would get in a Unix
+listing. Except there are these 1's and 2's before what in Unix would
+be the user/group/other mode attribibutes.  Those numbers indicate
+whether the track is ``mode2 form1'' or ``mode2 form2.'' So the
+example above, AVSEQ01.DAT is in a mode2 form2 track while every other
+entry listed is in a mode2 form1 track.  The movie part is is this
+mode2 form2 track while the remaining meta-data part is in a mode2
+form1 track.
 
 Another unusal thing about that single mode2 form2 track containing
 AVSEQ01.DAT, is that there seem to be two numbers listed before the
@@ -1074,17 +1094,17 @@ currently sitting in your CD-ROM drive. If the CD is in the
 ``default'' location for your OS, then this might work:
 
 @smallexample
-  vcddump
+  vcd-info
 @end smallexample 
 
 It means the same thing as:
 @smallexample
-  vcddump --cdrom-device
+  vcd-info --cdrom-device
 @end smallexample 
 
 and using the ``short'' option:
 @smallexample
-  vcddump -C
+  vcd-info -C
 @end smallexample 
 
 I have a combined CD-ROM and DVD drive called @kbd{/dev/dvd}. I have
@@ -1095,12 +1115,12 @@ doesn't seem to run as hot. Since that drive is not the ``default''
 this will work:
 
 @smallexample
-  vcddump -C=/dev/dvd
+  vcd-info -C=/dev/dvd
 @end smallexample 
 
 Or even better, I'll let @value{program} figure out it's a CD-ROM device:
 @smallexample
-  vcddump -i /dev/dvd
+  vcd-info -i /dev/dvd
 @end smallexample 
 The equals sign before @kbd{/dev/dvd} is optional in either format.
 
@@ -1108,25 +1128,25 @@ Let's say you just used vcdimager or vcdxbuild it created output to
 its ``default'' location (probably @kbd{videocd.cue} and
 @kbd{videocd.bin}. To dump out this out:
 @smallexample
-  vcddump --cue-file
+  vcd-info --cue-file
 @end smallexample 
 
 But if you specified the output to go to say @kbd{nausicaa.bin} and
 @kbd{nausicaa.cue} you would have to specify that location like this:
 @smallexample
-  vcddump -c nausicaa.cue
+  vcd-info -c nausicaa.cue
 @end smallexample 
 
 Or again not having to worry about what type of file you could use 
 the ``intelligent'' input option again as we did before:
 @smallexample
-  vcddump -i nausicaa.cue
+  vcd-info -i nausicaa.cue
 @end smallexample 
 
 To list all of the suboptions to choose from in the Primary Volume
 Descriptor section (PVD) try this:
 @smallexample
-  vcddump --show-pvd help
+  vcd-info --show-pvd help
 @end smallexample 
 
 Okay, now for for some more obscure stuff. Let's say I'm writing a
@@ -1136,19 +1156,19 @@ in the default drive. Since I have to read in this output, I don't
 want any extra lines not relevant other than the version.
 
 @smallexample
-  vcddump --no-banner --show-format
+  vcd-info --no-banner --show-format
 @end smallexample 
 
 Or even shorter:
 @smallexample
-  vcddump -t -f
+  vcd-info -t -f
 @end smallexample 
 
 I want to see the filesystem info and track info for the CD
 in my default drive
 
 @smallexample
-  vcddump --show-tracks --show-filesystem
+  vcd-info --show-tracks --show-filesystem
 @end smallexample 
 
 I want to see the filesystem info and track info for the CD
@@ -1157,7 +1177,7 @@ in my default drive
 And finally I want to see just the ``data'' part --- that is the list
 of the entries section, no summary information like a count or ID tag.
 @smallexample
-  vcddump --show-entries data
+  vcd-info --show-entries data
 @end smallexample 
 
 @node History and Thanks

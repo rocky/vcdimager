@@ -1,5 +1,9 @@
 /*
+<<<<<<< vcd_xml_gen.c
     $Id$
+=======
+    $Id$
+>>>>>>> 1.20.4.8
 
     Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
 
@@ -35,12 +39,13 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include <libvcd/vcd.h>
-#include <libvcd/vcd_types.h>
-#include <libvcd/vcd_data_structures.h>
-#include <libvcd/vcd_cd_sector.h>
-#include <libvcd/vcd_util.h>
-#include <libvcd/vcd_pbc.h>
+#include <libvcd/sector.h>
+
+/* Private headers */
+#include "data_structures.h"
+#include "pbc.h"
+#include "util.h"
+#include "vcd.h"
 
 #include "vcd_xml_dtd.h"
 #include "vcd_xml_dump.h"
@@ -245,8 +250,6 @@ main (int argc, const char *argv[])
 
   vcd_xml_log_init ();
 
-  obj.comment = vcd_xml_dump_cl_comment (argc, argv);
-
   obj.pvd.system_id = strdup (DEFAULT_SYSTEM_ID);
   obj.pvd.volume_id = strdup (DEFAULT_VOLUME_ID);
   obj.pvd.application_id = strdup (DEFAULT_APPLICATION_ID);
@@ -332,6 +335,7 @@ main (int argc, const char *argv[])
       };
     
     poptContext optCon = poptGetContext ("vcdimager", argc, argv, optionsTable, 0);
+    poptSetOtherOptionHelp (optCon, "mpeg-track1 [mpeg-track2...]");
 
     if (poptReadDefaultConfig (optCon, 0)) 
       fprintf (stderr, "warning, reading popt configuration failed\n"); 
@@ -419,10 +423,10 @@ main (int argc, const char *argv[])
         _vcd_list_append (obj.sequence_list, _seq);
       }
 
-    if (_vcd_list_length (obj.sequence_list) > CD_MAX_TRACKS - 1)
+    if (_vcd_list_length (obj.sequence_list) > CDIO_CD_MAX_TRACKS - 1)
       {
         fprintf (stderr, "error: maximal number of supported mpeg tracks (%d) reached",
-                 CD_MAX_TRACKS - 1);
+                 CDIO_CD_MAX_TRACKS - 1);
         exit (EXIT_FAILURE);
       }
                         
@@ -433,11 +437,11 @@ main (int argc, const char *argv[])
   }
 
   if (_quiet_flag)
-    vcd_xml_verbosity = LOG_WARN;
+    vcd_xml_verbosity = VCD_LOG_WARN;
   else if (_verbose_flag)
-    vcd_xml_verbosity = LOG_DEBUG;
+    vcd_xml_verbosity = VCD_LOG_DEBUG;
   else
-    vcd_xml_verbosity = LOG_INFO;
+    vcd_xml_verbosity = VCD_LOG_INFO;
 
   /* done with argument processing */
 

@@ -25,6 +25,11 @@
 
 int vcd_xml_dump (struct vcdxml_t *obj, const char xml_fname[]);
 
-char *vcd_xml_dump_cl_comment (int argc, const char *argv[]);
+/*!
+   Print command line used as a XML comment. Start is either 0 or 
+   1. The program might be invoked either from a binary or a libtool
+   wrapper script to invoke the module.
+*/
+char *vcd_xml_dump_cl_comment (int argc, const char *argv[], int start);
 
 #endif /* __VCD_XML_DUMP_H__ */

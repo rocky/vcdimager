@@ -22,8 +22,10 @@
 #define __VCD_XML_MASTER_H__
 #include "vcdxml.h"
 
+#include <time.h>
+
 bool vcd_xml_master (const struct vcdxml_t *obj, 
-		     VcdImageSink *image_sink);
+		     VcdImageSink *image_sink, time_t *create_time);
 
 #endif /* __VCD_XML_MASTER_H__ */
 

@@ -491,18 +491,35 @@ vcd_xml_dump (struct vcdxml_t *obj, const char xml_fname[])
   return 0;
 }
 
+/* 
+   Print command line used as a XML comment. Start is either 0 or 
+   1. The program might be invoked either from a binary or a libtool
+   wrapper script to invoke the module.
+*/
 char *
-vcd_xml_dump_cl_comment (int argc, const char *argv[])
+vcd_xml_dump_cl_comment (int argc, const char *argv[], int start)
 {
   int idx;
   char *retval;
   size_t len = 0;
 
-  retval = strdup (" commandline used: ");
+  switch(start) {
+  case 0:
+    retval = strdup (" command line used: ");
+    break;
+  case 1:
+    retval = strdup (" command arguments used: ");
+    break;
+  default:
+    fprintf (stderr, "internal error: expecting start=0 or start=1\n"); 
+    retval = strdup (" command line used: ");
+    start=0;
+  }
+  
 
   len = strlen (retval);
 
-  for (idx = 0; idx < argc; idx++)
+  for (idx = start; idx < argc; idx++)
     {
       len += strlen (argv[idx]) + 1;
       

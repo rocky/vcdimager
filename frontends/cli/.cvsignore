@@ -8,5 +8,5 @@ vcddebug
 vcddebug.1
 vcdimager
 vcdimager.1
-vcddump
-vcddump.1
+vcd-info
+vcd-info.1
