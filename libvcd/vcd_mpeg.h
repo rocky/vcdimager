@@ -49,8 +49,8 @@ typedef struct {
   struct vcd_mpeg_packet_info {
     bool video[3];
     bool audio[3];
+    bool ogt[4];
 
-    bool ogt;
     bool padding;
     bool pem;
     bool zero;
@@ -84,6 +84,8 @@ typedef struct {
     unsigned packets;
 
     mpeg_vers_t version;
+
+    bool ogt[4];
 
     struct vcd_mpeg_stream_vid_info {
       bool seen;

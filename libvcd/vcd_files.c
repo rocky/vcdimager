@@ -63,6 +63,25 @@ _derive_vid_type (const struct vcd_mpeg_stream_info *_info, bool svcd)
 }
 
 static int
+_derive_ogt_type (const struct vcd_mpeg_stream_info *_info, bool svcd)
+{
+  if (!svcd)
+    return 0;
+
+  if ((_info->ogt[3] || _info->ogt[2])
+      && _info->ogt[1] && _info->ogt[0])
+    return 0x3;
+
+  if (_info->ogt[1] && _info->ogt[0])
+    return 0x2;
+
+  if (_info->ogt[0])
+    return 0x1;
+
+  return 0x0;
+}
+
+static int
 _derive_aud_type (const struct vcd_mpeg_stream_info *_info, bool svcd)
 {
   if (!_info->ahdr[0].seen)
@@ -393,6 +412,10 @@ set_info_vcd(VcdObj *obj, void *buf)
                 _derive_aud_type (segment->info,
                                   _vcd_obj_has_cap_p (obj, _CAP_4C_SVCD));
 
+              contents.ogt =
+                _derive_ogt_type (segment->info,
+                                  _vcd_obj_has_cap_p (obj, _CAP_4C_SVCD));
+
               for (idx = 0; idx < segment->segment_count; idx++)
                 {
                   vcd_assert (segments + idx < MAX_SEGMENTS);
@@ -433,13 +456,17 @@ set_tracks_svd_v30 (VcdObj *obj, void *buf)
   _VCD_LIST_FOREACH (node, obj->mpeg_track_list)
     {
       mpeg_track_t *track = _vcd_list_node_data (node);
+      int i;
 
       playtime += track->info->playing_time;
 
       tracks_svd->track[n].audio_info = track->info->ahdr[0].seen ? 0x2 : 0x0; /* fixme */
       tracks_svd->track[n].audio_info |= track->info->ahdr[1].seen ? 0x20 : 0x0; /* fixme */
 
-      tracks_svd->track[n].ogt_info = 0x0; /* fixme */
+      tracks_svd->track[n].ogt_info = 0x0;
+      for (i = 0; i < 4; i++)
+        if (track->info->ogt[i])
+          tracks_svd->track[n].ogt_info |= 1 << (i * 2); /* fixme */
 
       /* setting playtime */
       
@@ -501,6 +528,9 @@ set_tracks_svd (VcdObj *obj, void *buf)
 
       tracks_svd2->contents[n].audio =
         _derive_aud_type (track->info, true);
+
+      tracks_svd2->contents[n].ogt = 
+        _derive_ogt_type (track->info, true);
 
       if (_video != 0x3 && _video != 0x7)
         vcd_warn("SVCD/TRACKS.SVCD: No MPEG motion video for track #%d?", n);

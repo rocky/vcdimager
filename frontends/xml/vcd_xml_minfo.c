@@ -365,6 +365,16 @@ main (int argc, const char *argv[])
             _TAG_CLOSE ();
           }
 
+        for (i = 0; i < 4; i++)
+          {
+            if (!_info->ogt[i])
+              continue;
+
+            _TAG_OPEN ("ogt-stream", "index=\"%d\"", i);
+            _TAG_CLOSE ();
+          }
+
+
         /* fprintf (stdout, " v: %d a: %d\n", _info->video_type, _info->audio_type); */
 
         _TAG_CLOSE ();

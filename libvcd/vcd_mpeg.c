@@ -768,10 +768,6 @@ _register_streamid (uint8_t streamid, VcdMpegStreamCtx *state)
       state->packet.padding = true;
       break;
 
-    case MPEG_OGT_CODE:
-      state->packet.ogt = true;
-      break;
-
     case MPEG_SYSTEM_HEADER_CODE: 
       state->packet.system_header = true;
       break;
@@ -818,6 +814,26 @@ _analyze_system_header (const uint8_t *buf, int len,
     }
 
   vcd_assert (bitpos <= (len << 3));
+}
+
+static void
+_analyze_ogt_stream (const uint8_t *buf, int len, 
+                     VcdMpegStreamCtx *state)
+{
+  int bitpos = _analyze_pes_header (buf, len, state);
+  unsigned ogt_idx;
+
+  bitpos <<= 3;
+
+  ogt_idx = vcd_bitvec_peek_bits (buf, bitpos, 8);
+  
+  if (!IN(ogt_idx, 0, 3))
+    {
+      vcd_warn ("OGT channel out of range %d", ogt_idx);
+      return;
+    }
+
+  state->stream.ogt[ogt_idx] = state->packet.ogt[ogt_idx] = true;
 }
 
 int
@@ -1025,6 +1041,10 @@ vcd_mpeg_parse_packet (const void *_buf, unsigned buflen, bool parse_pes,
             case MPEG_AUDIO_C1_CODE:
             case MPEG_AUDIO_C2_CODE:
               _analyze_audio_pes (code & 0xff, buf + pos, size, !parse_pes, ctx);
+              break;
+
+            case MPEG_OGT_CODE:
+              _analyze_ogt_stream (buf + pos, size, ctx);
               break;
 	    }
 
