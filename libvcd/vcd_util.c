@@ -117,7 +117,7 @@ _vcd_strsplit(const char str[], char delim) /* fixme -- non-reentrant */
   n = 1;
   p = _str;
   while(*p) 
-    if(*(p++) == delim)
+    if (*(p++) == delim)
       n++;
 
   strv = _vcd_malloc (sizeof (char *) * (n+1));

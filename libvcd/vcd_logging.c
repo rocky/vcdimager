@@ -77,7 +77,7 @@ vcd_logv(log_level_t level, const char format[], va_list args)
   char buf[1024] = { 0, };
   static int in_recursion = 0;
 
-  if(in_recursion)
+  if (in_recursion)
     vcd_assert_not_reached ();
 
   in_recursion = 1;

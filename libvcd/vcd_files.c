@@ -293,7 +293,7 @@ set_info_vcd(VcdObj *obj, void *buf)
         {
           mpeg_track_t *track = _vcd_list_node_data (node);
           
-          if(track->info->norm == MPEG_NORM_PAL 
+          if (track->info->norm == MPEG_NORM_PAL 
              || track->info->norm == MPEG_NORM_PAL_S)
             _set_bit(info_vcd.pal_flags, n);
           else if (track->info->vsize == 288 || track->info->vsize == 576)

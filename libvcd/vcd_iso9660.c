@@ -153,10 +153,10 @@ dir_calc_record_size(unsigned namelen,
 
   length = sizeof(struct iso_directory_record);
   length += namelen;
-  if(length % 2) /* pad to word boundary */
+  if (length % 2) /* pad to word boundary */
     length++;
   length += su_len;
-  if(length % 2) /* pad to word boundary again */
+  if (length % 2) /* pad to word boundary again */
     length++;
 
   return length;
@@ -180,7 +180,7 @@ dir_add_entry_su(void *dir,
 
   vcd_assert (sizeof(struct iso_directory_record) == 33);
 
-  if(!dsize && !idr->length)
+  if (!dsize && !idr->length)
     dsize = ISO_BLOCKSIZE; /* for when dir lacks '.' entry */
   
   vcd_assert (dsize > 0 && !(dsize % ISO_BLOCKSIZE));
@@ -191,11 +191,11 @@ dir_add_entry_su(void *dir,
 
   length = sizeof(struct iso_directory_record);
   length += strlen(name);
-  if(length % 2) /* pad to word boundary */
+  if (length % 2) /* pad to word boundary */
     length++;
   su_offset = length;
   length += su_size;
-  if(length % 2) /* pad to word boundary again */
+  if (length % 2) /* pad to word boundary again */
     length++;
 
   /* fixme -- the following looks quite ugly, although it seems to work */
@@ -203,15 +203,15 @@ dir_add_entry_su(void *dir,
   while(offset < dsize) {
     tmp8 = dir8 + offset;
       
-    if(!*tmp8) {
-      if(offset)
+    if (!*tmp8) {
+      if (offset)
         offset-=ISO_BLOCKSIZE;
       break;
     }
 
     offset+=ISO_BLOCKSIZE;
 
-    if(offset == dsize) {
+    if (offset == dsize) {
       offset-=ISO_BLOCKSIZE;
       break;
     }
@@ -224,7 +224,7 @@ dir_add_entry_su(void *dir,
     tmp8 = dir8 + offset;
   }
 
-  if( ((offset+length) % ISO_BLOCKSIZE) < (offset % ISO_BLOCKSIZE) )
+  if ( ((offset+length) % ISO_BLOCKSIZE) < (offset % ISO_BLOCKSIZE) )
     offset += ISO_BLOCKSIZE-(offset % ISO_BLOCKSIZE);
 
   tmp8 = dir8 + offset;

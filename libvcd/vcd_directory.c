@@ -81,7 +81,7 @@ traverse_get_dirsizes(VcdDirNode *node, void *data)
   data_t *d = DATAP(node);
   unsigned *sum = data;
 
-  if(d->is_dir)
+  if (d->is_dir)
     *sum += (d->size / ISO_BLOCKSIZE);
 }
 

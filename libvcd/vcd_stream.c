@@ -50,8 +50,8 @@ _vcd_data_sink_open_if_necessary(VcdDataSink *obj)
 {
   vcd_assert (obj != NULL);
 
-  if(!obj->is_open) {
-    if(obj->op.open(obj->user_data))
+  if (!obj->is_open) {
+    if (obj->op.open(obj->user_data))
       vcd_error("could not opening output stream...");
     else {
       obj->is_open = 1;
@@ -80,7 +80,7 @@ vcd_data_sink_seek(VcdDataSink* obj, long offset)
 
   _vcd_data_sink_open_if_necessary(obj);
 
-  if(obj->position != offset) {
+  if (obj->position != offset) {
     vcd_warn("had to reposition DataSink from %ld to %ld!", obj->position, offset);
     obj->position = offset;
     return obj->op.seek(obj->user_data, offset);
@@ -109,7 +109,7 @@ vcd_data_sink_close(VcdDataSink* obj)
 {
   vcd_assert (obj != NULL);
 
-  if(obj->is_open) {
+  if (obj->is_open) {
     obj->op.close(obj->user_data);
     obj->is_open = 0;
     obj->position = 0;
@@ -142,8 +142,8 @@ _vcd_data_source_open_if_necessary(VcdDataSource *obj)
 {
   vcd_assert (obj != NULL);
 
-  if(!obj->is_open) {
-    if(obj->op.open(obj->user_data))
+  if (!obj->is_open) {
+    if (obj->op.open(obj->user_data))
       vcd_error ("could not opening input stream...");
     else {
 #ifdef STREAM_DEBUG
@@ -162,7 +162,7 @@ vcd_data_source_seek(VcdDataSource* obj, long offset)
 
   _vcd_data_source_open_if_necessary(obj);
 
-  if(obj->position != offset) {
+  if (obj->position != offset) {
 #ifdef STREAM_DEBUG
     vcd_warn("had to reposition DataSource from %ld to %ld!", obj->position, offset);
 #endif
@@ -216,7 +216,7 @@ vcd_data_source_close(VcdDataSource* obj)
 {
   vcd_assert (obj != NULL);
 
-  if(obj->is_open) {
+  if (obj->is_open) {
 #ifdef STREAM_DEBUG
     vcd_debug ("closed source...");
 #endif

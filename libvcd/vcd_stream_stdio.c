@@ -77,10 +77,10 @@ _stdio_free(void *user_data)
 {
   _UserData *ud = user_data;
 
-  if(ud->pathname)
+  if (ud->pathname)
     free(ud->pathname);
 
-  if(ud->fd) /* should be NULL anyway... */
+  if (ud->fd) /* should be NULL anyway... */
     _stdio_close(user_data); 
 
   free(ud);
@@ -102,7 +102,7 @@ _stdio_stat(void *user_data)
   _UserData *ud = user_data;
   struct stat statbuf;
   
-  if(fstat(fileno(ud->fd), &statbuf))
+  if (fstat(fileno(ud->fd), &statbuf))
     return -1;
 
   return statbuf.st_size;
