@@ -4,8 +4,8 @@ libdir=@libdir@
 includedir=@includedir@
 
 Name: libvcdinfo
-Description: VCD information library
+Description: (Super) Video CD information library
 Version: @VERSION@
 Requires: libcdio
-Libs: -L${libdir} -lvcdinfo
+Libs: -L${libdir} -lvcdinfo -liso9660
 Cflags: -I${includedir}
