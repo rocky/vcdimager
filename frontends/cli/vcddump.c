@@ -33,6 +33,10 @@
 #include <stddef.h>
 
 #include <popt.h>
+/* Accomodate to older popt that doesn't support the "optional" flag */
+#ifndef POPT_ARGFLAG_OPTIONAL
+#define POPT_ARGFLAG_OPTIONAL 0
+#endif
 
 #include <libvcd/vcd_assert.h>
 #include <libvcd/vcd_bitvec.h>
