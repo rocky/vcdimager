@@ -1,3 +1,8 @@
+2001-07-26  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* frontends/xml/vcd_xml_minfo.c:
+		new tool for dumping mpeg infos
+
 2001-07-25  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* frontends/xml/vcd_xml_master.c (vcd_xml_master): 
