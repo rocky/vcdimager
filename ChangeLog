@@ -1,5 +1,10 @@
 2001-01-20  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* frontends/cli/vcdrip.c (rip): ignore stream leadin, if subheader broken
+
+	* libvcd/vcd.c (_write_source_mode2_form1): fixed zeroed-last-block bug,
+		when filesize was a multiple of 2048 bytes...
+
 	* frontends/cli/vcdrip.c, frontends/cli/vcdimager.c: 
 		minor printf-fixes
 

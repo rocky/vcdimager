@@ -101,10 +101,10 @@ Video CD 1.1 image output support
 Video CD 2.0 image output support
 
 @item
-Super Video CD 1.0 image output support (preliminary, needs testing)
+Super Video CD 1.0 image output support
 
 @item
-general facility for adding files as form 1 and form 2 sectors to
+general facility for adding files as mode 2 form 1 and 2 sectors to
 the @acronym{ISO9660} filesystem and setting the @acronym{ISO9660}
 volume label and application id fields.
 
@@ -128,6 +128,8 @@ $ vcdimager --help
 Usage: vcdimager [OPTION...]
   -t, --type=TYPE                     select VideoCD type ('vcd11', 'vcd2' 
                                       or 'svcd') (default: 'vcd2')
+  --broken-svcd-mode                  enable non-compliant compatibility mode
+                                      for broken devices
   -l, --iso-volume-label=LABEL        specify ISO volume label for 
                                       video cd (default: 'VideoCD')
   --iso-application-id=LABEL          specify ISO application id for
@@ -142,6 +144,7 @@ Usage: vcdimager [OPTION...]
                                       sectors to ISO fs
   -p, --progress                      show progress
   -v, --verbose                       be verbose
+  -q, --quiet                         show only critical messages
   -V, --version                       display version and copyright
                                       information and exit
 
@@ -159,9 +162,9 @@ The @file{vcdrip} utility offers just a few arguments:
 $ vcdrip
 Usage: vcdrip [OPTION...]
   --bin-file=FILE         set image file as source
-  --cdrom-device=DEVICE   set CDROM device as source (only linux)
+  --cdrom-device=DEVICE   set CDROM device as source (linux only)
   --dump                  dump information about VideoCD
-  --rip                   rip data tracks
+  --rip                   rip mpeg tracks
   -V, --version           display version and copyright information 
                           and exit
 
@@ -187,69 +190,7 @@ $
 @end cartouche
 @end example
 
-The following shows how to display information of a given Video CD image
-file @file{test.bin}.
-
-@example
-@cartouche
-$ vcdrip-devel --dump --bin-file=test.bin     
-------------------------------------------------------------------------
-Source: image file `test.bin'
-Image size: 300041 sectors
-------------------------------------------------------------------------
-VCD 2.0 detected
-VCD/INFO.VCD
- ID: `VIDEO_CD'
- version: 0x02
- system profile tag: 0x00
- album desc: `                '
- volume count: 1
- volume number: 1
- pal flags: 0x00 00 00 00 00 00 00 00 00 00 00 00 00 
- flags:
-  restriction: 0
-  special info: no
-  user data cc: no
-  start lid#1: no
-  start track#3: no
- psd size: 72
- first segment addr: 00:02:00
- offset multiplier: 0x08 (must be 0x08)
- highest psd offset: 0x0008 (real offset = 64)
- item count: 0
-------------------------------------------------------------------------
-VCD/ENTRIES.VCD
- ID: `ENTRYVCD'
- version: 0x02
- entries: 4
- entry 1 starts in track 2 at (lba) extent 1262 (msf: 00:18:62)
- entry 2 starts in track 3 at (lba) extent 2555 (msf: 00:36:05)
- entry 3 starts in track 4 at (lba) extent 101705 (msf: 22:38:05)
- entry 4 starts in track 5 at (lba) extent 200994 (msf: 44:41:69)
-------------------------------------------------------------------------
-VCD/LOT.VCD
- offset[0]: 0x0000 (real offset = 0)
- offset[1]: 0x0002 (real offset = 16)
- offset[2]: 0x0004 (real offset = 32)
- offset[3]: 0x0006 (real offset = 48)
- offset[4]: 0x0008 (real offset = 64)
-------------------------------------------------------------------------
-VCD/PSD.VCD
- [ 0]: play list descriptor ( NOI: 1 | LID#: 1 | prev: ffff | next: 0002
-  | retn: 0008 | ptime: 0 | wait: 5 | await: 0 | itemid[0]: 2)
- [ 1]: play list descriptor ( NOI: 1 | LID#: 2 | prev: 0000 | next: 0004
-  | retn: 0008 | ptime: 0 | wait: 5 | await: 0 | itemid[0]: 3)
- [ 2]: play list descriptor ( NOI: 1 | LID#: 3 | prev: 0002 | next: 0006
-  | retn: 0008 | ptime: 0 | wait: 5 | await: 0 | itemid[0]: 4)
- [ 3]: play list descriptor ( NOI: 1 | LID#: 4 | prev: 0004 | next: 0008
-  | retn: 0008 | ptime: 0 | wait: 5 | await: 0 | itemid[0]: 5)
- [ 4]: end of list descriptor ( 00 00 00 00 00 00 00 )
-------------------------------------------------------------------------
-$
-@end cartouche
-@end example
-
-Finally, the last example show how to extract the mpeg streams contained
+Finally, the next example show how to extract the mpeg streams contained
 in the same image file @file{test.bin} (the resulting streams are
 stored in files named @file{track_##.mpg} with @samp{##} being the track
 number, starting with 0).
@@ -257,7 +198,7 @@ number, starting with 0).
 @example
 @cartouche
 $ vcdrip-devel --rip --bin-file=test.bin     
---DEBUG: found ENTRIES.VCD
+--DEBUG: found ENTRIES.VCD/SVD
    INFO: track_00.mpg: 1262 -> 2555
 --DEBUG:  stream leadin at 1292
 --DEBUG:  stream leadout at 2360
@@ -282,8 +223,8 @@ GNU VCDImager expects @acronym{MPEG} streams in a format suitable for
 @unnumberedsec Video CD 2.0
 
 The Video CD 2.0 specification requires the @acronym{MPEG}-1 stream to
-have a maximum bitrate of 1151929.1 bits/sec and to have one of the
-following resolution:
+have a maximum constant bitrate of 1151929.1 bits/sec and to have one of
+the following resolution:
 
 @itemize @bullet
 @item
@@ -295,7 +236,7 @@ following resolution:
 @end itemize
 
 The audio stream must be @acronym{MPEG}-1 layer II, fixed to a 224
-kbits/sec bitrate with 1 stereo or 2 mono channels.
+kbits/sec constant bitrate with 1 stereo or 2 mono channels.
 
 @unnumberedsec Super Video CD
 
@@ -317,20 +258,22 @@ mono channels.
 @unnumberedsec Common Constraints
 
 Furthermore the @acronym{MPEG} files need to be aligned to 2324 byte
-@acronym{MPEG} packets. So if GNU VCDImager complains, try fixing those
-files with VCDpad
+@acronym{MPEG} packet boundaries. So if GNU VCDImager complains, try
+fixing those files with VCDpad
 @footnote{see @url{http://www.nocrew.org/?part=vcdpad}} 
 or any other program capable of aligning or fixing @acronym{MPEG}
 packets.
 
 @unnumbered Adding Files to the VideoCD 
 
-Files can be added to the @acronym{ISO} filesystem, that is track 0 of
-the VideoCD, by making use of the commandline options
+Files can be added to the @acronym{ISO} filesystem, that is the first
+track of the VideoCD, by making use of the commandline options
 @code{--add-file=@var{FILE},@var{ISO_FILENAME}} and
 @code{--add-file-2336=@var{FILE},@var{ISO_FILENAME}}.
 The latter option allows you to include files containing the complete
-user data of mode2 cdrom sectors. 
+user data of mode2 cdrom sectors
+@footnote{8 bytes for subheader, 2324 bytes payload and finaly 4 bytes
+for @acronym{EDC}}.
 
 The pathname given as @var{ISO_FILENAME} determines where to link the
 file in the filesystem of the VideoCD. The given pathname must be a

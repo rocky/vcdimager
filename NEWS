@@ -2,6 +2,16 @@ $Id$
 
 see ChangeLog for more information
 
+version 0.5.9beta2
+==================
+2001-01-..
+
+* fixed empty last block bug with --add-file
+* minor vcdrip improvements
+* scandata.dat scantable support for vcd 2.0
+* extended psd & lot for vcd 2.0
+* added handling of 2ndary audio channel and OGT 
+
 version 0.5.9beta1
 ==================
 2001-01-15

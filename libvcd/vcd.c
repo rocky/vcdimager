@@ -1064,11 +1064,15 @@ static void
 _write_source_mode2_form1 (VcdObj *obj, VcdDataSource *source, uint32_t extent)
 {
   int n;
-  uint32_t sectors, size;
+  uint32_t sectors, size, last_block_size;
 
   size = vcd_data_source_stat (source);
 
   sectors = _vcd_len2blocks (size, M2F1_SIZE);
+
+  last_block_size = size % M2F1_SIZE;
+  if (!last_block_size)
+    last_block_size = M2F1_SIZE;
 
   vcd_data_source_seek (source, 0); 
 
@@ -1077,7 +1081,7 @@ _write_source_mode2_form1 (VcdObj *obj, VcdDataSource *source, uint32_t extent)
 
     vcd_data_source_read (source, buf, 
                           ((n + 1 == sectors) 
-                           ? size % M2F1_SIZE 
+                           ? last_block_size
                            : M2F1_SIZE), 1);
 
     if (_write_m2_image_sector (obj, buf, extent+n, 1, 0, 

@@ -1013,12 +1013,19 @@ rip (const char device_fname[])
 
           gl_read_mode2_sector (fd, &buf, pos, true);
 
+          /* fixme -- ugly nested blocks */
+
           if (buf.subheader[1])
             {
               if (!in_data)
                 {
-                  vcd_debug (" stream leadin at %d", pos);
-                  in_data = true;
+                  if (!memcmp(&(buf.subheader[0]), &(buf.subheader[4]), 4))
+                    {
+                      vcd_debug (" stream leadin at %d", pos);
+                      in_data = true;
+                    }
+                  else
+                    vcd_debug (" ignoring stream leadin due to broken subheader %d", pos);
                 }
             }
           else if (buf.data[0] == 0x00 
