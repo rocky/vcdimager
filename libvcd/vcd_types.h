@@ -105,7 +105,7 @@ typedef enum
 # endif
 #endif
 
-/* some GCC optimizations */
+/* some GCC optimizations -- gcc 2.5+ */
 
 #if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)
 #define GNUC_PRINTF( format_idx, arg_idx )    \
@@ -132,28 +132,32 @@ typedef enum
 #define GNUC_PACKED
 #endif  /* !__GNUC__ */
 
-#if defined(__sgi) && !defined(__GNUC__)
-# define PRAGMA_BEGIN_PACKED _Pragma("pack (1)")
-# define PRAGMA_END_PACKED   _Pragma("pack (0)")
+#if !defined(__GNUC__)
+/* should work with most EDG-frontend based compilers */
+# define PRAGMA_BEGIN_PACKED _Pragma("pack(1)")
+# define PRAGMA_END_PACKED   _Pragma("pack()")
 #else
+/* for GCC we try to use GNUC_PACKED instead */
 # define PRAGMA_BEGIN_PACKED
 # define PRAGMA_END_PACKED
 #endif
 
-/* user directed static branch prediction
+/*
+ * user directed static branch prediction gcc 2.96+
  */
-#if !defined(__GNUC__) || (__GNUC__ == 2 && __GNUC_MINOR__ < 96)
-# define GNUC_LIKELY(x)   (x) 
-# define GNUC_UNLIKELY(x) (x)
-#else /* supported with gcc 2.96+ */
+#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 95)
 # define GNUC_LIKELY(x)   __builtin_expect((x),true)
 # define GNUC_UNLIKELY(x) __builtin_expect((x),false)
+#else 
+# define GNUC_LIKELY(x)   (x) 
+# define GNUC_UNLIKELY(x) (x)
 #endif
 
 #ifndef NULL
 # define NULL ((void*) 0)
 #endif
 
+/* our own offsetof()-like macro */
 #define __vcd_offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
 
 /* In many structures on the disk a sector address is stored as a

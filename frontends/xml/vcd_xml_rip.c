@@ -971,9 +971,11 @@ _rip_isofs (struct vcdxml_t *obj, VcdImageSource *img)
       for (idx = 0; idx < _fs->size; idx += blocksize)
 	{
 	  char buf[blocksize];
-	  memset (&buf, 0, sizeof (buf));
+	  /* some EDG based compilers segfault on the commented out code */
+	  /* memset (buf, 0, sizeof (buf)); */
+	  memset (buf, 0, blocksize);
 
-	  vcd_image_source_read_mode2_sector (img, &buf, 
+	  vcd_image_source_read_mode2_sector (img, buf, 
 					      _fs->lsn + (idx / blocksize),
 					      _fs->file_raw);
 

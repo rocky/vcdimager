@@ -7,7 +7,7 @@ This package has been developed with GNU CC in mind. Caution has been
 taken to stay compatible with other compilers, but there's been no
 testing or whatsoever to ensure anything. 
 
-Most of the code is ISO C compliant, with the exception of the
+Most of the code is ISO C99 compliant, with the exception of the
 following features not contained in ISO C99:
 
  *) uint8_t used as bit-field type 
@@ -20,11 +20,6 @@ which should at least check for _obvious_ missbehaviour...
 
 try avoiding gcc version 2.96 20000731 (Red Hat Linux 7.0) -- it is known
 to slightly miscompile vcdimager.
-
-the following gcc versions seem to create good code:
-
-gcc version 2.96 20000731 (Red Hat Linux 7.1 2.96-81)
-gcc version egcs-2.91.66 19990314/Linux (egcs-1.1.2 release)
 
 
 vcdimager/vcdxbuild

@@ -1,7 +1,9 @@
 2003-02-19  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* libvcd/vcd_files_private.h: use 'unsigned' as bitfild type
+
 	* libvcd/vcd_types.h (PRAGMA_BEGIN/END_PACKED): added pragmas for
-	mipspro compiler
+	mipspro compiler; cleaned up a bit
 
 	* libvcd/vcd_files_private.h: fixed 3 occurences of variable length
 	arrays in otherwise empty structures
