@@ -4,62 +4,56 @@ see ChangeLog for more information
 
 version 0.7.20 (unstable/development)
 =====================================
-* Join in libcdio branch (forked after 0.7.14)
+2004-02-20
 
+* Join in libcdio branch (forked after 0.7.14)
 * Performance fix: (libvcdinfo) Redo the way we find segment 
   LSNs to greatly reduce the number of CD reads when there are many
   files in the ISO-9660 track, or there are many segments or continued
   segments. Requires libcdio 0.65 API change.
-
 * API completion: (libvcdinfo) now has API for multi-default selections;
   APIs for mapping a selection number to a LID or LID offset added.
-
 * Replace unfree encode_L2_Q with GPL version from cdrtools 1.11a40
-
 * cdxa2mpeg warns if input and output file are the same.
-
 * some bug fixes.
-
 * library symbol versioning (from Nicolas Boullis)
-
 * libvcd is private once again.
-
 * Go over documentation. (CD image info has been moved to libcdio doc)
 
 version 0.7.19 (unstable/development)
 =====================================
+-unreleased-
+
 * Use VCD CD-drive auto scanning in vcdxrip and vcd-info that is 
   now part of in libcdio
-
 * doc changes, clarification of cdxa2mpeg
-
 * error checking in cdxa2mpeg (from Nicolas Boullis)
-
 * Changes dicted by those in libcdio, libiso9660
 
 version 0.7.18 (unstable/development)
 =====================================
-* Move iso9660 stuff into libcdio. 
+-unreleased-
 
+* Move iso9660 stuff into libcdio. 
 * More private files are private. 
 
 version 0.7.17 (unstable/development)
 =====================================
+-unreleased-
 
 * Complete interface with ..._lsn routines for the corresponding
   ..._lba routines.
-
 * Install pkginfo files
 
 version 0.7.16 (unstable/development)
 =====================================
+-unreleased-
+
 * Better use of updated cdio API. Removed vcd_inf_open. Uses cdio_open now.
 * Regression tests use diff -u if that's available and revert to cmp of no
   diff found.
 * Changes for Cygwin compatibility
 
-
-2003-04-18
 version 0.7.15 (unstable/development)
 =====================================
 2003-04-18
