@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2001,2003 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,7 +26,6 @@
 #include <libvcd/vcd_bytesex.h>
 #include <libvcd/vcd_cd_sector.h>
 #include <libvcd/vcd_image_cd.h>
-#include <libvcd/vcd_iso9660.h>
 #include <libvcd/vcd_logging.h>
 #include <libvcd/vcd_util.h>
 
@@ -50,6 +49,8 @@ static const char _rcsid[] = "$Id$";
 
 /* reader */
 
+#define DEFAULT_VCD_DEVICE "/dev/cdrom"
+
 typedef struct {
   int fd;
 
@@ -62,7 +63,7 @@ typedef struct {
   char *device;
   
   bool init;
-} _img_bsdicd_src_t;
+} _img_cd_src_t;
 
 static int
 _scsi_cmd (int fd, struct scsi_user_cdb *sucp, const char *tag)
@@ -87,13 +88,12 @@ _scsi_cmd (int fd, struct scsi_user_cdb *sucp, const char *tag)
 }
 
 static void
-_source_init (_img_bsdicd_src_t *_obj)
+_vcd_source_init (_img_cd_src_t *_obj)
 {
   if (_obj->init)
     return;
 
   _obj->fd = open (_obj->device, O_RDONLY, 0);
-  _obj->access_mode = _AM_READ_CD;
 
   if (_obj->fd < 0)
     {
@@ -105,11 +105,15 @@ _source_init (_img_bsdicd_src_t *_obj)
 }
 
 
+/*!
+  Release and free resources associated with cd. 
+ */
 static void
 _source_free (void *user_data)
 {
-  _img_bsdicd_src_t *_obj = user_data;
+  _img_cd_src_t *_obj = user_data;
 
+  if (NULL == _obj) return;
   free (_obj->device);
 
   if (_obj->fd)
@@ -219,9 +223,9 @@ _read_mode2 (int fd, void *buf, uint32_t lba, unsigned nblocks,
 static int
 _read_mode2_sector (void *user_data, void *data, uint32_t lsn, bool form2)
 {
-  _img_bsdicd_src_t *_obj = user_data;
+  _img_cd_src_t *_obj = user_data;
 
-  _source_init (_obj);
+  _vcd_source_init (_obj);
 
   if (form2)
     {
@@ -263,7 +267,7 @@ _read_mode2_sector (void *user_data, void *data, uint32_t lsn, bool form2)
       if ((retval = _read_mode2_sector (_obj, buf, lsn, true)))
 	return retval;
 
-      memcpy (data, buf + 8, ISO_BLOCKSIZE);
+      memcpy (data, buf + 8, M2F1_SECTOR_SIZE);
     }
 
   return 0;
@@ -274,14 +278,14 @@ static const u_char scsi_cdblen[8] = {6, 10, 10, 12, 12, 12, 10, 10};
 static uint32_t 
 _stat_size (void *user_data)
 {
-  _img_bsdicd_src_t *_obj = user_data;
+  _img_cd_src_t *_obj = user_data;
 
   struct scsi_user_cdb suc; 
   uint8_t buf[12] = { 0, };
 
   uint32_t retval;
 
-  _source_init(_obj);
+  _vcd_source_init(_obj);
 
   memset (&suc, 0, sizeof (struct scsi_user_cdb));
 
@@ -320,7 +324,7 @@ _stat_size (void *user_data)
 static int
 _source_set_arg (void *user_data, const char key[], const char value[])
 {
-  _img_bsdicd_src_t *_obj = user_data;
+  _img_cd_src_t *_obj = user_data;
   
   if (!strcmp (key, "device"))
     {
@@ -331,10 +335,28 @@ _source_set_arg (void *user_data, const char key[], const char value[])
       
       _obj->device = strdup (value);
     }
+  else if (!strcmp (key, "access-mode"))
+    {
+      if (!strcmp(value, "READ_CD"))
+	_obj->access_mode = _AM_READ_CD;
+      else if (!strcmp(value, "READ_10"))
+	_obj->access_mode = _AM_READ_10;
+      else
+	vcd_error ("unknown access type: %s. ignored.", value);
+    }
   else 
     return -1;
 
   return 0;
+}
+
+/*!
+  Return a string containing the default VCD device if none is specified.
+ */
+static char *
+_vcd_get_default_device()
+{
+  return strdup(DEFAULT_VCD_DEVICE);
 }
 
 #endif /* defined(__bsdi__) */
@@ -343,17 +365,21 @@ VcdImageSource *
 vcd_image_source_new_cd (void)
 {
 #if defined(__bsdi__)
-  _img_bsdicd_src_t *_data;
+  _img_cd_src_t *_data;
 
   vcd_image_source_funcs _funcs = {
-    .read_mode2_sector = _read_mode2_sector,
-    .stat_size         = _stat_size,
     .free              = _source_free,
-    .set_arg           = _source_set_arg
+    .get_default_device= _vcd_get_default_device,
+    .read_mode2_sector = _read_mode2_sector,
+    .set_arg           = _source_set_arg,
+    .stat_size         = _stat_size
   };
 
-  _data = _vcd_malloc (sizeof (_img_bsdicd_src_t));
-  _data->device = strdup ("/dev/cdrom");
+  _data = _vcd_malloc (sizeof (_img_cd_src_t));
+  _data->access_mode = _AM_READ_CD;
+  _data->init        = false;
+  _data->device      = _vcd_get_default_device();
+  _data->fd          = -1;
 
   return vcd_image_source_new (_data, &_funcs);
 #else 
