@@ -6,6 +6,10 @@
 @c %**start of header
 @setfilename vcddump.info
 @set program @kbd{vcddump}
+@c A simple macro for optional variables.
+@macro ovar{varname}
+@r{[}@var{\varname\}@r{]}
+@end macro
 
 @settitle The GNU Video CD Dump Program (@value{program})
 @setchapternewpage on
@@ -71,6 +75,9 @@ Copyright (C) 2003 Rocky Bernstein
 * Command Options::     How do I get this to do anything? 
 * Output Sections::     How do interpret the output? 
 * Some Examples::       Okay, enough talk. How about some simple examples?
+* History and Thanks::  History and Acknowledgments
+* General Index::       Overall index
+* Option Index::        Index for options
 @end menu
 @end ifnottex
 
@@ -159,31 +166,50 @@ which specify where the CD-ROM or CD-ROM disk-image is.
 @menu
 * Where Options::     Options controlling where to read from 
 * What Options::      Options controlling what do you want shown
-* Other Options::     Other miscellaneous options
+* All Options::       A complete list of options
 @end menu
 
 @node Where Options
 @section Options controlling where to read from 
 
-@subsection BIN or CUE file
+If you don't specify any place to read from @value{program} will try
+to read from the default device that may be appropriate for your OS.
 
-Options controlling where the CD-ROM or CD disk image are
-@kbd{--bin-file} (@kbd{-b}), @kbd{--cue-file} (@kbd{-c}),
-@kbd{--cdrom-device} and the ``intelligent'' option
-@kbd{--input}. These options are mutually exclusive, use only one
-option from this set.
+There are two broad categories of input, reading from a device that
+contains a Compact Disk, and reading from a file on the filesystem
+that contains an image that could be burned into a Compact Disk.  The
+option for the former category, reading a physical CD, is
+@kbd{--cdrom-device} (@kbd{-C}); options for the latter category,
+reading a file containing a CD disk image, are @kbd{--bin-file}
+(@kbd{-b}), @kbd{--cue-file} (@kbd{-c}). There is one other option
+@kbd{--input} (@kbd{-i}) which blurs the distinction---it tries to
+figure out based on the name whether you are reading from a device
+containing a CD or not and do the appropriate thing.  Of course, since
+it only makes sense to read from one place, these options are mutually
+exclusive; use only one option from this set.
 
-The option @kbd{--bin-file} and @kbd{--cue-file} indicate to read
-from a file containing an image what might be burned onto Compact
-Disk. The format is expected to be in the BIN/CUE format that cdrdao
-uses and is used by a popular DOS/Windows CD mastering tool. If you
-use the --bin-file option, the file read is expected to be the
-``.BIN'' part---this is the bulk of the data.  If you use
-@kbd{--cue-file} the file read is a funny sort of TOC (Table of
-Contents) file. The corresponding BIN file (which again contains the
-bulk of the data) is not taken from the FILE statement inside the CUE
-file, but it is constructed from the CUE file name by replacing ".cue"
-by ".bin".  The CUE file must have exactly one FILE statement.
+@menu
+* BIN or CUE file::     Reading from a file containing a CD disk image
+* CD-ROM Device::       Reading from a CD-ROM device
+* Intelligent Input::   Reading from whereever
+@end menu
+
+@node BIN or CUE file
+@subsection Reading from a file containing a CD disk image
+@cindex Reading, BIN or CUE file
+
+The option @kbd{--bin-file} and @kbd{--cue-file} (the short forms for
+these are @kbd{-b} and @kbd{-c} respectively) indicate to read from a
+file containing an image what might be burned onto Compact Disk. The
+format is expected to be in the BIN/CUE format that cdrdao uses and is
+used by a popular DOS/Windows CD mastering tool. If you use the
+@kbd{--bin-file} option, the file read is expected to be the ``.BIN''
+part---this is the bulk of the data.  If you use @kbd{--cue-file} the
+file read is a funny sort of TOC (Table of Contents) file. The
+corresponding BIN file (which again contains the bulk of the data) is
+not taken from the FILE statement inside the CUE file, but it is
+constructed from the CUE file name by replacing ".cue" by ".bin".  The
+CUE file must have exactly one FILE statement.
 
 If you do not specify a file name after @kbd{--bin-file}, a default
 name is used ``VIDEOCD.BIN'' is probably used; likewise if you do not
@@ -195,20 +221,25 @@ It is preferable to specify a CUE file over a BIN file since this will
 give @value{program} TOC and, in particular, track information that it
 cannot get otherwise.
 
-@subsection CD-ROM Device
+@node CD-ROM Device
+@subsection Reading from CD-ROM Device
+@cindex Reading, CD-ROM Device
 
-The option @kbd{--cdrom-device} is used when you want to read from a
-Compact Disk. The name given would be the device name. If you don't
-specify a device, a default will be selected based on the Operating
-System or information that can be gleaned from the OS. For example on
-Linux, the default device may be @kbd{/dev/cdrom}, while on Solaris it
-might be @kbd{/vol/dev/aliases/cdrom0}.
+The option @kbd{--cdrom-device} or the short form @kbd{-C} is used
+when you want to read from a Compact Disk. The name given would be the
+device name. If you don't specify a device, a default will be selected
+based on the Operating System or information that can be gleaned from
+the OS. For example on GNU/Linux, the default device may be
+@kbd{/dev/cdrom}, while on Solaris it might be
+@kbd{/vol/dev/aliases/cdrom0}.
 
-@subsection Intelligent Input
+@node Intelligent Input
+@subsection Reading from whereever
+@cindex Reading, whereever
 
-The kind of where option tries to be intelligent by trying to figure
-out whether the thing you are referring to is a device or a bin/cue
-disk image of a CD.
+The option @kbd{--input} or the short form of this @kbd{-i} tries to
+be intelligent by trying to figure out whether the thing you are
+referring to is a device or a bin/cue disk image of a CD.
 
 Currently the algorithm it uses is pretty simple. If the thing
 referred to is what in Unix is called a ``block'' or ``character''
@@ -223,9 +254,9 @@ ends (i.e. the extension is) ``.bin'' or ``.BIN'' then we assume a
 ``BIN file'' and if the filename ends ``.cue'' or ``.CUE'' then we
 assume a CUE file. 
 
-Althought this algorithm is subject to change and there may be more
+Although this algorithm is subject to change and there may be more
 sophisticated or alternative methods, in practice I think this does
-pretty much what's expected. 
+pretty much what's expected.
 
 @node What Options
 @section Options controlling what do you want shown
@@ -240,8 +271,12 @@ the option @kbd{--verbose}, but this is of a debugging nature.
 However if you specify something in particular to dump, for example to
 dump track information via command option @kbd{--show-tracks},
 @value{program} switches behavior and shows you almost nothing except
-what you asked for. You don't have to ask for just one item at a time,
-you can list many individual items.
+what you asked for. I wrote ``almost nothing except'' rather than
+``nothing except'' because by default there still is a little bit of
+extra information that is shown: delimiters between requested sections
+and a banner. However there are options to turn these off too. You
+don't have to ask for just one section or one item of a section at a
+time, you can list many individual items or sections together.
 
 Most of the individual items that can be shown are part of a larger
 group listed in @ref{Output Sections,,Output Sections}. For example to
@@ -253,33 +288,40 @@ To show everything in one of these large sections you give the section
 name followed by ``-all.'' So to see the entire PVD section you would
 use the command option @kbd{--show-pvd-all}.
 
-@node Other Options
-@section Other Miscellaneous options
+To see a list of the suboptions available use the sub-option ``help'';
+for example to see the sub-options available for the PVD section, you
+would use the command option @kbd{--show-pvd help}.
+
+@node All Options
+@section A complete list of options
 
 @table @code
 @item --help
-@cindex @code{--help}
+@kindex @code{--help}
 This option give a list of options type @kbd{--help}. @kbd{-?} is an
 abbreviation however you will probably have to ``escape'' the question
 mark so that the shell doesn't interpret this; i.e. you may have to
 type @kbd{-\?}.
 
 @item --usage
-@cindex @code{--usage}
+@kindex @code{--usage}
 This option shows an abbreviated usage message
 
 @item --sector-2336
-@cindex @code{--2336}
+@kindex @code{--2336}
+@kindex @code{--sector-2336}
 This option only makes sense if you are reading from a file CD-image.
 This indicated to @value{program} to assume a 2336-byte sector mode
 for image file.
 
 @item --verbose
 @itemx -v
+@kindex @code{--vebose}
 This opton gives more verbose, debugging  output.
 
 @item --terse
 @itemx -t
+@kindex @code{--terse}
 This option is the same as giving the combined options
 @kbd{--no-header --no-banner --no-delimiter}.  This option can be
 useful if this program is getting called for information from another
@@ -287,22 +329,152 @@ program and you don't want to have filter this information out.
 
 @item --no-banner
 @itemx -B
+@kindex @code{--banner}
 Do not show program banner header and CVS Id line. This would be
 useful in a regression test program where you want to check the output
 but know that the version information is going to change over time.
 
 @item --no-delimiter
 @itemx -D
+@kindex @code{--no-delimiter}
 Do not show delimiter lines around various the sections of @ref{Output
 Sections,,Output Sections}.
 
-  -q, --quiet                 show only critical messages
+@item --quiet
+@itemx -q
+@kindex @code{--quiet}
+Show only critical messages
 
 @item --version
 @itemx -V
+@kindex @code{--version}
 Display version and copyright information (the stuff that is
 suppressed by @kbd{--no-banner} and exit after displaying this
 information. Sometimes, you just wanna know what version you got.
+@end table
+
+Use at most one option in an invocation from the following list. These
+options are described in general in @ref{Where Options,,Options
+controlling where to read from}.
+
+@table @code
+@item --bin-file @ovar{filename}
+@itemx -b @ovar{filename}
+@kindex @code{--bin-file}
+Specifies a BIN file to read from. See @ref{BIN or CUE file,,Reading
+from a file containing a CD disk image} for more information.
+
+
+@item --cdrom-device @ovar{device-name}
+@itemx -C @ovar{device-name}
+@kindex @code{--cdrom-device}
+Specifies a CD-ROM device to read from. See @ref{CD-ROM
+Device,,Reading from CD-ROM Device} for more information.
+
+@item --cue-file @ovar{filename}
+@itemx -c @ovar{filename}
+@kindex @code{--cue-file}
+Specifies a CUE file to read from. Preferred over a BIN file if
+available. See @ref{BIN or CUE file,,Reading from a file containing a
+CD disk image} for more information.
+
+@item --input @ovar{file or device name}
+@itemx -i @ovar{file or device name}
+@kindex @code{--input}
+This option is insensitive to whether the thing reading from is a
+CD-ROM device or a file. See @ref{Intelligent Input,,Reading from
+whereever} for more information.
+
+@end table
+
+The options below controll how much output you get and described in
+general in @ref{Output Sections,,Output Sections}.
+
+@table @code
+@item --show-entries-all
+@itemx -E
+@kindex @code{--show-entries-all}
+List everything in the PVD section. See @ref{Entries,,Entries Section} for
+information about what is in this section.
+
+@item --show-entries @var{sub-option}
+@kindex @code{--show-entries}
+
+Sub-options are: ``count'', ``data'', ``id'', ``prof'', or ``vers''.
+
+@item --show-filesystem
+@itemx -F 
+@kindex @code{--show-filesystem}
+List everything in the PVD section. See @ref{Filesystem,,Filesystem} for
+information about what is in this section.
+
+@item --show-format
+@itemx -f 
+@kindex @code{--show-format}
+Show the format that the VCD is in. The value will be one of ``VCD 1.1'',
+``VCD 2.0'', ``SVCD'', or ``HQVCD''.
+
+@item --show-info-all
+@kindex @code{--show-info-all}
+List everything in the PVD section. See @ref{Info,,Info Section} for
+information about what is in this section.
+
+@item --show-info @var{suboption}
+@itemx -I @ovar{sub-option}
+@kindex @code{--show-info}
+
+Sub-options are: album, cc, count, id, ofm, lid2, lidn, pal, pbc,
+prof, psds, res, seg, segn, segs, spec, start, st2, vers, or vol.
+
+@item --show-lot
+@itemx -L
+@kindex @code{--show-lot}
+
+List everything in the LOT section. See @ref{LOT,,LID Offset Table
+(LOT) Section) Section} for information about what is in this section.
+
+@item --show-psd
+@itemx -p
+@kindex @code{--show-psd}
+
+List everything in the PSD section. See @ref{PSD,,Program Segment
+Descriptors (PSD) Section} for information about what is in this
+section.
+
+@item --show-pvd-all
+@kindex @code{--show-pvd-all}
+List everything in the PVD section. See @ref{PVD,,Primary Volume
+Descriptor (PVD) Section} for information about what is in this
+section.
+
+@item --show-pvd @var{suboption}
+@itemx -P @ovar{sub-option}
+@kindex @code{--show-pvd}
+
+Sub-options are: album, app, id, iso, prep, pub, sys, vers, vol,
+volset, or xa.
+
+@item --show-scandata
+@itemx -s
+@kindex @code{--show-scandata}
+
+@item --show-search
+@itemx -X
+@kindex @code{--show-search}
+
+@item --show-source
+@itemx -S
+@kindex @code{--show-source}
+
+Just list out where you are reading from and the size of the image.
+
+@item --show-tracks
+@itemx -T
+@kindex @code{--show-tracks}
+
+List everything in the Tracks section. See @ref{Tracks,,Tracks Section} for
+information about what is in this section.
+
 @end table
 
 @node Output Sections
@@ -319,18 +491,18 @@ sections of output separated by a string of dashes like this:
 These separate the major logical sections of a VCD
 
 @menu
-@c * Source Information::  Overall disk information
 * PVD::                 Primary Volume Descriptor (PVD) Section
 * Filesystem::          ISO 9660 Information
 * Entries::             Entries Section
 * Info::                Info Section
-* LOT::                 List of Tracks (LOT) Section
+* LOT::                 LID Offset Table (LOT) Section
 * PSD::                 Program Segment Descriptors (PSD) Section
 * Tracks::              Tracks 
 @end menu
 
 @node PVD
 @section Primary Volume Descriptor (PVD) Section
+@cindex Primary Volume Descriptor (PVD) 
 
 @smallexample
 ISO9660 primary volume descriptor
@@ -354,30 +526,30 @@ directory listing. Here's a sample:
 
 @smallexample
  /:
-  d d---1xrxrxr 0 0 [fn 00] [lsn     18]      2048  .
-  d d---1xrxrxr 0 0 [fn 00] [lsn     18]      2048  ..
-  d d---1xrxrxr 0 0 [fn 00] [lsn     19]      2048  EXT
-  d d---1xrxrxr 0 0 [fn 00] [lsn     20]      2048  MPEGAV
-  d d---1xrxrxr 0 0 [fn 00] [lsn     21]      2048  VCD
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  d d---1xrxrxr 0 0 [fn 00] [LSN     19]      2048  EXT
+  d d---1xrxrxr 0 0 [fn 00] [LSN     20]      2048  MPEGAV
+  d d---1xrxrxr 0 0 [fn 00] [LSN     21]      2048  VCD
 
  /EXT/:
-  d d---1xrxrxr 0 0 [fn 00] [lsn     19]      2048  .
-  d d---1xrxrxr 0 0 [fn 00] [lsn     18]      2048  ..
-  - ----1xrxrxr 0 0 [fn 01] [lsn    225]     65536  LOT_X.VCD;1
-  - ----1xrxrxr 0 0 [fn 01] [lsn    257]      6800  PSD_X.VCD;1
+  d d---1xrxrxr 0 0 [fn 00] [LSN     19]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  - ----1xrxrxr 0 0 [fn 01] [LSN    225]     65536  LOT_X.VCD;1
+  - ----1xrxrxr 0 0 [fn 01] [LSN    257]      6800  PSD_X.VCD;1
 
  /MPEGAV/:
-  d d---1xrxrxr 0 0 [fn 00] [lsn     20]      2048  .
-  d d---1xrxrxr 0 0 [fn 00] [lsn     18]      2048  ..
-  - ---2-xrxrxr 0 0 [fn 01] [lsn    450] 639546208 (563593216)  AVSEQ01.DAT;1
+  d d---1xrxrxr 0 0 [fn 00] [LSN     20]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  - ---2-xrxrxr 0 0 [fn 01] [LSN    450] 639546208 (563593216)  AVSEQ01.DAT;1
 
  /VCD/:
-  d d---1xrxrxr 0 0 [fn 00] [lsn     21]      2048  .
-  d d---1xrxrxr 0 0 [fn 00] [lsn     18]      2048  ..
-  - ----1xrxrxr 0 0 [fn 00] [lsn    151]      2048  ENTRIES.VCD;1
-  - ----1xrxrxr 0 0 [fn 00] [lsn    150]      2048  INFO.VCD;1
-  - ----1xrxrxr 0 0 [fn 00] [lsn    152]     65536  LOT.VCD;1
-  - ----1xrxrxr 0 0 [fn 00] [lsn    184]      2456  PSD.VCD;1
+  d d---1xrxrxr 0 0 [fn 00] [LSN     21]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  - ----1xrxrxr 0 0 [fn 00] [LSN    151]      2048  ENTRIES.VCD;1
+  - ----1xrxrxr 0 0 [fn 00] [LSN    150]      2048  INFO.VCD;1
+  - ----1xrxrxr 0 0 [fn 00] [LSN    152]     65536  LOT.VCD;1
+  - ----1xrxrxr 0 0 [fn 00] [LSN    184]      2456  PSD.VCD;1
 @end smallexample
 
 A little about the funny ``attribute'' characters at the beginning of
@@ -407,7 +579,7 @@ The exact meaning of the attributes section is listed below:
 The 1st character is either "d" if the entry is a directory, or "-" if
 not.
 @item
-The 2nd character is either "a" if the entry is CDDA (audio), or "-"
+The 2nd character is either "a" if the entry is CD-DA (audio), or "-"
 if not.
 @item
 The 3rd character is either "i" if the entry is interleaved, or "-" if
@@ -432,7 +604,7 @@ entry is executable. For a directory this means the directory is
 allowed to be listed or "searched".  The second character of a pair
 (7, 9, 11) is "r" if the entry is allowed to be read.
 
-The item in brackets, e.g. @kbd{[lsn 450]} for the AVSEQ01.DAT entry
+The item in brackets, e.g. @kbd{[LSN 450]} for the AVSEQ01.DAT entry
 is the ``logical sector number'' or the place on the CD where the
 entry starts.
 
@@ -447,10 +619,10 @@ VCD/ENTRIES.VCD
  version: 0x02
  system profile tag: 0x00
  entries: 31
- ENTRY[00]: track# 1 (SEQUENCE[0]), LSN 450 (msf 00:08:00)
- ENTRY[01]: track# 1 (SEQUENCE[0]), LSN 482 (msf 00:08:32)
- ENTRY[02]: track# 1 (SEQUENCE[0]), LSN 5888 (msf 01:20:38)
- ENTRY[03]: track# 1 (SEQUENCE[0]), LSN 8925 (msf 02:01:00)
+ ENTRY[00]: track# 1 (SEQUENCE[0]), LSN 450 (MSF 00:08:00)
+ ENTRY[01]: track# 1 (SEQUENCE[0]), LSN 482 (MSF 00:08:32)
+ ENTRY[02]: track# 1 (SEQUENCE[0]), LSN 5888 (MSF 01:20:38)
+ ENTRY[03]: track# 1 (SEQUENCE[0]), LSN 8925 (MSF 02:01:00)
  ...
 @end smallexample
 
@@ -469,7 +641,7 @@ track being one more than the SEQUENCE number. Note the first entry is
 also at logical sector number 450, the same as AVSEQ01.DAT. In other
 words ``Entry 0'' is the start of the movie.
 
-The minutes, seconds, frames number (msf 00:08:00) is equivalent to
+The minutes, seconds, frames number (MSF 00:08:00) is equivalent to
 the LSN number. For those who wonder how to from the MSF to the LSN
 you basically multiply the seconds (8) by 75 since there are 75 frames
 in a second (note this has nothing to do with how fast this is
@@ -518,7 +690,7 @@ SVCD/INFO.SVD
 @end smallexample
 
 @node LOT
-@section List of Tracks (LOT) Section
+@section LID Offset Table (LOT) Section
 
 Here is part of sample output from a SVCD of this section.
 
@@ -530,13 +702,19 @@ SVCD/LOT.SVD
 @end smallexample
 
 We have list id's (LIDs). The offset are offsets into the Program
-Segment descriptors given in the next section. LID 3 is rejected which
-means that you are not supposed to be able to jump to that entry
-directly but may reach it through program control.
+Segment descriptors described in @ref{PSD, Program Segment Descriptors
+(PSD) Section}. LID 3 is rejected which means that you are not
+supposed to be able to jump to that entry directly but may reach it
+through program control.
 
 
 @node PSD
 @section Program Segment Descriptors (PSD) Section
+@cindex Program Segment Descriptors (PSD) 
+
+Here is part of sample output from the test PAL SVCD that can be found
+from:
+@url{http://www.vcdimager.org/pub/vcdimager/examples/test_svcd/test_svcd_pal.zip}
 
 @smallexample
 SVCD/PSD.SVD
@@ -546,24 +724,44 @@ SVCD/PSD.SVD
   playtime: 0/15s | wait: 0s | autowait: 0s
   play-item[0]: SEGMENT[8] (0x03ef)
   play-item[1]: SEGMENT[7] (0x03ee)
+@end smallexample
 
- PSD[01] (LID[2] @@0x0003): play list descriptor
-  NOI: 1 | LID#: 2 (rejected: yes)
-  prev: disabled | next: LID[3] @@0x0005 | return: disabled
-  playtime: 0/15s | wait: 5s | autowait: 0s
-  play-item[0]: SEGMENT[5] (0x03ec)
+The first line SVCD/PSD.SVD again is the file entry that we are
+reading. Since the CD image is in the SVCD format have that particular
+name. If the CD image were in VCD 1.1 or VCD 2.0 format the line would
+read VCD/PSD.VCD.
 
- PSD[02] (LID[3] @@0x0005): play list descriptor
-  NOI: 1 | LID#: 3 (rejected: yes)
-  prev: disabled | next: LID[4] @@0x0007 | return: disabled
-  playtime: 0/15s | wait: 0s | autowait: 0s
-  play-item[0]: SEGMENT[7] (0x03ee)
+Above NOI shows that there are two play-item entries, the individual
+entries are given below. We also see that this item is not
+``rejected'' and thus could be accessed directly from a player.
 
+The corresponding XML text for the above output is:
+
+@smallexample
+  <playlist id="playlist-01">
+    <next ref="playlist-02"/>
+    <wait>0</wait>
+    <autowait>0</autowait>
+    <play-item ref="segment-0007"/>
+    <play-item ref="segment-0006"/>
+  </playlist>
+@end smallexample
+
+Some of the tag names like ``play-item,'' ``wait, and ``autowait''
+given above match what are in the XML description. Although, you won't
+find ``next,'' ``prev'' or ``return'' listed, the tag names are also
+the same. In the XML you are free to omit values and you will get
+default values put in; in @value{program} you see what has been filled
+in.
+
+Below is another excerpt from that file.
+
+@smallexample
   PSD[03] (LID[4] @@0x0007): selection list descriptor
   Flags: 0x01 | NOS: 9 | BSN: 1 | LID: 4 (rejected: yes)
   prev: disabled | next: disabled | return: disabled
   default: LID[12] @@0x0029 | timeout: LID[2] @@0x0003
-  totime: 10s | loop: 1 (delayed: no)
+  wait: 10 secs | loop: 1 (delayed: no)
   play-item: SEGMENT[1] (0x03e8)
   ofs[0]: LID[6] @@0x0015
   ofs[1]: LID[7] @@0x0017
@@ -587,8 +785,31 @@ SVCD/PSD.SVD
   area[8]: disabled
 @end smallexample
 
+The XML excerpt that corresponds to this part is this:
+
+@smallexample
+  <selection id="selection-01" rejected="true">
+    <bsn>1</bsn>
+    <default ref="playlist-10" x1="0" y1="0" x2="0" y2="0"/>
+    <timeout ref="playlist-02"/>
+    <wait>10</wait>
+    <loop jump-timing="immediate">1</loop>
+    <play-item ref="segment-0000"/>
+    <select ref="playlist-05" x1="0" y1="0" x2="0" y2="0"/>
+    <select ref="playlist-06" x1="0" y1="0" x2="0" y2="0"/>
+    <select ref="playlist-07" x1="0" y1="0" x2="0" y2="0"/>
+    <select ref="playlist-08" x1="0" y1="0" x2="0" y2="0"/>
+    <select ref="playlist-09" x1="0" y1="0" x2="0" y2="0"/>
+    <select ref="selection-02" x1="0" y1="0" x2="0" y2="0"/>
+    <select ref="playlist-11" x1="0" y1="0" x2="0" y2="0"/>
+    <select/>
+    <select ref="playlist-12" x1="0" y1="0" x2="0" y2="0"/>
+   </selection>
+@end smallexample
+
 @node Tracks
 @section Tracks
+@cindex Tracks
 
 Here is part of sample output from the test PAL SVCD that can be found
 from:
@@ -642,13 +863,20 @@ It means the same thing as:
   vcddump --cdrom-device
 @end smallexample 
 
-I have a combined CD-ROM and DVD drive; my CD-ROM drive also can write
-and seems to draw more power; so I prefer to read from the DVD
-drive. Since that is not the ``default'' (@kbd{/dev/cdrom}) on my
-Linux box, I have to give a location. So this will work: 
+and using the ``short'' option:
+@smallexample
+  vcddump -C
+@end smallexample 
+
+I have a combined CD-ROM and DVD drive called @kbd{/dev/dvd}. I have
+another CD-ROM drive which goes under the name @kbd{/dev/cdrom}, but I
+generally prefer to use the DVD/CD-ROM drive for reading since it
+doesn't seem to run as hot. Since that drive is not the ``default''
+(@kbd{/dev/cdrom}) on my GNU/Linux box, I have to give a location. So
+this will work:
 
 @smallexample
-  vcddump --cdrom-device=/dev/dvd
+  vcddump -C=/dev/dvd
 @end smallexample 
 
 Or even better, I'll let @value{program} figure out it's a CD-ROM device:
@@ -661,7 +889,7 @@ Let's say you just used vcdimager or vcdxbuild it created output to
 its ``default'' location (probably @kbd{videocd.cue} and
 @kbd{videocd.bin}. To dump out this out:
 @smallexample
-  vcddump -c
+  vcddump --cue-file
 @end smallexample 
 
 But if you specified the output to go to say @kbd{nausicaa.bin} and
@@ -674,6 +902,12 @@ Or again not having to worry about what type of file you could use
 the ``intelligent'' input option again as we did before:
 @smallexample
   vcddump -i nausicaa.cue
+@end smallexample 
+
+To list all of the suboptions to choose from in the Primary Volume
+Descriptor section (PVD) try this:
+@smallexample
+  vcddump --show-pvd help
 @end smallexample 
 
 Okay, now for for some more obscure stuff. Let's say I'm writing a
@@ -706,6 +940,55 @@ of the entries section, no summary information like a count or ID tag.
 @smallexample
   vcddump --show-entries data
 @end smallexample 
+
+@node History and Thanks
+@chapter History and Thanks
+
+This program started its life under the name ``vcddebug'' by Herbert
+Valerio Riedel. The overall structure is still largely that of this
+program. However vcddebug dumps all information about a VCD always.  I
+needed to pick out individual pieces of information from this for a a
+media player plugin. Initially I was running vcddebug and parsing
+output. It became clear that it would be convenient to add options to
+reduce the amount of output. Initially there were single options added
+such as to show the VCD format. However with the bulk of information
+that's that is available, a sub-option system became very useful; that
+was added.
+
+I was unhappy about the name ``vcddebug'' since there really was no
+debugging involved. Furthermore getting changes back into vcddebug was
+going a bit slowly. So @value{program} was started and that allowed me more
+freedom to change the program in more drastic ways. In particular, it
+was becoming clear to me that what I really needed was a library to
+give information about a VCD and much of this code was ``inlined''
+inside vcddebug. So I pulled pieces of that out and a library was
+created. As a result @value{program} became a test-bed for this library.
+
+In developing my VCD plugin, I used @value{program} quite a bit. One of the
+annoying things about vcddebug was it's inflexibility in specifying
+where to read from; I was constantly typing
+``--cdrom-device=/dev/cdrom'' when I felt that the program should be
+able to figure this out. The distinction between a ``device'' and a
+file containing CD image while it may be fascinating to the program,
+was just not of interest to me as a user. So the ability to figure
+make what seems to be a reasonable guess about what's being read,
+short options for the classes of input and optional names were then
+added. 
+
+When my VCD input plugin got good enough to read CD-images from a
+file, I realized that in order to recover track information one needs
+to consult the CUE file. So the ability to read this kind of file was
+added to the library routines, and @value{program} was adjusted
+accordingly. Likewise dumping out track information when a image is
+not a VCD was added.
+
+@node General Index
+@unnumbered General Index
+@printindex cp
+
+@node Option Index
+@unnumbered Option Index
+@printindex ky
 
 @tex
 % I think something like @colophon should be in texinfo.  In the
