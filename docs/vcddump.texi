@@ -63,7 +63,7 @@ development.''
 @ifnottex
 @dircategory Video CD Tools
 @direntry
-* vcddump: (vcddump)Top.                  Video CD dump tool
+* vcddump: (vcddump).                           Video CD dump tool
 @end direntry
 
 @node Top, Introduction, (dir), (dir)
