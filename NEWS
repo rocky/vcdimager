@@ -6,9 +6,9 @@ version 0.7.13 (unstable/development)
 =====================================
 2003-02-11
 
-* maintainance release
+* maintenance release
 * fixes for gcc on linux/arm
-* removed internal popt and gnome frontend code from distribution
+* removed internal popt and gnome front-end code from distribution
 * added --dump-dtd option to vcdxbuild
 * added testsuite to distribution
 * added vcdinfo library to retrieve VCD information
