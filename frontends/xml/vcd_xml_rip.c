@@ -22,11 +22,21 @@
 # include "config.h"
 #endif
 
-#include <ctype.h>
-#include <stdlib.h>
-#include <string.h>
 #include <stdio.h>
+#include <errno.h>
+#include <ctype.h>
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 #include <popt.h>
 
@@ -408,13 +418,6 @@ _xstrdup(const char *s)
   return NULL;
 }
 
-typedef struct {
-  uint8_t type;
-  unsigned lid;
-  unsigned offset;
-  bool in_lot;
-} psd_offset_t;
-
 struct _pbc_ctx {
   unsigned psd_size;
   unsigned maximum_lid;
@@ -459,7 +462,7 @@ _ofs2id (unsigned offset, const struct _pbc_ctx *_ctx)
   VcdListNode *node;
   static char buf[80];
   unsigned sl_num = 0, el_num = 0, pl_num = 0;
-  psd_offset_t *ofs = NULL;
+  vcdinfo_offset_t *ofs = NULL;
   
   if (offset == PSD_OFS_DISABLED)
     return NULL;
@@ -525,7 +528,7 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
 {
   pbc_t *_pbc = NULL;
   const uint8_t *_buf = &_ctx->psd[offset * _ctx->offset_mult];
-  psd_offset_t *ofs = NULL;
+  vcdinfo_offset_t *ofs = NULL;
 
   {
     VcdListNode *node;
@@ -554,14 +557,14 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
 	_pbc->retn_id = _xstrdup (_ofs2id (vcdinf_get_return_from_pld(d), 
 					   _ctx));
 	
-	_pbc->playing_time = (double) (uint16_from_be (d->ptime)) / 15.0;
+	_pbc->playing_time = (double) (vcdinf_get_play_time(d)) / 15.0;
 	_pbc->wait_time       = vcdinfo_get_wait_time(d);
 	_pbc->auto_pause_time = vcdinfo_get_autowait_time(d);
 
-	for (n = 0; n < d->noi; n++)
-	  {
-	    _vcd_list_append (_pbc->item_id_list, 
-			      _xstrdup (_pin2id (uint16_from_be (d->itemid[n]), _ctx)));
+	for (n = 0; n < d->noi; n++) {
+	  _vcd_list_append (_pbc->item_id_list, 
+			    _xstrdup(_pin2id(vcdinf_get_play_item_from_pld(d, n),
+					     _ctx)));
 	  }
       }
       break;
@@ -605,7 +608,7 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
 	_pbc->timeout_id = 
 	  _xstrdup (_ofs2id (uint16_from_be (d->timeout_ofs), _ctx));
 	_pbc->timeout_time = vcdinfo_get_timeout_time (d);
-	_pbc->jump_delayed = (0x80 & d->loop) != 0;
+	_pbc->jump_delayed = vcdinf_has_jump_delay(d);
 	_pbc->loop_count = vcdinf_get_loop_count(d);
 	_pbc->item_id = _xstrdup (_pin2id (uint16_from_be (d->itemid), _ctx));
 
@@ -656,7 +659,7 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
       break;
 
     default:
-      vcd_warn ("unknown psd type %d", *_buf);
+      vcd_warn ("Unknown PSD type %d", *_buf);
       break;
     }
 
@@ -673,7 +676,7 @@ static void
 _visit_pbc (struct _pbc_ctx *obj, unsigned lid, unsigned offset, bool in_lot)
 {
   VcdListNode *node;
-  psd_offset_t *ofs;
+  vcdinfo_offset_t *ofs;
   unsigned _rofs = offset * obj->offset_mult;
 
   vcd_assert (obj->psd_size % 8 == 0);
@@ -717,7 +720,7 @@ _visit_pbc (struct _pbc_ctx *obj, unsigned lid, unsigned offset, bool in_lot)
         }
     }
 
-  ofs = _vcd_malloc (sizeof (psd_offset_t));
+  ofs = _vcd_malloc (sizeof (vcdinfo_offset_t));
 
   ofs->offset = offset;
   ofs->lid = lid;
@@ -786,25 +789,6 @@ _visit_pbc (struct _pbc_ctx *obj, unsigned lid, unsigned offset, bool in_lot)
     }
 }
 
-static int
-_offset_t_cmp (psd_offset_t *a, psd_offset_t *b)
-{
-  if (a->lid && b->lid)
-    {
-      if (a->lid > b->lid)
-	return 1;
-
-      if (a->lid < b->lid)
-	return -1;
-    } 
-  else if (a->lid)
-    return -1;
-  else if (b->lid)
-    return 1;
-
-  return 0;
-}
-
 static void
 _visit_lot (struct _pbc_ctx *obj)
 {
@@ -815,7 +799,7 @@ _visit_lot (struct _pbc_ctx *obj)
     if ((tmp = uint16_from_be (lot->offset[n])) != PSD_OFS_DISABLED)
       _visit_pbc (obj, n + 1, tmp, true);
 
-  _vcd_list_sort (obj->offset_list, (_vcd_list_cmp_func) _offset_t_cmp);
+  _vcd_list_sort (obj->offset_list, (_vcd_list_cmp_func) vcdinf_lid_t_cmp);
 }
 
 static int
@@ -832,7 +816,7 @@ _parse_pbc (struct vcdxml_t *obj, VcdImageSource *img, bool no_ext_psd)
 
   if (!obj->info.psd_size)
     {
-      vcd_debug ("no pbc info");
+      vcd_debug ("No PBC info");
       return 0;
     }
 
@@ -900,7 +884,7 @@ _parse_pbc (struct vcdxml_t *obj, VcdImageSource *img, bool no_ext_psd)
 
   _VCD_LIST_FOREACH (node, _pctx.offset_list)
     {
-      psd_offset_t *ofs = _vcd_list_node_data (node);
+      vcdinfo_offset_t *ofs = _vcd_list_node_data (node);
       pbc_t *_pbc;
 
       vcd_assert (ofs->offset != PSD_OFS_DISABLED);
@@ -1004,7 +988,7 @@ _rip_segments (struct vcdxml_t *obj, VcdImageSource *img)
 	  struct m2f2sector
           {
             uint8_t subheader[8];
-            uint8_t data[2324];
+            uint8_t data[M2F2_SECTOR_SIZE];
             uint8_t spare[4];
           }
           buf;
@@ -1022,7 +1006,7 @@ _rip_segments (struct vcdxml_t *obj, VcdImageSource *img)
               break;
             }
 
-	  vcd_mpeg_parse_packet (buf.data, 2324, false, &mpeg_ctx);
+	  vcd_mpeg_parse_packet (buf.data, M2F2_SECTOR_SIZE, false, &mpeg_ctx);
 
 	  if (mpeg_ctx.packet.has_pts)
 	    {
@@ -1044,7 +1028,7 @@ _rip_segments (struct vcdxml_t *obj, VcdImageSource *img)
 	      _vcd_list_append (_seg->autopause_list, _ap_ts);
 	    }
 
-	  fwrite (buf.data, 2324, 1, outfd);
+	  fwrite (buf.data, M2F2_SECTOR_SIZE, 1, outfd);
 
 	  if (ferror (outfd))
             {
@@ -1085,7 +1069,7 @@ _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img)
       struct m2f2sector
       {
 	uint8_t subheader[8];
-	uint8_t data[2324];
+	uint8_t data[M2F2_SECTOR_SIZE];
 	uint8_t spare[4];
       }
       buf[15];
@@ -1173,7 +1157,8 @@ _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img)
 	    {
 	      VcdListNode *_node;
 
-	      vcd_mpeg_parse_packet (buf[buf_idx].data, 2324, false, &mpeg_ctx);
+	      vcd_mpeg_parse_packet (buf[buf_idx].data, M2F2_SECTOR_SIZE, 
+				     false, &mpeg_ctx);
 
 	      if (!mpeg_ctx.packet.zero)
 		last_nonzero = n;
@@ -1214,7 +1199,7 @@ _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img)
 	      
 	      if (first_data)
 		{
-		  fwrite (buf[buf_idx].data, 2324, 1, outfd);
+		  fwrite (buf[buf_idx].data, M2F2_SECTOR_SIZE, 1, outfd);
 
 		  if (ferror (outfd))
 		    {
@@ -1247,7 +1232,7 @@ _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img)
 	  vcd_debug ("truncating file to %d packets", length);
 
 	  fflush (outfd);
-	  if (ftruncate (fileno (outfd), length * 2324))
+	  if (ftruncate (fileno (outfd), length * M2F2_SECTOR_SIZE))
 	    perror ("ftruncate()");
 	}
 
@@ -1279,10 +1264,12 @@ main (int argc, const char *argv[])
   int _gui_flag = 0;
 
   enum { 
-    CL_VERSION = 1,
-    CL_BINCUE,
-    CL_CDROM,
-    CL_NRG
+    CL_SOURCE_UNDEF = VCDINFO_SOURCE_UNDEF,
+    CL_SOURCE_AUTO  = VCDINFO_SOURCE_AUTO,
+    CL_SOURCE_BIN   = VCDINFO_SOURCE_BIN,
+    CL_SOURCE_CDROM = VCDINFO_SOURCE_DEVICE,
+    CL_SOURCE_NRG   = VCDINFO_SOURCE_NRG,
+    CL_VERSION      = 20
   } _img_type = 0;
 
   vcd_xml_progname = "vcdxrip";
@@ -1302,17 +1289,20 @@ main (int argc, const char *argv[])
        "specify xml file for output (default: '" DEFAULT_XML_FNAME "')",
        "FILE"},
 
-      {"bin-file", 'b', POPT_ARG_STRING, &img_fname, CL_BINCUE,
+      {"bin-file", 'b', POPT_ARG_STRING, &img_fname, CL_SOURCE_BIN,
        "set image file as source (default: '" DEFAULT_IMG_FNAME "')", 
        "FILE"},
 
       {"sector-2336", '\0', POPT_ARG_NONE, &sector_2336_flag, 0,
        "use 2336 byte sector mode for image file"},
 
-      {"cdrom-device", '\0', POPT_ARG_STRING, &img_fname, CL_CDROM,
+      {"cdrom-device", '\0', POPT_ARG_STRING, &img_fname, CL_SOURCE_CDROM,
        "set CDROM device as source", "DEVICE"},
 
-      {"nrg-file", '\0', POPT_ARG_STRING, &img_fname, CL_NRG,
+      {"input", 'i', POPT_ARG_STRING, &img_fname, CL_SOURCE_AUTO,
+       "set source and determine if \"bin\" image or device", "FILE"},
+
+      {"nrg-file", '\0', POPT_ARG_STRING, &img_fname, CL_SOURCE_NRG,
        "set NRG image file as source",
        "FILE"},
 
@@ -1362,9 +1352,10 @@ main (int argc, const char *argv[])
 	  exit (EXIT_SUCCESS);
 	  break;
 
-	case CL_NRG:
-	case CL_BINCUE:
-	case CL_CDROM:
+	case CL_SOURCE_AUTO:
+	case CL_SOURCE_NRG:
+	case CL_SOURCE_BIN:
+	case CL_SOURCE_CDROM:
 	  if (_img_type)
 	    {
 	      vcd_error ("Only one image (type) supported at once - try --help");
@@ -1374,7 +1365,10 @@ main (int argc, const char *argv[])
 	  break;
 
 	default:
-	  vcd_error ("Error while parsing command line - try --help");
+	  fprintf (stderr, "%s: %s\n", 
+		   poptBadOption(optCon, POPT_BADOPTION_NOALIAS),
+		   poptStrerror(opt));
+	  fprintf (stderr, "error while parsing command line - try --help\n");
 	  exit (EXIT_FAILURE);
 	  break;
       }
@@ -1404,9 +1398,35 @@ main (int argc, const char *argv[])
   if (!xml_fname)
     xml_fname = strdup (DEFAULT_XML_FNAME);
 
+  if (CL_SOURCE_AUTO == _img_type) {
+    struct stat buf;
+    if (0 != stat(img_fname, &buf)) {
+      vcd_error ("Can't stat file %s:", strerror(errno));
+      exit (EXIT_FAILURE);
+    }
+    if (S_ISBLK(buf.st_mode) || S_ISCHR(buf.st_mode)) {
+      _img_type = CL_SOURCE_CDROM;
+    } else if (S_ISREG(buf.st_mode)) {
+      /* FIXME: check to see if is a text file. If so, then 
+	 set VCDINFO_SOURCE_CUE. */
+      int i=strlen(img_fname)-strlen("bin");
+      if (i > 0
+	       && (img_fname[i] =='n' || img_fname[i+1] =='N')
+	       && (img_fname[i+1] =='r' || img_fname[i+1] =='R')
+	       && (img_fname[i+2] =='g' || img_fname[i+2] =='G') ) 
+	_img_type = CL_SOURCE_NRG;
+      else
+	_img_type = CL_SOURCE_BIN;
+    } else {
+      vcd_error ("Source file `%s' should either be a block device "
+		 "or a regular file", img_fname);
+      exit (EXIT_FAILURE);
+    }
+  }
+  
   switch (_img_type) 
     {
-    case CL_BINCUE:
+    case CL_SOURCE_BIN:
       img_src = vcd_image_source_new_bincue ();
 
       vcd_image_source_set_arg (img_src, "bin", img_fname);
@@ -1415,12 +1435,12 @@ main (int argc, const char *argv[])
 				sector_2336_flag ? "2336" : "2352");
       break;
 
-    case CL_NRG:
+    case CL_SOURCE_NRG:
       img_src = vcd_image_source_new_nrg ();
       vcd_image_source_set_arg (img_src, "nrg", img_fname);
       break;
 
-    case CL_CDROM:
+    case CL_SOURCE_CDROM:
       img_src = vcd_image_source_new_cd ();
 
       vcd_image_source_set_arg (img_src, "device", img_fname);
