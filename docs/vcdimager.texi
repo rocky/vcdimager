@@ -426,7 +426,7 @@ added.
 
 @item
 Support for (optional) playing related access by providing a scan point
-index file was added. (@file{EXT/SCANDATA.DAT})
+index file was added. (@file{/EXT/SCANDATA.DAT})
 
 @end itemize
 
@@ -494,6 +494,24 @@ for motion pictures:
 Just like the XVCD, and thus also known as @dfn{XSVCD}, this is not an
 official standard and may not work with all playing devices supporting
 SVCDs.
+
+@section The ISO9660 Track
+
+@subsection Primary Volume Descriptor
+
+@subsection Directory Structure
+
+@subsubsection @file{/VCD} & @file{/SVCD} Directory
+
+@subsubsection @file{/MPEGAV} & @file{/MPEG2} Directory
+
+@subsubsection @file{/CDDA} Directory
+
+@subsubsection @file{/SEGMENT} Directory
+
+@subsubsection @file{/EXT} Directory
+
+@subsubsection @file{/CDI} Directory
 
 @node Constraints on @acronym{MPEG} streams,  , Known Video CD Flavors, Video CD Concepts
 @section Constraints on @acronym{MPEG} streams
@@ -736,13 +754,20 @@ downloaded from @url{http://www.gnu.org/software/vcdimager/videocd.dtd}.
 @end menu
 
 @example
-<!ELEMENT videocd (option*,info,pvd,filesystem?,
-                   segment-items?,sequence-items,pbc?)>
+<!ELEMENT videocd                       (option*,
+                                         info,
+                                         pvd,
+                                         filesystem?,
+                                         segment-items?,
+                                         sequence-items,
+                                         pbc?)>
 <!ATTLIST videocd
   class        CDATA  #REQUIRED
   version      CDATA  #REQUIRED
   xmlns        %URI;  #FIXED 'http://www.gnu.org/software/vcdimager/1.0/'
 >
+
+<!ENTITY % URI "CDATA">
 @end example
 
 Supported combinations of @var{class} and @var{version} are listed below:
@@ -761,7 +786,7 @@ Supported combinations of @var{class} and @var{version} are listed below:
 @subsection @code{<option>} Element
 
 @example
-<!ELEMENT option EMPTY>
+<!ELEMENT option                        EMPTY>
 <!ATTLIST option 
   name         CDATA  #REQUIRED
   value        CDATA  #IMPLIED
@@ -773,8 +798,8 @@ The following option @var{name} are recognized.  At the moment only
 
 @table @samp
 @item svcd vcd30 mpegav
-Rename @file{/MPEG2/} folder on @acronym{SVCD}s to (non-compliant)
-@file{/MPEGAV/}.  Default: @samp{false}.
+Rename @file{/MPEG2} folder on @acronym{SVCD}s to (non-compliant)
+@file{/MPEGAV}.  Default: @samp{false}.
 
 @item svcd vcd30 entrysvd
 Enables the use of the (deprecated) signature @samp{ENTRYSVD} instead of
@@ -791,9 +816,13 @@ relaxed. Default: @samp{false}.
 @subsection @code{<info>} Container
 
 @example
-<!ELEMENT info (album-id?,volume-count?,volume-number?,
-                next-volume-use-sequence2?,next-volume-use-lid2?,
-                restriction?,time-offset?)>
+<!ELEMENT info                          (album-id?,
+                                         volume-count?,
+                                         volume-number?,
+                                         next-volume-use-sequence2?,
+                                         next-volume-use-lid2?,
+                                         restriction?,
+                                         time-offset?)>
 
 <!ELEMENT album-id                      (#PCDATA)>
 <!ELEMENT volume-count                  (#PCDATA)>
@@ -808,8 +837,11 @@ relaxed. Default: @samp{false}.
 @subsection @code{<pvd>} Container
 
 @example
-<!ELEMENT pvd (volume-id?,system-id?,application-id?,
-               preparer-id?,publisher-id?)>
+<!ELEMENT pvd                           (volume-id?,
+                                         system-id?,
+                                         application-id?,
+                                         preparer-id?,
+                                         publisher-id?)>
 
 <!ELEMENT volume-id                     (#PCDATA)>
 <!ELEMENT system-id                     (#PCDATA)>
@@ -827,22 +859,26 @@ relaxed. Default: @samp{false}.
 @end menu
 
 @example
-<!ELEMENT filesystem (folder*,file*)>
+<!ELEMENT filesystem                    (folder*,
+                                         file*)>
 @end example
 
 @node @code{<folder>} Element/Containter, @code{<file>} Element/Containter, @code{<filesystem>} Container, @code{<filesystem>} Container
 @subsubsection @code{<folder>} Element/Containter
 
 @example
-<!ELEMENT folder (name,folder*,file*)>
+<!ELEMENT folder                        (name,
+                                         folder*,
+                                         file*)>
+
 <!ELEMENT name                          (#PCDATA)>
 @end example
 
 @node @code{<file>} Element/Containter,  , @code{<folder>} Element/Containter, @code{<filesystem>} Container
-@subsubsection @code{<file>} Element/Containter
+@subsubsection @code{<file>} Element
 
 @example
-<!ELEMENT file (name)>
+<!ELEMENT file                          (name)>
 <!ATTLIST file 
   src          %URI;  #REQUIRED
   format       (form1|mixed) "form1"
@@ -857,8 +893,20 @@ relaxed. Default: @samp{false}.
 * @code{<segment-item>} Element::  
 @end menu
 
+@example
+<!ELEMENT segment-items                 (segment-item)+>
+@end example
+
 @node @code{<segment-item>} Element,  , @code{<segment-items>} Container, @code{<segment-items>} Container
 @subsubsection @code{<segment-item>} Element
+
+@example
+<!ELEMENT segment-item                  EMPTY>
+<!ATTLIST segment-item 
+  id           ID     #REQUIRED
+  src          %URI;  #REQUIRED
+>
+@end example
 
 @node @code{<sequence-items>} Container, @code{<pbc>} Container, @code{<segment-items>} Container, @code{<videocd>} Root
 @subsection @code{<sequence-items>} Container
@@ -868,14 +916,15 @@ relaxed. Default: @samp{false}.
 @end menu
 
 @example
-<!ELEMENT sequence-items (sequence-item)+>
+<!ELEMENT sequence-items                (sequence-item)+>
 @end example
 
 @node @code{<sequence-item>} Element,  , @code{<sequence-items>} Container, @code{<sequence-items>} Container
 @subsubsection @code{<sequence-item>} Element
 
 @example
-<!ELEMENT sequence-item (entry*,auto-pause*)>
+<!ELEMENT sequence-item                 (entry*,
+                                         auto-pause*)>
 <!ATTLIST sequence-item
   id           ID     #REQUIRED
   src          %URI;  #REQUIRED
@@ -898,14 +947,96 @@ relaxed. Default: @samp{false}.
 * @code{<endlist>} Element::    
 @end menu
 
+@example
+<!ELEMENT pbc                           (selection|
+                                         playlist|
+                                         endlist)+>
+
+<!ENTITY % pbcattrs
+" id           ID     #REQUIRED
+  rejected     (true|false) 'false'"
+>
+
+<!ENTITY % XY "CDATA">
+
+<!ENTITY % ofsattrs
+" ref          IDREF  #REQUIRED
+  x1           %XY;   #IMPLIED
+  y1           %XY;   #IMPLIED
+  x2           %XY;   #IMPLIED
+  y2           %XY;   #IMPLIED"
+>
+@end example
+
 @node @code{<selection>} Element, @code{<playlist>} Element, @code{<pbc>} Container, @code{<pbc>} Container
 @subsubsection @code{<selection>} Element
+
+@example
+<!ELEMENT selection                     (bsn?,
+                                         prev?,
+                                         next?,
+                                         return?,
+                                         default*,
+                                         timeout?,
+                                         wait?,
+                                         loop?,
+                                         play-item?,
+                                         select*)>
+<!ATTLIST selection
+  %pbcattrs;
+>
+
+<!ELEMENT      bsn                      (#PCDATA)>
+<!ELEMENT      prev                     EMPTY>
+<!ELEMENT      next                     EMPTY>
+<!ELEMENT      return                   EMPTY>
+<!ELEMENT      default                  EMPTY>
+<!ELEMENT      timeout                  EMPTY>
+<!ELEMENT      wait                     (#PCDATA)>
+
+<!ELEMENT      loop                     (#PCDATA)>
+<!ATTLIST loop
+  jump-timing  (immediate|delayed) 'immediate'
+>
+
+<!ELEMENT      play-item                EMPTY>
+<!ELEMENT      select                   EMPTY>
+@end example
 
 @node @code{<playlist>} Element, @code{<endlist>} Element, @code{<selection>} Element, @code{<pbc>} Container
 @subsubsection @code{<playlist>} Element
 
+@example
+<!ELEMENT playlist                      (prev?,
+                                         next?,
+                                         return?,
+                                         playtime?,
+                                         wait?,
+                                         autowait?,
+                                         play-item*)>
+<!ATTLIST playlist
+  %pbcattrs;
+>
+
+<!ELEMENT      prev                     EMPTY>
+<!ELEMENT      next                     EMPTY>
+<!ELEMENT      return                   EMPTY>
+<!ELEMENT      playtime                 (#PCDATA)>
+<!ELEMENT      wait                     (#PCDATA)>
+<!ELEMENT      autowait                 (#PCDATA)>
+<!ELEMENT      play-item                EMPTY>
+@end example
+
 @node @code{<endlist>} Element,  , @code{<playlist>} Element, @code{<pbc>} Container
 @subsubsection @code{<endlist>} Element
+
+@example
+<!ELEMENT endlist                       (next-volume?,
+                                         play-item?)>
+<!ATTLIST endlist
+  %pbcattrs;
+>
+@end example
 
 @node Examples, Tips and Hints, VideoCD @acronym{XML} Description, Top
 @chapter Examples
@@ -969,7 +1100,7 @@ $
 @end menu
 
 @node SVCD Player Compatibility,  , Tips and Hints, Tips and Hints
-@section SVCD Player Compatibility
+@appendixsec SVCD Player Compatibility
 
 If you have problems with your playing device failing to @emph{detect} a
 created @acronym{SVCD}, you can may the following things (some of the
@@ -993,6 +1124,76 @@ Add an empty @file{/SEGMENT} dir, if it isn't created due to inclusion
 of @acronym{SPI}s.
 
 @end enumerate
+
+@appendixsec Fast Forward/Fast Rewind with SVCD
+
+Because of the @acronym{VBR} encoding of the @acronym{MPEG}-2 streams on
+@acronym{SVCD}s, there's no fixed relation between sector index and
+playing time. If scanning doesn't work with your playing device it can
+be caused by:
+
+@itemize @bullet
+@item
+The playing device does not support @acronym{FF}/@acronym{RW} with
+@acronym{SVCD}s.@footnote{Sometimes upgrading the player firmware may
+help.}
+
+@item
+The @acronym{MPEG}-2 stream does not include the mandatory scan
+information data.
+
+@item
+@emph{more reasons to follow}
+
+@end itemize
+
+@appendix Character Sets
+
+@appendixsec ISO646 d-Characters
+
+@example
+  | 0 1 2 3 4 5 6 7 
+--+-----------------
+0 |       0   P     
+1 |       1 A Q     
+2 |       2 B R     
+3 |       3 C S     
+4 |       4 D T     
+5 |       5 E U     
+6 |       6 F V     
+7 |       7 G W     
+8 |       8 H X     
+9 |       9 I Y     
+a |         J Z     
+b |         K       
+c |         L       
+d |         M       
+e |         N       
+f |         O _     
+@end example
+
+@appendixsec ISO646 a-Characters
+
+@example
+  | 0 1 2 3 4 5 6 7
+--+-----------------
+0 |       0   P                    
+1 |     ! 1 A Q                    
+2 |     " 2 B R                    
+3 |       3 C S                    
+4 |       4 D T                    
+5 |     % 5 E U                    
+6 |     & 6 F V                    
+7 |     ' 7 G W                    
+8 |     ( 8 H X                    
+9 |     ) 9 I Y                    
+a |     * : J Z                    
+b |     + ; K                      
+c |     , < L                      
+d |     - = M                      
+e |     . > N                      
+f |     / ? O _                    
+@end example
 
 @node Acronym Expansions, GNU GENERAL PUBLIC LICENSE, Tips and Hints, Top
 @appendix Glossary
