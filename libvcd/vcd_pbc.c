@@ -576,22 +576,19 @@ _vcd_pbc_finalize (VcdObj *obj)
       length = _vcd_pbc_node_length (_pbc, false);
       length_ext = _vcd_pbc_node_length (_pbc, true);
 
+      /* round them up to... */
+      length = _vcd_ceil2block (length, INFO_OFFSET_MULT);
+      length_ext = _vcd_ceil2block (length_ext, INFO_OFFSET_MULT);
+
       /* node may not cross sector boundary! */
-      if (ISO_BLOCKSIZE - (offset % ISO_BLOCKSIZE) < length)
-	offset = ISO_BLOCKSIZE * _vcd_len2blocks (offset, ISO_BLOCKSIZE);
+      offset = _vcd_ofs_add (offset, length, ISO_BLOCKSIZE);
+      offset_ext = _vcd_ofs_add (offset_ext, length_ext, ISO_BLOCKSIZE);
 
-      if (ISO_BLOCKSIZE - (offset_ext % ISO_BLOCKSIZE) < length_ext)
-	offset_ext = ISO_BLOCKSIZE * _vcd_len2blocks (offset_ext, 
-						      ISO_BLOCKSIZE);
+      /* save start offsets */
+      _pbc->offset = offset - length;
+      _pbc->offset_ext = offset_ext - length_ext;
 
-      _pbc->offset = offset;
-      _pbc->offset_ext = offset_ext;
       _pbc->lid = lid;
-      /* vcd_debug ("pbc %d+%d (%d+%d)", offset, length, offset_ext, length_ext); */
-
-      offset += _vcd_len2blocks (length, INFO_OFFSET_MULT) * INFO_OFFSET_MULT;
-      offset_ext += 
-	_vcd_len2blocks (length_ext, INFO_OFFSET_MULT) * INFO_OFFSET_MULT;
 
       lid++;
     }

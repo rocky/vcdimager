@@ -160,7 +160,6 @@ set_entries_vcd (VcdObj *obj, void *buf)
   memcpy(buf, &entries_vcd, sizeof(entries_vcd));
 }
 
-
 static void
 _set_bit (uint8_t bitset[], unsigned bitnum)
 {
@@ -169,7 +168,6 @@ _set_bit (uint8_t bitset[], unsigned bitnum)
 
   bitset[_byte] |= (1 << _bit);
 }
-
 
 uint32_t 
 get_psd_size (VcdObj *obj, bool extended)
