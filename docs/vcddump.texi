@@ -212,11 +212,11 @@ format is expected to be in the BIN/CUE format that cdrdao uses and is
 used by a popular DOS/Windows CD mastering tool. If you use the
 @kbd{--bin-file} option, the file read is expected to be the ``.BIN''
 part---this is the bulk of the data.  If you use @kbd{--cue-file} the
-file read is a funny sort of TOC (Table of Contents) file. The
-corresponding BIN file (which again contains the bulk of the data) is
-not taken from the FILE statement inside the CUE file, but it is
-constructed from the CUE file name by replacing ".cue" by ".bin".  The
-CUE file must have exactly one FILE statement.
+file read is a ``cue sheet'' a funny sort of TOC (Table of Contents)
+file. The corresponding BIN file (which again contains the bulk of the
+data) is not taken from the FILE statement inside the CUE file, but it
+is constructed from the CUE file name by replacing ".cue" by ".bin".
+The CUE file must have exactly one FILE statement.
 
 If you do not specify a file name after @kbd{--bin-file}, a default
 name is used ``videocd.bin'' is probably used; likewise if you do not
@@ -286,7 +286,7 @@ don't have to ask for just one section or one item of a section at a
 time, you can list many individual items or sections together.
 
 Most of the individual items that can be shown are part of a larger
-group listed in @ref{Output Sections,,Output Sections}. For example to
+group listed in @ref{Output Sections, ,Output Sections}. For example to
 show the volume id of the VCD image which resides in the PVD
 sections of output you would use the option @kbd{--show-pvd vol}.
 
@@ -345,7 +345,7 @@ but know that the version information is going to change over time.
 @itemx -D
 @kindex @code{--no-delimiter}
 Do not show delimiter lines around various the sections of @ref{Output
-Sections,,Output Sections}.
+Sections, ,Output Sections}.
 
 @item --quiet
 @itemx -q
@@ -361,48 +361,47 @@ information. Sometimes, you just wanna know what version you got.
 @end table
 
 Use at most one option in an invocation from the following list. These
-options are described in general in @ref{Where Options,,Options
+options are described in general in @ref{Where Options, ,Options
 controlling where to read from}.
 
 @table @code
 @item --bin-file @ovar{filename}
 @itemx -b @ovar{filename}
 @kindex @code{--bin-file}
-Specifies a BIN file to read from. See @ref{BIN or CUE file,,Reading
-from a file containing a CD disk image} for more information.
+Specifies a BIN file to read from. See @ref{BIN or CUE file, ,Reading
+from a file containing a CD disk image}.
 
 
 @item --cdrom-device @ovar{device-name}
 @itemx -C @ovar{device-name}
 @kindex @code{--cdrom-device}
 Specifies a CD-ROM device to read from. See @ref{CD-ROM
-Device,,Reading from CD-ROM Device} for more information.
+Device, ,Reading from CD-ROM Device}.
 
 @item --cue-file @ovar{filename}
 @itemx -c @ovar{filename}
 @kindex @code{--cue-file}
 Specifies a CUE file to read from. Preferred over a BIN file if
-available. See @ref{BIN or CUE file,,Reading from a file containing a
-CD disk image} for more information.
+available. See @ref{BIN or CUE file, ,Reading from a file containing a
+CD disk image}.
 
 @item --input @ovar{file or device name}
 @itemx -i @ovar{file or device name}
 @kindex @code{--input}
 This option is insensitive to whether the thing reading from is a
-CD-ROM device or a file. See @ref{Intelligent Input,,Reading from
-whereever} for more information.
+CD-ROM device or a file. See @ref{Intelligent Input, ,Reading from
+whereever}.
 
 @end table
 
 The options below controll how much output you get and described in
-general in @ref{Output Sections,,Output Sections}.
+general in @ref{Output Sections, ,Output Sections}.
 
 @table @code
 @item --show-entries-all
 @itemx -E
 @kindex @code{--show-entries-all}
-List everything in the PVD section. See @ref{Entries,,Entries Section} for
-information about what is in this section.
+List everything in the PVD section. See @ref{Entries, ,Entries Section}.
 
 @item --show-entries @var{sub-option}
 @kindex @code{--show-entries}
@@ -412,41 +411,40 @@ Sub-options are: ``count'', ``data'', ``id'', ``prof'', or ``vers''.
 @ftable @code
 @item count
 The number of entries. A number. See line 5 of the example in
-@ref{Entries,,Entries Section}.
+@ref{Entries, ,Entries Section}.
 @item data
 A complete list of the entries. See lines 6--9. of the example in
-@ref{Entries,,Entries Section}.
+@ref{Entries, ,Entries Section}.
 @item id
 An 8 characters name, probably ``ENTRYVCD''. See line 2 of the example
-in @ref{Entries,,Entries Section}.
+in @ref{Entries, ,Entries Section}.
 @item prof
-System profile tag. See line 4 of the example in @ref{Entries,,Entries
+System profile tag. See line 4 of the example in @ref{Entries, ,Entries
 Section}. If the format is HQSVCD the value will be 1. If the format
 is SVCD the value will be 0.
 @item vers
 A 2-hex digit version number. See line 3 of the example in
-@ref{Entries,,Entries Section}.
+@ref{Entries, ,Entries Section}.
 @end ftable
 
 @item --show-filesystem
 @itemx -F 
 @kindex @code{--show-filesystem}
-List everything in the PVD section. See @ref{Filesystem,,Filesystem} for
-information about what is in this section.
+List everything in the PVD section.  For information about what is in
+this section,  see @ref{Filesystem, ,ISO-9660 section}.
 
 @item --show-format
 @itemx -f 
 @kindex @code{--show-format}
 Show the format that the VCD is in. The value will be one of ``VCD
 1.1'', ``VCD 2.0'', ``SVCD'', or ``HQVCD''. Note that @value{program}
-does not do validate that the CD image conforms rigorously to any set
+does not validate that the CD image conforms rigorously to any set
 of standards. However this does suggest what it might most closely
 conform to.
 
 @item --show-info-all
 @kindex @code{--show-info-all}
-List everything in the PVD section. See @ref{Info,,Info Section} for
-information about what is in this section.
+List everything in the PVD section. See @ref{Info, ,Info Section}.
 
 @item --show-info @var{suboption}
 @itemx -I @ovar{sub-option}
@@ -459,88 +457,94 @@ prof, psds, res, seg, segn, segs, spec, start, st2, vers, or vol.
 @item album
 A description of the album; it could be an album id. The XML tag for
 this is <album-id>. It is a fixed-length blank-padded string of 16
-characters. See line 5 of the example in @ref{Info,,Info Section}.
+characters. See line 5 of the example in @ref{Info, ,Info Section}.
 @item cc
-user data cc. See line 14 of the example in @ref{Info,,Info Section}.
+user data cc. See line 14 of the example in @ref{Info, ,Info Section}.
 @item count
 The number of disks in the volume, an integer. The XML tag for this is
-<volume-count>. See line 6 of the example in @ref{Info,,Info Section}.
+<volume-count>. See line 6 of the example in @ref{Info, ,Info Section}.
 @item id
 A string representing the VCD format. ``VIDEO_CD'' for VCD 1.0, VCD
 1.1, or VCD 2.0, ``SUPERVCD'' for SVCD, XVCD, CVD, and ``HQ-VCD'' for
 HQVCD. A Maxiumum of 8 characters. See line 2 of the example in
-@ref{Info,,Info Section}.
+@ref{Info, ,Info Section}.
 @item ofm
 offset multiplier. Value is given is in hexadecimal. See line 20 of
-the example in @ref{Info,,Info Section}.
+the example in @ref{Info, ,Info Section}.
 @item lid2
 start lid #2. A boolean value. The XML tag for this is
-<next-volume-use-lid2>. See line 15 of the example in @ref{Info,,Info
+<next-volume-use-lid2>. See line 15 of the example in @ref{Info, ,Info
 Section}.
 @item lidn
-Maximum LID number. See line 21 of the example in @ref{Info,,Info
+Maximum LID number. See line 21 of the example in @ref{Info, ,Info
 Section}.
 @item pal
 bitset of 98 PAL(=set)/NTSC flags. See lines 8--9 of the example in
-@ref{Info,,Info Section}.
+@ref{Info, ,Info Section}.
 @item pbc
+Show the field called ``extended pbc'' or ``reserved2'' A boolean
+value. If the image format is SVCD or HQVCD, this will be labled
+``reserved2'' rather than ``extended pbc.'' Furthermore if the format
+is VCD2.0, checks for for extended playback control files
+(EXT/LOT_X.VCD and EXT_PSD_X.VCD) will be made. If both files exist
+then VCD2.0 extended playback is probably used.  See line 17 of
+@ref{Info, ,Info Section}.
 @item prof
 System profile tag.  Used to define the set of mandatory parts to be
 applied for compatibility. Tag, 0x00 for "SUPERVCD", 0x01 for
 "HQ-VCD", 0x0@emph{n} for VCD@emph{x}.@emph{n}. A hexidecimal number.
-See line 4 of the example in @ref{Info,,Info Section}.
+See line 4 of the example in @ref{Info, ,Info Section}.
 @item psds
-PSD size. See line 18 of the example in @ref{Info,,Info Section}.
+PSD size. See line 18 of the example in @ref{Info, ,Info Section}.
 @item res 
 Restriction number, e.g. ``unsuitiable for kids''; 0 is unrestricted,
 1 is restricted category 1, 2 is restricted category 2, 3 is
 restricted category 3. The XML tag for this is <restriction>.
 @item seg
 First segment MSF address. See line 19 of the example in
-@ref{Info,,Info Section}.
+@ref{Info, ,Info Section}.
 @item segn
-Max segment number. See line 22 of the example in @ref{Info,,Info Section}.
+Max segment number. See line 22 of the example in @ref{Info, ,Info Section}.
 @item segs
 The name of file containing segment information. VCD/INFO.VCD or
-SVCD/INFO.SVD. See line 1 of the example in @ref{Info,,Info Section}.
+SVCD/INFO.SVD. See line 1 of the example in @ref{Info, ,Info Section}.
 @item spec
 Special info is encoded into the pictures. A boolean value. See line
-13 of the example in @ref{Info,,Info Section}.
+13 of the example in @ref{Info, ,Info Section}.
 @item start
 start time offset. Only relevant if SVCD or HQVCD. The XML tag for
 this is <start-time-offset>. 
 @item st2
 start track #2. A boolean value. The XML tag for this is
 <next-volume-use-sequence2>. See line 16 of the example in
-@ref{Info,,Info Section}.
+@ref{Info, ,Info Section}.
 @item vers
 0x01 for SVCD and VCD1.@emph{x}; 0x02 -- VCD2.0. A hexadecimal number.
-See line 3 of the example in @ref{Info,,Info Section}.
+See line 3 of the example in @ref{Info, ,Info Section}.
 @item vol
 The volume number. The XML tag for this is <volume-number>. See line 7
-of the example in @ref{Info,,Info Section}.
+of the example in @ref{Info, ,Info Section}.
 @end ftable
 
 @item --show-lot
 @itemx -L
 @kindex @code{--show-lot}
 
-List everything in the LOT section. See @ref{LOT,,LID Offset Table
-(LOT) Section) Section} for information about what is in this section.
+List everything in the LOT section. See @ref{LOT, ,LID Offset Table
+(LOT) Section) Section}.
 
 @item --show-psd
 @itemx -p
 @kindex @code{--show-psd}
 
-List everything in the PSD section. See @ref{PSD,,Program Segment
-Descriptors (PSD) Section} for information about what is in this
-section.
+List everything in the PSD section. See @ref{PSD, ,Program Segment
+Descriptors (PSD) Section}.
 
 @item --show-pvd-all
 @kindex @code{--show-pvd-all}
-List everything in the PVD section. See the listing @ref{PVD,,Primary
-Volume Descriptor (PVD) Section} for an example of this section and
-some additional information.
+List everything in the PVD section. For an example of this section and
+some additional information, see the listing @ref{PVD, ,Primary
+Volume Descriptor (PVD) Section}. 
 
 @item --show-pvd @var{suboption}
 @itemx -P @ovar{sub-option}
@@ -552,37 +556,37 @@ volset, or xa.
 @ftable @code
 @item app
 The application id; a string of at most 128 characters. The XML tag for
-this is <application-id>. See line 9 of the example in @ref{PVD,,Primary Volume
+this is <application-id>. See line 9 of the example in @ref{PVD, ,Primary Volume
 Descriptor (PVD) Section}.
 @item id
-Some sort of string ID. See line 2 of the example in @ref{PVD,,Primary Volume
+Some sort of string ID. See line 2 of the example in @ref{PVD, ,Primary Volume
 Descriptor (PVD) Section}.
 @item iso
-ISO size in blocks. See line 10 of the example in @ref{PVD,,Primary
+ISO size in blocks. See line 10 of the example in @ref{PVD, ,Primary
 Volume Descriptor (PVD) Section}.
 @item prep
 preparer id; a string of at most 128 characters. The XML tag for this
-is <preparer-id>. See line 7 of the example in @ref{PVD,,Primary
+is <preparer-id>. See line 7 of the example in @ref{PVD, ,Primary
 Volume Descriptor (PVD) Section}.
 @item pub
 publisher id. The XML tag for this is <publisher-id>. See line 7 of
-the example in @ref{PVD,,Primary Volume Descriptor (PVD) Section}.
+the example in @ref{PVD, ,Primary Volume Descriptor (PVD) Section}.
 @item sys
 The system ID; a string of at most 32 characters. The XML tag for this
-is <system-id>. See line 4 of the example in @ref{PVD,,Primary Volume
+is <system-id>. See line 4 of the example in @ref{PVD, ,Primary Volume
 Descriptor (PVD) Section}.
 @item vers
 The version ID. A decimal number. See line 3 of the example in
-@ref{PVD,,Primary Volume Descriptor (PVD) Section}.
+@ref{PVD, ,Primary Volume Descriptor (PVD) Section}.
 @item vol
 The volume ID. The XML tag for this is <volume-id>. See line 5 of the
-example in @ref{PVD,,Primary Volume Descriptor (PVD) Section}.
+example in @ref{PVD, ,Primary Volume Descriptor (PVD) Section}.
 @item volset
-Volumeset id. See line 5 of the example in @ref{PVD,,Primary Volume
+Volumeset id. See line 5 of the example in @ref{PVD, ,Primary Volume
 Descriptor (PVD) Section}.
 @item xa
 A boolean indicating whether the XA marker is present or not. See line
-11 of the example in @ref{PVD,,Primary Volume Descriptor (PVD)
+11 of the example in @ref{PVD, ,Primary Volume Descriptor (PVD)
 Section}.
 @end ftable
 
@@ -616,8 +620,7 @@ Image size: 275792 sectors
 @itemx -T
 @kindex @code{--show-tracks}
 
-List everything in the Tracks section. See @ref{Tracks,,Tracks Section} for
-information about what is in this section.
+List everything in the Tracks section. See @ref{Tracks, ,Tracks Section}.
 
 @end table
 
@@ -982,10 +985,10 @@ from:
  6. CVD interpretation (probably)
  7. (track[00]: 00:59:61 (cumulated), audio: 00, ogt: de)
  8. ------------------------------------------------------------------------
- 9. CDROM TRACKS
-10.  tracks:  1
-11.  track #  1: 00:23:01, size:   13547520
-12.  leadout   : 01:39:61
+ 9. CD-ROM TRACKS
+10. tracks:  1
+11. track # 01, LSN   1576, MSF: 00:23:01, size:   13386240
+12. leadout   : LSN   7486, MSF: 01:41:61, size:          0
 @end smallexample
 
 Lines 1 and 2 you will see if the format is a SVCD, XVCD, or CVD. 
@@ -1021,8 +1024,8 @@ meta-data read in that IS09660 filesystem.
 If you are reading from a CD-ROM device, this information comes from
 comes requsts from the device to give track information. If what you
 are reading is a disk image, the only way to get this information has
-to come from the CUE file which is why it is better to specify a CUE
-file than a BIN file.
+to come from a ``cue sheet'' which is why it is better to specify a
+CUE file than a BIN file.
 
 @node Some Examples
 @chapter Some simple command invocations.
