@@ -53,13 +53,13 @@ static const char DELIM[] = \
 "----------------------------------------" \
 "---------------------------------------\n";
 
-static const int BUF_COUNT = 64;
-static const int BUF_SIZE = 80;
+#define BUF_COUNT 16
+#define BUF_SIZE 80
 
 static char *
 _getbuf (void)
 {
-  static char _buf[64][80];
+  static char _buf[BUF_COUNT][BUF_SIZE];
   static int _num = -1;
   
   _num++;
@@ -333,7 +333,7 @@ _visit_lot (debug_obj_t *obj)
     if ((tmp = UINT16_FROM_BE (lot->offset[n])) != 0xFFFF)
       _visit_pbc (obj, n + 1, tmp, true);
 
-  _vcd_list_sort (obj->offset_list, _offset_t_cmp);
+  _vcd_list_sort (obj->offset_list, (_vcd_list_cmp_func) _offset_t_cmp);
 }
 
 static void

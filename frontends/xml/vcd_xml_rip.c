@@ -314,10 +314,6 @@ _parse_entries (struct vcdxml_t *obj, VcdImageSource *img)
   return 0;
 }
 
-struct _pbc_ctx {
-  
-};
-
 static char *
 _xstrdup(const char *s)
 {
@@ -326,6 +322,23 @@ _xstrdup(const char *s)
   
   return NULL;
 }
+
+typedef struct {
+  uint8_t type;
+  unsigned lid;
+  unsigned offset;
+  bool in_lot;
+} offset_t;
+
+struct _pbc_ctx {
+  unsigned psd_size;
+  unsigned maximum_lid;
+  unsigned offset_mult;
+  VcdList *offset_list;
+
+  uint8_t *psd;
+  LotVcd *lot;
+};
 
 static const char *
 _pin2id (unsigned pin, const struct _pbc_ctx *_ctx)
@@ -350,14 +363,62 @@ _pin2id (unsigned pin, const struct _pbc_ctx *_ctx)
 }
 
 static const char *
-_ofs2id (unsigned ofs, const struct _pbc_ctx *_ctx)
+_ofs2id (unsigned offset, const struct _pbc_ctx *_ctx)
 {
+  VcdListNode *node;
   static char buf[80];
-
-  if (ofs == 0xffff)
+  unsigned sl_num = 0, el_num = 0, pl_num = 0;
+  offset_t *ofs = NULL;
+  
+  if (offset == 0xffff)
     return NULL;
 
-  snprintf (buf, sizeof (buf), "ofs-%4.4x", ofs);
+  _VCD_LIST_FOREACH (node, _ctx->offset_list)
+    {
+      ofs = _vcd_list_node_data (node);
+	
+      switch (ofs->type)
+	{
+	case PSD_TYPE_PLAY_LIST:
+	  pl_num++;
+	  break;
+
+	case PSD_TYPE_SELECTION_LIST:
+	  sl_num++;
+	  break;
+
+	case PSD_TYPE_END_LIST:
+	  el_num++;
+	  break;
+	}
+
+      if (ofs->offset == offset)
+	break;
+    }
+
+  if (node)
+    {
+      switch (ofs->type)
+	{
+	case PSD_TYPE_PLAY_LIST:
+	  snprintf (buf, sizeof (buf), "playlist-%.2d", pl_num);
+	  break;
+
+	case PSD_TYPE_SELECTION_LIST:
+	  snprintf (buf, sizeof (buf), "selection-%.2d", sl_num);
+	  break;
+
+	case PSD_TYPE_END_LIST:
+	  snprintf (buf, sizeof (buf), "end-%d", el_num);
+	  break;
+
+	default:
+	  snprintf (buf, sizeof (buf), "unknown-type-%4.4x", offset);
+	  break;
+	}
+    }
+  else
+    snprintf (buf, sizeof (buf), "unknown-offset-%4.4x", offset);
 
   return buf;
 }
@@ -373,11 +434,26 @@ _calc_time (uint16_t wtime)
     return -1;
 }
 
+
+
 static pbc_t *
-_pbc_node_read (const void *buf, const struct _pbc_ctx *_ctx)
+_pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
 {
   pbc_t *_pbc = NULL;
-  const uint8_t *_buf = buf;
+  const uint8_t *_buf = &_ctx->psd[offset * _ctx->offset_mult];
+  offset_t *ofs = NULL;
+
+  {
+    VcdListNode *node;
+    _VCD_LIST_FOREACH (node, _ctx->offset_list)
+      {
+	ofs = _vcd_list_node_data (node);
+
+	if (ofs->offset == offset)
+	  break;
+      }
+    vcd_assert (node);
+  }
 
   switch (*_buf)
     {
@@ -386,7 +462,7 @@ _pbc_node_read (const void *buf, const struct _pbc_ctx *_ctx)
     case PSD_TYPE_PLAY_LIST:
       _pbc = vcd_pbc_new (PBC_PLAYLIST);
       {
-	const PsdPlayListDescriptor *d = buf;
+	const PsdPlayListDescriptor *d = (const void *) _buf;
 	_pbc->prev_id = _xstrdup (_ofs2id (UINT16_FROM_BE (d->prev_ofs), _ctx));
 	_pbc->next_id = _xstrdup (_ofs2id (UINT16_FROM_BE (d->next_ofs), _ctx));
 	_pbc->retn_id = _xstrdup (_ofs2id (UINT16_FROM_BE (d->return_ofs), _ctx));
@@ -406,7 +482,7 @@ _pbc_node_read (const void *buf, const struct _pbc_ctx *_ctx)
     case PSD_TYPE_SELECTION_LIST:
       _pbc = vcd_pbc_new (PBC_SELECTION);
       {
-	const PsdSelectionListDescriptor *d = buf;
+	const PsdSelectionListDescriptor *d = (const void *) _buf;
 	_pbc->bsn = d->bsn;
 	_pbc->prev_id = _xstrdup (_ofs2id (UINT16_FROM_BE (d->prev_ofs), _ctx));
 	_pbc->next_id = _xstrdup (_ofs2id (UINT16_FROM_BE (d->next_ofs), _ctx));
@@ -442,17 +518,150 @@ _pbc_node_read (const void *buf, const struct _pbc_ctx *_ctx)
       break;
     }
 
+  if (_pbc)
+    {
+      _pbc->id = _xstrdup (_ofs2id (offset, _ctx));
+      _pbc->rejected = !ofs->in_lot;
+    }
+
   return _pbc;
+}
+
+static void
+_visit_pbc (struct _pbc_ctx *obj, unsigned lid, unsigned offset, bool in_lot)
+{
+  VcdListNode *node;
+  offset_t *ofs;
+  unsigned _rofs = offset * obj->offset_mult;
+
+  assert (obj->psd_size % 8 == 0);
+
+  if (offset == 0xffff)
+    return;
+
+  assert (_rofs < obj->psd_size);
+
+  if (!obj->offset_list)
+    obj->offset_list = _vcd_list_new ();
+
+  _VCD_LIST_FOREACH (node, obj->offset_list)
+    {
+      ofs = _vcd_list_node_data (node);
+
+      if (offset == ofs->offset)
+        {
+          if (in_lot)
+            ofs->in_lot = true;
+
+          return; /* already been there... */
+        }
+    }
+
+  ofs = _vcd_malloc (sizeof (offset_t));
+
+  ofs->offset = offset;
+  ofs->lid = lid;
+  ofs->in_lot = in_lot;
+  ofs->type = obj->psd[_rofs];
+
+  switch (ofs->type)
+    {
+    case PSD_TYPE_PLAY_LIST:
+      _vcd_list_append (obj->offset_list, ofs);
+      {
+        const PsdPlayListDescriptor *d = 
+          (const void *) (obj->psd + _rofs);
+
+        if (!ofs->lid)
+          ofs->lid = UINT16_FROM_BE (d->lid) & 0x7fff;
+        else 
+          if (ofs->lid != (UINT16_FROM_BE (d->lid) & 0x7fff))
+            vcd_warn ("LOT entry assigned LID %d, but descriptor has LID %d",
+                      ofs->lid, UINT16_FROM_BE (d->lid) & 0x7fff);
+
+        _visit_pbc (obj, 0, UINT16_FROM_BE (d->prev_ofs), false);
+        _visit_pbc (obj, 0, UINT16_FROM_BE (d->next_ofs), false);
+        _visit_pbc (obj, 0, UINT16_FROM_BE (d->return_ofs), false);
+      }
+      break;
+
+    case PSD_TYPE_SELECTION_LIST:
+      _vcd_list_append (obj->offset_list, ofs);
+      {
+        const PsdSelectionListDescriptor *d =
+          (const void *) (obj->psd + _rofs);
+
+        int idx;
+
+        if (!ofs->lid)
+          ofs->lid = UINT16_FROM_BE (d->lid) & 0x7fff;
+        else 
+          if (ofs->lid != (UINT16_FROM_BE (d->lid) & 0x7fff))
+            vcd_warn ("LOT entry assigned LID %d, but descriptor has LID %d",
+                      ofs->lid, UINT16_FROM_BE (d->lid) & 0x7fff);
+
+        _visit_pbc (obj, 0, UINT16_FROM_BE (d->prev_ofs), false);
+        _visit_pbc (obj, 0, UINT16_FROM_BE (d->next_ofs), false);
+        _visit_pbc (obj, 0, UINT16_FROM_BE (d->return_ofs), false);
+        _visit_pbc (obj, 0, UINT16_FROM_BE (d->default_ofs), false);
+        _visit_pbc (obj, 0, UINT16_FROM_BE (d->timeout_ofs), false);
+
+        for (idx = 0; idx < d->nos; idx++)
+          _visit_pbc (obj, 0, UINT16_FROM_BE (d->ofs[idx]), false);
+        
+      }
+      break;
+
+    case PSD_TYPE_END_LIST:
+      _vcd_list_append (obj->offset_list, ofs);
+      break;
+
+    default:
+      vcd_warn ("corrupt PSD???????");
+      free (ofs);
+      return;
+      break;
+    }
+}
+
+static int
+_offset_t_cmp (offset_t *a, offset_t *b)
+{
+  if (a->lid && b->lid)
+    {
+      if (a->lid > b->lid)
+	return 1;
+
+      if (a->lid < b->lid)
+	return -1;
+    } 
+  else if (a->lid)
+    return -1;
+  else if (b->lid)
+    return 1;
+
+  return 0;
+}
+
+static void
+_visit_lot (struct _pbc_ctx *obj)
+{
+  const LotVcd *lot = obj->lot;
+  unsigned n, tmp;
+
+  for (n = 0; n < LOT_VCD_OFFSETS; n++)
+    if ((tmp = UINT16_FROM_BE (lot->offset[n])) != 0xFFFF)
+      _visit_pbc (obj, n + 1, tmp, true);
+
+  _vcd_list_sort (obj->offset_list, (_vcd_list_cmp_func) _offset_t_cmp);
 }
 
 static int
 _parse_pbc (struct vcdxml_t *obj, VcdImageSource *img)
 {
-  /* VcdList *_offsets; -- fixme -- detect offsets better */
-  LotVcd *lot = NULL;
-  uint8_t *psd = NULL;
   int n;
   struct _pbc_ctx _pctx;
+  VcdListNode *node;
 
   if (!obj->info.psd_size)
     {
@@ -460,37 +669,35 @@ _parse_pbc (struct vcdxml_t *obj, VcdImageSource *img)
       return 0;
     }
 
-  lot = _vcd_malloc (ISO_BLOCKSIZE * LOT_VCD_SIZE);
+  _pctx.psd_size = obj->info.psd_size;
+  _pctx.offset_mult = 8;
+  _pctx.maximum_lid = obj->info.max_lid;
+
+  _pctx.offset_list = _vcd_list_new ();
+
+  _pctx.lot = _vcd_malloc (ISO_BLOCKSIZE * LOT_VCD_SIZE);
   
   for (n = 0; n < LOT_VCD_SIZE; n++)
-    vcd_image_source_read_mode2_sector (img, ((char *) lot) + (n * ISO_BLOCKSIZE),
+    vcd_image_source_read_mode2_sector (img, ((char *) _pctx.lot) + (n * ISO_BLOCKSIZE),
 					LOT_VCD_SECTOR + n, false);
 
-  psd = _vcd_malloc (ISO_BLOCKSIZE * _vcd_len2blocks (obj->info.psd_size, ISO_BLOCKSIZE));
+  _pctx.psd = _vcd_malloc (ISO_BLOCKSIZE * _vcd_len2blocks (obj->info.psd_size, ISO_BLOCKSIZE));
 
   for (n = 0; n < _vcd_len2blocks (obj->info.psd_size, ISO_BLOCKSIZE); n++)
-    vcd_image_source_read_mode2_sector (img, psd + (n * ISO_BLOCKSIZE),
+    vcd_image_source_read_mode2_sector (img, _pctx.psd + (n * ISO_BLOCKSIZE),
 					PSD_VCD_SECTOR + n, false);
 
-  for (n = 0; n < obj->info.max_lid + 2; n++)
+  _visit_lot (&_pctx);
+
+  _VCD_LIST_FOREACH (node, _pctx.offset_list)
     {
-      unsigned _ofs = UINT16_FROM_BE (lot->offset[n]);
+      offset_t *ofs = _vcd_list_node_data (node);
       pbc_t *_pbc;
 
-      if (_ofs == 0xffff)
-	continue;
+      vcd_assert (ofs->offset != 0xffff);
 
-      if ((_ofs << 3) >= obj->info.psd_size)
-	vcd_error ("offset out of range :-(");
-
-      if ((_pbc = _pbc_node_read (&psd[_ofs << 3], &_pctx)))
-	{
-	  char buf[80];
-
-	  snprintf (buf, sizeof (buf), "ofs-%4.4x", _ofs);
-	  _pbc->id = _xstrdup (buf);
-	  _vcd_list_append (obj->pbc_list, _pbc);
-	}
+      if ((_pbc = _pbc_node_read (&_pctx, ofs->offset)))
+	_vcd_list_append (obj->pbc_list, _pbc);
     }
 
   /* fixme -- what about 'rejected' PBC lists... */

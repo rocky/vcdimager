@@ -1,3 +1,8 @@
+2001-05-26  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* frontends/xml/vcd_xml_rip.c: detect rejected pbc nodes, 
+		use more informative id's
+
 2001-05-25  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd.c: disabled psd_x/lot_x stuff since not needed for SVCDs, 
