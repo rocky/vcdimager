@@ -1,7 +1,6 @@
 POPT_LIBS = -lpopt
 
-bin_PROGRAMS = vcdxbuild vcdxgen
-#vcdrestore
+bin_PROGRAMS = vcdxbuild vcdxgen vcdxrip
 
 INCLUDES = -I$(top_srcdir) $(POPT_INCLUDES) $(LIBVCD_CFLAGS) $(XML_CFLAGS)
 
@@ -22,10 +21,10 @@ vcdxbuild_SOURCES = \
 	vcd_xml_dtd.h \
 	vcd_xml_dtd.c
 
-#vcdxrestore_LDADD = $(XML_LIBS) $(VCD_LIBS) $(POPT_LIBS)
-#vcdxrestore_SOURCES = \
-#	vcdrestore.c \
-#	vcdxml.h 
+vcdxrip_LDADD = $(XML_LIBS) $(VCD_LIBS) $(POPT_LIBS)
+vcdxrip_SOURCES = \
+	vcd_xml_rip.c \
+	vcd_xml_dtd.h 
 
 vcdxgen_LDADD = $(XML_LIBS) $(POPT_LIBS) $(VCD_LIBS)
 vcdxgen_SOURCES = \
