@@ -68,9 +68,9 @@ development.''
 
 @node Top, Introduction, (dir), (dir)
 
-@top The GNU Video CD Dump Program (@value{program})
+@top The GNU Video CD Info Program (@value{program})
 
-This file documents GNU Video CD Dump Program.
+This file documents GNU Video CD Info Program.
 
 Copyright (C) 2003, 2004, 2005 Rocky Bernstein
 
