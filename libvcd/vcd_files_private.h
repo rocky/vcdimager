@@ -27,8 +27,11 @@
 
 /* random note: most stuff is big endian here */
 
-#define ENTRIES_ID "ENTRYVCD"
-#define ENTRIES_VERSION 0x0200
+#define ENTRIES_ID_VCD  "ENTRYVCD"
+#define ENTRIES_ID_SVCD "ENTRYSVD"
+
+#define ENTRIES_VERSION_VCD2 0x02
+#define ENTRIES_VERSION_SVCD 0x01
 
 #ifdef __MWERKS__
 #pragma options align=packed

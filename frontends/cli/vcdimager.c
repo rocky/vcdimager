@@ -39,11 +39,13 @@
 #define DEFAULT_CUE_FILE      "videocd.cue"
 #define DEFAULT_BIN_FILE      "videocd.bin"
 #define DEFAULT_VOLUME_LABEL  "VideoCD"
+#define DEFAULT_TYPE          "vcd"
 
 /* global stuff kept as a singleton makes for less typing effort :-) 
  */
 static struct
 {
+  const gchar *type;
   const gchar *image_fname;
   const gchar *cue_fname;
   gchar **track_fnames;
@@ -82,6 +84,7 @@ int
 main (int argc, const char *argv[])
 {
   gint n = 0, sectors;
+  vcd_type_t type_id;
 
   g_set_prgname (argv[0]);
 
@@ -89,13 +92,21 @@ main (int argc, const char *argv[])
   gl.image_fname = DEFAULT_BIN_FILE;
   gl.track_fnames = NULL;
 
+  gl.type = DEFAULT_TYPE;
+
   gl.volume_label = DEFAULT_VOLUME_LABEL;
+
+  
 
   {
     const gchar **args = NULL;
     gint opt = 0;
 
     struct poptOption optionsTable[] = {
+
+      {"type", 't', POPT_ARG_STRING, &gl.type, 0,
+       "select VideoCD type ('vcd' or 'svcd') (default: '" DEFAULT_TYPE "')", 
+       "TYPE"},
 
       {"volume-label", 'l', POPT_ARG_STRING, &gl.volume_label, 0,
        "specify volume label for video cd (default: '" DEFAULT_VOLUME_LABEL
@@ -104,6 +115,7 @@ main (int argc, const char *argv[])
       {"cue-file", 'c', POPT_ARG_STRING, &gl.cue_fname, 0,
        "specify cue file for output (default: '" DEFAULT_CUE_FILE "')",
        "FILE"},
+      
       {"bin-file", 'b', POPT_ARG_STRING, &gl.image_fname, 0,
        "specify bin file for output (default: '" DEFAULT_BIN_FILE "')",
        "FILE"},
@@ -153,12 +165,35 @@ main (int argc, const char *argv[])
     for (n = 0; args[n]; n++)
       gl.track_fnames[n] = g_strdup (args[n]);
 
+    {
+      struct {
+        const gchar *str;
+        vcd_type_t id;
+      } type_str[] = {
+        { "vcd", VCD_TYPE_VCD2 },
+        { "svcd", VCD_TYPE_SVCD },
+        { NULL, }
+      };
+      gint i = 0;
+
+      while(type_str[i].str) 
+        if(g_strcasecmp(gl.type, type_str[i].str))
+          i++;
+        else
+          break;
+
+      if(!type_str[i].str)
+        vcd_error("invalid type given");
+        
+      type_id = type_str[i].id;
+    }
+
     poptFreeContext (optCon);
   }
 
   /* done with argument processing */
 
-  gl_vcd_obj = vcd_obj_new (VCD_TYPE_VCD2);
+  gl_vcd_obj = vcd_obj_new (type_id);
 
   vcd_obj_set_param (gl_vcd_obj, VCD_PARM_VOLUME_LABEL, gl.volume_label);
 

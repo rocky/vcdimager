@@ -1,6 +1,21 @@
+2000-11-18  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd.c (vcd_obj_add_file): fixed memset()
+
+	* libvcd/vcd_files.c (set_entries_vcd): added svcd support
+	(set_info_vcd): added svcd support
+
+	* libvcd/vcd.c (_finalize_vcd_iso_track): s/mpeg-2/mpeg2/,
+		fixed vcd sector reservation
+	(_finalize_vcd_iso_track): fixed svcd dir structure
+
+	* frontends/cli/vcdimager.c (main): new argument for selecting 
+		type of videocd
+
 2000-11-17  Herbert Valerio Riedel  <hvr@gnu.org>
 
-	* libvcd/vcd_mpeg.c (mpeg_analyze_start_seq): widened range of fixup-hack
+	* libvcd/vcd_mpeg.c (mpeg_analyze_start_seq): widened range of 
+		fixup-hack
 
 	* libvcd/vcd_mpeg.h: renamed new norm tags
 

@@ -32,6 +32,7 @@
 #include "vcd_salloc.h"
 #include "vcd_transfer.h"
 #include "vcd_files.h"
+#include "vcd_files_private.h"
 #include "vcd_cd_sector.h"
 #include "vcd_directory.h"
 #include "vcd_logging.h"
@@ -274,7 +275,7 @@ vcd_obj_add_file (VcdObj *obj, const char iso_pathname[],
       p = &(*p)->next;
 
     *p = malloc (sizeof (struct cust_file));
-    memset (*p, sizeof (struct cust_file), 0);
+    memset (*p, 0, sizeof (struct cust_file));
     
     (*p)->file = file;
     (*p)->start_extent = start_extent;
@@ -297,8 +298,9 @@ _finalize_vcd_iso_track (VcdObj *obj)
   if (_vcd_salloc (obj->iso_bitmap, 75, 75) == SECTOR_NIL) 
     assert (0);
 
-  /* keep rest of vcd sector blank -- paranoia */
-  if (_vcd_salloc (obj->iso_bitmap, 185,40) == SECTOR_NIL) 
+
+  /* keep info area blank -- paranoid ? */
+  if (_vcd_salloc (obj->iso_bitmap, 187, 38) == SECTOR_NIL) 
     assert (0);
 
   obj->pvd_sec = _vcd_salloc (obj->iso_bitmap, 16, 2);      /* pre-alloc descriptors, PVD */  /* EOR */
@@ -309,8 +311,9 @@ _finalize_vcd_iso_track (VcdObj *obj)
   obj->lot_secs = _vcd_salloc (obj->iso_bitmap, LOT_VCD_SECTOR, LOT_VCD_SIZE);  /* LOT.VCD */ /* EOF */
   obj->psd_sec = _vcd_salloc (obj->iso_bitmap, PSD_VCD_SECTOR, 1); /* just one sec for now... */
 
-  if (obj->type == VCD_TYPE_SVCD)
+  switch (obj->type)
     {
+    case VCD_TYPE_SVCD:
       obj->tracks_sec = _vcd_salloc (obj->iso_bitmap, TRACKS_SVD_SECTOR, 1); /* TRACKS.SVD */
       
       /* fixme -- we create it with zero scan points for now, cause it's simpler */
@@ -318,6 +321,26 @@ _finalize_vcd_iso_track (VcdObj *obj)
 
       assert(obj->tracks_sec != SECTOR_NIL);
       assert(obj->search_secs != SECTOR_NIL);
+      break;
+
+    case VCD_TYPE_VCD2:
+      {
+        uint32_t rc = _vcd_salloc (obj->iso_bitmap, 185,2);
+        assert(rc != SECTOR_NIL);
+      }
+      break;
+
+  default:
+    vcd_error("VCD type not supported");
+    break;
+
+    }
+
+  /* keep rest of vcd sector blank -- paranoia */
+  for(n = 75;n < 225;n++) 
+    {
+      uint32_t rc = _vcd_salloc (obj->iso_bitmap, n,1);
+      assert(rc == SECTOR_NIL);
     }
 
   set_psd_size (obj);
@@ -353,13 +376,15 @@ _finalize_vcd_iso_track (VcdObj *obj)
 
   case VCD_TYPE_SVCD:
     _vcd_directory_mkdir (obj->dir, "EXT");
-    _vcd_directory_mkdir (obj->dir, "MPEG-2");
+    _vcd_directory_mkdir (obj->dir, "MPEG2");
     _vcd_directory_mkdir (obj->dir, "SVCD");
 
-    _vcd_directory_mkfile (obj->dir, "SVCD/ENTRIES.VCD;1", obj->entries_sec, ISO_BLOCKSIZE, FALSE, 0);    
-    _vcd_directory_mkfile (obj->dir, "SVCD/INFO.VCD;1", obj->info_sec, ISO_BLOCKSIZE, FALSE, 0);
-    _vcd_directory_mkfile (obj->dir, "SVCD/LOT.VCD;1", obj->lot_secs, ISO_BLOCKSIZE*LOT_VCD_SIZE, FALSE, 0);
-    _vcd_directory_mkfile (obj->dir, "SVCD/PSD.VCD;1", obj->psd_sec, obj->psd_size, FALSE, 0);
+    _vcd_directory_mkfile (obj->dir, "SVCD/ENTRIES.SVD;1", obj->entries_sec, ISO_BLOCKSIZE, FALSE, 0);    
+    _vcd_directory_mkfile (obj->dir, "SVCD/INFO.SVD;1", obj->info_sec, ISO_BLOCKSIZE, FALSE, 0);
+    _vcd_directory_mkfile (obj->dir, "SVCD/LOT.SVD;1", obj->lot_secs, ISO_BLOCKSIZE*LOT_VCD_SIZE, FALSE, 0);
+    _vcd_directory_mkfile (obj->dir, "SVCD/PSD.SVD;1", obj->psd_sec, obj->psd_size, FALSE, 0);
+
+    _vcd_directory_mkfile (obj->dir, "SVCD/SEARCH.DAT;1", obj->search_secs, sizeof (SearchDat), FALSE, 0);
 
     _vcd_directory_mkfile (obj->dir, "SVCD/TRACKS.SVD;1", obj->tracks_sec, ISO_BLOCKSIZE, FALSE, 0);
 
@@ -390,7 +415,7 @@ _finalize_vcd_iso_track (VcdObj *obj)
       fmt = "MPEGAV/AVSEQ%2.2d.DAT;1";
       break;
     case VCD_TYPE_SVCD:
-      fmt = "MPEG-2/AVSEQ%2.2d.MPG;1";
+      fmt = "MPEG2/AVSEQ%2.2d.MPG;1";
       break;
     default:
       assert(1);

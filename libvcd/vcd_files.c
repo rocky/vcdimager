@@ -26,6 +26,7 @@
 #include "vcd_files_private.h"
 #include "vcd_bytesex.h"
 #include "vcd_obj.h"
+#include "vcd_logging.h"
 
 void
 set_entries_vcd(VcdObj *obj)
@@ -39,12 +40,28 @@ set_entries_vcd(VcdObj *obj)
   assert(obj->mpeg_tracks_num > 0);
 
   memset(&entries_vcd, 0, sizeof(entries_vcd)); /* paranoia / fixme */
-  strncpy(entries_vcd.ID, ENTRIES_ID, 8);
-  entries_vcd.version = UINT16_TO_BE(ENTRIES_VERSION);
+
+  switch (obj->type)
+    {
+    case VCD_TYPE_VCD2:
+      strncpy(entries_vcd.ID, ENTRIES_ID_VCD, 8);
+      entries_vcd.version = ENTRIES_VERSION_VCD2;
+      break;
+
+    case VCD_TYPE_SVCD:
+      strncpy(entries_vcd.ID, ENTRIES_ID_SVCD, 8);
+      entries_vcd.version = ENTRIES_VERSION_SVCD;
+      break;
+      
+    default:
+      vcd_error("VCD type not supported");
+      break;
+    }
+
   entries_vcd.tracks = UINT16_TO_BE(obj->mpeg_tracks_num);
 
   for(n = 0;n < obj->mpeg_tracks_num;n++) {
-    unsigned lsect = obj->mpeg_tracks[n].relative_start_extent;
+    uint32_t lsect = obj->mpeg_tracks[n].relative_start_extent;
 
     lsect += obj->iso_size;
 
@@ -140,9 +157,25 @@ set_info_vcd(VcdObj *obj)
   assert(obj->mpeg_tracks_num <= 98);
   
   memset(&info_vcd, 0, sizeof(info_vcd));
-  strncpy(info_vcd.ID, INFO_ID_VCD, sizeof(info_vcd.ID));
-  info_vcd.version = INFO_VERSION_VCD2;
-  info_vcd.sys_prof_tag = INFO_SPTAG_VCD2;
+
+  switch (obj->type)
+    {
+    case VCD_TYPE_VCD2:
+      strncpy(info_vcd.ID, INFO_ID_VCD, sizeof(info_vcd.ID));
+      info_vcd.version = INFO_VERSION_VCD2;
+      info_vcd.sys_prof_tag = INFO_SPTAG_VCD2;
+      break;
+
+    case VCD_TYPE_SVCD:
+      strncpy(info_vcd.ID, INFO_ID_SVCD, sizeof(info_vcd.ID));
+      info_vcd.version = INFO_VERSION_SVCD;
+      info_vcd.sys_prof_tag = INFO_SPTAG_SVCD;
+      break;
+      
+    default:
+      vcd_error("VCD type not supported");
+      break;
+    }
   
   strncpy(info_vcd.album_desc, 
           "by GNU VCDImager",
@@ -152,7 +185,8 @@ set_info_vcd(VcdObj *obj)
   info_vcd.vol_id = UINT16_TO_BE(0x0001);
 
   for(n = 0; n < obj->mpeg_tracks_num;n++)
-    if(obj->mpeg_tracks[n].mpeg_info.norm == MPEG_NORM_PAL)
+    if(obj->mpeg_tracks[n].mpeg_info.norm == MPEG_NORM_PAL 
+       || obj->mpeg_tracks[n].mpeg_info.norm == MPEG_NORM_PAL_S)
       _set_bit(info_vcd.pal_flags, n);
 
   info_vcd.psd_size = UINT32_TO_BE(obj->psd_size);
@@ -170,17 +204,49 @@ void
 set_tracks_svd (VcdObj *obj)
 {
   TracksSVD tracks_svd;
+  int n;
   
+  assert (obj->type == VCD_TYPE_SVCD);
+  assert (sizeof (SVDTrackContent) == 1);
   assert (sizeof (TracksSVD) == ISO_BLOCKSIZE);
 
-  memset (&tracks_svd, sizeof (tracks_svd), 0);
+  memset (&tracks_svd, 0, sizeof (tracks_svd));
 
   strncpy (tracks_svd.file_id, TRACKS_SVD_FILE_ID, sizeof (TRACKS_SVD_FILE_ID));
-  
   tracks_svd.version = TRACKS_SVD_VERSION;
-  
-  /* fixme !!! */
-  /* tracks_svd.tracks = */
+
+
+  tracks_svd.tracks = obj->mpeg_tracks_num;
+
+  for (n = 0; n < obj->mpeg_tracks_num; n++) 
+    {
+      
+      switch (obj->mpeg_tracks[n].mpeg_info.norm)
+        {
+        case MPEG_NORM_PAL:
+        case MPEG_NORM_PAL_S:
+          tracks_svd.tracks_info[n].contents.video = 0x07;
+          break;
+
+        case MPEG_NORM_NTSC:
+        case MPEG_NORM_NTSC_S:
+          tracks_svd.tracks_info[n].contents.video = 0x03;
+          break;
+          
+        default:
+          vcd_warn("SVCD/TRACKS.SVCD: No MPEG video?");
+          break;
+        }
+
+      tracks_svd.tracks_info[n].contents.audio = 0x02; /* fixme -- assumption */
+
+      tracks_svd.tracks_info[n].playing_time.m = 0;
+      tracks_svd.tracks_info[n].playing_time.s = 0;
+      tracks_svd.tracks_info[n].playing_time.f = 0;
+
+      vcd_warn("SVCD/TRACKS.SVCD: cannot determine playing time yet...");
+    }
+
   /* tracks_svd.tracks_info[0] = */
   
   memcpy (obj->tracks_svd_buf, &tracks_svd, sizeof(tracks_svd));
@@ -193,7 +259,7 @@ set_search_dat (VcdObj *obj)
 
   /* assert (sizeof (SearchDat) == ?) */
 
-  memset (&search_dat, sizeof (search_dat), 0);
+  memset (&search_dat, 0, sizeof (search_dat));
 
   strncpy (search_dat.file_id, SEARCH_FILE_ID, sizeof (SEARCH_FILE_ID));
   
