@@ -194,7 +194,7 @@ set_entries_vcd (VcdObj *obj, void *buf)
       lsect += obj->iso_size;
 
       entries_vcd.entry[idx].n = to_bcd8(track_idx);
-      lba_to_msf(lsect + 150, &(entries_vcd.entry[idx].msf));
+      lba_to_msf(_vcd_lsn_to_lba(lsect), &(entries_vcd.entry[idx].msf));
 
       idx++;
       lsect += obj->track_front_margin;
@@ -932,7 +932,8 @@ vcd_files_info_detect_type (const void *info_buf)
       {
       case INFO_VERSION_VCD2:
         if (_info->sys_prof_tag != INFO_SPTAG_VCD2)
-          vcd_warn ("INFO.VCD: unexpected system profile tag encountered");
+          vcd_warn ("INFO.VCD: unexpected system profile tag %d encountered",
+                    _info->version);
         _type = VCD_TYPE_VCD2;
         break;
 
@@ -947,13 +948,15 @@ vcd_files_info_detect_type (const void *info_buf)
             _type = VCD_TYPE_VCD11;
             break;
           default:
-            vcd_warn ("INFO.VCD: unexpected system profile tag encountered, assuming VCD 1.1");
+            vcd_warn ("INFO.VCD: unexpected system profile tag %d "
+                      "encountered, assuming VCD 1.1", _info->sys_prof_tag);
             break;
           }
         break;
 
       default:
-        vcd_warn ("unexpected vcd version encountered -- assuming vcd 2.0");
+        vcd_warn ("unexpected VCD version %d encountered -- assuming VCD 2.0",
+                  _info->version);
         break;
       }
   else if (!strncmp (_info->ID, INFO_ID_SVCD, sizeof (_info->ID)))
@@ -961,12 +964,14 @@ vcd_files_info_detect_type (const void *info_buf)
       {
       case INFO_VERSION_SVCD:
         if (_info->sys_prof_tag != INFO_SPTAG_SVCD)
-          vcd_warn ("INFO.SVD: unexpected system profile tag value -- assuming svcd");
+          vcd_warn ("INFO.SVD: unexpected system profile tag value %d "
+                    "-- assuming SVCD", _info->sys_prof_tag);
         _type = VCD_TYPE_SVCD;
         break;
         
       default:
-        vcd_warn ("INFO.SVD: unexpected version value seen -- still assuming svcd");
+        vcd_warn ("INFO.SVD: unexpected version value %d seen "
+                  " -- still assuming SVCD", _info->version);
         _type = VCD_TYPE_SVCD;
         break;
       }
@@ -980,7 +985,8 @@ vcd_files_info_detect_type (const void *info_buf)
         break;
         
       default:
-        vcd_warn ("INFO.SVD: unexpected version value seen -- still assuming hqvcd");
+        vcd_warn ("INFO.SVD: unexpected version value %d seen "
+                  "-- still assuming HQVCD", _info->version);
         _type = VCD_TYPE_HQVCD;
         break;
       }
