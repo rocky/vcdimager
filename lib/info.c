@@ -92,21 +92,21 @@ _getbuf (void)
    MPEGs. That would be rather slow.
 */
 static void
-_init_segments (vcdinfo_obj_t *obj)
+_init_segments (vcdinfo_obj_t *p_obj)
 {
-  InfoVcd_t *info = vcdinfo_get_infoVcd(obj);
-  segnum_t num_segments = vcdinfo_get_num_segments(obj);
+  InfoVcd_t *info = vcdinfo_get_infoVcd(p_obj);
+  segnum_t num_segments = vcdinfo_get_num_segments(p_obj);
   CdioListNode_t *entnode;
   CdioList_t *entlist;
   int i;
   lsn_t last_lsn=0;
   
-  obj->first_segment_lsn = cdio_msf_to_lsn(&info->first_seg_addr);
-  obj->seg_sizes         = calloc(1, num_segments * sizeof(uint32_t *));
+  p_obj->first_segment_lsn = cdio_msf_to_lsn(&info->first_seg_addr);
+  p_obj->seg_sizes         = calloc(1, num_segments * sizeof(uint32_t *));
 
-  if (NULL == obj->seg_sizes || 0 == num_segments) return;
+  if (NULL == p_obj->seg_sizes || 0 == num_segments) return;
 
-  entlist = iso9660_fs_readdir(obj->img, "SEGMENT", true);
+  entlist = iso9660_fs_readdir(p_obj->img, "SEGMENT", true);
 
   i=0;
   _CDIO_LIST_FOREACH (entnode, entlist) {
@@ -115,14 +115,14 @@ _init_segments (vcdinfo_obj_t *obj)
     if (statbuf->type == _STAT_DIR) continue;
 
     while(info->spi_contents[i].item_cont) {
-      obj->seg_sizes[i] = VCDINFO_SEGMENT_SECTOR_SIZE;
+      p_obj->seg_sizes[i] = VCDINFO_SEGMENT_SECTOR_SIZE;
       i++;
     }
     
     /* Should have an entry in the ISO 9660 filesystem. Get and save 
        in statbuf.secsize this size.
     */
-    obj->seg_sizes[i] = statbuf->secsize;
+    p_obj->seg_sizes[i] = statbuf->secsize;
 
     if (last_lsn >= statbuf->lsn) 
       vcd_warn ("Segments if ISO 9660 directory out of order lsn %ul >= %ul", 
@@ -133,7 +133,7 @@ _init_segments (vcdinfo_obj_t *obj)
   }
 
   while(i < num_segments && info->spi_contents[i].item_cont) {
-    obj->seg_sizes[i] = VCDINFO_SEGMENT_SECTOR_SIZE;
+    p_obj->seg_sizes[i] = VCDINFO_SEGMENT_SECTOR_SIZE;
     i++;
   }
 
@@ -148,16 +148,16 @@ _init_segments (vcdinfo_obj_t *obj)
   /* Figure all of the segment sector sizes */
   for (i=0; i < num_segments; i++) {
     
-    obj->seg_sizes[i] = VCDINFO_SEGMENT_SECTOR_SIZE;
+    p_obj->seg_sizes[i] = VCDINFO_SEGMENT_SECTOR_SIZE;
 
     if ( !info->spi_contents[i].item_cont ) {
       /* Should have an entry in the ISO 9660 filesystem. Get and save 
          in statbuf.secsize this size.
        */
-      lsn_t lsn = vcdinfo_get_seg_lsn(obj, i);
-      iso9660_stat_t *statbuf =iso9660_find_fs_lsn(obj->img, lsn);
+      lsn_t lsn = vcdinfo_get_seg_lsn(p_obj, i);
+      iso9660_stat_t *statbuf =iso9660_find_fs_lsn(p_obj->img, lsn);
       if (NULL != statbuf) {
-        obj->seg_sizes[i] = statbuf->secsize;
+        p_obj->seg_sizes[i] = statbuf->secsize;
         free(statbuf);
       } else {
         vcd_warn ("Trouble finding ISO 9660 size for segment %d.", i);
@@ -173,7 +173,7 @@ _init_segments (vcdinfo_obj_t *obj)
    0 is returned on error.
 */
 unsigned int
-vcdinfo_audio_type_num_channels(const vcdinfo_obj_t *obj, 
+vcdinfo_audio_type_num_channels(const vcdinfo_obj_t *p_obj, 
                                  unsigned int audio_type) 
 {
   const int audio_types[2][5] =
@@ -199,7 +199,7 @@ vcdinfo_audio_type_num_channels(const vcdinfo_obj_t *obj,
   }
   
   /* Get first index entry into above audio_type array from vcd_type */
-  switch (obj->vcd_type) {
+  switch (p_obj->vcd_type) {
 
   case VCD_TYPE_VCD:
   case VCD_TYPE_VCD11:
@@ -225,7 +225,7 @@ vcdinfo_audio_type_num_channels(const vcdinfo_obj_t *obj,
   Return a string describing an audio type.
 */
 const char * 
-vcdinfo_audio_type2str(const vcdinfo_obj_t *obj, unsigned int audio_type)
+vcdinfo_audio_type2str(const vcdinfo_obj_t *p_obj, unsigned int audio_type)
 {
   const char *audio_types[3][5] =
     {
@@ -243,7 +243,7 @@ vcdinfo_audio_type2str(const vcdinfo_obj_t *obj, unsigned int audio_type)
   unsigned int first_index = 0; 
 
   /* Get first index entry into above audio_type array from vcd_type */
-  switch (obj->vcd_type) {
+  switch (p_obj->vcd_type) {
 
   case VCD_TYPE_VCD:
   case VCD_TYPE_VCD11:
@@ -272,12 +272,12 @@ vcdinfo_audio_type2str(const vcdinfo_obj_t *obj, unsigned int audio_type)
 }
 
 /*!
-  Note first seg_num is 0!
+  Note first i_seg is 0!
 */
 const char * 
-vcdinfo_ogt2str(const vcdinfo_obj_t *obj, segnum_t seg_num)
+vcdinfo_ogt2str(const vcdinfo_obj_t *p_obj, segnum_t i_seg)
 {
-  const InfoVcd_t *info = &obj->info;
+  const InfoVcd_t *info = &(p_obj->info);
   const char *ogt_str[] =
     {
       "None",
@@ -286,12 +286,12 @@ vcdinfo_ogt2str(const vcdinfo_obj_t *obj, segnum_t seg_num)
       "all 4 available"
     };
   
-  return ogt_str[info->spi_contents[seg_num].ogt];
+  return ogt_str[info->spi_contents[i_seg].ogt];
 }
 
 
 const char * 
-vcdinfo_video_type2str(const vcdinfo_obj_t *obj, segnum_t seg_num)
+vcdinfo_video_type2str(const vcdinfo_obj_t *p_obj, segnum_t i_seg)
 {
   const char *video_types[] =
     {
@@ -306,32 +306,32 @@ vcdinfo_video_type2str(const vcdinfo_obj_t *obj, segnum_t seg_num)
       "INVALID ENTRY"
     };
   
-  return video_types[vcdinfo_get_video_type(obj, seg_num)];
+  return video_types[vcdinfo_get_video_type(p_obj, i_seg)];
 }
 
 /*!
-  \brief Classify itemid_num into the kind of item it is: track #, entry #, 
+  \brief Classify i_itemid into the kind of item it is: track #, entry #, 
   segment #. 
   \param itemid is set to contain this classification an the converted 
   entry number. 
 */
 void
-vcdinfo_classify_itemid (uint16_t itemid_num, 
+vcdinfo_classify_itemid (uint16_t i_itemid, 
                          /*out*/ vcdinfo_itemid_t *itemid)
 {
 
-  itemid->num = itemid_num;
-  if (itemid_num < 2) 
+  itemid->num = i_itemid;
+  if (i_itemid < 2) 
     itemid->type = VCDINFO_ITEM_TYPE_NOTFOUND;
-  else if (itemid_num < MIN_ENCODED_TRACK_NUM) {
+  else if (i_itemid < MIN_ENCODED_TRACK_NUM) {
     itemid->type = VCDINFO_ITEM_TYPE_TRACK;
     itemid->num--;
-  } else if (itemid_num < 600) {
+  } else if (i_itemid < 600) {
     itemid->type = VCDINFO_ITEM_TYPE_ENTRY;
     itemid->num -= MIN_ENCODED_TRACK_NUM;
-  } else if (itemid_num < MIN_ENCODED_SEGMENT_NUM)
+  } else if (i_itemid < MIN_ENCODED_SEGMENT_NUM)
     itemid->type = VCDINFO_ITEM_TYPE_LID;
-  else if (itemid_num <= MAX_ENCODED_SEGMENT_NUM) {
+  else if (i_itemid <= MAX_ENCODED_SEGMENT_NUM) {
     itemid->type = VCDINFO_ITEM_TYPE_SEGMENT;
     itemid->num -= (MIN_ENCODED_SEGMENT_NUM);
   } else 
@@ -339,12 +339,12 @@ vcdinfo_classify_itemid (uint16_t itemid_num,
 }
 
 const char *
-vcdinfo_pin2str (uint16_t itemid_num)
+vcdinfo_pin2str (uint16_t i_itemid)
 {
   char *buf = _getbuf ();
   vcdinfo_itemid_t itemid;
   
-  vcdinfo_classify_itemid(itemid_num, &itemid);
+  vcdinfo_classify_itemid(i_itemid, &itemid);
   strcpy (buf, "??");
 
   switch(itemid.type) {
@@ -353,13 +353,13 @@ vcdinfo_pin2str (uint16_t itemid_num)
     break;
   case VCDINFO_ITEM_TYPE_TRACK:
     snprintf (buf, BUF_SIZE, "SEQUENCE[%d] (0x%4.4x)", itemid.num-1, 
-              itemid_num);
+              i_itemid);
     break;
   case VCDINFO_ITEM_TYPE_ENTRY:
-    snprintf (buf, BUF_SIZE, "ENTRY[%d] (0x%4.4x)", itemid.num, itemid_num);
+    snprintf (buf, BUF_SIZE, "ENTRY[%d] (0x%4.4x)", itemid.num, i_itemid);
     break;
   case VCDINFO_ITEM_TYPE_SEGMENT:
-    snprintf (buf, BUF_SIZE, "SEGMENT[%d] (0x%4.4x)", itemid.num, itemid_num);
+    snprintf (buf, BUF_SIZE, "SEGMENT[%d] (0x%4.4x)", itemid.num, i_itemid);
     break;
   case VCDINFO_ITEM_TYPE_LID:
     snprintf (buf, BUF_SIZE, "spare id (0x%4.4x)", itemid.num);
@@ -407,7 +407,7 @@ vcdinfo_get_cd_image (const vcdinfo_obj_t *p_vcd_obj)
 
 
 /*!
-  \fn vcdinfo_selection_get_lid(const vcdinfo_obj_t *obj, lid_t lid,
+  \fn vcdinfo_selection_get_lid(const vcdinfo_obj_t *p_obj, lid_t lid,
                                unsigned int selection);
 
   \brief Get offset of a selection for a given lid. 
@@ -440,7 +440,7 @@ lid_t vcdinfo_selection_get_lid(const vcdinfo_obj_t *p_obj, lid_t lid,
 }
 
 /*!
-  \fn vcdinfo_selection_get_offset(const vcdinfo_obj_t *obj, lid_t lid,
+  \fn vcdinfo_selection_get_offset(const vcdinfo_obj_t *p_obj, lid_t lid,
   unsigned int selection);
 
   \brief Get offset of a selection for a given lid. 
@@ -994,50 +994,50 @@ vcdinfo_get_offset_t (const vcdinfo_obj_t *p_obj, unsigned int offset)
    blanks removed, or NULL if there is some problem in getting this.
 */
 const char *
-vcdinfo_get_preparer_id(const vcdinfo_obj_t *obj)
+vcdinfo_get_preparer_id(const vcdinfo_obj_t *p_obj)
 {
-  if ( NULL == obj ) return (NULL);
-  return iso9660_get_preparer_id(&obj->pvd);
+  if ( !p_obj ) return (NULL);
+  return iso9660_get_preparer_id(&(p_obj->pvd));
 }
 
 /*!
   Get the PSD.
 */
 uint8_t *
-vcdinfo_get_psd(const vcdinfo_obj_t *obj) 
+vcdinfo_get_psd(const vcdinfo_obj_t *p_obj) 
 {
-  if ( NULL == obj ) return (NULL);
-  return obj->psd;
+  if ( !p_obj ) return NULL;
+  return p_obj->psd;
 }
 
 /*!
   Get the extended PSD.
 */
 uint8_t *
-vcdinfo_get_psd_x(const vcdinfo_obj_t *obj)
+vcdinfo_get_psd_x(const vcdinfo_obj_t *p_obj)
 {
-  if ( NULL == obj ) return (NULL);
-  return obj->psd_x;
+  if ( !p_obj ) return NULL;
+  return p_obj->psd_x;
 }
 
 /*!
   Return number of bytes in PSD. Return 0 if there's an error.
 */
 uint32_t
-vcdinfo_get_psd_size (const vcdinfo_obj_t *obj)
+vcdinfo_get_psd_size (const vcdinfo_obj_t *p_obj)
 {
-  if ( NULL == obj ) return 0;
-  return vcdinf_get_psd_size(&obj->info);
+  if ( !p_obj ) return 0;
+  return vcdinf_get_psd_size(&(p_obj->info));
 }
 
 /*!
   Return number of bytes in the extended PSD. Return 0 if there's an error.
 */
 uint32_t
-vcdinfo_get_psd_x_size (const vcdinfo_obj_t *obj)
+vcdinfo_get_psd_x_size (const vcdinfo_obj_t *p_obj)
 {
-  if ( NULL == obj ) return 0;
-  return obj->psd_x_size;
+  if ( !p_obj ) return 0;
+  return p_obj->psd_x_size;
 }
 
 /*!
@@ -1045,10 +1045,10 @@ vcdinfo_get_psd_x_size (const vcdinfo_obj_t *obj)
    blanks removed, or NULL if there is some problem in getting this.
 */
 const char *
-vcdinfo_get_publisher_id(const vcdinfo_obj_t *obj)
+vcdinfo_get_publisher_id(const vcdinfo_obj_t *p_obj)
 {
-  if ( NULL == obj ) return (NULL);
-  return iso9660_get_publisher_id(&obj->pvd);
+  if ( !p_obj ) return (NULL);
+  return iso9660_get_publisher_id(&(p_obj->pvd));
 }
 
 /*!
@@ -1056,13 +1056,13 @@ vcdinfo_get_publisher_id(const vcdinfo_obj_t *obj)
   NULL is returned if error or not found.
 */
 static bool
-_vcdinfo_lid_get_pxd(const vcdinfo_obj_t *obj, PsdListDescriptor_t *pxd,
+_vcdinfo_lid_get_pxd(const vcdinfo_obj_t *p_obj, PsdListDescriptor_t *pxd,
                      uint16_t lid, bool ext) 
 {
   CdioListNode_t *node;
-  unsigned mult = obj->info.offset_mult;
-  const uint8_t *psd = ext ? obj->psd_x : obj->psd;
-  CdioList_t *offset_list = ext ? obj->offset_x_list : obj->offset_list;
+  unsigned mult = p_obj->info.offset_mult;
+  const uint8_t *psd = ext ? p_obj->psd_x : p_obj->psd;
+  CdioList_t *offset_list = ext ? p_obj->offset_x_list : p_obj->offset_list;
 
   if (offset_list == NULL) return false;
   
@@ -1104,28 +1104,28 @@ _vcdinfo_lid_get_pxd(const vcdinfo_obj_t *obj, PsdListDescriptor_t *pxd,
   False is returned if not found.
 */
 bool
-vcdinfo_lid_get_pxd(const vcdinfo_obj_t *obj, PsdListDescriptor_t *pxd,
+vcdinfo_lid_get_pxd(const vcdinfo_obj_t *p_obj, PsdListDescriptor_t *pxd,
                     uint16_t lid)
 {
-  if (_vcdinfo_lid_get_pxd(obj, pxd, lid, true))
+  if (_vcdinfo_lid_get_pxd(p_obj, pxd, lid, true))
     return true;
-  return _vcdinfo_lid_get_pxd(obj, pxd, lid, false);
+  return _vcdinfo_lid_get_pxd(p_obj, pxd, lid, false);
 }
 
 /**
- \fn vcdinfo_get_return_offset(const vcdinfo_obj_t *obj);
+ \fn vcdinfo_get_return_offset(const vcdinfo_obj_t *p_obj);
  \brief Get return offset for a given LID. 
  \return  VCDINFO_INVALID_OFFSET is returned on error or if LID has no 
  "return" entry. Otherwise the LID offset is returned.
  */
 uint16_t
-vcdinfo_get_return_offset(const vcdinfo_obj_t *obj, lid_t lid)
+vcdinfo_get_return_offset(const vcdinfo_obj_t *p_obj, lid_t lid)
 {
-  if (NULL != obj) {
+  if (NULL != p_obj) {
 
     PsdListDescriptor_t pxd;
 
-    vcdinfo_lid_get_pxd(obj, &pxd, lid);
+    vcdinfo_lid_get_pxd(p_obj, &pxd, lid);
     
     switch (pxd.descriptor_type) {
     case PSD_TYPE_PLAY_LIST:
@@ -1148,12 +1148,12 @@ vcdinfo_get_return_offset(const vcdinfo_obj_t *obj, lid_t lid)
    VCDINFO_INVALID_AUDIO_TYPE is returned on error.
 */
 unsigned int
-vcdinfo_get_seg_audio_type(const vcdinfo_obj_t *obj, segnum_t seg_num)
+vcdinfo_get_seg_audio_type(const vcdinfo_obj_t *p_obj, segnum_t i_seg)
 {
-  if ( NULL == obj || NULL == &obj->info 
-       || seg_num >= vcdinfo_get_num_segments(obj) )
+  if ( !p_obj || NULL == &(p_obj->info)
+       || i_seg >= vcdinfo_get_num_segments(p_obj) )
     return VCDINFO_INVALID_AUDIO_TYPE;
-  return(obj->info.spi_contents[seg_num].audio_type);
+  return(p_obj->info.spi_contents[i_seg].audio_type);
 }
 
 /*!
@@ -1161,51 +1161,51 @@ vcdinfo_get_seg_audio_type(const vcdinfo_obj_t *obj, segnum_t seg_num)
    (is part of an "item" or listing in the ISO 9660 filesystem).
 */
 bool
-vcdinfo_get_seg_continue(const vcdinfo_obj_t *obj, segnum_t seg_num)
+vcdinfo_get_seg_continue(const vcdinfo_obj_t *p_obj, segnum_t i_seg)
 {
-  if ( NULL == obj || NULL == &obj->info 
-       || seg_num >= vcdinfo_get_num_segments(obj) )
+  if ( !p_obj || !&(p_obj->info)
+       || i_seg >= vcdinfo_get_num_segments(p_obj) )
     return false;
-  return(obj->info.spi_contents[seg_num].item_cont);
+  return(p_obj->info.spi_contents[i_seg].item_cont);
 }
 
 /*!  Return the starting LBA (logical block address) for segment
   entry_num in obj.  VCDINFO_LBA_NULL is returned if there is no entry.
 
-  Note first seg_num is 0.
+  Note first i_seg is 0.
 */
 lba_t
-vcdinfo_get_seg_lba(const vcdinfo_obj_t *obj, segnum_t seg_num)
+vcdinfo_get_seg_lba(const vcdinfo_obj_t *p_obj, segnum_t i_seg)
 { 
-  if (obj == NULL) return VCDINFO_NULL_LBA;
-  return cdio_lsn_to_lba(vcdinfo_get_seg_lsn(obj, seg_num));
+  if (!p_obj) return VCDINFO_NULL_LBA;
+  return cdio_lsn_to_lba(vcdinfo_get_seg_lsn(p_obj, i_seg));
 }
 
 /*!  Return the starting LBA (logical block address) for segment
   entry_num in obj.  VCDINFO_LSN_NULL is returned if there is no entry.
 
-  Note first seg_num is 0.
+  Note first i_seg is 0.
 */
 lsn_t
-vcdinfo_get_seg_lsn(const vcdinfo_obj_t *obj, segnum_t seg_num)
+vcdinfo_get_seg_lsn(const vcdinfo_obj_t *p_obj, segnum_t i_seg)
 { 
-  if (obj == NULL || seg_num >= vcdinfo_get_num_segments(obj))
+  if (!p_obj || i_seg >= vcdinfo_get_num_segments(p_obj))
     return VCDINFO_NULL_LSN;
-  return obj->first_segment_lsn + (VCDINFO_SEGMENT_SECTOR_SIZE * seg_num);
+  return p_obj->first_segment_lsn + (VCDINFO_SEGMENT_SECTOR_SIZE * i_seg);
 }
 
 /*!  Return the starting MSF (minutes/secs/frames) for segment
   entry_num in obj.  NULL is returned if there is no entry.
 
-  Note first seg_num is 0!
+  Note first i_seg is 0!
 */
 const msf_t *
-vcdinfo_get_seg_msf(const vcdinfo_obj_t *obj, segnum_t seg_num)
+vcdinfo_get_seg_msf(const vcdinfo_obj_t *p_obj, segnum_t i_seg)
 { 
-  if (obj == NULL || seg_num >= vcdinfo_get_num_segments(obj))
+  if (!p_obj || i_seg >= vcdinfo_get_num_segments(p_obj))
     return NULL;
   else {
-    lsn_t lsn = vcdinfo_get_seg_lsn(obj, seg_num);
+    lsn_t lsn = vcdinfo_get_seg_lsn(p_obj, i_seg);
     static msf_t msf;
     cdio_lsn_to_msf(lsn, &msf);
     return &msf;
@@ -1224,11 +1224,11 @@ vcdinfo_get_seg_msf(const vcdinfo_obj_t *obj, segnum_t seg_num)
   remaining ones. We may revisit this decision later. 
 */
 uint32_t
-vcdinfo_get_seg_sector_count(const vcdinfo_obj_t *obj, segnum_t seg_num)
+vcdinfo_get_seg_sector_count(const vcdinfo_obj_t *p_obj, segnum_t i_seg)
 { 
-  if (obj == NULL || seg_num >= vcdinfo_get_num_segments(obj))
+  if (!p_obj || i_seg >= vcdinfo_get_num_segments(p_obj))
     return 0;
-  return obj->seg_sizes[seg_num];
+  return p_obj->seg_sizes[i_seg];
 }
 
 /*!
@@ -1236,10 +1236,10 @@ vcdinfo_get_seg_sector_count(const vcdinfo_obj_t *obj, segnum_t seg_num)
    blanks removed, or NULL if there is some problem in getting this.
 */
 const char *
-vcdinfo_get_system_id(const vcdinfo_obj_t *obj)
+vcdinfo_get_system_id(const vcdinfo_obj_t *p_obj)
 {
-  if ( NULL == obj || NULL == &obj->pvd ) return (NULL);
-  return(iso9660_get_system_id(&obj->pvd));
+  if ( !p_obj || !&(p_obj->pvd) ) return NULL;
+  return(iso9660_get_system_id(&p_obj->pvd));
 }
 
 /*!
@@ -1250,9 +1250,9 @@ vcdinfo_get_system_id(const vcdinfo_obj_t *obj)
   1 is the first track the first complete MPEG track generally.
 */
 track_t
-vcdinfo_get_track(const vcdinfo_obj_t *obj, const unsigned int entry_num)
+vcdinfo_get_track(const vcdinfo_obj_t *p_obj, const unsigned int entry_num)
 {
-  const EntriesVcd_t *entries = &obj->entries;
+  const EntriesVcd_t *entries = &p_obj->entries;
   const unsigned int entry_count = vcdinf_get_num_entries(entries);
   /* Note entry_num is 0 origin. */
   return entry_num < entry_count ?
@@ -1266,16 +1266,16 @@ vcdinfo_get_track(const vcdinfo_obj_t *obj, const unsigned int entry_num)
    Note: track 1 is usually the first track.
 */
 unsigned int
-vcdinfo_get_track_audio_type(const vcdinfo_obj_t *obj, track_t track_num)
+vcdinfo_get_track_audio_type(const vcdinfo_obj_t *p_obj, track_t i_track)
 {
   TracksSVD *tracks;
   TracksSVD2 *tracks2;
-  if ( NULL == obj || NULL == &obj->info ) return VCDINFO_INVALID_AUDIO_TYPE;
-  tracks = obj->tracks_buf;
+  if ( !p_obj || !&(p_obj->info) ) return VCDINFO_INVALID_AUDIO_TYPE;
+  tracks = p_obj->tracks_buf;
 
   if ( NULL == tracks ) return 0;
   tracks2 = (TracksSVD2 *) &(tracks->playing_time[tracks->tracks]);
-  return(tracks2->contents[track_num-1].audio);
+  return(tracks2->contents[i_track-1].audio);
 }
 
 /*!  
@@ -1288,79 +1288,79 @@ vcdinfo_get_track_audio_type(const vcdinfo_obj_t *obj, track_t track_num)
     If there are no tracks, we return -1.
 */
 unsigned int
-vcdinfo_get_num_tracks(const vcdinfo_obj_t *obj)
+vcdinfo_get_num_tracks(const vcdinfo_obj_t *p_obj)
 {
-  if (obj == NULL || obj->img == NULL) return 0;
+  if (!p_obj || !p_obj->img) return 0;
 
-  return cdio_get_num_tracks(obj->img)-1;
+  return cdio_get_num_tracks(p_obj->img)-1;
 }
 
 
 /*!  
   Return the starting LBA (logical block address) for track number
-  track_num in obj.  
+  i_track in obj.  
 
   The IS0-9660 filesystem track has number 0. Tracks associated
   with playable entries numbers start at 1.
 
   The "leadout" track is specified either by
-  using track_num LEADOUT_TRACK or the total tracks+1.
+  using i_track LEADOUT_TRACK or the total tracks+1.
   VCDINFO_NULL_LBA is returned on failure.
 */
 lba_t 
-vcdinfo_get_track_lba(const vcdinfo_obj_t *obj, track_t track_num)
+vcdinfo_get_track_lba(const vcdinfo_obj_t *p_obj, track_t i_track)
 {
-  if (NULL == obj || NULL == obj->img)
+  if (!p_obj || !p_obj->img)
     return VCDINFO_NULL_LBA;
   
 
   /* CdIo tracks start at 1 rather than 0. */
-  return cdio_get_track_lba(obj->img, track_num+1);
+  return cdio_get_track_lba(p_obj->img, i_track+1);
 }
 
 /*!  
   Return the starting LSN (logical sector number) for track number
-  track_num in obj.  
+  i_track in obj.  
 
   The IS0-9660 filesystem track has number 0. Tracks associated
   with playable entries numbers start at 1.
 
   The "leadout" track is specified either by
-  using track_num LEADOUT_TRACK or the total tracks+1.
+  using i_track LEADOUT_TRACK or the total tracks+1.
   VCDINFO_NULL_LBA is returned on failure.
 */
 lsn_t 
-vcdinfo_get_track_lsn(const vcdinfo_obj_t *obj, track_t track_num)
+vcdinfo_get_track_lsn(const vcdinfo_obj_t *p_obj, track_t i_track)
 {
-  if (NULL == obj || NULL == obj->img)
+  if (!p_obj || !p_obj->img)
     return VCDINFO_NULL_LSN;
 
   /* CdIo tracks start at 1 rather than 0. */
-  return cdio_get_track_lsn(obj->img, track_num+1);
+  return cdio_get_track_lsn(p_obj->img, i_track+1);
 }
 
 /*!  
   Return the starting MSF (minutes/secs/frames) for track number
-  track_num in obj.  
+  i_track in obj.  
 
   The IS0-9660 filesystem track has number 0. Tracks associated
   with playable entries numbers start at 1.
 
   The "leadout" track is specified either by
-  using track_num LEADOUT_TRACK or the total tracks+1.
+  using i_track LEADOUT_TRACK or the total tracks+1.
   VCDINFO_NULL_LBA is returned on failure.
 */
 int
-vcdinfo_get_track_msf(const vcdinfo_obj_t *obj, track_t track_num,
+vcdinfo_get_track_msf(const vcdinfo_obj_t *p_obj, track_t i_track,
                       uint8_t *min, uint8_t *sec, uint8_t *frame)
 {
   msf_t msf;
 
-  if (NULL == obj || NULL == obj->img)
+  if (!p_obj || !p_obj->img)
     return 1;
   
   /* CdIo tracks start at 1 rather than 0. */
-  if (cdio_get_track_msf(obj->img, track_num+1, &msf)) {
+  if (cdio_get_track_msf(p_obj->img, i_track+1, &msf)) {
     *min   = cdio_from_bcd8(msf.m);
     *sec   = cdio_from_bcd8(msf.s);
     *frame = cdio_from_bcd8(msf.f);
@@ -1381,22 +1381,23 @@ vcdinfo_get_track_msf(const vcdinfo_obj_t *obj, track_t track_num,
 
 */
 unsigned int
-vcdinfo_get_track_sect_count(const vcdinfo_obj_t *obj, const track_t track_num)
+vcdinfo_get_track_sect_count(const vcdinfo_obj_t *p_obj, 
+                             const track_t i_track)
 {
-  if (NULL == obj || VCDINFO_INVALID_TRACK == track_num) 
+  if (!p_obj || VCDINFO_INVALID_TRACK == i_track) 
     return 0;
   
   {
-    iso9660_stat_t *statbuf;
-    const lsn_t lsn = vcdinfo_get_track_lsn(obj, track_num);
+    iso9660_stat_t *p_statbuf;
+    const lsn_t lsn = vcdinfo_get_track_lsn(p_obj, i_track);
     
     /* Try to get the sector count from the ISO 9660 filesystem */
-    if (obj->has_xa && (statbuf = iso9660_find_fs_lsn(obj->img, lsn))) {
-      unsigned int secsize = statbuf->secsize;
-      free(statbuf);
+    if (p_obj->has_xa && (p_statbuf = iso9660_find_fs_lsn(p_obj->img, lsn))) {
+      unsigned int secsize = p_statbuf->secsize;
+      free(p_statbuf);
       return secsize;
     } else {
-      const lsn_t next_lsn=vcdinfo_get_track_lsn(obj, track_num+1);
+      const lsn_t next_lsn=vcdinfo_get_track_lsn(p_obj, i_track+1);
       /* Failed on ISO 9660 filesystem. Use track information.  */
       return next_lsn > lsn ? next_lsn - lsn : 0;
     }
@@ -1414,14 +1415,14 @@ vcdinfo_get_track_sect_count(const vcdinfo_obj_t *obj, const track_t track_num)
   We should add a parameter to indicate whether this is wanted or not.
 */
 unsigned int
-vcdinfo_get_track_size(const vcdinfo_obj_t *p_obj, track_t track_num)
+vcdinfo_get_track_size(const vcdinfo_obj_t *p_obj, track_t i_track)
 {
-  if (NULL == p_obj || VCDINFO_INVALID_TRACK == track_num) 
+  if (NULL == p_obj || VCDINFO_INVALID_TRACK == i_track) 
     return 0;
   
   {
     const lsn_t lsn = cdio_lba_to_lsn(vcdinfo_get_track_lba(p_obj, 
-                                                            track_num));
+                                                            i_track));
     
     /* Try to get the sector count from the ISO 9660 filesystem */
     if (p_obj->has_xa) {
@@ -1441,20 +1442,20 @@ vcdinfo_get_track_size(const vcdinfo_obj_t *p_obj, track_t track_num)
 }
 
 /*!
-  \brief Get the kind of video stream segment of segment seg_num in p_obj.
+  \brief Get the kind of video stream segment of segment i_seg in p_obj.
   \return VCDINFO_FILES_VIDEO_INVALID is returned if  on error or p_obj is
   null. Otherwise the enumeration type.
 
-  Note first seg_num is 0!
+  Note first i_seg is 0!
 */
 vcdinfo_video_segment_type_t
-vcdinfo_get_video_type(const vcdinfo_obj_t *p_obj, segnum_t seg_num)
+vcdinfo_get_video_type(const vcdinfo_obj_t *p_obj, segnum_t i_seg)
 {
   const InfoVcd_t *info;
   if (p_obj == NULL)  return VCDINFO_FILES_VIDEO_INVALID;
   info = &p_obj->info;
   if (info == NULL) return VCDINFO_FILES_VIDEO_INVALID;
-  return info->spi_contents[seg_num].video_type;
+  return info->spi_contents[i_seg].video_type;
 }
 
 /*!
