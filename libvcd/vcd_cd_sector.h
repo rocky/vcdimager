@@ -42,6 +42,10 @@
 
 #define CD_MAX_TRACKS 99 
 
+#define CD_74MIN_SECTORS UINT32_C(74*60*75)
+#define CD_80MIN_SECTORS UINT32_C(80*60*75)
+#define CD_MAX_SECTORS   UINT32_C(99*60*75)
+
 /* make mode 2 form 1/2 sector
  *
  * data must be a buffer of size 2048 or 2324 for SM_FORM2

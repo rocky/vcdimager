@@ -883,7 +883,7 @@ _finalize_vcd_iso_track (VcdObj *obj)
 static int
 _callback_wrapper (VcdObj *obj, int force)
 {
-  const int cb_frequency = 75*4;
+  const int cb_frequency = 75;
 
   if (obj->last_cb_call + cb_frequency > obj->sectors_written && !force)
     return 0;
@@ -1216,6 +1216,8 @@ vcd_obj_get_image_size (VcdObj *obj)
 long
 vcd_obj_begin_output (VcdObj *obj)
 {
+  uint32_t image_size;
+
   assert (obj != NULL);
   assert (_vcd_list_length (obj->mpeg_track_list) > 0);
 
@@ -1233,7 +1235,16 @@ vcd_obj_begin_output (VcdObj *obj)
 
   _finalize_vcd_iso_track (obj);
 
-  return obj->relative_end_extent + obj->iso_size;
+  image_size = obj->relative_end_extent + obj->iso_size;
+
+  if (image_size > CD_MAX_SECTORS)
+    vcd_error ("image too big (%d sectors)", image_size);
+
+  if (image_size > CD_74MIN_SECTORS)
+    vcd_warn ("generated image (%d sectors) may not fit "
+              "on 74min CDRs (%d sectors)", image_size, CD_74MIN_SECTORS);
+
+  return image_size;
 }
 
 int

@@ -25,14 +25,13 @@
 #include <sys/ioctl.h>
 #include <popt.h>
 #include <errno.h>
-#include <stdint.h>
-#include <stdbool.h>
 
 #ifdef __linux__
 #warning expect missing prototype warnings from swab.h
 #include <linux/cdrom.h>
 #endif
 
+#include "vcd_types.h"
 #include "vcd_bytesex.h"
 #include "vcd_cd_sector.h"
 #include "vcd_files.h"

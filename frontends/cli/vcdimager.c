@@ -29,6 +29,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "vcd_types.h"
 #include "vcd.h"
 #include "vcd_stream_stdio.h"
 #include "vcd_logging.h"
