@@ -52,7 +52,7 @@ dnl headers
 AC_DEFINE(_DEVELOPMENT_, [], enable warnings about being development release)
 AC_DEFINE(_GNU_SOURCE, [], enable GNU libc extension)
 AC_STDC_HEADERS
-AC_CHECK_HEADERS(stdint.h inttypes.h stdbool.h alloca.h)
+AC_CHECK_HEADERS(sys/stat.h stdint.h inttypes.h stdbool.h)
 AC_CHECK_HEADERS(linux/version.h)
 
 if test "x$ac_cv_header_stdint_h" != "xyes" 

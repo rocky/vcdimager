@@ -1,3 +1,7 @@
+2003-01-28  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_image_cd-bsdi.c: fixes from Steven M. Schultz
+
 2003-01-19  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_image_cd.h: replaced #if-based selection of cdrom

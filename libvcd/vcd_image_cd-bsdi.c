@@ -25,7 +25,7 @@
 #include <libvcd/vcd_assert.h>
 #include <libvcd/vcd_bytesex.h>
 #include <libvcd/vcd_cd_sector.h>
-#include <libvcd/vcd_image_bsdicd.h>
+#include <libvcd/vcd_image_cd.h>
 #include <libvcd/vcd_iso9660.h>
 #include <libvcd/vcd_logging.h>
 #include <libvcd/vcd_util.h>
@@ -257,7 +257,7 @@ _read_mode2_sector (void *user_data, void *data, uint32_t lsn, bool form2)
     }
   else
     {
-      char buf[M2RAW_SIZE] = { 0, };
+      char buf[M2RAW_SECTOR_SIZE] = { 0, };
       int retval;
 
       if ((retval = _read_mode2_sector (_obj, buf, lsn, true)))
@@ -349,7 +349,7 @@ vcd_image_source_new_bsdicd (void)
     .read_mode2_sector = _read_mode2_sector,
     .stat_size         = _stat_size,
     .free              = _source_free,
-    .set_arg           = _source_set_device
+    .set_arg           = _source_set_arg
   };
 
   _data = _vcd_malloc (sizeof (_img_bsdicd_src_t));
@@ -357,7 +357,8 @@ vcd_image_source_new_bsdicd (void)
 
   return vcd_image_source_new (_data, &_funcs);
 #else 
-  vcd_error ("bsdi cd image source only supported under BSDI");
+# error bsdi cd image source only supported under BSDI
+  vcd_assert_not_reached ();
   return NULL;
 #endif
 }
