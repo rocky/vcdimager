@@ -43,37 +43,37 @@ _get_node (xmlDocPtr doc, xmlNodePtr cur, xmlNsPtr ns,
 	   const char nodename[], bool folder)
 {
   xmlNodePtr n = NULL;
-  const xmlChar *_node_id = folder ? "folder" : "file";
+  const xmlChar *_node_id = folder ?(const xmlChar *) "folder" :(const xmlChar *) "file";
 
   FOR_EACH (n, cur)
     {
-      char *tmp;
+      xmlChar *tmp = NULL;
 
       if (xmlStrcmp (n->name, _node_id))
 	continue;
 
-      vcd_assert (!xmlStrcmp (n->children->name, "name"));
+      vcd_assert (!xmlStrcmp (n->children->name, (const xmlChar *) "name"));
       
       tmp = xmlNodeListGetString (doc, n->children->children, 1);
       
-      if (!xmlStrcmp (tmp, nodename))
+      if (!xmlStrcmp (tmp, (const xmlChar *) nodename))
 	break;
     }
   
   if (!n)
     {
       n = xmlNewNode (ns, _node_id);
-      xmlNewChild (n, ns, "name", nodename);
+      xmlNewChild (n, ns, (const xmlChar *) "name", (const xmlChar *) nodename);
 
       if (!folder || !cur->xmlChildrenNode) /* file or first entry */
 	xmlAddChild (cur, n);
       else /* folder */
 	{
-	  if (!xmlStrcmp (cur->children->name, "name"))
+	  if (!xmlStrcmp (cur->children->name, (const xmlChar *) "name"))
 	    xmlAddNextSibling (cur->xmlChildrenNode, n);
 	  else
 	    {
-	      vcd_assert (!xmlStrcmp (cur->name, "filesystem"));
+	      vcd_assert (!xmlStrcmp (cur->name, (const xmlChar *) "filesystem"));
 	      xmlAddPrevSibling (cur->xmlChildrenNode, n); /* special case for <filesystem> */
 	    }
 	}
@@ -125,25 +125,25 @@ _ref_area_helper (xmlNodePtr cur, xmlNsPtr ns, const char tag_id[], const char p
   if (!pbc_id)
     return;
   
-  node = xmlNewChild (cur, ns, tag_id, NULL);
+  node = xmlNewChild (cur, ns, (const xmlChar *) tag_id, NULL);
   
-  xmlSetProp (node, "ref", pbc_id);
+  xmlSetProp (node, (const xmlChar *) "ref", (const xmlChar *) pbc_id);
 
   if (_area)
     {
       char buf[16];
 
       snprintf (buf, sizeof (buf), "%d", _area->x1);
-      xmlSetProp (node, "x1", buf);
+      xmlSetProp (node, (const xmlChar *) "x1", (const xmlChar *) buf);
 
       snprintf (buf, sizeof (buf), "%d", _area->y1);
-      xmlSetProp (node, "y1", buf);
+      xmlSetProp (node, (const xmlChar *) "y1", (const xmlChar *) buf);
 
       snprintf (buf, sizeof (buf), "%d", _area->x2);
-      xmlSetProp (node, "x2", buf);
+      xmlSetProp (node, (const xmlChar *) "x2", (const xmlChar *) buf);
 
       snprintf (buf, sizeof (buf), "%d", _area->y2);
-      xmlSetProp (node, "y2", buf);
+      xmlSetProp (node, (const xmlChar *) "y2", (const xmlChar *) buf);
     }
 }
 
@@ -159,45 +159,47 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 
   xmlKeepBlanksDefault(0);
 
-  doc = xmlNewDoc ("1.0");
+  doc = xmlNewDoc ((const xmlChar *) "1.0");
   
-  dtd = xmlNewDtd (doc, "videocd", VIDEOCD_DTD_PUBID, VIDEOCD_DTD_SYSID);
+  dtd = xmlNewDtd (doc, (const xmlChar *) "videocd", 
+		   (const xmlChar *) VIDEOCD_DTD_PUBID, 
+		   (const xmlChar *) VIDEOCD_DTD_SYSID);
   xmlAddChild ((xmlNodePtr) doc, (xmlNodePtr) dtd);
 
   if (obj->comment)
-    xmlAddChild ((xmlNodePtr) doc, xmlNewComment (obj->comment));
+    xmlAddChild ((xmlNodePtr) doc, xmlNewComment ((const xmlChar *) obj->comment));
 
-  vcd_node = xmlNewDocNode (doc, ns, "videocd", NULL);
+  vcd_node = xmlNewDocNode (doc, ns, (const xmlChar *) "videocd", NULL);
   xmlAddChild ((xmlNodePtr) doc, vcd_node);
 
-  ns = xmlNewNs (vcd_node, VIDEOCD_DTD_XMLNS, NULL);
+  ns = xmlNewNs (vcd_node, (const xmlChar *) VIDEOCD_DTD_XMLNS, NULL);
   xmlSetNs (vcd_node, ns);
 
   switch (obj->vcd_type) 
     {
     case VCD_TYPE_VCD:
-      xmlSetProp (vcd_node, "class", "vcd");
-      xmlSetProp (vcd_node, "version", "1.0");
+      xmlSetProp (vcd_node, (const xmlChar *) "class", (const xmlChar *) "vcd");
+      xmlSetProp (vcd_node, (const xmlChar *) "version", (const xmlChar *) "1.0");
       break;
 
     case VCD_TYPE_VCD11:
-      xmlSetProp (vcd_node, "class", "vcd");
-      xmlSetProp (vcd_node, "version", "1.1");
+      xmlSetProp (vcd_node, (const xmlChar *) "class", (const xmlChar *) "vcd");
+      xmlSetProp (vcd_node, (const xmlChar *) "version", (const xmlChar *) "1.1");
       break;
 
     case VCD_TYPE_VCD2:
-      xmlSetProp (vcd_node, "class", "vcd");
-      xmlSetProp (vcd_node, "version", "2.0");
+      xmlSetProp (vcd_node, (const xmlChar *) "class", (const xmlChar *) "vcd");
+      xmlSetProp (vcd_node, (const xmlChar *) "version", (const xmlChar *) "2.0");
       break;
 
     case VCD_TYPE_SVCD:
-      xmlSetProp (vcd_node, "class", "svcd");
-      xmlSetProp (vcd_node, "version", "1.0");
+      xmlSetProp (vcd_node, (const xmlChar *) "class", (const xmlChar *) "svcd");
+      xmlSetProp (vcd_node, (const xmlChar *) "version", (const xmlChar *) "1.0");
       break;
 
     case VCD_TYPE_HQVCD:
-      xmlSetProp (vcd_node, "class", "hqvcd");
-      xmlSetProp (vcd_node, "version", "1.0");
+      xmlSetProp (vcd_node, (const xmlChar *) "class", (const xmlChar *) "hqvcd");
+      xmlSetProp (vcd_node, (const xmlChar *) "version", (const xmlChar *) "1.0");
       break;
 
     default:
@@ -211,47 +213,47 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
     {
       struct option_t *_option = _vcd_list_node_data (node);
       
-      section = xmlNewChild (vcd_node, ns, "option", NULL);
-      xmlSetProp (section, "name", _option->name);
-      xmlSetProp (section, "value", _option->value);
+      section = xmlNewChild (vcd_node, ns, (const xmlChar *) "option", NULL);
+      xmlSetProp (section, (const xmlChar *) "name", (const xmlChar *) _option->name);
+      xmlSetProp (section, (const xmlChar *) "value", (const xmlChar *) _option->value);
     }
 
   /* INFO */
 
-  section = xmlNewChild (vcd_node, ns, "info", NULL);
+  section = xmlNewChild (vcd_node, ns, (const xmlChar *) "info", NULL);
 
-  xmlNewChild (section, ns, "album-id", obj->info.album_id);
+  xmlNewChild (section, ns, (const xmlChar *) "album-id", (const xmlChar *) obj->info.album_id);
   
   snprintf (buf, sizeof (buf), "%d", obj->info.volume_count);
-  xmlNewChild (section, ns, "volume-count", buf);
+  xmlNewChild (section, ns, (const xmlChar *) "volume-count", (const xmlChar *) buf);
 
   snprintf (buf, sizeof (buf), "%d", obj->info.volume_number);
-  xmlNewChild (section, ns, "volume-number", buf);
+  xmlNewChild (section, ns, (const xmlChar *) "volume-number", (const xmlChar *) buf);
 
   if (obj->info.use_sequence2)
-    xmlNewChild (section, ns, "next-volume-use-sequence2", NULL);
+    xmlNewChild (section, ns, (const xmlChar *) "next-volume-use-sequence2", NULL);
 
   if (obj->info.use_lid2)
-    xmlNewChild (section, ns, "next-volume-use-lid2", NULL);
+    xmlNewChild (section, ns, (const xmlChar *) "next-volume-use-lid2", NULL);
 
   snprintf (buf, sizeof (buf), "%d", obj->info.restriction);
-  xmlNewChild (section, ns, "restriction", buf);
+  xmlNewChild (section, ns, (const xmlChar *) "restriction", (const xmlChar *) buf);
 
   /* PVD */
 
-  section = xmlNewChild (vcd_node, ns, "pvd", NULL);
+  section = xmlNewChild (vcd_node, ns, (const xmlChar *) "pvd", NULL);
 
-  xmlNewChild (section, ns, "volume-id", obj->pvd.volume_id);
-  xmlNewChild (section, ns, "system-id", obj->pvd.system_id);
-  xmlNewChild (section, ns, "application-id", obj->pvd.application_id);
-  xmlNewChild (section, ns, "preparer-id", obj->pvd.preparer_id);
-  xmlNewChild (section, ns, "publisher-id", obj->pvd.publisher_id);
+  xmlNewChild (section, ns, (const xmlChar *) "volume-id", (const xmlChar *) obj->pvd.volume_id);
+  xmlNewChild (section, ns, (const xmlChar *) "system-id", (const xmlChar *) obj->pvd.system_id);
+  xmlNewChild (section, ns, (const xmlChar *) "application-id", (const xmlChar *) obj->pvd.application_id);
+  xmlNewChild (section, ns, (const xmlChar *) "preparer-id", (const xmlChar *) obj->pvd.preparer_id);
+  xmlNewChild (section, ns, (const xmlChar *) "publisher-id", (const xmlChar *) obj->pvd.publisher_id);
 
   /* filesystem */
 
   if (_vcd_list_length (obj->filesystem))
     {
-      section = xmlNewChild (vcd_node, ns, "filesystem", NULL);
+      section = xmlNewChild (vcd_node, ns, (const xmlChar *) "filesystem", NULL);
 
       _VCD_LIST_FOREACH (node, obj->filesystem)
 	{
@@ -261,10 +263,10 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 	    { /* file */
 	      xmlNodePtr filenode = _get_node_pathname (doc, section, ns, p->name, false);
 
-	      xmlSetProp (filenode, "src", p->file_src);
+	      xmlSetProp (filenode, (const xmlChar *) "src", (const xmlChar *) p->file_src);
 
 	      if (p->file_raw)
-		xmlSetProp (filenode, "format", "mixed");
+		xmlSetProp (filenode, (const xmlChar *) "format", (const xmlChar *) "mixed");
 	    }
 	  else /* folder */
 	    _get_node_pathname (doc, section, ns, p->name, true);
@@ -275,7 +277,7 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 
   if (_vcd_list_length (obj->segment_list))
     {
-      section = xmlNewChild (vcd_node, ns, "segment-items", NULL);
+      section = xmlNewChild (vcd_node, ns, (const xmlChar *) "segment-items", NULL);
 
       _VCD_LIST_FOREACH (node, obj->segment_list)
 	{
@@ -283,9 +285,9 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 	  xmlNodePtr seg_node;
 	  VcdListNode *node2;
 	  
-	  seg_node = xmlNewChild (section, ns, "segment-item", NULL);
-	  xmlSetProp (seg_node, "src", _segment->src);
-	  xmlSetProp (seg_node, "id", _segment->id);
+	  seg_node = xmlNewChild (section, ns, (const xmlChar *) "segment-item", NULL);
+	  xmlSetProp (seg_node, (const xmlChar *) "src", (const xmlChar *) _segment->src);
+	  xmlSetProp (seg_node, (const xmlChar *) "id", (const xmlChar *) _segment->id);
 
 	  _VCD_LIST_FOREACH (node2, _segment->autopause_list)
 	    {
@@ -293,14 +295,14 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 	      char buf[80];
 
 	      snprintf (buf, sizeof (buf), "%f", *_ap_ts);
-	      xmlNewChild (seg_node, ns, "auto-pause", buf);
+	      xmlNewChild (seg_node, ns, (const xmlChar *) "auto-pause", (const xmlChar *) buf);
 	    }
 	}
     }
 
   /* sequences */
     
-  section = xmlNewChild (vcd_node, ns, "sequence-items", NULL);
+  section = xmlNewChild (vcd_node, ns, (const xmlChar *) "sequence-items", NULL);
 
   _VCD_LIST_FOREACH (node, obj->sequence_list)
     {
@@ -308,16 +310,16 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
       xmlNodePtr seq_node;
       VcdListNode *node2;
 
-      seq_node = xmlNewChild (section, ns, "sequence-item", NULL);
-      xmlSetProp (seq_node, "src", _sequence->src);
-      xmlSetProp (seq_node, "id", _sequence->id);
+      seq_node = xmlNewChild (section, ns, (const xmlChar *) "sequence-item", NULL);
+      xmlSetProp (seq_node, (const xmlChar *) "src", (const xmlChar *) _sequence->src);
+      xmlSetProp (seq_node, (const xmlChar *) "id", (const xmlChar *) _sequence->id);
 
       if (_sequence->default_entry_id)
 	{
 	  xmlNodePtr ent_node;
 
-	  ent_node = xmlNewChild (seq_node, ns, "default-entry", NULL);
-	  xmlSetProp (ent_node, "id", _sequence->default_entry_id);
+	  ent_node = xmlNewChild (seq_node, ns, (const xmlChar *) "default-entry", NULL);
+	  xmlSetProp (ent_node, (const xmlChar *) "id", (const xmlChar *) _sequence->default_entry_id);
 	}
 
       _VCD_LIST_FOREACH (node2, _sequence->entry_point_list)
@@ -327,8 +329,8 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 	  char buf[80];
 
 	  snprintf (buf, sizeof (buf), "%f", _entry->timestamp);
-	  ent_node = xmlNewChild (seq_node, ns, "entry", buf);
-	  xmlSetProp (ent_node, "id", _entry->id);
+	  ent_node = xmlNewChild (seq_node, ns, (const xmlChar *) "entry", (const xmlChar *) buf);
+	  xmlSetProp (ent_node, (const xmlChar *) "id", (const xmlChar *) _entry->id);
 	}
 
       _VCD_LIST_FOREACH (node2, _sequence->autopause_list)
@@ -337,7 +339,7 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 	  char buf[80];
 
 	  snprintf (buf, sizeof (buf), "%f", *_ap_ts);
-	  xmlNewChild (seq_node, ns, "auto-pause", buf);
+	  xmlNewChild (seq_node, ns, (const xmlChar *) "auto-pause", (const xmlChar *) buf);
 	}
     }
 
@@ -345,7 +347,7 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 
   if (_vcd_list_length (obj->pbc_list))
     {
-      section = xmlNewChild (vcd_node, ns, "pbc", NULL);
+      section = xmlNewChild (vcd_node, ns, (const xmlChar *) "pbc", NULL);
 
       _VCD_LIST_FOREACH (node, obj->pbc_list)
 	{
@@ -358,7 +360,7 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 	      VcdListNode *node2;
 
 	    case PBC_PLAYLIST:
-	      pl = xmlNewChild (section, ns, "playlist", NULL);
+	      pl = xmlNewChild (section, ns, (const xmlChar *) "playlist", NULL);
 
 	      _ref_area_helper (pl, ns, "prev", _pbc->prev_id, _pbc->prev_area);
 	      _ref_area_helper (pl, ns, "next", _pbc->next_id, _pbc->next_area);
@@ -367,32 +369,33 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 	      if (_pbc->playing_time)
 		{
 		  snprintf (buf, sizeof (buf), "%f", _pbc->playing_time);
-		  xmlNewChild (pl, ns, "playtime", buf);
+		  xmlNewChild (pl, ns, (const xmlChar *) "playtime", (const xmlChar *) buf);
 		}
 
 	      snprintf (buf, sizeof (buf), "%d", _pbc->wait_time);
-	      xmlNewChild (pl, ns, "wait", buf);
+	      xmlNewChild (pl, ns, (const xmlChar *) "wait", (const xmlChar *) buf);
 
 	      snprintf (buf, sizeof (buf), "%d", _pbc->auto_pause_time);
-	      xmlNewChild (pl, ns, "autowait", buf);
+	      xmlNewChild (pl, ns, (const xmlChar *) "autowait", (const xmlChar *) buf);
 
 	      _VCD_LIST_FOREACH (node2, _pbc->item_id_list)
 		{
 		  const char *_id = _vcd_list_node_data (node2);
 		  
 		  if (_id)
-		    xmlSetProp (xmlNewChild (pl, ns, "play-item", NULL), "ref", _id);
+		    xmlSetProp (xmlNewChild (pl, ns, (const xmlChar *) "play-item", NULL), 
+				(const xmlChar *) "ref", (const xmlChar *) _id);
 		  else
-		    xmlNewChild (pl, ns, "play-item", NULL);
+		    xmlNewChild (pl, ns, (const xmlChar *) "play-item", NULL);
 		}
 
 	      break;
 
 	    case PBC_SELECTION:
-	      pl = xmlNewChild (section, ns, "selection", NULL);
+	      pl = xmlNewChild (section, ns, (const xmlChar *) "selection", NULL);
 
 	      snprintf (buf, sizeof (buf), "%d", _pbc->bsn);
-	      xmlNewChild (pl, ns, "bsn", buf);
+	      xmlNewChild (pl, ns, (const xmlChar *) "bsn", (const xmlChar *) buf);
 
 	      _ref_area_helper (pl, ns, "prev", _pbc->prev_id, _pbc->prev_area);
 	      _ref_area_helper (pl, ns, "next", _pbc->next_id, _pbc->next_area);
@@ -405,28 +408,31 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 		  break;
 
 		case _SEL_MULTI_DEF:
-		  xmlSetProp (xmlNewChild (pl, ns, "multi-default", NULL), 
-			      "numeric", "enabled");
+		  xmlSetProp (xmlNewChild (pl, ns, (const xmlChar *) "multi-default", NULL), 
+			      (const xmlChar *) "numeric", (const xmlChar *) "enabled");
 		  break;
 
 		case _SEL_MULTI_DEF_NO_NUM:
-		  xmlSetProp (xmlNewChild (pl, ns, "multi-default", NULL), 
-			      "numeric", "disabled");
+		  xmlSetProp (xmlNewChild (pl, ns, (const xmlChar *) "multi-default", NULL), 
+			      (const xmlChar *) "numeric", (const xmlChar *) "disabled");
 		  break;
 		}
 
 	      if (_pbc->timeout_id)
-		xmlSetProp (xmlNewChild (pl, ns, "timeout", NULL), "ref", _pbc->timeout_id);
+		xmlSetProp (xmlNewChild (pl, ns, (const xmlChar *) "timeout", NULL), 
+			    (const xmlChar *) "ref", (const xmlChar *) _pbc->timeout_id);
 
 	      snprintf (buf, sizeof (buf), "%d", _pbc->timeout_time);
-	      xmlNewChild (pl, ns, "wait", buf);
+	      xmlNewChild (pl, ns, (const xmlChar *) "wait", (const xmlChar *) buf);
 
 	      snprintf (buf, sizeof (buf), "%d", _pbc->loop_count);
-	      xmlSetProp (xmlNewChild (pl, ns, "loop", buf), "jump-timing", 
-			  (_pbc->jump_delayed ? "delayed" : "immediate"));
+	      xmlSetProp (xmlNewChild (pl, ns, (const xmlChar *) "loop", (const xmlChar *) buf),
+			  (const xmlChar *) "jump-timing", 
+			  (_pbc->jump_delayed ? (const xmlChar *) "delayed" : (const xmlChar *) "immediate"));
 
 	      if (_pbc->item_id)
-		xmlSetProp (xmlNewChild (pl, ns, "play-item", NULL), "ref", _pbc->item_id);
+		xmlSetProp (xmlNewChild (pl, ns, (const xmlChar *) "play-item", NULL), 
+			    (const xmlChar *) "ref", (const xmlChar *) _pbc->item_id);
 
 	      {
 		VcdListNode *node3 = _vcd_list_begin (_pbc->select_area_list);
@@ -439,7 +445,7 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 		    if (_id)
 		      _ref_area_helper (pl, ns, "select", _id, _area);
 		    else
-		      xmlNewChild (pl, ns, "select", NULL);
+		      xmlNewChild (pl, ns, (const xmlChar *) "select", NULL);
 
 		    if (_vcd_list_length (_pbc->select_area_list))
 		      node3 = _vcd_list_node_next (node3);
@@ -448,26 +454,26 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 	      break;
 	      
 	    case PBC_END:
-	      pl = xmlNewChild (section, ns, "endlist", NULL);
+	      pl = xmlNewChild (section, ns, (const xmlChar *) "endlist", NULL);
 
 	      if (_pbc->next_disc)
 		{
 		  snprintf (buf, sizeof (buf), "%d", _pbc->next_disc);
-		  xmlNewChild (pl, ns, "next-volume", buf);
+		  xmlNewChild (pl, ns, (const xmlChar *) "next-volume", (const xmlChar *) buf);
 		}
 
 	      if (_pbc->image_id)
-		xmlSetProp (xmlNewChild (pl, ns, "play-item", NULL),
-			    "ref", _pbc->image_id);
+		xmlSetProp (xmlNewChild (pl, ns, (const xmlChar *) "play-item", NULL),
+			    (const xmlChar *) "ref", (const xmlChar *) _pbc->image_id);
 	      break;
 
 	    default:
 	      vcd_assert_not_reached ();
 	    }
 	  
-	  xmlSetProp (pl, "id", _pbc->id);
+	  xmlSetProp (pl, (const xmlChar *) "id", (const xmlChar *) _pbc->id);
 	  if (_pbc->rejected)
-	    xmlSetProp (pl, "rejected", "true");
+	    xmlSetProp (pl, (const xmlChar *) "rejected", (const xmlChar *) "true");
 	}
     }
 

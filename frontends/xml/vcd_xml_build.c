@@ -444,7 +444,7 @@ main (int argc, const char *argv[])
     if (!(root = xmlDocGetRootElement (vcd_doc)))
       vcd_error ("XML document seems to be empty (no root node found)");
 
-    if (!(ns = xmlSearchNsByHref (vcd_doc, root, VIDEOCD_DTD_XMLNS)))
+    if (!(ns = xmlSearchNsByHref (vcd_doc, root, (const xmlChar *) VIDEOCD_DTD_XMLNS)))
       vcd_error ("Namespace not found in document");
     
     if (vcd_xml_parse (&obj, vcd_doc, root, ns))
