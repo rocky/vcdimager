@@ -1,3 +1,11 @@
+2001-06-15  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_mpeg_stream.c (vcd_mpeg_source_scan): added more verbose
+		autopadding warning
+
+	* libvcd/vcd_image_fs.c (_fs_stat_traverse): replaced dynamic stack array 
+		by heap allocated array to work around cygwin bug
+
 2001-06-14  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_files.c, libvcd/vcd.c:
