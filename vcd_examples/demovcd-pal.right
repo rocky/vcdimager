@@ -1,0 +1,2721 @@
+Source: image file `demovcd-pal.cue'
+Image size: 37543 sectors
+VCD 2.0 detected
+-------------------------------------------------------------------------------
+ISO9660 primary volume descriptor
+ ID: `CD001'
+ version: 1
+ system id: `CD-RTOS CD-BRIDGE'
+ volume id: `PAL_VCDDEMO'
+ volumeset id: `'
+ publisher id: `MICHAEL TAM - VITUALIS PRODUCTIONS'
+ preparer id: `GNU VCDIMAGER 0.7.11 CYGWIN/I686'
+ application id: `CDI/CDI_VCD.APP;1'
+ ISO size: 18277 blocks (logical blocksize: 2048 bytes)
+ XA marker present: yes
+-------------------------------------------------------------------------------
+ISO9660 filesystem dump
+ root dir in PVD set to lsn 18
+
+ /:
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  - ----1xrxrxr 0 0 [fn 01] [LSN  18269]       451  AUTHOR.TXT;1
+  d d---1xrxrxr 0 0 [fn 00] [LSN     19]      2048  CDI
+  d d---1xrxrxr 0 0 [fn 00] [LSN     20]      2048  EXT
+  d d---1xrxrxr 0 0 [fn 00] [LSN     21]      2048  EXTRA
+  d d---1xrxrxr 0 0 [fn 00] [LSN     22]      2048  MPEGAV
+  - ----1xrxrxr 0 0 [fn 01] [LSN  18273]      7745  MTAM.ASC;1
+  - ----1xrxrxr 0 0 [fn 01] [LSN  18270]      5580  README.TXT;1
+  d d---1xrxrxr 0 0 [fn 00] [LSN     23]      6144  SEGMENT
+  d d---1xrxrxr 0 0 [fn 00] [LSN     26]      2048  VCD
+
+ /CDI/:
+  d d---1xrxrxr 0 0 [fn 00] [LSN     19]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  - ---2-xrxrxr 0 0 [fn 01] [LSN  17510]   1308412 (  1153024)  CDI_IMAG.RTF;1
+  - ----1xrxrxr 0 0 [fn 01] [LSN  18073]     13616  CDI_TEXT.FNT;1
+  - ----1xrxrxr 0 0 [fn 01] [LSN  18080]    102400  CDI_VCD.APP;1
+
+ /EXT/:
+  d d---1xrxrxr 0 0 [fn 00] [LSN     20]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  - ----1xrxrxr 0 0 [fn 01] [LSN  17475]     65536  LOT_X.VCD;1
+  - ----1xrxrxr 0 0 [fn 01] [LSN  17507]      5048  PSD_X.VCD;1
+
+ /EXTRA/:
+  d d---1xrxrxr 0 0 [fn 00] [LSN     21]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  - ----1xrxrxr 0 0 [fn 01] [LSN  18166]     54377  BUILDLOG.TXT;1
+  - ----1xrxrxr 0 0 [fn 01] [LSN  18193]    117588  DEBUGLOG.TXT;1
+  - ----1xrxrxr 0 0 [fn 01] [LSN  18130]     72770  DEMOVCD.XML;1
+  - ----1xrxrxr 0 0 [fn 01] [LSN  18251]     35084  XML_INFO.HTM;1
+
+ /MPEGAV/:
+  d d---1xrxrxr 0 0 [fn 00] [LSN     22]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  - ---2-xrxrxr 0 0 [fn 01] [LSN  18427]   2305408 (  2031616)  AVSEQ01.DAT;1
+  - ---2-xrxrxr 0 0 [fn 02] [LSN  19569]   8054984 (  7098368)  AVSEQ02.DAT;1
+  - ---2-xrxrxr 0 0 [fn 03] [LSN  23185]   1257284 (  1107968)  AVSEQ03.DAT;1
+  - ---2-xrxrxr 0 0 [fn 04] [LSN  23876]   1257284 (  1107968)  AVSEQ04.DAT;1
+  - ---2-xrxrxr 0 0 [fn 05] [LSN  24567]   1257284 (  1107968)  AVSEQ05.DAT;1
+  - ---2-xrxrxr 0 0 [fn 06] [LSN  25258]   3697484 (  3258368)  AVSEQ06.DAT;1
+  - ---2-xrxrxr 0 0 [fn 07] [LSN  26999]   4564336 (  4022272)  AVSEQ07.DAT;1
+  - ---2-xrxrxr 0 0 [fn 08] [LSN  29113]   4390036 (  3868672)  AVSEQ08.DAT;1
+  - ---2-xrxrxr 0 0 [fn 09] [LSN  31152]  14852684 ( 13088768)  AVSEQ09.DAT;1
+
+ /SEGMENT/:
+  d d---1xrxrxr 0 0 [fn 00] [LSN     23]      6144  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  - ---2-xrxrxr 0 0 [fn 01] [LSN    225]     65072 (    57344)  ITEM0001.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN    375]     67396 (    59392)  ITEM0002.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN    525]     62748 (    55296)  ITEM0003.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN    675]     55776 (    49152)  ITEM0004.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN    825]     53452 (    47104)  ITEM0005.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN    975]     55776 (    49152)  ITEM0006.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   1125]     53452 (    47104)  ITEM0007.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   1275]     53452 (    47104)  ITEM0008.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   1425]     51128 (    45056)  ITEM0009.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   1575]     67396 (    59392)  ITEM0010.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   1725]     65072 (    57344)  ITEM0011.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   1875]     53452 (    47104)  ITEM0012.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   2025]     62748 (    55296)  ITEM0013.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   2175]     67396 (    59392)  ITEM0014.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   2325]     62748 (    55296)  ITEM0015.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   2475]     62748 (    55296)  ITEM0016.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   2625]     62748 (    55296)  ITEM0017.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   2775]     65072 (    57344)  ITEM0018.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   2925]     67396 (    59392)  ITEM0019.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   3075]     60424 (    53248)  ITEM0020.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   3225]     67396 (    59392)  ITEM0021.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   3375]     67396 (    59392)  ITEM0022.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   3525]     62748 (    55296)  ITEM0023.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   3675]     65072 (    57344)  ITEM0024.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   3825]     69720 (    61440)  ITEM0025.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   3975]     74368 (    65536)  ITEM0026.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   4125]     67396 (    59392)  ITEM0027.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   4275]     58100 (    51200)  ITEM0028.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   4425]     58100 (    51200)  ITEM0029.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   4575]     65072 (    57344)  ITEM0030.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   4725]     69720 (    61440)  ITEM0031.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   4875]     65072 (    57344)  ITEM0032.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   5025]     62748 (    55296)  ITEM0033.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   5175]     62748 (    55296)  ITEM0034.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   5325]     55776 (    49152)  ITEM0035.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   5475]     41832 (    36864)  ITEM0036.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   5625]     62748 (    55296)  ITEM0037.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   5775]     69720 (    61440)  ITEM0038.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   5925]     58100 (    51200)  ITEM0039.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   6075]     60424 (    53248)  ITEM0040.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   6225]     65072 (    57344)  ITEM0041.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   6375]     76692 (    67584)  ITEM0042.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   6525]     62748 (    55296)  ITEM0043.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   6675]     72044 (    63488)  ITEM0044.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   6825]     92960 (    81920)  ITEM0045.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   6975]     90636 (    79872)  ITEM0046.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   7125]     74368 (    65536)  ITEM0047.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   7275]     69720 (    61440)  ITEM0048.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   7425]     69720 (    61440)  ITEM0049.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   7575]     62748 (    55296)  ITEM0050.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   7725]     62748 (    55296)  ITEM0051.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   7875]     53452 (    47104)  ITEM0052.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   8025]     67396 (    59392)  ITEM0053.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   8175]     53452 (    47104)  ITEM0054.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   8325]     53452 (    47104)  ITEM0055.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   8475]     72044 (    63488)  ITEM0056.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   8625]     67396 (    59392)  ITEM0057.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   8775]     74368 (    65536)  ITEM0058.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   8925]     69720 (    61440)  ITEM0059.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   9075]     65072 (    57344)  ITEM0060.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   9225]     69720 (    61440)  ITEM0061.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   9375]     72044 (    63488)  ITEM0062.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   9525]     72044 (    63488)  ITEM0063.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   9675]     72044 (    63488)  ITEM0064.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   9825]     72044 (    63488)  ITEM0065.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   9975]     76692 (    67584)  ITEM0066.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN  10125]     67396 (    59392)  ITEM0067.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN  10275]     74368 (    65536)  ITEM0068.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN  10425]     76692 (    67584)  ITEM0069.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN  10575]     74368 (    65536)  ITEM0070.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN  10725]     60424 (    53248)  ITEM0071.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN  10875]     65072 (    57344)  ITEM0072.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN  11025]     58100 (    51200)  ITEM0073.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN  11175]     67396 (    59392)  ITEM0074.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN  11325]     53452 (    47104)  ITEM0075.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN  11475]     55776 (    49152)  ITEM0076.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN  11625]     53452 (    47104)  ITEM0077.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN  11775]     67396 (    59392)  ITEM0078.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN  11925]     74368 (    65536)  ITEM0079.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN  12075]     74368 (    65536)  ITEM0080.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN  12225]     76692 (    67584)  ITEM0081.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN  12375]     74368 (    65536)  ITEM0082.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN  12525]     74368 (    65536)  ITEM0083.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN  12675]     69720 (    61440)  ITEM0084.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN  12825]     69720 (    61440)  ITEM0085.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN  12975]     81340 (    71680)  ITEM0086.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN  13125]     79016 (    69632)  ITEM0087.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN  13275]     81340 (    71680)  ITEM0088.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN  13425]     79016 (    69632)  ITEM0089.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN  13575]     76692 (    67584)  ITEM0090.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN  13725]     69720 (    61440)  ITEM0091.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN  13875]     72044 (    63488)  ITEM0092.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN  14025]     69720 (    61440)  ITEM0093.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN  14175]     67396 (    59392)  ITEM0094.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN  14325]     67396 (    59392)  ITEM0095.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN  14475]     67396 (    59392)  ITEM0096.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN  14625]   6530440 (  5754880)  ITEM0097.DAT;1
+
+ /VCD/:
+  d d---1xrxrxr 0 0 [fn 00] [LSN     26]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  - ----1xrxrxr 0 0 [fn 00] [LSN    151]      2048  ENTRIES.VCD;1
+  - ----1xrxrxr 0 0 [fn 00] [LSN    150]      2048  INFO.VCD;1
+  - ----1xrxrxr 0 0 [fn 00] [LSN    152]     65536  LOT.VCD;1
+  - ----1xrxrxr 0 0 [fn 00] [LSN    184]      2872  PSD.VCD;1
+
+-------------------------------------------------------------------------------
+VCD/INFO.VCD
+ ID: `VIDEO_CD'
+ version: 0x02
+ system profile tag: 0x00
+ album id: `PAL_VCDDEMO'
+ volume count: 1
+ volume number: 1
+ pal flags: 11111001 10000000 00000000 00000000 00000000 00000000
+  (bslbf)   00000000 00000000 00000000 00000000 00000000 00000000 00
+ flags:
+  karaoke area: no
+  restriction: 0
+  special info: no
+  user data cc: no
+  start lid #2: no
+  start track #2: no
+  extended pbc: yes
+ Detected extended VCD2.0 PBC files.
+ psd size: 2872
+ first segment addr: 00:05:00
+ offset multiplier: 0x08
+ maximum lid: 117
+ maximum segment number: 115
+ SEGMENT[1]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[2]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[3]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[4]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[5]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[6]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[7]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[8]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[9]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[10]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[11]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[12]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[13]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[14]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[15]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[16]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[17]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[18]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[19]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[20]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[21]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[22]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[23]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[24]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[25]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[26]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[27]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[28]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[29]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[30]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[31]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[32]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[33]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[34]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[35]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[36]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[37]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[38]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[39]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[40]: audio: no audio, video: NTSC still (lo+hires), continuation no 
+ SEGMENT[41]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[42]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[43]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[44]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[45]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[46]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[47]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[48]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[49]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[50]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[51]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[52]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[53]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[54]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[55]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[56]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[57]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[58]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[59]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[60]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[61]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[62]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[63]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[64]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[65]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[66]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[67]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[68]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[69]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[70]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[71]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[72]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[73]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[74]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[75]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[76]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[77]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[78]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[79]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[80]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[81]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[82]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[83]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[84]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[85]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[86]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[87]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[88]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[89]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[90]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[91]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[92]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[93]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[94]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[95]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[96]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[97]: audio: stereo, video: no stream, continuation no 
+ SEGMENT[98]: audio: stereo, video: no stream, continuation yes 
+ SEGMENT[99]: audio: stereo, video: no stream, continuation yes 
+ SEGMENT[100]: audio: stereo, video: no stream, continuation yes 
+ SEGMENT[101]: audio: stereo, video: no stream, continuation yes 
+ SEGMENT[102]: audio: stereo, video: no stream, continuation yes 
+ SEGMENT[103]: audio: stereo, video: no stream, continuation yes 
+ SEGMENT[104]: audio: stereo, video: no stream, continuation yes 
+ SEGMENT[105]: audio: stereo, video: no stream, continuation yes 
+ SEGMENT[106]: audio: stereo, video: no stream, continuation yes 
+ SEGMENT[107]: audio: stereo, video: no stream, continuation yes 
+ SEGMENT[108]: audio: stereo, video: no stream, continuation yes 
+ SEGMENT[109]: audio: stereo, video: no stream, continuation yes 
+ SEGMENT[110]: audio: stereo, video: no stream, continuation yes 
+ SEGMENT[111]: audio: stereo, video: no stream, continuation yes 
+ SEGMENT[112]: audio: stereo, video: no stream, continuation yes 
+ SEGMENT[113]: audio: stereo, video: no stream, continuation yes 
+ SEGMENT[114]: audio: stereo, video: no stream, continuation yes 
+ SEGMENT[115]: audio: stereo, video: no stream, continuation yes 
+-------------------------------------------------------------------------------
+VCD/ENTRIES.VCD
+ ID: `ENTRYVCD'
+ version: 0x02
+ system profile tag: 0x00
+ entries: 19
+ ENTRY[00]: track#  1 (SEQUENCE[0]), LSN  18427 (MSF 04:07:52)
+ ENTRY[01]: track#  2 (SEQUENCE[1]), LSN  19569 (MSF 04:22:69)
+ ENTRY[02]: track#  2 (SEQUENCE[1]), LSN  19601 (MSF 04:23:26)
+ ENTRY[03]: track#  2 (SEQUENCE[1]), LSN  19958 (MSF 04:28:08)
+ ENTRY[04]: track#  2 (SEQUENCE[1]), LSN  20498 (MSF 04:35:23)
+ ENTRY[05]: track#  2 (SEQUENCE[1]), LSN  21039 (MSF 04:42:39)
+ ENTRY[06]: track#  2 (SEQUENCE[1]), LSN  21534 (MSF 04:49:09)
+ ENTRY[07]: track#  2 (SEQUENCE[1]), LSN  22029 (MSF 04:55:54)
+ ENTRY[08]: track#  2 (SEQUENCE[1]), LSN  22615 (MSF 05:03:40)
+ ENTRY[09]: track#  3 (SEQUENCE[2]), LSN  23185 (MSF 05:11:10)
+ ENTRY[10]: track#  4 (SEQUENCE[3]), LSN  23876 (MSF 05:20:26)
+ ENTRY[11]: track#  5 (SEQUENCE[4]), LSN  24567 (MSF 05:29:42)
+ ENTRY[12]: track#  6 (SEQUENCE[5]), LSN  25258 (MSF 05:38:58)
+ ENTRY[13]: track#  7 (SEQUENCE[6]), LSN  26999 (MSF 06:01:74)
+ ENTRY[14]: track#  8 (SEQUENCE[7]), LSN  29113 (MSF 06:30:13)
+ ENTRY[15]: track#  9 (SEQUENCE[8]), LSN  31152 (MSF 06:57:27)
+ ENTRY[16]: track#  9 (SEQUENCE[8]), LSN  31184 (MSF 06:57:59)
+ ENTRY[17]: track#  9 (SEQUENCE[8]), LSN  33437 (MSF 07:27:62)
+ ENTRY[18]: track#  9 (SEQUENCE[8]), LSN  35682 (MSF 07:57:57)
+-------------------------------------------------------------------------------
+VCD/LOT.VCD
+ LID[1]: offset = 0 (0x0000)
+ LID[2]: offset = 16 (0x0002)
+ LID[3]: offset = 40 (0x0005)
+ LID[4]: offset = 64 (0x0008)
+ LID[5]: offset = 96 (0x000c)
+ LID[6]: offset = 128 (0x0010)
+ LID[7]: offset = 160 (0x0014)
+ LID[8]: offset = 192 (0x0018)
+ LID[9]: offset = 224 (0x001c)
+ LID[10]: offset = 256 (0x0020)
+ LID[11]: offset = 288 (0x0024)
+ LID[12]: offset = 328 (0x0029)
+ LID[13]: offset = 352 (0x002c)
+ LID[14]: offset = 368 (0x002e)
+ LID[15]: offset = 392 (0x0031)
+ LID[16]: offset = 416 (0x0034)
+ LID[17]: offset = 440 (0x0037)
+ LID[18]: offset = 456 (0x0039)
+ LID[19]: offset = 472 (0x003b)
+ LID[20]: offset = 496 (0x003e)
+ LID[21]: offset = 520 (0x0041)
+ LID[22]: offset = 544 (0x0044)
+ LID[23]: offset = 568 (0x0047)
+ LID[24]: offset = 592 (0x004a)
+ LID[25]: offset = 616 (0x004d)
+ LID[26]: offset = 640 (0x0050)
+ LID[27]: offset = 664 (0x0053)
+ LID[28]: offset = 688 (0x0056)
+ LID[29]: offset = 720 (0x005a)
+ LID[30]: offset = 744 (0x005d)
+ LID[31]: offset = 768 (0x0060)
+ LID[32]: offset = 792 (0x0063)
+ LID[33]: offset = 816 (0x0066)
+ LID[34]: offset = 840 (0x0069)
+ LID[35]: offset = 864 (0x006c)
+ LID[36]: offset = 888 (0x006f)
+ LID[37]: offset = 912 (0x0072)
+ LID[38]: offset = 944 (0x0076)
+ LID[39]: offset = 960 (0x0078)
+ LID[40]: offset = 984 (0x007b)
+ LID[41]: offset = 1008 (0x007e)
+ LID[42]: offset = 1032 (0x0081)
+ LID[43]: offset = 1064 (0x0085)
+ LID[44]: offset = 1080 (0x0087)
+ LID[45]: offset = 1104 (0x008a)
+ LID[46]: offset = 1128 (0x008d)
+ LID[47]: offset = 1152 (0x0090)
+ LID[48]: offset = 1176 (0x0093)
+ LID[49]: offset = 1192 (0x0095)
+ LID[50]: offset = 1216 (0x0098)
+ LID[51]: offset = 1240 (0x009b)
+ LID[52]: offset = 1272 (0x009f)
+ LID[53]: offset = 1304 (0x00a3)
+ LID[54]: offset = 1328 (0x00a6)
+ LID[55]: offset = 1352 (0x00a9)
+ LID[56]: offset = 1376 (0x00ac)
+ LID[57]: offset = 1408 (0x00b0)
+ LID[58]: offset = 1424 (0x00b2)
+ LID[59]: offset = 1440 (0x00b4)
+ LID[60]: offset = 1456 (0x00b6)
+ LID[61]: offset = 1480 (0x00b9)
+ LID[62]: offset = 1504 (0x00bc)
+ LID[63]: offset = 1528 (0x00bf)
+ LID[64]: offset = 1552 (0x00c2)
+ LID[65]: offset = 1584 (0x00c6)
+ LID[66]: offset = 1608 (0x00c9)
+ LID[67]: offset = 1632 (0x00cc)
+ LID[68]: offset = 1656 (0x00cf)
+ LID[69]: offset = 1680 (0x00d2)
+ LID[70]: offset = 1704 (0x00d5)
+ LID[71]: offset = 1728 (0x00d8)
+ LID[72]: offset = 1752 (0x00db)
+ LID[73]: offset = 1776 (0x00de)
+ LID[74]: offset = 1800 (0x00e1)
+ LID[75]: offset = 1824 (0x00e4)
+ LID[76]: offset = 1848 (0x00e7)
+ LID[77]: offset = 1872 (0x00ea)
+ LID[78]: offset = 1896 (0x00ed)
+ LID[79]: offset = 1920 (0x00f0)
+ LID[80]: offset = 1952 (0x00f4)
+ LID[81]: offset = 1976 (0x00f7)
+ LID[82]: offset = 2000 (0x00fa)
+ LID[83]: offset = 2024 (0x00fd)
+ LID[84]: offset = 2048 (0x0100)
+ LID[85]: offset = 2072 (0x0103)
+ LID[86]: offset = 2096 (0x0106)
+ LID[87]: offset = 2120 (0x0109)
+ LID[88]: offset = 2144 (0x010c)
+ LID[89]: offset = 2168 (0x010f)
+ LID[90]: offset = 2192 (0x0112)
+ LID[91]: offset = 2216 (0x0115)
+ LID[92]: offset = 2240 (0x0118)
+ LID[93]: offset = 2264 (0x011b)
+ LID[94]: offset = 2288 (0x011e)
+ LID[95]: offset = 2312 (0x0121)
+ LID[96]: offset = 2344 (0x0125)
+ LID[97]: offset = 2368 (0x0128)
+ LID[98]: offset = 2392 (0x012b)
+ LID[99]: offset = 2416 (0x012e)
+ LID[100]: offset = 2440 (0x0131)
+ LID[101]: offset = 2464 (0x0134)
+ LID[102]: offset = 2488 (0x0137)
+ LID[103]: offset = 2520 (0x013b)
+ LID[104]: offset = 2544 (0x013e)
+ LID[105]: offset = 2568 (0x0141)
+ LID[106]: offset = 2592 (0x0144)
+ LID[107]: offset = 2616 (0x0147)
+ LID[108]: offset = 2640 (0x014a)
+ LID[109]: offset = 2664 (0x014d)
+ LID[110]: offset = 2688 (0x0150)
+ LID[111]: offset = 2712 (0x0153)
+ LID[112]: offset = 2736 (0x0156)
+ LID[113]: offset = 2760 (0x0159)
+ LID[114]: offset = 2784 (0x015c)
+ LID[115]: offset = 2808 (0x015f)
+ LID[116]: offset = 2832 (0x0162)
+ LID[117]: offset = 2856 (0x0165)
+-------------------------------------------------------------------------------
+VCD/PSD.VCD
+ PSD[00] (LID[1] @0x0000): play list descriptor
+  NOI: 1 | LID#: 1 (rejected: no)
+  prev: disabled | next: LID[2] @0x0002 | return: disabled
+  playtime: 0/15s | wait: 0s | autowait: 0s
+  play-item[0]: SEQUENCE[8] (0x0009)
+
+  PSD[01] (LID[2] @0x0002): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 2 (rejected: no)
+  prev: disabled | next: LID[3] @0x0005 | return: LID[4] @0x0008
+  default: disabled | timeout: disabled
+  wait: -1 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[1] (0x03e8)
+
+  PSD[02] (LID[3] @0x0005): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 3 (rejected: no)
+  prev: disabled | next: LID[4] @0x0008 | return: disabled
+  default: disabled | timeout: LID[4] @0x0008
+  wait: 30 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[2] (0x03e9)
+
+  PSD[03] (LID[4] @0x0008): selection list descriptor
+  Flags: 0x00 | NOS: 6 | BSN: 1 | LID: 4 (rejected: no)
+  prev: disabled | next: disabled | return: disabled
+  default: disabled | timeout: disabled
+  wait: 0 secs | loop: 0 (delayed: no)
+  play-item: ENTRY[2] (0x0066)
+  ofs[0]: LID[11] @0x0024
+  ofs[1]: LID[51] @0x009b
+  ofs[2]: LID[64] @0x00c2
+  ofs[3]: LID[79] @0x00f0
+  ofs[4]: LID[95] @0x0121
+  ofs[5]: LID[102] @0x0137
+
+  PSD[04] (LID[5] @0x000c): selection list descriptor
+  Flags: 0x00 | NOS: 6 | BSN: 1 | LID: 5 (rejected: no)
+  prev: disabled | next: LID[4] @0x0008 | return: disabled
+  default: disabled | timeout: LID[4] @0x0008
+  wait: 1 secs | loop: 1 (delayed: no)
+  play-item: ENTRY[3] (0x0067)
+  ofs[0]: LID[11] @0x0024
+  ofs[1]: LID[51] @0x009b
+  ofs[2]: LID[64] @0x00c2
+  ofs[3]: LID[79] @0x00f0
+  ofs[4]: LID[95] @0x0121
+  ofs[5]: LID[102] @0x0137
+
+  PSD[05] (LID[6] @0x0010): selection list descriptor
+  Flags: 0x00 | NOS: 6 | BSN: 1 | LID: 6 (rejected: no)
+  prev: disabled | next: LID[4] @0x0008 | return: disabled
+  default: disabled | timeout: LID[4] @0x0008
+  wait: 1 secs | loop: 1 (delayed: no)
+  play-item: ENTRY[4] (0x0068)
+  ofs[0]: LID[11] @0x0024
+  ofs[1]: LID[51] @0x009b
+  ofs[2]: LID[64] @0x00c2
+  ofs[3]: LID[79] @0x00f0
+  ofs[4]: LID[95] @0x0121
+  ofs[5]: LID[102] @0x0137
+
+  PSD[06] (LID[7] @0x0014): selection list descriptor
+  Flags: 0x00 | NOS: 6 | BSN: 1 | LID: 7 (rejected: no)
+  prev: disabled | next: LID[4] @0x0008 | return: disabled
+  default: disabled | timeout: LID[4] @0x0008
+  wait: 1 secs | loop: 1 (delayed: no)
+  play-item: ENTRY[5] (0x0069)
+  ofs[0]: LID[11] @0x0024
+  ofs[1]: LID[51] @0x009b
+  ofs[2]: LID[64] @0x00c2
+  ofs[3]: LID[79] @0x00f0
+  ofs[4]: LID[95] @0x0121
+  ofs[5]: LID[102] @0x0137
+
+  PSD[07] (LID[8] @0x0018): selection list descriptor
+  Flags: 0x00 | NOS: 6 | BSN: 1 | LID: 8 (rejected: no)
+  prev: disabled | next: LID[4] @0x0008 | return: disabled
+  default: disabled | timeout: LID[4] @0x0008
+  wait: 1 secs | loop: 1 (delayed: no)
+  play-item: ENTRY[6] (0x006a)
+  ofs[0]: LID[11] @0x0024
+  ofs[1]: LID[51] @0x009b
+  ofs[2]: LID[64] @0x00c2
+  ofs[3]: LID[79] @0x00f0
+  ofs[4]: LID[95] @0x0121
+  ofs[5]: LID[102] @0x0137
+
+  PSD[08] (LID[9] @0x001c): selection list descriptor
+  Flags: 0x00 | NOS: 6 | BSN: 1 | LID: 9 (rejected: no)
+  prev: disabled | next: LID[4] @0x0008 | return: disabled
+  default: disabled | timeout: LID[4] @0x0008
+  wait: 1 secs | loop: 1 (delayed: no)
+  play-item: ENTRY[7] (0x006b)
+  ofs[0]: LID[11] @0x0024
+  ofs[1]: LID[51] @0x009b
+  ofs[2]: LID[64] @0x00c2
+  ofs[3]: LID[79] @0x00f0
+  ofs[4]: LID[95] @0x0121
+  ofs[5]: LID[102] @0x0137
+
+  PSD[09] (LID[10] @0x0020): selection list descriptor
+  Flags: 0x00 | NOS: 6 | BSN: 1 | LID: 10 (rejected: no)
+  prev: disabled | next: LID[4] @0x0008 | return: disabled
+  default: disabled | timeout: LID[4] @0x0008
+  wait: 1 secs | loop: 1 (delayed: no)
+  play-item: ENTRY[8] (0x006c)
+  ofs[0]: LID[11] @0x0024
+  ofs[1]: LID[51] @0x009b
+  ofs[2]: LID[64] @0x00c2
+  ofs[3]: LID[79] @0x00f0
+  ofs[4]: LID[95] @0x0121
+  ofs[5]: LID[102] @0x0137
+
+  PSD[10] (LID[11] @0x0024): selection list descriptor
+  Flags: 0x00 | NOS: 9 | BSN: 1 | LID: 11 (rejected: no)
+  prev: disabled | next: disabled | return: LID[5] @0x000c
+  default: disabled | timeout: LID[5] @0x000c
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[3] (0x03ea)
+  ofs[0]: LID[12] @0x0029
+  ofs[1]: LID[16] @0x0034
+  ofs[2]: LID[23] @0x0047
+  ofs[3]: LID[25] @0x004d
+  ofs[4]: LID[28] @0x0056
+  ofs[5]: LID[37] @0x0072
+  ofs[6]: LID[42] @0x0081
+  ofs[7]: LID[46] @0x008d
+  ofs[8]: LID[50] @0x0098
+
+  PSD[11] (LID[12] @0x0029): selection list descriptor
+  Flags: 0x00 | NOS: 2 | BSN: 1 | LID: 12 (rejected: no)
+  prev: disabled | next: disabled | return: LID[11] @0x0024
+  default: LID[5] @0x000c | timeout: LID[11] @0x0024
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[9] (0x03f0)
+  ofs[0]: LID[13] @0x002c
+  ofs[1]: LID[14] @0x002e
+
+ PSD[12] (LID[13] @0x002c): play list descriptor
+  NOI: 1 | LID#: 13 (rejected: no)
+  prev: LID[12] @0x0029 | next: LID[12] @0x0029 | return: LID[12] @0x0029
+  playtime: 0/15s | wait: 0s | autowait: 0s
+  play-item[0]: SEQUENCE[3] (0x0004)
+
+  PSD[13] (LID[14] @0x002e): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 14 (rejected: no)
+  prev: disabled | next: LID[15] @0x0031 | return: LID[12] @0x0029
+  default: LID[5] @0x000c | timeout: LID[12] @0x0029
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[10] (0x03f1)
+
+  PSD[14] (LID[15] @0x0031): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 15 (rejected: no)
+  prev: LID[14] @0x002e | next: disabled | return: LID[12] @0x0029
+  default: LID[5] @0x000c | timeout: LID[12] @0x0029
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[11] (0x03f2)
+
+  PSD[15] (LID[16] @0x0034): selection list descriptor
+  Flags: 0x00 | NOS: 2 | BSN: 1 | LID: 16 (rejected: no)
+  prev: disabled | next: disabled | return: LID[11] @0x0024
+  default: LID[5] @0x000c | timeout: LID[11] @0x0024
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[12] (0x03f3)
+  ofs[0]: LID[17] @0x0037
+  ofs[1]: LID[19] @0x003b
+
+ PSD[16] (LID[17] @0x0037): play list descriptor
+  NOI: 1 | LID#: 17 (rejected: no)
+  prev: LID[16] @0x0034 | next: LID[18] @0x0039 | return: LID[16] @0x0034
+  playtime: 0/15s | wait: 0s | autowait: 0s
+  play-item[0]: SEQUENCE[4] (0x0005)
+
+ PSD[17] (LID[18] @0x0039): play list descriptor
+  NOI: 1 | LID#: 18 (rejected: no)
+  prev: LID[17] @0x0037 | next: LID[16] @0x0034 | return: LID[16] @0x0034
+  playtime: 0/15s | wait: 0s | autowait: 0s
+  play-item[0]: SEQUENCE[5] (0x0006)
+
+  PSD[18] (LID[19] @0x003b): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 19 (rejected: no)
+  prev: disabled | next: LID[20] @0x003e | return: LID[16] @0x0034
+  default: LID[5] @0x000c | timeout: LID[16] @0x0034
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[13] (0x03f4)
+
+  PSD[19] (LID[20] @0x003e): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 20 (rejected: no)
+  prev: LID[19] @0x003b | next: LID[21] @0x0041 | return: LID[16] @0x0034
+  default: LID[5] @0x000c | timeout: LID[16] @0x0034
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[14] (0x03f5)
+
+  PSD[20] (LID[21] @0x0041): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 21 (rejected: no)
+  prev: LID[20] @0x003e | next: LID[22] @0x0044 | return: LID[16] @0x0034
+  default: LID[5] @0x000c | timeout: LID[16] @0x0034
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[15] (0x03f6)
+
+  PSD[21] (LID[22] @0x0044): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 22 (rejected: no)
+  prev: LID[21] @0x0041 | next: disabled | return: LID[16] @0x0034
+  default: LID[5] @0x000c | timeout: LID[16] @0x0034
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[16] (0x03f7)
+
+  PSD[22] (LID[23] @0x0047): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 23 (rejected: no)
+  prev: disabled | next: LID[24] @0x004a | return: LID[11] @0x0024
+  default: LID[5] @0x000c | timeout: LID[11] @0x0024
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[17] (0x03f8)
+
+  PSD[23] (LID[24] @0x004a): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 24 (rejected: no)
+  prev: LID[23] @0x0047 | next: disabled | return: LID[11] @0x0024
+  default: LID[5] @0x000c | timeout: LID[11] @0x0024
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[18] (0x03f9)
+
+  PSD[24] (LID[25] @0x004d): selection list descriptor
+  Flags: 0x00 | NOS: 2 | BSN: 1 | LID: 25 (rejected: no)
+  prev: disabled | next: disabled | return: LID[11] @0x0024
+  default: LID[5] @0x000c | timeout: LID[11] @0x0024
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[19] (0x03fa)
+  ofs[0]: LID[26] @0x0050
+  ofs[1]: LID[27] @0x0053
+
+  PSD[25] (LID[26] @0x0050): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 26 (rejected: no)
+  prev: disabled | next: disabled | return: LID[25] @0x004d
+  default: LID[5] @0x000c | timeout: LID[25] @0x004d
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[20] (0x03fb)
+
+  PSD[26] (LID[27] @0x0053): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 27 (rejected: no)
+  prev: disabled | next: disabled | return: LID[25] @0x004d
+  default: LID[5] @0x000c | timeout: LID[25] @0x004d
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[21] (0x03fc)
+
+  PSD[27] (LID[28] @0x0056): selection list descriptor
+  Flags: 0x00 | NOS: 5 | BSN: 1 | LID: 28 (rejected: no)
+  prev: disabled | next: disabled | return: LID[11] @0x0024
+  default: LID[5] @0x000c | timeout: LID[11] @0x0024
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[22] (0x03fd)
+  ofs[0]: LID[29] @0x005a
+  ofs[1]: LID[30] @0x005d
+  ofs[2]: LID[31] @0x0060
+  ofs[3]: LID[32] @0x0063
+  ofs[4]: LID[36] @0x006f
+
+  PSD[28] (LID[29] @0x005a): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 29 (rejected: no)
+  prev: disabled | next: LID[30] @0x005d | return: LID[28] @0x0056
+  default: LID[5] @0x000c | timeout: LID[28] @0x0056
+  wait: 1 secs | loop: 1 (delayed: no)
+  play-item: ENTRY[16] (0x0074)
+
+  PSD[29] (LID[30] @0x005d): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 30 (rejected: no)
+  prev: LID[29] @0x005a | next: LID[31] @0x0060 | return: LID[28] @0x0056
+  default: LID[5] @0x000c | timeout: LID[28] @0x0056
+  wait: 1 secs | loop: 1 (delayed: no)
+  play-item: ENTRY[17] (0x0075)
+
+  PSD[30] (LID[31] @0x0060): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 31 (rejected: no)
+  prev: LID[30] @0x005d | next: disabled | return: LID[28] @0x0056
+  default: LID[5] @0x000c | timeout: LID[28] @0x0056
+  wait: 1 secs | loop: 1 (delayed: no)
+  play-item: ENTRY[18] (0x0076)
+
+  PSD[31] (LID[32] @0x0063): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 32 (rejected: no)
+  prev: disabled | next: LID[33] @0x0066 | return: LID[28] @0x0056
+  default: LID[5] @0x000c | timeout: LID[28] @0x0056
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[23] (0x03fe)
+
+  PSD[32] (LID[33] @0x0066): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 33 (rejected: no)
+  prev: LID[32] @0x0063 | next: LID[34] @0x0069 | return: LID[28] @0x0056
+  default: LID[5] @0x000c | timeout: LID[28] @0x0056
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[24] (0x03ff)
+
+  PSD[33] (LID[34] @0x0069): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 34 (rejected: no)
+  prev: LID[33] @0x0066 | next: LID[35] @0x006c | return: LID[28] @0x0056
+  default: LID[5] @0x000c | timeout: LID[28] @0x0056
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[25] (0x0400)
+
+  PSD[34] (LID[35] @0x006c): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 35 (rejected: no)
+  prev: LID[34] @0x0069 | next: disabled | return: LID[28] @0x0056
+  default: LID[5] @0x000c | timeout: LID[28] @0x0056
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[26] (0x0401)
+
+  PSD[35] (LID[36] @0x006f): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 36 (rejected: no)
+  prev: disabled | next: disabled | return: LID[28] @0x0056
+  default: LID[5] @0x000c | timeout: LID[28] @0x0056
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[27] (0x0402)
+
+  PSD[36] (LID[37] @0x0072): selection list descriptor
+  Flags: 0x00 | NOS: 3 | BSN: 1 | LID: 37 (rejected: no)
+  prev: disabled | next: disabled | return: LID[11] @0x0024
+  default: LID[5] @0x000c | timeout: LID[11] @0x0024
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[28] (0x0403)
+  ofs[0]: LID[38] @0x0076
+  ofs[1]: LID[39] @0x0078
+  ofs[2]: LID[41] @0x007e
+
+ PSD[37] (LID[38] @0x0076): play list descriptor
+  NOI: 1 | LID#: 38 (rejected: no)
+  prev: LID[37] @0x0072 | next: LID[37] @0x0072 | return: LID[37] @0x0072
+  playtime: 0/15s | wait: 0s | autowait: 5s
+  play-item[0]: SEQUENCE[8] (0x0009)
+
+  PSD[38] (LID[39] @0x0078): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 39 (rejected: no)
+  prev: disabled | next: LID[40] @0x007b | return: LID[37] @0x0072
+  default: LID[5] @0x000c | timeout: LID[37] @0x0072
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[29] (0x0404)
+
+  PSD[39] (LID[40] @0x007b): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 40 (rejected: no)
+  prev: LID[39] @0x0078 | next: disabled | return: LID[37] @0x0072
+  default: LID[5] @0x000c | timeout: LID[37] @0x0072
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[30] (0x0405)
+
+  PSD[40] (LID[41] @0x007e): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 41 (rejected: no)
+  prev: disabled | next: disabled | return: LID[37] @0x0072
+  default: LID[5] @0x000c | timeout: LID[37] @0x0072
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[31] (0x0406)
+
+  PSD[41] (LID[42] @0x0081): selection list descriptor
+  Flags: 0x00 | NOS: 3 | BSN: 1 | LID: 42 (rejected: no)
+  prev: disabled | next: disabled | return: LID[11] @0x0024
+  default: LID[5] @0x000c | timeout: LID[11] @0x0024
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[32] (0x0407)
+  ofs[0]: LID[43] @0x0085
+  ofs[1]: LID[44] @0x0087
+  ofs[2]: LID[45] @0x008a
+
+ PSD[42] (LID[43] @0x0085): play list descriptor
+  NOI: 1 | LID#: 43 (rejected: no)
+  prev: LID[42] @0x0081 | next: LID[42] @0x0081 | return: LID[42] @0x0081
+  playtime: 225/15s | wait: 0s | autowait: 0s
+  play-item[0]: ENTRY[17] (0x0075)
+
+  PSD[43] (LID[44] @0x0087): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 44 (rejected: no)
+  prev: disabled | next: disabled | return: LID[42] @0x0081
+  default: LID[5] @0x000c | timeout: LID[42] @0x0081
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[33] (0x0408)
+
+  PSD[44] (LID[45] @0x008a): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 45 (rejected: no)
+  prev: disabled | next: disabled | return: LID[42] @0x0081
+  default: LID[5] @0x000c | timeout: LID[42] @0x0081
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[34] (0x0409)
+
+  PSD[45] (LID[46] @0x008d): selection list descriptor
+  Flags: 0x00 | NOS: 2 | BSN: 1 | LID: 46 (rejected: no)
+  prev: disabled | next: disabled | return: LID[11] @0x0024
+  default: LID[5] @0x000c | timeout: LID[11] @0x0024
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[35] (0x040a)
+  ofs[0]: LID[47] @0x0090
+  ofs[1]: LID[49] @0x0095
+
+  PSD[46] (LID[47] @0x0090): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 47 (rejected: no)
+  prev: LID[46] @0x008d | next: LID[48] @0x0093 | return: LID[46] @0x008d
+  default: disabled | timeout: LID[48] @0x0093
+  wait: 1 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[36] (0x040b)
+
+ PSD[47] (LID[48] @0x0093): play list descriptor
+  NOI: 1 | LID#: 48 (rejected: no)
+  prev: LID[46] @0x008d | next: LID[46] @0x008d | return: LID[46] @0x008d
+  playtime: 0/15s | wait: 1s | autowait: 0s
+  play-item[0]: SEGMENT[97] (0x0448)
+
+  PSD[48] (LID[49] @0x0095): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 49 (rejected: no)
+  prev: disabled | next: disabled | return: LID[46] @0x008d
+  default: LID[5] @0x000c | timeout: LID[46] @0x008d
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[37] (0x040c)
+
+  PSD[49] (LID[50] @0x0098): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 50 (rejected: no)
+  prev: disabled | next: disabled | return: LID[11] @0x0024
+  default: LID[5] @0x000c | timeout: LID[11] @0x0024
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[38] (0x040d)
+
+  PSD[50] (LID[51] @0x009b): selection list descriptor
+  Flags: 0x00 | NOS: 5 | BSN: 1 | LID: 51 (rejected: no)
+  prev: disabled | next: disabled | return: LID[6] @0x0010
+  default: disabled | timeout: LID[6] @0x0010
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[4] (0x03eb)
+  ofs[0]: LID[52] @0x009f
+  ofs[1]: LID[56] @0x00ac
+  ofs[2]: LID[61] @0x00b9
+  ofs[3]: LID[62] @0x00bc
+  ofs[4]: LID[63] @0x00bf
+
+  PSD[51] (LID[52] @0x009f): selection list descriptor
+  Flags: 0x00 | NOS: 3 | BSN: 1 | LID: 52 (rejected: no)
+  prev: disabled | next: disabled | return: LID[51] @0x009b
+  default: LID[6] @0x0010 | timeout: LID[51] @0x009b
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[39] (0x040e)
+  ofs[0]: LID[53] @0x00a3
+  ofs[1]: LID[54] @0x00a6
+  ofs[2]: LID[55] @0x00a9
+
+  PSD[52] (LID[53] @0x00a3): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 53 (rejected: no)
+  prev: disabled | next: disabled | return: LID[52] @0x009f
+  default: LID[6] @0x0010 | timeout: disabled
+  wait: -1 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[40] (0x040f)
+
+  PSD[53] (LID[54] @0x00a6): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 54 (rejected: no)
+  prev: disabled | next: disabled | return: LID[52] @0x009f
+  default: LID[6] @0x0010 | timeout: disabled
+  wait: -1 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[41] (0x0410)
+
+  PSD[54] (LID[55] @0x00a9): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 55 (rejected: no)
+  prev: disabled | next: disabled | return: LID[52] @0x009f
+  default: LID[6] @0x0010 | timeout: LID[52] @0x009f
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[42] (0x0411)
+
+  PSD[55] (LID[56] @0x00ac): selection list descriptor
+  Flags: 0x00 | NOS: 4 | BSN: 1 | LID: 56 (rejected: no)
+  prev: disabled | next: disabled | return: LID[51] @0x009b
+  default: LID[6] @0x0010 | timeout: LID[51] @0x009b
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[43] (0x0412)
+  ofs[0]: LID[57] @0x00b0
+  ofs[1]: LID[58] @0x00b2
+  ofs[2]: LID[59] @0x00b4
+  ofs[3]: LID[60] @0x00b6
+
+ PSD[56] (LID[57] @0x00b0): play list descriptor
+  NOI: 1 | LID#: 57 (rejected: no)
+  prev: LID[56] @0x00ac | next: LID[56] @0x00ac | return: LID[56] @0x00ac
+  playtime: 0/15s | wait: 0s | autowait: 0s
+  play-item[0]: SEQUENCE[6] (0x0007)
+
+ PSD[57] (LID[58] @0x00b2): play list descriptor
+  NOI: 1 | LID#: 58 (rejected: no)
+  prev: LID[56] @0x00ac | next: LID[56] @0x00ac | return: LID[56] @0x00ac
+  playtime: 0/15s | wait: 0s | autowait: 0s
+  play-item[0]: SEQUENCE[7] (0x0008)
+
+ PSD[58] (LID[59] @0x00b4): play list descriptor
+  NOI: 1 | LID#: 59 (rejected: no)
+  prev: LID[56] @0x00ac | next: LID[56] @0x00ac | return: LID[56] @0x00ac
+  playtime: 0/15s | wait: 0s | autowait: 0s
+  play-item[0]: SEQUENCE[8] (0x0009)
+
+  PSD[59] (LID[60] @0x00b6): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 60 (rejected: no)
+  prev: disabled | next: disabled | return: LID[56] @0x00ac
+  default: LID[6] @0x0010 | timeout: LID[56] @0x00ac
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[44] (0x0413)
+
+  PSD[60] (LID[61] @0x00b9): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 61 (rejected: no)
+  prev: disabled | next: disabled | return: LID[51] @0x009b
+  default: LID[6] @0x0010 | timeout: LID[51] @0x009b
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[45] (0x0414)
+
+  PSD[61] (LID[62] @0x00bc): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 62 (rejected: no)
+  prev: disabled | next: disabled | return: LID[51] @0x009b
+  default: LID[6] @0x0010 | timeout: LID[51] @0x009b
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[46] (0x0415)
+
+  PSD[62] (LID[63] @0x00bf): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 63 (rejected: no)
+  prev: disabled | next: disabled | return: LID[51] @0x009b
+  default: LID[6] @0x0010 | timeout: LID[51] @0x009b
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[47] (0x0416)
+
+  PSD[63] (LID[64] @0x00c2): selection list descriptor
+  Flags: 0x00 | NOS: 3 | BSN: 1 | LID: 64 (rejected: no)
+  prev: disabled | next: disabled | return: LID[7] @0x0014
+  default: disabled | timeout: LID[7] @0x0014
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[5] (0x03ec)
+  ofs[0]: LID[65] @0x00c6
+  ofs[1]: LID[74] @0x00e1
+  ofs[2]: LID[77] @0x00ea
+
+  PSD[64] (LID[65] @0x00c6): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 65 (rejected: no)
+  prev: disabled | next: LID[66] @0x00c9 | return: LID[64] @0x00c2
+  default: LID[7] @0x0014 | timeout: LID[64] @0x00c2
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[48] (0x0417)
+
+  PSD[65] (LID[66] @0x00c9): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 66 (rejected: no)
+  prev: LID[65] @0x00c6 | next: LID[67] @0x00cc | return: LID[64] @0x00c2
+  default: LID[7] @0x0014 | timeout: LID[64] @0x00c2
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[49] (0x0418)
+
+  PSD[66] (LID[67] @0x00cc): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 67 (rejected: no)
+  prev: LID[66] @0x00c9 | next: LID[68] @0x00cf | return: LID[64] @0x00c2
+  default: LID[7] @0x0014 | timeout: LID[64] @0x00c2
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[50] (0x0419)
+
+  PSD[67] (LID[68] @0x00cf): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 68 (rejected: no)
+  prev: LID[67] @0x00cc | next: LID[69] @0x00d2 | return: LID[64] @0x00c2
+  default: LID[7] @0x0014 | timeout: LID[64] @0x00c2
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[51] (0x041a)
+
+  PSD[68] (LID[69] @0x00d2): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 69 (rejected: no)
+  prev: LID[68] @0x00cf | next: LID[70] @0x00d5 | return: LID[64] @0x00c2
+  default: LID[7] @0x0014 | timeout: LID[64] @0x00c2
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[52] (0x041b)
+
+  PSD[69] (LID[70] @0x00d5): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 70 (rejected: no)
+  prev: LID[69] @0x00d2 | next: LID[71] @0x00d8 | return: LID[64] @0x00c2
+  default: LID[7] @0x0014 | timeout: LID[64] @0x00c2
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[53] (0x041c)
+
+  PSD[70] (LID[71] @0x00d8): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 71 (rejected: no)
+  prev: LID[70] @0x00d5 | next: LID[72] @0x00db | return: LID[64] @0x00c2
+  default: LID[7] @0x0014 | timeout: LID[64] @0x00c2
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[54] (0x041d)
+
+  PSD[71] (LID[72] @0x00db): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 72 (rejected: no)
+  prev: LID[71] @0x00d8 | next: LID[73] @0x00de | return: LID[64] @0x00c2
+  default: LID[7] @0x0014 | timeout: LID[64] @0x00c2
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[55] (0x041e)
+
+  PSD[72] (LID[73] @0x00de): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 73 (rejected: no)
+  prev: LID[72] @0x00db | next: disabled | return: LID[64] @0x00c2
+  default: LID[7] @0x0014 | timeout: LID[64] @0x00c2
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[56] (0x041f)
+
+  PSD[73] (LID[74] @0x00e1): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 74 (rejected: no)
+  prev: disabled | next: LID[75] @0x00e4 | return: LID[64] @0x00c2
+  default: LID[7] @0x0014 | timeout: LID[64] @0x00c2
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[57] (0x0420)
+
+  PSD[74] (LID[75] @0x00e4): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 75 (rejected: no)
+  prev: LID[74] @0x00e1 | next: LID[76] @0x00e7 | return: LID[64] @0x00c2
+  default: LID[7] @0x0014 | timeout: LID[64] @0x00c2
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[58] (0x0421)
+
+  PSD[75] (LID[76] @0x00e7): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 76 (rejected: no)
+  prev: LID[75] @0x00e4 | next: disabled | return: LID[64] @0x00c2
+  default: LID[7] @0x0014 | timeout: LID[64] @0x00c2
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[59] (0x0422)
+
+  PSD[76] (LID[77] @0x00ea): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 77 (rejected: no)
+  prev: disabled | next: LID[78] @0x00ed | return: LID[64] @0x00c2
+  default: LID[7] @0x0014 | timeout: LID[64] @0x00c2
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[60] (0x0423)
+
+  PSD[77] (LID[78] @0x00ed): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 78 (rejected: no)
+  prev: LID[77] @0x00ea | next: disabled | return: LID[64] @0x00c2
+  default: LID[7] @0x0014 | timeout: LID[64] @0x00c2
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[61] (0x0424)
+
+  PSD[78] (LID[79] @0x00f0): selection list descriptor
+  Flags: 0x00 | NOS: 5 | BSN: 1 | LID: 79 (rejected: no)
+  prev: disabled | next: disabled | return: LID[8] @0x0018
+  default: disabled | timeout: LID[8] @0x0018
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[6] (0x03ed)
+  ofs[0]: LID[80] @0x00f4
+  ofs[1]: LID[86] @0x0106
+  ofs[2]: LID[89] @0x010f
+  ofs[3]: LID[92] @0x0118
+  ofs[4]: LID[94] @0x011e
+
+  PSD[79] (LID[80] @0x00f4): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 80 (rejected: no)
+  prev: disabled | next: LID[81] @0x00f7 | return: LID[79] @0x00f0
+  default: LID[8] @0x0018 | timeout: LID[79] @0x00f0
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[62] (0x0425)
+
+  PSD[80] (LID[81] @0x00f7): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 81 (rejected: no)
+  prev: LID[80] @0x00f4 | next: LID[82] @0x00fa | return: LID[79] @0x00f0
+  default: LID[8] @0x0018 | timeout: LID[79] @0x00f0
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[63] (0x0426)
+
+  PSD[81] (LID[82] @0x00fa): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 82 (rejected: no)
+  prev: LID[81] @0x00f7 | next: LID[83] @0x00fd | return: LID[79] @0x00f0
+  default: LID[8] @0x0018 | timeout: LID[79] @0x00f0
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[64] (0x0427)
+
+  PSD[82] (LID[83] @0x00fd): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 83 (rejected: no)
+  prev: LID[82] @0x00fa | next: LID[84] @0x0100 | return: LID[79] @0x00f0
+  default: LID[8] @0x0018 | timeout: LID[79] @0x00f0
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[65] (0x0428)
+
+  PSD[83] (LID[84] @0x0100): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 84 (rejected: no)
+  prev: LID[83] @0x00fd | next: LID[85] @0x0103 | return: LID[79] @0x00f0
+  default: LID[8] @0x0018 | timeout: LID[79] @0x00f0
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[66] (0x0429)
+
+  PSD[84] (LID[85] @0x0103): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 85 (rejected: no)
+  prev: LID[84] @0x0100 | next: disabled | return: LID[79] @0x00f0
+  default: LID[8] @0x0018 | timeout: LID[79] @0x00f0
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[67] (0x042a)
+
+  PSD[85] (LID[86] @0x0106): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 86 (rejected: no)
+  prev: disabled | next: LID[87] @0x0109 | return: LID[79] @0x00f0
+  default: LID[8] @0x0018 | timeout: LID[79] @0x00f0
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[68] (0x042b)
+
+  PSD[86] (LID[87] @0x0109): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 87 (rejected: no)
+  prev: LID[86] @0x0106 | next: LID[88] @0x010c | return: LID[79] @0x00f0
+  default: LID[8] @0x0018 | timeout: LID[79] @0x00f0
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[69] (0x042c)
+
+  PSD[87] (LID[88] @0x010c): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 88 (rejected: no)
+  prev: LID[87] @0x0109 | next: disabled | return: LID[79] @0x00f0
+  default: LID[8] @0x0018 | timeout: LID[79] @0x00f0
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[70] (0x042d)
+
+  PSD[88] (LID[89] @0x010f): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 89 (rejected: no)
+  prev: disabled | next: LID[90] @0x0112 | return: LID[79] @0x00f0
+  default: LID[8] @0x0018 | timeout: LID[79] @0x00f0
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[71] (0x042e)
+
+  PSD[89] (LID[90] @0x0112): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 90 (rejected: no)
+  prev: LID[89] @0x010f | next: LID[91] @0x0115 | return: LID[79] @0x00f0
+  default: LID[8] @0x0018 | timeout: LID[79] @0x00f0
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[72] (0x042f)
+
+  PSD[90] (LID[91] @0x0115): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 91 (rejected: no)
+  prev: LID[90] @0x0112 | next: disabled | return: LID[79] @0x00f0
+  default: LID[8] @0x0018 | timeout: LID[79] @0x00f0
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[73] (0x0430)
+
+  PSD[91] (LID[92] @0x0118): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 92 (rejected: no)
+  prev: disabled | next: LID[93] @0x011b | return: LID[79] @0x00f0
+  default: LID[8] @0x0018 | timeout: LID[79] @0x00f0
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[74] (0x0431)
+
+  PSD[92] (LID[93] @0x011b): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 93 (rejected: no)
+  prev: LID[92] @0x0118 | next: disabled | return: LID[79] @0x00f0
+  default: LID[8] @0x0018 | timeout: LID[79] @0x00f0
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[75] (0x0432)
+
+  PSD[93] (LID[94] @0x011e): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 94 (rejected: no)
+  prev: disabled | next: disabled | return: LID[79] @0x00f0
+  default: LID[8] @0x0018 | timeout: LID[79] @0x00f0
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[76] (0x0433)
+
+  PSD[94] (LID[95] @0x0121): selection list descriptor
+  Flags: 0x00 | NOS: 4 | BSN: 1 | LID: 95 (rejected: no)
+  prev: disabled | next: disabled | return: LID[9] @0x001c
+  default: disabled | timeout: LID[9] @0x001c
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[7] (0x03ee)
+  ofs[0]: LID[96] @0x0125
+  ofs[1]: LID[97] @0x0128
+  ofs[2]: LID[99] @0x012e
+  ofs[3]: LID[101] @0x0134
+
+  PSD[95] (LID[96] @0x0125): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 96 (rejected: no)
+  prev: disabled | next: disabled | return: LID[95] @0x0121
+  default: LID[9] @0x001c | timeout: LID[95] @0x0121
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[77] (0x0434)
+
+  PSD[96] (LID[97] @0x0128): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 97 (rejected: no)
+  prev: disabled | next: LID[98] @0x012b | return: LID[95] @0x0121
+  default: LID[9] @0x001c | timeout: LID[95] @0x0121
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[78] (0x0435)
+
+  PSD[97] (LID[98] @0x012b): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 98 (rejected: no)
+  prev: LID[97] @0x0128 | next: disabled | return: LID[95] @0x0121
+  default: LID[9] @0x001c | timeout: LID[95] @0x0121
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[79] (0x0436)
+
+  PSD[98] (LID[99] @0x012e): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 99 (rejected: no)
+  prev: disabled | next: LID[100] @0x0131 | return: LID[95] @0x0121
+  default: LID[9] @0x001c | timeout: LID[95] @0x0121
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[80] (0x0437)
+
+  PSD[99] (LID[100] @0x0131): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 100 (rejected: no)
+  prev: LID[99] @0x012e | next: disabled | return: LID[95] @0x0121
+  default: LID[9] @0x001c | timeout: LID[95] @0x0121
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[81] (0x0438)
+
+  PSD[100] (LID[101] @0x0134): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 101 (rejected: no)
+  prev: disabled | next: disabled | return: LID[95] @0x0121
+  default: LID[9] @0x001c | timeout: LID[95] @0x0121
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[82] (0x0439)
+
+  PSD[101] (LID[102] @0x0137): selection list descriptor
+  Flags: 0x00 | NOS: 5 | BSN: 1 | LID: 102 (rejected: no)
+  prev: disabled | next: disabled | return: LID[10] @0x0020
+  default: disabled | timeout: LID[10] @0x0020
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[8] (0x03ef)
+  ofs[0]: LID[103] @0x013b
+  ofs[1]: LID[106] @0x0144
+  ofs[2]: LID[115] @0x015f
+  ofs[3]: LID[116] @0x0162
+  ofs[4]: LID[117] @0x0165
+
+  PSD[102] (LID[103] @0x013b): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 103 (rejected: no)
+  prev: disabled | next: LID[104] @0x013e | return: LID[102] @0x0137
+  default: LID[10] @0x0020 | timeout: LID[102] @0x0137
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[83] (0x043a)
+
+  PSD[103] (LID[104] @0x013e): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 104 (rejected: no)
+  prev: LID[103] @0x013b | next: LID[105] @0x0141 | return: LID[102] @0x0137
+  default: LID[10] @0x0020 | timeout: LID[102] @0x0137
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[84] (0x043b)
+
+  PSD[104] (LID[105] @0x0141): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 105 (rejected: no)
+  prev: LID[104] @0x013e | next: disabled | return: LID[102] @0x0137
+  default: LID[10] @0x0020 | timeout: LID[102] @0x0137
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[85] (0x043c)
+
+  PSD[105] (LID[106] @0x0144): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 106 (rejected: no)
+  prev: disabled | next: LID[107] @0x0147 | return: LID[102] @0x0137
+  default: LID[10] @0x0020 | timeout: LID[102] @0x0137
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[86] (0x043d)
+
+  PSD[106] (LID[107] @0x0147): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 107 (rejected: no)
+  prev: LID[106] @0x0144 | next: LID[108] @0x014a | return: LID[102] @0x0137
+  default: LID[10] @0x0020 | timeout: LID[102] @0x0137
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[87] (0x043e)
+
+  PSD[107] (LID[108] @0x014a): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 108 (rejected: no)
+  prev: LID[107] @0x0147 | next: LID[109] @0x014d | return: LID[102] @0x0137
+  default: LID[10] @0x0020 | timeout: LID[102] @0x0137
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[88] (0x043f)
+
+  PSD[108] (LID[109] @0x014d): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 109 (rejected: no)
+  prev: LID[108] @0x014a | next: LID[110] @0x0150 | return: LID[102] @0x0137
+  default: LID[10] @0x0020 | timeout: LID[102] @0x0137
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[89] (0x0440)
+
+  PSD[109] (LID[110] @0x0150): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 110 (rejected: no)
+  prev: LID[109] @0x014d | next: LID[111] @0x0153 | return: LID[102] @0x0137
+  default: LID[10] @0x0020 | timeout: LID[102] @0x0137
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[90] (0x0441)
+
+  PSD[110] (LID[111] @0x0153): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 111 (rejected: no)
+  prev: LID[110] @0x0150 | next: LID[112] @0x0156 | return: LID[102] @0x0137
+  default: LID[10] @0x0020 | timeout: LID[102] @0x0137
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[91] (0x0442)
+
+  PSD[111] (LID[112] @0x0156): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 112 (rejected: no)
+  prev: LID[111] @0x0153 | next: LID[113] @0x0159 | return: LID[102] @0x0137
+  default: LID[10] @0x0020 | timeout: LID[102] @0x0137
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[92] (0x0443)
+
+  PSD[112] (LID[113] @0x0159): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 113 (rejected: no)
+  prev: LID[112] @0x0156 | next: LID[114] @0x015c | return: LID[102] @0x0137
+  default: LID[10] @0x0020 | timeout: LID[102] @0x0137
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[93] (0x0444)
+
+  PSD[113] (LID[114] @0x015c): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 114 (rejected: no)
+  prev: LID[113] @0x0159 | next: disabled | return: LID[102] @0x0137
+  default: LID[10] @0x0020 | timeout: LID[102] @0x0137
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[94] (0x0445)
+
+  PSD[114] (LID[115] @0x015f): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 115 (rejected: no)
+  prev: disabled | next: disabled | return: LID[102] @0x0137
+  default: LID[10] @0x0020 | timeout: LID[102] @0x0137
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[95] (0x0446)
+
+  PSD[115] (LID[116] @0x0162): selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 116 (rejected: no)
+  prev: disabled | next: disabled | return: LID[102] @0x0137
+  default: LID[10] @0x0020 | timeout: LID[102] @0x0137
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[96] (0x0447)
+
+ PSD[116] (LID[117] @0x0165): play list descriptor
+  NOI: 1 | LID#: 117 (rejected: no)
+  prev: LID[102] @0x0137 | next: LID[102] @0x0137 | return: LID[102] @0x0137
+  playtime: 0/15s | wait: 0s | autowait: 0s
+  play-item[0]: SEQUENCE[1] (0x0002)
+
+-------------------------------------------------------------------------------
+EXT/LOT_X.VCD
+ LID[1]: offset = 0 (0x0000)
+ LID[2]: offset = 16 (0x0002)
+ LID[3]: offset = 56 (0x0007)
+ LID[4]: offset = 96 (0x000c)
+ LID[5]: offset = 168 (0x0015)
+ LID[6]: offset = 240 (0x001e)
+ LID[7]: offset = 312 (0x0027)
+ LID[8]: offset = 384 (0x0030)
+ LID[9]: offset = 456 (0x0039)
+ LID[10]: offset = 528 (0x0042)
+ LID[11]: offset = 600 (0x004b)
+ LID[12]: offset = 696 (0x0057)
+ LID[13]: offset = 744 (0x005d)
+ LID[14]: offset = 760 (0x005f)
+ LID[15]: offset = 800 (0x0064)
+ LID[16]: offset = 840 (0x0069)
+ LID[17]: offset = 888 (0x006f)
+ LID[18]: offset = 904 (0x0071)
+ LID[19]: offset = 920 (0x0073)
+ LID[20]: offset = 960 (0x0078)
+ LID[21]: offset = 1000 (0x007d)
+ LID[22]: offset = 1040 (0x0082)
+ LID[23]: offset = 1080 (0x0087)
+ LID[24]: offset = 1120 (0x008c)
+ LID[25]: offset = 1160 (0x0091)
+ LID[26]: offset = 1208 (0x0097)
+ LID[27]: offset = 1248 (0x009c)
+ LID[28]: offset = 1288 (0x00a1)
+ LID[29]: offset = 1360 (0x00aa)
+ LID[30]: offset = 1400 (0x00af)
+ LID[31]: offset = 1440 (0x00b4)
+ LID[32]: offset = 1480 (0x00b9)
+ LID[33]: offset = 1520 (0x00be)
+ LID[34]: offset = 1560 (0x00c3)
+ LID[35]: offset = 1600 (0x00c8)
+ LID[36]: offset = 1640 (0x00cd)
+ LID[37]: offset = 1680 (0x00d2)
+ LID[38]: offset = 1736 (0x00d9)
+ LID[39]: offset = 1752 (0x00db)
+ LID[40]: offset = 1792 (0x00e0)
+ LID[41]: offset = 1832 (0x00e5)
+ LID[42]: offset = 1872 (0x00ea)
+ LID[43]: offset = 1928 (0x00f1)
+ LID[44]: offset = 1944 (0x00f3)
+ LID[45]: offset = 1984 (0x00f8)
+ LID[46]: offset = 2048 (0x0100)
+ LID[47]: offset = 2096 (0x0106)
+ LID[48]: offset = 2136 (0x010b)
+ LID[49]: offset = 2152 (0x010d)
+ LID[50]: offset = 2192 (0x0112)
+ LID[51]: offset = 2232 (0x0117)
+ LID[52]: offset = 2304 (0x0120)
+ LID[53]: offset = 2360 (0x0127)
+ LID[54]: offset = 2400 (0x012c)
+ LID[55]: offset = 2440 (0x0131)
+ LID[56]: offset = 2480 (0x0136)
+ LID[57]: offset = 2544 (0x013e)
+ LID[58]: offset = 2560 (0x0140)
+ LID[59]: offset = 2576 (0x0142)
+ LID[60]: offset = 2592 (0x0144)
+ LID[61]: offset = 2632 (0x0149)
+ LID[62]: offset = 2672 (0x014e)
+ LID[63]: offset = 2712 (0x0153)
+ LID[64]: offset = 2752 (0x0158)
+ LID[65]: offset = 2808 (0x015f)
+ LID[66]: offset = 2848 (0x0164)
+ LID[67]: offset = 2888 (0x0169)
+ LID[68]: offset = 2928 (0x016e)
+ LID[69]: offset = 2968 (0x0173)
+ LID[70]: offset = 3008 (0x0178)
+ LID[71]: offset = 3048 (0x017d)
+ LID[72]: offset = 3088 (0x0182)
+ LID[73]: offset = 3128 (0x0187)
+ LID[74]: offset = 3168 (0x018c)
+ LID[75]: offset = 3208 (0x0191)
+ LID[76]: offset = 3248 (0x0196)
+ LID[77]: offset = 3288 (0x019b)
+ LID[78]: offset = 3328 (0x01a0)
+ LID[79]: offset = 3368 (0x01a5)
+ LID[80]: offset = 3440 (0x01ae)
+ LID[81]: offset = 3480 (0x01b3)
+ LID[82]: offset = 3520 (0x01b8)
+ LID[83]: offset = 3560 (0x01bd)
+ LID[84]: offset = 3600 (0x01c2)
+ LID[85]: offset = 3640 (0x01c7)
+ LID[86]: offset = 3680 (0x01cc)
+ LID[87]: offset = 3720 (0x01d1)
+ LID[88]: offset = 3760 (0x01d6)
+ LID[89]: offset = 3800 (0x01db)
+ LID[90]: offset = 3840 (0x01e0)
+ LID[91]: offset = 3880 (0x01e5)
+ LID[92]: offset = 3920 (0x01ea)
+ LID[93]: offset = 3960 (0x01ef)
+ LID[94]: offset = 4000 (0x01f4)
+ LID[95]: offset = 4096 (0x0200)
+ LID[96]: offset = 4160 (0x0208)
+ LID[97]: offset = 4200 (0x020d)
+ LID[98]: offset = 4240 (0x0212)
+ LID[99]: offset = 4280 (0x0217)
+ LID[100]: offset = 4320 (0x021c)
+ LID[101]: offset = 4360 (0x0221)
+ LID[102]: offset = 4400 (0x0226)
+ LID[103]: offset = 4472 (0x022f)
+ LID[104]: offset = 4512 (0x0234)
+ LID[105]: offset = 4552 (0x0239)
+ LID[106]: offset = 4592 (0x023e)
+ LID[107]: offset = 4632 (0x0243)
+ LID[108]: offset = 4672 (0x0248)
+ LID[109]: offset = 4712 (0x024d)
+ LID[110]: offset = 4752 (0x0252)
+ LID[111]: offset = 4792 (0x0257)
+ LID[112]: offset = 4832 (0x025c)
+ LID[113]: offset = 4872 (0x0261)
+ LID[114]: offset = 4912 (0x0266)
+ LID[115]: offset = 4952 (0x026b)
+ LID[116]: offset = 4992 (0x0270)
+ LID[117]: offset = 5032 (0x0275)
+-------------------------------------------------------------------------------
+EXT/PSD_X.VCD
+ PSD[00] (LID[1] @0x0000): play list descriptor
+  NOI: 1 | LID#: 1 (rejected: no)
+  prev: disabled | next: LID[2] @0x0002 | return: disabled
+  playtime: 0/15s | wait: 0s | autowait: 0s
+  play-item[0]: SEQUENCE[8] (0x0009)
+
+  PSD[01] (LID[2] @0x0002): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 2 (rejected: no)
+  prev: disabled | next: LID[3] @0x0007 | return: LID[4] @0x000c
+  default: disabled | timeout: disabled
+  wait: -1 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[1] (0x03e8)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[02] (LID[3] @0x0007): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 3 (rejected: no)
+  prev: disabled | next: LID[4] @0x000c | return: disabled
+  default: disabled | timeout: LID[4] @0x000c
+  wait: 30 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[2] (0x03e9)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[03] (LID[4] @0x000c): extended selection list descriptor
+  Flags: 0x00 | NOS: 6 | BSN: 1 | LID: 4 (rejected: no)
+  prev: disabled | next: disabled | return: disabled
+  default: disabled | timeout: disabled
+  wait: 0 secs | loop: 0 (delayed: no)
+  play-item: ENTRY[2] (0x0066)
+  ofs[0]: LID[11] @0x004b
+  ofs[1]: LID[51] @0x0117
+  ofs[2]: LID[64] @0x0158
+  ofs[3]: LID[79] @0x01a5
+  ofs[4]: LID[95] @0x0200
+  ofs[5]: LID[102] @0x0226
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+  area[0]: disabled
+  area[1]: disabled
+  area[2]: disabled
+  area[3]: disabled
+  area[4]: disabled
+  area[5]: disabled
+
+  PSD[04] (LID[5] @0x0015): extended selection list descriptor
+  Flags: 0x00 | NOS: 6 | BSN: 1 | LID: 5 (rejected: no)
+  prev: disabled | next: LID[4] @0x000c | return: disabled
+  default: disabled | timeout: LID[4] @0x000c
+  wait: 1 secs | loop: 1 (delayed: no)
+  play-item: ENTRY[3] (0x0067)
+  ofs[0]: LID[11] @0x004b
+  ofs[1]: LID[51] @0x0117
+  ofs[2]: LID[64] @0x0158
+  ofs[3]: LID[79] @0x01a5
+  ofs[4]: LID[95] @0x0200
+  ofs[5]: LID[102] @0x0226
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+  area[0]: disabled
+  area[1]: disabled
+  area[2]: disabled
+  area[3]: disabled
+  area[4]: disabled
+  area[5]: disabled
+
+  PSD[05] (LID[6] @0x001e): extended selection list descriptor
+  Flags: 0x00 | NOS: 6 | BSN: 1 | LID: 6 (rejected: no)
+  prev: disabled | next: LID[4] @0x000c | return: disabled
+  default: disabled | timeout: LID[4] @0x000c
+  wait: 1 secs | loop: 1 (delayed: no)
+  play-item: ENTRY[4] (0x0068)
+  ofs[0]: LID[11] @0x004b
+  ofs[1]: LID[51] @0x0117
+  ofs[2]: LID[64] @0x0158
+  ofs[3]: LID[79] @0x01a5
+  ofs[4]: LID[95] @0x0200
+  ofs[5]: LID[102] @0x0226
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+  area[0]: disabled
+  area[1]: disabled
+  area[2]: disabled
+  area[3]: disabled
+  area[4]: disabled
+  area[5]: disabled
+
+  PSD[06] (LID[7] @0x0027): extended selection list descriptor
+  Flags: 0x00 | NOS: 6 | BSN: 1 | LID: 7 (rejected: no)
+  prev: disabled | next: LID[4] @0x000c | return: disabled
+  default: disabled | timeout: LID[4] @0x000c
+  wait: 1 secs | loop: 1 (delayed: no)
+  play-item: ENTRY[5] (0x0069)
+  ofs[0]: LID[11] @0x004b
+  ofs[1]: LID[51] @0x0117
+  ofs[2]: LID[64] @0x0158
+  ofs[3]: LID[79] @0x01a5
+  ofs[4]: LID[95] @0x0200
+  ofs[5]: LID[102] @0x0226
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+  area[0]: disabled
+  area[1]: disabled
+  area[2]: disabled
+  area[3]: disabled
+  area[4]: disabled
+  area[5]: disabled
+
+  PSD[07] (LID[8] @0x0030): extended selection list descriptor
+  Flags: 0x00 | NOS: 6 | BSN: 1 | LID: 8 (rejected: no)
+  prev: disabled | next: LID[4] @0x000c | return: disabled
+  default: disabled | timeout: LID[4] @0x000c
+  wait: 1 secs | loop: 1 (delayed: no)
+  play-item: ENTRY[6] (0x006a)
+  ofs[0]: LID[11] @0x004b
+  ofs[1]: LID[51] @0x0117
+  ofs[2]: LID[64] @0x0158
+  ofs[3]: LID[79] @0x01a5
+  ofs[4]: LID[95] @0x0200
+  ofs[5]: LID[102] @0x0226
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+  area[0]: disabled
+  area[1]: disabled
+  area[2]: disabled
+  area[3]: disabled
+  area[4]: disabled
+  area[5]: disabled
+
+  PSD[08] (LID[9] @0x0039): extended selection list descriptor
+  Flags: 0x00 | NOS: 6 | BSN: 1 | LID: 9 (rejected: no)
+  prev: disabled | next: LID[4] @0x000c | return: disabled
+  default: disabled | timeout: LID[4] @0x000c
+  wait: 1 secs | loop: 1 (delayed: no)
+  play-item: ENTRY[7] (0x006b)
+  ofs[0]: LID[11] @0x004b
+  ofs[1]: LID[51] @0x0117
+  ofs[2]: LID[64] @0x0158
+  ofs[3]: LID[79] @0x01a5
+  ofs[4]: LID[95] @0x0200
+  ofs[5]: LID[102] @0x0226
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+  area[0]: disabled
+  area[1]: disabled
+  area[2]: disabled
+  area[3]: disabled
+  area[4]: disabled
+  area[5]: disabled
+
+  PSD[09] (LID[10] @0x0042): extended selection list descriptor
+  Flags: 0x00 | NOS: 6 | BSN: 1 | LID: 10 (rejected: no)
+  prev: disabled | next: LID[4] @0x000c | return: disabled
+  default: disabled | timeout: LID[4] @0x000c
+  wait: 1 secs | loop: 1 (delayed: no)
+  play-item: ENTRY[8] (0x006c)
+  ofs[0]: LID[11] @0x004b
+  ofs[1]: LID[51] @0x0117
+  ofs[2]: LID[64] @0x0158
+  ofs[3]: LID[79] @0x01a5
+  ofs[4]: LID[95] @0x0200
+  ofs[5]: LID[102] @0x0226
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+  area[0]: disabled
+  area[1]: disabled
+  area[2]: disabled
+  area[3]: disabled
+  area[4]: disabled
+  area[5]: disabled
+
+  PSD[10] (LID[11] @0x004b): extended selection list descriptor
+  Flags: 0x00 | NOS: 9 | BSN: 1 | LID: 11 (rejected: no)
+  prev: disabled | next: disabled | return: LID[5] @0x0015
+  default: disabled | timeout: LID[5] @0x0015
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[3] (0x03ea)
+  ofs[0]: LID[12] @0x0057
+  ofs[1]: LID[16] @0x0069
+  ofs[2]: LID[23] @0x0087
+  ofs[3]: LID[25] @0x0091
+  ofs[4]: LID[28] @0x00a1
+  ofs[5]: LID[37] @0x00d2
+  ofs[6]: LID[42] @0x00ea
+  ofs[7]: LID[46] @0x0100
+  ofs[8]: LID[50] @0x0112
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+  area[0]: disabled
+  area[1]: disabled
+  area[2]: disabled
+  area[3]: disabled
+  area[4]: disabled
+  area[5]: disabled
+  area[6]: disabled
+  area[7]: disabled
+  area[8]: disabled
+
+  PSD[11] (LID[12] @0x0057): extended selection list descriptor
+  Flags: 0x00 | NOS: 2 | BSN: 1 | LID: 12 (rejected: no)
+  prev: disabled | next: disabled | return: LID[11] @0x004b
+  default: LID[5] @0x0015 | timeout: LID[11] @0x004b
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[9] (0x03f0)
+  ofs[0]: LID[13] @0x005d
+  ofs[1]: LID[14] @0x005f
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+  area[0]: disabled
+  area[1]: disabled
+
+ PSD[12] (LID[13] @0x005d): play list descriptor
+  NOI: 1 | LID#: 13 (rejected: no)
+  prev: LID[12] @0x0057 | next: LID[12] @0x0057 | return: LID[12] @0x0057
+  playtime: 0/15s | wait: 0s | autowait: 0s
+  play-item[0]: SEQUENCE[3] (0x0004)
+
+  PSD[13] (LID[14] @0x005f): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 14 (rejected: no)
+  prev: disabled | next: LID[15] @0x0064 | return: LID[12] @0x0057
+  default: LID[5] @0x0015 | timeout: LID[12] @0x0057
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[10] (0x03f1)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[14] (LID[15] @0x0064): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 15 (rejected: no)
+  prev: LID[14] @0x005f | next: disabled | return: LID[12] @0x0057
+  default: LID[5] @0x0015 | timeout: LID[12] @0x0057
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[11] (0x03f2)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[15] (LID[16] @0x0069): extended selection list descriptor
+  Flags: 0x00 | NOS: 2 | BSN: 1 | LID: 16 (rejected: no)
+  prev: disabled | next: disabled | return: LID[11] @0x004b
+  default: LID[5] @0x0015 | timeout: LID[11] @0x004b
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[12] (0x03f3)
+  ofs[0]: LID[17] @0x006f
+  ofs[1]: LID[19] @0x0073
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+  area[0]: disabled
+  area[1]: disabled
+
+ PSD[16] (LID[17] @0x006f): play list descriptor
+  NOI: 1 | LID#: 17 (rejected: no)
+  prev: LID[16] @0x0069 | next: LID[18] @0x0071 | return: LID[16] @0x0069
+  playtime: 0/15s | wait: 0s | autowait: 0s
+  play-item[0]: SEQUENCE[4] (0x0005)
+
+ PSD[17] (LID[18] @0x0071): play list descriptor
+  NOI: 1 | LID#: 18 (rejected: no)
+  prev: LID[17] @0x006f | next: LID[16] @0x0069 | return: LID[16] @0x0069
+  playtime: 0/15s | wait: 0s | autowait: 0s
+  play-item[0]: SEQUENCE[5] (0x0006)
+
+  PSD[18] (LID[19] @0x0073): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 19 (rejected: no)
+  prev: disabled | next: LID[20] @0x0078 | return: LID[16] @0x0069
+  default: LID[5] @0x0015 | timeout: LID[16] @0x0069
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[13] (0x03f4)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[19] (LID[20] @0x0078): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 20 (rejected: no)
+  prev: LID[19] @0x0073 | next: LID[21] @0x007d | return: LID[16] @0x0069
+  default: LID[5] @0x0015 | timeout: LID[16] @0x0069
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[14] (0x03f5)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[20] (LID[21] @0x007d): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 21 (rejected: no)
+  prev: LID[20] @0x0078 | next: LID[22] @0x0082 | return: LID[16] @0x0069
+  default: LID[5] @0x0015 | timeout: LID[16] @0x0069
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[15] (0x03f6)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[21] (LID[22] @0x0082): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 22 (rejected: no)
+  prev: LID[21] @0x007d | next: disabled | return: LID[16] @0x0069
+  default: LID[5] @0x0015 | timeout: LID[16] @0x0069
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[16] (0x03f7)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[22] (LID[23] @0x0087): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 23 (rejected: no)
+  prev: disabled | next: LID[24] @0x008c | return: LID[11] @0x004b
+  default: LID[5] @0x0015 | timeout: LID[11] @0x004b
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[17] (0x03f8)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[23] (LID[24] @0x008c): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 24 (rejected: no)
+  prev: LID[23] @0x0087 | next: disabled | return: LID[11] @0x004b
+  default: LID[5] @0x0015 | timeout: LID[11] @0x004b
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[18] (0x03f9)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[24] (LID[25] @0x0091): extended selection list descriptor
+  Flags: 0x00 | NOS: 2 | BSN: 1 | LID: 25 (rejected: no)
+  prev: disabled | next: disabled | return: LID[11] @0x004b
+  default: LID[5] @0x0015 | timeout: LID[11] @0x004b
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[19] (0x03fa)
+  ofs[0]: LID[26] @0x0097
+  ofs[1]: LID[27] @0x009c
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+  area[0]: disabled
+  area[1]: disabled
+
+  PSD[25] (LID[26] @0x0097): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 26 (rejected: no)
+  prev: disabled | next: disabled | return: LID[25] @0x0091
+  default: LID[5] @0x0015 | timeout: LID[25] @0x0091
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[20] (0x03fb)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[26] (LID[27] @0x009c): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 27 (rejected: no)
+  prev: disabled | next: disabled | return: LID[25] @0x0091
+  default: LID[5] @0x0015 | timeout: LID[25] @0x0091
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[21] (0x03fc)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[27] (LID[28] @0x00a1): extended selection list descriptor
+  Flags: 0x00 | NOS: 5 | BSN: 1 | LID: 28 (rejected: no)
+  prev: disabled | next: disabled | return: LID[11] @0x004b
+  default: LID[5] @0x0015 | timeout: LID[11] @0x004b
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[22] (0x03fd)
+  ofs[0]: LID[29] @0x00aa
+  ofs[1]: LID[30] @0x00af
+  ofs[2]: LID[31] @0x00b4
+  ofs[3]: LID[32] @0x00b9
+  ofs[4]: LID[36] @0x00cd
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+  area[0]: disabled
+  area[1]: disabled
+  area[2]: disabled
+  area[3]: disabled
+  area[4]: disabled
+
+  PSD[28] (LID[29] @0x00aa): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 29 (rejected: no)
+  prev: disabled | next: LID[30] @0x00af | return: LID[28] @0x00a1
+  default: LID[5] @0x0015 | timeout: LID[28] @0x00a1
+  wait: 1 secs | loop: 1 (delayed: no)
+  play-item: ENTRY[16] (0x0074)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[29] (LID[30] @0x00af): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 30 (rejected: no)
+  prev: LID[29] @0x00aa | next: LID[31] @0x00b4 | return: LID[28] @0x00a1
+  default: LID[5] @0x0015 | timeout: LID[28] @0x00a1
+  wait: 1 secs | loop: 1 (delayed: no)
+  play-item: ENTRY[17] (0x0075)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[30] (LID[31] @0x00b4): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 31 (rejected: no)
+  prev: LID[30] @0x00af | next: disabled | return: LID[28] @0x00a1
+  default: LID[5] @0x0015 | timeout: LID[28] @0x00a1
+  wait: 1 secs | loop: 1 (delayed: no)
+  play-item: ENTRY[18] (0x0076)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[31] (LID[32] @0x00b9): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 32 (rejected: no)
+  prev: disabled | next: LID[33] @0x00be | return: LID[28] @0x00a1
+  default: LID[5] @0x0015 | timeout: LID[28] @0x00a1
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[23] (0x03fe)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[32] (LID[33] @0x00be): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 33 (rejected: no)
+  prev: LID[32] @0x00b9 | next: LID[34] @0x00c3 | return: LID[28] @0x00a1
+  default: LID[5] @0x0015 | timeout: LID[28] @0x00a1
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[24] (0x03ff)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[33] (LID[34] @0x00c3): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 34 (rejected: no)
+  prev: LID[33] @0x00be | next: LID[35] @0x00c8 | return: LID[28] @0x00a1
+  default: LID[5] @0x0015 | timeout: LID[28] @0x00a1
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[25] (0x0400)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[34] (LID[35] @0x00c8): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 35 (rejected: no)
+  prev: LID[34] @0x00c3 | next: disabled | return: LID[28] @0x00a1
+  default: LID[5] @0x0015 | timeout: LID[28] @0x00a1
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[26] (0x0401)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[35] (LID[36] @0x00cd): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 36 (rejected: no)
+  prev: disabled | next: disabled | return: LID[28] @0x00a1
+  default: LID[5] @0x0015 | timeout: LID[28] @0x00a1
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[27] (0x0402)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[36] (LID[37] @0x00d2): extended selection list descriptor
+  Flags: 0x00 | NOS: 3 | BSN: 1 | LID: 37 (rejected: no)
+  prev: disabled | next: disabled | return: LID[11] @0x004b
+  default: LID[5] @0x0015 | timeout: LID[11] @0x004b
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[28] (0x0403)
+  ofs[0]: LID[38] @0x00d9
+  ofs[1]: LID[39] @0x00db
+  ofs[2]: LID[41] @0x00e5
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+  area[0]: disabled
+  area[1]: disabled
+  area[2]: disabled
+
+ PSD[37] (LID[38] @0x00d9): play list descriptor
+  NOI: 1 | LID#: 38 (rejected: no)
+  prev: LID[37] @0x00d2 | next: LID[37] @0x00d2 | return: LID[37] @0x00d2
+  playtime: 0/15s | wait: 0s | autowait: 5s
+  play-item[0]: SEQUENCE[8] (0x0009)
+
+  PSD[38] (LID[39] @0x00db): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 39 (rejected: no)
+  prev: disabled | next: LID[40] @0x00e0 | return: LID[37] @0x00d2
+  default: LID[5] @0x0015 | timeout: LID[37] @0x00d2
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[29] (0x0404)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[39] (LID[40] @0x00e0): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 40 (rejected: no)
+  prev: LID[39] @0x00db | next: disabled | return: LID[37] @0x00d2
+  default: LID[5] @0x0015 | timeout: LID[37] @0x00d2
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[30] (0x0405)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[40] (LID[41] @0x00e5): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 41 (rejected: no)
+  prev: disabled | next: disabled | return: LID[37] @0x00d2
+  default: LID[5] @0x0015 | timeout: LID[37] @0x00d2
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[31] (0x0406)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[41] (LID[42] @0x00ea): extended selection list descriptor
+  Flags: 0x00 | NOS: 3 | BSN: 1 | LID: 42 (rejected: no)
+  prev: disabled | next: disabled | return: LID[11] @0x004b
+  default: LID[5] @0x0015 | timeout: LID[11] @0x004b
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[32] (0x0407)
+  ofs[0]: LID[43] @0x00f1
+  ofs[1]: LID[44] @0x00f3
+  ofs[2]: LID[45] @0x00f8
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+  area[0]: disabled
+  area[1]: disabled
+  area[2]: disabled
+
+ PSD[42] (LID[43] @0x00f1): play list descriptor
+  NOI: 1 | LID#: 43 (rejected: no)
+  prev: LID[42] @0x00ea | next: LID[42] @0x00ea | return: LID[42] @0x00ea
+  playtime: 225/15s | wait: 0s | autowait: 0s
+  play-item[0]: ENTRY[17] (0x0075)
+
+  PSD[43] (LID[44] @0x00f3): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 44 (rejected: no)
+  prev: disabled | next: disabled | return: LID[42] @0x00ea
+  default: LID[5] @0x0015 | timeout: LID[42] @0x00ea
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[33] (0x0408)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[44] (LID[45] @0x00f8): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 45 (rejected: no)
+  prev: disabled | next: disabled | return: LID[42] @0x00ea
+  default: LID[5] @0x0015 | timeout: LID[42] @0x00ea
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[34] (0x0409)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[45] (LID[46] @0x0100): extended selection list descriptor
+  Flags: 0x00 | NOS: 2 | BSN: 1 | LID: 46 (rejected: no)
+  prev: disabled | next: disabled | return: LID[11] @0x004b
+  default: LID[5] @0x0015 | timeout: LID[11] @0x004b
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[35] (0x040a)
+  ofs[0]: LID[47] @0x0106
+  ofs[1]: LID[49] @0x010d
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+  area[0]: disabled
+  area[1]: disabled
+
+  PSD[46] (LID[47] @0x0106): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 47 (rejected: no)
+  prev: LID[46] @0x0100 | next: LID[48] @0x010b | return: LID[46] @0x0100
+  default: disabled | timeout: LID[48] @0x010b
+  wait: 1 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[36] (0x040b)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+ PSD[47] (LID[48] @0x010b): play list descriptor
+  NOI: 1 | LID#: 48 (rejected: no)
+  prev: LID[46] @0x0100 | next: LID[46] @0x0100 | return: LID[46] @0x0100
+  playtime: 0/15s | wait: 1s | autowait: 0s
+  play-item[0]: SEGMENT[97] (0x0448)
+
+  PSD[48] (LID[49] @0x010d): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 49 (rejected: no)
+  prev: disabled | next: disabled | return: LID[46] @0x0100
+  default: LID[5] @0x0015 | timeout: LID[46] @0x0100
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[37] (0x040c)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[49] (LID[50] @0x0112): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 50 (rejected: no)
+  prev: disabled | next: disabled | return: LID[11] @0x004b
+  default: LID[5] @0x0015 | timeout: LID[11] @0x004b
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[38] (0x040d)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[50] (LID[51] @0x0117): extended selection list descriptor
+  Flags: 0x00 | NOS: 5 | BSN: 1 | LID: 51 (rejected: no)
+  prev: disabled | next: disabled | return: LID[6] @0x001e
+  default: disabled | timeout: LID[6] @0x001e
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[4] (0x03eb)
+  ofs[0]: LID[52] @0x0120
+  ofs[1]: LID[56] @0x0136
+  ofs[2]: LID[61] @0x0149
+  ofs[3]: LID[62] @0x014e
+  ofs[4]: LID[63] @0x0153
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+  area[0]: disabled
+  area[1]: disabled
+  area[2]: disabled
+  area[3]: disabled
+  area[4]: disabled
+
+  PSD[51] (LID[52] @0x0120): extended selection list descriptor
+  Flags: 0x00 | NOS: 3 | BSN: 1 | LID: 52 (rejected: no)
+  prev: disabled | next: disabled | return: LID[51] @0x0117
+  default: LID[6] @0x001e | timeout: LID[51] @0x0117
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[39] (0x040e)
+  ofs[0]: LID[53] @0x0127
+  ofs[1]: LID[54] @0x012c
+  ofs[2]: LID[55] @0x0131
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+  area[0]: disabled
+  area[1]: disabled
+  area[2]: disabled
+
+  PSD[52] (LID[53] @0x0127): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 53 (rejected: no)
+  prev: disabled | next: disabled | return: LID[52] @0x0120
+  default: LID[6] @0x001e | timeout: disabled
+  wait: -1 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[40] (0x040f)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[53] (LID[54] @0x012c): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 54 (rejected: no)
+  prev: disabled | next: disabled | return: LID[52] @0x0120
+  default: LID[6] @0x001e | timeout: disabled
+  wait: -1 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[41] (0x0410)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[54] (LID[55] @0x0131): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 55 (rejected: no)
+  prev: disabled | next: disabled | return: LID[52] @0x0120
+  default: LID[6] @0x001e | timeout: LID[52] @0x0120
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[42] (0x0411)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[55] (LID[56] @0x0136): extended selection list descriptor
+  Flags: 0x00 | NOS: 4 | BSN: 1 | LID: 56 (rejected: no)
+  prev: disabled | next: disabled | return: LID[51] @0x0117
+  default: LID[6] @0x001e | timeout: LID[51] @0x0117
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[43] (0x0412)
+  ofs[0]: LID[57] @0x013e
+  ofs[1]: LID[58] @0x0140
+  ofs[2]: LID[59] @0x0142
+  ofs[3]: LID[60] @0x0144
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+  area[0]: disabled
+  area[1]: disabled
+  area[2]: disabled
+  area[3]: disabled
+
+ PSD[56] (LID[57] @0x013e): play list descriptor
+  NOI: 1 | LID#: 57 (rejected: no)
+  prev: LID[56] @0x0136 | next: LID[56] @0x0136 | return: LID[56] @0x0136
+  playtime: 0/15s | wait: 0s | autowait: 0s
+  play-item[0]: SEQUENCE[6] (0x0007)
+
+ PSD[57] (LID[58] @0x0140): play list descriptor
+  NOI: 1 | LID#: 58 (rejected: no)
+  prev: LID[56] @0x0136 | next: LID[56] @0x0136 | return: LID[56] @0x0136
+  playtime: 0/15s | wait: 0s | autowait: 0s
+  play-item[0]: SEQUENCE[7] (0x0008)
+
+ PSD[58] (LID[59] @0x0142): play list descriptor
+  NOI: 1 | LID#: 59 (rejected: no)
+  prev: LID[56] @0x0136 | next: LID[56] @0x0136 | return: LID[56] @0x0136
+  playtime: 0/15s | wait: 0s | autowait: 0s
+  play-item[0]: SEQUENCE[8] (0x0009)
+
+  PSD[59] (LID[60] @0x0144): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 60 (rejected: no)
+  prev: disabled | next: disabled | return: LID[56] @0x0136
+  default: LID[6] @0x001e | timeout: LID[56] @0x0136
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[44] (0x0413)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[60] (LID[61] @0x0149): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 61 (rejected: no)
+  prev: disabled | next: disabled | return: LID[51] @0x0117
+  default: LID[6] @0x001e | timeout: LID[51] @0x0117
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[45] (0x0414)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[61] (LID[62] @0x014e): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 62 (rejected: no)
+  prev: disabled | next: disabled | return: LID[51] @0x0117
+  default: LID[6] @0x001e | timeout: LID[51] @0x0117
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[46] (0x0415)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[62] (LID[63] @0x0153): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 63 (rejected: no)
+  prev: disabled | next: disabled | return: LID[51] @0x0117
+  default: LID[6] @0x001e | timeout: LID[51] @0x0117
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[47] (0x0416)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[63] (LID[64] @0x0158): extended selection list descriptor
+  Flags: 0x00 | NOS: 3 | BSN: 1 | LID: 64 (rejected: no)
+  prev: disabled | next: disabled | return: LID[7] @0x0027
+  default: disabled | timeout: LID[7] @0x0027
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[5] (0x03ec)
+  ofs[0]: LID[65] @0x015f
+  ofs[1]: LID[74] @0x018c
+  ofs[2]: LID[77] @0x019b
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+  area[0]: disabled
+  area[1]: disabled
+  area[2]: disabled
+
+  PSD[64] (LID[65] @0x015f): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 65 (rejected: no)
+  prev: disabled | next: LID[66] @0x0164 | return: LID[64] @0x0158
+  default: LID[7] @0x0027 | timeout: LID[64] @0x0158
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[48] (0x0417)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[65] (LID[66] @0x0164): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 66 (rejected: no)
+  prev: LID[65] @0x015f | next: LID[67] @0x0169 | return: LID[64] @0x0158
+  default: LID[7] @0x0027 | timeout: LID[64] @0x0158
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[49] (0x0418)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[66] (LID[67] @0x0169): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 67 (rejected: no)
+  prev: LID[66] @0x0164 | next: LID[68] @0x016e | return: LID[64] @0x0158
+  default: LID[7] @0x0027 | timeout: LID[64] @0x0158
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[50] (0x0419)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[67] (LID[68] @0x016e): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 68 (rejected: no)
+  prev: LID[67] @0x0169 | next: LID[69] @0x0173 | return: LID[64] @0x0158
+  default: LID[7] @0x0027 | timeout: LID[64] @0x0158
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[51] (0x041a)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[68] (LID[69] @0x0173): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 69 (rejected: no)
+  prev: LID[68] @0x016e | next: LID[70] @0x0178 | return: LID[64] @0x0158
+  default: LID[7] @0x0027 | timeout: LID[64] @0x0158
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[52] (0x041b)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[69] (LID[70] @0x0178): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 70 (rejected: no)
+  prev: LID[69] @0x0173 | next: LID[71] @0x017d | return: LID[64] @0x0158
+  default: LID[7] @0x0027 | timeout: LID[64] @0x0158
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[53] (0x041c)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[70] (LID[71] @0x017d): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 71 (rejected: no)
+  prev: LID[70] @0x0178 | next: LID[72] @0x0182 | return: LID[64] @0x0158
+  default: LID[7] @0x0027 | timeout: LID[64] @0x0158
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[54] (0x041d)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[71] (LID[72] @0x0182): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 72 (rejected: no)
+  prev: LID[71] @0x017d | next: LID[73] @0x0187 | return: LID[64] @0x0158
+  default: LID[7] @0x0027 | timeout: LID[64] @0x0158
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[55] (0x041e)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[72] (LID[73] @0x0187): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 73 (rejected: no)
+  prev: LID[72] @0x0182 | next: disabled | return: LID[64] @0x0158
+  default: LID[7] @0x0027 | timeout: LID[64] @0x0158
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[56] (0x041f)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[73] (LID[74] @0x018c): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 74 (rejected: no)
+  prev: disabled | next: LID[75] @0x0191 | return: LID[64] @0x0158
+  default: LID[7] @0x0027 | timeout: LID[64] @0x0158
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[57] (0x0420)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[74] (LID[75] @0x0191): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 75 (rejected: no)
+  prev: LID[74] @0x018c | next: LID[76] @0x0196 | return: LID[64] @0x0158
+  default: LID[7] @0x0027 | timeout: LID[64] @0x0158
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[58] (0x0421)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[75] (LID[76] @0x0196): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 76 (rejected: no)
+  prev: LID[75] @0x0191 | next: disabled | return: LID[64] @0x0158
+  default: LID[7] @0x0027 | timeout: LID[64] @0x0158
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[59] (0x0422)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[76] (LID[77] @0x019b): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 77 (rejected: no)
+  prev: disabled | next: LID[78] @0x01a0 | return: LID[64] @0x0158
+  default: LID[7] @0x0027 | timeout: LID[64] @0x0158
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[60] (0x0423)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[77] (LID[78] @0x01a0): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 78 (rejected: no)
+  prev: LID[77] @0x019b | next: disabled | return: LID[64] @0x0158
+  default: LID[7] @0x0027 | timeout: LID[64] @0x0158
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[61] (0x0424)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[78] (LID[79] @0x01a5): extended selection list descriptor
+  Flags: 0x00 | NOS: 5 | BSN: 1 | LID: 79 (rejected: no)
+  prev: disabled | next: disabled | return: LID[8] @0x0030
+  default: disabled | timeout: LID[8] @0x0030
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[6] (0x03ed)
+  ofs[0]: LID[80] @0x01ae
+  ofs[1]: LID[86] @0x01cc
+  ofs[2]: LID[89] @0x01db
+  ofs[3]: LID[92] @0x01ea
+  ofs[4]: LID[94] @0x01f4
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+  area[0]: disabled
+  area[1]: disabled
+  area[2]: disabled
+  area[3]: disabled
+  area[4]: disabled
+
+  PSD[79] (LID[80] @0x01ae): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 80 (rejected: no)
+  prev: disabled | next: LID[81] @0x01b3 | return: LID[79] @0x01a5
+  default: LID[8] @0x0030 | timeout: LID[79] @0x01a5
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[62] (0x0425)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[80] (LID[81] @0x01b3): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 81 (rejected: no)
+  prev: LID[80] @0x01ae | next: LID[82] @0x01b8 | return: LID[79] @0x01a5
+  default: LID[8] @0x0030 | timeout: LID[79] @0x01a5
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[63] (0x0426)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[81] (LID[82] @0x01b8): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 82 (rejected: no)
+  prev: LID[81] @0x01b3 | next: LID[83] @0x01bd | return: LID[79] @0x01a5
+  default: LID[8] @0x0030 | timeout: LID[79] @0x01a5
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[64] (0x0427)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[82] (LID[83] @0x01bd): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 83 (rejected: no)
+  prev: LID[82] @0x01b8 | next: LID[84] @0x01c2 | return: LID[79] @0x01a5
+  default: LID[8] @0x0030 | timeout: LID[79] @0x01a5
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[65] (0x0428)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[83] (LID[84] @0x01c2): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 84 (rejected: no)
+  prev: LID[83] @0x01bd | next: LID[85] @0x01c7 | return: LID[79] @0x01a5
+  default: LID[8] @0x0030 | timeout: LID[79] @0x01a5
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[66] (0x0429)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[84] (LID[85] @0x01c7): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 85 (rejected: no)
+  prev: LID[84] @0x01c2 | next: disabled | return: LID[79] @0x01a5
+  default: LID[8] @0x0030 | timeout: LID[79] @0x01a5
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[67] (0x042a)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[85] (LID[86] @0x01cc): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 86 (rejected: no)
+  prev: disabled | next: LID[87] @0x01d1 | return: LID[79] @0x01a5
+  default: LID[8] @0x0030 | timeout: LID[79] @0x01a5
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[68] (0x042b)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[86] (LID[87] @0x01d1): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 87 (rejected: no)
+  prev: LID[86] @0x01cc | next: LID[88] @0x01d6 | return: LID[79] @0x01a5
+  default: LID[8] @0x0030 | timeout: LID[79] @0x01a5
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[69] (0x042c)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[87] (LID[88] @0x01d6): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 88 (rejected: no)
+  prev: LID[87] @0x01d1 | next: disabled | return: LID[79] @0x01a5
+  default: LID[8] @0x0030 | timeout: LID[79] @0x01a5
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[70] (0x042d)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[88] (LID[89] @0x01db): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 89 (rejected: no)
+  prev: disabled | next: LID[90] @0x01e0 | return: LID[79] @0x01a5
+  default: LID[8] @0x0030 | timeout: LID[79] @0x01a5
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[71] (0x042e)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[89] (LID[90] @0x01e0): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 90 (rejected: no)
+  prev: LID[89] @0x01db | next: LID[91] @0x01e5 | return: LID[79] @0x01a5
+  default: LID[8] @0x0030 | timeout: LID[79] @0x01a5
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[72] (0x042f)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[90] (LID[91] @0x01e5): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 91 (rejected: no)
+  prev: LID[90] @0x01e0 | next: disabled | return: LID[79] @0x01a5
+  default: LID[8] @0x0030 | timeout: LID[79] @0x01a5
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[73] (0x0430)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[91] (LID[92] @0x01ea): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 92 (rejected: no)
+  prev: disabled | next: LID[93] @0x01ef | return: LID[79] @0x01a5
+  default: LID[8] @0x0030 | timeout: LID[79] @0x01a5
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[74] (0x0431)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[92] (LID[93] @0x01ef): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 93 (rejected: no)
+  prev: LID[92] @0x01ea | next: disabled | return: LID[79] @0x01a5
+  default: LID[8] @0x0030 | timeout: LID[79] @0x01a5
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[75] (0x0432)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[93] (LID[94] @0x01f4): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 94 (rejected: no)
+  prev: disabled | next: disabled | return: LID[79] @0x01a5
+  default: LID[8] @0x0030 | timeout: LID[79] @0x01a5
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[76] (0x0433)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[94] (LID[95] @0x0200): extended selection list descriptor
+  Flags: 0x00 | NOS: 4 | BSN: 1 | LID: 95 (rejected: no)
+  prev: disabled | next: disabled | return: LID[9] @0x0039
+  default: disabled | timeout: LID[9] @0x0039
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[7] (0x03ee)
+  ofs[0]: LID[96] @0x0208
+  ofs[1]: LID[97] @0x020d
+  ofs[2]: LID[99] @0x0217
+  ofs[3]: LID[101] @0x0221
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+  area[0]: disabled
+  area[1]: disabled
+  area[2]: disabled
+  area[3]: disabled
+
+  PSD[95] (LID[96] @0x0208): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 96 (rejected: no)
+  prev: disabled | next: disabled | return: LID[95] @0x0200
+  default: LID[9] @0x0039 | timeout: LID[95] @0x0200
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[77] (0x0434)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[96] (LID[97] @0x020d): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 97 (rejected: no)
+  prev: disabled | next: LID[98] @0x0212 | return: LID[95] @0x0200
+  default: LID[9] @0x0039 | timeout: LID[95] @0x0200
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[78] (0x0435)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[97] (LID[98] @0x0212): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 98 (rejected: no)
+  prev: LID[97] @0x020d | next: disabled | return: LID[95] @0x0200
+  default: LID[9] @0x0039 | timeout: LID[95] @0x0200
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[79] (0x0436)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[98] (LID[99] @0x0217): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 99 (rejected: no)
+  prev: disabled | next: LID[100] @0x021c | return: LID[95] @0x0200
+  default: LID[9] @0x0039 | timeout: LID[95] @0x0200
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[80] (0x0437)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[99] (LID[100] @0x021c): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 100 (rejected: no)
+  prev: LID[99] @0x0217 | next: disabled | return: LID[95] @0x0200
+  default: LID[9] @0x0039 | timeout: LID[95] @0x0200
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[81] (0x0438)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[100] (LID[101] @0x0221): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 101 (rejected: no)
+  prev: disabled | next: disabled | return: LID[95] @0x0200
+  default: LID[9] @0x0039 | timeout: LID[95] @0x0200
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[82] (0x0439)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[101] (LID[102] @0x0226): extended selection list descriptor
+  Flags: 0x00 | NOS: 5 | BSN: 1 | LID: 102 (rejected: no)
+  prev: disabled | next: disabled | return: LID[10] @0x0042
+  default: disabled | timeout: LID[10] @0x0042
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[8] (0x03ef)
+  ofs[0]: LID[103] @0x022f
+  ofs[1]: LID[106] @0x023e
+  ofs[2]: LID[115] @0x026b
+  ofs[3]: LID[116] @0x0270
+  ofs[4]: LID[117] @0x0275
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+  area[0]: disabled
+  area[1]: disabled
+  area[2]: disabled
+  area[3]: disabled
+  area[4]: disabled
+
+  PSD[102] (LID[103] @0x022f): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 103 (rejected: no)
+  prev: disabled | next: LID[104] @0x0234 | return: LID[102] @0x0226
+  default: LID[10] @0x0042 | timeout: LID[102] @0x0226
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[83] (0x043a)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[103] (LID[104] @0x0234): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 104 (rejected: no)
+  prev: LID[103] @0x022f | next: LID[105] @0x0239 | return: LID[102] @0x0226
+  default: LID[10] @0x0042 | timeout: LID[102] @0x0226
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[84] (0x043b)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[104] (LID[105] @0x0239): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 105 (rejected: no)
+  prev: LID[104] @0x0234 | next: disabled | return: LID[102] @0x0226
+  default: LID[10] @0x0042 | timeout: LID[102] @0x0226
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[85] (0x043c)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[105] (LID[106] @0x023e): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 106 (rejected: no)
+  prev: disabled | next: LID[107] @0x0243 | return: LID[102] @0x0226
+  default: LID[10] @0x0042 | timeout: LID[102] @0x0226
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[86] (0x043d)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[106] (LID[107] @0x0243): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 107 (rejected: no)
+  prev: LID[106] @0x023e | next: LID[108] @0x0248 | return: LID[102] @0x0226
+  default: LID[10] @0x0042 | timeout: LID[102] @0x0226
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[87] (0x043e)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[107] (LID[108] @0x0248): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 108 (rejected: no)
+  prev: LID[107] @0x0243 | next: LID[109] @0x024d | return: LID[102] @0x0226
+  default: LID[10] @0x0042 | timeout: LID[102] @0x0226
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[88] (0x043f)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[108] (LID[109] @0x024d): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 109 (rejected: no)
+  prev: LID[108] @0x0248 | next: LID[110] @0x0252 | return: LID[102] @0x0226
+  default: LID[10] @0x0042 | timeout: LID[102] @0x0226
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[89] (0x0440)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[109] (LID[110] @0x0252): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 110 (rejected: no)
+  prev: LID[109] @0x024d | next: LID[111] @0x0257 | return: LID[102] @0x0226
+  default: LID[10] @0x0042 | timeout: LID[102] @0x0226
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[90] (0x0441)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[110] (LID[111] @0x0257): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 111 (rejected: no)
+  prev: LID[110] @0x0252 | next: LID[112] @0x025c | return: LID[102] @0x0226
+  default: LID[10] @0x0042 | timeout: LID[102] @0x0226
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[91] (0x0442)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[111] (LID[112] @0x025c): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 112 (rejected: no)
+  prev: LID[111] @0x0257 | next: LID[113] @0x0261 | return: LID[102] @0x0226
+  default: LID[10] @0x0042 | timeout: LID[102] @0x0226
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[92] (0x0443)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[112] (LID[113] @0x0261): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 113 (rejected: no)
+  prev: LID[112] @0x025c | next: LID[114] @0x0266 | return: LID[102] @0x0226
+  default: LID[10] @0x0042 | timeout: LID[102] @0x0226
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[93] (0x0444)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[113] (LID[114] @0x0266): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 114 (rejected: no)
+  prev: LID[113] @0x0261 | next: disabled | return: LID[102] @0x0226
+  default: LID[10] @0x0042 | timeout: LID[102] @0x0226
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[94] (0x0445)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[114] (LID[115] @0x026b): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 115 (rejected: no)
+  prev: disabled | next: disabled | return: LID[102] @0x0226
+  default: LID[10] @0x0042 | timeout: LID[102] @0x0226
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[95] (0x0446)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+  PSD[115] (LID[116] @0x0270): extended selection list descriptor
+  Flags: 0x00 | NOS: 0 | BSN: 1 | LID: 116 (rejected: no)
+  prev: disabled | next: disabled | return: LID[102] @0x0226
+  default: LID[10] @0x0042 | timeout: LID[102] @0x0226
+  wait: 60 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[96] (0x0447)
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+
+ PSD[116] (LID[117] @0x0275): play list descriptor
+  NOI: 1 | LID#: 117 (rejected: no)
+  prev: LID[102] @0x0226 | next: LID[102] @0x0226 | return: LID[102] @0x0226
+  playtime: 0/15s | wait: 0s | autowait: 0s
+  play-item[0]: SEQUENCE[1] (0x0002)
+
+-------------------------------------------------------------------------------
+CD-ROM TRACKS (1 - 10)
+  #: MSF       LSN     Type
+  1: 00:02:00  000000  XA
+  2: 04:07:52  018427  XA
+  3: 04:22:69  019569  XA
+  4: 05:11:10  023185  XA
+  5: 05:20:26  023876  XA
+  6: 05:29:42  024567  XA
+  7: 05:38:58  025258  XA
+  8: 06:01:74  026999  XA
+  9: 06:30:13  029113  XA
+ 10: 06:57:27  031152  XA
+170: 08:22:43  037543  leadout
+-------------------------------------------------------------------------------

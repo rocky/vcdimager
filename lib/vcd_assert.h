@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,14 +18,38 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef __VCD_XML_PARSE_H__
-#define __VCD_XML_PARSE_H__
+#ifndef __VCD_ASSERT_H__
+#define __VCD_ASSERT_H__
 
-#include "vcdxml.h"
-#include <libxml/tree.h>
+#if defined(__GNUC__)
 
-bool vcd_xml_parse (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns);
+#include <libvcd/types.h>
+#include <libvcd/logging.h>
 
-#endif /* __VCD_XML_PARSE_H__ */
+#define vcd_assert(expr) \
+ { \
+   if (GNUC_UNLIKELY (!(expr))) vcd_log (VCD_LOG_ASSERT, \
+     "file %s: line %d (%s): assertion failed: (%s)", \
+     __FILE__, __LINE__, __PRETTY_FUNCTION__, #expr); \
+ } 
 
+#define vcd_assert_not_reached() \
+ { \
+   vcd_log (VCD_LOG_ASSERT, \
+     "file %s: line %d (%s): should not be reached", \
+     __FILE__, __LINE__, __PRETTY_FUNCTION__); \
+ }
 
+#else /* non GNU C */
+
+#include <assert.h>
+
+#define vcd_assert(expr) \
+ assert(expr)
+
+#define vcd_assert_not_reached() \
+ assert(0)
+
+#endif
+
+#endif /* __VCD_ASSERT_H__ */

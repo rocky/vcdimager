@@ -1,0 +1,209 @@
+Source: image file `svcd_ogt_test_ntsc.cue'
+Image size: 4106 sectors
+SVCD detected
+-------------------------------------------------------------------------------
+ISO9660 primary volume descriptor
+ ID: `CD001'
+ version: 1
+ system id: `CD-RTOS CD-BRIDGE'
+ volume id: `SVCD_OGT_TEST_NTSC'
+ volumeset id: `'
+ publisher id: `'
+ preparer id: `GNU VCDIMAGER 0.7.12 LINUX-GNU/I386'
+ application id: `'
+ ISO size: 376 blocks (logical blocksize: 2048 bytes)
+ XA marker present: yes
+-------------------------------------------------------------------------------
+ISO9660 filesystem dump
+ root dir in PVD set to lsn 18
+
+ /:
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  d d---1xrxrxr 0 0 [fn 00] [LSN     19]      2048  EXT
+  d d---1xrxrxr 0 0 [fn 00] [LSN     20]      2048  MPEG2
+  d d---1xrxrxr 0 0 [fn 00] [LSN     21]      2048  SEGMENT
+  d d---1xrxrxr 0 0 [fn 00] [LSN     22]      2048  SVCD
+
+ /EXT/:
+  d d---1xrxrxr 0 0 [fn 00] [LSN     19]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  - ----1xrxrxr 0 0 [fn 00] [LSN    375]       201  SCANDATA.DAT;1
+
+ /MPEG2/:
+  d d---1xrxrxr 0 0 [fn 00] [LSN     20]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  - ---2-xrxrxr 0 0 [fn 00] [LSN    526]   7971320 (  7024640)  AVSEQ01.MPG;1
+
+ /SEGMENT/:
+  d d---1xrxrxr 0 0 [fn 00] [LSN     21]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  - ---2-xrxrxr 0 0 [fn 00] [LSN    225]    183596 (   161792)  ITEM0001.MPG;1
+
+ /SVCD/:
+  d d---1xrxrxr 0 0 [fn 00] [LSN     22]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  - ----1xrxrxr 0 0 [fn 00] [LSN    151]      2048  ENTRIES.SVD;1
+  - ----1xrxrxr 0 0 [fn 00] [LSN    150]      2048  INFO.SVD;1
+  - ----1xrxrxr 0 0 [fn 00] [LSN    152]     65536  LOT.SVD;1
+  - ----1xrxrxr 0 0 [fn 00] [LSN    184]        40  PSD.SVD;1
+  - ----1xrxrxr 0 0 [fn 00] [LSN    186]       190  SEARCH.DAT;1
+  - ----1xrxrxr 0 0 [fn 00] [LSN    185]      2048  TRACKS.SVD;1
+
+-------------------------------------------------------------------------------
+SVCD/INFO.SVD
+ ID: `SUPERVCD'
+ version: 0x01
+ system profile tag: 0x00
+ album id: `OGT_TEST_NTSC'
+ volume count: 1
+ volume number: 1
+ pal flags: 00000000 00000000 00000000 00000000 00000000 00000000
+  (bslbf)   00000000 00000000 00000000 00000000 00000000 00000000 00
+ flags:
+  reserved1: no
+  restriction: 0
+  special info: no
+  user data cc: no
+  start lid #2: no
+  start track #2: no
+  reserved2: no
+ psd size: 40
+ first segment addr: 00:05:00
+ offset multiplier: 0x08
+ maximum lid: 3
+ maximum segment number: 1
+ SEGMENT[1]: audio: no stream, video: NTSC still, continuation no, OGT substream: None
+ volume start time[0]: 0 secs
+ volume start time[1]: 0 secs
+ volume start time[2]: 0 secs
+ volume start time[3]: 0 secs
+ volume start time[4]: 0 secs
+-------------------------------------------------------------------------------
+SVCD/ENTRIES.SVD
+ ID: `ENTRYVCD'
+ version: 0x01
+ system profile tag: 0x00
+ entries: 1
+ ENTRY[00]: track#  1 (SEQUENCE[0]), LSN    526 (MSF 00:09:01)
+-------------------------------------------------------------------------------
+SVCD/LOT.SVD
+ LID[1]: offset = 0 (0x0000)
+ LID[2]: offset = 16 (0x0002)
+ LID[3]: rejected
+-------------------------------------------------------------------------------
+SVCD/PSD.SVD
+ PSD[00] (LID[1] @0x0000): play list descriptor
+  NOI: 1 | LID#: 1 (rejected: no)
+  prev: LID[2] @0x0002 | next: LID[2] @0x0002 | return: LID[3] @0x0004
+  playtime: 0/15s | wait: 1s | autowait: 0s
+  play-item[0]: SEQUENCE[1] (0x0002)
+
+ PSD[01] (LID[2] @0x0002): play list descriptor
+  NOI: 1 | LID#: 2 (rejected: no)
+  prev: LID[1] @0x0000 | next: LID[1] @0x0000 | return: LID[3] @0x0004
+  playtime: 0/15s | wait: 6s | autowait: 0s
+  play-item[0]: SEGMENT[1] (0x03e8)
+
+ PSD[02] (LID[3] @0x0004): end list descriptor
+  next disc number: 0 (if 0 stop PBC handling)
+  change picture item: play nothing (0x0000)
+
+-------------------------------------------------------------------------------
+SVCD/TRACKS.SVD
+ ID: `TRACKSVD'
+ version: 0x01
+ tracks: 1
+ track[00]: 00:29:11, audio: 1 stream, video: NTSC stream, OGT stream: 0 available
+
+CVD interpretation (probably)
+(track[00]: 00:29:11 (cumulated), audio: 00, ogt: 4d)
+-------------------------------------------------------------------------------
+CD-ROM TRACKS (1 - 2)
+  #: MSF       LSN     Type
+  1: 00:02:00  000000  XA
+  2: 00:09:01  000526  XA
+170: 00:56:56  004106  leadout
+-------------------------------------------------------------------------------
+SVCD/SEARCH.DAT
+ ID: `SEARCHSV'
+ version: 0x01
+ scanpoints: 59
+ scaninterval: 1 (in 0.5sec units -- must be `1')
+ scanpoint[0000]: (real time: 00:00:00.0)  sector: LSN 527 (MSF 00:09:02)
+ scanpoint[0001]: (real time: 00:00:00.5)  sector: LSN 596 (MSF 00:09:71)
+ scanpoint[0002]: (real time: 00:00:01.0)  sector: LSN 596 (MSF 00:09:71)
+ scanpoint[0003]: (real time: 00:00:01.5)  sector: LSN 671 (MSF 00:10:71)
+ scanpoint[0004]: (real time: 00:00:02.0)  sector: LSN 737 (MSF 00:11:62)
+ scanpoint[0005]: (real time: 00:00:02.5)  sector: LSN 808 (MSF 00:12:58)
+ scanpoint[0006]: (real time: 00:00:03.0)  sector: LSN 877 (MSF 00:13:52)
+ scanpoint[0007]: (real time: 00:00:03.5)  sector: LSN 877 (MSF 00:13:52)
+ scanpoint[0008]: (real time: 00:00:04.0)  sector: LSN 944 (MSF 00:14:44)
+ scanpoint[0009]: (real time: 00:00:04.5)  sector: LSN 1012 (MSF 00:15:37)
+ scanpoint[0010]: (real time: 00:00:05.0)  sector: LSN 1106 (MSF 00:16:56)
+ scanpoint[0011]: (real time: 00:00:05.5)  sector: LSN 1183 (MSF 00:17:58)
+ scanpoint[0012]: (real time: 00:00:06.0)  sector: LSN 1183 (MSF 00:17:58)
+ scanpoint[0013]: (real time: 00:00:06.5)  sector: LSN 1257 (MSF 00:18:57)
+ scanpoint[0014]: (real time: 00:00:07.0)  sector: LSN 1333 (MSF 00:19:58)
+ scanpoint[0015]: (real time: 00:00:07.5)  sector: LSN 1408 (MSF 00:20:58)
+ [..skipping...]
+ scanpoint[0044]: (real time: 00:00:22.0)  sector: LSN 3097 (MSF 00:43:22)
+ scanpoint[0045]: (real time: 00:00:22.5)  sector: LSN 3173 (MSF 00:44:23)
+ scanpoint[0046]: (real time: 00:00:23.0)  sector: LSN 3246 (MSF 00:45:21)
+ scanpoint[0047]: (real time: 00:00:23.5)  sector: LSN 3246 (MSF 00:45:21)
+ scanpoint[0048]: (real time: 00:00:24.0)  sector: LSN 3321 (MSF 00:46:21)
+ scanpoint[0049]: (real time: 00:00:24.5)  sector: LSN 3387 (MSF 00:47:12)
+ scanpoint[0050]: (real time: 00:00:25.0)  sector: LSN 3455 (MSF 00:48:05)
+ scanpoint[0051]: (real time: 00:00:25.5)  sector: LSN 3519 (MSF 00:48:69)
+ scanpoint[0052]: (real time: 00:00:26.0)  sector: LSN 3519 (MSF 00:48:69)
+ scanpoint[0053]: (real time: 00:00:26.5)  sector: LSN 3584 (MSF 00:49:59)
+ scanpoint[0054]: (real time: 00:00:27.0)  sector: LSN 3654 (MSF 00:50:54)
+ scanpoint[0055]: (real time: 00:00:27.5)  sector: LSN 3727 (MSF 00:51:52)
+ scanpoint[0056]: (real time: 00:00:28.0)  sector: LSN 3801 (MSF 00:52:51)
+ scanpoint[0057]: (real time: 00:00:28.5)  sector: LSN 3801 (MSF 00:52:51)
+ scanpoint[0058]: (real time: 00:00:29.0)  sector: LSN 3874 (MSF 00:53:49)
+-------------------------------------------------------------------------------
+EXT/SCANDATA.DAT
+ ID: `SCAN_VCD'
+ version: 0x01
+ reserved: 0x00
+ scandata_count: 59
+ sequence_count: 1
+ segment_count: 0
+  cumulative_playingtime[0]: 00:29:11
+ sequence scandata ofs: 3
+  track [0]: TOC num: 2, sd offset: 3
+ (scanpoint[0] offset = 3)
+  scanpoint[0000] (ofs:    3): LSN 527 (MSF 00:09:02)
+  scanpoint[0001] (ofs:    6): LSN 596 (MSF 00:09:71)
+  scanpoint[0002] (ofs:    9): LSN 596 (MSF 00:09:71)
+  scanpoint[0003] (ofs:   12): LSN 671 (MSF 00:10:71)
+  scanpoint[0004] (ofs:   15): LSN 737 (MSF 00:11:62)
+  scanpoint[0005] (ofs:   18): LSN 808 (MSF 00:12:58)
+  scanpoint[0006] (ofs:   21): LSN 877 (MSF 00:13:52)
+  scanpoint[0007] (ofs:   24): LSN 877 (MSF 00:13:52)
+  scanpoint[0008] (ofs:   27): LSN 944 (MSF 00:14:44)
+  scanpoint[0009] (ofs:   30): LSN 1012 (MSF 00:15:37)
+  scanpoint[0010] (ofs:   33): LSN 1106 (MSF 00:16:56)
+  scanpoint[0011] (ofs:   36): LSN 1183 (MSF 00:17:58)
+  scanpoint[0012] (ofs:   39): LSN 1183 (MSF 00:17:58)
+  scanpoint[0013] (ofs:   42): LSN 1257 (MSF 00:18:57)
+  scanpoint[0014] (ofs:   45): LSN 1333 (MSF 00:19:58)
+  scanpoint[0015] (ofs:   48): LSN 1408 (MSF 00:20:58)
+ [..skipping...]
+  scanpoint[0044] (ofs:  135): LSN 3097 (MSF 00:43:22)
+  scanpoint[0045] (ofs:  138): LSN 3173 (MSF 00:44:23)
+  scanpoint[0046] (ofs:  141): LSN 3246 (MSF 00:45:21)
+  scanpoint[0047] (ofs:  144): LSN 3246 (MSF 00:45:21)
+  scanpoint[0048] (ofs:  147): LSN 3321 (MSF 00:46:21)
+  scanpoint[0049] (ofs:  150): LSN 3387 (MSF 00:47:12)
+  scanpoint[0050] (ofs:  153): LSN 3455 (MSF 00:48:05)
+  scanpoint[0051] (ofs:  156): LSN 3519 (MSF 00:48:69)
+  scanpoint[0052] (ofs:  159): LSN 3519 (MSF 00:48:69)
+  scanpoint[0053] (ofs:  162): LSN 3584 (MSF 00:49:59)
+  scanpoint[0054] (ofs:  165): LSN 3654 (MSF 00:50:54)
+  scanpoint[0055] (ofs:  168): LSN 3727 (MSF 00:51:52)
+  scanpoint[0056] (ofs:  171): LSN 3801 (MSF 00:52:51)
+  scanpoint[0057] (ofs:  174): LSN 3801 (MSF 00:52:51)
+  scanpoint[0058] (ofs:  177): LSN 3874 (MSF 00:53:49)
+-------------------------------------------------------------------------------

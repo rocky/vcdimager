@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,14 +18,26 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef __VCD_XML_PARSE_H__
-#define __VCD_XML_PARSE_H__
 
-#include "vcdxml.h"
-#include <libxml/tree.h>
+#ifndef __VCD_STREAM_STDIO_H__
+#define __VCD_STREAM_STDIO_H__
 
-bool vcd_xml_parse (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns);
+/* Private headers */
+#include "stream.h"
 
-#endif /* __VCD_XML_PARSE_H__ */
+VcdDataSink*
+vcd_data_sink_new_stdio(const char pathname[]);
 
+VcdDataSource*
+vcd_data_source_new_stdio(const char pathname[]);
 
+#endif /* __VCD_STREAM_STDIO_H__ */
+
+
+/* 
+ * Local variables:
+ *  c-file-style: "gnu"
+ *  tab-width: 8
+ *  indent-tabs-mode: nil
+ * End:
+ */

@@ -1,9 +1,5 @@
 /*
-<<<<<<< vcd_xml_gen.c
     $Id$
-=======
-    $Id$
->>>>>>> 1.20.4.8
 
     Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
 

@@ -1,0 +1,15 @@
+This directory contains test VCD/SVCD images.
+
+test_svcd_pal.*   - SVCD PAL with CVD selectable subtitles, 2 audio tracks, 
+	            menus, chapters (13 MB, BIN/CUE image)
+
+demovcd-pal.*     - VCD 2.0 Demo disk menus, chapters (BIN/CUE image)
+
+test_svcd_ntsc.*  - SVCD NTSC with SVCD selectable subtitles, 2 audio 
+	            tracks (7 MB, BIN/CUE image)
+
+iso2_vcd_pal.*    - VCD version 2.0 using the ISO9660 2 filesystem 
+	            this allows a greater character set to be used
+	            (4.5 MB, BIN/CUE image)
+
+monvoisin.*       - Nero Disk image

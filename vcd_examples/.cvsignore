@@ -1,0 +1,4 @@
+*.dump
+Makefile
+Makefile.in
+Makfeile.am

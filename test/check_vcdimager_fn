@@ -1,0 +1,43 @@
+# $Id$
+
+test_vcdimager_cleanup() {
+    rm -f core videocd.bin videocd.cue
+}
+
+test_vcdimager() {
+    VCDIMAGER="../frontends/cli/vcdimager"
+
+    RC=0
+
+    if [ ! -x "${VCDIMAGER}" ]; then
+	echo "$0: ${VCDIMAGER} missing, check not possible"
+	RC=77
+	return $RC
+    fi
+
+    if have_cksum; then
+	:
+    else
+	echo "$0: md5sum not found, check not possible";
+	RC=77
+	return $RC
+    fi
+
+    TZ=CUT
+    export TZ
+    # I've been told this is important date to celebrate.
+    if ${VCDIMAGER} --create-time TESTING --check $@; then
+	:
+    else
+	echo "$0: execution failed"
+	RC=1
+	return $RC
+    fi
+
+    return $RC
+}
+
+#;;; Local Variables: ***
+#;;; mode:shell-script ***
+#;;; eval: (sh-set-shell "bash") ***
+#;;; End: ***

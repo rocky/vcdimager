@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,14 +18,39 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef __VCD_XML_PARSE_H__
-#define __VCD_XML_PARSE_H__
+/* sector allocation management */
 
-#include "vcdxml.h"
-#include <libxml/tree.h>
+#ifndef _SALLOC_H_
+#define _SALLOC_H_
 
-bool vcd_xml_parse (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns);
+#include <libvcd/types.h>
 
-#endif /* __VCD_XML_PARSE_H__ */
+#define SECTOR_NIL ((uint32_t)(-1))
 
+typedef struct _VcdSalloc VcdSalloc;
 
+VcdSalloc *
+_vcd_salloc_new (void);
+
+void
+_vcd_salloc_destroy (VcdSalloc *bitmap);
+
+uint32_t
+_vcd_salloc (VcdSalloc *bitmap, uint32_t hint, uint32_t size);
+
+void
+_vcd_salloc_free (VcdSalloc *bitmap, uint32_t sec, uint32_t size);
+
+uint32_t
+_vcd_salloc_get_highest (const VcdSalloc *bitmap);
+
+#endif /* _SALLOC_H_ */
+
+
+/* 
+ * Local variables:
+ *  c-file-style: "gnu"
+ *  tab-width: 8
+ *  indent-tabs-mode: nil
+ * End:
+ */

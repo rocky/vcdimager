@@ -1,9 +1,5 @@
 /*
-<<<<<<< vcd_xml_parse.c
     $Id$
-=======
-    $Id$
->>>>>>> 1.29.2.5
 
     Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
 

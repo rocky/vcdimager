@@ -1,0 +1,78 @@
+#!/usr/bin/perl
+# $Id$
+use File::Basename;
+use Cwd;
+my $test_cwd = cwd;
+chdir "..";
+my $src_root = cwd;
+chdir $test_cwd;
+my $eg_dir    = "$src_root/vcd_examples";
+my $vcddump = "${src_root}/frontends/cli/vcdinfo";
+$bad = 0;
+my @files = ("$eg_dir/test_svcd_ntsc.bin",
+	     "$eg_dir/svcd_ogt_test_ntsc.bin",
+	     "$eg_dir/test_svcd_pal.bin",
+	     "$eg_dir/vcd_demo.bin",
+	     "$eg_dir/demovcd-pal.bin"
+	     );
+my $diff_opts = "-u";
+
+my $good = 0;
+foreach my $file (@files) {
+  my ($short,$path,$suffix) = fileparse($file, '.bin');
+  chdir $path;
+  my $dump  = "$test_cwd/${short}.dump";
+  my $compare_dump;
+  ($compare_dump = $file) =~ s:bin:right:;
+  my $cmd = "$vcddump --no-banner --cue-file=$short.cue";
+  $output = `$cmd >$dump`;
+  if ( $? != 0) {
+    print "Failed running $cmd...\n";
+    print $output;
+    $bad++;
+    next;
+  }
+  $output = `diff $diff_opts $dump $compare_dump 2>&1`;
+  if ( $? != 0) {
+    print "Compare of $dump $compare_dump failed...\n";
+    print $output;
+    $bad++;
+  } else {
+    $good++;
+    unlink $dump;
+  }
+}
+
+# Now try NRG files.
+@files = ("$eg_dir/monvoisin.nrg", "$eg_dir/svcdgs.nrg" );
+foreach my $file (@files) {
+  my ($short,$path,$suffix) = fileparse($file, '.nrg');
+  chdir $path;
+  my $dump  = "$test_cwd/${short}.dump";
+  my $compare_dump;
+  ($compare_dump = $file) =~ s:nrg:right:;
+  my $cmd = "$vcddump --no-banner --nrg-file=$short.nrg";
+  $output = `$cmd >$dump`;
+  if ( $? != 0) {
+    print "Failed running $cmd...\n";
+    print $output;
+    $bad++;
+    next;
+  }
+  $output = `diff $diff_opts $dump $compare_dump 2>&1`;
+  if ( $? != 0) {
+    print "Compare of $dump $compare_dump failed...\n";
+    print $output;
+    $bad++;
+  } else {
+    $good++;
+    unlink $dump;
+  }
+}
+
+if ($bad != 0) {
+  print "Summary: $bad tests tested bad $good tests tested good.\n";
+} else {
+  print "Summary: all $good tests passed.\n";
+}
+exit $bad;

@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2003 Rocky Bernstein <rocky@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,15 +17,20 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-
-#ifndef __VCD_XML_PARSE_H__
-#define __VCD_XML_PARSE_H__
 
-#include "vcdxml.h"
-#include <libxml/tree.h>
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
 
-bool vcd_xml_parse (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns);
+#include <cdio/cdio.h>
+#include <cdio/iso9660.h>
 
-#endif /* __VCD_XML_PARSE_H__ */
+/* FIXME: make this really private: */
+#include <libvcd/files_private.h>
+
+bool read_pvd(CdIo *cdio, iso9660_pvd_t *pvd);
+bool read_entries(CdIo *cdio, EntriesVcd *entries);
+bool read_info(CdIo *cdio, InfoVcd *info, vcd_type_t *vcd_type);
+
 
 

@@ -23,10 +23,13 @@
 
 #include <string.h>
 
-#include <libvcd/vcd_assert.h>
-#include <libvcd/vcd_types.h>
-#include <libvcd/vcd_data_structures.h>
-#include <libvcd/vcd_pbc.h>
+/* Public headers */
+#include <libvcd/types.h>
+
+/* Private headers */
+#include "vcd_assert.h"
+#include "data_structures.h"
+#include "pbc.h"
 
 struct vcdxml_t {
   char *comment; /* just a xml comment... */

@@ -18,9 +18,27 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifdef HAVE_CONFIG_H
-# include "config.h"
-#endif
+/* Private headers */
+#include "vcd_read.h"
+#include "bytesex.h"
+#include "vcdxml.h"
+#include "vcd_xml_dtd.h"
+#include "vcd_xml_dump.h"
+#include "vcd_xml_common.h"
+
+
+/* FIXME: Make this really private: */
+#include <libvcd/files_private.h>
+
+/* Public headers */
+
+#include <cdio/iso9660.h>
+#include <cdio/cd_types.h>
+#include <cdio/logging.h>
+
+#include <libvcd/sector.h>
+#include <libvcd/files.h>
+#include <libvcd/info.h>
 
 #include <stdio.h>
 #include <errno.h>
@@ -40,30 +58,6 @@
 
 #include <popt.h>
 
-#include <libvcd/vcd_bytesex.h>
-#include <libvcd/vcd_cd_sector.h>
-#include <libvcd/vcd_files.h>
-#include <libvcd/vcd_files_private.h>
-#include <libvcd/vcd_image_fs.h>
-#include <libvcd/vcd_image_bincue.h>
-#include <libvcd/vcd_image_cd.h>
-#include <libvcd/vcd_image_nrg.h>
-#include <libvcd/vcd_iso9660.h>
-#include <libvcd/vcd_iso9660_private.h>
-#include <libvcd/vcd_logging.h>
-#include <libvcd/vcd_mpeg.h>
-#include <libvcd/vcd_stream_stdio.h>
-#include <libvcd/vcd_types.h>
-#include <libvcd/vcd_util.h>
-#include <libvcd/vcd_xa.h>
-#include <libvcd/vcdinfo.h>
-#include <libvcd/vcdinf.h>
-
-#include "vcdxml.h"
-#include "vcd_xml_dtd.h"
-#include "vcd_xml_dump.h"
-#include "vcd_xml_common.h"
-
 static const char _rcsid[] = "$Id$";
 
 static int _verbose_flag = 0;
@@ -71,7 +65,7 @@ static int _quiet_flag = 0;
 
 static void
 _register_file (struct vcdxml_t *obj, const char *pathname,
-		vcd_image_stat_t const *statbuf)
+		iso9660_stat_t const *statbuf)
 {
   uint16_t xa_attr = uint16_from_be (statbuf->xa.attributes);
 
@@ -143,9 +137,9 @@ _register_file (struct vcdxml_t *obj, const char *pathname,
 }
 
 static int
-_parse_isofs_r (struct vcdxml_t *obj, VcdImageSource *img, const char pathname[])
+_parse_isofs_r (struct vcdxml_t *obj, CdIo *img, const char pathname[])
 { 
-  VcdList *entlist = vcd_image_source_fs_readdir (img, pathname);
+  VcdList *entlist = iso9660_fs_readdir (img, pathname, true);
   VcdListNode *entnode;
 
   if (entlist == NULL)
@@ -155,12 +149,12 @@ _parse_isofs_r (struct vcdxml_t *obj, VcdImageSource *img, const char pathname[]
     {
       char *_name = _vcd_list_node_data (entnode);
       char _fullname[4096] = { 0, };
-      vcd_image_stat_t statbuf;
+      iso9660_stat_t statbuf;
 
       strncpy (_fullname, pathname, sizeof (_fullname));
       strncat (_fullname, _name, sizeof (_fullname));
 
-      if (vcd_image_source_fs_stat (img, _fullname, &statbuf))
+      if (iso9660_fs_stat (img, _fullname, &statbuf, true))
 	return -1;
       
       if (!strcmp (_name, ".") 
@@ -190,39 +184,23 @@ _parse_isofs_r (struct vcdxml_t *obj, VcdImageSource *img, const char pathname[]
 }
 
 static int
-_parse_isofs (struct vcdxml_t *obj, VcdImageSource *img)
+_parse_isofs (struct vcdxml_t *obj, CdIo *img)
 {
   return _parse_isofs_r (obj, img, "/");
 }
 
 static int
-_parse_pvd (struct vcdxml_t *obj, VcdImageSource *img)
+_parse_pvd (struct vcdxml_t *obj, CdIo *img)
 {
-  struct iso_primary_descriptor pvd;
+  iso9660_pvd_t pvd;
 
-  memset (&pvd, 0, sizeof (struct iso_primary_descriptor));
-  vcd_assert (sizeof (struct iso_primary_descriptor) == ISO_BLOCKSIZE);
+  memset (&pvd, 0, sizeof (iso9660_pvd_t));
+  vcd_assert (sizeof (iso9660_pvd_t) == ISO_BLOCKSIZE);
 
-  if (vcd_image_source_read_mode2_sector (img, &pvd, ISO_PVD_SECTOR, false) != 0) 
-    {
-      vcd_error ("error reading PVD sector (%d)", ISO_PVD_SECTOR);
-      return -1;
-    }
-  
+  if (!read_pvd(img, &pvd)) {
+    return -1;
+  }
 
-  if (pvd.type != ISO_VD_PRIMARY)
-    {
-      vcd_error ("unexpected descriptor type");
-      return -1;
-    }
-  
-  if (strncmp (pvd.id, ISO_STANDARD_ID, strlen (ISO_STANDARD_ID)))
-    {
-      vcd_error ("unexpected ID encountered (expected `"
-		 ISO_STANDARD_ID "', got `%.5s'", pvd.id);
-      return -1;
-    }
- 
   obj->pvd.volume_id      = strdup (vcdinf_get_volume_id(&pvd));
   obj->pvd.system_id      = strdup (vcdinf_get_system_id(&pvd));
   obj->pvd.publisher_id   = strdup (vcdinf_get_publisher_id(&pvd));
@@ -233,37 +211,18 @@ _parse_pvd (struct vcdxml_t *obj, VcdImageSource *img)
 }
 
 static int
-_parse_info (struct vcdxml_t *obj, VcdImageSource *img)
+_parse_info (struct vcdxml_t *obj, CdIo *img)
 {
   InfoVcd info;
-  vcd_type_t _vcd_type;
 
   memset (&info, 0, sizeof (InfoVcd));
   vcd_assert (sizeof (InfoVcd) == ISO_BLOCKSIZE);
 
-  vcd_image_source_read_mode2_sector (img, &info, INFO_VCD_SECTOR, false);
+  if (!read_info(img, &info, &(obj->vcd_type)))
+    return -1;
 
-  /* analyze signature/type */
-
-  obj->vcd_type = _vcd_type = vcd_files_info_detect_type (&info);
-
-  switch (_vcd_type)
-    {
-    case VCD_TYPE_VCD:
-    case VCD_TYPE_VCD11:
-    case VCD_TYPE_VCD2:
-    case VCD_TYPE_SVCD:
-    case VCD_TYPE_HQVCD:
-      vcd_debug ("%s detected", vcdinf_get_format_version_str(_vcd_type));
-      break;
-    case VCD_TYPE_INVALID:
-      vcd_error ("unknown ID encountered -- maybe not a proper (S)VCD?");
-      return -1;
-      break;
-    default:
-      vcd_assert_not_reached ();
-      break;
-    }
+  if (obj->vcd_type == VCD_TYPE_INVALID)
+    return -1;
 
   obj->info.album_id = strdup (vcdinf_get_album_id(&info));
   obj->info.volume_count = vcdinf_get_volume_count(&info);
@@ -278,20 +237,20 @@ _parse_info (struct vcdxml_t *obj, VcdImageSource *img)
 
   {
     lba_t segment_start;
-    unsigned max_seg_num;
+    segnum_t max_seg_num;
     int idx, n;
     struct segment_t *_segment = NULL;
 
-    segment_start = msf_to_lba (&info.first_seg_addr);
+    segment_start = cdio_msf_to_lba (&info.first_seg_addr);
 
     max_seg_num = vcdinf_get_num_segments(&info);
 
-    if (segment_start < PREGAP_SECTORS)
+    if (segment_start < CDIO_PREGAP_SECTORS)
       return 0;
 
-    segment_start = vcdinfo_lba2lsn(segment_start);
+    segment_start = cdio_lba_to_lsn(segment_start);
 
-    vcd_assert (segment_start % CD_FRAMES_PER_SECOND == 0);
+    vcd_assert (segment_start % CDIO_CD_FRAMES_PER_SEC == 0);
 
     obj->info.segments_start = segment_start;
 
@@ -328,28 +287,18 @@ _parse_info (struct vcdxml_t *obj, VcdImageSource *img)
 }
 
 static int
-_parse_entries (struct vcdxml_t *obj, VcdImageSource *img)
+_parse_entries (struct vcdxml_t *obj, CdIo *img)
 {
   EntriesVcd entries;
   int idx;
-  uint8_t ltrack;
+  track_t ltrack;
 
   memset (&entries, 0, sizeof (EntriesVcd));
   vcd_assert (sizeof (EntriesVcd) == ISO_BLOCKSIZE);
 
-  vcd_image_source_read_mode2_sector (img, &entries, ENTRIES_VCD_SECTOR, false);
-
-  /* analyze signature/type */
-
-  if (!strncmp (entries.ID, ENTRIES_ID_VCD, sizeof (entries.ID)))
-    {}
-  else if (!strncmp (entries.ID, "ENTRYSVD", sizeof (entries.ID)))
-    vcd_warn ("found (non-compliant) SVCD ENTRIES.SVD signature");
-  else
-    {
-      vcd_error ("unexpected ID signature encountered `%.8s'", entries.ID);
-      return -1;
-    }
+  if (!read_entries(img, &entries)) {
+    return -1;
+  }
 
   ltrack = 0;
   for (idx = 0; idx < vcdinf_get_num_entries(&entries); idx++)
@@ -359,8 +308,8 @@ _parse_entries (struct vcdxml_t *obj, VcdImageSource *img)
       bool newtrack = (track != ltrack);
       ltrack = track;
       
-      vcd_assert (extent >= PREGAP_SECTORS);
-      extent = vcdinfo_lba2lsn(extent);
+      vcd_assert (extent >= CDIO_PREGAP_SECTORS);
+      extent = cdio_lba_to_lsn(extent);
 
       vcd_assert (track >= 2);
       track -= 2;
@@ -430,7 +379,7 @@ struct _pbc_ctx {
 };
 
 static const char *
-_pin2id (unsigned pin, const struct _pbc_ctx *_ctx)
+_pin2id (unsigned pin)
 {
   static char buf[80];
   vcdinfo_itemid_t itemid;
@@ -447,7 +396,7 @@ _pin2id (unsigned pin, const struct _pbc_ctx *_ctx)
     snprintf (buf, sizeof (buf), "entry-%3.3d", itemid.num);
     break;
   case VCDINFO_ITEM_TYPE_SEGMENT:
-    snprintf (buf, sizeof (buf), "segment-%4.4d", itemid.num-1);
+    snprintf (buf, sizeof (buf), "segment-%4.4d", itemid.num);
     break;
   case VCDINFO_ITEM_TYPE_SPAREID2:
   default:
@@ -550,21 +499,21 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
       _pbc = vcd_pbc_new (PBC_PLAYLIST);
       {
 	const PsdPlayListDescriptor *d = (const void *) _buf;
-	_pbc->prev_id = _xstrdup (_ofs2id (vcdinf_get_prev_from_pld(d), 
+	_pbc->prev_id = _xstrdup (_ofs2id (vcdinf_pld_get_prev_offset(d), 
 					   _ctx));
-	_pbc->next_id = _xstrdup (_ofs2id (vcdinf_get_next_from_pld(d),
+	_pbc->next_id = _xstrdup (_ofs2id (vcdinf_pld_get_next_offset(d),
 					   _ctx));
-	_pbc->retn_id = _xstrdup (_ofs2id (vcdinf_get_return_from_pld(d), 
+	_pbc->retn_id = _xstrdup (_ofs2id (vcdinf_pld_get_return_offset(d),
 					   _ctx));
 	
 	_pbc->playing_time = (double) (vcdinf_get_play_time(d)) / 15.0;
-	_pbc->wait_time       = vcdinfo_get_wait_time(d);
-	_pbc->auto_pause_time = vcdinfo_get_autowait_time(d);
+	_pbc->wait_time       = vcdinf_get_wait_time(d);
+	_pbc->auto_pause_time = vcdinf_get_autowait_time(d);
 
-	for (n = 0; n < d->noi; n++) {
+	for (n = 0; n < vcdinf_pld_get_noi(d); n++) {
 	  _vcd_list_append (_pbc->item_id_list, 
-			    _xstrdup(_pin2id(vcdinf_get_play_item_from_pld(d, n),
-					     _ctx)));
+			    _xstrdup(_pin2id(vcdinf_pld_get_play_item(d,n)
+					     )));
 	  }
       }
       break;
@@ -575,14 +524,14 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
       {
 	const PsdSelectionListDescriptor *d = (const void *) _buf;
 	_pbc->bsn = vcdinf_get_bsn(d);
-	_pbc->prev_id = _xstrdup (_ofs2id (vcdinf_get_prev_from_psd(d), 
+	_pbc->prev_id = _xstrdup (_ofs2id (vcdinf_psd_get_prev_offset(d), 
 					   _ctx));
-	_pbc->next_id = _xstrdup (_ofs2id (vcdinf_get_next_from_psd(d), 
+	_pbc->next_id = _xstrdup (_ofs2id (vcdinf_psd_get_next_offset(d), 
 					   _ctx));
-	_pbc->retn_id = _xstrdup (_ofs2id (vcdinf_get_return_from_psd(d), 
+	_pbc->retn_id = _xstrdup (_ofs2id (vcdinf_psd_get_return_offset(d),
 					   _ctx));
 
-	switch (vcdinf_get_default_from_psd(d))
+	switch (vcdinf_psd_get_default_offset(d))
 	  {
 	  case PSD_OFS_DISABLED:
 	    _pbc->default_id = NULL;
@@ -600,22 +549,24 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
 	    break;
 
 	  default:
-	    _pbc->default_id = _xstrdup (_ofs2id (uint16_from_be (d->default_ofs), _ctx));
+	    _pbc->default_id = _xstrdup (_ofs2id (vcdinf_psd_get_default_offset(d),
+						  _ctx));
 	    _pbc->selection_type = _SEL_NORMAL;
 	    break;
 	  }
 
-	_pbc->timeout_id = 
-	  _xstrdup (_ofs2id (uint16_from_be (d->timeout_ofs), _ctx));
-	_pbc->timeout_time = vcdinfo_get_timeout_time (d);
+	_pbc->timeout_id   = _xstrdup (_ofs2id (vcdinf_get_timeout_offset(d), 
+						_ctx));
+	_pbc->timeout_time = vcdinf_get_timeout_time (d);
 	_pbc->jump_delayed = vcdinf_has_jump_delay(d);
-	_pbc->loop_count = vcdinf_get_loop_count(d);
-	_pbc->item_id = _xstrdup (_pin2id (uint16_from_be (d->itemid), _ctx));
+	_pbc->loop_count   = vcdinf_get_loop_count(d);
+	_pbc->item_id      = _xstrdup (_pin2id (vcdinf_psd_get_itemid(d)));
 
 	for (n = 0; n < vcdinf_get_num_selections(d); n++)
 	  {
 	    _vcd_list_append (_pbc->select_id_list, 
-			      _xstrdup (_ofs2id (uint16_from_be (d->ofs[n]), _ctx)));
+			      _xstrdup(_ofs2id(vcdinf_psd_get_offset(d,n),
+					       _ctx)));
 	  }
 
 	if (d->type == PSD_TYPE_EXT_SELECTION_LIST
@@ -654,7 +605,7 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
 	const PsdEndListDescriptor *d = (const void *) _buf;
 	
 	_pbc->next_disc = d->next_disc;
-	_pbc->image_id = _xstrdup (_pin2id (uint16_from_be (d->change_pic), _ctx));
+	_pbc->image_id = _xstrdup (_pin2id (uint16_from_be (d->change_pic)));
       }      
       break;
 
@@ -673,7 +624,7 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
 }
 
 static void
-_visit_pbc (struct _pbc_ctx *obj, unsigned lid, unsigned offset, bool in_lot)
+_visit_pbc (struct _pbc_ctx *obj, lid_t lid, unsigned int offset, bool in_lot)
 {
   VcdListNode *node;
   vcdinfo_offset_t *ofs;
@@ -716,6 +667,14 @@ _visit_pbc (struct _pbc_ctx *obj, unsigned lid, unsigned offset, bool in_lot)
           if (in_lot)
             ofs->in_lot = true;
 
+          if (lid) {
+            /* Our caller thinks she knows what our LID is.
+               This should help out getting the LID for end descriptors
+               if not other things as well.
+             */
+            ofs->lid = lid;
+          }
+          
           return; /* already been there... */
         }
     }
@@ -723,33 +682,32 @@ _visit_pbc (struct _pbc_ctx *obj, unsigned lid, unsigned offset, bool in_lot)
   ofs = _vcd_malloc (sizeof (vcdinfo_offset_t));
 
   ofs->offset = offset;
-  ofs->lid = lid;
+  ofs->lid    = lid;
   ofs->in_lot = in_lot;
-  ofs->type = obj->psd[_rofs];
+  ofs->type   = obj->psd[_rofs];
 
   switch (ofs->type)
     {
     case PSD_TYPE_PLAY_LIST:
       _vcd_list_append (obj->offset_list, ofs);
       {
-        const PsdPlayListDescriptor *d = 
-          (const void *) (obj->psd + _rofs);
+        const PsdPlayListDescriptor *d = (const void *) (obj->psd + _rofs);
+        const lid_t lid = vcdinf_pld_get_lid(d);
 
         if (!ofs->lid)
-          ofs->lid = uint16_from_be (d->lid) & 0x7fff;
+          ofs->lid = lid;
         else 
-          if (ofs->lid != (uint16_from_be (d->lid) & 0x7fff))
+          if (ofs->lid != lid)
             vcd_warn ("LOT entry assigned LID %d, but descriptor has LID %d",
-                      ofs->lid, uint16_from_be (d->lid) & 0x7fff);
+                      ofs->lid, lid);
 
-        _visit_pbc (obj, 0, vcdinf_get_prev_from_pld(d), false);
-        _visit_pbc (obj, 0, vcdinf_get_next_from_pld(d), false);
-        _visit_pbc (obj, 0, vcdinf_get_return_from_pld(d), false);
+        _visit_pbc (obj, 0, vcdinf_pld_get_prev_offset(d), false);
+        _visit_pbc (obj, 0, vcdinf_pld_get_next_offset(d), false);
+        _visit_pbc (obj, 0, vcdinf_pld_get_return_offset(d), false);
       }
       break;
 
     case PSD_TYPE_EXT_SELECTION_LIST:
-      
     case PSD_TYPE_SELECTION_LIST:
       _vcd_list_append (obj->offset_list, ofs);
       {
@@ -757,22 +715,23 @@ _visit_pbc (struct _pbc_ctx *obj, unsigned lid, unsigned offset, bool in_lot)
           (const void *) (obj->psd + _rofs);
 
         int idx;
+	lid_t lid = vcdinf_psd_get_lid (d);
 
         if (!ofs->lid)
-          ofs->lid = uint16_from_be (d->lid) & 0x7fff;
+          ofs->lid = lid;
         else 
-          if (ofs->lid != (uint16_from_be (d->lid) & 0x7fff))
+          if (ofs->lid != lid)
             vcd_warn ("LOT entry assigned LID %d, but descriptor has LID %d",
-                      ofs->lid, uint16_from_be (d->lid) & 0x7fff);
+                      ofs->lid, lid);
 
-        _visit_pbc (obj, 0, vcdinf_get_prev_from_psd(d), false);
-        _visit_pbc (obj, 0, vcdinf_get_next_from_psd(d), false);
-        _visit_pbc (obj, 0, vcdinf_get_return_from_psd(d), false);
-        _visit_pbc (obj, 0, vcdinf_get_default_from_psd(d), false);
-        _visit_pbc (obj, 0, uint16_from_be (d->timeout_ofs), false);
+        _visit_pbc (obj, 0, vcdinf_psd_get_prev_offset(d), false);
+        _visit_pbc (obj, 0, vcdinf_psd_get_next_offset(d), false);
+        _visit_pbc (obj, 0, vcdinf_psd_get_return_offset(d), false);
+        _visit_pbc (obj, 0, vcdinf_psd_get_default_offset(d), false);
+        _visit_pbc (obj, 0, vcdinf_get_timeout_offset(d), false);
 
         for (idx = 0; idx < vcdinf_get_num_selections(d); idx++)
-          _visit_pbc (obj, 0, uint16_from_be (d->ofs[idx]), false);
+          _visit_pbc (obj, 0, vcdinf_psd_get_offset (d, idx), false);
         
       }
       break;
@@ -796,14 +755,14 @@ _visit_lot (struct _pbc_ctx *obj)
   unsigned n, tmp;
 
   for (n = 0; n < LOT_VCD_OFFSETS; n++)
-    if ((tmp = uint16_from_be (lot->offset[n])) != PSD_OFS_DISABLED)
+    if ((tmp = vcdinf_get_lot_offset(lot, n)) != PSD_OFS_DISABLED)
       _visit_pbc (obj, n + 1, tmp, true);
 
   _vcd_list_sort (obj->offset_list, (_vcd_list_cmp_func) vcdinf_lid_t_cmp);
 }
 
 static int
-_parse_pbc (struct vcdxml_t *obj, VcdImageSource *img, bool no_ext_psd)
+_parse_pbc (struct vcdxml_t *obj, CdIo *img, bool no_ext_psd)
 {
   int n;
   struct _pbc_ctx _pctx;
@@ -812,7 +771,7 @@ _parse_pbc (struct vcdxml_t *obj, VcdImageSource *img, bool no_ext_psd)
   uint32_t _lot_vcd_sector = -1;
   uint32_t _psd_vcd_sector = -1;
   unsigned _psd_size = -1;
-  vcd_image_stat_t statbuf;
+  iso9660_stat_t statbuf;
 
   if (!obj->info.psd_size)
     {
@@ -822,7 +781,7 @@ _parse_pbc (struct vcdxml_t *obj, VcdImageSource *img, bool no_ext_psd)
 
   if (obj->vcd_type == VCD_TYPE_VCD2)
     {
-      if (!vcd_image_source_fs_stat (img, "EXT/LOT_X.VCD;1", &statbuf))
+      if (!iso9660_fs_stat (img, "EXT/LOT_X.VCD;1", &statbuf, true))
 	{
 	  extended = true;
 	  _lot_vcd_sector = statbuf.lsn;
@@ -830,7 +789,7 @@ _parse_pbc (struct vcdxml_t *obj, VcdImageSource *img, bool no_ext_psd)
 	}  
 
       if (extended &&
-	  !vcd_image_source_fs_stat (img, "EXT/PSD_X.VCD;1", &statbuf))
+	  !iso9660_fs_stat (img, "EXT/PSD_X.VCD;1", &statbuf, true))
 	{
 	  _psd_vcd_sector = statbuf.lsn;
 	  _psd_size = statbuf.size;
@@ -865,7 +824,8 @@ _parse_pbc (struct vcdxml_t *obj, VcdImageSource *img, bool no_ext_psd)
   
   _pctx.lot = _vcd_malloc (ISO_BLOCKSIZE * LOT_VCD_SIZE);
   
-  if (vcd_image_source_read_mode2_sectors (img, _pctx.lot, _lot_vcd_sector, false, LOT_VCD_SIZE))
+  if (cdio_read_mode2_sectors (img, _pctx.lot, _lot_vcd_sector, false, 
+			       LOT_VCD_SIZE))
     return -1;
 
   /* read in PSD */
@@ -874,8 +834,7 @@ _parse_pbc (struct vcdxml_t *obj, VcdImageSource *img, bool no_ext_psd)
 
   _pctx.psd = _vcd_malloc (ISO_BLOCKSIZE * n);
 
-  if (vcd_image_source_read_mode2_sectors (img, _pctx.psd,
-					   _psd_vcd_sector, false, n))
+  if (cdio_read_mode2_sectors (img, _pctx.psd,_psd_vcd_sector, false, n))
     return -1;
 
   /* traverse it */
@@ -897,7 +856,7 @@ _parse_pbc (struct vcdxml_t *obj, VcdImageSource *img, bool no_ext_psd)
 }
 
 static int
-_rip_isofs (struct vcdxml_t *obj, VcdImageSource *img)
+_rip_isofs (struct vcdxml_t *obj, CdIo *img)
 {
   VcdListNode *node;
   
@@ -911,9 +870,10 @@ _rip_isofs (struct vcdxml_t *obj, VcdImageSource *img)
       if (!_fs->file_src)
 	continue;
 
-      vcd_info ("extracting %s to %s (lsn %d, size %d, raw %d)", 
+      vcd_info ("extracting %s to %s (lsn %u, size %u, raw %d)", 
 		_fs->name, _fs->file_src,
-		_fs->lsn, _fs->size, _fs->file_raw);
+		(unsigned int) _fs->lsn, (unsigned int) _fs->size, 
+		_fs->file_raw);
 
       if (!(outfd = fopen (_fs->file_src, "wb")))
         {
@@ -928,9 +888,8 @@ _rip_isofs (struct vcdxml_t *obj, VcdImageSource *img)
 	  /* memset (buf, 0, sizeof (buf)); */
 	  memset (buf, 0, blocksize);
 
-	  vcd_image_source_read_mode2_sector (img, buf, 
-					      _fs->lsn + (idx / blocksize),
-					      _fs->file_raw);
+	  cdio_read_mode2_sector (img, buf, _fs->lsn + (idx / blocksize),
+				  _fs->file_raw);
 
 	  fwrite (buf, blocksize, 1, outfd);
 
@@ -953,14 +912,14 @@ _rip_isofs (struct vcdxml_t *obj, VcdImageSource *img)
 }
 
 static int
-_rip_segments (struct vcdxml_t *obj, VcdImageSource *img)
+_rip_segments (struct vcdxml_t *obj, CdIo *img)
 {
   VcdListNode *node;
-  uint32_t start_extent;
+  lsn_t start_extent;
 
   start_extent = obj->info.segments_start;
 
-  vcd_assert (start_extent % CD_FRAMES_PER_SECOND == 0);
+  vcd_assert (start_extent % CDIO_CD_FRAMES_PER_SEC == 0);
 
   _VCD_LIST_FOREACH (node, obj->segment_list)
     {
@@ -974,8 +933,8 @@ _rip_segments (struct vcdxml_t *obj, VcdImageSource *img)
 
       memset (&mpeg_ctx, 0, sizeof (VcdMpegStreamCtx));
 
-      vcd_info ("extracting %s... (start lsn %d, %d segments)",
-		_seg->src, start_extent, _seg->segments_count);
+      vcd_info ("extracting %s... (start lsn %u, %d segments)",
+		_seg->src, (unsigned int) start_extent, _seg->segments_count);
 
       if (!(outfd = fopen (_seg->src, "wb")))
         {
@@ -983,7 +942,7 @@ _rip_segments (struct vcdxml_t *obj, VcdImageSource *img)
           exit (EXIT_FAILURE);
         }
 
-      for (n = 0; n < _seg->segments_count * 150; n++)
+      for (n = 0; n < _seg->segments_count * VCDINFO_SEGMENT_SECTOR_SIZE; n++)
 	{
 	  struct m2f2sector
           {
@@ -994,8 +953,7 @@ _rip_segments (struct vcdxml_t *obj, VcdImageSource *img)
           buf;
 
 	  memset (&buf, 0, sizeof (buf));
-	  vcd_image_source_read_mode2_sector (img, &buf, start_extent + n,
-					       true);
+	  cdio_read_mode2_sector (img, &buf, start_extent + n, true);
 	  
 	  if (!buf.subheader[0] 
               && !buf.subheader[1]
@@ -1022,7 +980,7 @@ _rip_segments (struct vcdxml_t *obj, VcdImageSource *img)
 	    {
 	      double *_ap_ts = _vcd_malloc (sizeof (double));
 	      
-	      vcd_debug ("autopause @%d (%f)", n, last_pts);
+	      vcd_debug ("autopause @%u (%f)", (unsigned int) n, last_pts);
 	      *_ap_ts = last_pts;
 
 	      _vcd_list_append (_seg->autopause_list, _ap_ts);
@@ -1042,14 +1000,14 @@ _rip_segments (struct vcdxml_t *obj, VcdImageSource *img)
 
       fclose (outfd);
 
-      start_extent += _seg->segments_count * 150;
+      start_extent += _seg->segments_count * VCDINFO_SEGMENT_SECTOR_SIZE;
     }
 
   return 0;
 }
 
 static int
-_rip_sequences (struct vcdxml_t *obj, VcdImageSource *img, int tracknum)
+_rip_sequences (struct vcdxml_t *obj, CdIo *img, int tracknum)
 {
   VcdListNode *node;
   int counter=1;
@@ -1083,10 +1041,11 @@ _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img, int tracknum)
       memset (&mpeg_ctx, 0, sizeof (VcdMpegStreamCtx));
 
       start_lsn = _seq->start_extent;
-      end_lsn = _nseq ? _nseq->start_extent : vcd_image_source_stat_size (img);
+      end_lsn = _nseq ? _nseq->start_extent : cdio_stat_size (img);
 
-      vcd_info ("extracting %s... (start lsn %d (+%d))",
-		_seq->src, start_lsn, end_lsn - start_lsn);
+      vcd_info ("extracting %s... (start lsn %lu (+%lu))",
+		_seq->src, (long unsigned int) start_lsn, 
+		(long unsigned int) (end_lsn - start_lsn));
 
       if (!(outfd = fopen (_seq->src, "wb")))
         {
@@ -1114,13 +1073,12 @@ _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img, int tracknum)
 	      const int secs_left = end_lsn - n;
 
 	      memset (buf, 0, sizeof (buf));
-	      vcd_image_source_read_mode2_sectors (img, buf, n, true, 
-						   (secs_left > 15 
-						    ? 15 : secs_left));
+	      cdio_read_mode2_sectors (img, buf, n, true, (secs_left > 15 
+							   ? 15 : secs_left));
 	    }
 
-	  if (_nseq && n + 150 == end_lsn + 1)
-	    vcd_warn ("reading into gap @%d... :-(", n);
+	  if (_nseq && n + CDIO_POSTGAP_SECTORS == end_lsn + 1)
+	    vcd_warn ("reading into gap @%u... :-(", (unsigned int) n);
 
 	  if (!(buf[buf_idx].subheader[2] & SM_FORM2))
 	    {
@@ -1132,20 +1090,21 @@ _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img, int tracknum)
 	    { /* end conditions... */
 	      if (!buf[buf_idx].subheader[0])
 		{
-		  vcd_debug ("fn -edge @%d", n);
+		  vcd_debug ("fn -edge @%u", (unsigned int) n);
 		  break;
 		}
 
 	      if (!(buf[buf_idx].subheader[2] & SM_REALT))
 		{
-		  vcd_debug ("subheader: no realtime data anymore @%d", n);
+		  vcd_debug ("subheader: no realtime data anymore @%u", 
+			     (unsigned int) n);
 		  break;
 		}
 	    }
 
 	  if (buf[buf_idx].subheader[1] && !in_data)
 	    {
-	      vcd_debug ("cn +edge @%d", n);
+	      vcd_debug ("cn +edge @%u", (unsigned int) n);
 	      in_data = true;
 	    }
 
@@ -1186,7 +1145,8 @@ _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img, int tracknum)
 		{
 		  double *_ap_ts = _vcd_malloc (sizeof (double));
 
-		  vcd_debug ("autopause @%d (%f)", n, last_pts);
+		  vcd_debug ("autopause @%u (%f)", (unsigned int) n, 
+			     last_pts);
 		  *_ap_ts = last_pts;
 
 		  _vcd_list_append (_seq->autopause_list, _ap_ts);
@@ -1198,7 +1158,8 @@ _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img, int tracknum)
 
 		  if (_ep->extent == n)
 		    {
-		      vcd_debug ("entry point @%d (%f)", n, last_pts);
+		      vcd_debug ("entry point @%u (%f)", (unsigned int) n, 
+				 last_pts);
 		      _ep->timestamp = last_pts;
 		    }
 		}
@@ -1218,7 +1179,7 @@ _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img, int tracknum)
 	  
 	  if (buf[buf_idx].subheader[2] & SM_EOF)
 	    {
-	      vcd_debug ("encountered subheader EOF @%d", n);
+	      vcd_debug ("encountered subheader EOF @%u", (unsigned int) n);
 	      break;
 	    }
 	} /* for */
@@ -1235,7 +1196,8 @@ _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img, int tracknum)
 	  
 	  length = (1 + last_nonzero) - first_data;
 
-	  vcd_debug ("truncating file to %d packets", length);
+	  vcd_debug ("truncating file to %u packets", 
+		     (unsigned int) length);
 
 	  fflush (outfd);
 	  if (ftruncate (fileno (outfd), length * M2F2_SECTOR_SIZE))
@@ -1248,19 +1210,35 @@ _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img, int tracknum)
   return 0;
 }
 
+static vcd_log_handler_t  gl_default_vcd_log_handler = NULL;
+static cdio_log_handler_t gl_default_cdio_log_handler = NULL;
+
+static void 
+_vcd_log_handler (vcd_log_level_t level, const char message[])
+{
+  if (level == VCD_LOG_DEBUG && !_verbose_flag)
+    return;
+
+  if (level == VCD_LOG_INFO && _quiet_flag)
+    return;
+  
+  gl_default_vcd_log_handler (level, message);
+}
+
 #define DEFAULT_XML_FNAME      "videocd.xml"
 #define DEFAULT_IMG_FNAME      "videocd.bin"
 
 int
 main (int argc, const char *argv[])
 {
-  VcdImageSource *img_src = NULL;
+  CdIo *img_src = NULL;
   struct vcdxml_t obj;
 
   /* cl params */
   char *xml_fname = NULL;
   char *img_fname = NULL;
   int norip_flag = 0;
+  int nocommand_comment_flag = 0;
   int nofile_flag = 0;
   int noseq_flag = 0;
   int noseg_flag = 0;
@@ -1271,11 +1249,10 @@ main (int argc, const char *argv[])
   int _track_flag=0;
 
   enum { 
-    CL_SOURCE_UNDEF = VCDINFO_SOURCE_UNDEF,
-    CL_SOURCE_AUTO  = VCDINFO_SOURCE_AUTO,
-    CL_SOURCE_BIN   = VCDINFO_SOURCE_BIN,
-    CL_SOURCE_CDROM = VCDINFO_SOURCE_DEVICE,
-    CL_SOURCE_NRG   = VCDINFO_SOURCE_NRG,
+    CL_SOURCE_UNDEF = DRIVER_UNKNOWN, 
+    CL_SOURCE_BINCUE= DRIVER_BINCUE,
+    CL_SOURCE_NRG   = DRIVER_NRG,
+    CL_SOURCE_CDROM = DRIVER_DEVICE,
     CL_VERSION      = 20
   } _img_type = CL_SOURCE_UNDEF;
 
@@ -1283,9 +1260,8 @@ main (int argc, const char *argv[])
 
   vcd_xml_init (&obj);
 
-  vcd_xml_log_init ();
-
-  obj.comment = vcd_xml_dump_cl_comment (argc, argv);
+  gl_default_vcd_log_handler  = vcd_log_set_handler (_vcd_log_handler);
+  gl_default_cdio_log_handler = cdio_log_set_handler (_vcd_log_handler);
 
   {
     poptContext optCon = NULL;
@@ -1297,9 +1273,12 @@ main (int argc, const char *argv[])
        "FILE"},
 
       {"bin-file", 'b', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &img_fname, 
-       CL_SOURCE_BIN,
+       CL_SOURCE_BINCUE,
        "set image file as source (default: '" DEFAULT_IMG_FNAME "')", 
        "FILE"},
+
+      {"cue-file", 'c', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &img_fname, 
+       CL_SOURCE_BINCUE, "set \"cue\" CD-ROM disk image file as source", "FILE"},
 
       {"sector-2336", '\0', POPT_ARG_NONE, &sector_2336_flag, 0,
        "use 2336 byte sector mode for image file"},
@@ -1308,7 +1287,7 @@ main (int argc, const char *argv[])
        CL_SOURCE_CDROM,"set CDROM device as source", "DEVICE"},
 
       {"input", 'i', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &img_fname, 
-       CL_SOURCE_AUTO, 
+       CL_SOURCE_UNDEF, 
        "set source and determine if \"bin\" image or device", "FILE"},
 
       {"nrg-file", 'N', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &img_fname, 
@@ -1317,6 +1296,9 @@ main (int argc, const char *argv[])
 
       {"no-ext-psd", '\0', POPT_ARG_NONE, &no_ext_psd_flag, 0,
        "ignore /EXT/PSD_X.VCD"},
+
+      {"no-command-comment", '\0', POPT_ARG_NONE, &nocommand_comment_flag, 0,
+       "Don't include command name as a comment"},
 
       {"norip", '\0', POPT_ARG_NONE, &norip_flag, 0,
        "only extract XML structure"},
@@ -1335,7 +1317,7 @@ main (int argc, const char *argv[])
 
       { "track", 't', POPT_ARG_INT, &_track_flag, 0,
 	"rip only this track"},
-
+      
       { "filename-encoding", '\0', POPT_ARG_STRING, &vcd_xml_filename_charset, 0,
         "use given charset encoding for filenames instead of UTF8" },
 
@@ -1350,12 +1332,11 @@ main (int argc, const char *argv[])
       {"version", 'V', POPT_ARG_NONE, NULL, CL_VERSION,
        "display version and copyright information and exit"},
 	   
-      
       POPT_AUTOHELP {NULL, 0, 0, NULL, 0}
     };
 
     optCon = poptGetContext ("vcdimager", argc, argv, optionsTable, 0);
-      
+
     if (poptReadDefaultConfig (optCon, 0)) 
       vcd_warn ("reading popt configuration failed"); 
 
@@ -1368,9 +1349,8 @@ main (int argc, const char *argv[])
 	  exit (EXIT_SUCCESS);
 	  break;
 
-	case CL_SOURCE_AUTO:
 	case CL_SOURCE_NRG:
-	case CL_SOURCE_BIN:
+	case CL_SOURCE_BINCUE:
 	case CL_SOURCE_CDROM:
 	  if (_img_type)
 	    {
@@ -1399,11 +1379,11 @@ main (int argc, const char *argv[])
   }
 
   if (_quiet_flag)
-    vcd_xml_verbosity = LOG_WARN;
+    vcd_xml_verbosity = VCD_LOG_WARN;
   else if (_verbose_flag)
-    vcd_xml_verbosity = LOG_DEBUG;
+    vcd_xml_verbosity = VCD_LOG_DEBUG;
   else
-    vcd_xml_verbosity = LOG_INFO;
+    vcd_xml_verbosity = VCD_LOG_INFO;
 
   if (_gui_flag)
     vcd_xml_gui_mode = true;
@@ -1414,15 +1394,32 @@ main (int argc, const char *argv[])
   if (!xml_fname)
     xml_fname = strdup (DEFAULT_XML_FNAME);
 
-  if (CL_SOURCE_UNDEF == _img_type) 
-    _img_type = CL_SOURCE_AUTO;
+  /* If we don't specify a driver_id or a source_name, scan the
+     system for a CD that contains a VCD.
+   */
+  if (NULL == img_fname && _img_type == DRIVER_UNKNOWN) {
+    char **cd_drives=NULL;
+    cd_drives = cdio_get_devices_with_cap(NULL, 
+                (CDIO_FS_ANAL_SVCD|CDIO_FS_ANAL_CVD|CDIO_FS_ANAL_VIDEOCD
+                |CDIO_FS_UNKNOWN),
+                                          true);
+    if ( NULL == cd_drives || NULL == cd_drives[0] ) {
+      return VCDINFO_OPEN_ERROR;
+    }
+    img_fname = strdup(cd_drives[0]);
+    cdio_free_device_list(cd_drives);
+  }
 
-  if (!vcdinf_open(&img_src, &img_fname, _img_type, NULL)) {
+  img_src = cdio_open(img_fname, _img_type);
+  if (NULL == img_src) {
     vcd_error ("Error determining place to read from.");
     exit (EXIT_FAILURE);
   }
   
-  vcd_assert (img_src != NULL);
+  if (NULL == img_fname) 
+    img_fname = cdio_get_default_device(img_src);
+
+  obj.comment = vcd_xml_dump_cl_comment (argc, argv, nocommand_comment_flag);
 
   /* start with ISO9660 PVD */
   _parse_pvd (&obj, img_src);
@@ -1456,8 +1453,7 @@ main (int argc, const char *argv[])
   vcd_info ("Writing XML description to `%s'...", xml_fname);
   vcd_xml_dump (&obj, xml_fname);
 
-  vcd_image_source_destroy (img_src);
-
+  cdio_destroy (img_src);
   vcd_info ("done");
   return 0;
 }

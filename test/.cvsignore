@@ -1,0 +1,16 @@
+Makefile.in
+Makefile
+.deps
+.libs
+check_bitfield
+check_common_fn
+check_sizeof
+check_vcddump_fn
+mpegscan
+mpegscan2
+testassert
+testimage
+testischar
+*.dump
+videocd.cue
+videocd.bin

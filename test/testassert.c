@@ -18,14 +18,19 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef __VCD_XML_PARSE_H__
-#define __VCD_XML_PARSE_H__
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
 
-#include "vcdxml.h"
-#include <libxml/tree.h>
+/* Private headers */
+#include "vcd_assert.h"
 
-bool vcd_xml_parse (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns);
+int
+main (int argc, const char *argv[])
+{
+  vcd_assert (argc < 2);
 
-#endif /* __VCD_XML_PARSE_H__ */
+  vcd_assert_not_reached ();
 
-
+  return 0;
+}

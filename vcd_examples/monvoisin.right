@@ -1,0 +1,166 @@
+   INFO: detected v50 (32bit offsets) NRG magic
+   INFO: SAO type image (ETNF) detected
+Source: image file `monvoisin.nrg'
+Image size: 2846 sectors
+VCD 2.0 detected
+-------------------------------------------------------------------------------
+ISO9660 primary volume descriptor
+ ID: `CD001'
+ version: 1
+ system id: `CD-RTOS CD-BRIDGE'
+ volume id: `MONVOISIN'
+ volumeset id: `'
+ publisher id: `'
+ preparer id: `'
+ application id: `CDI/CDI_VCD.APP;1'
+ ISO size: 1101 blocks (logical blocksize: 2048 bytes)
+ XA marker present: yes
+-------------------------------------------------------------------------------
+ISO9660 filesystem dump
+ root dir in PVD set to lsn 18
+
+ /:
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  d d---1xrxrxr 0 0 [fn 00] [LSN     19]      2048  CDI
+  d d---1xrxrxr 0 0 [fn 00] [LSN     20]      2048  EXT
+  d d---1xrxrxr 0 0 [fn 00] [LSN     21]      2048  MPEGAV
+  d d---1xrxrxr 0 0 [fn 00] [LSN     22]      2048  SEGMENT
+  d d---1xrxrxr 0 0 [fn 00] [LSN     23]      2048  VCD
+
+ /CDI/:
+  d d---1xrxrxr 0 0 [fn 00] [LSN     19]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  - ---2-xrxrxr 0 0 [fn 01] [LSN    211]   1494332 (  1315168)  CDI_IMAG.RTF;1
+  - ----1xrxrxr 0 0 [fn 01] [LSN    854]     13616  CDI_TEXT.FNT;1
+  - ----1xrxrxr 0 0 [fn 01] [LSN    861]    102400  CDI_VCD.APP;1
+  - ----1xrxrxr 0 0 [fn 01] [LSN    911]       279  CDI_VCD.CFG;1
+
+ /EXT/:
+  d d---1xrxrxr 0 0 [fn 00] [LSN     20]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  - ----1xrxrxr 0 0 [fn 01] [LSN    912]     65536  LOT_X.VCD;1
+  - ----1xrxrxr 0 0 [fn 01] [LSN    944]        24  PSD_X.VCD;1
+  - ----1xrxrxr 0 0 [fn 01] [LSN    945]       114  SCANDATA.DAT;1
+
+ /MPEGAV/:
+  d d---1xrxrxr 0 0 [fn 00] [LSN     21]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   1251]   3655652 (  3221504)  AVSEQ01.DAT;1
+
+ /SEGMENT/:
+  d d---1xrxrxr 0 0 [fn 00] [LSN     22]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+
+ /VCD/:
+  d d---1xrxrxr 0 0 [fn 00] [LSN     23]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  - ----1xrxrxr 0 0 [fn 00] [LSN    151]      2048  ENTRIES.VCD;1
+  - ----1xrxrxr 0 0 [fn 00] [LSN    150]      2048  INFO.VCD;1
+  - ----1xrxrxr 0 0 [fn 00] [LSN    152]     65536  LOT.VCD;1
+  - ----1xrxrxr 0 0 [fn 00] [LSN    184]        24  PSD.VCD;1
+
+-------------------------------------------------------------------------------
+VCD/INFO.VCD
+ ID: `VIDEO_CD'
+ version: 0x02
+ system profile tag: 0x00
+ album id: `'
+ volume count: 1
+ volume number: 1
+ pal flags: 10000000 00000000 00000000 00000000 00000000 00000000
+  (bslbf)   00000000 00000000 00000000 00000000 00000000 00000000 00
+ flags:
+  karaoke area: no
+  restriction: 0
+  special info: no
+  user data cc: no
+  start lid #2: no
+  start track #2: no
+  extended pbc: yes
+ Detected extended VCD2.0 PBC files.
+ psd size: 24
+ first segment addr: 00:02:00
+ offset multiplier: 0x08
+ maximum lid: 2
+ maximum segment number: 0
+-------------------------------------------------------------------------------
+VCD/ENTRIES.VCD
+ ID: `ENTRYVCD'
+ version: 0x02
+ system profile tag: 0x00
+ entries: 1
+ ENTRY[00]: track#  1 (SEQUENCE[0]), LSN   1251 (MSF 00:18:51)
+-------------------------------------------------------------------------------
+VCD/LOT.VCD
+ LID[1]: offset = 0 (0x0000)
+ LID[2]: offset = 16 (0x0002)
+-------------------------------------------------------------------------------
+VCD/PSD.VCD
+ PSD[00] (LID[1] @0x0000): play list descriptor
+  NOI: 1 | LID#: 1 (rejected: no)
+  prev: disabled | next: LID[2] @0x0002 | return: LID[2] @0x0002
+  playtime: 0/15s | wait: 5s | autowait: 0s
+  play-item[0]: SEQUENCE[1] (0x0002)
+
+ PSD[01] (LID[2] @0x0002): end list descriptor
+
+-------------------------------------------------------------------------------
+EXT/LOT_X.VCD
+ LID[1]: offset = 0 (0x0000)
+ LID[2]: offset = 16 (0x0002)
+-------------------------------------------------------------------------------
+EXT/PSD_X.VCD
+ PSD[00] (LID[1] @0x0000): play list descriptor
+  NOI: 1 | LID#: 1 (rejected: no)
+  prev: disabled | next: LID[2] @0x0002 | return: LID[2] @0x0002
+  playtime: 0/15s | wait: 5s | autowait: 0s
+  play-item[0]: SEQUENCE[1] (0x0002)
+
+ PSD[01] (LID[2] @0x0002): end list descriptor
+
+-------------------------------------------------------------------------------
+CD-ROM TRACKS (1 - 2)
+  #: MSF       LSN     Type
+  1: 00:02:00  000000  XA
+  2: 00:18:51  001251  XA
+170: 00:39:71  002846  leadout
+-------------------------------------------------------------------------------
+EXT/SCANDATA.DAT
+ ID: `SCAN_VCD'
+ version: 0x02
+ reserved: 0x00
+ scandata_count: 34
+  scanpoint[0000]: LSN 1283 (msf 00:19:08)
+  scanpoint[0001]: LSN 1328 (msf 00:19:53)
+  scanpoint[0002]: LSN 1381 (msf 00:20:31)
+  scanpoint[0003]: LSN 1430 (msf 00:21:05)
+  scanpoint[0004]: LSN 1485 (msf 00:21:60)
+  scanpoint[0005]: LSN 1538 (msf 00:22:38)
+  scanpoint[0006]: LSN 1592 (msf 00:23:17)
+  scanpoint[0007]: LSN 1646 (msf 00:23:71)
+  scanpoint[0008]: LSN 1700 (msf 00:24:50)
+  scanpoint[0009]: LSN 1753 (msf 00:25:28)
+  scanpoint[0010]: LSN 1774 (msf 00:25:49)
+  scanpoint[0011]: LSN 1813 (msf 00:26:13)
+  scanpoint[0012]: LSN 1867 (msf 00:26:67)
+  scanpoint[0013]: LSN 1889 (msf 00:27:14)
+  scanpoint[0014]: LSN 1933 (msf 00:27:58)
+  scanpoint[0015]: LSN 1970 (msf 00:28:20)
+ [..skipping...]
+  scanpoint[0019]: LSN 2135 (msf 00:30:35)
+  scanpoint[0020]: LSN 2177 (msf 00:31:02)
+  scanpoint[0021]: LSN 2219 (msf 00:31:44)
+  scanpoint[0022]: LSN 2267 (msf 00:32:17)
+  scanpoint[0023]: LSN 2322 (msf 00:32:72)
+  scanpoint[0024]: LSN 2376 (msf 00:33:51)
+  scanpoint[0025]: LSN 2429 (msf 00:34:29)
+  scanpoint[0026]: LSN 2483 (msf 00:35:08)
+  scanpoint[0027]: LSN 2503 (msf 00:35:28)
+  scanpoint[0028]: LSN 2545 (msf 00:35:70)
+  scanpoint[0029]: LSN 2566 (msf 00:36:16)
+  scanpoint[0030]: LSN 2610 (msf 00:36:60)
+  scanpoint[0031]: LSN 2664 (msf 00:37:39)
+  scanpoint[0032]: LSN 2717 (msf 00:38:17)
+  scanpoint[0033]: LSN 2771 (msf 00:38:71)
+-------------------------------------------------------------------------------

@@ -1,0 +1,202 @@
+Source: image file `vcd_demo.cue'
+Image size: 2110 sectors
+VCD 2.0 detected
+-------------------------------------------------------------------------------
+ISO9660 primary volume descriptor
+ ID: `CD001'
+ version: 1
+ system id: `CD-RTOS CD-BRIDGE'
+ volume id: `V0469'
+ volumeset id: `'
+ publisher id: `LAURENS KOEHOORN'
+ preparer id: `LKVCDIMAGER 5.0.7.10(WIN32)'
+ application id: `'
+ ISO size: 1032 blocks (logical blocksize: 2048 bytes)
+ XA marker present: yes
+-------------------------------------------------------------------------------
+ISO9660 filesystem dump
+ root dir in PVD set to lsn 18
+
+ /:
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  d d---1xrxrxr 0 0 [fn 00] [LSN     19]      2048  EXT
+  d d---1xrxrxr 0 0 [fn 00] [LSN     20]      2048  MPEGAV
+  d d---1xrxrxr 0 0 [fn 00] [LSN     21]      2048  SEGMENT
+  d d---1xrxrxr 0 0 [fn 00] [LSN     22]      2048  Sources
+  d d---1xrxrxr 0 0 [fn 00] [LSN     25]      2048  VCD
+
+ /EXT/:
+  d d---1xrxrxr 0 0 [fn 00] [LSN     19]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  - ----1xrxrxr 0 0 [fn 01] [LSN    375]     65536  LOT_X.VCD;1
+  - ----1xrxrxr 0 0 [fn 01] [LSN    407]       144  PSD_X.VCD;1
+
+ /MPEGAV/:
+  d d---1xrxrxr 0 0 [fn 00] [LSN     20]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  - ---2-xrxrxr 0 0 [fn 01] [LSN   1182]    904036 (   796672)  AVSEQ01.DAT;1
+  - ---2-xrxrxr 0 0 [fn 02] [LSN   1721]    904036 (   796672)  AVSEQ02.DAT;1
+
+ /SEGMENT/:
+  d d---1xrxrxr 0 0 [fn 00] [LSN     21]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  - ---2-xrxrxr 0 0 [fn 01] [LSN    225]    220780 (   194560)  ITEM0001.DAT;1
+
+ /Sources/:
+  d d---1xrxrxr 0 0 [fn 00] [LSN     22]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  d d---1xrxrxr 0 0 [fn 00] [LSN     23]      2048  HTML
+  - ----1xrxrxr 0 0 [fn 01] [LSN    434]       842  index.htm;1
+  - ----1xrxrxr 0 0 [fn 01] [LSN    435]   1216557  menu.ppm;1
+  - ----1xrxrxr 0 0 [fn 01] [LSN   1030]      2793  source.xml;1
+
+ /Sources/HTML/:
+  d d---1xrxrxr 0 0 [fn 00] [LSN     23]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     22]      2048  ..
+  - ----1xrxrxr 0 0 [fn 01] [LSN    425]      1067  0.xml;1
+  - ----1xrxrxr 0 0 [fn 01] [LSN    426]      1067  1.xml;1
+  d d---1xrxrxr 0 0 [fn 00] [LSN     24]      2048  img
+  - ----1xrxrxr 0 0 [fn 01] [LSN    427]      1327  movies.css;1
+  - ----1xrxrxr 0 0 [fn 01] [LSN    428]     12024  toc.xsl;1
+
+ /Sources/HTML/img/:
+  d d---1xrxrxr 0 0 [fn 00] [LSN     24]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     23]      2048  ..
+  - ----1xrxrxr 0 0 [fn 01] [LSN    408]      1999  AL.gif;1
+  - ----1xrxrxr 0 0 [fn 01] [LSN    409]      7626  Loeki_Groep_01.gif;1
+  - ----1xrxrxr 0 0 [fn 01] [LSN    413]      9986  Loeki_Groep_02.gif;1
+  - ----1xrxrxr 0 0 [fn 01] [LSN    418]       207  a_left.gif;1
+  - ----1xrxrxr 0 0 [fn 01] [LSN    419]       207  a_right.gif;1
+  - ----1xrxrxr 0 0 [fn 01] [LSN    420]       441  animatie.gif;1
+  - ----1xrxrxr 0 0 [fn 01] [LSN    421]       250  face_up2.gif;1
+  - ----1xrxrxr 0 0 [fn 01] [LSN    422]       259  familie.gif;1
+  - ----1xrxrxr 0 0 [fn 01] [LSN    423]      1010  goldstar2.gif;1
+  - ----1xrxrxr 0 0 [fn 01] [LSN    424]      1783  vcd.gif;1
+
+ /VCD/:
+  d d---1xrxrxr 0 0 [fn 00] [LSN     25]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  - ----1xrxrxr 0 0 [fn 00] [LSN    151]      2048  ENTRIES.VCD;1
+  - ----1xrxrxr 0 0 [fn 00] [LSN    150]      2048  INFO.VCD;1
+  - ----1xrxrxr 0 0 [fn 00] [LSN    152]     65536  LOT.VCD;1
+  - ----1xrxrxr 0 0 [fn 00] [LSN    184]        72  PSD.VCD;1
+
+-------------------------------------------------------------------------------
+VCD/INFO.VCD
+ ID: `VIDEO_CD'
+ version: 0x02
+ system profile tag: 0x00
+ album id: `LOEKI'
+ volume count: 1
+ volume number: 1
+ pal flags: 11000000 00000000 00000000 00000000 00000000 00000000
+  (bslbf)   00000000 00000000 00000000 00000000 00000000 00000000 00
+ flags:
+  karaoke area: no
+  restriction: 0
+  special info: no
+  user data cc: no
+  start lid #2: no
+  start track #2: no
+  extended pbc: yes
+ Detected extended VCD2.0 PBC files.
+ psd size: 72
+ first segment addr: 00:05:00
+ offset multiplier: 0x08
+ maximum lid: 3
+ maximum segment number: 1
+ SEGMENT[1]: audio: no audio, video: PAL still (lo+hires), continuation no 
+-------------------------------------------------------------------------------
+VCD/ENTRIES.VCD
+ ID: `ENTRYVCD'
+ version: 0x02
+ system profile tag: 0x00
+ entries: 2
+ ENTRY[00]: track#  1 (SEQUENCE[0]), LSN   1182 (MSF 00:17:57)
+ ENTRY[01]: track#  2 (SEQUENCE[1]), LSN   1721 (MSF 00:24:71)
+-------------------------------------------------------------------------------
+VCD/LOT.VCD
+ LID[1]: offset = 0 (0x0000)
+ LID[2]: offset = 24 (0x0003)
+ LID[3]: offset = 48 (0x0006)
+-------------------------------------------------------------------------------
+VCD/PSD.VCD
+  PSD[00] (LID[1] @0x0000): selection list descriptor
+  Flags: 0xec | NOS: 2 | BSN: 1 | LID: 1 (rejected: no)
+  prev: disabled | next: disabled | return: disabled
+  default: disabled | timeout: disabled
+  wait: -1 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[1] (0x03e8)
+  ofs[0]: LID[2] @0x0003
+  ofs[1]: LID[3] @0x0006
+
+  PSD[01] (LID[2] @0x0003): selection list descriptor
+  Flags: 0x00 | NOS: 2 | BSN: 1 | LID: 2 (rejected: no)
+  prev: LID[2] @0x0003 | next: LID[3] @0x0006 | return: LID[1] @0x0000
+  default: disabled | timeout: LID[3] @0x0006
+  wait: 0 secs | loop: 1 (delayed: no)
+  play-item: SEQUENCE[1] (0x0002)
+  ofs[0]: disabled
+  ofs[1]: LID[3] @0x0006
+
+  PSD[02] (LID[3] @0x0006): selection list descriptor
+  Flags: 0x00 | NOS: 1 | BSN: 1 | LID: 3 (rejected: no)
+  prev: LID[3] @0x0006 | next: LID[2] @0x0003 | return: LID[1] @0x0000
+  default: disabled | timeout: LID[1] @0x0000
+  wait: 0 secs | loop: 1 (delayed: no)
+  play-item: SEQUENCE[2] (0x0003)
+  ofs[0]: LID[2] @0x0003
+
+-------------------------------------------------------------------------------
+EXT/LOT_X.VCD
+ LID[1]: offset = 0 (0x0000)
+ LID[2]: offset = 48 (0x0006)
+ LID[3]: offset = 96 (0x000c)
+-------------------------------------------------------------------------------
+EXT/PSD_X.VCD
+  PSD[00] (LID[1] @0x0000): extended selection list descriptor
+  Flags: 0xec | NOS: 2 | BSN: 1 | LID: 1 (rejected: no)
+  prev: disabled | next: disabled | return: disabled
+  default: disabled | timeout: disabled
+  wait: -1 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[1] (0x03e8)
+  ofs[0]: LID[2] @0x0006
+  ofs[1]: LID[3] @0x000c
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+  area[0]: disabled
+  area[1]: disabled
+
+  PSD[01] (LID[2] @0x0006): extended selection list descriptor
+  Flags: 0x00 | NOS: 2 | BSN: 1 | LID: 2 (rejected: no)
+  prev: LID[2] @0x0006 | next: LID[3] @0x000c | return: LID[1] @0x0000
+  default: disabled | timeout: LID[3] @0x000c
+  wait: 0 secs | loop: 1 (delayed: no)
+  play-item: SEQUENCE[1] (0x0002)
+  ofs[0]: disabled
+  ofs[1]: LID[3] @0x000c
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+  area[0]: disabled
+  area[1]: disabled
+
+  PSD[02] (LID[3] @0x000c): extended selection list descriptor
+  Flags: 0x00 | NOS: 1 | BSN: 1 | LID: 3 (rejected: no)
+  prev: LID[3] @0x000c | next: LID[2] @0x0006 | return: LID[1] @0x0000
+  default: disabled | timeout: LID[1] @0x0000
+  wait: 0 secs | loop: 1 (delayed: no)
+  play-item: SEQUENCE[2] (0x0003)
+  ofs[0]: LID[2] @0x0006
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+  area[0]: disabled
+
+-------------------------------------------------------------------------------
+CD-ROM TRACKS (1 - 3)
+  #: MSF       LSN     Type
+  1: 00:02:00  000000  XA
+  2: 00:17:57  001182  XA
+  3: 00:24:71  001721  XA
+170: 00:30:10  002110  leadout
+-------------------------------------------------------------------------------
