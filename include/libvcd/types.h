@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2000, 2004 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -34,13 +34,13 @@ extern "C" {
   typedef struct _VcdListNode VcdListNode;
   
   /* Defined fully in files_private.h */
-  typedef struct _InfoVcd_tag    InfoVcd;
-  typedef struct _EntriesVcd_tag EntriesVcd;
-  typedef struct _LotVcd_tag     LotVcd;
+  typedef struct _InfoVcd_tag    InfoVcd_t;
+  typedef struct _EntriesVcd_tag EntriesVcd_t;
+  typedef struct _LotVcd_tag     LotVcd_t;
   
-  typedef struct _PsdPlayListDescriptor_tag      PsdPlayListDescriptor;
-  typedef struct _PsdSelectionListDescriptor_tag PsdSelectionListDescriptor;
-  
+  typedef struct _PsdPlayListDescriptor_tag      PsdPlayListDescriptor_t;
+  typedef struct _PsdSelectionListDescriptor_tag PsdSelectionListDescriptor_t;
+
   /* Overall data structure representing a VideoCD object.
      Defined fully in info_private.h. 
    */

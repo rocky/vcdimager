@@ -29,8 +29,8 @@
 #include <libvcd/files_private.h>
 
 bool read_pvd(CdIo *cdio, iso9660_pvd_t *pvd);
-bool read_entries(CdIo *cdio, EntriesVcd *entries);
-bool read_info(CdIo *cdio, InfoVcd *info, vcd_type_t *vcd_type);
+bool read_entries(CdIo *cdio, EntriesVcd_t *entries);
+bool read_info(CdIo *cdio, InfoVcd_t *info, vcd_type_t *vcd_type);
 
 
 

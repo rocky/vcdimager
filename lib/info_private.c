@@ -124,7 +124,7 @@ vcdinf_update_offset_list(struct _vcdinf_pbc_ctx *obj, bool extended)
 bool
 vcdinf_visit_lot (struct _vcdinf_pbc_ctx *obj)
 {
-  const LotVcd *lot = obj->extended ? obj->lot_x : obj->lot;
+  const LotVcd_t *lot = obj->extended ? obj->lot_x : obj->lot;
   unsigned int n, tmp;
   bool ret=true;
 
@@ -234,7 +234,7 @@ vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, unsigned int offset,
     case PSD_TYPE_PLAY_LIST:
       _vcd_list_append (offset_list, ofs);
       {
-        const PsdPlayListDescriptor *d = (const void *) (psd + _rofs);
+        const PsdPlayListDescriptor_t *d = (const void *) (psd + _rofs);
         const lid_t lid = vcdinf_pld_get_lid(d);
 
         if (!ofs->lid)
@@ -255,7 +255,7 @@ vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, unsigned int offset,
     case PSD_TYPE_SELECTION_LIST:
       _vcd_list_append (offset_list, ofs);
       {
-        const PsdSelectionListDescriptor *d =
+        const PsdSelectionListDescriptor_t *d =
           (const void *) (psd + _rofs);
 
         int idx;
@@ -299,7 +299,7 @@ vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, unsigned int offset,
   entry_num in obj.  VCDINFO_NULL_LBA is returned if there is no entry.
 */
 lba_t
-vcdinf_get_entry_lba(const EntriesVcd *entries, unsigned int entry_num)
+vcdinf_get_entry_lba(const EntriesVcd_t *entries, unsigned int entry_num)
 {
   const msf_t *msf = vcdinf_get_entry_msf(entries, entry_num);
   return (msf != NULL) ? cdio_msf_to_lba(msf) : VCDINFO_NULL_LBA;
@@ -310,7 +310,7 @@ vcdinf_get_entry_lba(const EntriesVcd *entries, unsigned int entry_num)
   The first entry number is 0.
 */
 const msf_t *
-vcdinf_get_entry_msf(const EntriesVcd *entries, unsigned int entry_num)
+vcdinf_get_entry_msf(const EntriesVcd_t *entries, unsigned int entry_num)
 {
   const unsigned int entry_count = uint16_from_be (entries->entry_count);
   return entry_num < entry_count ?

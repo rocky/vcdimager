@@ -139,9 +139,9 @@ set_entries_vcd (VcdObj *obj, void *buf)
   VcdListNode *node = NULL;
   int idx = 0;
   int track_idx = 0;
-  EntriesVcd entries_vcd;
+  EntriesVcd_t entries_vcd;
 
-  vcd_assert (sizeof(EntriesVcd) == 2048);
+  vcd_assert (sizeof(EntriesVcd_t) == 2048);
 
   vcd_assert (_vcd_list_length (obj->mpeg_track_list) <= MAX_ENTRIES);
   vcd_assert (_vcd_list_length (obj->mpeg_track_list) > 0);
@@ -279,7 +279,7 @@ set_psd_vcd (VcdObj *obj, void *buf, bool extended)
 void
 set_lot_vcd(VcdObj *obj, void *buf, bool extended)
 {
-  LotVcd *lot_vcd = NULL;
+  LotVcd_t *lot_vcd = NULL;
   VcdListNode *node;
 
   if (extended)
@@ -287,15 +287,15 @@ set_lot_vcd(VcdObj *obj, void *buf, bool extended)
 
   vcd_assert (_vcd_pbc_available (obj));
 
-  lot_vcd = _vcd_malloc (sizeof (LotVcd));
-  memset(lot_vcd, 0xff, sizeof(LotVcd));
+  lot_vcd = _vcd_malloc (sizeof (LotVcd_t));
+  memset(lot_vcd, 0xff, sizeof(LotVcd_t));
 
   lot_vcd->reserved = 0x0000;
 
   _VCD_LIST_FOREACH (node, obj->pbc_list)
     {
       pbc_t *_pbc = _vcd_list_node_data (node);
-      unsigned offset = extended ? _pbc->offset_ext : _pbc->offset;
+      unsigned int offset = extended ? _pbc->offset_ext : _pbc->offset;
       
       vcd_assert (offset % INFO_OFFSET_MULT == 0);
 
@@ -307,18 +307,18 @@ set_lot_vcd(VcdObj *obj, void *buf, bool extended)
       lot_vcd->offset[_pbc->lid - 1] = uint16_to_be (offset);
     }
 
-  memcpy(buf, lot_vcd, sizeof(LotVcd));
+  memcpy(buf, lot_vcd, sizeof(LotVcd_t));
   free(lot_vcd);
 }
 
 void
 set_info_vcd(VcdObj *obj, void *buf)
 {
-  InfoVcd info_vcd;
+  InfoVcd_t info_vcd;
   VcdListNode *node = NULL;
   int n = 0;
 
-  vcd_assert (sizeof (InfoVcd) == 2048);
+  vcd_assert (sizeof (InfoVcd_t) == 2048);
   vcd_assert (_vcd_list_length (obj->mpeg_track_list) <= 98);
   
   memset (&info_vcd, 0, sizeof (info_vcd));
@@ -932,7 +932,7 @@ set_scandata_dat (VcdObj *obj, void *buf)
 vcd_type_t
 vcd_files_info_detect_type (const void *info_buf)
 {
-  const InfoVcd *_info = info_buf;
+  const InfoVcd_t *_info = info_buf;
   vcd_type_t _type = VCD_TYPE_INVALID;
 
   vcd_assert (info_buf != NULL);

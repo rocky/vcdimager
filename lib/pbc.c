@@ -279,7 +279,7 @@ _vcd_pbc_node_length (const VcdObj *obj, const pbc_t *_pbc, bool extended)
     case PBC_SELECTION:
       n = _vcd_list_length (_pbc->select_id_list);
 
-      retval = __cd_offsetof (PsdSelectionListDescriptor, ofs[n]);
+      retval = __cd_offsetof (PsdSelectionListDescriptor_t, ofs[n]);
 
       if (extended || _vcd_obj_has_cap_p (obj, _CAP_4C_SVCD))
 	retval += __cd_offsetof (PsdSelectionListDescriptorExtended, area[n]);
@@ -546,9 +546,9 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 
     case PBC_SELECTION:
       {
-	PsdSelectionListDescriptor *_md = buf;
+	PsdSelectionListDescriptor_t *_md = buf;
 
-	const unsigned _nos = _vcd_list_length (_pbc->select_id_list);
+	const unsigned int _nos = _vcd_list_length (_pbc->select_id_list);
 
 	if (extended)
 	  _md->type = PSD_TYPE_EXT_SELECTION_LIST;

@@ -141,14 +141,14 @@ typedef struct {
 
   struct iso_primary_descriptor pvd;
 
-  InfoVcd info;
-  EntriesVcd entries;
+  InfoVcd_t info;
+  EntriesVcd_t entries;
   
-  LotVcd *lot;
+  LotVcd_t *lot;
   uint8_t *psd;
 
   unsigned psd_x_size;
-  LotVcd *lot_x;
+  LotVcd_t *lot_x;
   uint8_t *psd_x;
 
   VcdList *offset_list;
@@ -384,7 +384,7 @@ _offset_t_cmp (offset_t *a, offset_t *b)
 static void
 _visit_lot (debug_obj_t *obj, bool ext)
 {
-  const LotVcd *lot = ext ? obj->lot_x : obj->lot;
+  const LotVcd_t *lot = ext ? obj->lot_x : obj->lot;
   unsigned n;
 
   if (!ext && !_get_psd_size (obj))
@@ -403,7 +403,7 @@ _visit_lot (debug_obj_t *obj, bool ext)
 static void
 dump_lot (const debug_obj_t *obj, bool ext)
 {
-  const LotVcd *lot = ext ? obj->lot_x : obj->lot;
+  const LotVcd_t *lot = ext ? obj->lot_x : obj->lot;
   
   unsigned n, tmp;
   unsigned max_lid = uint16_from_be (obj->info.lot_entries);
@@ -609,7 +609,7 @@ detect_type (debug_obj_t *obj)
 static void
 dump_info (const debug_obj_t *obj)
 {
-  const InfoVcd *info = &obj->info;
+  const InfoVcd_t *info = &obj->info;
   int n;
 
   fprintf (stdout, 

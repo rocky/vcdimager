@@ -230,7 +230,7 @@ _has_vcd2_ext_pbc (const vcdinfo_obj_t *obj)
 static void
 dump_lot (const vcdinfo_obj_t *obj, bool ext)
 {
-  const LotVcd *lot = ext ? vcdinfo_get_lot_x(obj) : vcdinfo_get_lot(obj);
+  const LotVcd_t *lot = ext ? vcdinfo_get_lot_x(obj) : vcdinfo_get_lot(obj);
   
   unsigned n, tmp;
   const uint16_t max_lid = vcdinfo_get_num_LIDs(obj);
@@ -293,7 +293,7 @@ dump_psd (const vcdinfo_obj_t *obj, bool ext)
         {
         case PSD_TYPE_PLAY_LIST:
           {
-            const PsdPlayListDescriptor *pld = (const void *) (psd + _rofs);
+            const PsdPlayListDescriptor_t *pld = (const void *) (psd + _rofs);
             
             int i;
             uint16_t lid = vcdinf_pld_get_lid(pld);
@@ -340,7 +340,7 @@ dump_psd (const vcdinfo_obj_t *obj, bool ext)
         case PSD_TYPE_EXT_SELECTION_LIST:
         case PSD_TYPE_SELECTION_LIST:
           {
-            const PsdSelectionListDescriptor *d =
+            const PsdSelectionListDescriptor_t *d =
               (const void *) (psd + _rofs);
             int i;
             const unsigned int lid=vcdinf_psd_get_lid(d);
@@ -416,7 +416,7 @@ dump_psd (const vcdinfo_obj_t *obj, bool ext)
 static void
 dump_info (vcdinfo_obj_t *obj)
 {
-  const InfoVcd *info = vcdinfo_get_infoVcd(obj);
+  const InfoVcd_t *info = vcdinfo_get_infoVcd(obj);
   segnum_t num_segments = vcdinfo_get_num_segments(obj);
   int n;
 
@@ -556,7 +556,7 @@ dump_info (vcdinfo_obj_t *obj)
 static void
 dump_entries (vcdinfo_obj_t *obj)
 {
-  const EntriesVcd *entries = vcdinfo_get_entriesVcd(obj);
+  const EntriesVcd_t *entries = vcdinfo_get_entriesVcd(obj);
   int num_entries, n;
 
   num_entries = vcdinfo_get_num_entries(obj);

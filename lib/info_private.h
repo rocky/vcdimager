@@ -46,16 +46,16 @@ extern "C" {
     
     iso9660_pvd_t pvd;
     
-    InfoVcd info;
-    EntriesVcd entries;
+    InfoVcd_t info;
+    EntriesVcd_t entries;
     
     VcdList *offset_list;
     VcdList *offset_x_list;
     uint32_t *seg_sizes; 
     lsn_t   first_segment_lsn;
     
-    LotVcd *lot;
-    LotVcd *lot_x;
+    LotVcd_t *lot;
+    LotVcd_t *lot_x;
     uint8_t *psd;
     uint8_t *psd_x;
     unsigned int psd_x_size;
@@ -75,7 +75,7 @@ extern "C" {
     entry_num in obj.  NULL is returned if there is no entry.
     The first entry number is 0.
   */
-  const msf_t * vcdinf_get_entry_msf(const EntriesVcd *entries, 
+  const msf_t * vcdinf_get_entry_msf(const EntriesVcd_t *entries, 
 				     unsigned int entry_num);
 
   struct _vcdinf_pbc_ctx {
@@ -85,8 +85,8 @@ extern "C" {
     VcdList *offset_x_list;
     VcdList *offset_list;
     
-    LotVcd *lot;
-    LotVcd *lot_x;
+    LotVcd_t *lot;
+    LotVcd_t *lot_x;
     uint8_t *psd;
     uint8_t *psd_x;
     unsigned int psd_x_size;

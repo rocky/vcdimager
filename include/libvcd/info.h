@@ -189,11 +189,14 @@ extern "C" {
     /* Only one of pld or psd is used below. Not all
        C compiler accept the anonymous unions commented out below. */
     /* union  { */
-    PsdPlayListDescriptor *pld;
-    PsdSelectionListDescriptor *psd;
+    PsdPlayListDescriptor_t *pld;
+    PsdSelectionListDescriptor_t *psd;
     /* }; */
     
-  } PsdListDescriptor;
+  } PsdListDescriptor_t;
+
+  /* For backwards compatibility. Don't use PsdListDescriptor. */
+#define PsdListDescriptor PsdListDescriptor_t
   
   /*!
     Return the number of audio channels implied by "audio_type".
@@ -324,9 +327,9 @@ extern "C" {
   const char * 
   vcdinfo_get_format_version_str (const vcdinfo_obj_t *obj);
   
-  EntriesVcd * vcdinfo_get_entriesVcd (vcdinfo_obj_t *obj);
+  EntriesVcd_t * vcdinfo_get_entriesVcd (vcdinfo_obj_t *obj);
   
-  InfoVcd * vcdinfo_get_infoVcd (vcdinfo_obj_t *obj);
+  InfoVcd_t    * vcdinfo_get_infoVcd (vcdinfo_obj_t *obj);
 
   /*!
     \brief Get default or multi-default LID. 
@@ -345,7 +348,7 @@ extern "C" {
   */
   lid_t
   vcdinfo_get_multi_default_lid(const vcdinfo_obj_t *obj, lid_t lid,
-				unsigned int selection);
+				lsn_t lsn);
   
   /*!
     \brief Get default or multi-default LID offset. 
@@ -377,13 +380,13 @@ extern "C" {
   /*!
     Get the LOT pointer. 
   */
-  LotVcd *
+  LotVcd_t *
   vcdinfo_get_lot(const vcdinfo_obj_t *obj);
   
   /*!
     Get the extended LOT pointer. 
   */
-  LotVcd *
+  LotVcd_t *
   vcdinfo_get_lot_x(const vcdinfo_obj_t *obj);
 
   /*!
@@ -726,8 +729,13 @@ extern "C" {
     Get the PSD Selection List Descriptor for a given lid.
     False is returned if not found.
   */
-  bool vcdinfo_lid_get_pxd(const vcdinfo_obj_t *obj, PsdListDescriptor *pxd,
+  bool vcdinfo_lid_get_pxd(const vcdinfo_obj_t *obj, PsdListDescriptor_t *pxd,
 			   uint16_t lid);
+  
+  /*!  Return the entry number closest and before the given LSN.
+  */
+  unsigned int 
+  vcdinfo_lsn_get_entry(const vcdinfo_obj_t *obj, lsn_t lsn);
   
   /*!
     Convert minutes, seconds and frame (MSF components) into a
@@ -788,6 +796,11 @@ extern "C" {
     n characters.
   */
   const char * vcdinfo_strip_trail (const char str[], size_t n);
+  
+  /*!  Return the entry number for the given track.
+  */
+  unsigned int 
+  vcdinfo_track_get_entry(const vcdinfo_obj_t *obj, track_t track);
   
   /*!
     Initialize the vcdinfo structure "obj". Should be done before other

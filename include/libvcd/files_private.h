@@ -59,13 +59,13 @@ typedef struct _EntriesVcd_tag {
                                              0x00 else */
   uint16_t entry_count;                   /* 1 <= tracks <= 500 */
   struct {     /* all fields are BCD */
-    uint8_t n; /* cd track no 2 <= n <= 99 */
+    track_t n; /* cd track no 2 <= n <= 99 */
     msf_t msf;
   } GNUC_PACKED entry[MAX_ENTRIES];
   uint8_t reserved2[36];                  /* RESERVED, must be 0x00 */
 } GNUC_PACKED _EntriesVcd; /* sector 00:04:01 */
 
-#define EntriesVcd_SIZEOF ISO_BLOCKSIZE
+#define EntriesVcd_t_SIZEOF ISO_BLOCKSIZE
 
 
 #define INFO_ID_VCD   "VIDEO_CD"
@@ -217,7 +217,7 @@ typedef struct _InfoVcd_tag {
   char reserved[2];          /* Reserved, must be zero */
 } GNUC_PACKED _InfoVcd;
 
-#define InfoVcd_SIZEOF ISO_BLOCKSIZE
+#define InfoVcd_t_SIZEOF ISO_BLOCKSIZE
 
 /* LOT.VCD
    This optional file is only necessary if the PSD size is not zero.
@@ -235,7 +235,7 @@ typedef struct _LotVcd_tag {
   uint16_t offset[LOT_VCD_OFFSETS];  /* offset given in 8 byte units */
 } GNUC_PACKED _LotVcd;
 
-#define LotVcd_SIZEOF (32*ISO_BLOCKSIZE)
+#define LotVcd_t_SIZEOF (32*ISO_BLOCKSIZE)
 
 /* PSD.VCD
    The PSD controls the "user interaction" mode which can be used to make
@@ -303,7 +303,7 @@ typedef struct _PsdSelectionListDescriptor_tag {
   /* PsdSelectionListDescriptorExtended */
 } GNUC_PACKED _PsdSelectionListDescriptor;
 
-#define PsdSelectionListDescriptor_SIZEOF 20
+#define PsdSelectionListDescriptor_t_SIZEOF 20
 
 typedef struct {
   struct psd_area_t prev_area;
@@ -350,9 +350,13 @@ typedef struct  _PsdPlayListDescriptor_tag {
                                         1000 <= n <= 2979   - play segment
                                                        play item (n - 999)
                                         2980 <= n <= 0xffff - reserved */
-} GNUC_PACKED _PsdPlayListDescriptor;
+} GNUC_PACKED _PsdPlayListDescriptor_t;
 
-#define PsdPlayListDescriptor_SIZEOF 14
+  /* For backwards compatibility. Don't use PsdListDescriptor. */
+#define _PsdPlayListDescriptor _PsdPlayListDescriptor_t
+
+
+#define PsdPlayListDescriptor_t_SIZEOF 14
 
 /* TRACKS.SVD
    SVCD\TRACKS.SVD is a mandatory file which describes the numbers and types

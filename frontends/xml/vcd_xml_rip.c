@@ -217,10 +217,10 @@ _parse_pvd (struct vcdxml_t *obj, CdIo *img)
 static int
 _parse_info (struct vcdxml_t *obj, CdIo *img)
 {
-  InfoVcd info;
+  InfoVcd_t info;
 
-  memset (&info, 0, sizeof (InfoVcd));
-  vcd_assert (sizeof (InfoVcd) == ISO_BLOCKSIZE);
+  memset (&info, 0, sizeof (InfoVcd_t));
+  vcd_assert (sizeof (InfoVcd_t) == ISO_BLOCKSIZE);
 
   if (!read_info(img, &info, &(obj->vcd_type)))
     return -1;
@@ -293,12 +293,12 @@ _parse_info (struct vcdxml_t *obj, CdIo *img)
 static int
 _parse_entries (struct vcdxml_t *obj, CdIo *img)
 {
-  EntriesVcd entries;
+  EntriesVcd_t entries;
   int idx;
   track_t ltrack;
 
-  memset (&entries, 0, sizeof (EntriesVcd));
-  vcd_assert (sizeof (EntriesVcd) == ISO_BLOCKSIZE);
+  memset (&entries, 0, sizeof (EntriesVcd_t));
+  vcd_assert (sizeof (EntriesVcd_t) == ISO_BLOCKSIZE);
 
   if (!read_entries(img, &entries)) {
     return -1;
@@ -378,7 +378,7 @@ struct _pbc_ctx {
   VcdList *offset_list;
 
   uint8_t *psd;
-  LotVcd *lot;
+  LotVcd_t *lot;
   bool extended;
 };
 
@@ -502,7 +502,7 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
     case PSD_TYPE_PLAY_LIST:
       _pbc = vcd_pbc_new (PBC_PLAYLIST);
       {
-	const PsdPlayListDescriptor *d = (const void *) _buf;
+	const PsdPlayListDescriptor_t *d = (const void *) _buf;
 	_pbc->prev_id = _xstrdup (_ofs2id (vcdinf_pld_get_prev_offset(d), 
 					   _ctx));
 	_pbc->next_id = _xstrdup (_ofs2id (vcdinf_pld_get_next_offset(d),
@@ -526,7 +526,7 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
     case PSD_TYPE_SELECTION_LIST:
       _pbc = vcd_pbc_new (PBC_SELECTION);
       {
-	const PsdSelectionListDescriptor *d = (const void *) _buf;
+	const PsdSelectionListDescriptor_t *d = (const void *) _buf;
 	_pbc->bsn = vcdinf_get_bsn(d);
 	_pbc->prev_id = _xstrdup (_ofs2id (vcdinf_psd_get_prev_offset(d), 
 					   _ctx));
@@ -695,7 +695,7 @@ _visit_pbc (struct _pbc_ctx *obj, lid_t lid, unsigned int offset, bool in_lot)
     case PSD_TYPE_PLAY_LIST:
       _vcd_list_append (obj->offset_list, ofs);
       {
-        const PsdPlayListDescriptor *d = (const void *) (obj->psd + _rofs);
+        const PsdPlayListDescriptor_t *d = (const void *) (obj->psd + _rofs);
         const lid_t lid = vcdinf_pld_get_lid(d);
 
         if (!ofs->lid)
@@ -715,7 +715,7 @@ _visit_pbc (struct _pbc_ctx *obj, lid_t lid, unsigned int offset, bool in_lot)
     case PSD_TYPE_SELECTION_LIST:
       _vcd_list_append (obj->offset_list, ofs);
       {
-        const PsdSelectionListDescriptor *d =
+        const PsdSelectionListDescriptor_t *d =
           (const void *) (obj->psd + _rofs);
 
         int idx;
@@ -755,8 +755,8 @@ _visit_pbc (struct _pbc_ctx *obj, lid_t lid, unsigned int offset, bool in_lot)
 static void
 _visit_lot (struct _pbc_ctx *obj)
 {
-  const LotVcd *lot = obj->lot;
-  unsigned n, tmp;
+  const LotVcd_t *lot = obj->lot;
+  unsigned int n, tmp;
 
   for (n = 0; n < LOT_VCD_OFFSETS; n++)
     if ((tmp = vcdinf_get_lot_offset(lot, n)) != PSD_OFS_DISABLED)

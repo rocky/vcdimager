@@ -72,18 +72,18 @@ int main (int argc, const char *argv[])
   CHECK_SIZEOF_STRUCT(vcd_mpeg_scan_data_t);
 
   /* vcd_files_private.h */
-  CHECK_SIZEOF(EntriesVcd);
+  CHECK_SIZEOF(EntriesVcd_t);
   CHECK_SIZEOF(InfoStatusFlags);
   CHECK_SIZEOF(InfoSpiContents);
-  CHECK_SIZEOF(InfoVcd);
-  CHECK_SIZEOF(LotVcd);
+  CHECK_SIZEOF(InfoVcd_t);
+  CHECK_SIZEOF(LotVcd_t);
 
   CHECK_SIZEOF(PsdEndListDescriptor);
   CHECK_SIZEOF(PsdSelectionListFlags);
-  CHECK_SIZEOF(PsdSelectionListDescriptor);
+  CHECK_SIZEOF(PsdSelectionListDescriptor_t);
   CHECK_SIZEOF(PsdSelectionListDescriptorExtended);
   CHECK_SIZEOF(PsdCommandListDescriptor);
-  CHECK_SIZEOF(PsdPlayListDescriptor);
+  CHECK_SIZEOF(PsdPlayListDescriptor_t);
   CHECK_SIZEOF(SVDTrackContent);
   CHECK_SIZEOF(TracksSVD);
   CHECK_SIZEOF(TracksSVD2);

@@ -53,7 +53,7 @@ read_pvd(CdIo *cdio, iso9660_pvd_t *pvd)
 }
 
 bool 
-read_entries(CdIo *cdio, EntriesVcd *entries) 
+read_entries(CdIo *cdio, EntriesVcd_t *entries) 
 {
   if (cdio_read_mode2_sector (cdio, entries, ENTRIES_VCD_SECTOR, false)) {
     vcd_error ("error reading Entries sector (%d)", ENTRIES_VCD_SECTOR);
@@ -74,7 +74,7 @@ read_entries(CdIo *cdio, EntriesVcd *entries)
 }
 
 bool 
-read_info(CdIo *cdio, InfoVcd *info, vcd_type_t *vcd_type) 
+read_info(CdIo *cdio, InfoVcd_t *info, vcd_type_t *vcd_type) 
 {
   if (cdio_read_mode2_sector (cdio, info, INFO_VCD_SECTOR, false)) {
     vcd_error ("error reading Info sector (%d)", INFO_VCD_SECTOR);
