@@ -16,7 +16,7 @@ configure: configure-stamp
 configure-stamp:
 	dh_testdir
 	# Add here commands to configure the package.
-	./autogen.sh
+	if [ ! -e ./configure -a -e ./autogen.sh ]; then ./autogen.sh; fi
 	./configure --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info --without-gnome
 
 	touch configure-stamp

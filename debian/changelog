@@ -4,6 +4,22 @@ vcdimager (0.7.12-1) unstable; urgency=low
 
  -- Herbert Valerio Riedel <hvr@gnu.org>  Tue, 23 Jul 2002 19:29:21 +0200
 
+vcdimager (0.7.11-2) unstable; urgency=low
+
+  * Previous build was incorrect, didn't contain vcdxrip etc. 
+    Build again. (Closes: #117329)
+  * Also since new version is packaged, (Closes: #112290)
+  * README fixed, although a better one is required. (Closes: #111136)
+  * Add libxml2-dev, help2man to Build-Depends.
+  
+ -- Viral Shah <viral@debian.org>  Sat, 27 Oct 2001 17:24:23 -0600
+
+vcdimager (0.7.11-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Viral Shah <viral@debian.org>  Sat, 27 Oct 2001 00:38:38 -0600
+
 vcdimager (0.7.9-1) unstable; urgency=low
 
   * New upstream release
@@ -14,13 +30,13 @@ vcdimager (0.6.1-1) unstable; urgency=low
 
   * New upstream release
 
- -- Viral <viral@debian.org>  Fri, 11 May 2001 17:25:06 +0530
+ -- Viral Shah <viral@debian.org>  Fri, 11 May 2001 17:25:06 +0530
 
 vcdimager (0.6.0-1) unstable; urgency=low
 
   * Initial Release. Closes: Bug#95590
 
- -- Viral <viral@debian.org>  Fri, 27 Apr 2001 10:13:45 +0530
+ -- Viral Shah <viral@debian.org>  Fri, 27 Apr 2001 10:13:45 +0530
 
 Local variables:
 mode: debian-changelog
