@@ -133,15 +133,20 @@ _fs_stat_traverse (VcdImageSource *obj,
     return -1;
 
   vcd_assert (_root->type == _STAT_DIR);
-  vcd_assert (_root->size == ISO_BLOCKSIZE * _root->secsize);
 
-  _dirbuf = _vcd_malloc (_root->size);
+  if (_root->size != ISO_BLOCKSIZE * _root->secsize)
+    {
+      vcd_warn ("bad size for ISO9660 directory (%ud) should be (%d)!",
+		(unsigned) _root->size, ISO_BLOCKSIZE * _root->secsize);
+    }
+  
+  _dirbuf = _vcd_malloc (_root->secsize * ISO_BLOCKSIZE);
 
   if (vcd_image_source_read_mode2_sectors (obj, _dirbuf, _root->lsn, 
 					   false, _root->secsize))
     vcd_assert_not_reached ();
 
-  while (offset < _root->size)
+  while (offset < (_root->secsize * ISO_BLOCKSIZE))
     {
       struct iso_directory_record const *idr 
 	= (void *) &_dirbuf[offset];
@@ -171,7 +176,7 @@ _fs_stat_traverse (VcdImageSource *obj,
       offset += idr->length;
     }
 
-  vcd_assert (offset == _root->size);
+  vcd_assert (offset == (_root->secsize * ISO_BLOCKSIZE));
   
   /* not found */
   free (_dirbuf);
@@ -219,15 +224,19 @@ vcd_image_source_fs_readdir (VcdImageSource *obj,
     uint8_t *_dirbuf = NULL;
     VcdList *retval = _vcd_list_new ();
 
-    vcd_assert (_stat.size == ISO_BLOCKSIZE * _stat.secsize);
+    if (_stat.size != ISO_BLOCKSIZE * _stat.secsize)
+      {
+	vcd_warn ("bad size for ISO9660 directory (%ud) should be (%d)!",
+		  (unsigned) _stat.size, ISO_BLOCKSIZE * _stat.secsize);
+      }
 
-    _dirbuf = _vcd_malloc (_stat.size);
+    _dirbuf = _vcd_malloc (_stat.secsize * ISO_BLOCKSIZE);
 
     if (vcd_image_source_read_mode2_sectors (obj, _dirbuf, _stat.lsn, 
 					     false, _stat.secsize))
       vcd_assert_not_reached ();
 
-    while (offset < _stat.size)
+    while (offset < (_stat.secsize * ISO_BLOCKSIZE))
       {
 	struct iso_directory_record const *idr 
 	  = (void *) &_dirbuf[offset];
@@ -243,7 +252,7 @@ vcd_image_source_fs_readdir (VcdImageSource *obj,
 	offset += idr->length;
       }
 
-    vcd_assert (offset == _stat.size);
+    vcd_assert (offset == (_stat.secsize * ISO_BLOCKSIZE));
 
     free (_dirbuf);
     return retval;
