@@ -6,7 +6,7 @@ else
 POPT_LIBS = -lpopt
 endif
 
-bin_PROGRAMS = vcdimager vcddebug
+bin_PROGRAMS = vcdimager vcddebug cdxa2mpeg
 man_MANS = vcdimager.1 vcddebug.1
 #man_MANS = $(patsubst %,%.1,$(bin_PROGRAMS))
 
@@ -21,6 +21,9 @@ vcdimager_LDADD = $(VCD_LIBS) $(POPT_LIBS)
 
 vcddebug_SOURCES = vcd_debug.c
 vcddebug_LDADD = $(VCD_LIBS) $(POPT_LIBS)
+
+cdxa2mpeg_SOURCES = cdxa2mpeg.c
+cdxa2mpeg_LDADD = $(VCD_LIBS)
 
 $(man_MANS): %.1: %
 	-$(HELP2MAN) --output=$@ ./$<
