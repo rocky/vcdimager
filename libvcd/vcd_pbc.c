@@ -675,8 +675,10 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 			       _pbc->id, _entries, _pbc->item_id, _nos);
 		}
 	      else
-		vcd_error ("selection '%s': play item '%s' is requried to be sequence or entry point"
-			   " item for multi default selecton", _pbc->id, _pbc->item_id);
+		vcd_error ("selection '%s': play item '%s'"
+			   " is requried to be sequence or entry point"
+			   " item for multi default selecton",
+			   _pbc->id, _pbc->item_id);
 	    }	    
 
 	    break;
@@ -749,27 +751,35 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 	      {
 		uint16_t _pin = _vcd_pbc_pin_lookup (obj, _pbc->image_id);
 		mpeg_segment_t *_segment;
-	  
+
+		if (!_pbc->next_disc)
+		  vcd_warn ("PSD: endlist '%s': change disc picture given,"
+			    " but next volume is 0", _pbc->id);
+
 		if (!_pin)
-		  vcd_error ("PSD: referenced play item '%s' not found", _pbc->item_id);
+		  vcd_error ("PSD: referenced play item '%s' not found", 
+			     _pbc->item_id);
 
 		_md->change_pic = UINT16_TO_BE (_pin);
 
 		/* sanity checks */
 
-		_segment = _vcd_obj_get_segment_by_id ((VcdObj *) obj, _pbc->image_id);
+		_segment = _vcd_obj_get_segment_by_id ((VcdObj *) obj,
+						       _pbc->image_id);
 
 		if (!_segment)
 		  vcd_warn ("PSD: endlist '%s': referenced play item '%s'"
-			    " is not a segment play item", _pbc->id, _pbc->image_id);
-		else if (_segment->info->video_type != MPEG_VIDEO_PAL_STILL
-			 && _segment->info->video_type != MPEG_VIDEO_NTSC_STILL)
+			    " is not a segment play item", 
+			    _pbc->id, _pbc->image_id);
+		else if (_segment->info->video_type != MPEG_VIDEO_NTSC_STILL
+			 && _segment->info->video_type != MPEG_VIDEO_PAL_STILL)
 		  vcd_warn ("PSD: endlist '%s': referenced play item '%s'"
-			    " should be a still picture", _pbc->id, _pbc->image_id);
+			    " should be a still picture", 
+			    _pbc->id, _pbc->image_id);
 	      }
-	    else if (_pbc->next_disc || _pbc->image_id)
-	      vcd_warn ("extended end list attributes ignored for non-SVCD");
 	  }
+	else if (_pbc->next_disc || _pbc->image_id)
+	  vcd_warn ("extended end list attributes ignored for non-SVCD");
       }
       break;
 

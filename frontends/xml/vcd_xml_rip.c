@@ -874,13 +874,14 @@ _parse_pbc (struct vcdxml_t *obj, VcdImageSource *img, bool no_ext_psd)
 	extended = false;
     }
 
-  if (extended && no_ext_psd)
-    vcd_info ("ignoring detected extended VCD2.0 PBC files");
 
-  if (extended)
+  if (extended && !no_ext_psd)
     vcd_info ("detected extended VCD2.0 PBC files");
   else
     {
+      if (extended)
+	vcd_info ("ignoring detected extended VCD2.0 PBC files");
+
       _lot_vcd_sector = LOT_VCD_SECTOR;
       _psd_vcd_sector = PSD_VCD_SECTOR;
       _psd_size = obj->info.psd_size;
