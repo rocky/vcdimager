@@ -1095,7 +1095,7 @@ dump (char image_fname[])
       gl.source_type = VCDINFO_SOURCE_DEVICE;
     }
   
-  open_rc = vcdinfo_open(&obj, image_fname, gl.source_type, gl.access_mode);
+  open_rc = vcdinfo_open(&obj, &image_fname, gl.source_type, gl.access_mode);
   if (open_rc==VCDINFO_OPEN_ERROR) {
     vcd_error ("Error determining place to read from");
     exit (EXIT_FAILURE);

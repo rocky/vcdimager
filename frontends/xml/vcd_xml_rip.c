@@ -1413,7 +1413,7 @@ main (int argc, const char *argv[])
   if (CL_SOURCE_UNDEF == _img_type) 
     _img_type = CL_SOURCE_AUTO;
 
-  if (!vcdinf_open(&img_src, img_fname, _img_type, NULL)) {
+  if (!vcdinf_open(&img_src, &img_fname, _img_type, NULL)) {
     vcd_error ("Error determining place to read from.");
     exit (EXIT_FAILURE);
   }
