@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2001,2003 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,6 +16,10 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
+
+/*! This code implements low-level access functions for Nero's native
+   CD-image format residing inside a disk file (*.nrg).
 */
 
 #ifdef HAVE_CONFIG_H
@@ -49,7 +53,7 @@ typedef struct {
   uint32_t length     GNUC_PACKED;
   uint32_t type       GNUC_PACKED; /* only 0x3 seen so far... 
                                       -> MIXED_MODE2 2336 blocksize */
-  uint32_t start_lsn  GNUC_PACKED; /* cummulated w/o pre-gap! */
+  uint32_t start_lsn  GNUC_PACKED; /* does not include any pre-gaps! */
   uint32_t _unknown   GNUC_PACKED; /* wtf is this for? -- always zero... */
 } _etnf_array_t;
 
@@ -80,7 +84,9 @@ PRAGMA_END_PACKED
 
 /* to be converted into BE */
 #define CUEX_ID  0x43554558
+#define CUES_ID  0x43554553
 #define DAOX_ID  0x44414f58
+#define DAOI_ID  0x44414f49
 #define END1_ID  0x454e4421
 #define ETN2_ID  0x45544e32
 #define ETNF_ID  0x45544e46
@@ -90,11 +96,16 @@ PRAGMA_END_PACKED
 
 /* reader */
 
+#define DEFAULT_VCD_DEVICE "image.nrg"
+#define VCD_LEADOUT_TRACK  0xaa
+
 typedef struct {
   VcdDataSource *nrg_src;
+  char *nrg_name;
 
+  VcdList *mapping; /* List of track information */
   uint32_t size;
-  VcdList *mapping;
+  bool init;
 } _img_nrg_src_t;
 
 typedef struct {
@@ -114,6 +125,9 @@ _source_free (void *user_data)
   free (_obj);
 }
 
+/* Updates internal track TOC, so we can later 
+   simulate ioctl(CDROMREADTOCENTRY).
+ */
 static void
 _register_mapping (_img_nrg_src_t *_obj, 
 		  uint32_t start_lsn, uint32_t length_lsn,
@@ -134,8 +148,13 @@ _register_mapping (_img_nrg_src_t *_obj,
   /* vcd_debug ("map: %d +%d -> %ld", start_lsn, length_lsn, img_offset); */
 }
 
+
+/* 
+   Disk and track information for a Nero file are located at the end
+   of the file. This routine extracts that information.
+ */
 static int
-_parse_footer (_img_nrg_src_t *_obj)
+_parse_nero_footer (_img_nrg_src_t *_obj)
 {
   long size, footer_start;
   char *footer_buf = NULL;
@@ -356,14 +375,40 @@ PRAGMA_END_PACKED
   return 0;
 }
 
-  static int
+/*!
+  Initialize image structures.
+ */
+static void
+_vcd_source_init (_img_nrg_src_t *_obj)
+{
+  if (_obj->init)
+    return;
+
+  if (!(_obj->nrg_src = vcd_data_source_new_stdio (_obj->nrg_name)))
+    vcd_error ("init failed");
+
+  _parse_nero_footer (_obj);
+  _obj->init = true;
+
+}
+
+static uint32_t 
+_vcd_stat_size (void *user_data)
+{
+  _img_nrg_src_t *_obj = user_data;
+
+  _vcd_source_init (_obj);
+  return _obj->size;
+}
+
+static int
 _read_mode2_sector (void *user_data, void *data, uint32_t lsn, bool form2)
 {
   _img_nrg_src_t *_obj = user_data;
   char buf[M2RAW_SECTOR_SIZE] = { 0, };
   VcdListNode *node;
 
-  _parse_footer (_obj);
+  _vcd_source_init (_obj);
 
   if (lsn >= _obj->size)
     {
@@ -399,31 +444,64 @@ _read_mode2_sector (void *user_data, void *data, uint32_t lsn, bool form2)
   return 0;
 }
 
-static uint32_t 
-_stat_size (void *user_data)
+/*!
+  Set the device to use in I/O operations.
+*/
+static int
+_source_set_arg (void *user_data, const char key[], const char value[])
 {
   _img_nrg_src_t *_obj = user_data;
 
-  _parse_footer (_obj);
-  return _obj->size;
+  if (!strcmp (key, "nrg"))
+    {
+      free (_obj->nrg_name);
+
+      if (!value)
+	return -2;
+
+      _obj->nrg_name = strdup (value);
+    }
+  else
+    return -1;
+
+  return 0;
+}
+
+/*!
+  Eject media -- there's nothing to do here. We always return 2.
+  also free obj.
+ */
+static int 
+_vcd_eject_media (void *user_data) {
+  /* Sort of a stub here. Perhaps log a message? */
+  return 2;
+}
+
+/*!
+  Return a string containing the default VCD device if none is specified.
+ */
+static char *
+_vcd_get_default_device()
+{
+  return strdup(DEFAULT_VCD_DEVICE);
 }
 
 VcdImageSource *
-vcd_image_source_new_nrg (VcdDataSource *nrg_source)
+vcd_image_source_new_nrg (void)
 {
   _img_nrg_src_t *_data;
 
   vcd_image_source_funcs _funcs = {
-    .read_mode2_sector = _read_mode2_sector,
-    .stat_size         = _stat_size,
-    .free              = _source_free
+    eject_media       : _vcd_eject_media,
+    free              : _source_free,
+    read_mode2_sector : _read_mode2_sector,
+    set_arg           : _source_set_arg,
+    stat_size         : _vcd_stat_size,
   };
 
-  if (!nrg_source)
-    return NULL;
-
   _data = _vcd_malloc (sizeof (_img_nrg_src_t));
-  _data->nrg_src = nrg_source;
+  _data->init              = false;
+  _data->nrg_name          = _vcd_get_default_device();
 
   return vcd_image_source_new (_data, &_funcs);
 }
