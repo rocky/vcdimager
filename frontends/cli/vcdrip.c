@@ -105,19 +105,21 @@ static uint32_t
 
 /* image file */
 
-/* static bool _read_mode2_sector_file_2336_flag = false; */
+static int gl_sector_2336_flag = 0;
 
 static int
 _read_mode2_sector_file (FILE *fd, void *data, uint32_t lba, bool form2)
 {
   char buf[CDDA_SIZE] = { 0, };
+  int blocksize = gl_sector_2336_flag ? 2336 : CDDA_SIZE;
 
   assert (fd != NULL);
 
-  if (fseek (fd, lba * CDDA_SIZE, SEEK_SET))
+  if (fseek (fd, lba * blocksize, SEEK_SET))
     vcd_error ("fseek(): %s", strerror (errno));
 
-  fread (buf, CDDA_SIZE, 1, fd);
+  fread (gl_sector_2336_flag ? (buf + 12 + 4) : buf,
+         blocksize, 1, fd);
 
   if (ferror (fd))
     vcd_error ("fwrite(): %s", strerror (errno));
@@ -138,6 +140,7 @@ _get_image_size_file (FILE *fd)
 {
   struct stat statbuf;
   uint32_t size;
+  int blocksize = gl_sector_2336_flag ? 2336 : CDDA_SIZE;
 
   if (fstat (fileno (fd), &statbuf))
     {
@@ -147,13 +150,14 @@ _get_image_size_file (FILE *fd)
 
   size = statbuf.st_size;
 
-  if (size % CDDA_SIZE)
+  if (size % blocksize)
     {
-      vcd_warn ("image file not multiple of blocksize");
+      vcd_warn ("image file not multiple of blocksize (%d)", 
+                blocksize);
       /* exit (EXIT_FAILURE); */
     }
 
-  size /= CDDA_SIZE;
+  size /= blocksize;
 
   return size;
 }
@@ -413,7 +417,9 @@ dump_lot_and_psd_vcd (const void *data, const void *data2,
                        _ofs2idx (lot, UINT16_FROM_BE (d->ofs[i])),
                        UINT16_FROM_BE (d->ofs[i]));
 
-#ifdef EXTENDED_PSD            
+#if defined(EXTENDED_PSD)
+            /* this is just for documentation... */
+
             {
               const PsdSelectionListDescriptorExtended *d2 =
                 (const void *) &(d->ofs[d->nos]);
@@ -862,6 +868,12 @@ dump (const char image_fname[])
     {
       uint32_t n;
 
+      if (psd_size > 256*1024)
+        {
+          vcd_error ("weird psd size (%u) -- aborting", psd_size);
+          exit (EXIT_FAILURE);
+        }
+
       lot_buf = _vcd_malloc (ISO_BLOCKSIZE * 32);
       psd_buf = _vcd_malloc (ISO_BLOCKSIZE 
                              * (((psd_size - 1) / ISO_BLOCKSIZE) + 1));
@@ -1090,7 +1102,24 @@ static enum
 }
 gl_operation = OP_NOOP;
 
+static int gl_verbose_flag = false;
+static int gl_quiet_flag = false;
+
 /* end of vars */
+
+static vcd_log_handler_t gl_default_vcd_log_handler = NULL;
+
+static void 
+_vcd_log_handler (log_level_t level, const char message[])
+{
+  if (level == LOG_DEBUG && !gl_verbose_flag)
+    return;
+
+  if (level == LOG_INFO && gl_quiet_flag)
+    return;
+  
+  gl_default_vcd_log_handler (level, message);
+}
 
 int
 main (int argc, const char *argv[])
@@ -1102,6 +1131,9 @@ main (int argc, const char *argv[])
     {"bin-file", 'b', POPT_ARG_STRING, &gl_source_name, SOURCE_FILE,
      "set image file as source", "FILE"},
 
+    {"sector-2336", '\0', POPT_ARG_NONE, &gl_sector_2336_flag, 0,
+     "use 2336 byte sector mode for image file"},
+
 #ifdef __linux__
     {"cdrom-device", '\0', POPT_ARG_STRING, &gl_source_name, SOURCE_DEVICE,
      "set CDROM device as source (linux only)", "DEVICE"},
@@ -1112,6 +1144,12 @@ main (int argc, const char *argv[])
 
     {"rip", '\0', POPT_ARG_NONE, NULL, OP_RIP,
      "rip mpeg tracks"},
+
+    {"verbose", 'v', POPT_ARG_NONE, &gl_verbose_flag, 0, 
+     "be verbose"},
+    
+    {"quiet", 'q', POPT_ARG_NONE, &gl_quiet_flag, 0, 
+     "show only critical messages"},
 
     {"version", 'V', POPT_ARG_NONE, NULL, OP_VERSION,
      "display version and copyright information and exit"},
@@ -1179,6 +1217,8 @@ main (int argc, const char *argv[])
       fprintf (stderr, "no source given -- can't do anything...\n");
       exit (EXIT_FAILURE);
     }
+
+  gl_default_vcd_log_handler = vcd_log_set_handler (_vcd_log_handler);
 
   if (gl_operation & OP_DUMP)
     dump (gl_source_name);

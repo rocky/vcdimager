@@ -1,3 +1,8 @@
+2001-03-17  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* frontends/cli/vcdrip.c: implemented --sector-2336, --verbose
+		and --quiet options
+
 2001-03-16  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_files.c (set_tracks_svd): clip play time value to
