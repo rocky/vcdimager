@@ -59,6 +59,7 @@ static const char DELIM[] = \
 static struct gl_t
 {
   vcdinfo_source_t source_type;
+  char *access_mode;
 
   /* Boolean values set by command-line options to reduce output.
      Note: because these are used by popt, the datatype here has to be 
@@ -340,6 +341,7 @@ dump_psd (const vcdinfo_obj_t *obj, bool ext)
             const PsdSelectionListDescriptor *d =
               (const void *) (psd + _rofs);
             int i;
+            const unsigned int lid=vcdinfo_get_lid_from_psd(d);
 
             fprintf (stdout,
                      "  PSD[%.2d] (%s): %sselection list descriptor\n"
@@ -353,12 +355,12 @@ dump_psd (const vcdinfo_obj_t *obj, bool ext)
                      *(uint8_t *) &d->flags,
                      d->nos, 
                      vcdinfo_get_bsn(d),
-                     vcdinfo_get_lid_from_psd(d),
+                     lid, 
                      _vcd_bool_str (vcdinfo_get_lid_rejected_from_psd(d)),
                      vcdinfo_ofs2str (obj, vcdinfo_get_prev_from_psd(d), ext),
                      vcdinfo_ofs2str (obj, vcdinfo_get_next_from_psd(d), ext),
                      vcdinfo_ofs2str (obj, vcdinfo_get_return_from_psd(d),ext),
-                     vcdinfo_ofs2str (obj, uint16_from_be (d->default_ofs), ext),
+                     vcdinfo_ofs2str (obj, vcdinfo_get_default(obj, lid), ext),
                      vcdinfo_ofs2str (obj, vcdinfo_get_timeout_LID(d), ext),
                      vcdinfo_get_timeout_time(d),
                      vcdinfo_get_loop_count(d), _vcd_bool_str (0x80 & d->loop),
@@ -1092,7 +1094,7 @@ dump (char image_fname[])
       gl.source_type = VCDINFO_SOURCE_DEVICE;
     }
   
-  open_rc = vcdinfo_open(&obj, image_fname, gl.source_type);
+  open_rc = vcdinfo_open(&obj, image_fname, gl.source_type, gl.access_mode);
   if (open_rc==VCDINFO_OPEN_ERROR)
     exit (EXIT_FAILURE);
 
@@ -1280,11 +1282,13 @@ enum {
   OP_SOURCE_AUTO        = VCDINFO_SOURCE_AUTO,
   OP_SOURCE_BIN         = VCDINFO_SOURCE_BIN,
   OP_SOURCE_CUE         = VCDINFO_SOURCE_CUE,
+  OP_SOURCE_NRG         = VCDINFO_SOURCE_NRG,
   OP_SOURCE_DEVICE      = VCDINFO_SOURCE_DEVICE,
   OP_SOURCE_SECTOR_2336 = VCDINFO_SOURCE_SECTOR_2336,
 
   /* These are the remaining configuration options */
   OP_VERSION,       OP_ENTRIES,   OP_INFO,      OP_PVD,       OP_SHOW, 
+  OP_ACCESS_MODE
 
 };
 
@@ -1295,6 +1299,7 @@ init()
   gl.verbose_flag     = false;
   gl.quiet_flag       = false;
   gl.source_type      = VCDINFO_SOURCE_UNDEF;
+  gl.access_mode      = NULL;
 
   /* Set all of show-flag entries false in one go. */
   memset(&gl.show, false, sizeof(gl.show));
@@ -1372,15 +1377,23 @@ main (int argc, const char *argv[])
   /* Command-line options */
   struct poptOption optionsTable[] = {
 
+    {"access-mode", 'a', 
+     POPT_ARG_STRING, &gl.access_mode, 
+     OP_ACCESS_MODE,
+     "set CD-ROM access mode", "ACCESS"},
+
     {"bin-file", 'b', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &source_name, 
-     OP_SOURCE_BIN, "set \"bin\" image file as source", "FILE"},
+     OP_SOURCE_BIN, "set \"bin\" CD-ROM disk image file as source", "FILE"},
 
     {"cue-file", 'c', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &source_name, 
-     OP_SOURCE_CUE, "set \"cue\" image file as source", "FILE"},
+     OP_SOURCE_CUE, "set \"cue\" CD-ROM disk image file as source", "FILE"},
 
     {"input", 'i', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &source_name, 
      OP_SOURCE_AUTO,
-     "set source and determine if \"bin\" image or device", "INPUT"},
+     "set source and determine if \"bin\" image or device", "FILE"},
+
+    {"nrg-file", 'N', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &source_name, 
+     OP_SOURCE_CUE, "set Nero CD-ROM disk image file as source", "FILE"},
 
     {"sector-2336", '\0', 
      POPT_ARG_NONE, &sector_2336_flag, 
@@ -1543,9 +1556,14 @@ main (int argc, const char *argv[])
         exit (EXIT_SUCCESS);
         break;
 
+      case OP_ACCESS_MODE:
+        /* Make sure a we do only once? */
+        break;
+
       case OP_SOURCE_AUTO:
       case OP_SOURCE_BIN: 
       case OP_SOURCE_CUE: 
+      case OP_SOURCE_NRG: 
       case OP_SOURCE_DEVICE: 
       case OP_SOURCE_SECTOR_2336:
         {
@@ -1571,6 +1589,7 @@ main (int argc, const char *argv[])
             break;
           case OP_SOURCE_AUTO:
           case OP_SOURCE_CUE:
+          case OP_SOURCE_NRG: 
           case OP_SOURCE_DEVICE:
             /* This case is implied, but we'll make it explicit anyway. */
             okay = false;
