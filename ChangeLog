@@ -1,5 +1,13 @@
+2001-06-14  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_files.c, libvcd/vcd.c:
+		fixed/added boundary checks for segment & entry point counts
+
+
 2001-06-12  Herbert Valerio Riedel  <hvr@gnu.org>
 
+ 	* configure.in: bumped version up to 0.7.5
+	
 	* tests/mpegscan2.c: new testing tool for dumping scan offset data
 
 	* libvcd/vcd.c (vcd_obj_add_dir): implemented

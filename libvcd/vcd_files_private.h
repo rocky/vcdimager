@@ -56,7 +56,7 @@ typedef struct {
   struct { /* all fields are BCD */
     uint8_t n                GNUC_PACKED; /* cd track no 2 <= n <= 99 */
     msf_t msf                GNUC_PACKED;
-  } entry[500]               GNUC_PACKED;
+  } entry[MAX_ENTRIES]       GNUC_PACKED;
   uint8_t reserved2[36]      GNUC_PACKED; /* RESERVED, must be 0x00 */
 } EntriesVcd; /* sector 00:04:01 */
 
@@ -193,7 +193,7 @@ typedef struct {
   uint8_t  offset_mult       GNUC_PACKED;  /* offset multiplier, must be 8 */
   uint16_t lot_entries       GNUC_PACKED;  /* offsets in lot */
   uint16_t item_count        GNUC_PACKED;  /* segments used for segmentitems */
-  InfoSpiContents spi_contents[1980]
+  InfoSpiContents spi_contents[MAX_SEGMENTS]
                              GNUC_PACKED;  /* The next 1980 bytes contain one
                                               byte for each possible segment
                                               play item. Each byte indicates
@@ -423,7 +423,7 @@ typedef struct {
   struct {
     uint8_t ogt_info          GNUC_PACKED;
     uint8_t audio_info        GNUC_PACKED;
-  } spi[1980]                 GNUC_PACKED;
+  } spi[MAX_SEGMENTS]         GNUC_PACKED;
   uint8_t reserved2[126]      GNUC_PACKED; /* 0x00 */
 } SpicontxSvd;
 

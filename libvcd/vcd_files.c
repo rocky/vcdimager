@@ -81,7 +81,7 @@ set_entries_vcd (VcdObj *obj, void *buf)
 
   vcd_assert (sizeof(EntriesVcd) == 2048);
 
-  vcd_assert (_vcd_list_length (obj->mpeg_track_list) <= 500);
+  vcd_assert (_vcd_list_length (obj->mpeg_track_list) <= MAX_ENTRIES);
   vcd_assert (_vcd_list_length (obj->mpeg_track_list) > 0);
 
   memset(&entries_vcd, 0, sizeof(entries_vcd)); /* paranoia / fixme */
@@ -139,6 +139,8 @@ set_entries_vcd (VcdObj *obj, void *buf)
           entry_t *_entry = _vcd_list_node_data (node2);
           /* additional entries */
           struct aps_data _closest_aps;
+
+          vcd_assert (idx < MAX_ENTRIES);
 
           _get_closest_aps (track->info, _entry->time, &_closest_aps);
 
@@ -332,6 +334,8 @@ set_info_vcd(VcdObj *obj, void *buf)
 
               for (idx = 0; idx < segment->segment_count; idx++)
                 {
+                  vcd_assert (segments + idx < MAX_SEGMENTS);
+
                   info_vcd.spi_contents[segments + idx] = contents;
                 
                   if (!contents.item_cont)

@@ -399,6 +399,12 @@ vcd_obj_add_sequence_entry (VcdObj *obj, const char sequence_id[],
       return -1;
     }
 
+  if (_vcd_list_length (_sequence->entry_list) >= MAX_SEQ_ENTRIES)
+    {
+      vcd_error ("only %d entries per sequence allowed!", MAX_SEQ_ENTRIES);
+      return -1;
+    }
+
   if (entry_id && _vcd_pbc_lookup (obj, entry_id))
     {
       vcd_error ("item id (%s) exists already", entry_id);
@@ -951,7 +957,7 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
           vcd_assert_not_reached ();
         }
 
-      vcd_assert (n < 500);
+      vcd_assert (n < MAX_SEGMENTS);
       
       snprintf (segment_pathname, sizeof (segment_pathname), fmt, n + 1);
         

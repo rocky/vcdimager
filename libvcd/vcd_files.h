@@ -29,6 +29,10 @@
 #define LOT_VCD_SIZE       32
 #define PSD_VCD_SECTOR     (LOT_VCD_SECTOR+LOT_VCD_SIZE)
 
+#define MAX_SEGMENTS       1980
+#define MAX_ENTRIES        500
+#define MAX_SEQ_ENTRIES    99
+
 /* these are used for SVCDs only */
 #define TRACKS_SVD_SECTOR  (PSD_VCD_SECTOR+1)
 #define SEARCH_DAT_SECTOR  (TRACKS_SVD_SECTOR+1)
