@@ -124,12 +124,12 @@ do
   fi
 done
 
-touch $srcdir/doc/version.texi
-touch $srcdir/doc/version-vcd-info.texi
-touch $srcdir/doc/version-vcdxrip.texi
-test -f $srcdir/doc/stamp-vti && rm $srcdir/doc/stamp-vti
-test -f $srcdir/doc/stamp-1 && rm $srcdir/doc/stamp-1
-test -f $srcdir/doc/stamp-2 && rm $srcdir/doc/stamp-2
+touch $srcdir/docs/version.texi
+touch $srcdir/docs/version-vcd-info.texi
+touch $srcdir/docs/version-vcdxrip.texi
+test -f $srcdir/docs/stamp-vti && rm $srcdir/docs/stamp-vti
+test -f $srcdir/docs/stamp-1 && rm $srcdir/docs/stamp-1
+test -f $srcdir/docs/stamp-2 && rm $srcdir/docs/stamp-2
   
 conf_flags="--enable-maintainer-mode" # --enable-compile-warnings #--enable-iso-c
 
