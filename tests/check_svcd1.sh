@@ -9,6 +9,7 @@ fi
 . ${srcdir}/check_vcddump_fn
 . ${srcdir}/check_vcdimager_fn
 . ${srcdir}/check_vcdxbuild_fn
+. ${srcdir}/check_vcdxrip_fn
 
 BASE=`basename $0 .sh`
 RC=0
@@ -71,6 +72,15 @@ else
 fi
 
 echo "$0: vcdxbuild cksum(1) checksums matched :-)"
+
+if test_vcdxrip '--norip -b videocd.bin --output-file svcd1_test1.xml' \
+    svcd1_test1.xml ${srcdir}/svcd1_test1.xml-right ; then 
+    :
+else
+    echo "$0: vcddump test 1 failed "
+    test_vcdxbuild_cleanup
+    exit 1
+fi
 
 if test_vcddump '--no-banner -i videocd.bin' \
     svcd1_test1.dump ${srcdir}/svcd1_test1.right ; then 

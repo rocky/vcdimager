@@ -148,7 +148,7 @@ EXT/PSD_X.VCD
   ofs[1]: LID[3] @0x000a
   ofs[2]: LID[4] @0x000d
   prev_area: disabled | next_area: disabled
-  retn_area: disabled | default_area: disabled
+  retn_area: [ 10, 20] - [ 30, 40] | default_area: disabled
   area[0]: disabled
   area[1]: disabled
   area[2]: disabled

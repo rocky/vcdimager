@@ -1,40 +1,38 @@
 # $Id$
 # Pssst.... This file is intended to be sourced...
 
-test_vcdrip_cleanup() {
-  rm -f $outfile
-}
-
-test_vcddump() {
+test_vcdxrip() {
 
   opts="$1"
-  outfile="$2"
+  xmlfile="$2"
   rightfile="$3"
 
-  VCDDUMP="../frontends/cli/vcddump"
-
-  if [ ! -x ${VCDDUMP} ]; then
-    echo "$0: No vcddump test skipped"
+  VCDXRIP="../frontends/xml/vcdxrip"
+  
+  if [ ! -x "${VCDXRIP}" ]; then
+    echo "$0: ${VCDXRIP} missing, check not possible"
     return 77
   fi
-
-  if ${VCDDUMP} ${opts} >${outfile} 2>&1 ; then 
+  
+  if ${VCDXRIP} ${opts} ; then
     if have_cmp; then
-      if cmp ${outfile} ${rightfile} ; then
-	rm -f $outfile
+      if cmp ${xmlfile} ${rightfile} ; then
+	rm -f $xmlfile
 	return 0
       else
 	return 3
       fi
     else
       echo "$0: No cmp(1) found - cannot test vcddump"
-      rm -f $outfile
       return 77
     fi
   else
-    echo "$0: ${VCDDUMP} ${opts} failed"
-    return 2
+    echo "$0: ${VCDXRIP} ${opts} failed"
+    rm -f core* $xmlfile
+    return 1
   fi
+
+  return 0
 
 }
 

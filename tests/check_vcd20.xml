@@ -39,7 +39,7 @@
     <selection id="menu">
       <bsn>1</bsn>
       <next ref="lid-end"/>
-      <return ref="lid-end" x1="0" y1="0" x2="0" y2="0"/>
+      <return ref="lid-end" x1="10" y1="20" x2="30" y2="40"/>
       <wait>-1</wait>
       <loop jump-timing="immediate">1</loop>
       <play-item ref="segment-0000"/>
