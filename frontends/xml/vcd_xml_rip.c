@@ -1049,9 +1049,10 @@ _rip_segments (struct vcdxml_t *obj, VcdImageSource *img)
 }
 
 static int
-_rip_sequences (struct vcdxml_t *obj, VcdImageSource *img)
+_rip_sequences (struct vcdxml_t *obj, VcdImageSource *img, int tracknum)
 {
   VcdListNode *node;
+  int counter=1;
 
   _VCD_LIST_FOREACH (node, obj->sequence_list)
     {
@@ -1064,6 +1065,11 @@ _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img)
       uint32_t start_lsn, end_lsn, n, last_nonzero, first_data;
       double last_pts = 0;
 
+      if (tracknum && tracknum!=counter++) {
+	vcd_info("Track %d selected, skipping track %d", tracknum,counter-1);
+	continue;
+      }
+	  
       _read_progress_t _progress;
 
       struct m2f2sector
@@ -1262,6 +1268,7 @@ main (int argc, const char *argv[])
   int sector_2336_flag = 0;
   int _progress_flag = 0;
   int _gui_flag = 0;
+  int _track_flag=0;
 
   enum { 
     CL_SOURCE_UNDEF = VCDINFO_SOURCE_UNDEF,
@@ -1336,6 +1343,9 @@ main (int argc, const char *argv[])
 
       {"version", 'V', POPT_ARG_NONE, NULL, CL_VERSION,
        "display version and copyright information and exit"},
+	   
+      { "track", 't', POPT_ARG_INT, &_track_flag, 0,
+	"rip only this track"},
       
       POPT_AUTOHELP {NULL, 0, 0, NULL, 0}
     };
@@ -1420,10 +1430,11 @@ main (int argc, const char *argv[])
   /* needs to be parsed last! */
   _parse_pbc (&obj, img_src, no_ext_psd_flag);
 
-  if (norip_flag)
-    vcd_warn ("Entry point and auto pause locations cannot be "
-	      "determined without MPEG extraction -- hope that's ok.");
-  else
+  if (norip_flag || noseq_flag || noseg_flag || _track_flag)
+    vcd_warn ("Some entry point and auto pause locations might not be "
+	      "checked.");
+
+  if (!norip_flag)
     {
       if (!nofile_flag)
 	_rip_isofs (&obj, img_src);
@@ -1432,7 +1443,7 @@ main (int argc, const char *argv[])
 	_rip_segments (&obj, img_src);
 
       if (!noseq_flag)
-	_rip_sequences (&obj, img_src);
+	_rip_sequences (&obj, img_src, _track_flag);
     }
 
   vcd_info ("Writing XML description to `%s'...", xml_fname);
