@@ -37,12 +37,12 @@ make -C docs/ vcdimager.ps.gz
 
 %post
 /sbin/install-info \
-        --info-dir=%{_infodir} %{_infodir}/vcdimager.info*
+        --info-dir=%{_infodir} %{_infodir}/vcdimager.info.*
 
 %preun
 if [ $1 = 0 ]; then
     /sbin/install-info --delete \
-        --info-dir=%{_infodir} %{_infodir}/vcdimager.info*
+        --info-dir=%{_infodir} %{_infodir}/vcdimager.info.*
 fi
 
 %install
