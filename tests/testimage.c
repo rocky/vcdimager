@@ -27,6 +27,7 @@
 #include <string.h>
 
 #include <libvcd/vcd_util.h>
+#include <libvcd/vcd_logging.h>
 #include <libvcd/vcd_assert.h>
 
 #include <libvcd/vcd_image_nrg.h>

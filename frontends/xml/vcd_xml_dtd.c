@@ -25,6 +25,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include <libvcd/vcd_logging.h>
 #include <libvcd/vcd_assert.h>
 
 #include "vcd_xml_dtd.h"
