@@ -71,6 +71,7 @@ Image-Dateien kÃÂ¶nnen von [cdrdao] (bitte nutzen sie aktuelle Versionen,
 Irix, Solaris und auch Win32) gebrannt werden.
 
 vcdimager   generiert direkt einfache pbc-lose VCD oder SVCD Image-Dateien
+vcd-info    Zeigt (selektiv) den Inhalt einer Video-CD oder eines CD-Images
 vcdxgen     XML VCD-Beschreibungsgenerator
 vcdxbuild   Erstellt eine VCD/SVCD entsprechend einer XML-Kontrollfile Vorgabe.
 vcdxrip     Kehrt dem Prozess um und erstellt eine MPEG-Datei aus eine VCD/SVCD.
