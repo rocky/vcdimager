@@ -36,8 +36,35 @@
 #undef  CLAMP
 #define CLAMP(x, low, high)  (((x) > (high)) ? (high) : (((x) < (low)) ? (low) : (x)))
 
-unsigned
-_vcd_len2blocks (unsigned len, int blocksize);
+static inline unsigned
+_vcd_len2blocks (unsigned len, int blocksize)
+{
+  unsigned blocks;
+
+  blocks = len / blocksize;
+  if (len % blocksize)
+    blocks++;
+
+  return blocks;
+}
+
+/* round up to next block boundary */
+static inline unsigned 
+_vcd_ceil2block (unsigned offset, int blocksize)
+{
+  return _vcd_len2blocks (offset, blocksize) * blocksize;
+}
+
+static inline unsigned 
+_vcd_ofs_add (unsigned offset, unsigned length, int blocksize)
+{
+  if (blocksize - (offset % blocksize) < length)
+    offset = _vcd_ceil2block (offset, blocksize);
+
+  offset += length;
+
+  return offset;
+}
 
 size_t
 _vcd_strlenv(char **str_array);

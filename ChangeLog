@@ -1,5 +1,9 @@
 2001-06-03  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* libvcd/vcd_util.h: made block related functions inline
+
+	* libvcd/vcd_iso9660.c, libvcd/vcd_directory.c: various cleanups
+
 	* frontends/xml/vcd_xml_dump.c (_get_node): fixed typo, causing
 		wrong insertion.
 

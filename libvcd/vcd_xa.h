@@ -22,7 +22,7 @@
 #define __VCD_XA_H__
 
 #include <libvcd/vcd_types.h>
-
+#include <libvcd/vcd_assert.h>
 
 /* XA attribute definitions */
 #define XA_ATTR_U_READ         (1 << 0)
@@ -59,5 +59,35 @@ typedef struct /* big endian!! */
   uint8_t  filenum       GNUC_PACKED;   /* file number, see also XA subheader */
   uint8_t  reserved[5]   GNUC_PACKED;   /* zero */
 } vcd_xa_t;
+
+static inline vcd_xa_t *
+vcd_xa_new (void)
+{
+  return _vcd_malloc (sizeof (vcd_xa_t));
+}
+
+static inline vcd_xa_t *
+vcd_xa_init (vcd_xa_t *_xa, uint16_t uid, uint16_t gid, uint16_t attr, uint8_t filenum)
+{
+  vcd_assert (_xa != NULL);
+  
+  
+  _xa->user_id = UINT16_TO_BE (uid);
+  _xa->group_id = UINT16_TO_BE (gid);
+  _xa->attributes = UINT16_TO_BE (attr);
+
+  _xa->signature[0] = 'X';
+  _xa->signature[1] = 'A';
+
+  _xa->filenum = filenum;
+
+  _xa->reserved[0] 
+    = _xa->reserved[1] 
+    = _xa->reserved[2] 
+    = _xa->reserved[3] 
+    = _xa->reserved[4] = 0x00;
+
+  return _xa;
+}
 
 #endif /* __VCD_XA_H__ */

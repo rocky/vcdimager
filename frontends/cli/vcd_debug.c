@@ -861,24 +861,26 @@ _xa_attr_str (uint16_t xa_attr)
 }
 
 static void
-dump_idr (const debug_obj_t *obj, uint32_t lsn, const char pathname[])
+dump_idr (const debug_obj_t *obj, uint32_t lsn, const char pathname[], int size_info)
 {
   struct iso_directory_record *idr = NULL;
   char *buf = NULL;
   int pos = 0;
 
-  buf = realloc (buf, ISO_BLOCKSIZE);
+  vcd_assert (size_info % ISO_BLOCKSIZE == 0);
+
+  buf = realloc (buf, size_info);
       
-  if (vcd_image_source_read_mode2_sector (obj->img, buf, lsn, false)) 
+  if (vcd_image_source_read_mode2_sectors (obj->img, buf, lsn, false, size_info / ISO_BLOCKSIZE)) 
     vcd_assert_not_reached ();
 
   idr = (void *) buf;
 
-  vcd_assert (from_733 (idr->size) == ISO_BLOCKSIZE);
+  vcd_assert (from_733 (idr->size) == size_info);
 
   fprintf (stdout, " %s:\n", pathname);
 
-  while (pos < ISO_BLOCKSIZE)
+  while (pos < size_info)
     {
       char namebuf[256] = { 0, };
       idr = (void *) &buf[pos];
@@ -970,7 +972,7 @@ dump_idr (const debug_obj_t *obj, uint32_t lsn, const char pathname[])
               strncat (namebuf, idr->name, idr->name_len);
               strcat (namebuf, "/");
           
-              dump_idr (obj, from_733 (idr->extent), namebuf);
+              dump_idr (obj, from_733 (idr->extent), namebuf, from_733 (idr->size));
             }
 
           pos += idr->length;
@@ -994,7 +996,7 @@ dump_fs (const debug_obj_t *obj)
   fprintf (stdout, "ISO9660 filesystem dump\n");
   fprintf (stdout, " root dir at lsn %d\n", extent);
  
-  dump_idr (obj, extent, "/");
+  dump_idr (obj, extent, "/", from_733 (idr->size));
 }
 
 static void

@@ -71,6 +71,9 @@ void *_vcd_list_node_data (VcdListNode *node);
 typedef struct _VcdTree VcdTree;
 typedef struct _VcdTreeNode VcdTreeNode;
 
+#define _VCD_CHILD_FOREACH(child, parent) \
+ for (child = _vcd_tree_node_first_child (parent); child; child = _vcd_tree_node_next_sibling (child))
+
 typedef int (*_vcd_tree_node_cmp_func) (VcdTreeNode *node1, 
                                         VcdTreeNode *node2);
 

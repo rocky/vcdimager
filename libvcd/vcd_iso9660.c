@@ -22,6 +22,7 @@
 # include "config.h"
 #endif
 
+#include <time.h>
 #include <ctype.h>
 #include <string.h>
 #include <stdio.h>
@@ -41,6 +42,40 @@ static const char _rcsid[] = "$Id$";
 #define VOLUME_SET_ID     ""
 #define PUBLISHER_ID      ""
 #define PREPARER_ID       "GNU VCDImager " VERSION " " HOST_ARCH
+
+static void
+_idr_set_time (uint8_t _idr_date[], const struct tm *_tm)
+{
+  memset (_idr_date, 0, 7);
+
+  if (!_tm)
+    return;
+
+  _idr_date[0] = _tm->tm_year;
+  _idr_date[1] = _tm->tm_mon + 1;
+  _idr_date[2] = _tm->tm_mday;
+  _idr_date[3] = _tm->tm_hour;
+  _idr_date[4] = _tm->tm_min;
+  _idr_date[5] = _tm->tm_sec;
+  _idr_date[6] = 0x00; /* tz, GMT -48 +52 in 15min intervals */
+}
+
+static void
+_pvd_set_time (char _pvd_date[], const struct tm *_tm)
+{
+  memset (_pvd_date, '0', 16);
+  _pvd_date[16] = (int8_t) 0; /* tz */
+
+  if (!_tm)
+    return;
+
+  snprintf(_pvd_date, 16, 
+           "%4.4d%2.2d%2.2d%2.2d%2.2d%2.2d",
+           _tm->tm_year + 1900, _tm->tm_mon + 1, _tm->tm_mday,
+           _tm->tm_hour, _tm->tm_min, _tm->tm_sec);
+  
+  _pvd_date[16] = (int8_t) 0; /* tz */
+}
 
 static void
 pathtable_get_size_and_entries(const void *pt, unsigned *size, 
@@ -63,6 +98,8 @@ set_iso_evd(void *pd)
 
   memcpy(pd, &ied, sizeof(ied));
 }
+
+const time_t _time = 269222400L;
                                        
 void
 set_iso_pvd(void *pd,
@@ -122,25 +159,14 @@ set_iso_pvd(void *pd,
   _vcd_strncpy_pad (ipd.abstract_file_id     , "", 37, VCD_DCHARS);
   _vcd_strncpy_pad (ipd.bibliographic_file_id, "", 37, VCD_DCHARS);
 
-  {
-    char iso_time[17];
-
-    snprintf(iso_time, sizeof(iso_time), 
-             "%4.4d%2.2d%2.2d%2.2d%2.2d%2.2d00",
-             1978, 7, 14,  0, 0, 0);
-    iso_time[16] = 0;
-
-    memcpy(ipd.creation_date,    iso_time,17);
-    memcpy(ipd.modification_date,iso_time,17);
-    memcpy(ipd.expiration_date,  "0000000000000000",17);
-    memcpy(ipd.effective_date,   "0000000000000000",17);
-  }
+  _pvd_set_time (ipd.creation_date, gmtime (&_time));
+  _pvd_set_time (ipd.modification_date, gmtime (&_time));
+  _pvd_set_time (ipd.expiration_date, NULL);
+  _pvd_set_time (ipd.effective_date, NULL);
 
   ipd.file_structure_version = to_711(1);
 
   /* we leave ipd.application_data = 0 */
-
-  
 
   memcpy(pd, &ipd, sizeof(ipd)); /* copy stuff to arg ptr */
 }
@@ -172,10 +198,9 @@ dir_add_entry_su(void *dir,
                  unsigned su_size)
 {
   struct iso_directory_record *idr = dir;
-  uint8_t *dir8 = dir, *tmp8 = dir;
+  uint8_t *dir8 = dir;
   unsigned offset = 0;
   uint32_t dsize = from_733(idr->size);
-
   int length, su_offset;
 
   vcd_assert (sizeof(struct iso_directory_record) == 33);
@@ -191,62 +216,51 @@ dir_add_entry_su(void *dir,
 
   length = sizeof(struct iso_directory_record);
   length += strlen(name);
-  if (length % 2) /* pad to word boundary */
-    length++;
+  length = _vcd_ceil2block (length, 2); /* pad to word boundary */
   su_offset = length;
   length += su_size;
-  if (length % 2) /* pad to word boundary again */
-    length++;
+  length = _vcd_ceil2block (length, 2); /* pad to word boundary again */
 
-  /* fixme -- the following looks quite ugly, although it seems to work */
+  /* find the last entry's end */
+  {
+    unsigned ofs_last_rec = 0;
 
-  while(offset < dsize) {
-    tmp8 = dir8 + offset;
-      
-    if (!*tmp8) {
-      if (offset)
-        offset-=ISO_BLOCKSIZE;
-      break;
-    }
+    offset = 0;
+    while (offset < dsize)
+      {
+        if (!dir8[offset])
+          {
+            offset++;
+            continue;
+          }
 
-    offset+=ISO_BLOCKSIZE;
+        offset += dir8[offset];
+        ofs_last_rec = offset;
+      }
 
-    if (offset == dsize) {
-      offset-=ISO_BLOCKSIZE;
-      break;
-    }
-  }
-  
-  tmp8 = dir8 + offset;
+    vcd_assert (offset == dsize);
 
-  while(*tmp8) {
-    offset += *tmp8;
-    tmp8 = dir8 + offset;
+    offset = ofs_last_rec;
   }
 
-  if ( ((offset+length) % ISO_BLOCKSIZE) < (offset % ISO_BLOCKSIZE) )
-    offset += ISO_BLOCKSIZE-(offset % ISO_BLOCKSIZE);
+  /* be sure we don't cross sectors boundaries */
+  offset = _vcd_ofs_add (offset, length, ISO_BLOCKSIZE);
+  offset -= length;
 
-  tmp8 = dir8 + offset;
+  vcd_assert (offset + length <= dsize);
 
-  /* g_printerr("using offset %d (for len %d of '%s')\n", offset, length, name); */
-
-  vcd_assert (offset+length < dsize);
-
-  idr = (struct iso_directory_record*)tmp8;
+  idr = (struct iso_directory_record*) &dir8[offset];
   
   vcd_assert (offset+length < dsize); 
   
   memset(idr, 0, length);
+
   idr->length = to_711(length);
   idr->extent = to_733(extent);
   idr->size = to_733(size);
   
-  idr->date[0] = 1978-1900;
-  idr->date[1] = 7;
-  idr->date[2] = 14;
-  /* ... [6] */
-
+  _idr_set_time (idr->date, gmtime (&_time));
+  
   idr->flags = to_711(flags);
 
   idr->volume_sequence_number = to_723(1);
@@ -254,7 +268,7 @@ dir_add_entry_su(void *dir,
   idr->name_len = to_711(strlen(name) ? strlen(name) : 1); /* working hack! */
 
   memcpy(idr->name, name, from_711(idr->name_len));
-  memcpy(tmp8+su_offset, su_data, su_size);
+  memcpy(&dir8[offset] + su_offset, su_data, su_size);
 }
 
 void

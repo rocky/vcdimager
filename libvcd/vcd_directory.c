@@ -37,9 +37,9 @@ static const char _rcsid[] = "$Id$";
 
 /* CD-ROM XA */
 
-#define XA_FORM1_DIR    UINT16_TO_BE(XA_ATTR_DIRECTORY | XA_ATTR_MODE2FORM1 | XA_PERM_ALL_ALL)
-#define XA_FORM1_FILE   UINT16_TO_BE(XA_ATTR_MODE2FORM1 | XA_PERM_ALL_ALL)
-#define XA_FORM2_FILE   UINT16_TO_BE(XA_ATTR_MODE2FORM2 | XA_PERM_ALL_ALL)
+#define XA_FORM1_DIR    (XA_ATTR_DIRECTORY | XA_ATTR_MODE2FORM1 | XA_PERM_ALL_ALL)
+#define XA_FORM1_FILE   (XA_ATTR_MODE2FORM1 | XA_PERM_ALL_ALL)
+#define XA_FORM2_FILE   (XA_ATTR_MODE2FORM2 | XA_PERM_ALL_ALL)
 
 /* tree data structure */
 
@@ -72,7 +72,11 @@ traverse_get_dirsizes(VcdDirNode *node, void *data)
   unsigned *sum = data;
 
   if (d->is_dir)
-    *sum += (d->size / ISO_BLOCKSIZE);
+    {
+      vcd_assert (d->size % ISO_BLOCKSIZE == 0);
+
+      *sum += (d->size / ISO_BLOCKSIZE);
+    }
 }
 
 static unsigned
@@ -92,12 +96,14 @@ traverse_update_dirextents (VcdDirNode *dirnode, void *data)
 
   if (d->is_dir) 
     {
-      VcdDirNode* child = _vcd_tree_node_first_child (dirnode);
+      VcdDirNode* child;
       unsigned dirextent = d->extent;
+      
+      vcd_assert (d->size % ISO_BLOCKSIZE == 0);
       
       dirextent += d->size / ISO_BLOCKSIZE;
       
-      while (child) 
+      _VCD_CHILD_FOREACH (child, dirnode)
         {
           data_t *d = DATAP(child);
           
@@ -108,8 +114,6 @@ traverse_update_dirextents (VcdDirNode *dirnode, void *data)
               d->extent = dirextent;
               dirextent += get_dirsizes (child);
             }
-          
-          child = _vcd_tree_node_next_sibling (child);
         }
     }
 }
@@ -131,14 +135,13 @@ traverse_update_sizes(VcdDirNode *node, void *data)
 
   if (dirdata->is_dir)
     {
-      VcdDirNode* child = _vcd_tree_node_first_child(node);
-      unsigned blocks = 1;
+      VcdDirNode* child;
       unsigned offset = 0;
       
       offset += dir_calc_record_size (1, sizeof(vcd_xa_t)); /* '.' */
       offset += dir_calc_record_size (1, sizeof(vcd_xa_t)); /* '..' */
       
-      while (child) 
+      _VCD_CHILD_FOREACH (child, node)
         {
           data_t *d = DATAP(child);
           unsigned reclen;
@@ -152,17 +155,12 @@ traverse_update_sizes(VcdDirNode *node, void *data)
 
           free (pathname);
           
-          if (offset + reclen > ISO_BLOCKSIZE) 
-            {
-              blocks++;
-              offset = reclen;
-            } 
-          else
-            offset += reclen;
-          
-          child = _vcd_tree_node_next_sibling (child);
+          offset = _vcd_ofs_add (offset, reclen, ISO_BLOCKSIZE);
         }
-      dirdata->size = blocks * ISO_BLOCKSIZE;
+
+      vcd_assert (offset > 0);
+
+      dirdata->size = _vcd_ceil2block (offset, ISO_BLOCKSIZE);
     }
 }
 
@@ -216,16 +214,14 @@ _vcd_directory_destroy (VcdDirectory *dir)
 static VcdDirNode* 
 lookup_child (VcdDirNode* node, const char name[])
 {
-  VcdDirNode* child = _vcd_tree_node_first_child (node);
+  VcdDirNode* child;
 
-  while (child)
+  _VCD_CHILD_FOREACH (child, node)
     {
       data_t *d = DATAP(child);
       
       if (!strcmp (d->name, name))
         return child;
-
-      child = _vcd_tree_node_next_sibling (child);
     }
   
   return child; /* NULL */
@@ -382,20 +378,15 @@ static void
 traverse_vcd_directory_dump_entries (VcdDirNode *node, void *data)
 {
   data_t *d = DATAP(node);
-  vcd_xa_t tmp = {
-    user_id: 0,
-    group_id: 0,
-    attributes: 0,
-    signature: { 'X', 'A' },
-    filenum: 0,
-    reserved: { 0, } 
-  };
-  
+  vcd_xa_t xa_su;
+
   uint32_t root_extent = EXTENT(_vcd_tree_node_root (node));
+
   uint32_t parent_extent = 
     (!_vcd_tree_node_is_root (node))
     ? EXTENT(_vcd_tree_node_parent (node))
     : EXTENT(node);
+
   uint32_t parent_size = 
     (!_vcd_tree_node_is_root (node))
     ? SIZE(_vcd_tree_node_parent (node))
@@ -403,8 +394,7 @@ traverse_vcd_directory_dump_entries (VcdDirNode *node, void *data)
 
   void *dirbufp = (char*) data + ISO_BLOCKSIZE * (parent_extent - root_extent);
 
-  tmp.attributes = d->xa_attributes;
-  tmp.filenum = d->xa_filenum;
+  vcd_xa_init (&xa_su, 0, 0, d->xa_attributes, d->xa_filenum);
 
   if (!_vcd_tree_node_is_root (node))
     {
@@ -414,26 +404,19 @@ traverse_vcd_directory_dump_entries (VcdDirNode *node, void *data)
 
       dir_add_entry_su (dirbufp, pathname, d->extent, d->size, 
                         d->is_dir ? ISO_DIRECTORY : ISO_FILE,
-                        &tmp, sizeof (tmp));
+                        &xa_su, sizeof (xa_su));
 
       free (pathname);
-    }  
+    }
 
+  /* if this is a directory, create the new directory node */
   if (d->is_dir) 
     {
-      void *dirbuf = (char*)data + ISO_BLOCKSIZE * (d->extent - root_extent);
-      vcd_xa_t tmp2 = {
-        user_id: 0,
-        group_id: 0,
-        attributes: XA_FORM1_DIR,
-        signature: { 'X', 'A' },
-        filenum: 0,
-        reserved: { 0, } 
-      };
-      
-      dir_init_new_su (dirbuf, 
-                       d->extent, d->size, &tmp2, sizeof (tmp2),
-                       parent_extent, parent_size, &tmp2, sizeof (tmp2));
+      dirbufp = (char*)data + ISO_BLOCKSIZE * (d->extent - root_extent);
+
+      dir_init_new_su (dirbufp, 
+                       d->extent, d->size, &xa_su, sizeof (xa_su),
+                       parent_extent, parent_size, &xa_su, sizeof (xa_su));
     }
 }
 
@@ -480,16 +463,14 @@ traverse_vcd_directory_dump_pathtables (VcdDirNode *node, void *data)
 {
   _vcd_directory_dump_pathtables_t *args = data;
 
-  if (DATAP(node)->is_dir)
+  if (DATAP (node)->is_dir)
     {
-      VcdDirNode* child = _vcd_tree_node_first_child (node);
+      VcdDirNode* child;
 
-      while (child) 
+      _VCD_CHILD_FOREACH (child, node)
         {
-          if (DATAP(child)->is_dir) 
-            _dump_pathtables_helper (args, DATAP(child), PT_ID(node));
-          
-          child = _vcd_tree_node_next_sibling (child);
+          if (DATAP (child)->is_dir) 
+            _dump_pathtables_helper (args, DATAP (child), PT_ID (node));
         }
     }
 }
