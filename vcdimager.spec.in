@@ -24,7 +24,10 @@ Source:         http://alpha.gnu.org/pub/gnu/%{name}/%{name}-%{dist_version}.tar
 URL:            http://www.vcdimager.org/
 Requires:       libxml2 >= 2.3.8
 Requires:       libcdio >= 0.66
-BuildPrereq:    libxml2-devel >= 2.3.8, popt >= 1.6, libcdio-devel >= 0.64, texinfo
+BuildPrereq:    libxml2-devel >= 2.3.8
+BuildPrereq:    popt >= 1.6
+BuildPrereq:    libcdio-devel >= 0.66
+BuildPrereq:    texinfo
 Buildroot:      %{_tmppath}/%{name}-%{version}-%{release}-root
 
 %description
@@ -59,13 +62,13 @@ entpacken und analysieren von Video CDs und Super Video CDs.
 
 Die Basisfunktion ist die direkte Erstellung von Video CD BIN/CUE
 CD Image-Dateien aus MPEG-Dateien, welche sich (nachdem sie auf
-CDR(W) gebrannt wurden) von VCD oder DVD Abspielgeräten und Computern
+CDR(W) gebrannt wurden) von VCD oder DVD Abspielger�¤ten und Computern
 mit GNU/Linux, MacOS, Win32 oder irgendeinem anderen OS, welche in
-der Lage sind, VCDs abzusielen, abgespielt werden können. BIN/CUE
-Image-Dateien können von [cdrdao] (bitte nutzen sie aktuelle Versionen,
-ältere unterstützen keine BIN/CUE artigen cuesheets) unter GNU/Linux
-(und anderen von cdrdao unterstützten Palltform, wie z.B. freeBSD,
-Irix, Solars und auch Win32) gebrannt werden.
+der Lage sind, VCDs abzusielen, abgespielt werden k�¶nnen. BIN/CUE
+Image-Dateien k�¶nnen von [cdrdao] (bitte nutzen sie aktuelle Versionen,
+�¤ltere unterst�¼tzen keine BIN/CUE artigen cuesheets) unter GNU/Linux
+(und anderen von cdrdao unterst�¼tzten Platform, wie z.B. freeBSD,
+Irix, Solaris und auch Win32) gebrannt werden.
 
 vcdimager   generiert direkt einfache pbc-lose VCD oder SVCD Image-Dateien
 vcdxgen     XML VCD-Beschreibungsgenerator
@@ -83,14 +86,14 @@ Autor:
 Summary:        (Super)Video CD image mastering and ripping tool - Libraries
 Summary(de):    (Super)Video CD Image erstellungs- und ripp-Tool - Bibliotheken
 Group: Development/Libraries
+Requires:       libcdio >= 0.66
 BuildRequires:  libcdio-devel >= 0.66
-# Packmandepends: libcdio
 
 %description -n libvcd
 Libraries for vcdimager
 
 %description -n libvcd -l de
-Bibliotheken für vcdimager
+Bibliotheken f�¼r vcdimager
 
 %package -n libvcd-devel
 Summary:        (Super)Video CD image mastering and ripping tool - development package
@@ -102,7 +105,7 @@ Requires: libvcd = %{version}-%{release}
 Development files for vcdimager
 
 %description -n libvcd-devel -l de
-Entwicklderdateien für vcdimager
+Entwicklderdateien f�¼r vcdimager
 
 %prep
 %setup -q -n %{name}-%{dist_version}
@@ -113,12 +116,11 @@ make all
 #make -C docs/ vcdimager.ps.gz vcddump.ps.gz
 
 %install
-rm -rf %{buildroot}
+[ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
 %makeinstall
-rm -vf "%{buildroot}/%{_infodir}/dir"
 
 %clean
-rm -rf %{buildroot}
+[ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-, root, root)
@@ -133,12 +135,15 @@ rm -rf %{buildroot}
 
 %files -n libvcd-devel
 %defattr(-, root, root)
-%{_includedir}/*
+%{_includedir}/libvcd
 %{_libdir}/*.so
 %{_libdir}/*a
-%{_libdir}/pkgconfig/*
+%{_libdir}/pkgconfig/*.pc
 
 %changelog -n vcdimager
+* Sun Feb 15 2004 Manfred Tremmel <Manfred.Tremmel@iiv.de>
+- some little changes
+
 * Sat Feb 14 2004 Rocky Bernstein <rocky@panix.com>
 - require libcdio 0.66
 
