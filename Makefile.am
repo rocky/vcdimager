@@ -22,7 +22,7 @@ SUBDIRS = include lib frontends test amiga docs
 
 # pkg-config(1) related rules
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = libvcd.pc libvcdinfo.pc 
+pkgconfig_DATA = libvcdinfo.pc 
 
 EXTRA_DIST = BUGS FAQ cygwin-dist.sh HACKING libpopt.m4 \
 	debian/changelog debian/control debian/copyright debian/docs debian/info debian/rules debian/watch
