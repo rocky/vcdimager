@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #$Id$
 
 . ${srcdir}/check_common_fn
