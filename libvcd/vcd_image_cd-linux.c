@@ -17,6 +17,10 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
+
+/* This file contains Linux-specific code and impliments low-level 
+   control of the CD drive.
+*/
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -26,7 +30,6 @@
 #include <libvcd/vcd_bytesex.h>
 #include <libvcd/vcd_cd_sector.h>
 #include <libvcd/vcd_image_cd.h>
-#include <libvcd/vcd_iso9660.h>
 #include <libvcd/vcd_logging.h>
 #include <libvcd/vcd_util.h>
 
@@ -52,7 +55,34 @@ static const char _rcsid[] = "$Id$";
 #include <sys/types.h>
 #include <sys/ioctl.h>
 
+/* FIXME!!!!!
+   The below two functions will be in libcdio's cdio_sector.h
+   REMOVE THEM FROM HERE.
+*/
+
+#define CDIO_PREGAP_SECTORS 150
+
+static void
+cdio_lba_to_msf (uint32_t lba, msf_t *msf)
+{
+  vcd_assert (msf != 0);
+
+  msf->m = to_bcd8 (lba / (60 * 75));
+  msf->s = to_bcd8 ((lba / 75) % 60);
+  msf->f = to_bcd8 (lba % 75);
+}
+
+static inline lba_t
+cdio_lsn_to_lba (lsn_t lsn)
+{
+  return lsn + CDIO_PREGAP_SECTORS; 
+}
+
+/* END FIXME HACK. */
+
 /* reader */
+
+#define DEFAULT_VCD_DEVICE "/dev/cdrom"
 
 typedef struct {
   int fd;
@@ -69,10 +99,10 @@ typedef struct {
   char *device;
   
   bool init;
-} _img_linuxcd_src_t;
+} _img_cd_src_t;
 
 static void
-_source_init (_img_linuxcd_src_t *_obj)
+_vcd_source_init (_img_cd_src_t *_obj)
 {
   if (_obj->init)
     return;
@@ -88,12 +118,15 @@ _source_init (_img_linuxcd_src_t *_obj)
   _obj->init = true;
 }
 
-
+/*!
+  Release and free resources associated with cd. 
+ */
 static void
-_source_free (void *user_data)
+_vcd_source_free (void *user_data)
 {
-  _img_linuxcd_src_t *_obj = user_data;
+  _img_cd_src_t *_obj = user_data;
 
+  if (NULL == _obj) return;
   free (_obj->device);
 
   if (_obj->fd >= 0)
@@ -144,7 +177,7 @@ _set_bsize (int fd, unsigned bsize)
 }
 
 static int
-__read_mode2 (int fd, void *buf, uint32_t lba, unsigned nblocks, 
+__read_mode2 (int fd, void *buf, lba_t lba, unsigned nblocks, 
 		 bool _workaround)
 {
   struct cdrom_generic_command cgc;
@@ -198,7 +231,7 @@ __read_mode2 (int fd, void *buf, uint32_t lba, unsigned nblocks,
 }
 
 static int
-_read_mode2 (int fd, void *buf, uint32_t lba, unsigned nblocks, 
+_read_mode2 (int fd, void *buf, lba_t lba, unsigned nblocks, 
 	     bool _workaround)
 {
   unsigned l = 0;
@@ -221,13 +254,17 @@ _read_mode2 (int fd, void *buf, uint32_t lba, unsigned nblocks,
   return retval;
 }
 
+/*!
+   Reads a single mode2 sector from cd device into data starting
+   from lsn. Returns 0 if no error. 
+ */
 static int
-_read_mode2_sectors (void *user_data, void *data, uint32_t lsn, bool form2,
+_read_mode2_sectors (void *user_data, void *data, lsn_t lsn, bool form2,
 		     unsigned nblocks)
 {
-  _img_linuxcd_src_t *_obj = user_data;
+  _img_cd_src_t *_obj = user_data;
 
-  _source_init (_obj);
+  _vcd_source_init (_obj);
 
   if (form2)
     {
@@ -235,7 +272,7 @@ _read_mode2_sectors (void *user_data, void *data, uint32_t lsn, bool form2,
       struct cdrom_msf *msf = (struct cdrom_msf *) &buf;
       msf_t _msf;
       
-      lba_to_msf (lsn + 150, &_msf);
+      cdio_lba_to_msf (cdio_lsn_to_lba(lsn), &_msf);
       msf->cdmsf_min0 = from_bcd8(_msf.m);
       msf->cdmsf_sec0 = from_bcd8(_msf.s);
       msf->cdmsf_frame0 = from_bcd8(_msf.f);
@@ -319,8 +356,8 @@ _read_mode2_sectors (void *user_data, void *data, uint32_t lsn, bool form2,
 	  if ((retval = _read_mode2_sectors (_obj, buf, lsn + i, true, 1)))
 	    return retval;
 
-	  memcpy (((char *)data) + (ISO_BLOCKSIZE * i), 
-		  buf + 8, ISO_BLOCKSIZE);
+	  memcpy (((char *)data) + (M2F1_SECTOR_SIZE * i), buf + 8, 
+		  M2F1_SECTOR_SIZE);
 	}
     }
 
@@ -328,14 +365,14 @@ _read_mode2_sectors (void *user_data, void *data, uint32_t lsn, bool form2,
 }
 
 static uint32_t 
-_stat_size (void *user_data)
+_vcd_stat_size (void *user_data)
 {
-  _img_linuxcd_src_t *_obj = user_data;
+  _img_cd_src_t *_obj = user_data;
 
   struct cdrom_tocentry tocent;
   uint32_t size;
 
-  _source_init (_obj);
+  _vcd_source_init (_obj);
 
   tocent.cdte_track = CDROM_LEADOUT;
   tocent.cdte_format = CDROM_LBA;
@@ -350,10 +387,13 @@ _stat_size (void *user_data)
   return size;
 }
 
+/*!
+  Set the key "arg" to "value" in source device.
+*/
 static int
-_source_set_arg (void *user_data, const char key[], const char value[])
+_vcd_source_set_arg (void *user_data, const char key[], const char value[])
 {
-  _img_linuxcd_src_t *_obj = user_data;
+  _img_cd_src_t *_obj = user_data;
 
   if (!strcmp (key, "device"))
     {
@@ -381,23 +421,71 @@ _source_set_arg (void *user_data, const char key[], const char value[])
   return 0;
 }
 
+/*!
+  Eject media in CD drive. If successful, as a side effect we 
+  also free obj.
+ */
+static int 
+_vcd_eject_media (void *user_data) {
+
+  _img_cd_src_t *_obj = user_data;
+  int ret, status;
+
+  if (!_obj->init) _vcd_source_init(_obj);
+
+  if (_obj->fd > -1) {
+    if((status = ioctl(_obj->fd, CDROM_DRIVE_STATUS, CDSL_CURRENT)) > 0) {
+      switch(status) {
+      case CDS_TRAY_OPEN:
+	if((ret = ioctl(_obj->fd, CDROMCLOSETRAY)) != 0) {
+	  vcd_error ("CDROMCLOSETRAY failed: %s\n", strerror(errno));  
+	}
+	break;
+      case CDS_DISC_OK:
+	if((ret = ioctl(_obj->fd, CDROMEJECT)) != 0) {
+	  vcd_error("CDROMEJECT failed: %s\n", strerror(errno));  
+	}
+	break;
+      }
+      _vcd_source_free((void *) _obj);
+      return 0;
+    } else {
+      vcd_error ("CDROM_DRIVE_STATUS failed: %s\n", strerror(errno));
+      _vcd_source_free((void *) _obj);
+      return 1;
+    }
+  }
+  return 2;
+}
+
+/*!
+  Return a string containing the default VCD device if none is specified.
+ */
+static char *
+_vcd_get_default_device()
+{
+  return strdup(DEFAULT_VCD_DEVICE);
+}
+
 #endif /* defined(__VCD_IMAGE_LINUXCD_BUILD) */
 
 VcdImageSource *
 vcd_image_source_new_cd (void)
 {
 #if defined(__VCD_IMAGE_LINUXCD_BUILD)
-  _img_linuxcd_src_t *_data = _vcd_malloc (sizeof *_data);
+  _img_cd_src_t *_data = _vcd_malloc (sizeof *_data);
 
   vcd_image_source_funcs _funcs = {
-    .read_mode2_sectors = _read_mode2_sectors,
-    .stat_size          = _stat_size,
-    .free               = _source_free,
-    .set_arg            = _source_set_arg
+    eject_media       : _vcd_eject_media,
+    free              : _vcd_source_free,
+    read_mode2_sectors: _read_mode2_sectors,
+    set_arg           : _vcd_source_set_arg,
+    stat_size         : _vcd_stat_size
   };
 
-  _data->device = strdup ("/dev/cdrom");
+  _data->device = _vcd_get_default_device();
   _data->access_mode = _AM_READ_CD;
+  _data->init   = false;
   _data->fd = -1;
 
   return vcd_image_source_new (_data, &_funcs);
