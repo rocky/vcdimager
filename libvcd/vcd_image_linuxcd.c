@@ -32,8 +32,14 @@
 
 static const char _rcsid[] = "$Id$";
 
-#if defined(__linux__)
+#if defined(__linux__) && defined(HAVE_LINUX_VERSION_H)
+#include <linux/version.h>
+# if LINUX_VERSION_CODE >= KERNEL_VERSION(2,2,16)
+#  define __VCD_IMAGE_LINUXCD_BUILD
+# endif
+#endif
 
+#if defined(__VCD_IMAGE_LINUXCD_BUILD)
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -365,12 +371,12 @@ _source_set_arg (void *user_data, const char key[], const char value[])
   return 0;
 }
 
-#endif /* defined(__linux__) */
+#endif /* defined(__VCD_IMAGE_LINUXCD_BUILD) */
 
 VcdImageSource *
 vcd_image_source_new_linuxcd (void)
 {
-#if defined(__linux__)
+#if defined(__VCD_IMAGE_LINUXCD_BUILD)
   _img_linuxcd_src_t *_data;
 
   vcd_image_source_funcs _funcs = {
@@ -385,7 +391,10 @@ vcd_image_source_new_linuxcd (void)
   _data->fd = -1;
 
   return vcd_image_source_new (_data, &_funcs);
-#else 
+#elif defined(__linux__)
+  vcd_error ("linux cd image source driver was not enabled in build due to old or missing linux kernel headers.");
+  return NULL;
+#else
   vcd_error ("linux cd image source only supported under linux");
   return NULL;
 #endif

@@ -27,8 +27,14 @@
 #include <libvcd/vcd_logging.h>
 #include <libvcd/vcd_assert.h>
 
-#if defined(__linux__)
+#if defined(__linux__) && defined(HAVE_LINUX_VERSION_H)
+#include <linux/version.h>
+# if LINUX_VERSION_CODE >= KERNEL_VERSION(2,2,16)
+#  define __VCD_MMC_LINUX_BUILD
+# endif
+#endif
 
+#if defined(__VCD_MMC_LINUX_BUILD)
 #include <libvcd/vcd_util.h>
 
 #include <string.h>
@@ -36,6 +42,7 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
+
 #include <linux/cdrom.h>
 
 #define NAME_MAX (256 - sizeof (int))
@@ -191,7 +198,6 @@ _vcd_mmc_linux_destroy_device (void *user_data)
 
 
 #else /* !defined (__linux__) */
-
 int
 _vcd_mmc_linux_generic_packet (void *device, _vcd_mmc_command_t * cmd)
 {

@@ -326,11 +326,15 @@ _parse_user_data (uint8_t streamid, const void *buf, unsigned len,
     uint8_t data[EMPTY_ARRAY_SIZE] GNUC_PACKED;
   } const *udg = buf;
 
-/*   if (state->stream.version != MPEG_VERS_MPEG2) */
-/*     return; */
-
-  while (pos + 2 < len && udg->tag)
+  if (udg->tag == 0x00) /* if first tag's already 0x00 */
     {
+      vcd_debug ("strange (possibly non-compliant) user_data seen...");
+    }
+  else while (pos + 2 < len)
+    {
+      if (udg->tag == 0x00)
+        break;
+
       if (pos + udg->len >= len)
         break;
 
@@ -339,6 +343,10 @@ _parse_user_data (uint8_t streamid, const void *buf, unsigned len,
 
       switch (udg->tag)
         {
+        case 0x00:
+          vcd_assert_not_reached ();
+          break;
+
         case 0x10: /* scan information */
           {
             struct vcd_mpeg_scan_data_t *usdi = (void *) udg;
@@ -362,7 +370,7 @@ _parse_user_data (uint8_t streamid, const void *buf, unsigned len,
           break;
 
         case 0x11: /* closed caption data */
-          vcd_debug ("caption data seen -- not supported yet (len = %d)", udg->len);
+          vcd_debug ("closed caption data seen -- not supported yet (len = %d)", udg->len);
           break;
 
         default:
@@ -370,6 +378,7 @@ _parse_user_data (uint8_t streamid, const void *buf, unsigned len,
           return; /* since we cannot rely on udg->len anymore... */
           break;
         }
+
 
       pos += udg->len;
       vcd_assert (udg->len >= 2);

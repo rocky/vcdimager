@@ -186,7 +186,7 @@ _vcd_strncpy_pad(char dst[], const char src[], size_t len,
 
     case VCD_7BIT:
       for (idx = 0; src[idx]; idx++)
-        if (src[idx] < 0)
+        if ((int8_t) src[idx] < 0)
           {
             vcd_warn ("string '%s' fails 7bit constraint (pos = %d)", 
                       src, idx);

@@ -164,7 +164,7 @@ typedef struct {
 static inline uint32_t
 _get_psd_size (const debug_obj_t *obj)
 {
-  return UINT32_FROM_BE (obj->info.psd_size);
+  return uint32_from_be (obj->info.psd_size);
 }
 
 static void
@@ -629,7 +629,7 @@ dump_info (const debug_obj_t *obj)
   for (n = 0; n < 98; n++)
     {
       if (n == 48)
-        fprintf (stdout, "\n           ");
+        fprintf (stdout, "\n  (bslbf)  ");
 
       fprintf (stdout, n % 8 ? "%d" : " %d",
                _bitset_get_bit (info->pal_flags, n));
@@ -637,7 +637,10 @@ dump_info (const debug_obj_t *obj)
   fprintf (stdout, "\n");
 
   fprintf (stdout, " flags:\n");
-  fprintf (stdout, "  reserved1: %s\n",
+  fprintf (stdout, 
+           ((obj->vcd_type == VCD_TYPE_SVCD || obj->vcd_type == VCD_TYPE_HQVCD) 
+            ? "  reserved1: %s\n"
+            : "  karaoke area: %s\n"),
            _vcd_bool_str (info->flags.reserved1));
 
   fprintf (stdout, "  restriction: %d\n", info->flags.restriction);
@@ -645,9 +648,13 @@ dump_info (const debug_obj_t *obj)
   fprintf (stdout, "  user data cc: %s\n", _vcd_bool_str (info->flags.user_data_cc));
   fprintf (stdout, "  start lid #2: %s\n", _vcd_bool_str (info->flags.use_lid2));
   fprintf (stdout, "  start track #2: %s\n", _vcd_bool_str (info->flags.use_track3));
-  fprintf (stdout, "  extended pbc: %s\n", _vcd_bool_str (info->flags.pbc_x));
+  fprintf (stdout, 
+           ((obj->vcd_type == VCD_TYPE_SVCD || obj->vcd_type == VCD_TYPE_HQVCD) 
+            ? "  reserved2: %s\n"
+            : "  extended pbc: %s\n"),
+           _vcd_bool_str (info->flags.pbc_x));
 
-  fprintf (stdout, " psd size: %d\n", UINT32_FROM_BE (info->psd_size));
+  fprintf (stdout, " psd size: %d\n", uint32_from_be (info->psd_size));
   fprintf (stdout, " first segment addr: %2.2x:%2.2x:%2.2x\n",
            info->first_seg_addr.m, info->first_seg_addr.s, info->first_seg_addr.f);
 
@@ -734,8 +741,7 @@ dump_entries (const debug_obj_t *obj)
   for (n = 0; n < ntracks; n++)
     {
       const msf_t *msf = &(entries->entry[n].msf);
-      uint32_t extent = msf_to_lba(msf);
-      extent -= 150;
+      const uint32_t extent = msf_to_lba(msf) - 150;
 
       fprintf (stdout, " ENTRY[%2.2d]: track# %d (SEQUENCE[%d]), LSN %d "
                "(msf %2.2x:%2.2x:%2.2x)\n",
@@ -842,14 +848,15 @@ dump_scandata_dat (const debug_obj_t *obj)
       for (n = 0; n < scandata_count; n++)
         {
           const msf_t *msf = &_sd_v2->points[n];
+          const uint32_t extent = msf_to_lba (msf) - 150;
 
           if (!gl_verbose_flag 
               && n > PRINTED_POINTS
               && n < scandata_count - PRINTED_POINTS)
             continue;
 
-          fprintf (stdout, "  scanpoint[%.4d]: lsn: %2.2x:%2.2x:%2.2x\n",
-                   n, msf->m, msf->s, msf->f);
+          fprintf (stdout, "  scanpoint[%.4d]: LSN %u (msf %2.2x:%2.2x:%2.2x)\n",
+                   n, extent, msf->m, msf->s, msf->f);
 
           if (!gl_verbose_flag
               && n == PRINTED_POINTS
@@ -910,14 +917,15 @@ dump_scandata_dat (const debug_obj_t *obj)
       for (n = 0; n < scandata_count; n++)
         {
           const msf_t *msf = &_sd4->scandata_table[n];
+          const uint32_t extent = msf_to_lba (msf) - 150;
 
           if (!gl_verbose_flag 
               && n > PRINTED_POINTS
               && n < scandata_count - PRINTED_POINTS)
             continue;
 
-          fprintf (stdout, "  scanpoint[%.4d] (ofs:%5d): lsn: %2.2x:%2.2x:%2.2x\n",
-                   n, scandata_ofs0 + (n * 3), msf->m, msf->s, msf->f);
+          fprintf (stdout, "  scanpoint[%.4d] (ofs:%5d): LSN %u (msf %2.2x:%2.2x:%2.2x)\n",
+                   n, scandata_ofs0 + (n * 3), extent, msf->m, msf->s, msf->f);
 
           if (!gl_verbose_flag
               && n == PRINTED_POINTS
@@ -946,6 +954,8 @@ dump_search_dat (const debug_obj_t *obj)
   for (m = 0; m < scan_points;m++)
     {
       unsigned hh, mm, ss, ss2;
+      const msf_t *msf = &(searchdat->points[m]);
+      const uint32_t extent = msf_to_lba(msf) - 150;
 
       if (!gl_verbose_flag 
           && m > PRINTED_POINTS 
@@ -960,10 +970,8 @@ dump_search_dat (const debug_obj_t *obj)
       ss2 = (ss2 % 2) * 5;
 
       fprintf (stdout, " scanpoint[%.4d]: (real time: %.2d:%.2d:%.2d.%.1d) "
-               " sector: %.2x:%.2x:%.2x \n", m, hh, mm, ss, ss2,
-               searchdat->points[m].m,
-               searchdat->points[m].s,
-               searchdat->points[m].f);
+               " sector: LSN %u (msf %.2x:%.2x:%.2x)\n", m, hh, mm, ss, ss2,
+               extent, msf->m, msf->s, msf->f);
       
       if (!gl_verbose_flag
           && m == PRINTED_POINTS && scan_points > (PRINTED_POINTS * 2))

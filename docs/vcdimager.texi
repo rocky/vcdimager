@@ -230,14 +230,37 @@ multimedia support.
 @cindex Video CD layout
 @cindex @acronym{SPI} area
 
-In general, the layout of a Video CD is as follows:
+Basically a Video CD is made up of @acronym{CD-ROM XA} sectors,
+i.e. @acronym{CD-ROM} mode 2 form 1 & 2 sectors. Non-@acronym{MPEG} data
+is stored in mode 2 form 1 sectors with a user data area of 2048 byte,
+which have a similiar L2 error correction and detection
+(@acronym{ECC}/@acronym{EDC}) to @acronym{CD-ROM} mode 1 sectors. While
+realtime @acronym{MPEG} streams is stored in @acronym{CD-ROM} mode 2
+form 2 sectors, which by have no L2 @acronym{ECC}, yield a ~14% greater
+user data area consisting of 2324 bytes@footnote{actually raw mode 2
+sectors have a 2336 byte user data area, but parts of it are used for
+error codes and headers when using the mode 2 form 1 or form 2
+configurations.}
+
+@strong{Warning:} Realtime @acronym{MPEG} streams on Video CD's are only
+protected by L2 error detection (but no correction!), @acronym{EDC}, and
+@acronym{CIRC} encoding. Thus Video CD's are more easily affected by
+scratches and alike on the @acronym{CD-ROM} media surface.
+
+In general, a Video CD is made up of several mode 2 (and optionally
+@acronym{CD-DA}) tracks. The layout of a Video CD is as follows:
 
 @itemize @bullet
-@item 
-lead-in area containing the TOC (@code{00:00:00} -- @code{00:01:74}).
+@item
+lead-in area containing the TOC.
 
 @item
-ISO-9660 data track. @xref{The ISO-9660 Track}.
+Mandatory pre-gap consisting of 150 sectors (@code{00:00:00} --
+@code{00:01:74}).
+
+@item
+ISO-9660 data track. The beginning of this track is defined to have the
+@acronym{LSN} @code{0}. @xref{The ISO-9660 Track}.
 
 @itemize @bullet 
 @item 
@@ -264,8 +287,15 @@ ISO-9660 track.
 @end itemize
 
 @item
-Up to 98 @acronym{MPEG} mode 2 form 2 tracks embedded in front and rear
-margin empty sectors, preceded by track pre-gaps.
+Up to 98 @acronym{MPEG} mode 2 form 2 tracks wrapped in front and rear
+margin@footnote{Margins seem to be used, in order to compensate for
+inaccurate sector addressing issues on CD-ROM media. Interestingly, they
+have been abandoned for the Super Video CD.} empty sectors and preceded
+by (at least) 150 empty sector pre-gaps.
+
+@item
+150 sector post-gap after the last mpeg track, as required by the
+ECMA-130 standard.
 
 @item
 Up to 97@footnote{the maximum number of tracks on a Video CD must not
@@ -273,10 +303,7 @@ exceed 99 tracks} @acronym{CD-DA} tracks. (not supported yet by
 vcdimager)
 
 @item
-Optional lead-out pre-gap.
-
-@item
-lead-out area.
+Lead-out area.
 
 @end itemize
 
@@ -398,8 +425,11 @@ pictures@footnote{in addition to the resolutions already defined for
 motion video, also high resolutions are available for still pictures,
 which are 704 x 480 (@acronym{NTSC} Full @acronym{D-2}) and 704 x 576
 (@acronym{PAL} Full @acronym{D-2})} was provided. The bit-rate of
-multiplex-ed streams should be kept under 174300 bytes/sec in order to
-accommodate single speed drives.
+multiplex-ed streams should be kept under@footnote{Alas it seems, that
+for @emph{strict} Video CD 2.0 compliance, it's required to pad the
+stream exactly to 1x muxrate. The Super Video CD format does not have
+this flaw.} 174300 bytes/sec (except for single still picture items) in
+order to accommodate single speed drives.
 
 @node Extended Video CD, Super Video CD 1.0, Video CD 2.0, Known Video CD Flavors
 @subsection Extended Video CD
@@ -437,10 +467,11 @@ Higher resolutions (see below) for video stream resolution.
 
 @item
 Up to 4 overlay graphics and text (@dfn{OGT}) sub-channels for user
-switchable subtitle displaying.@footnote{There is also a non-compliant
+switchable subtitle displaying@footnote{There is also a non-compliant
 subtitle format widely used, having its origins in the forgotten
-@dfn{CVD} specification, which was a competitor for the Video CD 2.0
-successor. vcdimager supports both formats.}
+@dfn{CVD} specification, which is said to have been a competitor for the
+Video CD 2.0 successor. Vcdimager recognizes both formats.} in addition
+to the already existing closed caption facility.
 
 @item
 Command lists for controlling the @acronym{SVCD} virtual machine.
@@ -661,25 +692,55 @@ but then you are leaving the SVCD specification behind you@dots{}}:
 @end itemize
 
 The audio stream must be @acronym{MPEG}-1 layer II, with a bit-rate
-ranging from 32 to 384 kbits/sec bit-rate (i.e. @acronym{VBR}!) 
-with up to 2 stereo or 4 mono channels, or 1 extended @acronym{MPEG}-1/2
-multichannel (5+1) surround sound stream.
+ranging from 32 to 384 kbits/sec bit-rate (i.e. the audio stream
+@emph{is} allowed to be @acronym{VBR}!) with up to 2 stereo or 4 mono
+channels, or 1 extended @acronym{MPEG}-1/2 multichannel (5+1) surround
+sound stream.
 
 @menu
 * Scan Information Data::       
+* SVCD Subtitles::              
 @end menu
 
-@node Scan Information Data,  , Super Video CD, Super Video CD
+@node Scan Information Data, SVCD Subtitles, Super Video CD, Super Video CD
 @subsubsection Scan Information Data
 @cindex MPEG scan information user data
 
-According to the specification, it is mandatory to encode scan
-information data into user data blocks in the picture layer of all intra
-coded picture. It can be used by playing devices for implementing fast
-forward & fast reverse scanning.
+According to the specification, it is mandatory for Super Video
+CD's@footnote{It seems to be optionally supported for the Video CD 2.0}
+to encode scan information data into user data blocks in the picture
+layer of all intra coded picture. It can be used by playing devices for
+implementing fast forward & fast reverse scanning.
 
 The already existing scan information data can be updated by enabling
 the @code{update scan offsets} option. @xref{<option> Element}.
+
+@node SVCD Subtitles,  , Scan Information Data, Super Video CD
+@subsubsection SVCD Subtitles
+@cindex Subtitles
+
+There exist two major subtitle formats for SVCD's, of which only one is
+officially supported. The non-compliant one has it's origin in the
+so-called @acronym{CVD} format, a competitor for the Video CD 2.0
+successor. The @emph{real} SVCD subtitle format is part of the Super
+Video Specification, wheras the @acronym{CVD}-style subtitle format is
+not. Alas the latter one is more widely used, due to older pre-SVCD aged
+software only supporting the non-compliant @acronym{CVD} subtitle
+format.
+
+Compliant SVCD subtitles are transported in a @code{private_stream_1}
+stream with only the @code{private_data_id} @code{0x70}@footnote{While
+AC3 tracks use the @code{private_data_id} @code{0x80+}, @acronym{DVD}
+subtitles @code{0x20} onwards and @acronym{CVD} subtitles @code{0x00}
+and up.}. The @code{sub_stream_id} is used to distinguish between the 4
+available subtitle channels.
+
+As of the time of writing, there is only a proof of concept
+implementation (read @emph{hack}) for creating proper SVCD
+subtitles. The source code is available from the contribs download
+directory, but its use is not recommended for production use. If you are
+searching for a new free software project, you could take this as an
+idea@dots{}
 
 @node Common Constraints,  , Super Video CD, Constraints on MPEG streams
 @subsection Common Constraints
@@ -724,10 +785,11 @@ in the same mpeg pack/sector, thus forming a so-called @dfn{access
 point sector}.
 
 This requirement can be relaxed by enabling the @code{relaxed aps}
-option. @strong{Warning:} The sequence header is needed for a playing
-device to figure out display parameters, such as display resolution and
-frame rate, relaxing the aps requirement may lead to non-working entry
-points.
+option, i.e. every sector containing an I-frame will be regarded as an
+@acronym{APS}. @strong{Warning:} The sequence header is needed for a
+playing device to figure out display parameters, such as display
+resolution and frame rate, relaxing the aps requirement may lead to
+non-working entry points.
 
 @node Play Items, Playback Control, Constraints on MPEG streams, Video CD Concepts
 @section Play Items
@@ -763,7 +825,7 @@ Entry points.
 
 @itemize @bullet
 @item
-Pregap of 150 empty sectors.
+Pre-gap of 150 empty sectors.
 
 @item
 Limit of 98 sequences.
@@ -794,8 +856,8 @@ consecutive segments. A segment item can be
 @acronym{MPEG} audio.
 
 @item
-@acronym{MPEG} audio only.@footnote{which allows for several hours of
-audio only play back}
+@acronym{MPEG} audio only.@footnote{Which allows for several hours of
+audio only play back to fit on a @acronym{CD-ROM}.}
 @end itemize
 
 @subsubheading Advantages
@@ -1131,8 +1193,9 @@ the stream is supported as well.
 The @acronym{DTD} the @acronym{XML} description conforms to, can be
 downloaded from @uref{http://www.gnu.org/software/vcdimager/videocd.dtd}.
 
-XML examples are available at
-@uref{http://www.hvrlab.org/~hvr/vcdimager/xml_repository.html}.
+This chapter is merely a reference. Pointers to examples and more
+practical information about the XML structure used in vcdimager are
+available at @uref{http://www.vcdimager.org/}.
 
 The use of @command{vcdxgen} is recommended as a starting point point,
 when creating an advanced @acronym{XML} description.@footnote{Graphical user
@@ -1386,43 +1449,50 @@ Allowed @code{value} content: @samp{true}, @samp{false}. Default: @samp{false}.
 
 @item track pregap
 
-Used to set the track pre-gap for all tracks at once in sectors. The
-specification requires the pre-gap to be at least 150 sectors long.
+Used to set the track pre-gap for all tracks@footnote{except for the
+first one, which is hardwired to 150 sectors} in sectors globally. The
+specification requires the pre-gaps to be at least 150 sectors long.
 
 Allowed @code{value} content: [@samp{1}..@samp{300}]. Default: @samp{150}.
 
 @item track front margin
 
-Set's the front margin for sequence items. For Video CD 1.0/1.1/2.0 it
-should be at least 15 sectors long.
+Set's the front margin for sequence items. For Video CD 1.0/1.1/2.0 this
+margin should be at least 15 sectors long.
 
 Allowed @code{value} content: [@samp{0}..@samp{150}]. Default: @samp{30}
-for Video CD 1.0/1.1/2.0, otherwise @samp{0}.
+for Video CD 1.0/1.1/2.0, otherwise (i.e. Super Video CD 1.0 and HQ-VCD
+1.0) @samp{0}.
 
 @item track rear margin
 
-Set's the rear margin for sequence items. For Video CD 1.0/1.1/2.0 it
-should be at least 15 sectors long.
+Set's the rear margin for sequence items. For Video CD 1.0/1.1/2.0 this
+margin should be at least 15 sectors long.
 
 Allowed @code{value} content: [@samp{0}..@samp{150}]. Default: @samp{45}
 for Video CD 1.0/1.1/2.0, otherwise @samp{0}.
 
 @item leadout pregap 
 
-This option allows to set the amount of empty sectors added before the
-lead-out area begins. Some operating systems may encounter I/O errors due
-to read-ahead issues when reading the last mpeg track if this parameter
-is not set to a value around @samp{15}.
+This option@footnote{Should have been better named @samp{data track
+post-gap}.}  allows to set the amount of empty sectors added before the
+lead-out area begins, i.e. the amount of post-gap sectors. The ECMA-130
+specification requires the last data track before the lead-out to carry
+a post-gap of at least 150 sectors, which is used as default for this
+parameter.
 
-Allowed @code{value} content: [@samp{0}..@samp{300}]. Default: @samp{0}.
+Some operating systems may encounter I/O errors due to read-ahead issues
+when reading the last mpeg track if this parameter is set to low.
+
+Allowed @code{value} content: [@samp{0}..@samp{300}]. Default: @samp{150}.
 
 @item leadout pause
 
 @emph{DEPRECATED}. Use @samp{leadout pregap} instead. This option is
-equivalent to setting the @samp{leadout pregap} option to the value 
-@samp{150}.
+equivalent to setting the @samp{leadout pregap} option to the (default)
+value @samp{150}.
 
-Allowed @code{value} content: @samp{true}, @samp{false}. Default: @samp{false}.
+Allowed @code{value} content: @samp{true}, @samp{false}. Default: @samp{true}.
 
 @item relaxed aps
 @cindex Relaxed @acronym{APS} constraints
@@ -1494,11 +1564,17 @@ discs which contain related content} which the discs belongs to. This id
 is used in conjunction with the following elements to decide whether a
 disc is the next volume of the currently played one.
 
+The Content restricted to upto 16 d-characters, @xref{ISO646 d-Characters}.
+
 @item <volume-count>
 Total number of volumes (discs) in the album identified by @code{<album-id>}.
 
+Allowed content: [@samp{1}..@samp{65535}]. Default: @samp{1}.
+
 @item <volume-number>
 Ordinal number of the volume (disc) in the album.
+
+Allowed content: [@samp{0}..@samp{65535}]. Default: @samp{1}.
 @end table
 
 @noindent

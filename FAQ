@@ -1,38 +1,8 @@
 -*- text -*-
 
-VCDIMAGER FAQ
-~~~~~~~~~~~~~
+The FAQ is available at 
+ 
+ http://www.vcdimager.org/faq.phtml
 
-Q: ...cdrdao does not understand .cue-style toc-sheets!?
-
-A: make sure you use at least version 1.1.4 of cdrdao. 
-   (see also cdrdao's man page!)
-
-- -
-
-Q: I converted the .bin/.cue files to an .iso image and burned it. Why
-   can't I access the movie tracks?
-
-A: You must burn the Video CD image in DAO mode, converting it to an
-   'ISO Image' destroys important data stored in the cdrom mode 2 type sectors.
-
-- - 
-
-Q: When I double click on the application, a window flashes up and gets closed
-   fast again. What am I doing wrong?
-
-A: 'vcdimager' is the commandline frontend, and as such it is not a GUI.
-
-- -
-
-Q: The MPEG streams on (S)VCDs have a RIFF CD-XA header, how do I create such
-   one?
-
-A: There is no need to create one; Some operating systems wrap such a header
-   around XA form2 files, i.e. the RIFF header is not contained on the (S)VCD.
-   Vcdimager does not support RIFF wrapped MPEG streams, only plain MPEG 
-   program streams are.
-
-hvr
 --
 $Id$

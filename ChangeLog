@@ -1,3 +1,19 @@
+2002-01-04  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* configure.in: released version 0.7.12
+	
+	* libvcd/vcd_mpeg.c (_parse_user_data): 
+		display through vcd_debug() when encountering strange 
+		user_data content
+
+	* libvcd/vcd_image_linuxcd.c: make sure recent kernel headers 
+		are available when compiling
+
+	* frontends/cli/vcd_debug.c: minor improvements
+
+	* libvcd/vcd_util.c (_vcd_strncpy_pad): char signedness 	
+		assumption made explicit
+
 2002-01-03  Herbert Valerio Riedel  <hvr@gnu.org>
 	
 	* libvcd/vcd.c (_write_segment): minor change to SPI subheader
@@ -31,6 +47,8 @@
 
 2001-10-21  Herbert Valerio Riedel  <hvr@gnu.org>
 
+ 	* configure.in: released version 0.7.11
+	
 	* frontends/xml/vcd_xml_rip.c (main): added three new options for
 		disabling extraction of data
 
