@@ -54,11 +54,13 @@ vcd_obj_new (vcd_type_t vcd_type)
   case VCD_TYPE_SVCD:
     break;
   default:
-    return new_obj;
+    return new_obj; /* NULL */
   }
 
   new_obj = malloc (sizeof (VcdObj));
   memset (new_obj, 0, sizeof (VcdObj));
+  new_obj->custom_files = NULL; /* paranoid */
+
   new_obj->type = vcd_type;
 
   return new_obj;
@@ -70,7 +72,7 @@ vcd_obj_get_mpeg_info (VcdObj *obj, int track_id)
   assert (track_id >= 0);
   assert (track_id < obj->mpeg_tracks_num);
 
-  return & (obj->mpeg_tracks[track_id].mpeg_info); 
+  return &(obj->mpeg_tracks[track_id].mpeg_info); 
 }
 
 void
@@ -94,7 +96,7 @@ vcd_obj_remove_mpeg_track (VcdObj *obj, int track_id)
 
   /* shift up */
   for (n = track_id+1;n < obj->mpeg_tracks_num;n++)
-    memcpy (& (obj->mpeg_tracks[n-1]), & (obj->mpeg_tracks[n]), sizeof (obj->mpeg_tracks[n]));
+    memcpy (&(obj->mpeg_tracks[n-1]), &(obj->mpeg_tracks[n]), sizeof (obj->mpeg_tracks[n]));
 
   obj->mpeg_tracks_num--;
 }
@@ -128,7 +130,7 @@ vcd_obj_append_mpeg_track (VcdObj *obj, VcdDataSource *mpeg_file)
 
     vcd_data_source_read (mpeg_file, buf, sizeof (buf), 1);
 
-    if (mpeg_analyze_start_seq (buf, & (obj->mpeg_tracks[obj->mpeg_tracks_num].mpeg_info)))
+    if (mpeg_analyze_start_seq (buf, &(obj->mpeg_tracks[obj->mpeg_tracks_num].mpeg_info)))
       break;
 
     if (j > 16) {
@@ -146,6 +148,20 @@ void
 vcd_obj_destroy (VcdObj *obj)
 {
   assert (obj != NULL);
+
+  /* destroy cust_file linked list */
+  {
+    struct cust_file *p = obj->custom_files;
+    
+    while (p)
+      {
+        struct cust_file *tmp = p->next;
+        free (p);
+        p = tmp;
+      }
+
+    obj->custom_files = NULL;
+  }
 
   free (obj);
 }
@@ -193,6 +209,8 @@ vcd_obj_write_cuefile (VcdObj *obj, VcdDataSink *cue_file,
                obj->mpeg_tracks[n].relative_start_extent+obj->iso_size);
 
   vcd_data_sink_destroy (cue_file);
+
+  return 0;
 }
 
 void
@@ -222,6 +240,50 @@ vcd_obj_set_param (VcdObj *obj, vcd_parm_t param, const void *arg)
   }
 }
 
+int
+vcd_obj_add_file (VcdObj *obj, const char iso_pathname[],
+                  VcdDataSource *file, int raw_flag)
+{
+  uint32_t size = 0, sectors = 0, start_extent = 0;
+ 
+  assert (obj != NULL);
+  assert (iso_pathname != NULL);
+  assert (file != NULL);
+  
+  size = vcd_data_source_stat(file);
+
+  sectors = size / (raw_flag ? M2RAW_SIZE : M2F1_SIZE);
+
+  if (raw_flag && (size % M2RAW_SIZE))
+    {
+      vcd_error("raw mode2 file must have size multiple of %d \n", M2RAW_SIZE);
+      return 1;
+    }
+
+  if (size % M2F1_SIZE)
+    sectors++;
+
+  start_extent = _vcd_salloc(obj->iso_bitmap, SECTOR_NIL, sectors);
+
+  _vcd_directory_mkfile(obj->dir, iso_pathname, start_extent, size, raw_flag, 1);
+
+  {
+    struct cust_file **p = &(obj->custom_files);
+
+    while(*p)
+      p = &(*p)->next;
+
+    *p = malloc (sizeof (struct cust_file));
+    memset (*p, sizeof (struct cust_file), 0);
+    
+    (*p)->file = file;
+    (*p)->start_extent = start_extent;
+    (*p)->sectors = sectors;
+  }
+
+  return 0;
+}
+
 static void
 _finalize_vcd_iso_track (VcdObj *obj)
 {
@@ -246,8 +308,21 @@ _finalize_vcd_iso_track (VcdObj *obj)
   obj->entries_sec = _vcd_salloc (obj->iso_bitmap, ENTRIES_VCD_SECTOR, 1); /* ENTRIES.VCD  */ /* EOF */
   obj->lot_secs = _vcd_salloc (obj->iso_bitmap, LOT_VCD_SECTOR, LOT_VCD_SIZE);  /* LOT.VCD */ /* EOF */
   obj->psd_sec = _vcd_salloc (obj->iso_bitmap, PSD_VCD_SECTOR, 1); /* just one sec for now... */
+
+  if (obj->type == VCD_TYPE_SVCD)
+    {
+      obj->tracks_sec = _vcd_salloc (obj->iso_bitmap, TRACKS_SVD_SECTOR, 1); /* TRACKS.SVD */
+      
+      /* fixme -- we create it with zero scan points for now, cause it's simpler */
+      obj->search_secs = _vcd_salloc (obj->iso_bitmap, SEARCH_DAT_SECTOR, 1); /* SEARCH.DAT */
+
+      assert(obj->tracks_sec != SECTOR_NIL);
+      assert(obj->search_secs != SECTOR_NIL);
+    }
+
   set_psd_size (obj);
 
+  /* these are set/put after the directory tree/records have been created */
   obj->ptl_sec = SECTOR_NIL; /* EOR+EOF */
   obj->ptm_sec = SECTOR_NIL; /* EOR+EOF */
     
@@ -255,6 +330,8 @@ _finalize_vcd_iso_track (VcdObj *obj)
   assert (obj->pvd_sec != SECTOR_NIL);
   assert (obj->info_sec != SECTOR_NIL);
   assert (obj->entries_sec != SECTOR_NIL);
+  assert (obj->lot_secs != SECTOR_NIL);
+  assert (obj->psd_sec != SECTOR_NIL);
 
   switch(obj->type) {
   case VCD_TYPE_VCD2:
@@ -263,11 +340,13 @@ _finalize_vcd_iso_track (VcdObj *obj)
     _vcd_directory_mkdir (obj->dir, "EXT");
     /* _vcd_directory_mkdir (obj->dir, "KARAOKE"); */
     _vcd_directory_mkdir (obj->dir, "MPEGAV");
-    _vcd_directory_mkdir (obj->dir, "SEGMENT"); 
+    _vcd_directory_mkdir (obj->dir, "SEGMENT");
     _vcd_directory_mkdir (obj->dir, "VCD");
 
     _vcd_directory_mkfile (obj->dir, "VCD/ENTRIES.VCD;1", obj->entries_sec, ISO_BLOCKSIZE, FALSE, 0);    
     _vcd_directory_mkfile (obj->dir, "VCD/INFO.VCD;1", obj->info_sec, ISO_BLOCKSIZE, FALSE, 0);
+
+    /* only for vcd2.0 */
     _vcd_directory_mkfile (obj->dir, "VCD/LOT.VCD;1", obj->lot_secs, ISO_BLOCKSIZE*LOT_VCD_SIZE, FALSE, 0);
     _vcd_directory_mkfile (obj->dir, "VCD/PSD.VCD;1", obj->psd_sec, obj->psd_size, FALSE, 0);
     break;
@@ -281,6 +360,9 @@ _finalize_vcd_iso_track (VcdObj *obj)
     _vcd_directory_mkfile (obj->dir, "SVCD/INFO.VCD;1", obj->info_sec, ISO_BLOCKSIZE, FALSE, 0);
     _vcd_directory_mkfile (obj->dir, "SVCD/LOT.VCD;1", obj->lot_secs, ISO_BLOCKSIZE*LOT_VCD_SIZE, FALSE, 0);
     _vcd_directory_mkfile (obj->dir, "SVCD/PSD.VCD;1", obj->psd_sec, obj->psd_size, FALSE, 0);
+
+    _vcd_directory_mkfile (obj->dir, "SVCD/TRACKS.SVD;1", obj->tracks_sec, ISO_BLOCKSIZE, FALSE, 0);
+
     break;
 
   default:
@@ -288,15 +370,6 @@ _finalize_vcd_iso_track (VcdObj *obj)
     break;
   }
 
-  /* add custom user files */
-
-  
-
-  /* fixme */
-
-  /*     if (gl.add_files_path) */
-  /*       insert_tree_mode2_form1 (gl.image_fd, gl.add_files_path); */
-  
   /* calculate iso size -- after this point no sector shall be
      allocated anymore */
 
@@ -309,16 +382,27 @@ _finalize_vcd_iso_track (VcdObj *obj)
 
   for (n = 0; n < obj->mpeg_tracks_num; n++) {
     char avseq_pathname[128] = { 0, };
+    const char *fmt = NULL;
     uint32_t extent = obj->mpeg_tracks[n].relative_start_extent;
       
-    snprintf (avseq_pathname, sizeof (avseq_pathname), 
-              "MPEGAV/AVSEQ%2.2d.DAT;1", n+1); /* fixme --> SVCD */
-    
+    switch (obj->type) {
+    case VCD_TYPE_VCD2:
+      fmt = "MPEGAV/AVSEQ%2.2d.DAT;1";
+      break;
+    case VCD_TYPE_SVCD:
+      fmt = "MPEG-2/AVSEQ%2.2d.MPG;1";
+      break;
+    default:
+      assert(1);
+    }
+      
+    snprintf (avseq_pathname, sizeof (avseq_pathname), fmt, n+1);
+
     extent += obj->iso_size;
 
     _vcd_directory_mkfile (obj->dir, avseq_pathname, extent+PRE_DATA_GAP,
-                      obj->mpeg_tracks[n].length_sectors*ISO_BLOCKSIZE,
-                      TRUE, n+1);
+                           obj->mpeg_tracks[n].length_sectors*ISO_BLOCKSIZE,
+                           TRUE, n+1);
   }
 
   obj->dirs_size = _vcd_directory_get_size (obj->dir);
@@ -460,6 +544,12 @@ _write_vcd_iso_track (VcdObj *obj)
   set_lot_vcd (obj);
   set_psd_vcd (obj);
 
+  if (obj->type == VCD_TYPE_SVCD) 
+    {
+      set_tracks_svd (obj);
+      set_search_dat (obj);
+    }
+
   /* start actually writing stuff */
 
   vcd_debug ("writing track 1 (ISO9660)...");
@@ -508,15 +598,36 @@ _write_vcd_iso_track (VcdObj *obj)
   _write_m2_image_sector (obj, obj->psd_vcd_buf, obj->psd_sec,
                           0, 0, SM_DATA|SM_EOF, 0);
 
-  for (n = 185;n < 225; n++)
+  if(obj->type == VCD_TYPE_SVCD) 
+    {
+      _write_m2_image_sector (obj, obj->tracks_svd_buf, obj->tracks_sec,
+                              0, 0, SM_DATA|SM_EOF, 0);
+      _write_m2_image_sector (obj, obj->search_dat_buf, obj->search_secs,
+                              0, 0, SM_DATA|SM_EOF, 0);
+    }
+  else
+    {
+      _write_m2_image_sector (obj, zero, TRACKS_SVD_SECTOR, 0, 0, SM_DATA, 0);
+      _write_m2_image_sector (obj, zero, SEARCH_DAT_SECTOR, 0, 0, SM_DATA, 0);
+    }
+
+  for (n = 185+2;n < 225; n++)
     _write_m2_image_sector (obj, zero, n, 0, 0, SM_DATA, 0);
 
-  if (obj->cdi_vcd_file && obj->cdi_text_file && obj->cdi_image_file) {
-    _write_source_mode2_raw (obj, obj->cdi_image_file, obj->cdi_image_extent);
+  /* write custom files */
+  {
+    struct cust_file *p = obj->custom_files;
+    
+    while (p) 
+      {
+        vcd_debug ("writing custom file...");
+        if (p->raw_flag)
+          _write_source_mode2_raw (obj, p->file, p->start_extent);
+        else
+          _write_source_mode2_form1 (obj, p->file, p->start_extent);
 
-    _write_source_mode2_form1 (obj, obj->cdi_text_file, obj->cdi_text_extent);
-
-    _write_source_mode2_form1 (obj, obj->cdi_vcd_file, obj->cdi_vcd_extent);
+        p = p->next;
+      }
   }
   
   /* blank unalloced tracks */
@@ -543,7 +654,7 @@ _write_sectors (VcdObj *obj, int track)
 
   {
     char *norm_str = NULL;
-    mpeg_info_t *info = & (obj->mpeg_tracks[track].mpeg_info);
+    mpeg_info_t *info = &(obj->mpeg_tracks[track].mpeg_info);
 
     switch (info->norm) {
     case MPEG_NORM_PAL:

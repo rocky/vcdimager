@@ -72,6 +72,13 @@ uint8_t  to_bcd8(uint8_t n);
 
 uint8_t  from_bcd8(uint8_t p);
 
+
+void
+lba_to_msf(uint32_t lba, msf_t *msf);
+
+uint32_t
+msf_to_lba (const msf_t *msf);
+
 #endif /* _BYTESEX_H_ */
 
 

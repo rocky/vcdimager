@@ -31,7 +31,7 @@ struct _VcdObj {
   vcd_type_t type;
 
   /* output */
-  bool bin_file_2336_flag;
+  int bin_file_2336_flag;
   VcdDataSink *bin_file;
   /* VcdDataSink* cue_file; */
 
@@ -48,20 +48,24 @@ struct _VcdObj {
   } mpeg_tracks[100]; /* fixme */
   int mpeg_tracks_num;
 
-  /* cdi support files */
-  VcdDataSource *cdi_image_file;
-  VcdDataSource *cdi_text_file;
-  VcdDataSource *cdi_vcd_file;
-
-  uint32_t cdi_image_extent;
-  uint32_t cdi_text_extent;
-  uint32_t cdi_vcd_extent;
+  /* custom files */
+  struct cust_file {
+    VcdDataSource *file;
+    uint32_t start_extent;
+    uint32_t sectors;
+    int raw_flag;
+    
+    struct cust_file *next;
+  } *custom_files;
 
   /* fixme -- vcd files */
   char info_vcd_buf[ISO_BLOCKSIZE];
   char entries_vcd_buf[ISO_BLOCKSIZE];
   char lot_vcd_buf[ISO_BLOCKSIZE*LOT_VCD_SIZE];
   char psd_vcd_buf[ISO_BLOCKSIZE]; /* fixme */
+
+  char tracks_svd_buf[ISO_BLOCKSIZE];
+  char search_dat_buf[ISO_BLOCKSIZE]; /* fixme */
 
   uint32_t pvd_sec;
   uint32_t evd_sec;
@@ -72,6 +76,9 @@ struct _VcdObj {
   uint32_t lot_secs;
   uint32_t psd_sec;
   uint32_t psd_size;
+  
+  uint32_t tracks_sec;
+  uint32_t search_secs;
 
   uint32_t ptl_sec;
   uint32_t ptm_sec;

@@ -43,9 +43,7 @@ build_address(void * buf, sectortype_t sectortype, uint32_t address)
   
   assert(sizeof(raw_cd_sector_t) == CDDA_SIZE-DATA_LEN);
 
-  sector->msf[0] = to_bcd8(address / (60*75));
-  sector->msf[1] = to_bcd8((address / 75) % 60);
-  sector->msf[2] = to_bcd8(address % 75);
+  lba_to_msf(address, &(sector->msf));
 
   switch(sectortype) {
   case MODE_0:

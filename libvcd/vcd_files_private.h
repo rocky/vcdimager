@@ -34,18 +34,6 @@
 #pragma options align=packed
 #endif
 
-/* In many structures on the disk a sector address is stored as a
-   BCD-encoded mmssff in three bytes. */
-typedef struct {
-  uint8_t m1 : 4;
-  uint8_t m2 : 4;
-  uint8_t s1 : 4;
-  uint8_t s2 : 4;
-  uint8_t f1 : 4;
-  uint8_t f2 : 4;
-} MMSSFF;
-
-
 typedef struct {
   char ID[8]                 GNUC_PACKED; /* "ENTRYVCD" */
   uint8_t version            GNUC_PACKED; /* 0x02 --- VCD2.0
@@ -56,9 +44,7 @@ typedef struct {
   uint16_t tracks            GNUC_PACKED; /* 1 <= tracks <= 500 */
   struct { /* all fields are BCD */
     uint8_t n                GNUC_PACKED;
-    uint8_t m                GNUC_PACKED;
-    uint8_t s                GNUC_PACKED;
-    uint8_t f                GNUC_PACKED;
+    msf_t msf                GNUC_PACKED;
   } entry[500]               GNUC_PACKED;
   uint8_t reserved2[36]      GNUC_PACKED; /* RESERVED, must be 0x00 */
 } EntriesVcd; /* sector 00:04:01 */
@@ -279,23 +265,24 @@ typedef struct {
   uint8_t reserved2 : 2                 ; /* Reserved, must be zero */
 } SVDTrackContent;
 
-/* The file contains a series of the TracksSVDTrack structures, one for each
+/* The file contains a series of structures, one for each
    track, which indicates the track's playing time (in sectors, not actually
    real time) and contents. */
 
-typedef struct {
-    MMSSFF playing_time  GNUC_PACKED; /* BCD coded mm:ss:ff */
-    SVDTrackContent contents GNUC_PACKED; /* indicates track contents */
-} TracksSVDTrack;
-
-/* Here's the whole file structure */
+#define TRACKS_SVD_FILE_ID  "TRACKSVD"
+#define TRACKS_SVD_VERSION  0x01
 
 typedef struct {
   char file_id[8]               GNUC_PACKED; /* == "TRACKSVD" */
   uint8_t version               GNUC_PACKED; /* == 0x01 */
   uint8_t reserved              GNUC_PACKED; /* Reserved, must be zero */
   uint8_t tracks                GNUC_PACKED; /* number of MPEG tracks */
-  TracksSVDTrack tracks_info[0] GNUC_PACKED; /* track info, one per track */
+  struct {
+    msf_t playing_time          GNUC_PACKED; /* BCD coded mm:ss:ff */
+    SVDTrackContent contents    GNUC_PACKED; /* indicates track contents */
+  } tracks_info[98]             GNUC_PACKED; /* track info, one per track */
+
+  uint8_t reserved2[1645]       GNUC_PACKED; /* padding to 2k block */
 } TracksSVD;
 
 /* SEARCH.DAT
@@ -304,15 +291,19 @@ typedef struct {
    stream to the given time T. Scan points are given at every half-second
    for the entire duration of the disc. */
 
+#define SEARCH_FILE_ID        "SEARCHSV"
+#define SEARCH_VERSION        0x01
+#define SEARCH_TIME_INTERVAL  0x01
+
 typedef struct {
   char file_id[8]             GNUC_PACKED; /* = "SEARCHSV" */
   uint8_t version             GNUC_PACKED; /* = 0x01 */
   uint8_t reserved            GNUC_PACKED; /* Reserved, must be zero */
-  u_short scan_points         GNUC_PACKED; /* the number of scan points */
+  uint16_t scan_points        GNUC_PACKED; /* the number of scan points */
   uint8_t time_interval       GNUC_PACKED; /* The interval of time in
                                               between scan points, in units
                                               of 0.5 seconds, must be 0x01 */
-  MMSSFF points[0]            GNUC_PACKED; /* The series of scan points */
+  msf_t points[0]             GNUC_PACKED; /* The series of scan points */
 } SearchDat;
 
 /* SCANDATA.DAT
@@ -333,7 +324,7 @@ typedef struct {
                                               play item segments (as opposed
                                               to the number of segment play
                                               items). */
-  /* MMSSFF playtimes[track_count]            cumulative playing time up to
+  /* MSF_T playtimes[track_count]            cumulative playing time up to
                                               track N. Track time just
                                               wraps at 99:59:74 */
   /* uint16_t spi_indexes[spi_count]          Indexes into the following
@@ -346,8 +337,8 @@ typedef struct {
        uint8_t track_num;                     Track number as in TOC
        uint16_t table_offset;                 Index into scandata table
      } mpeg_track_offsets[track_count]                                  */
-  /* MMSSFF spi_item_points[spi_count][time(item)/0.5s] scan points for spis */
-  /* MMSSFF mpeg_track_points[track_count][time(item)/0.5s] scan points */
+  /* MSF_T spi_item_points[spi_count][time(item)/0.5s] scan points for spis */
+  /* MSF_T mpeg_track_points[track_count][time(item)/0.5s] scan points */
 } ScandataDat;
 
 #ifdef __MWERKS__

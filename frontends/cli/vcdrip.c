@@ -27,6 +27,7 @@
 #include <errno.h>
 
 #ifdef __linux__
+#warning expect missing prototype warnings from swab.h
 #include <linux/cdrom.h>
 #endif
 
@@ -236,17 +237,14 @@ dump_entries_vcd (gconstpointer data)
 
   for (n = 0; n < ntracks; n++)
     {
-      guint32 extent = from_bcd8 (entries.entry[n].m);
-      extent *= 60;
-      extent += from_bcd8 (entries.entry[n].s);
-      extent -= 2;
-      extent *= 75;
-      extent += from_bcd8 (entries.entry[n].f);
+      const msf_t *msf = &(entries.entry[n].msf);
+      uint32_t extent = msf_to_lba(msf);
+      extent -= 150;
 
-      g_print
-        (" entry %d starts in track %d at (lba) extent %d (msf: %2.2x:%2.2x:%2.2x)\n",
-         n + 1, from_bcd8 (entries.entry[n].n), extent, entries.entry[n].m,
-         entries.entry[n].s, entries.entry[n].f);
+      g_print (" entry %d starts in track %d at (lba) extent %d "
+               "(msf: %2.2x:%2.2x:%2.2x)\n",
+               n + 1, from_bcd8 (entries.entry[n].n), extent,
+               msf->m, msf->s, msf->f);
     }
 
 }
@@ -444,19 +442,6 @@ rip_file (const gchar device_fname[])
   g_printerr ("ripping file image not supported yet\n");
 }
 
-static guint32
-msf2lba (guint8 m, guint8 s, guint8 f)
-{
-  guint32 lba = from_bcd8 (m);
-  lba *= 60;
-  lba += from_bcd8 (s);
-  lba -= 2;
-  lba *= 75;
-  lba += from_bcd8 (f);
-
-  return lba;
-}
-
 static void
 rip_device (const gchar device_fname[])
 {
@@ -493,14 +478,10 @@ rip_device (const gchar device_fname[])
 
   for (i = 0; i < GUINT16_FROM_BE (entries.tracks); i++)
     {
-      guint32 startlba = msf2lba (entries.entry[i].m,
-                                  entries.entry[i].s,
-                                  entries.entry[i].f);
+      guint32 startlba = msf_to_lba (&(entries.entry[i].msf)) - 150;
 
       guint32 endlba = (i + 1 == GUINT16_FROM_BE (entries.tracks))
-        ? size : msf2lba (entries.entry[i + 1].m,
-                          entries.entry[i + 1].s,
-                          entries.entry[i + 1].f);
+        ? size : (msf_to_lba (&(entries.entry[i + 1].msf)) - 150);
 
       guint32 pos = -1;
 
@@ -534,7 +515,7 @@ rip_device (const gchar device_fname[])
           }
           buf;
 
-          struct cdrom_msf *msf = &buf;
+          struct cdrom_msf *msf = (struct cdrom_msf *) &buf;
 
           memset (&buf, 0, sizeof (buf));
 

@@ -426,6 +426,8 @@ _vcd_directory_mkfile (VcdDirectory *dir, const char pathname[],
   }
 
   _strfreev(splitpath);
+
+  return 0;
 }
 
 uint32_t

@@ -31,7 +31,7 @@
 #include "vcd_salloc.h"
 
 void
-write_mode2_sector(VcdDataSink *sink, bool sect2336, const void *data,
+write_mode2_sector(VcdDataSink *sink, int sect2336, const void *data,
                    uint32_t extent, uint8_t fnum, uint8_t cnum, 
                    uint8_t sm, uint8_t ci)
 {
@@ -59,7 +59,7 @@ write_mode2_sector(VcdDataSink *sink, bool sect2336, const void *data,
 }
 
 void
-write_mode2_raw_sector(VcdDataSink *sink, bool sect2336,
+write_mode2_raw_sector(VcdDataSink *sink, int sect2336,
                        const void *data, uint32_t extent)
 {
   char buf[CDDA_SIZE] = { 0, };
@@ -82,47 +82,6 @@ write_mode2_raw_sector(VcdDataSink *sink, bool sect2336,
 
 /*   if(ferror(fd))  */
 /*     vcd_error("fwrite(): %s", g_strerror(errno)); */
-}
-
-uint32_t
-mknod_source_mode2_raw(VcdDirectory *dir, VcdDataSink *sink, VcdDataSource *source,
-                       VcdSalloc *iso_bitmap, const char iso_pathname[])
-{
-  uint32_t size = 0, extent = 0, sectors = 0;
-
-  size = vcd_data_source_stat(source);
-
-  sectors = size / M2RAW_SIZE;
-
-  if(size % M2RAW_SIZE) 
-    vcd_error("raw mode2 file must have size multiple of %d \n", M2RAW_SIZE);
-
-  extent = _vcd_salloc(iso_bitmap, SECTOR_NIL, sectors);
-
-  _vcd_directory_mkfile(dir, iso_pathname, extent, size, TRUE, 1);
-
-  return extent;
-
-}
-
-uint32_t
-mknod_source_mode2_form1(VcdDirectory *dir, VcdDataSink *sink, VcdDataSource *source,
-                         VcdSalloc *iso_bitmap, const char iso_pathname[])
-{
-  uint32_t size = 0, sectors = 0, start_extent = 0;
-
-  size = vcd_data_source_stat(source);
-
-  sectors = size / M2F1_SIZE;
-  if(size % M2F1_SIZE)
-    sectors++;
-
-  start_extent = _vcd_salloc(iso_bitmap, SECTOR_NIL, sectors);
-  
-  _vcd_directory_mkfile(dir, iso_pathname, start_extent, size, FALSE, 1);
-
-  return start_extent;
-
 }
 
 

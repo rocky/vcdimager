@@ -81,7 +81,7 @@ mpeg_type (const void *mpeg_block)
   return MPEG_UNKNOWN;
 }
 
-bool 
+int
 mpeg_analyze_start_seq(const void *packet, mpeg_info_t *info)
 {
   const uint8_t *pkt = packet;

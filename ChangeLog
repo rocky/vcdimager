@@ -1,3 +1,27 @@
+2000-11-14  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_bytesex.c (msf_to_lba): new function
+	(lba_to_msf): new function
+
+	* libvcd/vcd.c: more svcd support added...
+
+	* libvcd/vcd_cd_sector_private.h: replaced char[3] by msf
+
+	* libvcd/vcd_files_private.h: replaced MMSSFF by 
+		msf_t (defined in vcd_types.h)
+
+	* libvcd/vcd_files.c: svcd support starting...
+	(set_tracks_svd): new function
+	(set_search_dat): new function 
+
+	* frontends/cli/vcdimager.c: just some constify
+
+	* libvcd/vcd_types.h: removed bool type
+
+	* libvcd/vcd_transfer.c: removed obsolete mknod_source* () functions
+
+	* libvcd/vcd.c (vcd_obj_add_file): implemented function
+
 2000-11-13  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_salloc.h: prefixed exported symbols _vcd

@@ -41,7 +41,7 @@ typedef enum {
 
 typedef struct {
   uint8_t sync[SYNC_LEN];
-  uint8_t msf[3];
+  msf_t msf;
   uint8_t mode;
   uint8_t user_data[0];
 } raw_cd_sector_t;

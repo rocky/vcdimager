@@ -29,21 +29,13 @@
 #include "vcd_directory.h"
 
 void
-write_mode2_sector(VcdDataSink *sink, bool sect2336, const void *data, 
+write_mode2_sector(VcdDataSink *sink, int sect2336, const void *data, 
                    uint32_t extent, uint8_t fnum, uint8_t cnum, 
                    uint8_t sm, uint8_t ci);
 
 void
-write_mode2_raw_sector(VcdDataSink *sink, bool sect2336, 
+write_mode2_raw_sector(VcdDataSink *sink, int sect2336, 
                        const void *data, uint32_t extent);
-
-uint32_t
-mknod_source_mode2_raw(VcdDirectory *dir, VcdDataSink *sink, VcdDataSource *source,
-                       VcdSalloc *iso_bitmap, const char iso_pathname[]);
-
-uint32_t
-mknod_source_mode2_form1(VcdDirectory *dir, VcdDataSink *sink, VcdDataSource *source,
-                         VcdSalloc *iso_bitmap, const char iso_pathname[]);
 
 #endif /* _TRANSFER_H_ */
 

@@ -49,9 +49,8 @@ set_entries_vcd(VcdObj *obj)
     lsect += obj->iso_size;
 
     entries_vcd.entry[n].n = to_bcd8(n+2);
-    entries_vcd.entry[n].m = to_bcd8(lsect / (60*75));
-    entries_vcd.entry[n].s = to_bcd8(((lsect / 75) % 60)+2);
-    entries_vcd.entry[n].f = to_bcd8(lsect % 75);
+
+    lba_to_msf(lsect + 150, &(entries_vcd.entry[n].msf));
   }
 
   memcpy(obj->entries_vcd_buf, &entries_vcd, sizeof(entries_vcd));
@@ -160,6 +159,44 @@ set_info_vcd(VcdObj *obj)
   info_vcd.item_count = UINT16_TO_BE(0x0000); /* no items in /SEGMENT supported yet */
 
   memcpy(obj->info_vcd_buf, &info_vcd, sizeof(info_vcd));
+}
+
+void
+set_tracks_svd (VcdObj *obj)
+{
+  TracksSVD tracks_svd;
+  
+  assert (sizeof (TracksSVD) == ISO_BLOCKSIZE);
+
+  memset (&tracks_svd, sizeof (tracks_svd), 0);
+
+  strncpy (tracks_svd.file_id, TRACKS_SVD_FILE_ID, sizeof (TRACKS_SVD_FILE_ID));
+  
+  tracks_svd.version = TRACKS_SVD_VERSION;
+  
+  /* fixme !!! */
+  /* tracks_svd.tracks = */
+  /* tracks_svd.tracks_info[0] = */
+  
+  memcpy (obj->tracks_svd_buf, &tracks_svd, sizeof(tracks_svd));
+}
+
+void
+set_search_dat (VcdObj *obj)
+{
+  SearchDat search_dat;
+
+  /* assert (sizeof (SearchDat) == ?) */
+
+  memset (&search_dat, sizeof (search_dat), 0);
+
+  strncpy (search_dat.file_id, SEARCH_FILE_ID, sizeof (SEARCH_FILE_ID));
+  
+  search_dat.version = SEARCH_VERSION;
+  search_dat.scan_points = UINT16_TO_BE (0x0000); /* fixme */
+  search_dat.time_interval = SEARCH_TIME_INTERVAL;
+
+  memcpy (obj->search_dat_buf, &search_dat, sizeof (search_dat));
 }
 
 /* eof */

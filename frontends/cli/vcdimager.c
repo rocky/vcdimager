@@ -44,13 +44,13 @@
  */
 static struct
 {
-  gchar *image_fname;
-  gchar *cue_fname;
+  const gchar *image_fname;
+  const gchar *cue_fname;
   gchar **track_fnames;
 
   gchar *add_files_path;
 
-  gchar *volume_label;
+  const gchar *volume_label;
 
   gboolean sector_2336_flag;
 

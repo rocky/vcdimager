@@ -54,7 +54,7 @@ typedef struct {
 mpeg_type_t 
 mpeg_type(const void *mpeg_block);
 
-bool
+int
 mpeg_analyze_start_seq(const void *packet, mpeg_info_t *info);
 
 #endif /* _MPEG_H_ */

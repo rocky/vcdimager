@@ -30,23 +30,31 @@
 #define LOT_VCD_SIZE       32
 #define PSD_VCD_SECTOR     (LOT_VCD_SECTOR+LOT_VCD_SIZE)
 
-/* dest must be a ISO_BLOCKSIZE malloc'ed buffer */
+/* these are used for SVCDs only */
+#define TRACKS_SVD_SECTOR  (PSD_VCD_SECTOR+1)
+#define SEARCH_DAT_SECTOR  (TRACKS_SVD_SECTOR+1)
+
+
 void
-set_entries_vcd(VcdObj *obj);
+set_entries_vcd (VcdObj *obj);
 
 void 
-set_info_vcd(VcdObj *obj);
+set_info_vcd (VcdObj *obj);
 
 void
-set_psd_size(VcdObj *obj);
+set_psd_size (VcdObj *obj);
 
 void
-set_lot_vcd(VcdObj *obj);
+set_lot_vcd (VcdObj *obj);
 
 void
-set_psd_vcd(VcdObj *obj);
+set_psd_vcd (VcdObj *obj);
 
-/* TODO: optional lot.vcd & psd.vcd files */
+void
+set_tracks_svd (VcdObj *obj);
+
+void
+set_search_dat (VcdObj *obj);
 
 #endif /* VCDFILES_H */
 

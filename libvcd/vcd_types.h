@@ -25,15 +25,12 @@
 #include <stdint.h>
 #endif
 
-#ifndef bool
-# undef FALSE
-# undef TRUE
-typedef enum { FALSE=0, TRUE=1 } bool;
-#else
-# undef FALSE
-# undef TRUE
-# define FALSE 0
-# define TRUE 1
+#ifndef FALSE
+#define FALSE 0
+#endif 
+
+#ifndef TRUE
+#define TRUE 1
 #endif
 
 #if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)
@@ -60,6 +57,14 @@ typedef enum { FALSE=0, TRUE=1 } bool;
 #define GNUC_UNUSED
 #define GNUC_PACKED
 #endif  /* !__GNUC__ */
+
+/* In many structures on the disk a sector address is stored as a
+   BCD-encoded mmssff in three bytes. */
+typedef struct {
+  uint8_t m  GNUC_PACKED;
+  uint8_t s  GNUC_PACKED;
+  uint8_t f  GNUC_PACKED;
+} msf_t;
 
 #endif /* __VCD_TYPES_H__ */
 

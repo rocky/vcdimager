@@ -82,6 +82,34 @@ from_bcd8(uint8_t p)
   return (0xf & p)+(10*(p >> 4));
 }
 
+void
+lba_to_msf (uint32_t lba, msf_t *msf)
+{
+  assert (msf != 0);
+
+  msf->m = to_bcd8 (lba / (60 * 75));
+  msf->s = to_bcd8 ((lba / 75) % 60);
+  msf->f = to_bcd8 (lba % 75);
+}
+
+uint32_t
+msf_to_lba (const msf_t *msf)
+{
+  uint32_t lba = 0;
+
+  assert (msf != 0);
+
+  lba = from_bcd8 (msf->m);
+  lba *= 60;
+
+  lba += from_bcd8 (msf->s);
+  lba *= 75;
+  
+  lba += from_bcd8 (msf->f);
+
+  return lba;
+}
+
 
 /* 
  * Local variables:
