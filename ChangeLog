@@ -1,3 +1,11 @@
+2000-11-19  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* frontends/cli/vcdrip.c: removed glib dependancy
+
+	* libvcd/vcd_bytesex.h: added _FROM_ macros
+
+	* frontends/cli/vcdimager.c: removed glib dependancy
+
 2000-11-18  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd.c (vcd_obj_add_file): fixed memset()

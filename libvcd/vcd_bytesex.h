@@ -54,6 +54,10 @@
 # define UINT32_TO_LE(val)     ((uint32_t) (val))
 #endif
 
+#define UINT16_FROM_BE(val)    (UINT16_TO_BE (val))
+#define UINT16_FROM_LE(val)    (UINT16_TO_LE (val))
+#define UINT32_FROM_BE(val)    (UINT32_TO_BE (val))
+#define UINT32_FROM_LE(val)    (UINT32_TO_LE (val))
 
 #define  to_711(val)  ((uint8_t) (val))
 
