@@ -1966,6 +1966,7 @@ vcdinfo_close(vcdinfo_obj_t *obj)
     free(obj->seg_sizes);
     free(obj->lot);
     free(obj->lot_x);
+    if (obj->psd_x) free(obj->psd_x);
     free(obj->tracks_buf);
     free(obj->search_buf);
     free(obj->source_name);
