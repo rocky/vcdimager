@@ -20,14 +20,12 @@
 
 bin_PROGRAMS = vcdxbuild vcdxgen vcdxrip vcdxminfo
 
-if MAINTAINER_MODE
 man_MANS = vcdxbuild.1 vcdxgen.1 vcdxrip.1 vcdxminfo.1
-$(man_MANS): %.1: %
+
+$(man_MANS): %.1: @MAINTAINER_MODE_TRUE@ %
 	-$(HELP2MAN) --output=$@ ./$<
+
 MAINTAINERCLEANFILES = $(man_MANS)
-else 
-man_MANS =
-endif
 
 INCLUDES = -I$(top_srcdir) $(LIBPOPT_CFLAGS) $(LIBVCD_CFLAGS) $(XML_CFLAGS) $(LIBCDIO_CFLAGS) $(LIBISO9660_CFLAGS) $(XML_CFLAGS)
 

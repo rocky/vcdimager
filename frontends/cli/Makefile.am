@@ -30,12 +30,11 @@ cdxa2mpeg_LDADD =  $(LIBISO9660_LIBS) $(LIBVCD_LIBS) $(LIBPOPT_LIBS)
 vcd_info_SOURCES = vcd-info.c
 vcd_info_LDADD = $(LIBISO9660_LIBS) $(LIBVCDINFO_LIBS) $(LIBVCD_LIBS) $(LIBPOPT_LIBS) $(LIBCDIO_LIBS) $(LIBISO9660_LIBS)
 
-if MAINTAINER_MODE
 man_MANS = vcdimager.1 cdxa2mpeg.1 vcd-info.1
-$(man_MANS): %.1: %
+
+$(man_MANS): %.1: @MAINTAINER_MODE_TRUE@ %
 	-$(HELP2MAN) --output=$@ ./$<
+
 MAINTAINERCLEANFILES = $(man_MANS)
+
 EXTRA_DIST = $(man_MANS)
-endif
-
-
