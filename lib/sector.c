@@ -37,6 +37,7 @@
 #include "bytesex.h"
 #include "salloc.h"
 #include "sector_private.h"
+#include "l2sq_table.h"
 
 static const char _rcsid[] = "$Id$";
 
@@ -82,54 +83,43 @@ build_edc (const void *in, unsigned from, unsigned upto)
   return result;
 }
 
+/* From cdrtools-1.11a40 */
 static void
-encode_L2_Q (uint8_t inout[4 + L2_RAW + 4 + 8 + L2_P + L2_Q])
+encode_L2_Q(uint8_t inout[4 + L2_RAW + 4 + 8 + L2_P + L2_Q])
 {
+  uint8_t *dps;
+  uint8_t *dp;
   uint8_t *Q;
-  int i,j;
-
+  int i, j;
+        
   Q = inout + 4 + L2_RAW + 4 + 8 + L2_P;
-  memset (Q, 0, L2_Q);
+  
+  dps = inout;
   for (j = 0; j < 26; j++) {
+    uint16_t a, b;
+
+    a = b = 0;
+    dp = dps;
     for (i = 0; i < 43; i++) {
-      uint8_t data;
-
+      
       /* LSB */
-      data = inout[(j*43*2+i*2*44) % (4 + L2_RAW + 4 + 8 + L2_P)];
-      if (data != 0) {
-        uint32_t base = rs_l12_log[data];
-
-        uint32_t sum = base + DQ[0][i];
-        if (sum >= ((1 << RS_L12_BITS)-1))
-          sum -= (1 << RS_L12_BITS)-1;
-                
-        Q[0] ^= rs_l12_alog[sum];
-
-        sum = base + DQ[1][i];
-        if (sum >= ((1 << RS_L12_BITS)-1))
-          sum -= (1 << RS_L12_BITS)-1;
-                
-        Q[26*2] ^= rs_l12_alog[sum];
-      }
+      a ^= L2sq[i][*dp++];
+      
       /* MSB */
-      data = inout[(j*43*2+i*2*44+1) % (4 + L2_RAW + 4 + 8 + L2_P)];
-      if (data != 0) {
-        uint32_t base = rs_l12_log[data];
-
-        uint32_t sum = base+DQ[0][i];
-        if (sum >= ((1 << RS_L12_BITS)-1))
-          sum -= (1 << RS_L12_BITS)-1;
-                
-        Q[1] ^= rs_l12_alog[sum];
-
-        sum = base + DQ[1][i];
-        if (sum >= ((1 << RS_L12_BITS)-1))
-          sum -= (1 << RS_L12_BITS)-1;
-                
-        Q[26*2+1] ^= rs_l12_alog[sum];
-      }
+      b ^= L2sq[i][*dp];
+      
+      dp += 2*44-1;
+      if (dp >= &inout[(4 + L2_RAW + 4 + 8 + L2_P)]) {
+        dp -= (4 + L2_RAW + 4 + 8 + L2_P);
+      } 
     }
+    Q[0]      = a >> 8;
+    Q[26*2]   = a;
+    Q[1]      = b >> 8;
+    Q[26*2+1] = b;
+    
     Q += 2;
+    dps += 2*43;
   }
 }
 
