@@ -7,6 +7,7 @@ test_vcdxrip() {
   xmlfile="$2"
   rightfile="$3"
 
+  # VCDXRIP="/usr/local/bin/vcdxrip"
   VCDXRIP="../frontends/xml/vcdxrip"
   
   if [ ! -x "${VCDXRIP}" ]; then
