@@ -1,6 +1,102 @@
+Source: image file `videocd.bin'
+Image size: 2058 sectors
+VCD 2.0 detected
+-------------------------------------------------------------------------------
+ISO9660 primary volume descriptor
+ ID: `CD001'
+ version: 1
+ system id: `CD-RTOS CD-BRIDGE'
+ volume id: `VIDEOCD'
+ volumeset id: `'
+ publisher id: `PUBL_ID'
+ preparer id: `GNU VCDIMAGER CHECK MODE'
+ application id: `VIDEOCD.APP;1'
+ ISO size: 708 blocks (logical blocksize: 2048 bytes)
+ XA marker present: yes
+-------------------------------------------------------------------------------
+ISO9660 filesystem dump
+ root dir in PVD set to lsn 18
+
+ /:
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  d d---1xrxrxr 0 0 [fn 00] [LSN     19]      2048  EXT
+  d d---1xrxrxr 0 0 [fn 00] [LSN     20]      2048  MPEGAV
+  d d---1xrxrxr 0 0 [fn 00] [LSN     21]      2048  SEGMENT
+  d d---1xrxrxr 0 0 [fn 00] [LSN     22]      2048  VCD
+
+ /EXT/:
+  d d---1xrxrxr 0 0 [fn 00] [LSN     19]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  - ----1xrxrxr 0 0 [fn 01] [LSN    675]     65536  LOT_X.VCD;1
+  - ----1xrxrxr 0 0 [fn 01] [LSN    707]       112  PSD_X.VCD;1
+
+ /MPEGAV/:
+  d d---1xrxrxr 0 0 [fn 00] [LSN     20]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  - ---2-xrxrxr 0 0 [fn 01] [LSN    858]    348600 (   307200)  AVSEQ01.DAT;1
+  - ---2-xrxrxr 0 0 [fn 02] [LSN   1158]    348600 (   307200)  AVSEQ02.DAT;1
+  - ---2-xrxrxr 0 0 [fn 03] [LSN   1458]    348600 (   307200)  AVSEQ03.DAT;1
+  - ---2-xrxrxr 0 0 [fn 04] [LSN   1758]    348600 (   307200)  AVSEQ04.DAT;1
+
+ /SEGMENT/:
+  d d---1xrxrxr 0 0 [fn 00] [LSN     21]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  - ---2-xrxrxr 0 0 [fn 01] [LSN    225]     65072 (    57344)  ITEM0001.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN    375]     65072 (    57344)  ITEM0002.DAT;1
+  - ---2-xrxrxr 0 0 [fn 01] [LSN    525]     65072 (    57344)  ITEM0003.DAT;1
+
+ /VCD/:
+  d d---1xrxrxr 0 0 [fn 00] [LSN     22]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  - ----1xrxrxr 0 0 [fn 00] [LSN    151]      2048  ENTRIES.VCD;1
+  - ----1xrxrxr 0 0 [fn 00] [LSN    150]      2048  INFO.VCD;1
+  - ----1xrxrxr 0 0 [fn 00] [LSN    152]     65536  LOT.VCD;1
+  - ----1xrxrxr 0 0 [fn 00] [LSN    184]        88  PSD.VCD;1
+
+-------------------------------------------------------------------------------
+VCD/INFO.VCD
+ ID: `VIDEO_CD'
+ version: 0x02
+ system profile tag: 0x00
+ album id: `CHECK           '
+ volume count: 1
+ volume number: 4
+ pal flags: 11110000 00000000 00000000 00000000 00000000 00000000
+  (bslbf)   00000000 00000000 00000000 00000000 00000000 00000000 00
+ flags:
+  karaoke area: no
+  restriction: 1
+  special info: no
+  user data cc: no
+  start lid #2: no
+  start track #2: no
+  extended pbc: yes
+ Detected extended VCD2.0 PBC files.
+ psd size: 88
+ first segment addr: 00:05:00
+ offset multiplier: 0x08
+ maximum lid: 4
+ maximum segment number: 3
+ SEGMENT[1]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[2]: audio: no audio, video: PAL still (lo+hires), continuation no 
+ SEGMENT[3]: audio: no audio, video: PAL still (lo+hires), continuation no 
 -------------------------------------------------------------------------------
 VCD/ENTRIES.VCD
+ ID: `ENTRYVCD'
+ version: 0x02
  system profile tag: 0x00
+ entries: 4
+ ENTRY[00]: track#  1 (SEQUENCE[0]), LSN    858 (MSF 00:13:33)
+ ENTRY[01]: track#  2 (SEQUENCE[1]), LSN   1158 (MSF 00:17:33)
+ ENTRY[02]: track#  3 (SEQUENCE[2]), LSN   1458 (MSF 00:21:33)
+ ENTRY[03]: track#  4 (SEQUENCE[3]), LSN   1758 (MSF 00:25:33)
+-------------------------------------------------------------------------------
+VCD/LOT.VCD
+ LID[1]: offset = 0 (0x0000)
+ LID[2]: offset = 32 (0x0004)
+ LID[3]: offset = 56 (0x0007)
+ LID[4]: rejected
 -------------------------------------------------------------------------------
 VCD/PSD.VCD
   PSD[00] (LID[1] @0x0000): selection list descriptor
@@ -31,6 +127,12 @@ VCD/PSD.VCD
 
  PSD[03] (LID[4] @0x000a): end list descriptor
 
+-------------------------------------------------------------------------------
+EXT/LOT_X.VCD
+ LID[1]: offset = 0 (0x0000)
+ LID[2]: offset = 56 (0x0007)
+ LID[3]: offset = 80 (0x000a)
+ LID[4]: rejected
 -------------------------------------------------------------------------------
 EXT/PSD_X.VCD
   PSD[00] (LID[1] @0x0000): extended selection list descriptor
@@ -66,4 +168,7 @@ EXT/PSD_X.VCD
 
  PSD[03] (LID[4] @0x000d): end list descriptor
 
+-------------------------------------------------------------------------------
+CD-ROM TRACKS
+ tracks:  0
 -------------------------------------------------------------------------------

@@ -20,11 +20,12 @@ check_SCRIPTS = check_vcd11.sh check_vcd20.sh check_svcd1.sh
 
 check_DATA = avseq00.m1p item0000.m1p \
 	check_vcd11.xml check_vcd20.xml check_svcd1.xml \
+	vcd11_test0.right vcd20_test0.right svcd1_test0.right \
 	vcd11_test1.right vcd20_test1.right svcd1_test1.right \
 	vcd11_test2.right vcd20_test2.right svcd1_test2.right
 
 EXTRA_DIST = $(check_SCRIPTS) $(check_DATA) \
-	check_common_fn check_vcddump_fn check_vcdxbuild_fn
+	check_common_fn check_vcddump_fn check_vcdimager_fn check_vcdxbuild_fn
 
 TESTS = \
 	check_sizeof \
