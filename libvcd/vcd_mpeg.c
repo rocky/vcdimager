@@ -309,8 +309,8 @@ _parse_user_data (uint8_t streamid, const void *buf, unsigned len,
     uint8_t data[EMPTY_ARRAY_SIZE] GNUC_PACKED;
   } const *udg = buf;
 
-  if (state->stream.version != MPEG_VERS_MPEG2)
-    return;
+/*   if (state->stream.version != MPEG_VERS_MPEG2) */
+/*     return; */
 
   while (pos + 2 < len && udg->tag)
     {
@@ -338,6 +338,7 @@ _parse_user_data (uint8_t streamid, const void *buf, unsigned len,
           break;
 
         case 0x11: /* closed caption data */
+          vcd_debug ("caption data seen -- not supported yet (len = %d)", udg->len);
           break;
 
         default:
@@ -661,6 +662,7 @@ vcd_mpeg_parse_packet (const void *_buf, unsigned buflen, bool parse_pes,
       return buflen;
     }
 
+  /* verify the packet begins with a pack header */
   if (vcd_bitvec_peek_bits32 (buf, 0) != MPEG_PACK_HEADER_CODE)
     {
       const uint32_t _code = vcd_bitvec_peek_bits32 (buf, 0);
@@ -689,7 +691,11 @@ vcd_mpeg_parse_packet (const void *_buf, unsigned buflen, bool parse_pes,
       return 0;
     }
 
+  /* take a look at the pack header */
   pos = 0;
+
+  
+
   while (pos + 4 <= buflen)
     {
       uint32_t code = vcd_bitvec_peek_bits32 (buf, pos << 3);

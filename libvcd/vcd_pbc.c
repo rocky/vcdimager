@@ -664,7 +664,8 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 	    {
 	      mpeg_sequence_t *_seq;
 
-	      if ((_seq = _vcd_obj_get_sequence_by_id ((VcdObj *) obj, _pbc->item_id)))
+	      if ((_seq = _vcd_obj_get_sequence_by_id ((VcdObj *) obj, _pbc->item_id))
+		  || (_seq = _vcd_obj_get_sequence_by_entry_id ((VcdObj *) obj, _pbc->item_id)))
 		{
 		  const unsigned _entries = _vcd_list_length (_seq->entry_list) + 1;
 
@@ -674,7 +675,7 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 			       _pbc->id, _entries, _pbc->item_id, _nos);
 		}
 	      else
-		vcd_error ("selection '%s': play item '%s' is requried to be sequence"
+		vcd_error ("selection '%s': play item '%s' is requried to be sequence or entry point"
 			   " item for multi default selecton", _pbc->id, _pbc->item_id);
 	    }	    
 
@@ -762,7 +763,7 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 		  vcd_warn ("PSD: endlist '%s': referenced play item '%s'"
 			    " is not a segment play item", _pbc->id, _pbc->image_id);
 		else if (_segment->info->video_type != MPEG_VIDEO_PAL_STILL
-			 && _segment->info->video_type != MPEG_VIDEO_PAL_STILL)
+			 && _segment->info->video_type != MPEG_VIDEO_NTSC_STILL)
 		  vcd_warn ("PSD: endlist '%s': referenced play item '%s'"
 			    " should be a still picture", _pbc->id, _pbc->image_id);
 	      }

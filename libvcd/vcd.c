@@ -72,6 +72,40 @@ _vcd_obj_get_sequence_by_id (VcdObj *obj, const char sequence_id[])
   return NULL;
 }
 
+mpeg_sequence_t *
+_vcd_obj_get_sequence_by_entry_id (VcdObj *obj, const char entry_id[])
+{
+  VcdListNode *node;
+
+  vcd_assert (entry_id != NULL);
+  vcd_assert (obj != NULL);
+
+  _VCD_LIST_FOREACH (node, obj->mpeg_sequence_list)
+    {
+      mpeg_sequence_t *_sequence = _vcd_list_node_data (node);
+      VcdListNode *node2;
+
+      /* default entry point */
+      if (_sequence->default_entry_id 
+          && !strcmp (entry_id, _sequence->default_entry_id))
+        return _sequence;
+
+      /* additional entry points */
+      _VCD_LIST_FOREACH (node2, _sequence->entry_list)
+	{
+	  entry_t *_entry = _vcd_list_node_data (node2);
+
+	  if (_entry->id 
+              && !strcmp (entry_id, _entry->id))
+	    return _sequence;
+	}
+    }
+
+  /* not found */
+
+  return NULL;
+}
+
 mpeg_segment_t *
 _vcd_obj_get_segment_by_id (VcdObj *obj, const char segment_id[])
 {

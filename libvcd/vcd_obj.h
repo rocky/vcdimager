@@ -161,6 +161,9 @@ struct _VcdObj {
 mpeg_sequence_t *
 _vcd_obj_get_sequence_by_id (VcdObj *obj, const char sequence_id[]);
 
+mpeg_sequence_t *
+_vcd_obj_get_sequence_by_entry_id (VcdObj *obj, const char entry_id[]);
+
 mpeg_segment_t *
 _vcd_obj_get_segment_by_id (VcdObj *obj, const char segment_id[]);
 
