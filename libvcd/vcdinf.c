@@ -69,6 +69,212 @@
 
 static const char _rcsid[] = "$Id$";
 
+/* Comparison routine used in sorting. */
+static int
+_offset_t_cmp (vcdinfo_offset_t *a, vcdinfo_offset_t *b)
+{
+  if (a->offset > b->offset)
+    return 1;
+
+  if (a->offset < b->offset)
+    return -1;
+  
+  return 0;
+}
+
+/*
+  This fills in the offset table with LIDs.  Due to
+  "rejected" LOT entries, some of these might not have gotten filled
+  in before.
+
+  I believe a requirement for this to work is that the offset_list be
+  sorted beforehand: to get the LIDs we are assuming first in the
+  offset list is LID1, second in the offset LID2 etc.
+ */
+static void
+vcdinf_update_offset_list(struct _vcdinf_pbc_ctx *obj, bool ext)
+{
+  if (NULL==obj) return;
+  {
+    VcdListNode *node;
+    unsigned int lid=1;
+    VcdList *offset_list = ext ? obj->offset_x_list : obj->offset_list;
+    
+    _VCD_LIST_FOREACH (node, offset_list)
+      {
+        vcdinfo_offset_t *ofs = _vcd_list_node_data (node);
+        ofs->lid = lid++;
+      }
+  }
+}
+
+/*!
+   Calls recursive routine to populate obj->offset_list or obj->offset_x_list
+   by going through LOT.
+*/
+void
+vcdinf_visit_lot (struct _vcdinf_pbc_ctx *obj)
+{
+  const LotVcd *lot = obj->extended ? obj->lot_x : obj->lot;
+  unsigned int n, tmp;
+
+  if (obj->extended) {
+    if (!obj->psd_x_size) return;
+  } else if (!obj->psd_size) return;
+
+  for (n = 0; n < LOT_VCD_OFFSETS; n++)
+    if ((tmp = uint16_from_be (lot->offset[n])) != PSD_OFS_DISABLED)
+      vcdinf_visit_pbc (obj, n + 1, tmp, true);
+
+  _vcd_list_sort (obj->extended ? obj->offset_x_list : obj->offset_list, 
+                  (_vcd_list_cmp_func) _offset_t_cmp);
+
+  /* Now really complete the offset table with LIDs.  This routine
+     might obviate the need for vcdinf_visit_pbc() or some of it which is
+     more complex. */
+  vcdinf_update_offset_list(obj, obj->extended);
+}
+
+/*!
+   Recursive routine to populate obj->offset_list or obj->offset_x_list
+   by reading playback control entries referred to via lid.
+*/
+void
+vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, unsigned int offset, 
+                  bool in_lot)
+{
+  VcdListNode *node;
+  vcdinfo_offset_t *ofs;
+  unsigned psd_size  = obj->extended ? obj->psd_x_size : obj->psd_size;
+  const uint8_t *psd = obj->extended ? obj->psd_x : obj->psd;
+  unsigned int _rofs = offset * obj->offset_mult;
+  VcdList *offset_list;
+
+  vcd_assert (psd_size % 8 == 0);
+
+  switch (offset)
+    {
+    case PSD_OFS_DISABLED:
+    case PSD_OFS_MULTI_DEF:
+    case PSD_OFS_MULTI_DEF_NO_NUM:
+      return;
+
+    default:
+      break;
+    }
+
+  if (_rofs >= psd_size)
+    {
+      if (obj->extended)
+	vcd_error ("psd offset out of range in extended PSD"
+		   " (try --no-ext-psd option)");
+      else
+        vcd_warn ("psd offset out of range (%d >= %d)", _rofs, psd_size);
+      return;
+    }
+
+  vcd_assert (_rofs < psd_size);
+
+  if (!obj->offset_list)
+    obj->offset_list = _vcd_list_new ();
+
+  if (obj->extended) {
+    if (!obj->offset_x_list)
+      obj->offset_x_list = _vcd_list_new ();
+    offset_list = obj->offset_x_list;
+  } else 
+    offset_list = obj->offset_list;
+
+  _VCD_LIST_FOREACH (node, offset_list)
+    {
+      ofs = _vcd_list_node_data (node);
+
+      if (offset == ofs->offset)
+        {
+          if (in_lot)
+            ofs->in_lot = true;
+
+          if (lid) 
+            /* Our caller thinks she knows what our LID is.
+               This should help out getting the LID for end descriptors
+               if not other things as well.
+             */
+            ofs->lid = lid;
+
+          ofs->ext = obj->extended;
+
+          return; /* already been there... */
+        }
+    }
+
+  ofs = _vcd_malloc (sizeof (vcdinfo_offset_t));
+
+  ofs->offset = offset;
+  ofs->lid    = lid;
+  ofs->in_lot = in_lot;
+  ofs->ext    = obj->extended;
+
+  switch (psd[_rofs])
+    {
+    case PSD_TYPE_PLAY_LIST:
+      _vcd_list_append (offset_list, ofs);
+      {
+        const PsdPlayListDescriptor *d = (const void *) (psd + _rofs);
+        const lid_t lid = vcdinfo_get_lid_from_pld(d);
+
+        if (!ofs->lid)
+          ofs->lid = lid;
+        else 
+          if (ofs->lid != lid)
+            vcd_warn ("LOT entry assigned LID %d, but descriptor has LID %d",
+                      ofs->lid, lid);
+
+        vcdinf_visit_pbc (obj, 0, vcdinfo_get_prev_from_pld(d), false);
+        vcdinf_visit_pbc (obj, 0, vcdinfo_get_next_from_pld(d), false);
+        vcdinf_visit_pbc (obj, 0, vcdinfo_get_return_from_pld(d), false);
+      }
+      break;
+
+    case PSD_TYPE_EXT_SELECTION_LIST:
+    case PSD_TYPE_SELECTION_LIST:
+      _vcd_list_append (offset_list, ofs);
+      {
+        const PsdSelectionListDescriptor *d =
+          (const void *) (psd + _rofs);
+
+        int idx;
+
+        if (!ofs->lid)
+          ofs->lid = uint16_from_be (d->lid) & 0x7fff;
+        else 
+          if (ofs->lid != (uint16_from_be (d->lid) & 0x7fff))
+            vcd_warn ("LOT entry assigned LID %d, but descriptor has LID %d",
+                      ofs->lid, uint16_from_be (d->lid) & 0x7fff);
+
+        vcdinf_visit_pbc (obj, 0, vcdinfo_get_prev_from_psd(d), false);
+        vcdinf_visit_pbc (obj, 0, vcdinfo_get_next_from_psd(d), false);
+        vcdinf_visit_pbc (obj, 0, vcdinfo_get_return_from_psd(d), false);
+        vcdinf_visit_pbc (obj, 0, uint16_from_be (d->default_ofs), false);
+        vcdinf_visit_pbc (obj, 0, uint16_from_be (d->timeout_ofs), false);
+
+        for (idx = 0; idx < d->nos; idx++)
+          vcdinf_visit_pbc (obj, 0, uint16_from_be (d->ofs[idx]), false);
+        
+      }
+      break;
+
+    case PSD_TYPE_END_LIST:
+      _vcd_list_append (offset_list, ofs);
+      break;
+
+    default:
+      vcd_warn ("corrupt PSD???????");
+      free (ofs);
+      return;
+      break;
+    }
+}
+
 /*!
    Return a string containing the VCD album id, or NULL if there is 
    some problem in getting this. 

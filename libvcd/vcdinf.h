@@ -120,6 +120,34 @@ extern "C" {
   */
   unsigned int vcdinf_get_volume_num(const InfoVcd *info);
   
+  struct _vcdinf_pbc_ctx {
+    unsigned int psd_size;
+    lid_t maximum_lid;
+    unsigned offset_mult;
+    VcdList *offset_x_list;
+    VcdList *offset_list;
+    
+    LotVcd *lot;
+    LotVcd *lot_x;
+    uint8_t *psd;
+    uint8_t *psd_x;
+    unsigned int psd_x_size;
+    bool extended;
+  };
+
+  /*!
+     Calls recursive routine to populate obj->offset_list or obj->offset_x_list
+     by going through LOT.
+  */
+  void vcdinf_visit_lot (struct _vcdinf_pbc_ctx *obj);
+  
+  /*! 
+     Recursive routine to populate obj->offset_list or obj->offset_x_list
+     by reading playback control entries referred to via lid.
+  */
+  void vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, 
+			 unsigned int offset, bool in_lot);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

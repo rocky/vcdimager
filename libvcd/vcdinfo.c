@@ -373,19 +373,6 @@ _getbuf (void)
   return _buf[_num];
 }
 
-/* Comparison routine used in sorting. */
-static int
-_offset_t_cmp (vcdinfo_offset_t *a, vcdinfo_offset_t *b)
-{
-  if (a->offset > b->offset)
-    return 1;
-
-  if (a->offset < b->offset)
-    return -1;
-  
-  return 0;
-}
-
 static void
 _visit_pbc (vcdinfo_obj_t *obj, unsigned int lid, unsigned int offset, 
                    bool in_lot, bool ext)
@@ -1732,54 +1719,28 @@ vcdinfo_read_psd (vcdinfo_obj_t *obj)
   return true;
 }
 
-/*
-  This fills in the offset table with LIDs.  Due to
-  "rejected" LOT entries, some of these might not have gotten filled
-  in before.
-
-  I believe a requirement for this to work is that the offset_list be
-  sorted beforehand: to get the LIDs we are assuming first in the
-  offset list is LID1, second in the offset LID2 etc.
- */
-static void
-vcdinfo_update_offset_list(const vcdinfo_obj_t *obj, bool ext)
-{
-  if (NULL==obj) return;
-  {
-    VcdListNode *node;
-    unsigned int lid=1;
-    VcdList *offset_list = ext ? obj->offset_x_list : obj->offset_list;
-    
-    _VCD_LIST_FOREACH (node, offset_list)
-      {
-        vcdinfo_offset_t *ofs = _vcd_list_node_data (node);
-        ofs->lid = lid++;
-      }
-  }
-}
-
 void
-vcdinfo_visit_lot (vcdinfo_obj_t *obj, bool ext)
+vcdinfo_visit_lot (vcdinfo_obj_t *obj, bool extended)
 {
-  const LotVcd *lot = ext ? obj->lot_x : obj->lot;
-  unsigned n;
+  struct _vcdinf_pbc_ctx pbc_ctx;
 
-  if (!ext && !vcdinfo_get_psd_size (obj))
-    return;
+  pbc_ctx.psd_size      = vcdinfo_get_psd_size (obj);
+  pbc_ctx.psd_x_size    = obj->psd_x_size;
+  pbc_ctx.offset_mult   = 8;
+  pbc_ctx.maximum_lid   = vcdinfo_get_num_LIDs(obj);
+  pbc_ctx.offset_x_list = NULL;
+  pbc_ctx.offset_list   = NULL;
+  pbc_ctx.psd           = obj->psd;
+  pbc_ctx.psd_x         = obj->psd_x;
+  pbc_ctx.lot           = obj->lot;
+  pbc_ctx.lot_x         = obj->lot_x;
+  pbc_ctx.extended      = extended;
 
-  if (ext && !obj->psd_x_size)
-    return;
-
-  for (n = 0; n < LOT_VCD_OFFSETS; n++)
-    _visit_pbc (obj, n + 1, uint16_from_be (lot->offset[n]), true, ext);
-
-  _vcd_list_sort (ext ? obj->offset_x_list : obj->offset_list, 
-                  (_vcd_list_cmp_func) _offset_t_cmp);
-
-  /* Now really complete the offset table with LIDs.  This routine
-     might obviate the need for _visit_pbc() or some of it which is
-     more complex. */
-  vcdinfo_update_offset_list(obj, ext);
+  vcdinf_visit_lot(&pbc_ctx);
+  free(obj->offset_x_list);
+  obj->offset_x_list = pbc_ctx.offset_x_list;
+  free(obj->offset_list);
+  obj->offset_list   = pbc_ctx.offset_list;
 }
 
 /*!

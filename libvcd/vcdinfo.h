@@ -157,16 +157,18 @@ extern "C" {
     InfoVcd info;
     EntriesVcd entries;
     
-    LotVcd *lot;
     uint8_t *psd;
-    unsigned psd_x_size;
-    LotVcd *lot_x;
-    uint8_t *psd_x;
-    bool has_xa;           /* True if has extended attributes (XA) */
-    
     VcdList *offset_list;
     VcdList *offset_x_list;
     VcdList *segment_list; /* list data entry is a vcd_image_stat_t */
+    
+    LotVcd *lot;
+    LotVcd *lot_x;
+    uint8_t *psd_x;
+    unsigned int psd_x_size;
+    bool extended;
+
+    bool has_xa;           /* True if has extended attributes (XA) */
     
     void *tracks_buf;
     void *search_buf;
@@ -798,7 +800,7 @@ vcdinfo_get_seg_size(const vcdinfo_obj_t *obj, const unsigned int seg_num);
   const char *
   vcdinfo_ofs2str (const vcdinfo_obj_t *obj, unsigned int offset, bool ext);
   
-  void vcdinfo_visit_lot (vcdinfo_obj_t *obj, bool ext);
+  void vcdinfo_visit_lot (vcdinfo_obj_t *obj, bool extended);
   
   bool vcdinfo_read_psd (vcdinfo_obj_t *obj);
   
