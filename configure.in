@@ -142,6 +142,7 @@ AC_SUBST(LIBVCD_LIBS)
 
 AC_OUTPUT([ \
 	Makefile \
+	amiga/Makefile \
 	libvcd/Makefile \
 	frontends/Makefile \
 	frontends/xml/Makefile \
