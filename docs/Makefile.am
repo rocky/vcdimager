@@ -1,13 +1,19 @@
 info_TEXINFOS = vcdimager.texi vcddump.texi
 vcdimager_TEXINFOS = fdl.texi gpl.texi glossary.texi
 
-vcdimager.ps.gz: vcdimager.ps
+pdf: vcdimager.pdf vcddump.pdf
+
+txt: vcdimager.txt vcddump.txt
+
+ps: vcdimager.ps vcddump.ps
+
+html: vcdimager.html vcddump.html 
+
+%.ps.gz: %.ps
 	gzip -9c $< > $@
 
-vcdimager.pdf: vcdimager.texi
+.texi.pdf:
 	texi2pdf $<
-
-pdf: vcdimager.pdf
 
 .texi.html:
 	texi2html $<
@@ -15,6 +21,6 @@ pdf: vcdimager.pdf
 .texi.txt:
 	makeinfo --no-headers $< > $@
 
-all-formats: vcdimager.txt vcdimager.html vcdimager.dvi vcdimager.ps vcdimager.pdf vcddump.dvi vcddump.html 
+all-formats: pdf dvi txt ps html
 
 MOSTLYCLEANFILES = vcdimager.tgs vcdimager.ps.gz vcdimager.pdf vcdimager.html vcdimager_toc.html vcdimager_foot.html vcddump.cps vcddump.kys vcddump.html vcddump.fns
