@@ -6,6 +6,6 @@ includedir=@includedir@
 Name: libvcdinfo
 Description: VCD information library
 Version: @VERSION@
-Requires: libcdio libvcd
+Requires: libcdio
 Libs: -L${libdir} -lvcdinfo
 Cflags: -I${includedir}
