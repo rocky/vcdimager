@@ -1248,7 +1248,7 @@ will extract the @acronym{MPEG} portion by stripping off the
 
 The name cdxa2meg refers to the fact that it reads the XA-format
 tracks of a @acronym{CD} and in such a circumstance described above turns them
-```2'' @acronym{MPEG} .
+``2'' @acronym{MPEG} .
 
 The ability to see or copy the .dat/.mpg requires some sort of
 filesystem support to read or show the @acronym{CD} Mode2 XA tracks. Depending
