@@ -318,7 +318,9 @@ _make_scantable (mpeg_track_t *track)
       switch (vcd_mpeg_get_type (buf, &ti))
         {
         case MPEG_TYPE_INVALID:
-          vcd_debug ("mpeg scan: invalid mpeg block @%d", sect);
+          vcd_error ("invalid mpeg packet found at packet# %d"
+                     " -- please fix this mpeg file!", sect);
+          vcd_data_source_close (track->source);
           break;
           
         case MPEG_TYPE_VIDEO:

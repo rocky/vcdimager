@@ -208,15 +208,31 @@ _read_mode2_sector_device (FILE *fd, void *data, uint32_t lba, bool form2)
       if (ioctl (fileno (fd), CDROMREADMODE2, &buf) == -1)
         {
           perror ("ioctl()");
-          exit (EXIT_FAILURE);
+          return 1;
+          /* exit (EXIT_FAILURE); */
         }
 
       memcpy (data, buf, M2RAW_SIZE);
     }
   else
     {
-      fseek (fd, lba * ISO_BLOCKSIZE, SEEK_SET);
-      fread (data, ISO_BLOCKSIZE, 1, fd);
+      char buf[ISO_BLOCKSIZE] = { 0, };
+
+      if (fseek (fd, lba * ISO_BLOCKSIZE, SEEK_SET))
+        {
+          perror ("fseek()");
+          clearerr (fd);
+          return 1;
+        }
+
+      if (fread (buf, ISO_BLOCKSIZE, 1, fd) != 1
+          && ferror (fd))
+        {
+          perror ("fread()");
+          clearerr (fd);
+          return 1;
+        }
+      memcpy (data, buf, ISO_BLOCKSIZE);
     }
 #else
   assert (0);
@@ -829,7 +845,9 @@ find_sect_by_fileid (FILE *fd, uint32_t start, uint32_t end,
     {
       char _buf[ISO_BLOCKSIZE] = { 0, };
       
-      gl_read_mode2_sector (fd, _buf, sect, false);
+      if (gl_read_mode2_sector (fd, _buf, sect, false))
+        break;
+
       if (!strncmp (_buf, file_id, 8))
         return sect;
     }
@@ -856,13 +874,16 @@ dump (const char image_fname[])
 
   size = gl_get_image_size (fd);
 
-  gl_read_mode2_sector (fd, pvd_buf, ISO_PVD_SECTOR, false);
+  if (gl_read_mode2_sector (fd, pvd_buf, ISO_PVD_SECTOR, false))
+    exit (EXIT_FAILURE);
 
-  gl_read_mode2_sector (fd, info_buf, INFO_VCD_SECTOR, false);
+  if (gl_read_mode2_sector (fd, info_buf, INFO_VCD_SECTOR, false))
+    exit (EXIT_FAILURE);
 
   psd_size = _get_psd_size (info_buf);
 
-  gl_read_mode2_sector (fd, entries_buf, ENTRIES_VCD_SECTOR, false);
+  if (gl_read_mode2_sector (fd, entries_buf, ENTRIES_VCD_SECTOR, false))
+    exit (EXIT_FAILURE);
   
   if (psd_size)
     {
@@ -882,7 +903,8 @@ dump (const char image_fname[])
         {
           char *p = lot_buf + (ISO_BLOCKSIZE * (n - LOT_VCD_SECTOR));
 
-          gl_read_mode2_sector (fd, p, n, false);
+          if (gl_read_mode2_sector (fd, p, n, false))
+            exit (EXIT_FAILURE);
         }
 
       for (n = PSD_VCD_SECTOR;
@@ -890,7 +912,8 @@ dump (const char image_fname[])
         {
           char *p = psd_buf + (ISO_BLOCKSIZE * (n - PSD_VCD_SECTOR));
 
-          gl_read_mode2_sector (fd, p, n, false);
+          if (gl_read_mode2_sector (fd, p, n, false))
+            exit (EXIT_FAILURE);
         }
     }
 
@@ -904,7 +927,8 @@ dump (const char image_fname[])
       {
         tracks_buf = _vcd_malloc (ISO_BLOCKSIZE);
         
-        gl_read_mode2_sector (fd, tracks_buf, n, false);
+        if (gl_read_mode2_sector (fd, tracks_buf, n, false))
+          exit (EXIT_FAILURE);
 
         vcd_debug ("found TRACKS.SVD signature at sector %d", n);
       }
@@ -927,7 +951,8 @@ dump (const char image_fname[])
         uint32_t size;
         uint32_t sectors;
 
-        gl_read_mode2_sector (fd, tmp, n, false);
+        if (gl_read_mode2_sector (fd, tmp, n, false))
+          exit (EXIT_FAILURE);
 
         size = (3 * UINT16_FROM_BE (((SearchDat *)tmp)->scan_points)) 
           + sizeof (SearchDat);
@@ -939,8 +964,10 @@ dump (const char image_fname[])
         search_buf = _vcd_malloc (sectors * ISO_BLOCKSIZE);
 
         for (m = 0; m < sectors;m++)
-          gl_read_mode2_sector (fd, &(search_buf[ISO_BLOCKSIZE*m]),
-                                m + n, false);
+          if (gl_read_mode2_sector (fd, &(search_buf[ISO_BLOCKSIZE*m]),
+                                    m + n, false))
+            exit (EXIT_FAILURE);
+
       }
     else
       vcd_debug ("no SEARCH.DAT signature found");
@@ -981,7 +1008,8 @@ ripspi (const char device_fname[])
   memset (&info, 0, sizeof (InfoVcd));
   assert (sizeof (InfoVcd) == ISO_BLOCKSIZE);
 
-  gl_read_mode2_sector (fd, &info, INFO_VCD_SECTOR, false);
+  if (gl_read_mode2_sector (fd, &info, INFO_VCD_SECTOR, false))
+    exit (EXIT_FAILURE);
 
   first_spi_lba = msf_to_lba ((msf_t *) info.first_seg_addr);
 
@@ -1028,7 +1056,8 @@ ripspi (const char device_fname[])
 
           memset (&buf, 0, sizeof (buf));
 
-          gl_read_mode2_sector (fd, &buf, pos, true);
+          if (gl_read_mode2_sector (fd, &buf, pos, true))
+            vcd_warn ("IO Error at %u (ignored)\n", pos);
 
           fwrite (buf.data, 2324, 1, outfd);
 
@@ -1065,7 +1094,8 @@ rip (const char device_fname[])
   memset (&entries, 0, sizeof (EntriesVcd));
   assert (sizeof (EntriesVcd) == ISO_BLOCKSIZE);
 
-  gl_read_mode2_sector (fd, &entries, ENTRIES_VCD_SECTOR, false);
+  if (gl_read_mode2_sector (fd, &entries, ENTRIES_VCD_SECTOR, false))
+    exit (EXIT_FAILURE);
 
   if (!strncmp (entries.ID, ENTRIES_ID_VCD, sizeof (entries.ID)))
     vcd_debug ("found ENTRIES.VCD/SVD");
@@ -1109,7 +1139,8 @@ rip (const char device_fname[])
 
           memset (&buf, 0, sizeof (buf));
 
-          gl_read_mode2_sector (fd, &buf, pos, true);
+          if (gl_read_mode2_sector (fd, &buf, pos, true))
+            vcd_warn ("IO Error at %u (ignored)\n", pos);
 
           /* fixme -- ugly nested blocks */
 

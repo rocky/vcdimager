@@ -1,5 +1,13 @@
 2001-04-15  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* configure.in: bumped version up to 0.6.0
+	
+	* frontends/cli/vcdrip.c: 
+		try to ignore IO errors in data stream
+
+	* libvcd/vcd.c (_make_scantable): bail out if 
+		invalid mpeg packet occurs
+	
 	* frontends/cli/vcdrip.c:
 		added --rip-spi operation
 

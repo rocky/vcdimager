@@ -2,6 +2,14 @@ $Id$
 
 see ChangeLog for more information
 
+version 0.6.0
+=============
+2001-04-15
+
+* implemented --rip-spi operation  
+* give up on invalid mpeg packets when scanning mpeg
+* fixed directory section growing into karaoke area
+
 version 0.5.9beta4
 ==================
 2001-03-18
