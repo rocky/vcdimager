@@ -45,7 +45,8 @@ libvcdinfo_la_CURRENT := 0
 libvcdinfo_la_REVISION := 1
 libvcdinfo_la_AGE := 0
 
-lib_LTLIBRARIES = libvcd.la libvcdinfo.la
+noinst_LTLIBRARIES = libvcd.la
+lib_LTLIBRARIES = libvcdinfo.la
 
 INCLUDES = $(LIBVCD_CFLAGS) $(LIBCDIO_CFLAGS)
 
@@ -97,5 +98,6 @@ libvcdinfo_la_SOURCES = \
 
 libvcdinfo_la_LIBADD = $(LIBCDIO_LIBS) $(LIBISO9660_LIBS) $(LIBVCD_LIBS)
 libvcdinfo_la_LDFLAGS = -version-info $(libvcdinfo_la_CURRENT):$(libvcdinfo_la_REVISION):$(libvcdinfo_la_AGE)
+libvcdinfo_la_DEPENDENCIES = libvcd.la
 
 # EOF
