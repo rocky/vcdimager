@@ -41,12 +41,13 @@ typedef struct {
   char *pathname;
   FILE *fd;
   char *fd_buf;
+  off_t st_size; /* used only for source */
 } _UserData;
 
 static int
 _stdio_open_source (void *user_data) 
 {
-  _UserData *ud = user_data;
+  _UserData *const ud = user_data;
   
   if ((ud->fd = fopen (ud->pathname, "rb")))
     {
@@ -60,7 +61,7 @@ _stdio_open_source (void *user_data)
 static int
 _stdio_open_sink (void *user_data) 
 {
-  _UserData *ud = user_data;
+  _UserData *const ud = user_data;
 
   if ((ud->fd = fopen (ud->pathname, "wb")))
     {
@@ -74,7 +75,7 @@ _stdio_open_sink (void *user_data)
 static int
 _stdio_close(void *user_data)
 {
-  _UserData *ud = user_data;
+  _UserData *const ud = user_data;
 
   if (fclose (ud->fd))
     vcd_error ("fclose (): %s", strerror (errno));
@@ -90,7 +91,7 @@ _stdio_close(void *user_data)
 static void
 _stdio_free(void *user_data)
 {
-  _UserData *ud = user_data;
+  _UserData *const ud = user_data;
 
   if (ud->pathname)
     free(ud->pathname);
@@ -104,9 +105,9 @@ _stdio_free(void *user_data)
 static long
 _stdio_seek(void *user_data, long offset)
 {
-  _UserData *ud = user_data;
+  _UserData *const ud = user_data;
 
-  if (fseek(ud->fd, offset, SEEK_SET))
+  if (fseek (ud->fd, offset, SEEK_SET))
     vcd_error ("fseek (): %s", strerror (errno));
 
   return offset;
@@ -115,19 +116,15 @@ _stdio_seek(void *user_data, long offset)
 static long
 _stdio_stat(void *user_data)
 {
-  _UserData *ud = user_data;
-  struct stat statbuf;
-  
-  if (fstat(fileno(ud->fd), &statbuf))
-    return -1;
+  const _UserData *const ud = user_data;
 
-  return statbuf.st_size;
+  return ud->st_size;
 }
 
 static long
 _stdio_read(void *user_data, void *buf, long count)
 {
-  _UserData *ud = user_data;
+  _UserData *const ud = user_data;
   long read;
 
   read = fread(buf, 1, count, ud->fd);
@@ -154,7 +151,7 @@ _stdio_read(void *user_data, void *buf, long count)
 static long
 _stdio_write(void *user_data, const void *buf, long count)
 {
-  _UserData *ud = user_data;
+  _UserData *const ud = user_data;
   long written;
 
   written = fwrite(buf, 1, count, ud->fd);
@@ -169,7 +166,7 @@ VcdDataSource*
 vcd_data_source_new_stdio(const char pathname[])
 {
   VcdDataSource *new_obj = NULL;
-  vcd_data_source_io_functions funcs;
+  vcd_data_source_io_functions funcs = { 0, };
   _UserData *ud = NULL;
   struct stat statbuf;
   
@@ -181,9 +178,8 @@ vcd_data_source_new_stdio(const char pathname[])
 
   ud = _vcd_malloc (sizeof (_UserData));
 
-  memset(&funcs, 0, sizeof(funcs));
-
   ud->pathname = strdup(pathname);
+  ud->st_size = statbuf.st_size; /* let's hope it doesn't change... */
 
   funcs.open = _stdio_open_source;
   funcs.seek = _stdio_seek;

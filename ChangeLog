@@ -1,3 +1,8 @@
+2001-12-26  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_stream_stdio.c: cache stat()'s st_size result
+		(suggested by Sven Ottemann)
+
 2001-12-25  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* cleaned up automake framework for automake 1.5
