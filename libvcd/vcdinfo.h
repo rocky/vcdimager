@@ -397,6 +397,13 @@ uint16_t
 vcdinfo_get_next_from_psd(const PsdSelectionListDescriptor *psd);
 
 /*!
+   Return the audio type for a given track. 
+   VCDINFO_INVALID_AUDIO_TYPE is returned on error.
+*/
+unsigned int
+vcdinfo_get_num_audio_channels(unsigned int audio_type);
+
+/*!
   Return the number of entries in the VCD.
 */
 unsigned int
@@ -601,13 +608,6 @@ vcdinfo_get_track(const vcdinfo_obj_t *obj, const unsigned int entry_num);
 unsigned int
 vcdinfo_get_track_audio_type(const vcdinfo_obj_t *obj, unsigned int track_num);
 
-/*!
-   Return the audio type for a given track. 
-   VCDINFO_INVALID_AUDIO_TYPE is returned on error.
-*/
-unsigned int
-vcdinfo_get_num_audio_channels(unsigned int audio_type);
-
 /*!  
   Return the starting LBA (logical block address) for track number
   track_num in obj.  Tracks numbers start at 1.
@@ -628,6 +628,13 @@ vcdinfo_get_track_lba(const vcdinfo_obj_t *obj, unsigned int track_num);
 int
 vcdinfo_get_track_msf(const vcdinfo_obj_t *obj, unsigned int track_num,
                       uint8_t *min, uint8_t *sec, uint8_t *frame);
+
+/*!
+  Return the size in sectors for track n. The first track is 1.
+*/
+unsigned int
+vcdinfo_get_track_sec_count(const vcdinfo_obj_t *obj, 
+                            const unsigned int track_num);
 
 /*!
   Return size in bytes for track number for entry n in obj.
