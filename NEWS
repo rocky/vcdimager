@@ -4,9 +4,9 @@ see ChangeLog for more information
 
 version 0.7.14 (unstable/development)
 =====================================
-2003-0.-..
+2003-03-16
 
-* almost ISO C99 compliant now
+* almost ISO C99 compliant now (see BUGS)
 * fixed bug in vcddump if no device specified
 * vcdxrip:
     uses lower-level vcdinf library (so --input option added)
