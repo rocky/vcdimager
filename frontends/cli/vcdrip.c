@@ -575,8 +575,7 @@ dump_info_vcd (const void *data)
 
   fprintf (stdout, " psd size: %d\n", UINT32_FROM_BE (info.psd_size));
   fprintf (stdout, " first segment addr: %2.2x:%2.2x:%2.2x\n",
-           info.first_seg_addr[0],
-           info.first_seg_addr[1], info.first_seg_addr[2]);
+           info.first_seg_addr.m, info.first_seg_addr.s, info.first_seg_addr.f);
 
   fprintf (stdout, " offset multiplier: 0x%2.2x (must be 0x08)\n", info.offset_mult);
 
@@ -1012,7 +1011,7 @@ ripspi (const char device_fname[])
   if (gl_read_mode2_sector (fd, &info, INFO_VCD_SECTOR, false))
     exit (EXIT_FAILURE);
 
-  first_spi_lba = msf_to_lba ((msf_t *) info.first_seg_addr);
+  first_spi_lba = msf_to_lba (&info.first_seg_addr);
 
   if (first_spi_lba < 150)
     {
@@ -1062,7 +1061,7 @@ ripspi (const char device_fname[])
 
           fwrite (buf.data, 2324, 1, outfd);
 
-          if (buf.subheader[2] & SM_EOF);
+          if (buf.subheader[2] & SM_EOF)
             break;
         }
 

@@ -50,6 +50,7 @@ typedef struct {
   char *id;
   const struct vcd_mpeg_source_info *info;
   unsigned segment_count;
+  unsigned start_extent;
 } mpeg_segment_t;
 
 typedef struct {
@@ -84,6 +85,7 @@ struct _VcdObj {
   unsigned info_volume_number;
 
   /* input */
+  unsigned mpeg_segment_start_extent;
   VcdList *mpeg_segment_list; /* mpeg_segment_t */
 
   VcdList *mpeg_sequence_list; /* mpeg_sequence_t */
@@ -91,6 +93,7 @@ struct _VcdObj {
   unsigned relative_end_extent; /* last mpeg sequence track end extent */
 
   /* custom files */
+  unsigned ext_file_start_extent; 
   unsigned custom_file_start_extent; 
   VcdList *custom_file_list; /* custom_file_t */
 

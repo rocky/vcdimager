@@ -171,7 +171,7 @@ typedef struct {
                                               PAL(=set)/NTSC flags */
   InfoStatusFlags flags      GNUC_PACKED;  /* status flags bit field */
   uint32_t psd_size          GNUC_PACKED;  /* size of PSD.VCD file */
-  uint8_t  first_seg_addr[3] GNUC_PACKED;  /* first segment addresses,
+  msf_t    first_seg_addr    GNUC_PACKED;  /* first segment addresses,
                                               coded BCD The location
                                               of the first sector of
                                               the Segment Play Item

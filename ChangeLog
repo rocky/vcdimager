@@ -1,5 +1,10 @@
 2001-05-11  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* intense coding session; extended framework to support spi's;
+	  implemented spi inclusion into vcd images
+	
+	* frontends/cli/vcdrip.c (ripspi): fixed rip spi
+
 	* libvcd/vcd_files.c (set_entries_vcd): added support for additional entry points
 
 	* libvcd/vcd.c: changed api to enable PBC/SPI/entry points,

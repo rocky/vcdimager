@@ -40,10 +40,9 @@ _dict_insert (VcdObj *obj, const char key[], uint32_t sector, uint32_t length,
   struct _dict_t *_new_node;
 
   assert (key != NULL);
-  assert (sector != SECTOR_NIL);
   assert (length > 0);
 
-  if (_vcd_salloc (obj->iso_bitmap, sector, length) == SECTOR_NIL)
+  if ((sector =_vcd_salloc (obj->iso_bitmap, sector, length)) == SECTOR_NIL)
     assert (0);
 
   _new_node = _vcd_malloc (sizeof (struct _dict_t));

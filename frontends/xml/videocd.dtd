@@ -89,7 +89,7 @@
   rejected  (true|false) 'false'"
 >
 
-<!ELEMENT selection (bsn?,prev?,next?,return?,default*,timeout?,wait?,play-item?,select*)>
+<!ELEMENT selection (bsn?,prev?,next?,return?,default*,timeout?,wait?,loop?,play-item?,select*)>
 <!ATTLIST selection
   %pbcattrs;
 >
@@ -107,6 +107,7 @@
 <!ELEMENT wait (#PCDATA)>
 <!ELEMENT autowait (#PCDATA)>
 <!ELEMENT playtime (#PCDATA)>
+<!ELEMENT loop (#PCDATA)>
 
 <!ELEMENT bsn (#PCDATA)>
 <!ELEMENT prev EMPTY>
@@ -116,6 +117,10 @@
 <!ELEMENT timeout EMPTY>
 <!ELEMENT play-item EMPTY>
 <!ELEMENT select EMPTY>
+
+<!ATTLIST loop
+  jump-timing  (immediate|delayed)   'immediate'
+>
 
 <!ATTLIST prev 
   ref       IDREF       #REQUIRED
