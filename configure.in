@@ -73,7 +73,7 @@ AC_C_INLINE
 
 dnl system
 WARN_CFLAGS="-Wall -ansi -Wmissing-prototypes -Wunused -Wpointer-arith -Wwrite-strings"
-dnl LIBS="$LIBS"
+LIBS="$LIBS -lm"
 CFLAGS="$CFLAGS -ansi $WARN_CFLAGS"
 
 AM_CONDITIONAL(BUILD_CLI_FE, test "x$enable_cli_fe" = "xyes")

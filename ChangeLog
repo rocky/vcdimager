@@ -1,6 +1,27 @@
-2000-12-25  Herbert Valerio Riedel  <hvr@gnu.org>
+2001-01-01  Herbert Valerio Riedel  <hvr@gnu.org>
 
-	* libvcd/vcd.c (_finalize_vcd_iso_track): added 2 links to /EXT
+	* configure.in: added -lm to link flags
+
+	* libvcd/vcd_util.c (_len2blocks): new function
+
+	* libvcd/vcd.c (vcd_obj_append_mpeg_track): reworked to use
+		_make_scantable()
+		(_finalize_vcd_iso_track): accomodated variable length 
+			SEARCH.DAT file...		
+
+2001-12-31  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd.c (_make_scantable): new function
+
+2000-12-30  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_files.c (get_search_dat_size): new function
+
+2000-12-27  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_files.c (set_tracks_svd): improved playtime accuracy
+
+2000-12-25  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/: added static _rcsid symbols to all modules
 

@@ -29,6 +29,9 @@
 #undef  MIN
 #define MIN(a, b)  (((a) < (b)) ? (a) : (b))
 
+unsigned
+_len2blocks (unsigned len, int blocksize);
+
 size_t
 _strlenv(char **str_array);
 

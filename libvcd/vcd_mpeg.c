@@ -265,15 +265,10 @@ _vcd_mpeg_parse_gop (const void *packet, int *offsetp, mpeg_type_info_t *info)
 
   broken_link = _bitvec_get_bits32(data, offset++, 1) != 0;
 
-  if (info->video.frate > 0)
-    {
-      info->video.timecode = frame;
-      info->video.timecode /= info->video.frate;
-    }
-
-  info->video.timecode += second;
-  info->video.timecode += minute * 60;
-  info->video.timecode += hour * 60 * 60;
+  info->video.timecode.h = hour;
+  info->video.timecode.m = minute;
+  info->video.timecode.s = second;
+  info->video.timecode.f = frame;
 
   info->video.gop_flag = true;
 
@@ -513,7 +508,7 @@ vcd_mpeg_get_timecode (const void *packet)
       assert (_info.type == MPEG_TYPE_VIDEO);
 
       if(_info.video.gop_flag)
-        return _info.video.timecode;
+        return -1; /* _info.video.timecode */;
     }
 
   return -1;

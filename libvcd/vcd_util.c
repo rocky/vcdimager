@@ -26,6 +26,18 @@
 
 static const char _rcsid[] = "$Id$";
 
+unsigned
+_len2blocks (unsigned len, int blocksize)
+{
+  unsigned blocks;
+
+  blocks = len / blocksize;
+  if (len % blocksize)
+    blocks++;
+
+  return blocks;
+}
+
 size_t
 _strlenv(char **str_array)
 {

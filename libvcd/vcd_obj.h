@@ -32,8 +32,9 @@ typedef struct {
   VcdDataSource *source;
   unsigned relative_start_extent; /* relative to iso data end */
   unsigned length_sectors;
-  unsigned playtime; /* estimated playtime in secs based on timecode */
+  double playtime; /* playtime in secs based on timecode */
   mpeg_info_t mpeg_info;
+  VcdList *scanpoints;
 } mpeg_track_t;
 
 struct _VcdObj {

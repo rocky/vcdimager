@@ -52,6 +52,9 @@ set_psd_vcd (VcdObj *obj, void *buf);
 void
 set_tracks_svd (VcdObj *obj, void *buf);
 
+uint32_t 
+get_search_dat_size (const VcdObj *obj);
+
 void
 set_search_dat (VcdObj *obj, void *buf);
 

@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <math.h>
 
 #include "vcd.h"
 #include "vcd_obj.h"
@@ -266,7 +267,9 @@ vcd_obj_remove_mpeg_track (VcdObj *obj, int track_id)
   track = (mpeg_track_t *) _vcd_list_node_data (node);
 
   vcd_data_source_destroy (track->source);
-  
+  if (track->scanpoints)
+    _vcd_list_free (track->scanpoints, true);
+
   length = track->length_sectors;
   length += PRE_TRACK_GAP + PRE_DATA_GAP + 0 + POST_DATA_GAP;
 
@@ -283,14 +286,164 @@ vcd_obj_remove_mpeg_track (VcdObj *obj, int track_id)
   _vcd_list_node_free (node, true);
 }
 
+static void
+_make_scantable (mpeg_track_t *track)
+{
+  char buf[M2F2_SIZE] = { 0, };
+  mpeg_type_info_t ti;
+  unsigned sect;
+
+  VcdList *table = _vcd_list_new ();
+  uint32_t *last_sect;
+
+  double last_gop_timecode = 0;
+  double last_i_timecode = 0;
+  double offset = 0;
+  bool got_first_gop = false;
+
+  unsigned n = 0;
+
+  last_sect = _vcd_malloc (sizeof (uint32_t));
+  *last_sect = 0;
+  _vcd_list_append (table, last_sect);
+
+  vcd_data_source_seek (track->source, 0); 
+
+  for (sect = 0; sect < track->length_sectors; sect++)
+    {
+      vcd_data_source_read (track->source, buf, sizeof (buf), 1);
+  
+      switch (vcd_mpeg_get_type (buf, &ti))
+        {
+        case MPEG_TYPE_INVALID:
+          vcd_debug ("mk_st: invalid type @%d", sect);
+          break;
+          
+        case MPEG_TYPE_VIDEO:
+          if (ti.video.gop_flag)
+            {
+              double timecode;
+
+              timecode = ti.video.timecode.f;
+
+              timecode /= track->mpeg_info.frate;
+
+              timecode += ti.video.timecode.s;
+              timecode += ti.video.timecode.m * 60;
+              timecode += ti.video.timecode.h * 60 * 60;
+
+              /* vcd_debug ("GOP: @%.4d  %6f", sect, timecode); */
+
+              if (!got_first_gop)
+                {
+                  got_first_gop = true;
+                  offset = timecode;
+
+                  if (timecode > 1)
+                    vcd_warn ("mpeg stream begins with offsetted timecode of %f seconds",
+                              offset);
+                  else
+                    offset = 0; /* ignore offset */
+                }
+
+              last_gop_timecode = timecode;
+            }
+
+          if (ti.video.i_frame_flag)
+            {
+              double timecode;
+
+              if (!got_first_gop)
+                vcd_warn ("ups... got I-frame before GOP");
+
+              timecode = ti.video.rel_timecode;
+              
+              timecode /= track->mpeg_info.frate;
+              
+              timecode += last_gop_timecode;
+
+              if (timecode <= last_i_timecode)
+                {
+                  /* break */
+                }
+              else
+                {
+                  /* vcd_debug ("I-Frame: @%.4d +%6f", sect, timecode); */
+
+                  while (fabs ((0.5 * (double) n) - (timecode - offset)) >
+                         fabs ((0.5 * (double) n) - (last_i_timecode - offset)))
+                    {
+                      uint32_t tmp = *last_sect;
+                      n++;
+
+                      last_sect = _vcd_malloc (sizeof (uint32_t));
+                      *last_sect = tmp;
+                      _vcd_list_append (table, last_sect);
+                      /* vcd_debug ("append I-Frame: @%.4d +%6f", *last_sect, last_i_timecode); */
+                    }
+                  
+                  /* just overwrite last element in list... */
+                  *last_sect = sect;
+                  last_i_timecode = timecode;
+                      
+                  /* vcd_debug ("replace I-Frame: @%.4d +%6f", sect, timecode); */
+
+                }
+            }
+          break;
+
+        case MPEG_TYPE_AUDIO:
+        case MPEG_TYPE_NULL:
+          break;
+
+        default:
+          vcd_debug ("mk_st: type %d @%d", ti.type, sect);
+          break;
+        }
+    }
+
+
+  /* be sure to have the right one... */
+  sect = *last_sect;
+
+  while ((last_i_timecode - offset) > (0.5 * n))
+    {
+      n++;
+      last_sect = _vcd_malloc (sizeof (uint32_t));
+      *last_sect = sect;
+      _vcd_list_append (table, last_sect);
+      /* vcd_debug ("filling I-Frame: @%.4d +%6f", sect, last_i_timecode); */
+    }  
+
+  track->playtime = last_i_timecode - offset;
+
+  /* done... */
+
+#if 0
+  {
+    unsigned s = 0;
+    VcdListNode *n;
+
+    for(n = _vcd_list_begin (table);
+        n; n = _vcd_list_node_next (n), s++)
+      {
+        vcd_debug ("%6d %6d", s, *((uint32_t*) _vcd_list_node_data (n)));
+      }
+  }
+#endif
+
+  track->scanpoints = table;
+}
+
 int
 vcd_obj_append_mpeg_track (VcdObj *obj, VcdDataSource *mpeg_file)
 {
   unsigned length;
   int j;
   mpeg_track_t *track = NULL;
-  double begin = -1, end = -1;
-  int got_info = 0;
+  bool got_info = false;
+
+  int track_no = _vcd_list_length (obj->mpeg_track_list);
 
   assert (obj != NULL);
   assert (mpeg_file != NULL);
@@ -298,9 +451,8 @@ vcd_obj_append_mpeg_track (VcdObj *obj, VcdDataSource *mpeg_file)
   length = vcd_data_source_stat (mpeg_file);
 
   if (length % 2324)
-    vcd_warn ("track# %d not a multiple of 2324 bytes", 
-              _vcd_list_length (obj->mpeg_track_list));
-
+    vcd_warn ("track# %d not a multiple of 2324 bytes", track_no);
+  
   track = _vcd_malloc (sizeof (mpeg_track_t));
 
   track->source = mpeg_file;
@@ -317,12 +469,8 @@ vcd_obj_append_mpeg_track (VcdObj *obj, VcdDataSource *mpeg_file)
       char buf[M2F2_SIZE] = { 0, };
       
       vcd_data_source_read (mpeg_file, buf, sizeof (buf), 1);
-
-      /* find beginning timecode */
-      if (begin < 0)
-        begin = vcd_mpeg_get_timecode (buf);
       
-      if (!got_info && vcd_mpeg_get_info (buf, &(track->mpeg_info)))
+      if (vcd_mpeg_get_info (buf, &(track->mpeg_info)))
         {
           if (obj->type == VCD_TYPE_SVCD
               && track->mpeg_info.version == MPEG_VERS_MPEG1)
@@ -332,14 +480,11 @@ vcd_obj_append_mpeg_track (VcdObj *obj, VcdDataSource *mpeg_file)
               && track->mpeg_info.version == MPEG_VERS_MPEG2)
             vcd_warn ("VCD should not contain MPEG2 tracks!");
           
-          got_info = 1;
+          got_info = true;
           break;
         }
 
-      if (got_info && begin >= 0)
-        break;
-
-      if (j > 75)
+      if (j > 150)
         break;
   }
 
@@ -349,50 +494,20 @@ vcd_obj_append_mpeg_track (VcdObj *obj, VcdDataSource *mpeg_file)
                 " -- assuming it is ok nevertheless");
     }
 
-  if (begin < 0)
-    vcd_warn ("couldn't determine starting timecode");
-
-  /* find ending timecode */
-
-  for(j = 1;;j++) 
+  if (obj->type == VCD_TYPE_SVCD)
     {
-      char buf[M2F2_SIZE] = { 0, };
-
-      vcd_data_source_seek (mpeg_file, (track->length_sectors - j) * 2324); 
-
-      vcd_data_source_read (mpeg_file, buf, sizeof (buf), 1);
-      
-      if (end < 0)
-        end = vcd_mpeg_get_timecode (buf);
-      
-      if (end >= 0)
-        break;
-
-      if (j > 150) 
-        {
-          vcd_warn ("could not determine ending timecode");
-          break;
-        }
+      vcd_debug ("scanning svcd mpeg track #%d for scanpoints ...", 
+                 track_no);
+      _make_scantable (track);
+      vcd_debug ("track# %d's estimated playtime: %.2f seconds", 
+                 track_no, track->playtime);
     }
 
   vcd_data_source_close (mpeg_file);
-
-  if (begin < 0 || end < 0 || begin >= end) 
-    {
-      vcd_warn ("track# %d: timecode begin with %f / end at %f " 
-                "-- setting playtime to 0", 
-                _vcd_list_length (obj->mpeg_track_list), begin, end);
-      track->playtime = 0;
-    }
-
-  track->playtime = (double) (0.5 + end - begin);
-
-  vcd_debug ("track# %d's estimated playtime: %d seconds", 
-             _vcd_list_length (obj->mpeg_track_list), track->playtime);
   
   _vcd_list_append (obj->mpeg_track_list, track);
 
-  return _vcd_list_length (obj->mpeg_track_list)-1;
+  return track_no;
 }
 
 void 
@@ -417,6 +532,8 @@ vcd_obj_destroy (VcdObj *obj)
 
   _vcd_list_free (obj->custom_file_list, true);
 
+  while (_vcd_list_length (obj->mpeg_track_list))
+    vcd_obj_remove_mpeg_track (obj, 0);
   _vcd_list_free (obj->mpeg_track_list, true);
 
   free (obj);
@@ -579,8 +696,8 @@ _finalize_vcd_iso_track (VcdObj *obj)
     assert (0);
 
   /* keep info area blank -- paranoid ? */
-  if (_vcd_salloc (obj->iso_bitmap, 187, 38) == SECTOR_NIL) 
-    assert (0);
+  /*   if (_vcd_salloc (obj->iso_bitmap, 187, 38) == SECTOR_NIL)  */
+  /*     assert (0); */
 
   _dict_insert (obj, "pvd", 16, 1, SM_EOR);        /* pre-alloc descriptors, PVD */  /* EOR */
   _dict_insert (obj, "evd", 17, 1, SM_EOR|SM_EOF); /* EVD */                         /* EOR+EOF */
@@ -603,9 +720,8 @@ _finalize_vcd_iso_track (VcdObj *obj)
   if (obj->type == VCD_TYPE_SVCD)
     {
       _dict_insert (obj, "tracks", TRACKS_SVD_SECTOR, 1, SM_EOF);      /* TRACKS.SVD */
-      
-      /* fixme -- we create it with zero scan points for now, cause it's simpler */
-      _dict_insert (obj, "search", SEARCH_DAT_SECTOR, 1, SM_EOF);      /* SEARCH.DAT */
+      _dict_insert (obj, "search", SEARCH_DAT_SECTOR, 
+                    _len2blocks (get_search_dat_size (obj), ISO_BLOCKSIZE), SM_EOF); /* SEARCH.DAT */
     }
 
   /* keep rest of vcd sector blank -- paranoia */
@@ -648,15 +764,6 @@ _finalize_vcd_iso_track (VcdObj *obj)
         _vcd_directory_mkfile (obj->dir, "VCD/PSD.VCD;1", 
                                _dict_get_bykey (obj, "psd")->sector, 
                                get_psd_size (obj), false, 0);
-
-        /* just link() those 2 files with filenum 1 in /EXT/ */
-
-        _vcd_directory_mkfile (obj->dir, "EXT/LOT_X.VCD;1", 
-                               _dict_get_bykey (obj, "lot")->sector, 
-                               ISO_BLOCKSIZE*LOT_VCD_SIZE, false, 1);
-        _vcd_directory_mkfile (obj->dir, "EXT/PSD_X.VCD;1", 
-                               _dict_get_bykey (obj, "psd")->sector, 
-                               get_psd_size (obj), false, 1);
       }
     break;
 
@@ -679,7 +786,7 @@ _finalize_vcd_iso_track (VcdObj *obj)
                            get_psd_size (obj), false, 0);
     _vcd_directory_mkfile (obj->dir, "SVCD/SEARCH.DAT;1", 
                            _dict_get_bykey (obj, "search")->sector, 
-                           sizeof (SearchDat), false, 0);
+                           get_search_dat_size (obj), false, 0);
     _vcd_directory_mkfile (obj->dir, "SVCD/TRACKS.SVD;1",
                            _dict_get_bykey (obj, "tracks")->sector, 
                            ISO_BLOCKSIZE, false, 0);
@@ -852,9 +959,8 @@ _write_source_mode2_form1 (VcdObj *obj, VcdDataSource *source, uint32_t extent)
   uint32_t sectors, size;
 
   size = vcd_data_source_stat (source);
-  sectors = size / M2F1_SIZE;
-  if (size % M2F1_SIZE)
-    sectors++;
+
+  sectors = _len2blocks (size, M2F1_SIZE);
 
   vcd_data_source_seek (source, 0); 
 
@@ -1091,14 +1197,13 @@ _write_sectors (VcdObj *obj, int track_idx)
   return 0;
 }
 
-
 long
 vcd_obj_get_image_size (VcdObj *obj)
 {
   long size_sectors = -1;
 
   assert (!obj->in_output);
-
+  
   if (_vcd_list_length (obj->mpeg_track_list) > 0) {
     /* fixme -- make this efficient */
     size_sectors = vcd_obj_begin_output (obj);

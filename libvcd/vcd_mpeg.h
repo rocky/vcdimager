@@ -85,7 +85,9 @@ typedef struct
       unsigned vbvsize;
       bool constrained_flag;
     
-      double timecode; /* linear timecode given in seconds */
+      struct {
+        unsigned h, m, s, f;
+      } timecode; /* linear timecode */
       int rel_timecode; /* relative timecode offset to last gop given
                            in frames */
 

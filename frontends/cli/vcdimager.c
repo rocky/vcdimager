@@ -34,6 +34,8 @@
 #include "vcd_logging.h"
 #include "vcd_cd_sector.h"
 
+static const char _rcsid[] = "$Id$";
+
 /* defaults */
 #define DEFAULT_CUE_FILE       "videocd.cue"
 #define DEFAULT_BIN_FILE       "videocd.bin"
