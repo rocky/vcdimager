@@ -47,7 +47,7 @@ main (int argc, const char *argv[])
       VcdDataSource *src = vcd_data_source_new_stdio (argv[2]);
       vcd_assert (src != NULL);
 
-      img = vcd_image_source_new_nrg (src); 
+      img = vcd_image_source_new_nrg (); 
     }
   else if (!strcmp ("bincue", argv[1]))
     {
