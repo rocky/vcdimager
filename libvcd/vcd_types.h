@@ -132,12 +132,16 @@ typedef enum
 #define GNUC_PACKED
 #endif  /* !__GNUC__ */
 
-#if !defined(__GNUC__)
+#if defined(__GNUC__)
+/* for GCC we try to use GNUC_PACKED */
+# define PRAGMA_BEGIN_PACKED
+# define PRAGMA_END_PACKED
+#elif defined(HAVE_ISOC99_PRAGMA)
 /* should work with most EDG-frontend based compilers */
 # define PRAGMA_BEGIN_PACKED _Pragma("pack(1)")
 # define PRAGMA_END_PACKED   _Pragma("pack()")
-#else
-/* for GCC we try to use GNUC_PACKED instead */
+#else /* neither gcc nor _Pragma() available... */
+/* ...so let's be naive and hope the regression testsuite is run... */
 # define PRAGMA_BEGIN_PACKED
 # define PRAGMA_END_PACKED
 #endif

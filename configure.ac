@@ -29,6 +29,24 @@ then
   echo "*** non GNU CC compiler detected."
   echo "*** This package has not been tested very well with non GNU compilers"
   echo "*** you should try to use 'gcc' for compiling this package."
+else
+  WARN_CFLAGS="-std=c99 -pedantic -Wall -Wchar-subscripts -Wmissing-prototypes -Wmissing-declarations -Wunused -Wpointer-arith -Wwrite-strings -Wnested-externs -Wsign-promo -Wno-sign-compare"
+
+  for WOPT in $WARN_CFLAGS; do
+    SAVE_CFLAGS="$CFLAGS"
+    CFLAGS="$CFLAGS $WOPT"
+    AC_MSG_CHECKING([whether $CC understands $WOPT])
+    AC_TRY_COMPILE([], [], has_option=yes, has_option=no,)
+    CFLAGS="$SAVE_CFLAGS"
+    AC_MSG_RESULT($has_option)
+    if test $has_option = yes; then
+      warning_flags="$warning_flags $option"
+    fi
+    unset has_option
+    unset SAVE_CFLAGS
+  done
+  WARNING_FLAGS="$warning_flags"
+  unset warning_flags
 fi
 
 AC_PROG_CPP
@@ -66,14 +84,22 @@ AC_C_BIGENDIAN
 AC_C_CONST
 AC_C_INLINE
 
+dnl ISOC99_PRAGMA
+AC_MSG_CHECKING([whether $CC supports ISOC99 _Pragma()])
+AC_TRY_COMPILE([],[_Pragma("pack(1)")], [
+  ISOC99_PRAGMA=yes 
+  AC_DEFINE(HAVE_ISOC99_PRAGMA, [], [Supports ISO _Pragma() macro])
+],ISOC99_PRAGMA=no)
+AC_MSG_RESULT($ISOC99_PRAGMA)
+
 dnl empty_array_size
 AC_MSG_CHECKING([how to create empty arrays])
 
 empty_array_size="xxx"
-AC_TRY_COMPILE(,[struct { int foo; int bar[]; } doo;], empty_array_size="")
+AC_TRY_COMPILE([],[struct { int foo; int bar[]; } doo;], empty_array_size="")
 
 if test "x$empty_array_size" = "xxxx";then
- AC_TRY_COMPILE(,[struct { int foo; int bar[0]; } doo;], empty_array_size="0")
+ AC_TRY_COMPILE([],[struct { int foo; int bar[0]; } doo;], empty_array_size="0")
 fi
 
 if test "x$empty_array_size" = "xxxx"
@@ -123,10 +149,6 @@ dnl
 dnl system
 AC_CYGWIN
 
-if test "x$GCC" = "xyes"
-then
-  WARN_CFLAGS="-Wall -Wchar-subscripts -Wmissing-prototypes -Wmissing-declarations -Wunused -Wpointer-arith -Wwrite-strings -Wnested-externs"
-fi
 
 LIBS="$LIBS -lm"
 CFLAGS="$CFLAGS $WARN_CFLAGS"
@@ -183,6 +205,10 @@ AC_OUTPUT([ \
 	tests/Makefile \
 	vcdimager.spec \
 ])
+
+if test -z "$enable_maintainer_mode"; then
+  enable_maintainer_mode="no"
+fi
 
 echo "
 Setup:
