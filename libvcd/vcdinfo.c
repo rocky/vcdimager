@@ -427,6 +427,13 @@ _visit_pbc (vcdinfo_obj_t *obj, unsigned int lid, unsigned int offset,
           if (in_lot)
             ofs->in_lot = true;
 
+          if (lid) 
+            /* Our caller thinks she knows what our LID is.
+               This should help out getting the LID for end descriptors
+               if not other things as well.
+             */
+            ofs->lid = lid;
+
           return; /* already been there... */
         }
     }
@@ -1331,7 +1338,7 @@ vcdinfo_get_track_msf(const vcdinfo_obj_t *obj, unsigned int track_num,
 */
 unsigned int
 vcdinfo_get_track_sect_count(const vcdinfo_obj_t *obj, 
-                            const unsigned int track_num)
+                             const unsigned int track_num)
 {
   if (NULL == obj || VCDINFO_INVALID_TRACK == track_num) 
     return 0;
