@@ -206,9 +206,12 @@ else
 fi
 dnl empty_array_size
 
-dnl bitfield order
-AC_MSG_CHECKING(bitfield ordering in structs)
-AC_TRY_RUN([
+#
+# Check bitfield order in structs
+#
+AC_MSG_CHECKING([bitfield ordering in structs])
+dnl basic compile test for all platforms
+AC_COMPILE_IFELSE([
 int
  main() {
   struct { char bit_0:1, bit_12:2, bit_345:3, bit_67:2; }
@@ -216,25 +219,58 @@ int
   __attribute__((packed))
 #endif
   bf = { 1,1,1,1 };
-  if (sizeof (bf) != 1) return 1;
-  return *((unsigned char*) &bf) != 0x4b; }
-], bf_lsbf=1, AC_TRY_RUN([ 
-int
-main() {
+  switch (0) case 0: case sizeof(bf) == 1:;
+  return 0;
+}
+], [], AC_MSG_ERROR([compiler doesn't support bitfield structs]))
+    dnl run test
+    AC_RUN_IFELSE([
+int main() {
   struct { char bit_0:1, bit_12:2, bit_345:3, bit_67:2; }
 #if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)
   __attribute__((packed))
 #endif
   bf = { 1,1,1,1 };
   if (sizeof (bf) != 1) return 1;
-  return *((unsigned char*) &bf) != 0xa5; }
-], bf_lsbf=0, AC_MSG_ERROR([unsupported bitfield ordering])))
-if test "x$bf_lsbf" = "x1"; then
- AC_MSG_RESULT(LSBF)
- AC_DEFINE(BITFIELD_LSBF, [], [compiler does lsbf in struct bitfields])
-else
- AC_MSG_RESULT(MSBF)
-fi
+  return *((unsigned char*) &bf) != 0x4b; }
+], bf_lsbf=1, [
+  AC_RUN_IFELSE([
+int main() {
+  struct { char bit_0:1, bit_12:2, bit_345:3, bit_67:2; }
+#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)
+  __attribute__((packed))
+#endif
+ bf = { 1,1,1,1 };
+ if (sizeof (bf) != 1) return 1;
+ return *((unsigned char*) &bf) != 0xa5; }
+], bf_lsbf=0, AC_MSG_ERROR([unsupported bitfield ordering]))
+  ],
+  [case "$host" in
+     *-*-mingw32* | *-*-cygwin*)
+       bf_lsbf=1
+     ;;
+     *)
+       AC_MSG_RESULT([unknown])
+       AC_MSG_ERROR([value of bitfield test isn't known for $host
+*********************************************************************
+Value of bitfield test can't find out for cross-compiling and we
+don't know its value for host "$host".
+*********************************************************************])
+  esac]
+)
+
+    if test "x$cross_compiling" = "xyes"; then
+      TEXT=" (guessed)"
+    else
+      TEXT=""
+    fi
+
+    if test "x$bf_lsbf" = "x1"; then
+      AC_MSG_RESULT(LSBF${TEXT})
+      AC_DEFINE(BITFIELD_LSBF, [], [compiler does lsbf in struct bitfields])
+    else
+      AC_MSG_RESULT(MSBF${TEXT})
+    fi
 dnl
 
 dnl system
