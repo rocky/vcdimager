@@ -1,3 +1,8 @@
+2001-06-04  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_pbc.c (_vcd_pbc_node_write): implemented writing of
+		area positions
+
 2001-06-03  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd.c: re-enabled generation of extended PBC

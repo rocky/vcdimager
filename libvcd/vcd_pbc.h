@@ -22,8 +22,9 @@
 #define __VCD_PBC_H__
 
 #include <libvcd/vcd.h>
-#include <libvcd/vcd_types.h>
 #include <libvcd/vcd_data_structures.h>
+#include <libvcd/vcd_types.h>
+#include <libvcd/vcd_util.h>
 
 enum pbc_type_t {
   PBC_INVALID = 0,
@@ -31,6 +32,30 @@ enum pbc_type_t {
   PBC_SELECTION,
   PBC_END
 };
+
+/* (0,0) == upper left , (255,255) == lower right */
+struct psd_area_t
+{
+  uint8_t x1                 GNUC_PACKED; /* upper left */
+  uint8_t y1                 GNUC_PACKED; /* upper left */
+  uint8_t x2                 GNUC_PACKED; /* lower right */
+  uint8_t y2                 GNUC_PACKED; /* lower right */
+};
+
+typedef struct psd_area_t pbc_area_t; /* fixme */
+
+static inline pbc_area_t *
+vcd_pbc_area_new (uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2)
+{
+  pbc_area_t *_new_area = _vcd_malloc (sizeof (pbc_area_t));
+
+  _new_area->x1 = x1;
+  _new_area->y1 = y1;
+  _new_area->x2 = x2;
+  _new_area->y2 = y2;
+
+  return _new_area;
+}
 
 /* typedef struct _pbc_t pbc_t; */
 
@@ -53,6 +78,12 @@ struct _pbc_t {
   VcdList *item_id_list; /* char */
 
   /* used for selection lists */
+  pbc_area_t *prev_area;
+  pbc_area_t *next_area;
+  pbc_area_t *return_area;
+  pbc_area_t *default_area;
+  VcdList *select_area_list; /* pbc_area_t */
+
   unsigned bsn;
   VcdList *default_id_list; /* char */
   char *timeout_id;

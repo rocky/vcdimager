@@ -23,7 +23,8 @@
 #ifndef __VCD_FILES_PRIVATE_H__
 #define __VCD_FILES_PRIVATE_H__
 
-#include "vcd_types.h"
+#include <libvcd/vcd_types.h>
+#include <libvcd/vcd_pbc.h>
 
 /* random note: most stuff is big endian here */
 
@@ -254,15 +255,6 @@ typedef struct {
   uint8_t type               GNUC_PACKED;
   uint8_t reserved[7]        GNUC_PACKED;
 } PsdEndOfListDescriptor;
-
-/* (0,0) == upper left , (255,255) == lower right */
-struct psd_area_t
-{
-  uint8_t x1                 GNUC_PACKED; /* upper left */
-  uint8_t y1                 GNUC_PACKED; /* upper left */
-  uint8_t x2                 GNUC_PACKED; /* lower right */
-  uint8_t y2                 GNUC_PACKED; /* lower right */
-};
 
 typedef struct {
 #if defined(BITFIELD_LSBF)

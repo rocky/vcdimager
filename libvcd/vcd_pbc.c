@@ -397,15 +397,16 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 	else
 	  _md->type = PSD_TYPE_SELECTION_LIST;
 	
-	if (obj->type == VCD_TYPE_SVCD)
-	  _md->flags.SelectionAreaFlag = true;
-
 	_md->bsn = _pbc->bsn;
 	_md->nos = _vcd_list_length (_pbc->select_id_list);
 	_md->default_ofs = UINT16_TO_BE (0xffff);
 
 	vcd_assert (sizeof (PsdSelectionListFlags) == 1);
-	_md->flags.SelectionAreaFlag = false;
+	if (obj->type == VCD_TYPE_SVCD
+	    && _mode != _SEL_MODE_MULTI_ONLY)
+	  _md->flags.SelectionAreaFlag = true;
+	else
+	  _md->flags.SelectionAreaFlag = false;
 	_md->flags.CommandListFlag = false;
 
 	vcd_assert (_pbc->lid < 0x8000);
@@ -510,6 +511,49 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 	  default:
 	    vcd_assert_not_reached ();
 	  }
+
+	if (extended 
+	    || (obj->type == VCD_TYPE_SVCD 
+		&& _mode != _SEL_MODE_MULTI_ONLY))
+	  {
+	    PsdSelectionListDescriptorExtended *_md2;
+	    VcdListNode *node;
+	    int n;
+	    
+	    /* append extended selection areas */
+
+	    n = _vcd_list_length (_pbc->select_id_list);
+	    if (_mode == _SEL_MODE_MULTI)
+	      n += _vcd_list_length (_pbc->default_id_list);
+
+	    _md2 = (void *) &_md->ofs[n];
+
+	    if (_pbc->prev_area)
+	      _md2->prev_area = *_pbc->prev_area;
+
+	    if (_pbc->next_area)
+	      _md2->next_area = *_pbc->next_area;
+
+	    if (_pbc->return_area)
+	      _md2->return_area = *_pbc->return_area;
+
+	    if (_pbc->default_area)
+	      _md2->default_area = *_pbc->default_area;
+
+	    n = 0;
+	    if (_pbc->select_area_list)
+	      _VCD_LIST_FOREACH (node, _pbc->select_area_list)
+	      {
+		pbc_area_t *_area = _vcd_list_node_data (node);
+
+		vcd_assert (_area != NULL);
+
+		_md2->area[n] = *_area;
+
+		n++;
+	      }
+	  }
+
       }
       break;
       
