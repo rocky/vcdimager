@@ -27,14 +27,16 @@
 <!ATTLIST videocd
   class     CDATA                    #REQUIRED
   version   CDATA                    #REQUIRED
+  options   CDATA                    #IMPLIED
   xmlns     %URI;                    #FIXED 'http://www.gnu.org/software/vcdimager/1.0/'
 >
 
-<!ELEMENT info (album-description?,volume-count?,volume-number?,restriction?)>
+<!ELEMENT info (album-description?,volume-count?,volume-number?,restriction?,time-offset?)>
 <!ELEMENT album-description (#PCDATA)>
 <!ELEMENT volume-count (#PCDATA)>
 <!ELEMENT volume-number (#PCDATA)>
 <!ELEMENT restriction (#PCDATA)>
+<!ELEMENT time-offset (#PCDATA)>
 
 <!ELEMENT pvd (volume-id?,system-id?,application-id?,preparer-id?,publisher-id)>
 <!ELEMENT volume-id (#PCDATA)>
@@ -75,17 +77,26 @@
   %itemattrs;
 >
 
-<!ELEMENT pbc (selection|playlist)*>
+<!ELEMENT pbc (selection|playlist|endlist)*>
 
-<!ELEMENT selection (bsn?,prev?,next?,return?,default?,timeout?,wait?,item*)>
-<!ATTLIST selection
-  id        ID           #REQUIRED
-  ref       IDREF        #REQUIRED
+<!ENTITY % pbcattrs
+" id        ID           #REQUIRED
+  rejected  (true|false) 'false'"
 >
 
-<!ELEMENT playlist (prev?,next?,return?,playtime?,wait?,autowait?,item*)>
+<!ELEMENT selection (bsn?,prev?,next?,return?,default*,timeout?,wait?,play-item?,select*)>
+<!ATTLIST selection
+  %pbcattrs;
+>
+
+<!ELEMENT playlist (prev?,next?,return?,playtime?,wait?,autowait?,play-item*)>
 <!ATTLIST playlist
-  id        ID           #REQUIRED
+  %pbcattrs;
+>
+
+<!ELEMENT endlist (next-volume?,play-item?)>
+<!ATTLIST endlist
+  %pbcattrs;
 >
 
 <!ELEMENT wait (#PCDATA)>
@@ -98,7 +109,8 @@
 <!ELEMENT return EMPTY>
 <!ELEMENT default EMPTY>
 <!ELEMENT timeout EMPTY>
-<!ELEMENT item EMPTY>
+<!ELEMENT play-item EMPTY>
+<!ELEMENT select EMPTY>
 
 <!ATTLIST prev 
   ref       IDREF       #REQUIRED
@@ -120,6 +132,11 @@
   ref       IDREF       #REQUIRED
 >
 
-<!ATTLIST item
+<!ATTLIST play-item
   ref       IDREF       #REQUIRED
 >
+
+<!ATTLIST select
+  ref       IDREF       #REQUIRED
+>
+
