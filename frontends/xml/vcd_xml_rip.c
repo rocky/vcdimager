@@ -1289,21 +1289,23 @@ main (int argc, const char *argv[])
        "specify xml file for output (default: '" DEFAULT_XML_FNAME "')",
        "FILE"},
 
-      {"bin-file", 'b', POPT_ARG_STRING, &img_fname, CL_SOURCE_BIN,
+      {"bin-file", 'b', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &img_fname, 
+       CL_SOURCE_BIN,
        "set image file as source (default: '" DEFAULT_IMG_FNAME "')", 
        "FILE"},
 
       {"sector-2336", '\0', POPT_ARG_NONE, &sector_2336_flag, 0,
        "use 2336 byte sector mode for image file"},
 
-      {"cdrom-device", '\0', POPT_ARG_STRING, &img_fname, CL_SOURCE_CDROM,
-       "set CDROM device as source", "DEVICE"},
+      {"cdrom-device", 'C', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &img_fname,
+       CL_SOURCE_CDROM,"set CDROM device as source", "DEVICE"},
 
-      {"input", 'i', POPT_ARG_STRING, &img_fname, CL_SOURCE_AUTO,
+      {"input", 'i', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &img_fname, 
+       CL_SOURCE_AUTO, 
        "set source and determine if \"bin\" image or device", "FILE"},
 
-      {"nrg-file", '\0', POPT_ARG_STRING, &img_fname, CL_SOURCE_NRG,
-       "set NRG image file as source",
+      {"nrg-file", 'N', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &img_fname, 
+       CL_SOURCE_NRG, "set Nero CD-ROM disk image image file as source",
        "FILE"},
 
       {"no-ext-psd", '\0', POPT_ARG_NONE, &no_ext_psd_flag, 0,
@@ -1398,60 +1400,9 @@ main (int argc, const char *argv[])
   if (!xml_fname)
     xml_fname = strdup (DEFAULT_XML_FNAME);
 
-  if (CL_SOURCE_AUTO == _img_type) {
-    struct stat buf;
-    if (0 != stat(img_fname, &buf)) {
-      vcd_error ("Can't stat file %s:", strerror(errno));
-      exit (EXIT_FAILURE);
-    }
-    if (S_ISBLK(buf.st_mode) || S_ISCHR(buf.st_mode)) {
-      _img_type = CL_SOURCE_CDROM;
-    } else if (S_ISREG(buf.st_mode)) {
-      /* FIXME: check to see if is a text file. If so, then 
-	 set VCDINFO_SOURCE_CUE. */
-      int i=strlen(img_fname)-strlen("bin");
-      if (i > 0
-	       && (img_fname[i] =='n' || img_fname[i+1] =='N')
-	       && (img_fname[i+1] =='r' || img_fname[i+1] =='R')
-	       && (img_fname[i+2] =='g' || img_fname[i+2] =='G') ) 
-	_img_type = CL_SOURCE_NRG;
-      else
-	_img_type = CL_SOURCE_BIN;
-    } else {
-      vcd_error ("Source file `%s' should either be a block device "
-		 "or a regular file", img_fname);
-      exit (EXIT_FAILURE);
-    }
-  }
-  
-  switch (_img_type) 
-    {
-    case CL_SOURCE_BIN:
-      img_src = vcd_image_source_new_bincue ();
-
-      vcd_image_source_set_arg (img_src, "bin", img_fname);
-
-      vcd_image_source_set_arg (img_src, "sector", 
-				sector_2336_flag ? "2336" : "2352");
-      break;
-
-    case CL_SOURCE_NRG:
-      img_src = vcd_image_source_new_nrg ();
-      vcd_image_source_set_arg (img_src, "nrg", img_fname);
-      break;
-
-    case CL_SOURCE_CDROM:
-      img_src = vcd_image_source_new_cd ();
-
-      vcd_image_source_set_arg (img_src, "device", img_fname);
-      break;
-
-    default:
-      vcd_error ("no image given - try --help");
-      exit (EXIT_FAILURE);
-      break;
-    }
-
+  if (!vcdinf_open(&img_src, img_fname, _img_type, NULL)) 
+    return VCDINFO_OPEN_ERROR;
+    
   vcd_assert (img_src != NULL);
 
   /* start with ISO9660 PVD */
