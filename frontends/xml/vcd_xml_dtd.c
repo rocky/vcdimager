@@ -45,7 +45,8 @@ _xmlExternalEntityLoader (const char *sysid, const char *pubid,
 {
   vcd_assert (vcd_xml_dtd_loaded >= 0);
 
-  vcd_debug ("EEL sysid=[%s] pubid=[%s]", sysid, pubid);
+  vcd_debug ("EEL sysid=[%s] pubid=[%s]", 
+	     sysid ? sysid : "NULL", pubid ? pubid : "NULL");
 
   if ((pubid && !strcmp (pubid, VIDEOCD_DTD_PUBID))
       || (sysid && !strcmp (sysid, VIDEOCD_DTD_SYSID)))
