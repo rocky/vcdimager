@@ -18,14 +18,75 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef _MPEG_H_
-#define _MPEG_H_
+#ifndef __VCD_MPEG_H__
+#define __VCD_MPEG_H__
 
-#include "vcd_types.h"
+#include <assert.h>
+#include <string.h>
 
-/* empty -- work in progress */
+#include <libvcd/vcd_types.h>
+#include <libvcd/vcd_mpeg_stream.h>
+#include <libvcd/vcd_logging.h>
 
-#endif /* _MPEG_H_ */
+typedef struct {
+  struct {
+    bool video[3];
+    bool audio[3];
+
+    bool ogt;
+    bool padding;
+    bool pem;
+    bool zero;
+    bool system_header;
+
+    bool aps;
+    double aps_pts;
+
+    bool has_pts;
+    double pts;
+
+    bool gop;
+    struct {
+      uint8_t h, m, s, f;
+    } gop_timecode;
+  } packet;
+
+  struct {
+    unsigned packets;
+
+    int first_shdr;
+    struct {
+      bool seen;
+      unsigned hsize;
+      unsigned vsize;
+      double aratio;
+      double frate;
+      unsigned bitrate;
+      unsigned vbvsize;
+      bool constrained_flag;
+    } shdr[3];
+
+    bool video[3];
+    bool audio[3];
+
+    mpeg_vers_t version;
+
+    bool seen_pts;
+    double min_pts;
+    double max_pts;
+
+    double last_aps_pts[3];
+  } stream;
+} VcdMpegStreamCtx;
+
+int
+vcd_mpeg_parse_packet (const void *buf, unsigned buflen, bool parse_pes,
+                       VcdMpegStreamCtx *ctx);
+
+mpeg_norm_t 
+vcd_mpeg_get_norm (unsigned hsize, unsigned vsize, double frate);
+
+#endif /* __VCD_MPEG_H__ */
 
 
 /* 

@@ -1,5 +1,11 @@
 2001-05-22  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* frontends/xml/vcd_xml_rip.c (_rip_sequences): resolve pts times
+
+	* libvcd/vcd_bitvec.h: inline functions for bit handling moved here
+
+	* libvcd/vcd_mpeg.c: moved lowlevel stuff back here, from vcd_mpeg_stream
+
 	* frontends/xml/vcd_xml_rip.c: re-implemented sequence ripping
 
 	* frontends/xml/vcd_xml_master.c: moved vcd type resolving to _parser

@@ -41,6 +41,7 @@
 #include <libvcd/vcd_bytesex.h>
 #include <libvcd/vcd_util.h>
 #include <libvcd/vcd_cd_sector.h>
+#include <libvcd/vcd_mpeg.h>
 
 #include "vcdxml.h"
 #include "vcd_xml_dtd.h"
@@ -573,8 +574,11 @@ _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img)
       struct sequence_t *_nseq = nnode ? _vcd_list_node_data (nnode) : NULL;
       FILE *outfd = NULL;
       bool in_data = false;
-
+      VcdMpegStreamCtx mpeg_ctx;
       uint32_t start_lsn, end_lsn, n, last_nonzero, first_data;
+      double last_pts = 0;
+
+      memset (&mpeg_ctx, 0, sizeof (VcdMpegStreamCtx));
 
       start_lsn = _seq->start_extent;
       end_lsn = _nseq ? _nseq->start_extent : vcd_image_source_stat_size (img);
@@ -599,6 +603,7 @@ _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img)
             uint8_t spare[4];
           }
           buf;
+
 	  memset (&buf, 0, sizeof (buf));
 	  vcd_image_source_read_mode2_sector (img, &buf, n, true);
 
@@ -632,6 +637,7 @@ _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img)
 	      in_data = true;
 	    }
 
+
 #ifdef DEBUG	 
 	  if (!in_data)
 	    vcd_debug ("%2.2x %2.2x %2.2x %2.2x",
@@ -643,22 +649,49 @@ _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img)
 
 	  if (in_data)
 	    {
-	      int i;
+	      VcdListNode *_node;
 
-	      if (!first_data)
+	      vcd_mpeg_parse_packet (buf.data, 2324, false, &mpeg_ctx);
+
+	      if (!mpeg_ctx.packet.zero)
+		last_nonzero = n;
+
+	      if (!first_data && !mpeg_ctx.packet.zero)
 		first_data = n;
 	      
-	      for (i = 0; i < 2324; i++)
-		if (buf.data[i])
-		  {
-		    last_nonzero = n;
-		    break;
-		  }
-	      
+	      if (mpeg_ctx.packet.has_pts)
+		{
+		  last_pts = mpeg_ctx.packet.pts;
+		  if (mpeg_ctx.stream.seen_pts)
+		    last_pts -= mpeg_ctx.stream.min_pts;
+		  if (last_pts < 0)
+		    last_pts = 0;
+		  /* vcd_debug ("pts %f @%d", mpeg_ctx.packet.pts, n); */
+		}
+
 	      if (buf.subheader[2] & SM_TRIG)
-		vcd_debug ("autopause @%d", n);
+		{
+		  double *_ap_ts = _vcd_malloc (sizeof (double));
+
+		  vcd_debug ("autopause @%d (%f)", n, last_pts);
+		  *_ap_ts = last_pts;
+
+		  _vcd_list_append (_seq->autopause_list, _ap_ts);
+		}
 	      
-	      fwrite (buf.data, 2324, 1, outfd);
+	      _VCD_LIST_FOREACH (_node, _seq->entry_point_list)
+		{
+		  struct entry_point_t *_ep = _vcd_list_node_data (_node);
+
+		  if (_ep->extent == n)
+		    {
+		      vcd_debug ("entry point @%d (%f)", n, last_pts);
+		      _ep->timestamp = last_pts;
+		    }
+		}
+	      
+	      if (first_data)
+		fwrite (buf.data, 2324, 1, outfd);
 	    }
 	  
 	  if (buf.subheader[2] & SM_EOF)

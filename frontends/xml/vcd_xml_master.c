@@ -130,6 +130,13 @@ bool vcd_xml_master (const struct vcdxml_t *obj, const char cue_fname[],
 
 	  vcd_obj_add_sequence_entry (_vcd, sequence->id, entry->timestamp, entry->id);
 	}
+
+      _VCD_LIST_FOREACH (node2, sequence->autopause_list)
+	{
+	  double *_ap_ts = _vcd_list_node_data (node2);
+
+	  vcd_obj_add_sequence_pause (_vcd, sequence->id, *_ap_ts, NULL);
+	}
     }
 
   /****************************************************************************

@@ -31,6 +31,8 @@
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
 
+#include <libvcd/vcd_util.h>
+
 static const char _rcsid[] = "$Id$";
 
 /*
@@ -201,8 +203,7 @@ _parse_segments (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr 
 
       if (!xmlStrcmp (cur->name, "segment-item")) 
 	{
-	  struct segment_t *_item = malloc (sizeof (struct segment_t));
-	  memset (_item, 0, sizeof (sizeof (struct segment_t)));
+	  struct segment_t *_item = _vcd_malloc (sizeof (struct segment_t));
 	  
 	  GET_PROP_STR (_item->id, "id", doc, cur, ns);
 	  GET_PROP_STR (_item->src, "src", doc, cur, ns);
@@ -395,8 +396,7 @@ _parse_mpeg_sequence (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlN
   struct sequence_t *sequence;
   xmlNodePtr cur;
 
-  sequence = malloc (sizeof (struct sequence_t));
-  memset (sequence, 0, sizeof (struct sequence_t));
+  sequence = _vcd_malloc (sizeof (struct sequence_t));
 
   _vcd_list_append (obj->sequence_list, sequence);
 
@@ -412,13 +412,21 @@ _parse_mpeg_sequence (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlN
 
       if (!xmlStrcmp (cur->name, "entry"))
 	{
-	  struct entry_point_t *entry = malloc (sizeof (struct entry_point_t));
-	  memset (entry, 0, sizeof (struct entry_point_t));
+	  struct entry_point_t *entry = _vcd_malloc (sizeof (struct entry_point_t));
 	  
 	  GET_PROP_STR (entry->id, "id", doc, cur, ns);
 	  GET_ELEM_DOUBLE (entry->timestamp, "entry", doc, cur, ns);
 
 	  _vcd_list_append (sequence->entry_point_list, entry);
+	}
+      else if (!xmlStrcmp (cur->name, "auto-pause"))
+	{
+	  double *_ap_ts = _vcd_malloc (sizeof (double));
+	  *_ap_ts = 0;
+	  
+	  GET_ELEM_DOUBLE (*_ap_ts, "auto-pause", doc, cur, ns);
+
+	  _vcd_list_append (sequence->autopause_list, _ap_ts);
 	}
       else
 	assert (0);
@@ -674,10 +682,8 @@ _parse_videocd (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr n
   return false;
 }
 
-
-
-
-/* exported entry point
+/*
+ * exported entry function
  */
 
 bool

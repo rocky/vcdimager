@@ -310,6 +310,15 @@ vcd_obj_append_sequence_play_item (VcdObj *obj, VcdMpegSource *mpeg_source,
 }
 
 int 
+vcd_obj_add_sequence_pause (VcdObj *obj, const char sequence_id[], 
+                            double pause_timestamp, const char pause_id[])
+{
+  vcd_warn ("%s not implemented yet", __FUNCTION__);
+
+  return -1;
+}
+
+int 
 vcd_obj_add_sequence_entry (VcdObj *obj, const char sequence_id[], 
                             double entry_time, const char entry_id[])
 {

@@ -236,6 +236,15 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 	  ent_node = xmlNewChild (seq_node, ns, "entry", buf);
 	  xmlSetProp (ent_node, "id", _entry->id);
 	}
+
+      _VCD_LIST_FOREACH (node2, _sequence->autopause_list)
+	{
+	  double *_ap_ts = _vcd_list_node_data (node2);
+	  char buf[80];
+
+	  snprintf (buf, sizeof (buf), "%f", *_ap_ts);
+	  xmlNewChild (seq_node, ns, "auto-pause", buf);
+	}
     }
 
   /* PBC */
