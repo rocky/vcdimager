@@ -1,3 +1,16 @@
+2000-11-12  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_obj.h: added VcdDirectory *dir to _VcdObj
+
+	* libvcd/vcd_directory.c: introduced directory object, prefixed exported
+		symbols with 'vcd_'
+
+	* libvcd/vcd.c (_finalize_vcd_iso_track): added preliminary svcd support
+
+	* libvcd/vcd.h: added vcd_obj_add_file() prototype
+
+	* libvcd/vcd_mpeg.c: made tables static
+
 2000-11-10  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* frontends/cli/vcdimager.c: removed cdi support

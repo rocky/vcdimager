@@ -43,9 +43,8 @@ typedef struct {
 
 /* tree data structure */
 
-
 typedef struct {
-  bool is_dir;
+  int is_dir;
   char *name;
   uint8_t xa_type;
   uint8_t xa_filenum;
@@ -56,7 +55,7 @@ typedef struct {
 
 typedef struct _VcdDirNode VcdDirNode;
 
-struct  _VcdDirNode {
+struct _VcdDirNode {
   data_t     data;
   VcdDirNode *next;
   VcdDirNode *prev;
@@ -64,7 +63,9 @@ struct  _VcdDirNode {
   VcdDirNode *children;
 };
 
-static VcdDirNode *_root = NULL;
+struct _VcdDirectory {
+  VcdDirNode *root;
+};
 
 #define EXTENT(anode) ((anode)->data.extent)
 #define SIZE(anode)   ((anode)->data.size)
@@ -84,14 +85,14 @@ _node_next_sibling(VcdDirNode *node)
 }
 
 static VcdDirNode* 
-_node_first_child(VcdDirNode *node)    
+_node_first_child (VcdDirNode *node)    
 {
   assert(node != NULL);
   return node->children;
 }
 
 static void
-_node_traverse(VcdDirNode *root, _node_traversal_func_t travfunc, void *user_data)
+_node_traverse (VcdDirNode *root, _node_traversal_func_t travfunc, void *user_data)
 {
   VcdDirNode *child;
 
@@ -221,11 +222,11 @@ traverse_update_dirextents(VcdDirNode *dirnode, void *data)
 }
 
 static void 
-update_dirextents(uint32_t extent)
+update_dirextents (VcdDirectory *dir, uint32_t extent)
 {
-  EXTENT(_root) = extent;
+  EXTENT(dir->root) = extent;
 
-  _node_traverse(_root, traverse_update_dirextents, NULL);
+  _node_traverse(dir->root, traverse_update_dirextents, NULL);
 }
 
 static void
@@ -262,9 +263,9 @@ traverse_update_sizes(VcdDirNode *node, void *data)
 }
 
 static void 
-update_sizes(void)
+update_sizes(VcdDirectory *dir)
 {
-  _node_traverse(_root, traverse_update_sizes, NULL);
+  _node_traverse(dir->root, traverse_update_sizes, NULL);
 }
 
 static void*
@@ -282,39 +283,46 @@ _memdup (const void *mem, size_t count)
 
 /* exported stuff: */
 
-void
-directory_init(void)
+VcdDirectory *
+_vcd_directory_new (void)
 {
   data_t *data;
+  VcdDirectory *dir = NULL;
 
-  assert(_root == NULL);
-  
   assert(sizeof(xa_t) == 14);
 
-  _root = _node_new();
-  data = &(_root->data);
+  dir = malloc(sizeof(VcdDirectory));
+  assert(dir != NULL);
+
+  dir->root = _node_new();
+  data = &(dir->root->data);
 
   data->is_dir = TRUE;
   data->name = _memdup("\0", 2);
   data->xa_type = XA_FORM1_DIR;
   data->xa_filenum = 0x00;
+
+  return dir;
 }
 
 static void
-traverse_directory_done(VcdDirNode *node, void *data)
+traverse__vcd_directory_done(VcdDirNode *node, void *data)
 {
   free(node->data.name);
 }
 
 void
-directory_done(void)
+_vcd_directory_destroy(VcdDirectory *dir)
 {
-  assert(_root != NULL);
+  assert(dir != NULL);
+  assert(dir->root != NULL);
 
-  _node_traverse(_root, traverse_directory_done, NULL);
+  _node_traverse(dir->root, traverse__vcd_directory_done, NULL);
 
-  _node_destroy(_root);
-  _root = NULL;
+  _node_destroy(dir->root);
+  dir->root = NULL;
+
+  free(dir);
 }
 
 static VcdDirNode* 
@@ -334,15 +342,15 @@ lookup_child(VcdDirNode* node, const char name[])
   return child; /* NULL */
 }
 
-void
-directory_mkdir(const char pathname[])
+int
+_vcd_directory_mkdir (VcdDirectory *dir, const char pathname[])
 {
   char **splitpath;
   unsigned level, n;
-  VcdDirNode* pdir = _root;
+  VcdDirNode* pdir = dir->root;
 
   assert(pathname != NULL);
-  assert(_root != NULL);
+  assert(dir->root != NULL);
 
   splitpath = _strsplit(pathname, '/');
 
@@ -355,7 +363,7 @@ directory_mkdir(const char pathname[])
     }
 
   if(lookup_child(pdir, splitpath[level-1])) {
-    vcd_error("directory_mkdir: `%s' already exists\n", pathname);
+    vcd_error("_vcd_directory_mkdir: `%s' already exists\n", pathname);
     assert(0);
   }
 
@@ -372,18 +380,21 @@ directory_mkdir(const char pathname[])
   }
 
   _strfreev(splitpath);
+
+  return 0;
 }
 
-void
-directory_mkfile(const char pathname[], uint32_t start, uint32_t size,
-                 bool form2, uint8_t filenum)
+int
+_vcd_directory_mkfile (VcdDirectory *dir, const char pathname[], 
+                       uint32_t start, uint32_t size,
+                       int form2_flag, uint8_t filenum)
 {
   char **splitpath;
   unsigned level, n;
-  VcdDirNode* pdir = _root;
+  VcdDirNode* pdir = dir->root;
 
   assert(pathname != NULL);
-  assert(_root != NULL);
+  assert(dir->root != NULL);
 
   splitpath = _strsplit(pathname, '/');
 
@@ -396,7 +407,7 @@ directory_mkfile(const char pathname[], uint32_t start, uint32_t size,
     }
 
   if(lookup_child(pdir, splitpath[level-1])) {
-    vcd_error("directory_mkfile: `%s' already exists\n", pathname);
+    vcd_error("_vcd_directory_mkfile: `%s' already exists\n", pathname);
     assert(0);
   }
 
@@ -407,7 +418,7 @@ directory_mkfile(const char pathname[], uint32_t start, uint32_t size,
 
     newnode->data.is_dir = FALSE;
     newnode->data.name = strdup(splitpath[level-1]);
-    newnode->data.xa_type = form2 ? XA_FORM2_FILE : XA_FORM1_FILE;
+    newnode->data.xa_type = form2_flag ? XA_FORM2_FILE : XA_FORM1_FILE;
     newnode->data.xa_filenum = filenum;
     newnode->data.size = size;
     newnode->data.extent = start;
@@ -418,16 +429,17 @@ directory_mkfile(const char pathname[], uint32_t start, uint32_t size,
 }
 
 uint32_t
-directory_get_size(void)
+_vcd_directory_get_size (VcdDirectory *dir)
 {
-  assert(_root != NULL);
+  assert(dir != NULL);
+  assert(dir->root != NULL);
 
-  update_sizes();
-  return get_dirsizes(_root);
+  update_sizes(dir);
+  return get_dirsizes(dir->root);
 }
 
 static void
-traverse_directory_dump_entries(VcdDirNode *node, void *data)
+traverse__vcd_directory_dump_entries(VcdDirNode *node, void *data)
 {
   data_t *d = DATAP(node);
   xa_t tmp = { { 0, }, 0, { 'U', 'X', 'A' }, 0, { 0, } };
@@ -463,26 +475,27 @@ traverse_directory_dump_entries(VcdDirNode *node, void *data)
 }
 
 void
-directory_dump_entries(void * buf, uint32_t extent)
+_vcd_directory_dump_entries (VcdDirectory *dir, void *buf, uint32_t extent)
 {
-  assert(_root != NULL);
+  assert(dir != NULL);
+  assert(dir->root != NULL);
 
-  update_sizes(); /* better call it one time more than one less */
-  update_dirextents(extent);
+  update_sizes(dir); /* better call it one time more than one less */
+  update_dirextents(dir, extent);
 
-  _node_traverse(_root, traverse_directory_dump_entries, buf); 
+  _node_traverse(dir->root, traverse__vcd_directory_dump_entries, buf); 
 }
 
 typedef struct {
   void *ptl;
   void *ptm;
-} directory_dump_pathtables_t;
+} _vcd_directory_dump_pathtables_t;
 
 static void
-traverse_directory_dump_pathtables(VcdDirNode *node, void * data)
+traverse__vcd_directory_dump_pathtables(VcdDirNode *node, void * data)
 {
   data_t *d = DATAP(node);
-  directory_dump_pathtables_t *args = data;
+  _vcd_directory_dump_pathtables_t *args = data;
 
   if(d->is_dir) {
     unsigned parent_id = node->parent ? PT_ID(node->parent) : 1;
@@ -494,9 +507,11 @@ traverse_directory_dump_pathtables(VcdDirNode *node, void * data)
 }
 
 void
-directory_dump_pathtables(void * ptl, void * ptm)
+_vcd_directory_dump_pathtables(VcdDirectory *dir, void *ptl, void *ptm)
 {
-  directory_dump_pathtables_t args;
+  _vcd_directory_dump_pathtables_t args;
+
+  assert(dir != NULL);
 
   pathtable_init(ptl);
   pathtable_init(ptm);
@@ -504,7 +519,7 @@ directory_dump_pathtables(void * ptl, void * ptm)
   args.ptl = ptl;
   args.ptm = ptm;
 
-  _node_traverse(_root, traverse_directory_dump_pathtables, &args); 
+  _node_traverse(dir->root, traverse__vcd_directory_dump_pathtables, &args); 
 }
 
 

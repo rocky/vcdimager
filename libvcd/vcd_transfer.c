@@ -85,7 +85,7 @@ write_mode2_raw_sector(VcdDataSink *sink, bool sect2336,
 }
 
 uint32_t
-mknod_source_mode2_raw(VcdDataSink *sink, VcdDataSource *source,
+mknod_source_mode2_raw(VcdDirectory *dir, VcdDataSink *sink, VcdDataSource *source,
                        VcdSalloc *iso_bitmap, const char iso_pathname[])
 {
   uint32_t size = 0, extent = 0, sectors = 0;
@@ -99,14 +99,14 @@ mknod_source_mode2_raw(VcdDataSink *sink, VcdDataSource *source,
 
   extent = vcd_salloc(iso_bitmap, SECTOR_NIL, sectors);
 
-  directory_mkfile(iso_pathname, extent, size, TRUE, 1);
+  _vcd_directory_mkfile(dir, iso_pathname, extent, size, TRUE, 1);
 
   return extent;
 
 }
 
 uint32_t
-mknod_source_mode2_form1(VcdDataSink *sink, VcdDataSource *source,
+mknod_source_mode2_form1(VcdDirectory *dir, VcdDataSink *sink, VcdDataSource *source,
                          VcdSalloc *iso_bitmap, const char iso_pathname[])
 {
   uint32_t size = 0, sectors = 0, start_extent = 0;
@@ -119,7 +119,7 @@ mknod_source_mode2_form1(VcdDataSink *sink, VcdDataSource *source,
 
   start_extent = vcd_salloc(iso_bitmap, SECTOR_NIL, sectors);
   
-  directory_mkfile(iso_pathname, start_extent, size, FALSE, 1);
+  _vcd_directory_mkfile(dir, iso_pathname, start_extent, size, FALSE, 1);
 
   return start_extent;
 

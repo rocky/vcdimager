@@ -26,6 +26,7 @@
 #include "vcd_types.h"
 #include "vcd_stream.h"
 #include "vcd_salloc.h"
+#include "vcd_directory.h"
 
 void
 write_mode2_sector(VcdDataSink *sink, bool sect2336, const void *data, 
@@ -37,11 +38,11 @@ write_mode2_raw_sector(VcdDataSink *sink, bool sect2336,
                        const void *data, uint32_t extent);
 
 uint32_t
-mknod_source_mode2_raw(VcdDataSink *sink, VcdDataSource *source,
+mknod_source_mode2_raw(VcdDirectory *dir, VcdDataSink *sink, VcdDataSource *source,
                        VcdSalloc *iso_bitmap, const char iso_pathname[]);
 
 uint32_t
-mknod_source_mode2_form1(VcdDataSink *sink, VcdDataSource *source,
+mknod_source_mode2_form1(VcdDirectory *dir, VcdDataSink *sink, VcdDataSource *source,
                          VcdSalloc *iso_bitmap, const char iso_pathname[]);
 
 #endif /* _TRANSFER_H_ */

@@ -503,7 +503,6 @@ rip_device(const gchar device_fname[])
 
       struct cdrom_msf *msf = &buf;
 
-
       memset(&buf, 0, sizeof(buf));
 
       msf->cdmsf_min0 = pos / (60*75);

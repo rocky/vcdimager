@@ -111,7 +111,7 @@ vcd_obj_append_mpeg_track (VcdObj *obj, VcdDataSource *mpeg_file)
   length = vcd_data_source_stat (mpeg_file);
 
   if (length % 2324)
-    vcd_warn ("track# %d not a multiple 2324...\n", obj->mpeg_tracks_num);
+    vcd_warn ("track# %d not a multiple 2324...", obj->mpeg_tracks_num);
 
   obj->mpeg_tracks[obj->mpeg_tracks_num].source = mpeg_file;
   obj->mpeg_tracks[obj->mpeg_tracks_num].length_sectors = length / 2324;
@@ -161,7 +161,7 @@ cue_start (VcdDataSink *sink, const char fname[])
 }
 
 static void
-cue_track (VcdDataSink *sink, bool sect2336, uint8_t num, uint32_t extent)
+cue_track (VcdDataSink *sink, int sect2336, uint8_t num, uint32_t extent)
 {
   char buf[1024] = { 0, };
 
@@ -256,39 +256,41 @@ _finalize_vcd_iso_track (VcdObj *obj)
   assert (obj->info_sec != SECTOR_NIL);
   assert (obj->entries_sec != SECTOR_NIL);
 
-  /* directory_mkdir ("CDDA"); */
-  directory_mkdir ("CDI");
-  directory_mkdir ("EXT");
-  /* directory_mkdir ("KARAOKE"); */
-  directory_mkdir ("MPEGAV");
-  directory_mkdir ("SEGMENT"); 
-  directory_mkdir ("VCD");
+  switch(obj->type) {
+  case VCD_TYPE_VCD2:
+    /* _vcd_directory_mkdir (obj->dir, "CDDA"); */
+    _vcd_directory_mkdir (obj->dir, "CDI");
+    _vcd_directory_mkdir (obj->dir, "EXT");
+    /* _vcd_directory_mkdir (obj->dir, "KARAOKE"); */
+    _vcd_directory_mkdir (obj->dir, "MPEGAV");
+    _vcd_directory_mkdir (obj->dir, "SEGMENT"); 
+    _vcd_directory_mkdir (obj->dir, "VCD");
 
-  directory_mkfile ("VCD/ENTRIES.VCD;1", obj->entries_sec, ISO_BLOCKSIZE, FALSE, 0);    
-  directory_mkfile ("VCD/INFO.VCD;1", obj->info_sec, ISO_BLOCKSIZE, FALSE, 0);
-  directory_mkfile ("VCD/LOT.VCD;1", obj->lot_secs, ISO_BLOCKSIZE*LOT_VCD_SIZE, FALSE, 0);
-  directory_mkfile ("VCD/PSD.VCD;1", obj->psd_sec, obj->psd_size, FALSE, 0);
+    _vcd_directory_mkfile (obj->dir, "VCD/ENTRIES.VCD;1", obj->entries_sec, ISO_BLOCKSIZE, FALSE, 0);    
+    _vcd_directory_mkfile (obj->dir, "VCD/INFO.VCD;1", obj->info_sec, ISO_BLOCKSIZE, FALSE, 0);
+    _vcd_directory_mkfile (obj->dir, "VCD/LOT.VCD;1", obj->lot_secs, ISO_BLOCKSIZE*LOT_VCD_SIZE, FALSE, 0);
+    _vcd_directory_mkfile (obj->dir, "VCD/PSD.VCD;1", obj->psd_sec, obj->psd_size, FALSE, 0);
+    break;
 
-  /* allocate and write cdi files if needed */
+  case VCD_TYPE_SVCD:
+    _vcd_directory_mkdir (obj->dir, "EXT");
+    _vcd_directory_mkdir (obj->dir, "MPEG-2");
+    _vcd_directory_mkdir (obj->dir, "SVCD");
 
-  if (obj->cdi_vcd_file && obj->cdi_text_file && obj->cdi_image_file) {
-    vcd_debug ("CD-i support enabled");
-      
-    obj->cdi_image_extent =
-      mknod_source_mode2_raw (obj->bin_file, obj->cdi_image_file,
-                              obj->iso_bitmap, "CDI/CDI_IMAG.RTF;1");
-    
-    obj->cdi_text_extent =
-      mknod_source_mode2_form1 (obj->bin_file, obj->cdi_text_file,
-                                obj->iso_bitmap, "CDI/CDI_TEXT.FNT;1");
+    _vcd_directory_mkfile (obj->dir, "SVCD/ENTRIES.VCD;1", obj->entries_sec, ISO_BLOCKSIZE, FALSE, 0);    
+    _vcd_directory_mkfile (obj->dir, "SVCD/INFO.VCD;1", obj->info_sec, ISO_BLOCKSIZE, FALSE, 0);
+    _vcd_directory_mkfile (obj->dir, "SVCD/LOT.VCD;1", obj->lot_secs, ISO_BLOCKSIZE*LOT_VCD_SIZE, FALSE, 0);
+    _vcd_directory_mkfile (obj->dir, "SVCD/PSD.VCD;1", obj->psd_sec, obj->psd_size, FALSE, 0);
+    break;
 
-    obj->cdi_vcd_extent =
-      mknod_source_mode2_form1 (obj->bin_file, obj->cdi_vcd_file,
-                                obj->iso_bitmap, "CDI/CDI_VCD.APP;1");
-  } else
-    vcd_info ("CD-i support disabled");
+  default:
+    vcd_error("VCD type not supported");
+    break;
+  }
 
   /* add custom user files */
+
+  
 
   /* fixme */
 
@@ -310,26 +312,26 @@ _finalize_vcd_iso_track (VcdObj *obj)
     uint32_t extent = obj->mpeg_tracks[n].relative_start_extent;
       
     snprintf (avseq_pathname, sizeof (avseq_pathname), 
-              "MPEGAV/AVSEQ%2.2d.DAT;1", n+1);
+              "MPEGAV/AVSEQ%2.2d.DAT;1", n+1); /* fixme --> SVCD */
     
     extent += obj->iso_size;
 
-    directory_mkfile (avseq_pathname, extent+PRE_DATA_GAP,
+    _vcd_directory_mkfile (obj->dir, avseq_pathname, extent+PRE_DATA_GAP,
                       obj->mpeg_tracks[n].length_sectors*ISO_BLOCKSIZE,
                       TRUE, n+1);
   }
 
-  obj->dirs_size = directory_get_size ();
+  obj->dirs_size = _vcd_directory_get_size (obj->dir);
 
   obj->ptl_sec = obj->dir_secs + obj->dirs_size;
   obj->ptm_sec = obj->ptl_sec + 1;
 
   if (obj->ptm_sec >= 75)
-    vcd_error ("directory section to big\n");
+    vcd_error ("directory section to big");
 }
 
 static int
-_callback_wrapper (VcdObj *obj, bool force)
+_callback_wrapper (VcdObj *obj, int force)
 {
   const int cb_frequency = 75*4;
 
@@ -442,8 +444,8 @@ _write_vcd_iso_track (VcdObj *obj)
   
   dir_buf = malloc (ISO_BLOCKSIZE*obj->dirs_size);
 
-  directory_dump_entries (dir_buf, 18);
-  directory_dump_pathtables (ptl_buf, ptm_buf);
+  _vcd_directory_dump_entries (obj->dir, dir_buf, 18);
+  _vcd_directory_dump_pathtables (obj->dir, ptl_buf, ptm_buf);
       
   /* generate PVD and EVD at last... */
   set_iso_pvd (pvd_buf, obj->iso_volume_label, obj->iso_size, dir_buf,
@@ -664,7 +666,8 @@ vcd_obj_begin_output (VcdObj *obj)
   obj->sectors_written = 0;
 
   obj->iso_bitmap = vcd_salloc_new ();
-  directory_init ();
+
+  obj->dir = _vcd_directory_new ();
 
   _finalize_vcd_iso_track (obj);
 
@@ -712,7 +715,7 @@ vcd_obj_end_output (VcdObj *obj)
 {
   assert (obj != NULL);
 
-  directory_done ();
+  _vcd_directory_destroy (obj->dir);
   vcd_salloc_destroy (obj->iso_bitmap);
 
   if (obj->bin_file)

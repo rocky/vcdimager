@@ -25,13 +25,14 @@
 #include "vcd_iso9660.h"
 #include "vcd_files.h"
 #include "vcd_salloc.h"
+#include "vcd_directory.h"
 
 struct _VcdObj {
   vcd_type_t type;
 
   /* output */
   bool bin_file_2336_flag;
-  VcdDataSink* bin_file;
+  VcdDataSink *bin_file;
   /* VcdDataSink* cue_file; */
 
   unsigned iso_size;
@@ -48,9 +49,9 @@ struct _VcdObj {
   int mpeg_tracks_num;
 
   /* cdi support files */
-  VcdDataSource* cdi_image_file;
-  VcdDataSource* cdi_text_file;
-  VcdDataSource* cdi_vcd_file;
+  VcdDataSource *cdi_image_file;
+  VcdDataSource *cdi_text_file;
+  VcdDataSource *cdi_vcd_file;
 
   uint32_t cdi_image_extent;
   uint32_t cdi_text_extent;
@@ -78,6 +79,8 @@ struct _VcdObj {
   unsigned dirs_size;
 
   VcdSalloc *iso_bitmap;
+
+  VcdDirectory *dir;
 
   /* state info */
   unsigned sectors_written;

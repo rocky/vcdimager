@@ -54,6 +54,12 @@ typedef enum {
 void
 vcd_obj_set_param (VcdObj *obj, vcd_parm_t param, const void *arg);
 
+/* add custom files; if raw_flag set, the data source has to include a
+   mode2 subheader, and needs to be a multiple of 2336 byte blocksize */
+int
+vcd_obj_add_file(VcdObj *obj, const char iso_pathname[], VcdDataSource *file,
+                 int raw_flag);
+
 /* this one is for actually adding mpeg tracks to VCD, returns item a
    id, or a negative value for error..  */
 int

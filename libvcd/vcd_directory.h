@@ -23,28 +23,33 @@
 
 #include "vcd_types.h"
 
-void directory_init(void);
+/* opaque data structure representing the ISO directory tree */
+typedef struct _VcdDirectory VcdDirectory;
 
-void directory_done(void);
+VcdDirectory *
+_vcd_directory_new (void);
 
-void directory_mkdir(const char pathname[]);
+void
+_vcd_directory_destroy (VcdDirectory *dir);
 
-void directory_mkfile(const char pathname[],
-                      uint32_t start, 
-                      uint32_t size,
-                      bool form2, 
-                      uint8_t filenum);
+int
+_vcd_directory_mkdir (VcdDirectory *dir, const char pathname[]);
 
-uint32_t directory_get_size(void);
+int
+_vcd_directory_mkfile (VcdDirectory *dir, const char pathname[], 
+                       uint32_t start, uint32_t size,
+                       int form2_flag, uint8_t filenum);
 
-void directory_dump_entries(void * buf, 
-                            uint32_t extent);
+uint32_t
+_vcd_directory_get_size (VcdDirectory *dir);
 
-void directory_dump_pathtables(void * ptl, 
-                               void * ptm);
+void 
+_vcd_directory_dump_entries (VcdDirectory *dir, void *buf, uint32_t extent);
+
+void
+_vcd_directory_dump_pathtables (VcdDirectory *dir, void *ptl, void *ptm);
 
 #endif /* _DIRECTORY_H_ */
-
 
 
 /* 

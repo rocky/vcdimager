@@ -155,7 +155,7 @@ set_info_vcd(VcdObj *obj)
 
   info_vcd.offset_mult = INFO_OFFSET_MULT;
 
-  info_vcd.last_psd_ofs = UINT16_TO_BE((obj->mpeg_tracks_num+1)<<1); /* maybe this is the autoplay offset? */
+  info_vcd.last_psd_ofs = UINT16_TO_BE((obj->mpeg_tracks_num+1)<<1);
 
   info_vcd.item_count = UINT16_TO_BE(0x0000); /* no items in /SEGMENT supported yet */
 

@@ -25,25 +25,25 @@
 #include "vcd_mpeg.h"
 #include "vcd_logging.h"
 
-const uint8_t mpeg_sync[] = {
+const static uint8_t mpeg_sync[] = {
   0x00, 0x00, 0x01, 0xba 
 };
 
-const uint8_t mpeg_seq_start[] = {
+const static uint8_t mpeg_seq_start[] = {
   0x00, 0x00, 0x01, 0xb3 
 };
 
-const uint8_t mpeg_end[] = {
+const static uint8_t mpeg_end[] = {
   0x00, 0x00, 0x01, 0xb9 
 };
 
-const double frame_rates[16] = {
+const static double frame_rates[16] = {
    0.00, 23.976, 24.0, 25.0, 
   29.97, 30.0,   50.0, 59.94, 
   60.00, 00.0, 
 };
 
-const double aspect_ratios[16] = { 
+const static double aspect_ratios[16] = { 
   0.0000, 1.0000, 0.6735, 0.7031,
   0.7615, 0.8055, 0.8437, 0.8935,
   0.9375, 0.9815, 1.0255, 1.0695,
@@ -67,6 +67,8 @@ mpeg_type (const void *mpeg_block)
 
       return MPEG_NULL;
     }
+
+  /* mpeg_block had mpeg_sync */
 
   if ((data[15] == 0xe0) ||
       (data[15] == 0xbb && data[24] == 0xe0))
