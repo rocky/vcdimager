@@ -492,11 +492,11 @@ vcd_image_source_new_nrg (void)
   _img_nrg_src_t *_data;
 
   vcd_image_source_funcs _funcs = {
-    eject_media       : _vcd_eject_media,
-    free              : _source_free,
-    read_mode2_sector : _read_mode2_sector,
-    set_arg           : _source_set_arg,
-    stat_size         : _vcd_stat_size,
+    .eject_media       = _vcd_eject_media,
+    .free              = _source_free,
+    .read_mode2_sector = _read_mode2_sector,
+    .set_arg           = _source_set_arg,
+    .stat_size         = _vcd_stat_size,
   };
 
   _data = _vcd_malloc (sizeof (_img_nrg_src_t));
