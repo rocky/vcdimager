@@ -6,7 +6,7 @@
 2000-11-25  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_mpeg.c: major reorganisation of functions -- based on
-		code contributed by mike@blk.org
+		code contributed by mike@mlb.org
 		(vcd_mpeg_get_timecode): new convenience function
 
 	* libvcd/vcd_mpeg.c (vcd_mpeg_get_info): do norm detection by means
