@@ -1,69 +1,79 @@
 @table @acronym
 
 @item APS
-access point sector
+Access Point Sector
 
 @item CBR
-constant bit rate
+Constant Bit Rate
 
 @item CD
-compact disc
+Compact Disc
 
 @item CD-DA
-@acronym{CD} digital audio
+@acronym{CD} Digital Audio
 
 @item CD-ROM
-@acronym{CD} read only memory
+@acronym{CD} Read Only Memory
+
+@item CVD
+Chaoji VCD or China Video Disc @*
+@uref{http://www.dvdrhelp.com/forum/userguides/98177.php}
 
 @item DVD
-digital versatile disc 
+Digital Versatile Disc  @uref{http://www.dvddemystified.com/dvdfaq.html}
 
 @item DVD-V
-@acronym{DVD} for video 
+@acronym{DVD} for Video 
 
 @item DVD-A
-@acronym{DVD} for audio
+@acronym{DVD} for Audio
 
 @item FSF
-free software foundation, @uref{http://www.fsf.org/}
+Free Software Foundation, @uref{http://www.fsf.org/}
 
 @item GNU
 @acronym{GNU} is not @acronym{UNIX}, @uref{http://www.gnu.org/}
 
+@item LOT
+List ID Offset Table
+
 @item MPEG
-movie picture experts group
+Movie Picture Experts Group @uref{http://mpeg.telecomitalialab.com}
 
 @item OGT
-overlay graphics & text
+Overlay Graphics & Text
 
 @item PEM
-program end marker
+Program End Marker
 
 @item PBC
-playback control
+PlayBack Control
 
 @item PSD
-play sequence descriptor
+Play Sequence Descriptor
 
 @item PVD
-primary volume descriptor
+Primary Volume Descriptor
+
+@item SPI
+Segment Play Items
 
 @item SVCD
-Super @acronym{VCD}
+Super @acronym{VCD} @uref{http://www.dvdrhelp.com/svcd}
 
 @item VBR
-variable bit rate
+Variable Bit Rate
 
 @item VCD
-Video @acronym{CD}
+Video @acronym{CD} @uref{http://www.dvdrhelp.com/vcd}
 
 @item XML
-extensible markup language, @uref{http://www.w3.org/XML/}
+eXtensible Markup Language, @uref{http://www.w3.org/XML/}
 
 @item XSVCD
-eXtended @acronym{SVCD}
+eXtended @acronym{SVCD}, @uref{http://www.dvdrhelp.com/xvcd.htm}
 
 @item XVCD
-eXtended @acronym{VCD}
+eXtended @acronym{VCD}, @uref{http://www.dvdrhelp.com/xvcd.htm}
 
 @end table
