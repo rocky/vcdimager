@@ -88,7 +88,15 @@ _get_node_pathname (xmlDocPtr doc, xmlNodePtr cur, xmlNsPtr ns, const char pathn
   char *_dir, *c;
   xmlNodePtr retval = NULL;
 
-  _dir = strdup (pathname);
+  vcd_assert (pathname != NULL);
+
+  if (pathname[0] == '/')
+    return _get_node_pathname (doc, cur, ns, pathname + 1, folder);
+
+  if (pathname[0] == '\0')
+    return retval;
+
+  _dir = _vcd_strdup_upper (pathname);
   c = strchr (_dir, '/');
 
   if (c)
@@ -102,7 +110,7 @@ _get_node_pathname (xmlDocPtr doc, xmlNodePtr cur, xmlNsPtr ns, const char pathn
       retval = _get_node_pathname (doc, n, ns, c, folder);
     }
   else /* leaf */
-    retval = _get_node (doc, cur, ns, pathname, folder);
+    retval = _get_node (doc, cur, ns, _dir, folder);
 
   free (_dir);
 

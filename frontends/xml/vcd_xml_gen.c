@@ -127,7 +127,23 @@ _parse_file_arg (const char *arg, char **fname1, char **fname2)
 }
 
 static void
-_add_dir (struct vcdxml_t *obj, const char pathname[], 
+_add_dir (struct vcdxml_t *obj, const char pathname[])
+{
+  vcd_assert (pathname != NULL);
+
+  {
+    struct filesystem_t *_file = _vcd_malloc (sizeof (struct filesystem_t));
+    
+    _file->name = strdup (pathname);
+    _file->file_src = NULL;
+    _file->file_raw = false;
+
+    _vcd_list_append (obj->filesystem, _file);
+  }
+}
+
+static void
+_add_dirtree (struct vcdxml_t *obj, const char pathname[], 
           const char iso_pathname[])
 {
   DIR *dir = NULL;
@@ -168,7 +184,7 @@ _add_dir (struct vcdxml_t *obj, const char pathname[],
       if (S_ISDIR(st.st_mode))
         {
           strcat (iso_name, "/");
-          _add_dir (obj, buf, iso_name);
+          _add_dirtree (obj, buf, iso_name);
         }
       else if (S_ISREG(st.st_mode))
         {
@@ -238,6 +254,7 @@ main (int argc, const char *argv[])
     enum {
       CL_VERSION = 1,
       CL_ADD_DIR,
+      CL_ADD_DIRTREE,
       CL_ADD_FILE,
       CL_ADD_FILE_RAW
     };
@@ -278,8 +295,11 @@ main (int argc, const char *argv[])
 
         {"nopbc", '\0', POPT_ARG_NONE, &nopbc_flag, 0, "don't create PBC"},
         
-        {"add-dir", '\0', POPT_ARG_STRING, NULL, CL_ADD_DIR,
+        {"add-dirtree", '\0', POPT_ARG_STRING, NULL, CL_ADD_DIRTREE,
          "add directory contents recursively to ISO fs root", "DIR"},
+
+        {"add-dir", '\0', POPT_ARG_STRING, NULL, CL_ADD_DIR, 
+         "add empty dir to ISO fs", "ISO_DIRNAME"},
 
         {"add-file", '\0', POPT_ARG_STRING, NULL, CL_ADD_FILE, 
          "add single file to ISO fs", "FILE,ISO_FILENAME"},
@@ -317,13 +337,23 @@ main (int argc, const char *argv[])
           exit (EXIT_SUCCESS);
           break;
 
+        case CL_ADD_DIRTREE:
+          {
+            const char *arg = poptGetOptArg (optCon);
+
+            vcd_assert (arg != NULL);
+            
+            _add_dirtree (&obj, arg, "");
+          }
+          break;
+
         case CL_ADD_DIR:
           {
             const char *arg = poptGetOptArg (optCon);
 
             vcd_assert (arg != NULL);
             
-            _add_dir (&obj, arg, "");
+            _add_dir (&obj, arg);
           }
           break;
 

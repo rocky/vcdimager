@@ -170,60 +170,6 @@ _parse_file_arg (const char *arg, char **fname1, char **fname2)
   return rc;
 }
 
-static void
-_add_dir (const char pathname[], const char iso_pathname[])
-{
-  DIR *dir = NULL;
-  struct dirent *dentry = NULL;
-
-  vcd_assert (pathname != NULL);
-  vcd_assert (iso_pathname != NULL);
-
-  dir = opendir (pathname);
-
-  if (!dir)
-    {
-      perror ("--add-dir: opendir()");
-      exit (EXIT_FAILURE);
-    }
-
-  while ((dentry = readdir (dir)))
-    {
-      char buf[1024] = { 0, };
-      char iso_name[1024] = { 0, };
-      struct stat st;
-
-      if (!strcmp (dentry->d_name, "."))
-        continue;
-
-      if (!strcmp (dentry->d_name, ".."))
-        continue;
-
-      strcat (buf, pathname);
-      strcat (buf, "/");
-      strcat (buf, dentry->d_name);
-
-      strcat (iso_name, dentry->d_name);
-
-      if (stat (buf, &st))
-        perror ("stat()");
-
-      if (S_ISDIR(st.st_mode))
-        {
-          strcat (iso_name, "/");
-          _add_dir (buf, iso_name);
-        }
-      else if (S_ISREG(st.st_mode))
-        {
-          gl_add_file (strdup (buf), strdup (iso_name), false);
-        }
-      else
-        fprintf (stdout, "ignoring %s\n", buf);
-    }
-
-  closedir (dir);
-}
-
 int
 main (int argc, const char *argv[])
 {
@@ -253,7 +199,6 @@ main (int argc, const char *argv[])
 
     enum {
       CL_VERSION = 1,
-      CL_ADD_DIR,
       CL_ADD_FILE,
       CL_ADD_FILE_RAW
     };
@@ -299,9 +244,6 @@ main (int argc, const char *argv[])
         {"sector-2336", '\0', POPT_ARG_NONE, &gl.sector_2336_flag, 0,
          "use 2336 byte sectors for output"},
 
-        {"add-dir", '\0', POPT_ARG_STRING, NULL, CL_ADD_DIR,
-         "add directory contents recursively to ISO fs root", "DIR"},
-
         {"add-file", '\0', POPT_ARG_STRING, NULL, CL_ADD_FILE, 
          "add single file to ISO fs", "FILE,ISO_FILENAME"},
 
@@ -337,16 +279,6 @@ main (int argc, const char *argv[])
                    "Licence; For details, see the file `COPYING', which is included in the GNU\n"
                    "VCDImager distribution. There is no warranty, to the extent permitted by law.\n");
           exit (EXIT_SUCCESS);
-          break;
-
-        case CL_ADD_DIR:
-          {
-            const char *arg = poptGetOptArg (optCon);
-
-            vcd_assert (arg != NULL);
-            
-            _add_dir (arg, "");
-          }
           break;
 
         case CL_ADD_FILE:
@@ -429,11 +361,13 @@ main (int argc, const char *argv[])
   gl_vcd_obj = vcd_obj_new (type_id);
 
   vcd_obj_set_param_str (gl_vcd_obj, VCD_PARM_VOLUME_ID, gl.volume_label);
-  vcd_obj_set_param_str (gl_vcd_obj, VCD_PARM_APPLICATION_ID, gl.application_id);
+  vcd_obj_set_param_str (gl_vcd_obj, VCD_PARM_APPLICATION_ID, 
+                         gl.application_id);
   vcd_obj_set_param_str (gl_vcd_obj, VCD_PARM_ALBUM_ID, gl.album_id);
 
   vcd_obj_set_param_uint (gl_vcd_obj, VCD_PARM_VOLUME_COUNT, gl.volume_count);
-  vcd_obj_set_param_uint (gl_vcd_obj, VCD_PARM_VOLUME_NUMBER, gl.volume_number);
+  vcd_obj_set_param_uint (gl_vcd_obj, VCD_PARM_VOLUME_NUMBER, 
+                          gl.volume_number);
 
   if (type_id == VCD_TYPE_SVCD)
     {
@@ -451,13 +385,16 @@ main (int argc, const char *argv[])
 
     while(p)
       {
-        fprintf (stdout, "debug: adding [%s] as [%s] (raw=%d)\n", p->fname, p->iso_fname, p->raw_flag);
+        fprintf (stdout, "debug: adding [%s] as [%s] (raw=%d)\n", 
+                 p->fname, p->iso_fname, p->raw_flag);
         
         if(vcd_obj_add_file(gl_vcd_obj, p->iso_fname,
                             vcd_data_source_new_stdio (p->fname),
                             p->raw_flag))
           {
-            fprintf (stderr, "error while adding file `%s' as `%s' to (S)VCD\n", p->fname, p->iso_fname);
+            fprintf (stderr, 
+                     "error while adding file `%s' as `%s' to (S)VCD\n",
+                     p->fname, p->iso_fname);
             exit (EXIT_FAILURE);
           }
 
@@ -467,7 +404,9 @@ main (int argc, const char *argv[])
 
   for (n = 0; gl.track_fnames[n] != NULL; n++)
     {
-      VcdDataSource *data_source = vcd_data_source_new_stdio (gl.track_fnames[n]);
+      VcdDataSource *data_source;
+      
+      data_source = vcd_data_source_new_stdio (gl.track_fnames[n]);
 
       vcd_assert (data_source != NULL);
 

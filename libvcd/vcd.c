@@ -745,9 +745,9 @@ _finalize_vcd_iso_track_allocation (VcdObj *obj)
 
   if (obj->type == VCD_TYPE_SVCD)
     {
+      _dict_insert (obj, "tracks", SECTOR_NIL, 1, SM_EOF);      /* TRACKS.SVD */
       _dict_insert (obj, "search", SECTOR_NIL, 
                     _vcd_len2blocks (get_search_dat_size (obj), ISO_BLOCKSIZE), SM_EOF); /* SEARCH.DAT */
-      _dict_insert (obj, "tracks", SECTOR_NIL, 1, SM_EOF);      /* TRACKS.SVD */
 
       vcd_assert (_dict_get_bykey (obj, "tracks")->sector > INFO_VCD_SECTOR);
       vcd_assert (_dict_get_bykey (obj, "search")->sector > INFO_VCD_SECTOR);

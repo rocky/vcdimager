@@ -149,8 +149,8 @@ _do_cl (int argc, const char *argv[])
       {"cdrdao-file", '\0', POPT_ARG_STRING, &gl.cdrdao_base, 0,
        "specify cdrdao-style image filename base", "FILE"},
 
-      {"nrg-file", '\0', POPT_ARG_STRING, &gl.nrg_fname, 0,
-       "specify nrg-style image filename", "FILE"},
+      {"nrg-file", '\0', POPT_ARG_STRING | POPT_ARGFLAG_DOC_HIDDEN,
+       &gl.nrg_fname, 0, "specify nrg-style image filename", "FILE"},
 
       { "sector-2336", '\0', POPT_ARG_NONE, &gl.sector_2336_flag, 0,
 	"use 2336 byte sectors for output"},

@@ -93,8 +93,6 @@ vcd_mpeg_source_get_info (VcdMpegSource *obj)
   return &(obj->info);
 }
 
-
-
 long
 vcd_mpeg_source_stat (VcdMpegSource *obj)
 {
@@ -218,7 +216,8 @@ vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps)
     obj->info.audio_type = MPEG_AUDIO_EXT_STREAM;
   else
     {
-      vcd_warn ("unsupported audio stream aggregation encountered! (c0: %d, c1: %d, c2: %d)",
+      vcd_warn ("unsupported audio stream aggregation encountered!"
+                " (c0: %d, c1: %d, c2: %d)",
                 state.stream.audio[0], state.stream.audio[1], state.stream.audio[2]);
       obj->info.audio_type = MPEG_AUDIO_NOSTREAM;
     }
@@ -226,8 +225,9 @@ vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps)
   obj->info.packets = state.stream.packets;
   obj->scanned = true;
 
-  obj->info.playing_time = state.stream.max_pts - state.stream.min_pts;
   obj->pts_offset = state.stream.min_pts;
+
+  obj->info.playing_time = state.stream.max_pts - obj->pts_offset;
 
   if (state.stream.min_pts)
     vcd_debug ("pts start offset %f (max pts = %f)", 
@@ -242,13 +242,14 @@ vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps)
     {
       struct aps_data *_data = _vcd_list_node_data (n);
       
-      _data->timestamp -= state.stream.min_pts; /* pts offset */
+      _data->timestamp -= obj->pts_offset; 
     }
 
   obj->info.aps_list = aps_list;
 
   if (padpackets)
-    vcd_warn ("autopadding requires to insert additional %d zero bytes into MPEG stream (due to %d unaligned packets)",
+    vcd_warn ("autopadding requires to insert additional %d zero bytes"
+              " into MPEG stream (due to %d unaligned packets)",
               padbytes, padpackets);
 
   {
@@ -410,7 +411,7 @@ vcd_mpeg_source_get_packet (VcdMpegSource *obj, unsigned long packet_no,
 
   if (packet_no < obj->_read_pkt_no)
     {
-      vcd_warn ("rewinding...");
+      vcd_warn ("rewinding mpeg stream...");
       obj->_read_pkt_no = 0;
       obj->_read_pkt_pos = 0;
     }
@@ -441,8 +442,10 @@ vcd_mpeg_source_get_packet (VcdMpegSource *obj, unsigned long packet_no,
 
       if (pno == packet_no)
 	{
-	  obj->_read_pkt_pos = pos;
-	  obj->_read_pkt_no = pno;
+          /* optimized for sequential access, 
+             thus save pointer to next mpeg pack */
+	  obj->_read_pkt_pos = pos + pkt_len;
+	  obj->_read_pkt_no = pno + 1;
 
           if (fix_scan_info
               && state.packet.scan_data_ptr
@@ -461,7 +464,6 @@ vcd_mpeg_source_get_packet (VcdMpegSource *obj, unsigned long packet_no,
 
 	  memset (packet_buf, 0, 2324);
 	  memcpy (packet_buf, buf, pkt_len);
-
 
           if (flags)
             {
@@ -501,7 +503,7 @@ vcd_mpeg_source_get_packet (VcdMpegSource *obj, unsigned long packet_no,
                 flags->pts = state.packet.pts - state.stream.min_pts;
             }
 
-	  return 0;
+	  return 0; /* breaking out */
 	}
 
       pos += pkt_len;
