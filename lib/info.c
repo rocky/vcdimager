@@ -425,7 +425,11 @@ vcdinfo_get_cd_image (const vcdinfo_obj_t *vcd_obj)
 lid_t vcdinfo_selection_get_lid(const vcdinfo_obj_t *obj, lid_t lid,
                                       unsigned int selection) 
 {
-  unsigned int offset = vcdinfo_selection_get_offset(obj, lid, selection);
+  unsigned int offset;
+
+  if (NULL == obj) return VCDINFO_INVALID_LID;
+
+  offset = vcdinfo_selection_get_offset(obj, lid, selection);
   switch (offset) {
   case VCDINFO_INVALID_OFFSET:
   case PSD_OFS_MULTI_DEF:
