@@ -3,11 +3,11 @@ vcdimager_TEXINFOS = fdl.texi gpl.texi glossary.texi
 
 pdf: vcdimager.pdf vcd-info.pdf vcdxrip.pdf
 
-txt: vcdimager.txt vcd-info.txt vcdxrip.txt
+txt: vcdimager.txt vcd-info.txt vcdxrip.txt svcd-ogt-subtitles.txt
 
 ps: vcdimager.ps vcd-info.ps vcdxrip.html
 
-html: vcdimager.html vcd-info.html vcdxrip.html
+html: vcdimager.html vcd-info.html vcdxrip.html svcd-ogt-subtitles.html
 
 %.ps.gz: %.ps
 	gzip -9c $< > $@
@@ -17,6 +17,12 @@ html: vcdimager.html vcd-info.html vcdxrip.html
 
 .texi.html:
 	texi2html $<
+
+.pod.html:
+	pod2html $< > $@
+
+.pod.txt:
+	pod2text $< > $@
 
 .texi.txt:
 	makeinfo --no-headers $< > $@
