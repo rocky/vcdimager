@@ -410,12 +410,34 @@ dump_info_vcd (const void *data)
   fprintf (stdout, " item count: %d\n", UINT16_FROM_BE (info.item_count));
 
   for (n = 0; n < UINT16_FROM_BE (info.item_count); n++)
-    fprintf (stdout, "  Item contents[%d]: audio type %d,"
-             " videotype %d, continuation %s\n",
-             n,
-             info.spi_contents[n].audio_type,
-             info.spi_contents[n].video_type,
-             bool_str[info.spi_contents[n].item_cont]);
+    {
+      const char *audio_types[] =
+        {
+          "no stream",
+          "1 stream",
+          "2 streams",
+          "1 multi-channel stream"
+        };
+
+      const char *video_types[] =
+        {
+          "no stream",
+          "NTSC STILL",
+          "NTSC STILL hires",
+          "NTSC stream",
+          "reserved (0x4)",
+          "PAL STILL",
+          "PAL STILL hires",
+          "PAL stream"
+        };
+
+      fprintf (stdout, "  Item contents[%d]: audio: %s,"
+               " video: %s, continuation %s\n",
+               n,
+               audio_types[info.spi_contents[n].audio_type],
+               video_types[info.spi_contents[n].video_type],
+               bool_str[info.spi_contents[n].item_cont]);
+    }
 }
 
 static void
@@ -467,13 +489,33 @@ dump_tracks_svd (const void *data)
   
   for (j = 0;j < tracks->tracks; j++)
     {
-      fprintf (stdout, " track[%.2d]: %2.2x:%2.2x:%2.2x  audio: %d  video: %d\n",
+      const char *audio_types[] =
+        {
+          "no stream",
+          "1 stream",
+          "2 streams",
+          "1 multi-channel stream"
+        };
+
+      const char *video_types[] =
+        {
+          "no stream",
+          "unknown (0x1)",
+          "unknown (0x2)",
+          "NTSC stream",
+          "unknown (0x4)",
+          "unknown (0x5)",
+          "unknown (0x6)",
+          "PAL stream",
+        };
+
+      fprintf (stdout, " track[%.2d]: %2.2x:%2.2x:%2.2x, audio: %s, video: %s\n",
                j,
                tracks->tracks_info[j].playing_time.m,
                tracks->tracks_info[j].playing_time.s,
                tracks->tracks_info[j].playing_time.f,
-               tracks->tracks_info[j].contents.audio,
-               tracks->tracks_info[j].contents.video);
+               audio_types[tracks->tracks_info[j].contents.audio],
+               video_types[tracks->tracks_info[j].contents.video]);
     }
 }
 
@@ -485,7 +527,7 @@ dump_search_dat (const void *data)
   unsigned m;
   uint32_t scan_points = UINT16_FROM_BE (searchdat->scan_points);
 
-  fprintf (stdout, "/SVCD/SEARCH.DAT\n");
+  fprintf (stdout, "SVCD/SEARCH.DAT\n");
   fprintf (stdout, " ID: `%.8s'\n", searchdat->file_id);
   fprintf (stdout, " version: 0x%2.2x\n", searchdat->version);
   fprintf (stdout, " scanpoints: %d\n", scan_points);
@@ -617,8 +659,27 @@ dump (const char image_fname[])
 
   {
     char tmp[ISO_BLOCKSIZE] = { 0, };
+    uint32_t n;
+
+    n = find_sect_by_fileid (fd, LOT_VCD_SECTOR, 225, TRACKS_SVD_FILE_ID);
+
+    if (n != SECTOR_NIL)
+      {
+        tracks_buf = _vcd_malloc (ISO_BLOCKSIZE);
+        
+        gl_read_mode2_sector (fd, tracks_buf, n, false);
+
+        vcd_debug ("found TRACKS.SVD signature at sector %d", n);
+      }
+    else
+      vcd_debug ("no TRACKS.SVD signature found");
+
+    n = find_sect_by_fileid (fd, LOT_VCD_SECTOR, 225, SPICONTX_FILE_ID);
     
-    uint32_t n = LOT_VCD_SECTOR;
+    if (n != SECTOR_NIL)
+      vcd_debug ("found SPICONTX.SVD signature at sector %d", n);
+    else
+      vcd_debug ("no SPICONTX.SVD signature found");
 
     n = find_sect_by_fileid (fd, LOT_VCD_SECTOR, 225, SEARCH_FILE_ID);
     
@@ -647,16 +708,6 @@ dump (const char image_fname[])
     else
       vcd_debug ("no SEARCH.DAT signature found");
 
-    n = find_sect_by_fileid (fd, LOT_VCD_SECTOR, 225, TRACKS_SVD_FILE_ID);
-
-    if (n != SECTOR_NIL)
-      {
-        tracks_buf = _vcd_malloc (ISO_BLOCKSIZE);
-        
-        gl_read_mode2_sector (fd, tracks_buf, n, false);
-      }
-    else
-      vcd_debug ("no TRACKS.SVD signature found");
     
   }
   

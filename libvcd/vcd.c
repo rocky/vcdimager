@@ -46,7 +46,7 @@ static const char _rcsid[] = "$Id$";
 #define PRE_DATA_GAP  30
 #define POST_DATA_GAP 45
 
-static const char zero[ISO_BLOCKSIZE] = { 0, };
+static const char zero[CDDA_SIZE] = { 0, };
 
 /*
  */
@@ -197,7 +197,6 @@ _dict_clean (VcdObj *obj)
       _vcd_list_node_free (node, true);
     }
 }
-
 
 /*
  */
@@ -495,7 +494,7 @@ vcd_obj_append_mpeg_track (VcdObj *obj, VcdDataSource *mpeg_file)
 
   if (obj->type == VCD_TYPE_SVCD)
     {
-      vcd_debug ("scanning svcd mpeg track #%d for scanpoints ...", 
+      vcd_info ("scanning svcd mpeg track #%d for scanpoints...", 
                  track_no);
       _make_scantable (track);
       vcd_debug ("track# %d's estimated playtime: %.2f seconds", 
@@ -694,10 +693,6 @@ _finalize_vcd_iso_track (VcdObj *obj)
   if (_vcd_salloc (obj->iso_bitmap, 75, 75) == SECTOR_NIL) 
     assert (0);
 
-  /* keep info area blank -- paranoid ? */
-  /*   if (_vcd_salloc (obj->iso_bitmap, 187, 38) == SECTOR_NIL)  */
-  /*     assert (0); */
-
   _dict_insert (obj, "pvd", 16, 1, SM_EOR);        /* pre-alloc descriptors, PVD */  /* EOR */
   _dict_insert (obj, "evd", 17, 1, SM_EOR|SM_EOF); /* EVD */                         /* EOR+EOF */
 
@@ -727,14 +722,15 @@ _finalize_vcd_iso_track (VcdObj *obj)
   for(n = 0;n < 225;n++) 
     {
       uint32_t rc = _vcd_salloc (obj->iso_bitmap, n,1);
-      /* assert(rc == SECTOR_NIL); */
-      if (rc != SECTOR_NIL)
-        {
 #if 0
-          vcd_debug ("blanking... %d", rc);
+      if (rc != SECTOR_NIL)
+        vcd_debug ("blanking... %d", rc);
+#else
+      rc = 0; /* dummy */
 #endif
-        }
     }
+
+  assert (_vcd_salloc_get_highest (obj->iso_bitmap) < 255); /* fixme -- momentary limitation */
 
   switch (obj->type) {
   case VCD_TYPE_VCD11:
@@ -852,6 +848,8 @@ _finalize_vcd_iso_track (VcdObj *obj)
           default:
             assert(1);
           }
+
+        assert (n < 98);
       
         snprintf (avseq_pathname, sizeof (avseq_pathname), fmt, n+1);
         
@@ -1048,9 +1046,9 @@ _write_vcd_iso_track (VcdObj *obj)
 
   /* start actually writing stuff */
 
-  vcd_debug ("writing track 1 (ISO9660)...");
+  vcd_info ("writing track 1 (ISO9660)...");
 
-  /* 00:00:00 -> 00:02:74 */
+  /* 00:02:00 -> 00:04:74 */
   for (n = 0;n < 225; n++)
     {
       const void *content = NULL;
@@ -1075,8 +1073,9 @@ _write_vcd_iso_track (VcdObj *obj)
       {
         struct _cust_file_t *p = _vcd_list_node_data (node);
         
-        vcd_debug ("Writing custom file as `%s' (size=%d)", 
-                   p->iso_pathname, p->size);
+        vcd_info ("writing file `%s' (%d bytes%s)", 
+                  p->iso_pathname, p->size, 
+                  p->raw_flag ? ", raw sectors file": "");
         if (p->raw_flag)
           _write_source_mode2_raw (obj, p->file, p->start_extent);
         else
@@ -1097,7 +1096,6 @@ _write_sectors (VcdObj *obj, int track_idx)
   mpeg_track_t *track = 
     _vcd_list_node_data (_vcd_list_at (obj->mpeg_track_list, track_idx));
   int n, lastsect = obj->sectors_written;
-  const char zero[2352] = { 0, };
   char buf[2324];
   struct {
     int audio;
@@ -1138,9 +1136,9 @@ _write_sectors (VcdObj *obj, int track_idx)
       break;
     }
 
-    vcd_debug ("writing track %d, %s, %s...", track_idx + 2,
-               (info->version == MPEG_VERS_MPEG1 ? "MPEG1" : "MPEG2"),
-               norm_str);
+    vcd_info ("writing track %d, %s, %s...", track_idx + 2,
+              (info->version == MPEG_VERS_MPEG1 ? "MPEG1" : "MPEG2"),
+              norm_str);
 
     free (norm_str);
   }
@@ -1155,7 +1153,7 @@ _write_sectors (VcdObj *obj, int track_idx)
   vcd_data_source_seek (track->source, 0);
 
   for (n = 0; n < track->length_sectors;n++) {
-    int ci = 0, sm = 0;
+    int ci = 0, sm = 0, cnum = 0;
 
     vcd_data_source_read (track->source, buf, 2324, 1);
 
@@ -1163,30 +1161,35 @@ _write_sectors (VcdObj *obj, int track_idx)
     case MPEG_TYPE_VIDEO:
       mpeg_packets.video++;
       sm = SM_FORM2|SM_REALT|SM_VIDEO;
-      ci = CI_NTSC;
+      ci = CI_VIDEO;
+      cnum = 1;
       break;
     case MPEG_TYPE_AUDIO:
       mpeg_packets.audio++;
       sm = SM_FORM2|SM_REALT|SM_AUDIO;
-      ci = CI_AUD;
+      ci = CI_AUDIO;
+      cnum = 1;
       break;
     case MPEG_TYPE_NULL:
       mpeg_packets.null++;
       sm = SM_FORM2|SM_REALT;
-      ci = 0;
+      ci = CI_OTHER;
+      cnum = 0;
       break;
     case MPEG_TYPE_UNKNOWN:
       mpeg_packets.unknown++;
       vcd_warn ("unknown packet @%d encounterd", n);
       sm = SM_FORM2|SM_REALT;
-      ci = 0;
+      ci = CI_OTHER;
+      cnum = 0;
       break;
     case MPEG_TYPE_END:
       if (n < track->length_sectors)
         vcd_warn ("Program end marker seen at packet %d"
                   " -- before actual end of stream", n);
       sm = SM_FORM2|SM_REALT;
-      ci = 0;
+      ci = CI_OTHER;
+      cnum = 0;
       break;
     case MPEG_TYPE_INVALID:
       vcd_error ("invalid mpeg packet found at packet# %d"
@@ -1201,7 +1204,7 @@ _write_sectors (VcdObj *obj, int track_idx)
     if (n == track->length_sectors-1)
       sm |= SM_EOR;
 
-    if (_write_m2_image_sector (obj, buf, lastsect++, track_idx + 1, 1, sm, ci))
+    if (_write_m2_image_sector (obj, buf, lastsect++, track_idx + 1, cnum, sm, ci))
       break;
   }
 

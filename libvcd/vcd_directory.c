@@ -320,8 +320,8 @@ _vcd_directory_mkfile (VcdDirectory *dir, const char pathname[],
           {
             char *newdir = _vcd_strjoin (splitpath, n+1, "/");
 
-            vcd_debug ("mkfile: autocreating directory `%s' for `%s'",
-                       newdir, pathname);
+            vcd_info ("autocreating directory `%s' for file `%s'",
+                      newdir, pathname);
             
             _vcd_directory_mkdir (dir, newdir);
             

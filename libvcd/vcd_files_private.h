@@ -72,33 +72,76 @@ typedef struct {
 #define INFO_OFFSET_MULT   0x08
 
 /* This one-byte field describes certain characteristics of the disc */
-
 typedef struct {
-  uint8_t reserved1 : 1                 ;  /* Reserved, must be zero */
-  uint8_t restriction : 2               ;  /* restriction, eg. "unsuitable
+#if !defined(WORDS_BIGENDIAN)
+  uint8_t reserved1 : 1;                   /* Reserved, must be zero */
+  uint8_t restriction : 2;                 /* restriction, eg. "unsuitable
                                               for kids":
                                               0x0 ==> unrestricted,
                                               0x1 ==> restricted category 1,
                                               0x2 ==> restricted category 2,
                                               0x3 ==> restricted category 3 */
-  uint8_t special_info : 1              ;  /* Special Information is encoded 
+  uint8_t special_info : 1;                /* Special Information is encoded 
                                               in the pictures */
-  uint8_t user_data_cc : 1              ;  /* MPEG User Data is used
+  uint8_t user_data_cc : 1;                /* MPEG User Data is used
                                               for Closed Caption */
-  uint8_t use_lid1 : 1                  ;  /* If == 1 and the PSD is
+  uint8_t use_lid1 : 1;                    /* If == 1 and the PSD is
                                               interpreted and the next
                                               disc has the same album
                                               id then start the next
                                               disc at List ID #2,
                                               otherwise List ID #1 */ 
-  uint8_t use_track3 : 1                ;  /* If == 1 and the PSD is
+  uint8_t use_track3 : 1;                  /* If == 1 and the PSD is
                                               not interpreted  and
                                               next disc has same album
                                               id, then start next disc
                                               with track 3, otherwise
                                               start with track 2 */ 
-  uint8_t reserved2 : 1                 ;  /* Reserved, must be zero */
+  uint8_t reserved2 : 1;                   /* Reserved, must be zero */
+#else
+  uint8_t reserved2 : 1;
+  uint8_t use_track3 : 1;
+  uint8_t use_lid1 : 1;
+  uint8_t user_data_cc : 1;
+  uint8_t special_info : 1;
+  uint8_t restriction : 2;
+  uint8_t reserved1 : 1;
+#endif
 } InfoStatusFlags;
+
+typedef struct 
+{
+#if !defined(WORDS_BIGENDIAN)
+  uint8_t audio_type : 2;                /* Audio characteristics:
+                                            0x0 - No MPEG audio stream
+                                            0x1 - One MPEG1 or MPEG2 audio
+                                                  stream without extension
+                                            0x2 - Two MPEG1 or MPEG2 audio
+                                                  streams without extension
+                                            0x3 - One MPEG2 multi-channel 
+                                                    audio stream w/ extension*/
+  uint8_t video_type : 3;                /* Video characteristics:
+                                            0x0 - No MPEG video data
+                                            0x1 - NTSC still picture
+                                            0x2 - Reserved (NTSC hires?)
+                                            0x3 - NTSC motion picture
+                                            0x4 - Reserved
+                                            0x5 - PAL still picture
+                                            0x6 - Reserved (PAL hires?)
+                                            0x7 - PAL motion picture */
+  uint8_t item_cont : 1;                 /* Indicates segment is continuation
+                                            0x0 - 1st or only segment of item
+                                            0x1 - 2nd or later
+                                                  segment of item */
+  uint8_t reserved2 : 2;                 /* Reserved, must be zero */
+#else
+  uint8_t reserved2 : 2;
+  uint8_t item_cont : 1;
+  uint8_t video_type : 3;
+  uint8_t audio_type : 2;
+#endif
+}
+InfoSpiContents;
 
 typedef struct {
   char   ID[8]               GNUC_PACKED;  /* const "VIDEO_CD" for
@@ -133,33 +176,11 @@ typedef struct {
   uint8_t  offset_mult       GNUC_PACKED;  /* offset multiplier, must be 8 */
   uint16_t last_psd_ofs      GNUC_PACKED;  /* last offset in psd */
   uint16_t item_count        GNUC_PACKED;  /* items in /SEGMENT/ */
-  struct {                                 /* The next 1980 bytes contain one
+  InfoSpiContents spi_contents[1980]
+                             GNUC_PACKED;  /* The next 1980 bytes contain one
                                               byte for each possible segment
                                               play item. Each byte indicates
                                               contents. */
-    uint8_t audio_type : 2   GNUC_PACKED;  /* Audio characteristics:
-                                              0x0 - No MPEG audio stream
-                                              0x1 - One MPEG1 or MPEG2 audio
-                                                    stream without extension
-                                              0x2 - Two MPEG1 or MPEG2 audio
-                                                    streams without extension
-                                              0x3 - One MPEG2 multi-channel 
-                                                    audio stream w/ extension*/
-    uint8_t video_type : 3   GNUC_PACKED;  /* Video characteristics:
-                                              0x0 - No MPEG video data
-                                              0x1 - NTSC still picture
-                                              0x2 - Reserved
-                                              0x3 - NTSC motion picture
-                                              0x4 - Reserved
-                                              0x5 - PAL still picture
-                                              0x6 - Reserved
-                                              0x7 - PAL motion picture */
-    uint8_t item_cont : 1    GNUC_PACKED;  /* Indicates segment is continuation
-                                              0x0 - 1st or only segment of item
-                                              0x1 - 2nd or later
-                                                    segment of item */
-    uint8_t reserved2 : 2    GNUC_PACKED;  /* Reserved, must be zero */
-  } spi_contents[1980];
   char reserved1[12]         GNUC_PACKED;  /* Reserved, must be zero */
 } InfoVcd;
 
@@ -256,20 +277,28 @@ typedef struct {
    of MPEG tracks on the disc. */
 
 /* SVDTrackContent indicates the audio/video content of an MPEG Track */
+
 typedef struct {
-  uint8_t audio : 2                     ; /* Audio Content
+#if !defined(WORDS_BIGENDIAN)
+  uint8_t audio : 2;                      /* Audio Content
                                              0x00 : No MPEG audio stream
                                              0x01 : One MPEG{1|2} audio stream
                                              0x02 : Two MPEG{1|2} streams
                                              0x03 : One MPEG2 multi-channel
                                                     audio stream with
                                                     extension */
-  uint8_t video : 3                     ; /* Video Content
+  uint8_t video : 3;                      /* Video Content
                                              0x00 : No MPEG video
                                              0x03 : NTSC video
                                              0x07 : PAL video */
-  uint8_t reserved1 : 1                 ; /* Reserved, must be zero */
-  uint8_t reserved2 : 2                 ; /* Reserved, must be zero */
+  uint8_t reserved1 : 1;                  /* Reserved, must be zero */
+  uint8_t reserved2 : 2;                  /* Reserved, must be zero */
+#else
+  uint8_t reserved2 : 2;
+  uint8_t reserved1 : 1;
+  uint8_t video : 3;
+  uint8_t audio : 2;
+#endif
 } SVDTrackContent;
 
 /* The file contains a series of structures, one for each
@@ -313,6 +342,24 @@ typedef struct {
   msf_t points[0]             GNUC_PACKED; /* The series of scan points */
 } SearchDat;
 
+/* SPICONTX.SVD 
+ */
+
+#define SPICONTX_FILE_ID      "SPICONSV"
+#define SPICONTX_VERSION      0x01
+
+typedef struct {
+  char file_id[8]             GNUC_PACKED; /* = "SPICONSV" */
+  uint8_t version             GNUC_PACKED; /* = 0x01 */
+  uint8_t reserved            GNUC_PACKED; /* Reserved, must be zero */
+  struct {
+    uint8_t ogt_info          GNUC_PACKED;
+    uint8_t audio_info        GNUC_PACKED;
+  } spi[1980]                 GNUC_PACKED;
+  uint8_t reserved2[126]      GNUC_PACKED; /* 0x00 */
+} SpicontxSvd;
+
+#if 0
 /* SCANDATA.DAT
    This file fulfills much the same purpose of the SEARCH.DAT file except
    that this file is mandatory only if the System Profile Tag of the
@@ -331,7 +378,7 @@ typedef struct {
                                               play item segments (as opposed
                                               to the number of segment play
                                               items). */
-  /* MSF_T playtimes[track_count]            cumulative playing time up to
+  /* msf_t playtimes[track_count]            cumulative playing time up to
                                               track N. Track time just
                                               wraps at 99:59:74 */
   /* uint16_t spi_indexes[spi_count]          Indexes into the following
@@ -344,9 +391,10 @@ typedef struct {
        uint8_t track_num;                     Track number as in TOC
        uint16_t table_offset;                 Index into scandata table
      } mpeg_track_offsets[track_count]                                  */
-  /* MSF_T spi_item_points[spi_count][time(item)/0.5s] scan points for spis */
-  /* MSF_T mpeg_track_points[track_count][time(item)/0.5s] scan points */
+  /* msf_t spi_item_points[spi_count][time(item)/0.5s] scan points for spis */
+  /* msf_t mpeg_track_points[track_count][time(item)/0.5s] scan points */
 } ScandataDat;
+#endif
 
 #ifdef __MWERKS__
 #pragma options align=reset

@@ -1,4 +1,18 @@
+2001-01-06  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_files_private.h: added SPICONTX.SVD struct
+
+	* frontends/cli/vcdrip.c (dump_tracks_svd): added
+		symbolic names for content types
+
+	* libvcd/vcd.c (_write_sectors): set channel no. 
+		according to content
+
+	* libvcd/vcd_files_private.h: gcc bitset big endian fix
+
 2001-01-05  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* frontends/cli/vcdimager.c: added quiet flag
 
 	* libvcd/vcd_iso9660.c (_vcd_iso_pathname_valid_p): 
 		do strict checking

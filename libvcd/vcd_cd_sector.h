@@ -23,8 +23,11 @@
 
 #include "vcd_types.h"
 
-#define CI_NTSC   0x0f
-#define CI_AUD    0x7f
+#define CI_VIDEO   0x0f
+#define CI_STILL   0x1f
+#define CI_STILL2  0x3f
+#define CI_AUDIO   0x7f
+#define CI_OTHER   0x00
 
 #define SM_EOR    (1<<0)
 #define SM_VIDEO  (1<<1)

@@ -9,6 +9,8 @@ version 0.5.9alpha3
 * improved ISO9660 file addition facility
 * minor ISO9660 file entry ordering fix
 * minor documentation improvements
+* big endian fix
+* new option '--quiet' for vcdimager cli fe
 * ...
 
 version 0.5.9alpha2

@@ -68,6 +68,7 @@ static struct
   int sector_2336_flag;
 
   int verbose_flag;
+  int quiet_flag;
   int progress_flag;
 
   vcd_log_handler_t default_vcd_log_handler;
@@ -82,6 +83,9 @@ static void
 _vcd_log_handler (log_level_t level, const char message[])
 {
   if (level == LOG_DEBUG && !gl.verbose_flag)
+    return;
+
+  if (level == LOG_INFO && gl.quiet_flag)
     return;
   
   gl.default_vcd_log_handler (level, message);
@@ -199,6 +203,8 @@ main (int argc, const char *argv[])
         {"progress", 'p', POPT_ARG_NONE, &gl.progress_flag, 0, "show progress"},
         {"verbose", 'v', POPT_ARG_NONE, &gl.verbose_flag, 0, "be verbose"},
 
+        {"quiet", 'q', POPT_ARG_NONE, &gl.quiet_flag, 0, "show only critical messages"},
+
         {"version", 'V', POPT_ARG_NONE, NULL, CL_VERSION,
          "display version and copyright information and exit"},
 
@@ -256,6 +262,9 @@ main (int argc, const char *argv[])
           break;
         }
 
+    if (gl.verbose_flag && gl.quiet_flag)
+      vcd_error ("I can't be both, quiet and verbose... either one or another ;-)");
+    
     if ((args = poptGetArgs (optCon)) == NULL)
       vcd_error ("error: need at least one data track as argument "
                  "-- try --help");

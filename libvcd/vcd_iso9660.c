@@ -34,7 +34,7 @@ static const char _rcsid[] = "$Id$";
 #define SYSTEM_ID         "CD-RTOS CD-BRIDGE"
 
 #define VOLUME_SET_ID     ""
-#define PREPARER_ID       "VCDImager " VERSION
+#define PREPARER_ID       "GNU VCDImager " VERSION
 #define PUBLISHER_ID      ""
 
 static void
@@ -257,133 +257,136 @@ dir_add_entry_su(void *dir,
 }
 
 void
-dir_init_new(void *dir,
-             uint32_t self,
-             uint32_t ssize,
-             uint32_t parent,
-             uint32_t psize)
+dir_init_new (void *dir,
+              uint32_t self,
+              uint32_t ssize,
+              uint32_t parent,
+              uint32_t psize)
 {
-  dir_init_new_su(dir, self, ssize, NULL, 0, parent, psize, NULL, 0);
+  dir_init_new_su (dir, self, ssize, NULL, 0, parent, psize, NULL, 0);
 }
 
-void dir_init_new_su(void *dir,
-                     uint32_t self,
-                     uint32_t ssize,
-                     const void *ssu_data,
-                     unsigned ssu_size,
-                     uint32_t parent,
-                     uint32_t psize,
-                     const void *psu_data,
-                     unsigned psu_size)
+void dir_init_new_su (void *dir,
+                      uint32_t self,
+                      uint32_t ssize,
+                      const void *ssu_data,
+                      unsigned ssu_size,
+                      uint32_t parent,
+                      uint32_t psize,
+                      const void *psu_data,
+                      unsigned psu_size)
 {
-  assert(ssize > 0 && !(ssize % ISO_BLOCKSIZE));
-  assert(psize > 0 && !(psize % ISO_BLOCKSIZE));
-  assert(dir != NULL);
+  assert (ssize > 0 && !(ssize % ISO_BLOCKSIZE));
+  assert (psize > 0 && !(psize % ISO_BLOCKSIZE));
+  assert (dir != NULL);
 
-  memset(dir, 0, ssize);
+  memset (dir, 0, ssize);
 
   /* "\0" -- working hack due to padding  */
-  dir_add_entry_su(dir, "\0", self, ssize, ISO_DIRECTORY, ssu_data, ssu_size); 
+  dir_add_entry_su (dir, "\0", self, ssize, ISO_DIRECTORY, ssu_data, ssu_size); 
 
-  dir_add_entry_su(dir, "\1", parent, psize, ISO_DIRECTORY, psu_data, psu_size);
+  dir_add_entry_su (dir, "\1", parent, psize, ISO_DIRECTORY, psu_data, psu_size);
 }
 
 void 
-pathtable_init(void *pt)
+pathtable_init (void *pt)
 {
-  assert(sizeof(struct iso_path_table) == 8);
+  assert (sizeof (struct iso_path_table) == 8);
 
-  assert(pt != NULL);
+  assert (pt != NULL);
   
-  memset(pt, 0, ISO_BLOCKSIZE); /* fixme */
+  memset (pt, 0, ISO_BLOCKSIZE); /* fixme */
 }
 
 void
-pathtable_get_size_and_entries(const void *pt, 
-                               unsigned *size,
-                               unsigned *entries)
+pathtable_get_size_and_entries (const void *pt, 
+                                unsigned *size,
+                                unsigned *entries)
 {
   const uint8_t *tmp = pt;
   unsigned offset = 0;
   unsigned count = 0;
 
-  assert(pt != NULL);
+  assert (pt != NULL);
 
-  while(from_711(*tmp)) {
-    offset += sizeof(struct iso_path_table);
-    offset += from_711(*tmp);
-    if(offset % 2)
-      offset++;
-    tmp = (uint8_t*)pt + offset;
-    count++;
-  }
+  while (from_711 (*tmp)) 
+    {
+      offset += sizeof (struct iso_path_table);
+      offset += from_711 (*tmp);
+      if (offset % 2)
+        offset++;
+      tmp = (uint8_t *)pt + offset;
+      count++;
+    }
 
-  if(size)
+  if (size)
     *size = offset;
 
-  if(entries)
+  if (entries)
     *entries = count;
 }
 
 unsigned
-pathtable_get_size(const void *pt)
+pathtable_get_size (const void *pt)
 {
   unsigned size = 0;
-  pathtable_get_size_and_entries(pt, &size, NULL);
+  pathtable_get_size_and_entries (pt, &size, NULL);
   return size;
 }
 
 uint16_t 
-pathtable_l_add_entry(void *pt, 
-                      const char name[], 
-                      uint32_t extent, 
-                      uint16_t parent)
+pathtable_l_add_entry (void *pt, 
+                       const char name[], 
+                       uint32_t extent, 
+                       uint16_t parent)
 {
-  struct iso_path_table *ipt = (struct iso_path_table*)((char*)pt + pathtable_get_size(pt));
-  size_t name_len = strlen(name) ? strlen(name) : 1;
+  struct iso_path_table *ipt = 
+    (struct iso_path_table*)((char *)pt + pathtable_get_size (pt));
+  size_t name_len = strlen (name) ? strlen (name) : 1;
   unsigned entrynum = 0;
 
-  assert(pathtable_get_size(pt) < ISO_BLOCKSIZE); /*fixme */
+  assert (pathtable_get_size (pt) < ISO_BLOCKSIZE); /*fixme */
 
-  memset(ipt, 0, sizeof(struct iso_path_table)+name_len); /* paranoia */
+  memset (ipt, 0, sizeof (struct iso_path_table) + name_len); /* paranoia */
 
-  ipt->name_len = to_711(name_len);
-  ipt->extent = to_731(extent);
-  ipt->parent = to_721(parent);
-  memcpy(ipt->name, name, name_len);
+  ipt->name_len = to_711 (name_len);
+  ipt->extent = to_731 (extent);
+  ipt->parent = to_721 (parent);
+  memcpy (ipt->name, name, name_len);
 
-  pathtable_get_size_and_entries(pt, NULL, &entrynum);
+  pathtable_get_size_and_entries (pt, NULL, &entrynum);
   return entrynum;
 }
 
 uint16_t 
-pathtable_m_add_entry(void *pt, 
-                      const char name[], 
-                      uint32_t extent, 
-                      uint16_t parent)
+pathtable_m_add_entry (void *pt, 
+                       const char name[], 
+                       uint32_t extent, 
+                       uint16_t parent)
 {
-  struct iso_path_table *ipt = (struct iso_path_table*)((char*)pt + pathtable_get_size(pt));
-  size_t name_len = strlen(name) ? strlen(name) : 1;
+  struct iso_path_table *ipt =
+    (struct iso_path_table*)((char *)pt + pathtable_get_size (pt));
+  size_t name_len = strlen (name) ? strlen (name) : 1;
   unsigned entrynum = 0;
 
-  assert(pathtable_get_size(pt) < ISO_BLOCKSIZE); /* fixme */
+  assert (pathtable_get_size(pt) < ISO_BLOCKSIZE); /* fixme */
 
-  memset(ipt, 0, sizeof(struct iso_path_table)+name_len); /* paranoia */
+  memset(ipt, 0, sizeof (struct iso_path_table) + name_len); /* paranoia */
 
-  ipt->name_len = to_711(name_len);
-  ipt->extent = to_732(extent);
-  ipt->parent = to_722(parent);
-  memcpy(ipt->name, name, name_len);
+  ipt->name_len = to_711 (name_len);
+  ipt->extent = to_732 (extent);
+  ipt->parent = to_722 (parent);
+  memcpy (ipt->name, name, name_len);
 
-  pathtable_get_size_and_entries(pt, NULL, &entrynum);
+  pathtable_get_size_and_entries (pt, NULL, &entrynum);
   return entrynum;
 }
 
 static int
-is_isochar(char c)
+is_isochar (char c)
 {
-  return isupper(c)
-    || isdigit(c)
+  return isupper (c)
+    || isdigit (c)
     || c == '.'
     || c == '_'
     || c == '/'
