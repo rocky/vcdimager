@@ -24,8 +24,15 @@
 #include <string.h>
 
 #include <libvcd/vcd_types.h>
-#include <libvcd/vcd_mpeg_stream.h>
+#include <libvcd/vcd_data_structures.h>
+/* #include <libvcd/vcd_mpeg_stream.h> */
 #include <libvcd/vcd_logging.h>
+
+typedef enum {
+  MPEG_VERS_INVALID = 0,
+  MPEG_VERS_MPEG1 = 1,
+  MPEG_VERS_MPEG2 = 2
+} mpeg_vers_t;
 
 struct vcd_mpeg_scan_data_t {
   uint8_t tag        GNUC_PACKED;
@@ -39,7 +46,7 @@ struct vcd_mpeg_scan_data_t {
 #define VCD_MPEG_SCAN_DATA_WARNS 8
 
 typedef struct {
-  struct {
+  struct vcd_mpeg_packet_info {
     bool video[3];
     bool audio[3];
 
@@ -55,15 +62,17 @@ typedef struct {
       APS_NONE = 0,
       APS_I,    /* iframe */
       APS_GI,   /* gop + iframe */
-      APS_SGI   /* sequence + gop + iframe */
+      APS_SGI,  /* sequence + gop + iframe */
+      APS_ASGI  /* aligned sequence + gop + iframe */
     } aps;
     double aps_pts;
+    int aps_idx;
 
     bool has_pts;
     double pts;
 
     uint64_t scr;
-    uint32_t muxrate;
+    unsigned muxrate;
 
     bool gop;
     struct {
@@ -71,11 +80,12 @@ typedef struct {
     } gop_timecode;
   } packet;
 
-  struct {
+  struct vcd_mpeg_stream_info {
     unsigned packets;
 
-    int first_shdr;
-    struct {
+    mpeg_vers_t version;
+
+    struct vcd_mpeg_stream_vid_info {
       bool seen;
       unsigned hsize;
       unsigned vsize;
@@ -84,31 +94,32 @@ typedef struct {
       unsigned bitrate;
       unsigned vbvsize;
       bool constrained_flag;
+
+      VcdList *aps_list; /* filled up by vcd_mpeg_source */
+      double last_aps_pts; /* temp, see ->packet */
+      
     } shdr[3];
 
-    struct {
+    struct vcd_mpeg_stream_aud_info {
       bool seen;
       unsigned layer;
       unsigned bitrate;
       unsigned sampfreq;
       enum {
-        MPEG_STEREO,
+        MPEG_STEREO = 1,
         MPEG_JOINT_STEREO,
         MPEG_DUAL_CHANNEL,
         MPEG_SINGLE_CHANNEL
       } mode;
     } ahdr[3];
 
-    bool video[3];
-    bool audio[3];
-
-    mpeg_vers_t version;
+    unsigned muxrate;
 
     bool seen_pts;
     double min_pts;
     double max_pts;
 
-    double last_aps_pts[3];
+    double playing_time;
 
     unsigned scan_data;
     unsigned scan_data_warnings;
@@ -119,8 +130,49 @@ int
 vcd_mpeg_parse_packet (const void *buf, unsigned buflen, bool parse_pes,
                        VcdMpegStreamCtx *ctx);
 
+typedef enum {
+  MPEG_NORM_OTHER,
+  MPEG_NORM_PAL,
+  MPEG_NORM_NTSC,
+  MPEG_NORM_FILM,
+  MPEG_NORM_PAL_S,
+  MPEG_NORM_NTSC_S
+} mpeg_norm_t;
+
 mpeg_norm_t 
-vcd_mpeg_get_norm (unsigned hsize, unsigned vsize, double frate);
+vcd_mpeg_get_norm (const struct vcd_mpeg_stream_vid_info *_info);
+
+enum vcd_mpeg_packet_type {
+  PKT_TYPE_INVALID = 0,
+  PKT_TYPE_VIDEO,
+  PKT_TYPE_AUDIO,
+  PKT_TYPE_OGT,
+  PKT_TYPE_ZERO,
+  PKT_TYPE_EMPTY
+};
+
+enum vcd_mpeg_packet_type
+vcd_mpeg_packet_get_type (const struct vcd_mpeg_packet_info *_info);
+
+struct vcd_mpeg_stream_vid_type {
+  enum {
+    VID_TYPE_NONE = 0,
+    VID_TYPE_MOTION,
+    VID_TYPE_STILL
+  } type;
+  enum {
+    VID_NORM_OTHER = 0,
+    VID_NORM_PAL,
+    VID_NORM_NTSC
+  } norm;
+  enum {
+    VID_RES_OTHER = 0,
+    VID_RES_SIF,
+    VID_RES_HALF_D1,
+    VID_RES_2_3_D1,
+    VID_RES_FULL_D2
+  } resolution;
+};
 
 #endif /* __VCD_MPEG_H__ */
 

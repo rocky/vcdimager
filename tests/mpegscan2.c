@@ -105,11 +105,11 @@ main (int argc, const char *argv[])
     }
 
   {
-    const struct vcd_mpeg_source_info *_info = vcd_mpeg_source_get_info (src);
+    const struct vcd_mpeg_stream_info *_info = vcd_mpeg_source_get_info (src);
     printf ("mpeg info\n");
   
-    printf (" %d x %d (%f:1) @%f v%d\n", _info->hsize, _info->vsize, _info->aratio, _info->frate, _info->version);
-    printf (" v: %d a: %d\n", _info->video_type, _info->audio_type);
+    printf (" %d x %d (%f:1) @%f v%d\n", _info->shdr[0].hsize, _info->shdr[0].vsize,
+	    _info->shdr[0].aratio, _info->shdr[0].frate, _info->version);
   }
 
   vcd_mpeg_source_destroy (src, true);

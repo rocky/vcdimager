@@ -304,7 +304,7 @@ divisions.
 @end itemize
 
 The Video CD specification requires the multiplex-ed @acronym{MPEG}-1
-stream to have a @acronym{CBR} of about 174300 bytes (1394400 bits) per
+stream to have a @acronym{CBR} of less than 174300 bytes (1394400 bits) per
 second@footnote{2324 bytes of payload per sector * 75 sectors per second
 = 174300 bytes per second} in order to accommodate single speed
 @acronym{CD-ROM} drives. The specification allows for the following two
@@ -318,7 +318,9 @@ resolutions:
 @end itemize
 
 The @acronym{CBR} @acronym{MPEG}-1, layer II audio stream is fixed at
-224kbps with 1 stereo or 2 mono channels.
+224 kbps with 1 stereo or 2 mono channels.
+It is recommended to keep the video bit-rate under 1151929.1 bps@footnote{It
+should be noted, that in addition to the audio stream and the video stream, there are also bits consumed by the program stream encapsulation which have to be taken into account for bit-rate calculations}.
 
 @node Video CD 2.0, Extended Video CD, Video CD 1.1, Known Video CD Flavors
 @subsection Video CD 2.0

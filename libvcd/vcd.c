@@ -461,8 +461,8 @@ vcd_obj_append_sequence_play_item (VcdObj *obj, VcdMpegSource *mpeg_source,
     vcd_warn ("mpeg stream shorter than 75 sectors");
 
   if (!_vcd_obj_has_cap_p (obj, _CAP_PAL_BITS)
-      && sequence->info->norm != MPEG_NORM_FILM
-      && sequence->info->norm != MPEG_NORM_NTSC)
+      && vcd_mpeg_get_norm (&sequence->info->shdr[0]) != MPEG_NORM_FILM
+      && vcd_mpeg_get_norm (&sequence->info->shdr[0]) != MPEG_NORM_NTSC)
     vcd_warn ("VCD 1.x should contain only NTSC/FILM video (may work with PAL nevertheless)");
 
   if (!_vcd_obj_has_cap_p (obj, _CAP_MPEG1)
@@ -473,12 +473,13 @@ vcd_obj_append_sequence_play_item (VcdObj *obj, VcdMpegSource *mpeg_source,
       && sequence->info->version == MPEG_VERS_MPEG2)
     vcd_warn ("this VCD type should not contain MPEG2 streams");
 
-  if (sequence->info->video_type != MPEG_VIDEO_PAL_MOTION
-      && sequence->info->video_type != MPEG_VIDEO_NTSC_MOTION)
+  if (!sequence->info->shdr[0].seen
+      || sequence->info->shdr[1].seen
+      || sequence->info->shdr[2].seen)
     vcd_warn ("sequence items should contain a motion video stream!");
     
-  vcd_debug ("track# %d's detected playing time: %.2f seconds", 
-             track_no, sequence->info->playing_time);
+  /* vcd_debug ("track# %d's detected playing time: %.2f seconds",  */
+  /*            track_no, sequence->info->playing_time); */
 
   _vcd_list_append (obj->mpeg_sequence_list, sequence);
 
@@ -797,6 +798,17 @@ vcd_obj_set_param_bool (VcdObj *obj, vcd_parm_t param, bool arg)
         {
           if ((obj->svcd_vcd3_entrysvd = arg ? true : false))
             vcd_warn ("!! enabling deprecated VCD3.0 ENTRYSVD signature --" 
+                      " SVCD will not be IEC62107 compliant !!");
+        }
+      else
+        vcd_error ("parameter not applicable for vcd type");
+      break;
+
+    case VCD_PARM_SVCD_VCD3_TRACKSVD:
+      if (obj->type == VCD_TYPE_SVCD)
+        {
+          if ((obj->svcd_vcd3_tracksvd = arg ? true : false))
+            vcd_warn ("!! enabling deprecated VCD3.0 TRACK.SVD format --" 
                       " SVCD will not be IEC62107 compliant !!");
         }
       else
@@ -1458,37 +1470,39 @@ _write_sequence (VcdObj *obj, int track_idx)
 
   {
     char *norm_str = NULL;
+    const struct vcd_mpeg_stream_vid_info *_info = &track->info->shdr[0];
 
-    switch (track->info->norm) {
+    switch (vcd_mpeg_get_norm (_info)) {
     case MPEG_NORM_PAL:
-      norm_str = strdup ("PAL (352x288/25fps)");
+      norm_str = strdup ("PAL SIF (352x288/25fps)");
       break;
     case MPEG_NORM_NTSC:
-      norm_str = strdup ("NTSC (352x240/30fps)");
+      norm_str = strdup ("NTSC SIF (352x240/30fps)");
       break;
     case MPEG_NORM_FILM:
-      norm_str = strdup ("FILM (352x240/24fps)");
+      norm_str = strdup ("FILM SIF (352x240/24fps)");
       break;
     case MPEG_NORM_PAL_S:
-      norm_str = strdup ("PAL S (480x576/25fps)");
+      norm_str = strdup ("PAL 2/3 D-1 (480x576/25fps)");
       break;
     case MPEG_NORM_NTSC_S:
-      norm_str = strdup ("NTSC S (480x480/30fps)");
+      norm_str = strdup ("NTSC 2/3 D-1 (480x480/30fps)");
       break;
 	
     case MPEG_NORM_OTHER:
       {
         char buf[1024] = { 0, };
         snprintf (buf, sizeof (buf), "UNKNOWN (%dx%d/%2.2ffps)",
-                  track->info->hsize, track->info->vsize, track->info->frate);
+                  _info->hsize, _info->vsize, _info->frate);
         norm_str = strdup (buf);
       }
       break;
     }
 
+#warning FIXME
     vcd_info ("writing track %d, %s, %s, %s...", track_idx + 2,
               (track->info->version == MPEG_VERS_MPEG1 ? "MPEG1" : "MPEG2"),
-              norm_str, audio_types[track->info->audio_type]);
+              norm_str, /* audio_types[track->info->audio_type] */ "FIXME");
 
     free (norm_str);
   }
@@ -1504,7 +1518,7 @@ _write_sequence (VcdObj *obj, int track_idx)
 
   for (n = 0; n < track->info->packets; n++) {
     int ci = 0, sm = 0, cnum = 0, fnum = 0;
-    struct vcd_mpeg_packet_flags pkt_flags;
+    struct vcd_mpeg_packet_info pkt_flags;
     bool set_trigger = false;
 
     vcd_mpeg_source_get_packet (track->source, n, buf, &pkt_flags, 
@@ -1529,7 +1543,8 @@ _write_sequence (VcdObj *obj, int track_idx)
         pause_node = _vcd_list_node_next (pause_node);
       }
 
-    switch (pkt_flags.type) {
+    switch (vcd_mpeg_packet_get_type (&pkt_flags)) 
+      {
     case PKT_TYPE_VIDEO:
       mpeg_packets.video++;
       sm = SM_FORM2|SM_REALT|SM_VIDEO;
@@ -1542,7 +1557,7 @@ _write_sequence (VcdObj *obj, int track_idx)
       sm = SM_FORM2|SM_REALT|SM_AUDIO;
       ci = CI_AUDIO;
       cnum = CN_AUDIO;
-      if (pkt_flags.audio_c1 || pkt_flags.audio_c2)
+      if (pkt_flags.audio[1] || pkt_flags.audio[2])
         {
           ci = CI_AUDIO2;
           cnum = CN_AUDIO2;
@@ -1627,7 +1642,7 @@ _write_segment (VcdObj *obj, mpeg_segment_t *_segment)
 
       if (packet_no < _segment->info->packets)
         {
-          struct vcd_mpeg_packet_flags pkt_flags;
+          struct vcd_mpeg_packet_info pkt_flags;
           bool set_trigger = false;
           bool _need_eor = false;
 
@@ -1658,7 +1673,7 @@ _write_segment (VcdObj *obj, mpeg_segment_t *_segment)
               pause_node = _vcd_list_node_next (pause_node);
             }
             
-          switch (pkt_flags.type) 
+          switch (vcd_mpeg_packet_get_type (&pkt_flags)) 
             {
             case PKT_TYPE_VIDEO:
               sm = SM_FORM2 | SM_REALT | SM_VIDEO;
@@ -1666,12 +1681,12 @@ _write_segment (VcdObj *obj, mpeg_segment_t *_segment)
               ci = CI_VIDEO;
               cn = CN_VIDEO;
 
-              if (pkt_flags.video_e1)
+              if (pkt_flags.video[1])
                 ci = CI_STILL, cn = CN_STILL;
-              else if (pkt_flags.video_e2)
+              else if (pkt_flags.video[2])
                 ci = CI_STILL2, cn = CN_STILL2;
 
-              if (pkt_flags.video_e1 || pkt_flags.video_e2)
+              if (pkt_flags.video[1] || pkt_flags.video[2])
                 { /* search for endcode -- hack */
                   int idx;
                 
@@ -1743,7 +1758,7 @@ _write_segment (VcdObj *obj, mpeg_segment_t *_segment)
 }
 
 static uint32_t
-_get_closest_aps (const struct vcd_mpeg_source_info *_mpeg_info, double t,
+_get_closest_aps (const struct vcd_mpeg_stream_info *_mpeg_info, double t,
                   struct aps_data *_best_aps)
 {
   VcdListNode *node;
@@ -1751,9 +1766,9 @@ _get_closest_aps (const struct vcd_mpeg_source_info *_mpeg_info, double t,
   bool first = true;
 
   vcd_assert (_mpeg_info != NULL);
-  vcd_assert (_mpeg_info->aps_list != NULL);
+  vcd_assert (_mpeg_info->shdr[0].aps_list != NULL);
 
-  _VCD_LIST_FOREACH (node, _mpeg_info->aps_list)
+  _VCD_LIST_FOREACH (node, _mpeg_info->shdr[0].aps_list)
     {
       struct aps_data *_aps = _vcd_list_node_data (node);
   

@@ -21,9 +21,10 @@
 #ifndef __VCD_MPEG_STREAM__
 #define __VCD_MPEG_STREAM__
 
-#include "vcd_types.h"
-#include "vcd_stream.h"
-#include "vcd_data_structures.h"
+#include <libvcd/vcd_types.h>
+#include <libvcd/vcd_stream.h>
+#include <libvcd/vcd_data_structures.h>
+#include <libvcd/vcd_mpeg.h>
 
 #define MPEG_PACKET_SIZE 2324
 
@@ -38,21 +39,6 @@ struct aps_data
 };
 
 /* enums */
-
-typedef enum {
-  MPEG_NORM_OTHER,
-  MPEG_NORM_PAL,
-  MPEG_NORM_NTSC,
-  MPEG_NORM_FILM,
-  MPEG_NORM_PAL_S,
-  MPEG_NORM_NTSC_S
-} mpeg_norm_t;
-
-typedef enum {
-  MPEG_VERS_INVALID = 0,
-  MPEG_VERS_MPEG1 = 1,
-  MPEG_VERS_MPEG2 = 2
-} mpeg_vers_t;
 
 typedef enum {
   MPEG_AUDIO_NOSTREAM = 0,
@@ -74,62 +60,11 @@ typedef enum {
 
 /* mpeg stream info */
 
-struct vcd_mpeg_source_info
-{
-  unsigned hsize;
-  unsigned vsize;
-  double aratio;
-  double frate;
-  unsigned bitrate;
-  unsigned vbvsize;
-  bool constrained_flag;
-
-  bool audio_c0;
-  bool audio_c1;
-  bool audio_c2;
-
-  bool video_e0;
-  bool video_e1;
-  bool video_e2;
-
-  mpeg_video_t video_type;
-  mpeg_audio_t audio_type;
-  mpeg_vers_t version;
-  mpeg_norm_t norm; 
-
-  double playing_time;
-  uint32_t packets;
-  VcdList *aps_list;
-};
+struct vcd_mpeg_stream_info;
 
 /* mpeg packet info */
 
-struct vcd_mpeg_packet_flags
-{
-  enum {
-    PKT_TYPE_INVALID = 0,
-    PKT_TYPE_VIDEO,
-    PKT_TYPE_AUDIO,
-    PKT_TYPE_OGT,
-    PKT_TYPE_ZERO,
-    PKT_TYPE_EMPTY
-  } type;
-
-  bool audio_c0;
-  bool audio_c1;
-  bool audio_c2;
-
-  bool video_e0;
-  bool video_e1;
-  bool video_e2;
-
-  bool pem;
-
-  bool has_pts;
-  double pts;
-
-  struct vcd_mpeg_scan_data_t *scan_data_ptr; /* points into actual packet memory! */
-};
+struct vcd_mpeg_packet_info;
 
 /* access functions */
 
@@ -153,13 +88,13 @@ vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps,
 /* gets the packet at given position */
 int
 vcd_mpeg_source_get_packet (VcdMpegSource *obj, unsigned long packet_no,
-			    void *packet_buf, struct vcd_mpeg_packet_flags *flags,
+			    void *packet_buf, struct vcd_mpeg_packet_info *flags,
                             bool fix_scan_info);
 
 void
 vcd_mpeg_source_close (VcdMpegSource *obj);
 
-const struct vcd_mpeg_source_info *
+const struct vcd_mpeg_stream_info *
 vcd_mpeg_source_get_info (VcdMpegSource *obj);
 
 long

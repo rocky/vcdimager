@@ -413,6 +413,20 @@ typedef struct {
                                                              contents */
 } TracksSVD2;
 
+/* VCD30 tracks svd */
+
+typedef struct {
+  char file_id[8]               GNUC_PACKED; /* == "TRACKSVD" */
+  uint8_t version               GNUC_PACKED; /* == 0x01 */
+  uint8_t reserved              GNUC_PACKED; /* Reserved, must be zero */
+  uint8_t tracks                GNUC_PACKED; /* number of MPEG tracks */
+  struct {
+    msf_t cum_playing_time      GNUC_PACKED; /* BCD coded mm:ss:ff */
+    uint8_t ogt_info            GNUC_PACKED;
+    uint8_t audio_info          GNUC_PACKED;
+  } track[EMPTY_ARRAY_SIZE]     GNUC_PACKED;
+} TracksSVD_v30;
+
 /* SEARCH.DAT
    This file defines where the scan points are. It covers all mpeg tracks
    together. A scan point at time T is the nearest I-picture in the MPEG

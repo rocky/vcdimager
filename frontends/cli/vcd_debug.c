@@ -495,8 +495,11 @@ dump_psd (const debug_obj_t *obj, bool ext)
           {
             const PsdEndListDescriptor *d = (const void *) (psd + _rofs);
             fprintf (stdout, " PSD[%.2d] (%s): end list descriptor\n", n, _ofs2str (obj, ofs->offset, ext));
-            fprintf (stdout, "  next disc number: %d (if 0 stop PBC handling)\n", d->next_disc);
-            fprintf (stdout, "  change picture item: %s\n", _pin2str (uint16_from_be (d->change_pic)));
+            if (obj->vcd_type != VCD_TYPE_VCD2)
+              {
+                fprintf (stdout, "  next disc number: %d (if 0 stop PBC handling)\n", d->next_disc);
+                fprintf (stdout, "  change picture item: %s\n", _pin2str (uint16_from_be (d->change_pic)));
+              }
             fprintf (stdout, "\n");
           }
           break;
@@ -657,23 +660,22 @@ dump_info (const debug_obj_t *obj)
 
   for (n = 0; n < uint16_from_be (info->item_count); n++)
     {
-      const char *audio_types[] =
+      const char *audio_types[2][4] =
         {
-          "no stream",
-          "1 stream",
-          "2 streams",
-          "1 multi-channel stream (surround sound)"
+          { "no stream", "1 stream", "2 streams",
+            "1 multi-channel stream (surround sound)" },
+          { "no audio", "single channel", "stereo", "dual channel" }
         };
 
       const char *video_types[] =
         {
           "no stream",
           "NTSC still",
-          "NTSC still (hires)",
+          "NTSC still (lo+hires)",
           "NTSC motion",
           "reserved (0x4)",
           "PAL still",
-          "PAL still (hires)",
+          "PAL still (lo+hires)",
           "PAL motion"
         };
 
@@ -686,17 +688,20 @@ dump_info (const debug_obj_t *obj)
         };
 
       fprintf (stdout, " SEGMENT[%d]: audio: %s,"
-               " video: %s, continuation %s, OGT substream: %s\n",
+               " video: %s, continuation %s%s %s\n",
                n + 1,
-               audio_types[info->spi_contents[n].audio_type],
+               audio_types[obj->vcd_type == VCD_TYPE_VCD2 ? 1 : 0][info->spi_contents[n].audio_type],
                video_types[info->spi_contents[n].video_type],
                _vcd_bool_str (info->spi_contents[n].item_cont),
-               ogt_str[info->spi_contents[n].ogt]);
+               (obj->vcd_type == VCD_TYPE_VCD2) ? "" : ", OGT substream:",
+               (obj->vcd_type == VCD_TYPE_VCD2) ? "" : ogt_str[info->spi_contents[n].ogt]);
     }
 
-  for (n = 0; n < 5; n++)
-    fprintf (stdout, " volume start time[%d]: %d secs\n", 
-             n, uint16_from_be (info->playing_time[n]));
+  if (obj->vcd_type == VCD_TYPE_SVCD
+      || obj->vcd_type == VCD_TYPE_HQVCD)
+    for (n = 0; n < 5; n++)
+      fprintf (stdout, " volume start time[%d]: %d secs\n", 
+               n, uint16_from_be (info->playing_time[n]));
 }
 
 static void
@@ -768,12 +773,12 @@ dump_tracks_svd (const debug_obj_t *obj)
       const char *video_types[] =
         {
           "no stream",
-          "unknown (0x1)",
-          "unknown (0x2)",
+          "reserved (0x1)",
+          "reserved (0x2)",
           "NTSC stream",
-          "unknown (0x4)",
-          "unknown (0x5)",
-          "unknown (0x6)",
+          "reserved (0x4)",
+          "reserved (0x5)",
+          "reserved (0x6)",
           "PAL stream",
         };
 

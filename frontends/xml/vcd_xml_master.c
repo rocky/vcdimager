@@ -98,6 +98,8 @@ bool vcd_xml_master (const struct vcdxml_t *obj, const char cue_fname[],
 	vcd_obj_set_param_bool (_vcd, VCD_PARM_SVCD_VCD3_MPEGAV, _value);
       else if (!strcmp (_option->name, OPT_SVCD_VCD3_ENTRYSVD))
 	vcd_obj_set_param_bool (_vcd, VCD_PARM_SVCD_VCD3_ENTRYSVD, _value);
+      else if (!strcmp (_option->name, OPT_SVCD_VCD3_TRACKSVD))
+	vcd_obj_set_param_bool (_vcd, VCD_PARM_SVCD_VCD3_TRACKSVD, _value);
       else if (!strcmp (_option->name, OPT_RELAXED_APS))
 	{
 	  vcd_obj_set_param_bool (_vcd, VCD_PARM_RELAXED_APS, _value);

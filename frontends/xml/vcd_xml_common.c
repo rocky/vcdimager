@@ -114,6 +114,8 @@ vcd_xml_scan_progress_cb (const vcd_mpeg_prog_info_t *info, void *user_data)
     }
 
   fflush (stdout);
+
+  return 0;
 }
 
 int

@@ -42,13 +42,12 @@ struct _VcdMpegSource
   VcdDataSource *data_source;
 
   bool scanned;
-  double pts_offset;
   
   /* _get_packet cache */
   unsigned _read_pkt_pos;
   unsigned _read_pkt_no;
 
-  struct vcd_mpeg_source_info info;
+  struct vcd_mpeg_stream_info info;
 };
 
 /*
@@ -73,17 +72,20 @@ vcd_mpeg_source_new (VcdDataSource *mpeg_file)
 void
 vcd_mpeg_source_destroy (VcdMpegSource *obj, bool destroy_file_obj)
 {
+  int i;
   vcd_assert (obj != NULL);
 
   if (destroy_file_obj)
     vcd_data_source_destroy (obj->data_source);
 
-  _vcd_list_free (obj->info.aps_list, true);
+  for (i = 0; i < 3; i++)
+    if (obj->info.shdr[i].aps_list)
+      _vcd_list_free (obj->info.shdr[i].aps_list, true);
 
   free (obj);
 }
 
-const struct vcd_mpeg_source_info *
+const struct vcd_mpeg_stream_info *
 vcd_mpeg_source_get_info (VcdMpegSource *obj)
 {
   vcd_assert (obj != NULL);
@@ -112,9 +114,7 @@ vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps,
   unsigned padbytes = 0;
   unsigned padpackets = 0;
   VcdMpegStreamCtx state;
-  VcdList *aps_list = 0;
   VcdListNode *n;
-  bool _pal = false;
   vcd_mpeg_prog_info_t _progress = { 0, };
 
   vcd_assert (obj != NULL);
@@ -138,7 +138,6 @@ vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps,
       callback (&_progress, user_data);
     }
 
-  aps_list = _vcd_list_new ();
 
   while (pos < length)
     {
@@ -181,13 +180,17 @@ vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps,
             break; /* allow only if now strict aps */
 
         case APS_SGI:
+        case APS_ASGI:
           {
             struct aps_data *_data = _vcd_malloc (sizeof (struct aps_data));
             
             _data->packet_no = pno;
             _data->timestamp = state.packet.aps_pts;
 
-            _vcd_list_append (aps_list, _data);
+            if (!state.stream.shdr[state.packet.aps_idx].aps_list)
+              state.stream.shdr[state.packet.aps_idx].aps_list = _vcd_list_new ();
+            
+            _vcd_list_append (state.stream.shdr[state.packet.aps_idx].aps_list, _data);
           }
           break;
 
@@ -223,100 +226,39 @@ vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps,
 
   vcd_assert (pos == length);
 
-  obj->info.audio_c0 = state.stream.audio[0];
-  obj->info.audio_c1 = state.stream.audio[1];
-  obj->info.audio_c2 = state.stream.audio[2];
-
-  obj->info.video_e0 = state.stream.video[0];
-  obj->info.video_e1 = state.stream.video[1];
-  obj->info.video_e2 = state.stream.video[2];
-
-  if (!state.stream.audio[0] && !state.stream.audio[1] && !state.stream.audio[2])
-    obj->info.audio_type = MPEG_AUDIO_NOSTREAM;
-  else if (state.stream.audio[0] && !state.stream.audio[1] && !state.stream.audio[2])
-    obj->info.audio_type = MPEG_AUDIO_1STREAM;
-  else if (state.stream.audio[0] && state.stream.audio[1] && !state.stream.audio[2])
-    obj->info.audio_type = MPEG_AUDIO_2STREAM;
-  else if (state.stream.audio[0] && !state.stream.audio[1] && state.stream.audio[2])
-    obj->info.audio_type = MPEG_AUDIO_EXT_STREAM;
-  else
-    {
-      vcd_warn ("unsupported audio stream aggregation encountered!"
-                " (c0: %d, c1: %d, c2: %d)",
-                state.stream.audio[0], state.stream.audio[1], state.stream.audio[2]);
-      obj->info.audio_type = MPEG_AUDIO_NOSTREAM;
-    }
-
-  obj->info.packets = state.stream.packets;
+  obj->info = state.stream;
   obj->scanned = true;
 
-  obj->pts_offset = state.stream.min_pts;
+  obj->info.playing_time = obj->info.max_pts - obj->info.min_pts;
 
-  obj->info.playing_time = state.stream.max_pts - obj->pts_offset;
-
-  if (state.stream.min_pts)
+  if (obj->info.min_pts)
     vcd_debug ("pts start offset %f (max pts = %f)", 
-               state.stream.min_pts, state.stream.max_pts);
+               obj->info.min_pts, obj->info.max_pts);
 
   vcd_debug ("playing time %f", obj->info.playing_time);
 
   if (!state.stream.scan_data && state.stream.version == MPEG_VERS_MPEG2)
     vcd_warn ("mpeg stream contained no scan information (user) data");
 
-  _VCD_LIST_FOREACH (n, aps_list)
-    {
-      struct aps_data *_data = _vcd_list_node_data (n);
-      
-      _data->timestamp -= obj->pts_offset; 
-    }
+  {
+    int i;
 
-  obj->info.aps_list = aps_list;
+    for (i = 0; i < 3; i++)
+      if (obj->info.shdr[i].aps_list)
+        _VCD_LIST_FOREACH (n, obj->info.shdr[i].aps_list)
+        {
+          struct aps_data *_data = _vcd_list_node_data (n);
+          
+          _data->timestamp -= obj->info.min_pts; 
+        }
+  }
 
   if (padpackets)
     vcd_warn ("autopadding requires to insert additional %d zero bytes"
               " into MPEG stream (due to %d unaligned packets of %d total)",
               padbytes, padpackets, state.stream.packets);
 
-  {
-    int vid_idx = state.stream.first_shdr;
-    
-    if (vid_idx)
-      {
-        vid_idx--;
-
-        obj->info.hsize = state.stream.shdr[vid_idx].hsize;
-        obj->info.vsize = state.stream.shdr[vid_idx].vsize;
-        obj->info.aratio = state.stream.shdr[vid_idx].aratio;
-        obj->info.frate = state.stream.shdr[vid_idx].frate;
-        obj->info.bitrate = state.stream.shdr[vid_idx].bitrate;
-        obj->info.vbvsize = state.stream.shdr[vid_idx].vbvsize;
-        obj->info.constrained_flag = state.stream.shdr[vid_idx].constrained_flag;
-      }
-  }  
-
   obj->info.version = state.stream.version;
-
-  obj->info.norm = vcd_mpeg_get_norm (obj->info.hsize,
-                                      obj->info.vsize,
-                                      obj->info.frate);
-
-  _pal = (obj->info.vsize == 576 || obj->info.vsize == 288);
-
-  switch (state.stream.first_shdr)
-    {
-    case 0:
-      obj->info.video_type = MPEG_VIDEO_NOSTREAM;
-      break;
-    case 1:
-      obj->info.video_type = _pal ? MPEG_VIDEO_PAL_MOTION : MPEG_VIDEO_NTSC_MOTION;
-      break;
-    case 2:
-      obj->info.video_type = _pal ? MPEG_VIDEO_PAL_STILL : MPEG_VIDEO_NTSC_STILL;
-      break;
-    case 3:
-      obj->info.video_type = _pal ? MPEG_VIDEO_PAL_STILL2 : MPEG_VIDEO_NTSC_STILL2;
-      break;
-    }
 }
 
 static double
@@ -416,7 +358,7 @@ _fix_scan_info (struct vcd_mpeg_scan_data_t *scan_data_ptr,
 
 int
 vcd_mpeg_source_get_packet (VcdMpegSource *obj, unsigned long packet_no,
-			    void *packet_buf, struct vcd_mpeg_packet_flags *flags,
+			    void *packet_buf, struct vcd_mpeg_packet_info *flags,
                             bool fix_scan_info)
 {
   unsigned length;
@@ -443,7 +385,7 @@ vcd_mpeg_source_get_packet (VcdMpegSource *obj, unsigned long packet_no,
 
   memset (&state, 0, sizeof (state));
   state.stream.seen_pts = true;
-  state.stream.min_pts = obj->pts_offset;
+  state.stream.min_pts = obj->info.min_pts;
   state.stream.scan_data_warnings = VCD_MPEG_SCAN_DATA_WARNS + 1;
 
   pos = obj->_read_pkt_pos;
@@ -476,15 +418,23 @@ vcd_mpeg_source_get_packet (VcdMpegSource *obj, unsigned long packet_no,
               && state.packet.scan_data_ptr
               && obj->info.version == MPEG_VERS_MPEG2)
             {
+              int vid_idx = 0;
               double _pts;
 
+              if (state.packet.video[2])
+                vid_idx = 2;
+              else if (state.packet.video[1])
+                vid_idx = 1;
+              else 
+                vid_idx = 0;
+
               if (state.packet.has_pts)
-                _pts = state.packet.pts;
+                _pts = state.packet.pts - obj->info.min_pts;
               else
-                _pts = _approx_pts (obj->info.aps_list, packet_no);
+                _pts = _approx_pts (obj->info.shdr[vid_idx].aps_list, packet_no);
 
               _fix_scan_info (state.packet.scan_data_ptr, packet_no, 
-                              _pts, obj->info.aps_list);
+                              _pts, obj->info.shdr[vid_idx].aps_list);
             }
 
 	  memset (packet_buf, 0, 2324);
@@ -492,40 +442,8 @@ vcd_mpeg_source_get_packet (VcdMpegSource *obj, unsigned long packet_no,
 
           if (flags)
             {
-              memset (flags, 0, sizeof (struct vcd_mpeg_packet_flags));
-
-              flags->scan_data_ptr = state.packet.scan_data_ptr;
-
-              if (state.packet.video[0] 
-                  || state.packet.video[1]
-                  || state.packet.video[2])
-                {
-                  flags->type = PKT_TYPE_VIDEO;
-                  flags->video_e0 = state.packet.video[0];
-                  flags->video_e1 = state.packet.video[1];
-                  flags->video_e2 = state.packet.video[2];
-                }
-              else if (state.packet.audio[0] 
-                       || state.packet.audio[1]
-                       || state.packet.audio[2])
-                {
-                  flags->type = PKT_TYPE_AUDIO;
-                  flags->audio_c0 = state.packet.audio[0];
-                  flags->audio_c1 = state.packet.audio[1];
-                  flags->audio_c2 = state.packet.audio[2];
-                }
-              else if (state.packet.zero)
-                flags->type = PKT_TYPE_ZERO;
-              else if (state.packet.ogt)
-                flags->type = PKT_TYPE_OGT;
-              else if (state.packet.system_header || state.packet.padding)
-                flags->type = PKT_TYPE_EMPTY;
-
-              if (state.packet.pem)
-                flags->pem = true;
-
-              if ((flags->has_pts = state.packet.has_pts))
-                flags->pts = state.packet.pts - state.stream.min_pts;
+              *flags = state.packet;
+              flags->pts -= obj->info.min_pts;
             }
 
 	  return 0; /* breaking out */

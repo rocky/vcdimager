@@ -25,6 +25,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdarg.h>
+#include <errno.h>
 
 #include <popt.h>
 
@@ -47,8 +49,91 @@ enum {
   OP_VERSION = 1 << 1
 };
 
-#define _TAG_PRINT(fd, tag, tp, val) \
- fprintf (fd, "  <" tag ">" tp "</" tag ">\n", val)
+static int _TAG_LEVEL = 0;
+static char *_TAG_STACK[16];
+
+static FILE *_TAG_FD = 0;
+
+static void
+_TAG_INDENT (void)
+{
+  int _i;
+
+  for (_i = 0; _i < _TAG_LEVEL; _i++) 
+    fputs ("  ", _TAG_FD);  
+}
+
+static void
+_TAG_OPEN (const char tag[], const char fmt[], ...)
+{
+  va_list args;
+  va_start (args, fmt);
+
+  _TAG_STACK[_TAG_LEVEL] = strdup (tag);
+
+  _TAG_INDENT();
+  if (fmt)
+    {
+      char buf[1024] = { 0, };
+
+      vsnprintf (buf, sizeof (buf), fmt, args);
+
+      fprintf (_TAG_FD, "<%s %s>", tag, buf);
+    }
+  else
+    fprintf (_TAG_FD, "<%s>", tag);
+
+  fputs ("\n", _TAG_FD);
+
+  _TAG_LEVEL++;
+
+  va_end (args);
+}
+
+static void
+_TAG_CLOSE (void)
+{
+  _TAG_LEVEL--;
+
+  _TAG_INDENT();
+  fprintf (_TAG_FD, "</%s>\n", _TAG_STACK[_TAG_LEVEL]);
+
+  free (_TAG_STACK[_TAG_LEVEL]);
+}
+
+static void
+_TAG_COMMENT (const char fmt[]) 
+{
+  _TAG_INDENT ();
+  fprintf (_TAG_FD, " <!-- %s -->\n", fmt);
+}
+
+static void
+_TAG_PRINT (const char tag[], const char fmt[], ...) 
+{
+  va_list args;
+  va_start (args, fmt);
+
+  _TAG_INDENT ();
+
+  if (fmt)
+    {
+      char buf[1024] = { 0, };
+
+      vsnprintf (buf, sizeof (buf), fmt, args);
+
+      fprintf (_TAG_FD, "<%s>%s</%s>", tag, buf, tag);
+    }
+  else
+    fprintf (_TAG_FD, "<%s />", tag);
+
+  fputs ("\n", _TAG_FD);
+
+  va_end (args);
+}
+
+#define _TAG_PRINT2(tag, tp, val) \
+ { _TAG_INDENT (); fprintf (_TAG_FD, "<" tag ">" tp "</" tag ">\n", val); }
 
 int
 main (int argc, const char *argv[])
@@ -62,6 +147,8 @@ main (int argc, const char *argv[])
   int _verbose_flag = 0;
   int _progress_flag = 0;
   int _gui_flag = 0;
+
+  char *_output_file = 0;
 
   vcd_xml_log_init ();
 
@@ -78,6 +165,9 @@ main (int argc, const char *argv[])
 
       {"relaxed-aps", '\0', POPT_ARG_NONE, &_relaxed_aps, OP_NONE,
        "relax APS constraints"},
+
+      {"output-file", 'o', POPT_ARG_STRING, &_output_file, OP_NONE,
+       "file for XML output", "FILE"},
 
       {"progress", 'p', POPT_ARG_NONE, &_progress_flag, 0,  
        "show progress"}, 
@@ -161,64 +251,131 @@ main (int argc, const char *argv[])
 
     vcd_debug ("stream scan completed");
 
-    fprintf (stdout, "<mpeg-info src=\"%s\">\n", _mpeg_fname);
+    fflush (stdout);
+
+    if (_output_file && strcmp (_output_file, "-"))
+      {
+        if (!(_TAG_FD = fopen (_output_file, "w")))
+          vcd_error ("fopen (): %s", strerror (errno));
+      }
+    else
+      {
+        _TAG_FD = stdout;
+        _output_file = 0;
+      }
+
+    _TAG_OPEN ("mpeg-info", "src=\"%s\"", _mpeg_fname);
 
     if (_generic_info)
       { 
-        const struct vcd_mpeg_source_info *_info = vcd_mpeg_source_get_info (src);
+        const struct vcd_mpeg_stream_info *_info = vcd_mpeg_source_get_info (src);
+        int i;
 
-        fprintf (stdout, "<mpeg-properties>\n");
+        _TAG_OPEN ("mpeg-properties", 0);
 
-        _TAG_PRINT (stdout, "version", "%d", _info->version);
+        _TAG_PRINT ("version", "%d", _info->version);
 
-        _TAG_PRINT (stdout, "hsize", "%d", _info->hsize);
-        _TAG_PRINT (stdout, "vsize", "%d", _info->vsize);
-        _TAG_PRINT (stdout, "frame-rate", "%f", _info->frate);
+        _TAG_PRINT ("playing-time", "%f", _info->playing_time);
+        _TAG_PRINT ("pts-offset", "%f", _info->min_pts);
+        _TAG_PRINT ("packets", "%d", _info->packets);
 
-        _TAG_PRINT (stdout, "playing-time", "%f", _info->playing_time);
-        _TAG_PRINT (stdout, "packets", "%d", _info->packets);
+        _TAG_PRINT ("bit-rate", "%d", (int) _info->muxrate);
 
-        _TAG_PRINT (stdout, "video-bitrate", "%d", _info->bitrate);
+        for (i = 0; i < 3; i++)
+          {
+            const struct vcd_mpeg_stream_vid_info *_vinfo = &_info->shdr[i];
 
-        if (_info->video_e0)
-          fprintf (stdout, "  <video-e0 /> <!-- motion -->\n");
-        if (_info->video_e1)
-          fprintf (stdout, "  <video-e1 /> <!-- still -->\n");
-        if (_info->video_e2)
-          fprintf (stdout, "  <video-e2 /> <!-- hi-res still -->\n");
+            if (!_vinfo->seen)
+              continue;
 
-        if (_info->audio_c0)
-          fprintf (stdout, "  <audio-c0 /> <!-- standard audio -->\n");
-        if (_info->audio_c1)
-          fprintf (stdout, "  <audio-c1 /> <!-- 2nd audio -->\n");
-        if (_info->audio_c2)
-          fprintf (stdout, "  <audio-c2 /> <!-- MC5.1 surround -->\n");
+            _TAG_OPEN ("video-stream", "index=\"%d\"", i);
+
+            {
+              const char *_str[] = {
+                "motion video stream",
+                "still picture stream",
+                "secondary still picture stream"
+              };
+
+              _TAG_COMMENT (_str[i]);
+            }
+
+            _TAG_PRINT ("horizontal-size", "%d", _vinfo->hsize);
+            _TAG_PRINT ("vertical-size", "%d", _vinfo->vsize);
+            _TAG_PRINT ("frame-rate", "%f", _vinfo->frate);
+            
+            _TAG_PRINT ("bit-rate", "%d", _vinfo->bitrate);
+
+            if (_dump_aps && _vinfo->aps_list)
+              {
+                _TAG_OPEN ("aps-list", 0);
+                if (_relaxed_aps)
+                  _TAG_COMMENT ("relaxed aps");
+
+                _VCD_LIST_FOREACH (n, _vinfo->aps_list)
+                  {
+                    struct aps_data *_data = _vcd_list_node_data (n);
+                    
+                    _TAG_INDENT ();
+                    fprintf (_TAG_FD, "<aps packet-no=\"%d\">%f</aps>\n",
+                             _data->packet_no, _data->timestamp);
+                  }
+
+                _TAG_CLOSE ();
+              }
+
+            _TAG_CLOSE ();
+          }
+
+        for (i = 0; i < 3; i++)
+          {
+            const struct vcd_mpeg_stream_aud_info *_ainfo = &_info->ahdr[i];
+
+            if (!_ainfo->seen)
+              continue;
+
+            _TAG_OPEN ("audio-stream", "index=\"%d\"", i);
+
+            {
+              const char *_str[] = {
+                "base audio stream",
+                "secondary audio stream",
+                "extended MC5.1 audio stream"
+              };
+
+              _TAG_COMMENT (_str[i]);
+            }
+            
+            _TAG_PRINT ("layer", "%d", _ainfo->layer);
+            _TAG_PRINT ("sampling-frequency", "%d", _ainfo->sampfreq);
+            _TAG_PRINT ("bit-rate", "%d", _ainfo->bitrate);
+
+            {
+              const char *_mode_str[] = {
+                "invalid",
+                "stereo",
+                "joint_stereo",
+                "dual_channel",
+                "single_channel",
+                "invalid"
+              };
+              _TAG_PRINT ("mode", "%s", _mode_str[_ainfo->mode]);
+            }
+
+            _TAG_CLOSE ();
+          }
 
         /* fprintf (stdout, " v: %d a: %d\n", _info->video_type, _info->audio_type); */
 
-        fprintf (stdout, "</mpeg-properties>\n");
+        _TAG_CLOSE ();
       }
 
-    if (_dump_aps)
-      {
-        fprintf (stdout, "<aps-list>\n");
-        if (_relaxed_aps)
-          fprintf (stdout, "  <!-- relaxed aps -->\n");
+    _TAG_CLOSE ();
 
-        _VCD_LIST_FOREACH (n, vcd_mpeg_source_get_info (src)->aps_list)
-          {
-            struct aps_data *_data = _vcd_list_node_data (n);
-            
-            fprintf (stdout, "  <aps packet=\"%d\">%f</aps>\n",
-                     _data->packet_no, _data->timestamp);
-          }
-
-        fprintf (stdout, "</aps-list>\n");
-      }
-
-    fprintf (stdout, "</mpeg-info>\n");
-
-    fflush (stdout);
+    if (_output_file)
+      fclose (_TAG_FD);
+    else
+      fflush (_TAG_FD);
 
     vcd_mpeg_source_destroy (src, true);
   }

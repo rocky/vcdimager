@@ -43,7 +43,7 @@ typedef struct {
 typedef struct {
   VcdMpegSource *source;
   char *id;
-  const struct vcd_mpeg_source_info *info;
+  const struct vcd_mpeg_stream_info *info;
 
   VcdList *pause_list; /* pause_t */
 
@@ -64,7 +64,7 @@ typedef struct {
 typedef struct {
   VcdMpegSource *source;
   char *id;
-  const struct vcd_mpeg_source_info *info;
+  const struct vcd_mpeg_stream_info *info;
 
   VcdList *pause_list; /* pause_t */
 
@@ -92,8 +92,11 @@ typedef struct {
 struct _VcdObj {
   vcd_type_t type;
 
+  /* VCD 3.0 chinese SVCD compat flags */
   bool svcd_vcd3_mpegav;
   bool svcd_vcd3_entrysvd;
+  bool svcd_vcd3_tracksvd;
+  bool svcd_vcd3_spiconsv;
 
   bool update_scan_offsets;
   bool relaxed_aps;

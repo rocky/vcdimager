@@ -771,8 +771,8 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 		  vcd_warn ("PSD: endlist '%s': referenced play item '%s'"
 			    " is not a segment play item", 
 			    _pbc->id, _pbc->image_id);
-		else if (_segment->info->video_type != MPEG_VIDEO_NTSC_STILL
-			 && _segment->info->video_type != MPEG_VIDEO_PAL_STILL)
+		else if (_segment->info->shdr[0].seen
+			 || !(_segment->info->shdr[1].seen || _segment->info->shdr[2].seen))
 		  vcd_warn ("PSD: endlist '%s': referenced play item '%s'"
 			    " should be a still picture", 
 			    _pbc->id, _pbc->image_id);

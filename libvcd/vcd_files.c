@@ -28,19 +28,75 @@
 #include <math.h>
 
 #include <libvcd/vcd_assert.h>
-
-#include "vcd_files.h"
-#include "vcd_files_private.h"
-#include "vcd_bytesex.h"
-#include "vcd_obj.h"
-#include "vcd_logging.h"
-#include "vcd_util.h"
-#include "vcd_mpeg_stream.h"
+#include <libvcd/vcd_bytesex.h>
+#include <libvcd/vcd_files.h>
+#include <libvcd/vcd_files_private.h>
+#include <libvcd/vcd_logging.h>
+#include <libvcd/vcd_mpeg_stream.h>
+#include <libvcd/vcd_obj.h>
+#include <libvcd/vcd_util.h>
 
 #include <libvcd/vcd_pbc.h>
 
 static const char _rcsid[] = "$Id$";
 
+inline static bool
+_pal_p (const struct vcd_mpeg_stream_vid_info *_info)
+{
+  return (_info->vsize == 288
+          || _info->vsize == 576);
+}
+
+static int
+_derive_vid_type (const struct vcd_mpeg_stream_info *_info, bool svcd)
+{
+  if (_info->shdr[0].seen)
+    return _pal_p (&_info->shdr[0]) ? 0x7 : 0x3;
+
+  if (!svcd && _info->shdr[2].seen)
+    return _pal_p (&_info->shdr[2]) ? 0x6 : 0x2;
+
+  if (_info->shdr[1].seen)
+    return _pal_p (&_info->shdr[1]) ? 0x5 : 0x1;
+
+  return 0;
+}
+
+static int
+_derive_aud_type (const struct vcd_mpeg_stream_info *_info, bool svcd)
+{
+  if (!_info->ahdr[0].seen)
+    return 0; /* no MPEG audio */
+
+  if (svcd)
+    {
+      if (_info->ahdr[2].seen)
+        return 3; /* MC */
+
+      if (_info->ahdr[1].seen)
+        return 2; /* 2 streams */
+      
+      return 1; /* just one stream */
+    }
+  else
+    switch (_info->ahdr[0].mode)
+      {
+      case MPEG_SINGLE_CHANNEL:
+        return 1;
+        break;
+
+      case MPEG_STEREO:
+      case MPEG_JOINT_STEREO:
+        return 2;
+        break;
+
+      case MPEG_DUAL_CHANNEL:
+        return 3;
+        break;
+      }
+
+  return 0;
+}
 
 void
 set_entries_vcd (VcdObj *obj, void *buf)
@@ -285,10 +341,12 @@ set_info_vcd(VcdObj *obj, void *buf)
         {
           mpeg_track_t *track = _vcd_list_node_data (node);
           
-          if (track->info->norm == MPEG_NORM_PAL 
-             || track->info->norm == MPEG_NORM_PAL_S)
+          const struct vcd_mpeg_stream_vid_info *_info = &track->info->shdr[0];
+
+          if (vcd_mpeg_get_norm (_info) == MPEG_NORM_PAL
+              || vcd_mpeg_get_norm (_info) == MPEG_NORM_PAL)
             _set_bit(info_vcd.pal_flags, n);
-          else if (track->info->vsize == 288 || track->info->vsize == 576)
+          else if (_info->vsize == 288 || _info->vsize == 576)
             {
               vcd_warn ("INFO.{VCD,SVD}: assuming PAL-type resolution for track #%d"
                         " -- are we creating a X(S)VCD?", n);
@@ -327,8 +385,13 @@ set_info_vcd(VcdObj *obj, void *buf)
               unsigned idx;
               InfoSpiContents contents = { 0, };
 
-              contents.audio_type = (int) segment->info->audio_type;
-              contents.video_type = (int) segment->info->video_type;
+              contents.video_type = 
+                _derive_vid_type (segment->info,
+                                  _vcd_obj_has_cap_p (obj, _CAP_4C_SVCD));
+
+              contents.audio_type = 
+                _derive_aud_type (segment->info,
+                                  _vcd_obj_has_cap_p (obj, _CAP_4C_SVCD));
 
               for (idx = 0; idx < segment->segment_count; idx++)
                 {
@@ -352,6 +415,52 @@ set_info_vcd(VcdObj *obj, void *buf)
   memcpy(buf, &info_vcd, sizeof(info_vcd));
 }
 
+static void
+set_tracks_svd_v30 (VcdObj *obj, void *buf)
+{
+  char tracks_svd_buf[ISO_BLOCKSIZE] = { 0, };
+  TracksSVD_v30 *tracks_svd = (void *) tracks_svd_buf;
+  VcdListNode *node;
+  double playtime;
+  int n;
+
+  strncpy (tracks_svd->file_id, TRACKS_SVD_FILE_ID, sizeof (TRACKS_SVD_FILE_ID));
+  tracks_svd->version = TRACKS_SVD_VERSION;
+  tracks_svd->tracks = _vcd_list_length (obj->mpeg_track_list);
+
+  n = 0;
+  playtime = 0;
+  _VCD_LIST_FOREACH (node, obj->mpeg_track_list)
+    {
+      mpeg_track_t *track = _vcd_list_node_data (node);
+
+      playtime += track->info->playing_time;
+
+      tracks_svd->track[n].audio_info = track->info->ahdr[0].seen ? 0x2 : 0x0; /* fixme */
+      tracks_svd->track[n].audio_info |= track->info->ahdr[1].seen ? 0x20 : 0x0; /* fixme */
+
+      tracks_svd->track[n].ogt_info = 0x0; /* fixme */
+
+      /* setting playtime */
+      
+      {
+        double i, f;
+
+        while (playtime >= 6000.0)
+          playtime -= 6000.0;
+
+        f = modf(playtime, &i);
+        
+        lba_to_msf (i * 75, &tracks_svd->track[n].cum_playing_time);
+        tracks_svd->track[n].cum_playing_time.f = to_bcd8 (floor (f * 75.0));
+      }
+      
+      n++;
+    }  
+  
+  memcpy (buf, &tracks_svd_buf, sizeof(tracks_svd_buf));
+}
+
 void
 set_tracks_svd (VcdObj *obj, void *buf)
 {
@@ -363,6 +472,12 @@ set_tracks_svd (VcdObj *obj, void *buf)
 
   vcd_assert (_vcd_obj_has_cap_p (obj, _CAP_4C_SVCD));
 
+  if (obj->svcd_vcd3_tracksvd)
+    {
+      set_tracks_svd_v30 (obj, buf);
+      return;
+    }
+
   vcd_assert (sizeof (SVDTrackContent) == 1);
 
   strncpy (tracks_svd1->file_id, TRACKS_SVD_FILE_ID, sizeof (TRACKS_SVD_FILE_ID));
@@ -373,42 +488,22 @@ set_tracks_svd (VcdObj *obj, void *buf)
   tracks_svd2 = (void *) &(tracks_svd1->playing_time[tracks_svd1->tracks]);
 
   n = 0;
+
   _VCD_LIST_FOREACH (node, obj->mpeg_track_list)
     {
       mpeg_track_t *track = _vcd_list_node_data (node);
-      double playtime = track->info->playing_time;
-       
-      switch (track->info->norm)
-        {
-        case MPEG_NORM_PAL:
-        case MPEG_NORM_PAL_S:
-          tracks_svd2->contents[n].video = 0x07;
-          break;
+      const double playtime = track->info->playing_time;
 
-        case MPEG_NORM_NTSC:
-        case MPEG_NORM_NTSC_S:
-          tracks_svd2->contents[n].video = 0x03;
-          break;
-          
-        default:
-          if (track->info->vsize == 240 || track->info->vsize == 480)
-            {
-              vcd_warn ("TRACKS.SVD: assuming NTSC-type resolution for track #%d"
-                        " -- are we creating a X(S)VCD?", n);
-              tracks_svd2->contents[n].video = 0x03;
-            }
-          else if (track->info->vsize == 288 || track->info->vsize == 576)
-            {
-              vcd_warn ("TRACKS.SVD: assuming PAL-type resolution for track #%d"
-                        " -- are we creating a X(S)VCD?", n);
-              tracks_svd2->contents[n].video = 0x07;
-            }
-          else
-            vcd_warn("SVCD/TRACKS.SVCD: No MPEG video for track #%d?", n);
-          break;
-        }
+      int _video;
+     
+      _video = tracks_svd2->contents[n].video =
+        _derive_vid_type (track->info, true);
 
-      tracks_svd2->contents[n].audio = (int) track->info->audio_type;
+      tracks_svd2->contents[n].audio =
+        _derive_aud_type (track->info, true);
+
+      if (_video != 0x3 && _video != 0x7)
+        vcd_warn("SVCD/TRACKS.SVCD: No MPEG motion video for track #%d?", n);
 
       /* setting playtime */
       
@@ -490,7 +585,7 @@ _make_track_scantable (const VcdObj *obj)
       mpeg_track_t *track = _vcd_list_node_data (node);
       VcdListNode *node2;
       
-      _VCD_LIST_FOREACH (node2, track->info->aps_list)
+      _VCD_LIST_FOREACH (node2, track->info->shdr[0].aps_list)
         {
           struct aps_data *_data = _vcd_malloc (sizeof (struct aps_data));
           
@@ -597,15 +692,15 @@ set_search_dat (VcdObj *obj, void *buf)
 }
 
 static uint32_t 
-_get_scandata_count (const struct vcd_mpeg_source_info *info)
+_get_scandata_count (const struct vcd_mpeg_stream_info *info)
 { 
   return ceil (info->playing_time * 2.0);
 }
 
 static uint32_t *
-_get_scandata_table (const struct vcd_mpeg_source_info *info)
+_get_scandata_table (const struct vcd_mpeg_stream_info *info)
 {
-  VcdListNode *n, *aps_node = _vcd_list_begin (info->aps_list);
+  VcdListNode *n, *aps_node = _vcd_list_begin (info->shdr[0].aps_list);
   struct aps_data *_data;
   double aps_time, t;
   int aps_packet;

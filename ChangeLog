@@ -1,3 +1,15 @@
+2001-08-23  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd.h: new parameter VCD_PARM_SVCD_VCD3_TRACKSVD added
+
+	* frontends/cli/vcd_debug.c: improved differenciation between VCD2.0 and SVCD
+
+2001-08-22  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* reorganized vcd_mpeg/vcd_mpeg_stream and updated related source locations
+
+	* libvcd/vcd_mpeg.c (_analyze_video_pes): detect aligned APS
+
 2001-08-21  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_mpeg.c (_analyze_audio_pes): implemented mpeg audio header interpretation

@@ -67,18 +67,18 @@ struct {
   int frate_idx;
 } const static norm_table[] = {
   { MPEG_NORM_FILM,   352, 240, 1 },
-    { MPEG_NORM_PAL,    352, 288, 3 },
-    { MPEG_NORM_NTSC,   352, 240, 4 },
-    { MPEG_NORM_PAL_S,  480, 576, 3 },
-    { MPEG_NORM_NTSC_S, 480, 480, 4 },
-    { MPEG_NORM_OTHER, }
-  };
+  { MPEG_NORM_PAL,    352, 288, 3 },
+  { MPEG_NORM_NTSC,   352, 240, 4 },
+  { MPEG_NORM_PAL_S,  480, 576, 3 },
+  { MPEG_NORM_NTSC_S, 480, 480, 4 },
+  { MPEG_NORM_OTHER, }
+};
 
 const static double frame_rates[16] =  {
-    0.00, 23.976, 24.0, 25.0, 
-    29.97, 30.0,  50.0, 59.94, 
-    60.00, 00.0, 
-  };
+  0.0, 24000.0/1001, 24.0, 25.0, 
+  30000.0/1001, 30.0,  50.0, 60000.0/1001, 
+  60.0, 0.0, 
+};
 
 #ifdef DEBUG
 # define MARKER(buf, offset) \
@@ -174,7 +174,7 @@ _parse_sequence_header (uint8_t streamid, const void *buf,
   int offset = 0;
   unsigned hsize, vsize, aratio, frate, brate, bufsize, constr;
   const uint8_t *data = buf;
-  int vid_idx = _vid_streamid_idx (streamid);
+  const int vid_idx = _vid_streamid_idx (streamid);
 
   const double aspect_ratios[16] = 
     { 
@@ -187,18 +187,6 @@ _parse_sequence_header (uint8_t streamid, const void *buf,
   if (state->stream.shdr[vid_idx].seen) /* we have it already */
     return;
   
-  if (!state->stream.first_shdr)
-    state->stream.first_shdr = vid_idx + 1;
-
-  /* ++KSW (Keith White), for stills with both stream ids, the higher
-     resolution takes precedence */
-  if (state->stream.first_shdr == 2 && vid_idx == 2)
-    {
-      vcd_debug ("got still image with hires sequence header "
-                 "coming later. declaring this still to be hires.");
-      state->stream.first_shdr = vid_idx + 1;
-    }
-
   hsize = vcd_bitvec_read_bits (data, &offset, 12);
 
   vsize = vcd_bitvec_read_bits (data, &offset, 12);
@@ -546,8 +534,8 @@ static void
 _analyze_audio_pes (uint8_t streamid, const uint8_t *buf, int len, bool only_pts,
 		    VcdMpegStreamCtx *state)
 {
-  unsigned bitpos;
   const int aud_idx = _aud_streamid_idx (streamid);
+  unsigned bitpos;
 
   vcd_assert (aud_idx != -1);
 
@@ -611,7 +599,7 @@ _analyze_audio_pes (uint8_t streamid, const uint8_t *buf, int len, bool only_pts
         vcd_assert (IN(state->stream.ahdr[aud_idx].layer, 0, 3));
         vcd_assert (IN(bits, 0, 15));
 
-        state->stream.ahdr[aud_idx].bitrate = bit_rates[state->stream.ahdr[aud_idx].layer][bits];
+        state->stream.ahdr[aud_idx].bitrate = 1024 * bit_rates[state->stream.ahdr[aud_idx].layer][bits];
       }
 
       switch (vcd_bitvec_read_bits (buf, &bitpos, 2)) /* sampling_frequency */
@@ -634,6 +622,8 @@ _analyze_audio_pes (uint8_t streamid, const uint8_t *buf, int len, bool only_pts
 
       bitpos++; /* private_bit */
 
+      state->stream.ahdr[aud_idx].mode = 1 + vcd_bitvec_read_bits (buf, &bitpos, 2); /* mode */
+      
       state->stream.ahdr[aud_idx].seen = true;
       
       /* we got the info, let's jump outta here */
@@ -645,14 +635,16 @@ static void
 _analyze_video_pes (uint8_t streamid, const uint8_t *buf, int len, bool only_pts,
 		    VcdMpegStreamCtx *state)
 {
-  int pos;
+  const int vid_idx = _vid_streamid_idx (streamid);
+
+  int pos, pes_header;
   int sequence_header_pos = -1;
   int gop_header_pos = -1;
   int ipicture_header_pos = -1;
-  
-  vcd_assert (_vid_streamid_idx (streamid) != -1);
 
-  pos = _analyze_pes_header (buf, len, state);
+  vcd_assert (vid_idx != -1);
+
+  pes_header = pos = _analyze_pes_header (buf, len, state);
 
   /* if only pts extraction was needed, we are done here... */
   if (only_pts)
@@ -721,7 +713,7 @@ _analyze_video_pes (uint8_t streamid, const uint8_t *buf, int len, bool only_pts
           if (sequence_header_pos != -1
               && sequence_header_pos < gop_header_pos
               && gop_header_pos < ipicture_header_pos)
-            _aps_type = APS_SGI;
+            _aps_type = (sequence_header_pos - 4 == pes_header) ? APS_ASGI : APS_SGI;
           else if (gop_header_pos != 1 
                    && gop_header_pos < ipicture_header_pos)
             _aps_type = APS_GI;
@@ -737,16 +729,17 @@ _analyze_video_pes (uint8_t streamid, const uint8_t *buf, int len, bool only_pts
       if (_aps_type) 
         {
           const double pts2 = state->packet.pts;
-          const int vid_idx = _vid_streamid_idx (streamid);
 
-          if (state->stream.last_aps_pts[vid_idx] > pts2)
-            vcd_warn ("aps pts seems out of order (actual pts %f, last seen pts %f) -- ignoring this aps",
-                      pts2, state->stream.last_aps_pts[vid_idx]);
+          if (state->stream.shdr[vid_idx].last_aps_pts > pts2)
+            vcd_warn ("APS' pts seems out of order (actual pts %f, last seen pts %f) "
+                      "-- ignoring this aps",
+                      pts2, state->stream.shdr[vid_idx].last_aps_pts);
           else
             {
+              state->packet.aps_idx = vid_idx;
               state->packet.aps = _aps_type;
               state->packet.aps_pts = pts2;
-              state->stream.last_aps_pts[vid_idx] = pts2;
+              state->stream.shdr[vid_idx].last_aps_pts = pts2;
             }
         }
     }
@@ -943,7 +936,7 @@ vcd_mpeg_parse_packet (const void *_buf, unsigned buflen, bool parse_pes,
               pos = bitpos >> 3;
 
               ctx->packet.scr = _scr;
-              ctx->packet.muxrate = _muxrate * 50;
+              ctx->stream.muxrate = ctx->packet.muxrate = _muxrate * 50 * 8;
             }
           else if (bits >> 2 == 0x1) /* %01xx ISO13818-1 */
             {
@@ -1035,18 +1028,6 @@ vcd_mpeg_parse_packet (const void *_buf, unsigned buflen, bool parse_pes,
               break;
 	    }
 
-          { 
-            int n;
-            for (n = 0; n < 3; n++)
-              {
-                if (ctx->packet.audio[n])
-                  ctx->stream.audio[n] = true;
-
-                if (ctx->packet.video[n])
-                  ctx->stream.video[n] = true;
-              }
-          }
-
 	  pos += size;
 	  break;
 	  
@@ -1073,18 +1054,38 @@ vcd_mpeg_parse_packet (const void *_buf, unsigned buflen, bool parse_pes,
 }
 
 mpeg_norm_t 
-vcd_mpeg_get_norm (unsigned hsize, unsigned vsize, double frate)
+vcd_mpeg_get_norm (const struct vcd_mpeg_stream_vid_info *_info)
 {
   int i;
-
         
   for (i = 0; norm_table[i].norm != MPEG_NORM_OTHER;i++)
-    if (norm_table[i].hsize == hsize
-        && norm_table[i].vsize == vsize
-        && frame_rates[norm_table[i].frate_idx] == frate)
+    if (norm_table[i].hsize == _info->hsize
+        && norm_table[i].vsize == _info->vsize
+        && frame_rates[norm_table[i].frate_idx] == _info->frate)
       break;
 
   return norm_table[i].norm;
+}
+
+enum vcd_mpeg_packet_type
+vcd_mpeg_packet_get_type (const struct vcd_mpeg_packet_info *_info)
+{
+  if (_info->video[0] 
+      || _info->video[1]
+      || _info->video[2])
+    return PKT_TYPE_VIDEO;
+  else if (_info->audio[0] 
+           || _info->audio[1]
+           || _info->audio[2])
+    return PKT_TYPE_AUDIO;
+  else if (_info->zero)
+    return PKT_TYPE_ZERO;
+  else if (_info->ogt)
+    return PKT_TYPE_OGT;
+  else if (_info->system_header || _info->padding)
+    return PKT_TYPE_EMPTY;
+
+  return 0;
 }
 
 
