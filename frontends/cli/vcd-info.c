@@ -1520,7 +1520,7 @@ main (int argc, const char *argv[])
         gl.show.all = false;
         break;
       case OP_VERSION:
-        fprintf (stdout, vcd_version_string (true), "vcdinfo");
+        fprintf (stdout, vcd_version_string (true), "vcd-info");
         fflush (stdout);
         poptFreeContext(optCon);
         exit (EXIT_SUCCESS);
