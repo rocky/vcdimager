@@ -443,15 +443,20 @@ XVCD may be unsupported by many available stand-alone playing devices.
 @node Super Video CD 1.0, HQ Video CD 1.0, Extended Video CD, Known Video CD Flavors
 @subsection Super Video CD 1.0
 
+
+
 With the upcoming of the @acronym{DVD-V} media, a new VCD standard had
 to be published in order to be able to keep up with technology, so the
-Super Video CD specification was called into life 1999. In the midst of
-2000 a full subset of this Super Video CD specification was published as
-IEC-62107.
+Super Video CD specification was called into life 1999.
 
-As the most notable change over Video CD 2.0 is a switch from
+In the midst of 2000 a full subset@footnote{The features left out in
+this subset are: subtitles, command lists, extended pbc (hotspots and
+disc changer support).} of this Super Video CD specification was
+published as IEC-62107.
+
+As the most notable change over Video CD 2.0 a switch from
 @acronym{MPEG}-1 CBR to @acronym{MPEG}-2 VBR encoding for the video
-stream was performed. The following new features---building upon the
+stream was performed. The following new features---based on the
 Video CD 2.0 specification---are:
 
 @itemize @bullet 

@@ -23,6 +23,10 @@
 
 #include "vcd_types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 typedef enum {
   LOG_DEBUG = 1,
   LOG_INFO,
@@ -50,6 +54,10 @@ vcd_warn (const char format[], ...) GNUC_PRINTF(1,2);
 
 void
 vcd_error (const char format[], ...) GNUC_PRINTF(1,2);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* __VCD_LOGGING_H__ */
 

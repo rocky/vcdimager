@@ -24,6 +24,10 @@
 #include <libvcd/vcd_types.h>
 #include <libvcd/vcd_data_structures.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 /* VcdImageSink ( --> image reader) */
 
 typedef struct _VcdImageSource VcdImageSource;
@@ -95,5 +99,9 @@ vcd_image_sink_write (VcdImageSink *obj, void *buf, uint32_t lsn);
 int
 vcd_image_sink_set_arg (VcdImageSink *obj, const char key[], 
 			const char value[]);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* __VCD_IMAGE_H__ */

@@ -23,6 +23,10 @@
 
 /* provide some C99 definitions */
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 #if defined(HAVE_STDINT_H)
 # include <stdint.h>
 #elif defined(HAVE_INTTYPES_H)
@@ -139,6 +143,10 @@ typedef struct {
   uint8_t s  GNUC_PACKED;
   uint8_t f  GNUC_PACKED;
 } msf_t;
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* __VCD_TYPES_H__ */
 
