@@ -106,13 +106,13 @@ SVCD/LOT.SVD
 SVCD/PSD.SVD
   PSD[00] (LID[1] @0x0000): selection list descriptor
   Flags: 0x01 | NOS: 3 | BSN: 1 | LID: 1 (rejected: no)
-  prev: disabled | next: PSD[?] @0x000d | return: PSD[?] @0x000d
+  prev: disabled | next: LID[4] @0x000d | return: LID[4] @0x000d
   default: disabled | timeout: disabled
   wait: 5 secs | loop: 1 (delayed: no)
   play-item: SEGMENT[1] (0x03e8)
   ofs[0]: LID[2] @0x0007
   ofs[1]: LID[3] @0x000a
-  ofs[2]: PSD[?] @0x000d
+  ofs[2]: LID[4] @0x000d
   prev_area: disabled | next_area: disabled
   retn_area: disabled | default_area: disabled
   area[0]: disabled
@@ -121,7 +121,7 @@ SVCD/PSD.SVD
 
  PSD[01] (LID[2] @0x0007): play list descriptor
   NOI: 3 | LID#: 2 (rejected: no)
-  prev: disabled | next: LID[3] @0x000a | return: PSD[?] @0x000d
+  prev: disabled | next: LID[3] @0x000a | return: LID[4] @0x000d
   playtime: 0/15s | wait: 5s | autowait: 0s
   play-item[0]: SEQUENCE[1] (0x0002)
   play-item[1]: SEQUENCE[2] (0x0003)
@@ -129,13 +129,13 @@ SVCD/PSD.SVD
 
  PSD[02] (LID[3] @0x000a): play list descriptor
   NOI: 3 | LID#: 3 (rejected: no)
-  prev: disabled | next: PSD[?] @0x000d | return: PSD[?] @0x000d
+  prev: disabled | next: LID[4] @0x000d | return: LID[4] @0x000d
   playtime: 0/15s | wait: 5s | autowait: 0s
   play-item[0]: SEQUENCE[3] (0x0004)
   play-item[1]: SEQUENCE[4] (0x0005)
   play-item[2]: SEGMENT[3] (0x03ea)
 
- PSD[03] (PSD[?] @0x000d): end list descriptor
+ PSD[03] (LID[4] @0x000d): end list descriptor
   next disc number: 0 (if 0 stop PBC handling)
   change picture item: play nothing (0x0000)
 

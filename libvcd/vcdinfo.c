@@ -1657,7 +1657,31 @@ vcdinfo_read_psd (vcdinfo_obj_t *obj)
   return true;
 }
 
+/*
+  This fills in the offset table with LIDs.  Due to
+  "rejected" LOT entries, some of these might not have gotten filled
+  in before.
 
+  I believe a requirement for this to work is that the offset_list be
+  sorted beforehand: to get the LIDs we are assuming first in the
+  offset list is LID1, second in the offset LID2 etc.
+ */
+static void
+vcdinfo_update_offset_list(const vcdinfo_obj_t *obj, bool ext)
+{
+  if (NULL==obj) return;
+  {
+    VcdListNode *node;
+    unsigned int lid=1;
+    VcdList *offset_list = ext ? obj->offset_x_list : obj->offset_list;
+    
+    _VCD_LIST_FOREACH (node, offset_list)
+      {
+        vcdinfo_offset_t *ofs = _vcd_list_node_data (node);
+        ofs->lid = lid++;
+      }
+  }
+}
 
 void
 vcdinfo_visit_lot (vcdinfo_obj_t *obj, bool ext)
@@ -1676,6 +1700,11 @@ vcdinfo_visit_lot (vcdinfo_obj_t *obj, bool ext)
 
   _vcd_list_sort (ext ? obj->offset_x_list : obj->offset_list, 
                   (_vcd_list_cmp_func) _offset_t_cmp);
+
+  /* Now really complete the offset table with LIDs.  This routine
+     might obviate the need for _visit_pbc() or some of it which is
+     more complex. */
+  vcdinfo_update_offset_list(obj, ext);
 }
 
 /*!
