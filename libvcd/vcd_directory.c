@@ -465,13 +465,10 @@ traverse_vcd_directory_dump_pathtables (VcdDirNode *node, void *data)
 
   if (DATAP (node)->is_dir)
     {
-      VcdDirNode* child;
+      VcdDirNode* parent = _vcd_tree_node_parent (node);
+      uint16_t parent_id = parent ? PT_ID (parent) : 1;
 
-      _VCD_CHILD_FOREACH (child, node)
-        {
-          if (DATAP (child)->is_dir) 
-            _dump_pathtables_helper (args, DATAP (child), PT_ID (node));
-        }
+      _dump_pathtables_helper (args, DATAP (node), parent_id);
     }
 }
 
@@ -488,10 +485,8 @@ _vcd_directory_dump_pathtables (VcdDirectory *dir, void *ptl, void *ptm)
   args.ptl = ptl;
   args.ptm = ptm;
 
-  _dump_pathtables_helper (&args, DATAP(_vcd_tree_root (dir)), 1);
-
-  _vcd_tree_node_traverse (_vcd_tree_root (dir),
-                           traverse_vcd_directory_dump_pathtables, &args); 
+  _vcd_tree_node_traverse_bf (_vcd_tree_root (dir),
+                              traverse_vcd_directory_dump_pathtables, &args); 
 }
 
 

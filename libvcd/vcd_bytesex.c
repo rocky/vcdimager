@@ -34,10 +34,22 @@ to_721(uint16_t i)
   return UINT16_TO_LE(i);
 }
 
+uint16_t 
+from_721(uint16_t p)
+{
+  return UINT16_FROM_LE(p);
+}
+
 uint16_t
 to_722(uint16_t i)
 {
   return UINT16_TO_BE(i);
+}
+
+uint16_t 
+from_722(uint16_t p)
+{
+  return UINT16_FROM_BE(p);
 }
 
 uint32_t

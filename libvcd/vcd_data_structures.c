@@ -455,11 +455,42 @@ _vcd_tree_node_traverse (VcdTreeNode *node,
 
   trav_func (node, user_data);
 
-  child = _vcd_tree_node_first_child (node);
-  while(child) {
-    _vcd_tree_node_traverse (child, trav_func, user_data);
-    child = _vcd_tree_node_next_sibling (child);
-  }
+  _VCD_CHILD_FOREACH (child, node)
+    {
+      _vcd_tree_node_traverse (child, trav_func, user_data);
+    }
+}
+
+void
+_vcd_tree_node_traverse_bf (VcdTreeNode *node, 
+                            _vcd_tree_node_traversal_func trav_func,
+                            void *user_data) /* breath-first */
+{
+  VcdList *queue;
+
+  vcd_assert (node != NULL);
+
+  queue = _vcd_list_new ();
+
+  _vcd_list_prepend (queue, node);
+
+  while (_vcd_list_length (queue))
+    {
+      VcdListNode *lastnode = _vcd_list_end (queue);
+      VcdTreeNode *treenode = _vcd_list_node_data (lastnode);
+      VcdTreeNode *childnode;
+
+      _vcd_list_node_free (lastnode, false);
+
+      trav_func (treenode, user_data);
+      
+      _VCD_CHILD_FOREACH (childnode, treenode)
+        {
+          _vcd_list_prepend (queue, childnode);
+        }
+    }
+
+  _vcd_list_free (queue, false);
 }
 
 VcdTreeNode *_vcd_tree_node_parent (VcdTreeNode *node)

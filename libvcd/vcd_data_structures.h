@@ -110,6 +110,11 @@ bool _vcd_tree_node_is_root (VcdTreeNode *node);
 void _vcd_tree_node_traverse (VcdTreeNode *node, 
                               _vcd_tree_node_traversal_func trav_func,
                               void *user_data);
+
+void
+_vcd_tree_node_traverse_bf (VcdTreeNode *node, 
+                            _vcd_tree_node_traversal_func trav_func,
+                            void *user_data);
      
 #endif /* __VCD_DATA_STRUCTURES_H__ */
 

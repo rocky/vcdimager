@@ -45,6 +45,7 @@
 #include <libvcd/vcd_salloc.h>
 #include <libvcd/vcd_stream_stdio.h>
 #include <libvcd/vcd_image.h>
+#include <libvcd/vcd_image_fs.h>
 #include <libvcd/vcd_image_bincue.h>
 #include <libvcd/vcd_image_linuxcd.h>
 #include <libvcd/vcd_data_structures.h>
@@ -840,6 +841,8 @@ _xa_attr_str (uint16_t xa_attr)
 {
   char *result = _getbuf();
 
+  xa_attr = UINT16_FROM_BE (xa_attr);
+
   result[0] = (xa_attr & XA_ATTR_DIRECTORY) ? 'd' : '-';
   result[1] = (xa_attr & XA_ATTR_CDDA) ? 'a' : '-';
   result[2] = (xa_attr & XA_ATTR_INTERLEAVED) ? 'i' : '-';
@@ -861,127 +864,63 @@ _xa_attr_str (uint16_t xa_attr)
 }
 
 static void
-dump_idr (const debug_obj_t *obj, uint32_t lsn, const char pathname[], int size_info)
+_dump_fs_recurse (const debug_obj_t *obj, const char pathname[])
 {
-  struct iso_directory_record *idr = NULL;
-  char *buf = NULL;
-  int pos = 0;
-
-  vcd_assert (size_info % ISO_BLOCKSIZE == 0);
-
-  buf = realloc (buf, size_info);
-      
-  if (vcd_image_source_read_mode2_sectors (obj->img, buf, lsn, false, size_info / ISO_BLOCKSIZE)) 
-    vcd_assert_not_reached ();
-
-  idr = (void *) buf;
-
-  vcd_assert (from_733 (idr->size) == size_info);
-
+  VcdList *entlist = vcd_image_source_fs_readdir (obj->img, pathname);
+  VcdList *dirlist =  _vcd_list_new ();
+  VcdListNode *entnode;
+    
   fprintf (stdout, " %s:\n", pathname);
 
-  while (pos < size_info)
+  vcd_assert (entlist != NULL);
+
+  /* just iterate */
+  
+  _VCD_LIST_FOREACH (entnode, entlist)
     {
-      char namebuf[256] = { 0, };
-      idr = (void *) &buf[pos];
+      char *_name = _vcd_list_node_data (entnode);
+      char _fullname[4096] = { 0, };
+      vcd_image_stat_t statbuf;
 
-      if (buf[pos])
-        {
-          vcd_xa_t *xa_data;
-          uint16_t xa_attr = 0;
-          int su_len;
+      snprintf (_fullname, sizeof (_fullname), "%s%s", pathname, _name);
+  
+      if (vcd_image_source_fs_stat (obj->img, _fullname, &statbuf))
+        vcd_assert_not_reached ();
 
-          su_len = idr->length;
-          su_len -= sizeof (struct iso_directory_record);
-          su_len -= idr->name_len;
+      strncat (_fullname, "/", sizeof (_fullname));
 
-          if (su_len % 2)
-            su_len--;
+      if (statbuf.type == _STAT_DIR
+          && strcmp (_name, ".") 
+          && strcmp (_name, ".."))
+        _vcd_list_append (dirlist, strdup (_fullname));
 
-          vcd_assert (su_len >= sizeof (vcd_xa_t));
+      fprintf (stdout, 
+               "  %c %s %d %d [fn %.2d] [lsn %6d] %9d  %s\n",
+               (statbuf.type == _STAT_DIR) ? 'd' : '-',
+               _xa_attr_str (statbuf.xa.attributes),
+               UINT16_FROM_BE (statbuf.xa.user_id),
+               UINT16_FROM_BE (statbuf.xa.group_id),
+               statbuf.xa.filenum,
+               statbuf.lsn,
+               statbuf.size,
+               _name);
 
-          xa_data = (void *) &buf[pos + (idr->length - su_len)];
-          xa_attr = UINT16_FROM_BE (xa_data->attributes);
-
-          if (xa_data->signature[0] != 'X' 
-              || xa_data->signature[1] != 'A')
-            vcd_assert_not_reached ();
-
-          if (idr->name[0] == '\0')
-            strcpy (namebuf, ".");
-          else if (idr->name[0] == '\1')
-            strcpy (namebuf, "..");
-          else
-            strncpy (namebuf, idr->name, idr->name_len);
-
-          fprintf (stdout, 
-                   "  %c %s %d %d [fn %.2d] [lsn %6d] %9d  %s\n",
-                   (idr->flags & ISO_DIRECTORY) ? 'd' : '-',
-                   _xa_attr_str (xa_attr),
-                   UINT16_FROM_BE (xa_data->user_id),
-                   UINT16_FROM_BE (xa_data->group_id),
-                   xa_data->filenum,
-                   from_733 (idr->extent),
-                   from_733 (idr->size),
-                   namebuf);
-
-          if (!strcmp (pathname, "/EXT/"))
-            {
-              if (!strcmp (namebuf, "PSD_X.VCD;1"))
-                {
-                  obj->psd_x_size = from_733 (idr->size);
-                  obj->psd_x = _vcd_malloc (obj->psd_x_size * ISO_BLOCKSIZE);
-                  
-                  if (vcd_image_source_read_mode2_sectors (obj->img, (void *) obj->psd_x, from_733 (idr->extent), false,
-                                                           _vcd_len2blocks (obj->psd_x_size, ISO_BLOCKSIZE)))
-                    exit (EXIT_FAILURE);
-                }
-              else if (!strcmp (namebuf, "LOT_X.VCD;1"))
-                {
-                  vcd_assert (from_733 (idr->size) == LOT_VCD_SIZE * ISO_BLOCKSIZE);
-                  obj->lot_x = _vcd_malloc (LOT_VCD_SIZE * ISO_BLOCKSIZE);
-
-                  if (vcd_image_source_read_mode2_sectors (obj->img, (void *) obj->lot_x, from_733 (idr->extent), false,
-                                                           LOT_VCD_SIZE))
-                    exit (EXIT_FAILURE);
-                }
-            }
-
-          pos += idr->length;
-        }
-      else /* skip zeros */
-        pos++;
     }
+
+  _vcd_list_free (entlist, true);
 
   fprintf (stdout, "\n");
 
-  /* play it again sam! */
-  pos = 0;
-  while (pos < ISO_BLOCKSIZE)
+  /* now recurse */
+
+  _VCD_LIST_FOREACH (entnode, dirlist)
     {
-      char namebuf[1024] = { 0, };
-      idr = (void *) &buf[pos];
+      char *_fullname = _vcd_list_node_data (entnode);
 
-      if (buf[pos])
-        {
-          if (idr->name[0] != '\0' 
-              && idr->name[0] != '\1'
-              && idr->flags & ISO_DIRECTORY)
-            {
-              strcat (namebuf, pathname);
-              strncat (namebuf, idr->name, idr->name_len);
-              strcat (namebuf, "/");
-          
-              dump_idr (obj, from_733 (idr->extent), namebuf, from_733 (idr->size));
-            }
-
-          pos += idr->length;
-        }
-      else /* skip zeros */
-        pos++;
+      _dump_fs_recurse (obj, _fullname);
     }
 
-  free (buf);
+  _vcd_list_free (dirlist, true);
 }
 
 static void
@@ -994,9 +933,9 @@ dump_fs (const debug_obj_t *obj)
   extent = from_733 (idr->extent);
 
   fprintf (stdout, "ISO9660 filesystem dump\n");
-  fprintf (stdout, " root dir at lsn %d\n", extent);
- 
-  dump_idr (obj, extent, "/", from_733 (idr->size));
+  fprintf (stdout, " root dir in PVD set to lsn %d\n\n", extent);
+
+  _dump_fs_recurse (obj, "/");
 }
 
 static void

@@ -1,3 +1,16 @@
+2001-06-06  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* frontends/cli/vcd_debug.c (dump_fs): make use of vcd_image_fs api
+
+	* libvcd/vcd_data_structures.c (_vcd_tree_node_traverse_bf): 
+		new breadth-first tree traversal implemented
+
+	* libvcd/vcd_directory.c (_vcd_directory_dump_pathtables): 
+		use breadth-first tree traversal for pathtable generation
+
+	* libvcd/vcd_iso9660.c: added asserts to ensure pathtable entries
+		are ordered
+
 2001-06-04  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_image_fs.c: new module for iso9660 fs reading

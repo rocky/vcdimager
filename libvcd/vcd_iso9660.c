@@ -313,6 +313,36 @@ pathtable_init (void *pt)
   memset (pt, 0, ISO_BLOCKSIZE); /* fixme */
 }
 
+static const struct iso_path_table*
+pathtable_get_entry (const void *pt, unsigned entrynum)
+{
+  const uint8_t *tmp = pt;
+  unsigned offset = 0;
+  unsigned count = 0;
+
+  vcd_assert (pt != NULL);
+
+  while (from_711 (*tmp)) 
+    {
+      if (count == entrynum)
+        break;
+
+      vcd_assert (count < entrynum);
+
+      offset += sizeof (struct iso_path_table);
+      offset += from_711 (*tmp);
+      if (offset % 2)
+        offset++;
+      tmp = (uint8_t *)pt + offset;
+      count++;
+    }
+
+  if (!from_711 (*tmp))
+    return NULL;
+
+  return (const void *) tmp;
+}
+
 void
 pathtable_get_size_and_entries (const void *pt, 
                                 unsigned *size,
@@ -370,6 +400,16 @@ pathtable_l_add_entry (void *pt,
   memcpy (ipt->name, name, name_len);
 
   pathtable_get_size_and_entries (pt, NULL, &entrynum);
+
+  if (entrynum > 1)
+    {
+      const struct iso_path_table *ipt2 
+        = pathtable_get_entry (pt, entrynum - 2);
+
+      vcd_assert (ipt2 != NULL);
+
+      vcd_assert (from_721 (ipt2->parent) <= parent);
+    }
   
   return entrynum;
 }
@@ -395,6 +435,16 @@ pathtable_m_add_entry (void *pt,
   memcpy (ipt->name, name, name_len);
 
   pathtable_get_size_and_entries (pt, NULL, &entrynum);
+
+  if (entrynum > 1)
+    {
+      const struct iso_path_table *ipt2 
+        = pathtable_get_entry (pt, entrynum - 2);
+
+      vcd_assert (ipt2 != NULL);
+
+      vcd_assert (from_722 (ipt2->parent) <= parent);
+    }
 
   return entrynum;
 }
