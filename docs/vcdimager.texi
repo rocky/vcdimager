@@ -271,6 +271,7 @@ ISO-9660 data track. The beginning of this track is defined to have the
 
 @itemize @bullet 
 @item 
+@cindex @acronym{PVD} area
 ISO-9660 structure at @code{00:02:00} consisting of 16 empty sectors,
 primary volume descriptor (@dfn{PVD}) and directory records with file
 pointers to information area structures (described below) and external
@@ -381,6 +382,8 @@ into account for bit-rate calculations}.
 
 @node Video CD 2.0, Extended Video CD, Video CD 1.1, Known Video CD Flavors
 @subsection Video CD 2.0
+@cindex VCD
+@cindex XVCD
 
 About two years after the Video CD 1.1 specification came out, an
 improved Video CD 2.0 standard was published in 1995. This one added the
@@ -487,8 +490,9 @@ Higher resolutions (see below) for video stream resolution.
 Up to 4 overlay graphics and text (@dfn{OGT}) sub-channels for user
 switchable subtitle displaying@footnote{There is also a non-compliant
 subtitle format widely used, having its origins in the forgotten
-@dfn{CVD} specification, which is said to have been a competitor for
-the Video CD 2.0 successor. See
+@dfn{China Video Disc} or @dfn{Chaoji VCD} (@dfn{CVD}) specification,
+which is said to have been a competitor for the Video CD 2.0
+successor. See
 @uref{http://www.dvdrhelp.com/forum/userguides/98177.php}. Vcdimager
 recognizes both formats.} in addition to the already existing closed
 caption facility.
@@ -544,6 +548,8 @@ The system identification field value in @file{/SVCD/INFO.SVD} is set to
 
 @node Extended Super Video CD,  , HQ Video CD 1.0, Known Video CD Flavors
 @subsection Extended Super Video CD
+@cindex SVCD
+@cindex XSVCD
 
 Just like the XVCD, and thus also known as @dfn{XSVCD}, this is not an
 official standard and may not work with all playing devices supporting
@@ -593,10 +599,12 @@ number of @acronym{MPEG} items)
 Entry point table.
 
 @item /VCD/LOT.VCD
-List ID Offset table into @file{PSD.VCD} (only allowed for Video CD 2.0
+@cindex @acronym{LOT} area
+List ID Offset Table into @file{PSD.VCD} (only allowed for Video CD 2.0
 discs with @acronym{PBC})
 
 @item /VCD/PSD.VCD
+@cindex @acronym{PSD} area
 Play sequence descriptor file (only allowed for Video CD 2.0 discs with
 @acronym{PBC}). This file may contain so-called lists (selection lists,
 play lists and end lists) which represent the @acronym{PBC}.
@@ -748,14 +756,16 @@ the @code{update scan offsets} option. @xref{<option> Element}.
 @node SVCD Subtitles,  , Scan Information Data, Super Video CD
 @subsubsection SVCD Subtitles
 @cindex Subtitles
+@cindex OGT
 
-There exist two major subtitle formats for SVCD's, of which only one is
-officially supported. The non-compliant one has it's origin in the
-so-called @acronym{CVD} format, a competitor for the Video CD 2.0
-successor. The @emph{real} SVCD subtitle format is part of the Super
-Video Specification, wheras the @acronym{CVD}-style subtitle format is
-not. Alas the latter one is more widely used, due to older pre-SVCD aged
-software only supporting the non-compliant @acronym{CVD} subtitle
+There exist two major subtitle formats for SVCD's, of which only
+one---@dfn{Overlay Graphics Text} or @acronym{OGT}---is officially
+supported.  The non-compliant one has it's origin in the so-called
+@acronym{CVD} format, a competitor for the Video CD 2.0 successor. The
+@emph{real} SVCD subtitle format is part of the Super Video
+Specification, wheras the @acronym{CVD}-style subtitle format is
+not. Alas the latter one is more widely used, due to older pre-SVCD
+aged software only supporting the non-compliant @acronym{CVD} subtitle
 format.
 
 Compliant SVCD subtitles are transported in a @code{private_stream_1}
@@ -2194,6 +2204,11 @@ that the length of the referenced @code{<play-item>} is not more than 5
 seconds. The recommended setting for a play item consisting of one still
 picture and no audio is to loop once and have a @emph{delayed}
 @code{jump-timing}.
+
+If @code{<play-time>} refers to an entry, the unit of looping is
+complete when the sequence that the entry is contained in is
+complete. The point to start again on repetition is still however the
+entry point, not the beginning of the sequence.
 
 @item <play-item>
 The @emph{play item} to be played while waiting for user intervention.
