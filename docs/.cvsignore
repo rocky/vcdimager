@@ -2,6 +2,7 @@ Makefile.in
 Makefile
 .deps
 stamp-1
+stamp-2
 vcdimager.info*
 vcdimager.pdf
 vcddump.info*
