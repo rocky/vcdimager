@@ -12,21 +12,42 @@ Constant Bit Rate. Used in MPEG-1's.
 Compact Disc
 
 @item CD-DA
-@acronym{CD} Digital Audio
+Compact Disc Digital Audio, described in the ``Red Book'' or ICE
+908. This commonly referred to as an audio @acronym{CD} and what most
+people think of when you play a @acronym{CD} as it was the first to
+use the @acronym{CD} medium.
 
 @item CD-ROM
-@acronym{CD} Read Only Memory
+Compact Disc Read Only Memory or ``Yellow Book'' describe in Standards
+ISO/IEC 10149. The data stored on it can be either in the form of
+audio, computer or video files.
 
-@item CD-ROM XA
-CD-ROM EXtended Architecture. A modificattion to the CD-ROM
+@item CD-ROM Mode 1 and Mode2
+
+The Yellow Book specifies two types of tracks, Mode 1 and Mode 2. Mode
+1 is used for computer data and text and has an extra error correction
+layer. Mode 2 is for audio and video data and has no extra correction
+layer. CD-ROM/XA An expansion of the CD-ROM Mode 2 format that allows
+both computer and audio/video to be mixed in the same track.
+
+@item CD XA
+CD-ROM EXtended Architecture. A modification to the CD-ROM
 specification that defines two new types of sectors.  CD-ROM XA was
-developed jointly by Sony, Philips, and Microsoft, and its
-specifications were published in an extension to the Yellow Book.
-CD-i, Photo CD, Video CD and CD-EXTRA have all subsequently been based
-on CD-ROM XA.
+developed jointly by Sony, Philips, and Microsoft, and announced in
+August 1988. Its specifications were published in an extension to the
+Yellow Book.  CD-i, Photo CD, Video CD and CD-EXTRA have all
+subsequently been based on CD-ROM XA.
 
-@item CD-XA
-See @acronym{CD-ROM XA}.
+CD-XA defines another way of formatting sectors on a CD-ROM, including
+headers in the sectors that describe the type (audio, video, data) and
+some additional info (markers, resolution in case of a video or audio
+sector, file numbers, etc).
+
+The data written on a CD-XA is consistent with and can be in ISO-9660
+file system format and therefore be readable by ISO-9660 file system
+translators. But also a CD-I player can also read CD-XA discs even if
+its own `Green Book' file system only resembles ISO 9660 and isn't
+fully compatible. 
 
 @item CVD
 Chaoji VCD or China Video Disc @*
@@ -108,11 +129,17 @@ Super @acronym{VCD} @uref{http://www.dvdrhelp.com/svcd}
 @item VBR
 Variable Bit Rate. Used in MPEG-2's
 
+@item Track 
+
+A unit of data of a CD. The size of a track can vary; it can occupy
+the entire contents of the CD. Most CD standards however require that
+tracks have a 150 frame (or ``2 second'') lead-in gap.
+
 @item VCD
 Video @acronym{CD} @uref{http://www.dvdrhelp.com/vcd}
 
 @item XA
-See @acronym{CD-ROM XA}
+See @acronym{CD XA}
 
 @item XML
 eXtensible Markup Language, @uref{http://www.w3.org/XML/}.
