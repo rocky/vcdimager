@@ -1,5 +1,8 @@
 2000-12-23  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* libvcd/vcd_mpeg.c (vcd_mpeg_get_type): added hack to detect
+		sector content by looking at the system header
+
 	* configure.in: bumped version up to 0.5.9alpha1
 
 	* libvcd/vcd.c: made app id customizable,

@@ -448,8 +448,24 @@ vcd_mpeg_get_type (const void *packet, mpeg_type_info_t *extended_type_info)
                 {
                   int size = _bitvec_get_bits32 (data, offset, 16); 
                   /* fixme -- boundary check assert (offset + 16 < 2324 * 8) */
-                  
                   offset += 16;
+                  
+                  /* just a hack, since I don't know exactly what the
+                     format of the system header is */
+                  if (!extended_type_info && size > 6)
+                    switch (_bitvec_get_bits32 (data, offset + (6 * 8), 8))
+                      {
+                      case 0xe0:
+                        return MPEG_TYPE_VIDEO;
+                        break;
+                      case 0xc0:
+                        return MPEG_TYPE_AUDIO;
+                        break;
+                      default:
+                        /* noop */
+                        break;
+                      }
+
                   offset += size * 8;
                 }
                 break;

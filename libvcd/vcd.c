@@ -854,8 +854,8 @@ _write_source_mode2_form1 (VcdObj *obj, VcdDataSource *source, uint32_t extent)
 
     if (_write_m2_image_sector (obj, buf, extent+n, 1, 0, 
                                 ((n+1 < sectors) 
-                                 ? SM_DATA : SM_DATA
-                                 |SM_EOF),
+                                 ? SM_DATA 
+                                 : SM_DATA |SM_EOF),
                                 0))
       break;
   }
@@ -1039,6 +1039,7 @@ _write_sectors (VcdObj *obj, int track_idx)
       break;
     case MPEG_TYPE_UNKNOWN:
       mpeg_packets.unknown++;
+      vcd_warn ("unknown packet @%d encounterd", n);
       sm = SM_FORM2|SM_REALT;
       ci = 0;
       break;

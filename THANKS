@@ -1,14 +1,15 @@
 $Id$
 
-thanks to:
+...thanks goes to:
 
-* Mike Bernson and
-  Andrew Stevens from the mjpeg project, for helping me fixing and understand mpeg1 and adding mpeg2 support
-* Jens Jorgensen, for making it possible to add SVCD support and fill some knowlegde gaps
+* Mike Bernson, for helping me fixing and understand mpeg1 and adding mpeg2 support
+* Andrew Stevens, for helping me fixing and understand mpeg1 and adding mpeg2 support
+* Jens Jorgensen, for making it possible to add SVCD support and fill quite some knowledge gaps
 * Andreas Varga, for his inspiration of this package's name and for his strong conception of portability
-* Wimpy, for taking over the win32 port
+* Wimpy, for taking over the win32 builds
 * Franz Ackermann, for suffering from my lack of patience and finally surrendering and getting me a CD-i player
 * Heiko Eissfeldt, for providing OSS edc/ecc routines
 * Rainer Johanni, for creating mkvcdfs, from which I stole a few ideas 
 
 ...and finally to all those people who helped with testing VCDImager!
+--
