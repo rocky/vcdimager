@@ -95,13 +95,13 @@ _pin2str (uint16_t itemid)
   if (itemid < 2) 
     snprintf (buf, BUF_SIZE, "no item (0x%4.4x)", itemid);
   else if (itemid < 100)
-    snprintf (buf, BUF_SIZE, "SEQUENCE[%d] (0x%4.4x)", itemid - 2, itemid);
+    snprintf (buf, BUF_SIZE, "SEQUENCE[%d] (0x%4.4x)", itemid - 1, itemid);
   else if (itemid < 600)
     snprintf (buf, BUF_SIZE, "ENTRY[%d] (0x%4.4x)", itemid - 100, itemid);
   else if (itemid < 1000)
     snprintf (buf, BUF_SIZE, "spare id (0x%4.4x)", itemid);
   else if (itemid < 2980)
-    snprintf (buf, BUF_SIZE, "SEGMENT[%d] (0x%4.4x)", itemid-1000, itemid);
+    snprintf (buf, BUF_SIZE, "SEGMENT[%d] (0x%4.4x)", itemid - 999, itemid);
   else 
     snprintf (buf, BUF_SIZE, "spare id (0x%4.4x)", itemid);
 
@@ -680,7 +680,7 @@ dump_info (const debug_obj_t *obj)
 
       fprintf (stdout, " SEGMENT[%d]: audio: %s,"
                " video: %s, continuation %s\n",
-               n,
+               n + 1,
                audio_types[info->spi_contents[n].audio_type],
                video_types[info->spi_contents[n].video_type],
                _vcd_bool_str (info->spi_contents[n].item_cont));
@@ -719,9 +719,11 @@ dump_entries (const debug_obj_t *obj)
       uint32_t extent = msf_to_lba(msf);
       extent -= 150;
 
-      fprintf (stdout, " ENTRY[%2.2d]: track# %d, LSN %d "
-               "(msf: %2.2x:%2.2x:%2.2x)\n",
-               n, from_bcd8 (entries->entry[n].n), extent,
+      fprintf (stdout, " ENTRY[%2.2d]: track# %d (SEQUENCE[%d]), LSN %d "
+               "(msf %2.2x:%2.2x:%2.2x)\n",
+               n, from_bcd8 (entries->entry[n].n),
+               from_bcd8 (entries->entry[n].n) - 1,               
+               extent,
                msf->m, msf->s, msf->f);
     }
 }

@@ -71,7 +71,7 @@ main (int argc, const char *argv[])
 
   ctx.stream.scan_data_warnings = VCD_MPEG_SCAN_DATA_WARNS + 1;
 
-  printf ("cur_ofs  (lba) aps prev_ofs  next_ofs  forw_ofs  back_ofs\n");
+  printf ("cur_ofs  (lba) aps prev_ofs  next_ofs  back_ofs  forw_ofs\n");
 
   for (packet_no = 0; packet_no < packets; packet_no++)
     {

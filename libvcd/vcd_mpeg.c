@@ -254,7 +254,10 @@ _check_scan_data (const char str[], const msf_t *msf,
 
   if (state->stream.scan_data_warnings == VCD_MPEG_SCAN_DATA_WARNS)
     {
-      vcd_warn ("mpeg user scan data: from now on, scan information data errors will not be reported anymore -- consider enabling the 'update scan offsets' option");
+      vcd_warn ("mpeg user scan data: from now on, scan information "
+                "data errors will not be reported anymore---consider"
+                " enabling the 'update scan offsets' option, "
+                "if it is not enabled already!");
       state->stream.scan_data_warnings++;
       return;
     }      

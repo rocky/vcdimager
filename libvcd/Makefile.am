@@ -28,6 +28,8 @@ libvcd_a_SOURCES = \
 	vcd_image_fs.h \
 	vcd_image_bincue.c \
 	vcd_image_bincue.h \
+	vcd_image_cdrdao.c \
+	vcd_image_cdrdao.h \
 	vcd_image_nrg.c \
 	vcd_image_nrg.h \
 	vcd_image_linuxcd.c \

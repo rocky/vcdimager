@@ -32,12 +32,14 @@
 #include <libvcd/vcd_logging.h>
 #include <libvcd/vcd_stream_stdio.h>
 #include <libvcd/vcd_image_bincue.h>
+#include <libvcd/vcd_image_cdrdao.h>
 #include <libvcd/vcd_bytesex.h>
 
 static const char _rcsid[] = "$Id$";
 
 bool vcd_xml_master (const struct vcdxml_t *obj, const char cue_fname[],
-		     const char bin_fname[], bool sector_2336_flag)
+		     const char bin_fname[], const char cdrdao_base[],
+		     bool sector_2336_flag)
 {
   VcdObj *_vcd;
   VcdListNode *node;
@@ -187,10 +189,23 @@ bool vcd_xml_master (const struct vcdxml_t *obj, const char cue_fname[],
     VcdImageSink *image_sink;
     char *_tmp;
 
-    image_sink = 
-      vcd_image_sink_new_bincue (vcd_data_sink_new_stdio (bin_fname),
-                                 vcd_data_sink_new_stdio (cue_fname),
-                                 bin_fname, sector_2336_flag);
+    if (cdrdao_base)
+      {
+	char buf[4096] = { 0, };
+
+	vcd_info ("cdrdao-style image requested!");
+
+	strncat (buf, cdrdao_base, sizeof (buf));
+	strncat (buf, ".toc", sizeof (buf));
+
+	image_sink = 
+	  vcd_image_sink_new_cdrdao (buf, cdrdao_base, sector_2336_flag);
+      }
+    else
+      image_sink = 
+	vcd_image_sink_new_bincue (vcd_data_sink_new_stdio (bin_fname),
+				   vcd_data_sink_new_stdio (cue_fname),
+				   bin_fname, sector_2336_flag);
 
     if (!image_sink)
       {

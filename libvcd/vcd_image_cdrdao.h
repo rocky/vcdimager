@@ -18,16 +18,15 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef __VCD_XML_MASTER_H__
-#define __VCD_XML_MASTER_H__
-#include "vcdxml.h"
+#ifndef __VCD_IMAGE_CDRDAO_H__
+#define __VCD_IMAGE_CDRDAO_H__
 
-bool vcd_xml_master (const struct vcdxml_t *obj, 
-		     const char cue_fname[],
-		     const char bin_fname[],
-		     const char cdrdao_base[],
-		     bool sector_2336_flag);
+#include <libvcd/vcd_stream.h>
+#include <libvcd/vcd_image.h>
 
-#endif /* __VCD_XML_MASTER_H__ */
+VcdImageSink *
+vcd_image_sink_new_cdrdao (const char toc_fname[],
+			   const char img_basename[],
+			   bool sector_2336);
 
-
+#endif /* __VCD_IMAGE_CDRDAO_H__ */

@@ -89,6 +89,10 @@ _stat_size (void *user_data)
     {
       vcd_warn ("image file not multiple of blocksize (%d)", 
                 blocksize);
+      if (size % 2336 == 0)
+	vcd_warn ("this may be a 2336-type disc image");
+      else if (size % CDDA_SIZE == 0)
+	vcd_warn ("this may be a 2352-type disc image");
       /* exit (EXIT_FAILURE); */
     }
 

@@ -935,7 +935,7 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
 
   /* SEGMENTS */
 
-  n = 0;
+  n = 1;
   _VCD_LIST_FOREACH (node, obj->mpeg_segment_list)
     {
       mpeg_segment_t *segment = _vcd_list_node_data (node);
@@ -957,15 +957,16 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
           vcd_assert_not_reached ();
         }
 
-      vcd_assert (n < MAX_SEGMENTS);
       
-      snprintf (segment_pathname, sizeof (segment_pathname), fmt, n + 1);
+      snprintf (segment_pathname, sizeof (segment_pathname), fmt, n);
         
       _vcd_directory_mkfile (obj->dir, segment_pathname, segment->start_extent,
                              segment->info->packets * ISO_BLOCKSIZE,
                              true, fnum);
 
-      n++;
+      vcd_assert (n <= MAX_SEGMENTS);
+
+      n += segment->segment_count;
     }
 
   /* EXT files */
