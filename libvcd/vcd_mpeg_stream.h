@@ -141,7 +141,8 @@ vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps);
 /* gets the packet at given position */
 int
 vcd_mpeg_source_get_packet (VcdMpegSource *obj, unsigned long packet_no,
-			    void *packet_buf, struct vcd_mpeg_packet_flags *flags);
+			    void *packet_buf, struct vcd_mpeg_packet_flags *flags,
+                            bool fix_scan_info);
 
 void
 vcd_mpeg_source_close (VcdMpegSource *obj);

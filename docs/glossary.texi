@@ -19,10 +19,10 @@ compact disc
 digital versatile/video disc
 
 @item FSF
-free software foundation, @url{http://www.fsf.org/}
+free software foundation, @uref{http://www.fsf.org/}
 
 @item GNU
-@acronym{GNU} is not @acronym{UNIX}, @url{http://www.gnu.org/}
+@acronym{GNU} is not @acronym{UNIX}, @uref{http://www.gnu.org/}
 
 @item MPEG
 movie picture experts group
@@ -49,7 +49,7 @@ variable bit rate
 Video @acronym{CD}
 
 @item XML
-extensible markup language, @url{http://www.w3.org/XML/}
+extensible markup language, @uref{http://www.w3.org/XML/}
 
 @item XSVCD
 eXtended @acronym{SVCD}

@@ -95,6 +95,8 @@ bool vcd_xml_master (const struct vcdxml_t *obj, const char cue_fname[],
 	vcd_obj_set_param_bool (_vcd, VCD_PARM_SVCD_VCD3_MPEGAV, _value);
       else if (!strcmp (_option->name, OPT_RELAXED_APS))
 	vcd_obj_set_param_bool (_vcd, VCD_PARM_RELAXED_APS, _value);
+      else if (!strcmp (_option->name, OPT_UPDATE_SCAN_OFFSETS))
+	vcd_obj_set_param_bool (_vcd, VCD_PARM_UPDATE_SCAN_OFSSETS, _value);
       else
 	vcd_error ("unknown option name '%s'", _option->name);
     }  

@@ -84,8 +84,9 @@ instead of in the original English.
 * VideoCD @acronym{XML} Description::  
 * Examples::                    
 * Tips and Hints::              
+* Character Sets::              
 * Acronym Expansions::          
-* GNU GENERAL PUBLIC LICENSE::  
+* GNU General Public License::  
 
 @detailmenu
  --- The Detailed Node Listing ---
@@ -100,6 +101,7 @@ Video CD Concepts
 * Overview::                    
 * Anatomy of Video CDs::        
 * Known Video CD Flavors::      
+* The ISO9660 Track::           
 * Constraints on @acronym{MPEG} streams::  
 
 Known Video CD Flavors
@@ -110,11 +112,29 @@ Known Video CD Flavors
 * Super Video CD 1.0::          
 * Extended Super Video CD::     
 
+The ISO9660 Track
+
+* Primary Volume Descriptor::   
+* Directory Structure::         
+
+Directory Structure
+
+* @file{/VCD} & @file{/SVCD} Directory::  
+* @file{/MPEGAV} & @file{/MPEG2} Directory::  
+* @file{/CDDA} Directory::      
+* @file{/SEGMENT} Directory::   
+* @file{/EXT} Directory::       
+* @file{/CDI} Directory::       
+
 Constraints on @acronym{MPEG} streams
 
 * Video CD::                    
 * Super Video CD::              
 * Common Constraints::          
+
+Super Video CD
+
+* Scan Information Data::       
 
 Common Constraints
 
@@ -179,6 +199,12 @@ Examples
 Tips and Hints
 
 * SVCD Player Compatibility::   
+* Fast Forward & Fast Rewind with Super Video CDs::  
+
+Character Sets
+
+* ISO646 d-Characters::         
+* ISO646 a-Characters::         
 
 @end detailmenu
 @end menu
@@ -187,8 +213,8 @@ Tips and Hints
 @chapter Introduction
 
 This manual describes the @dfn{GNU VCDImager}@footnote{see
-@url{http://www.gnu.org/software/vcdimager/}} package, a toolset for
-operating on (Super) Video CD disc images.
+@uref{http://www.gnu.org/software/vcdimager/}} package, a toolset for
+authoring, disassembling and analyzing Video CDs and Super Video CDs.
 
 @menu
 * Supplied Tools::              
@@ -229,7 +255,7 @@ streams.
 The generated @acronym{CD-ROM} images created are suitable for being
 burnt on to @acronym{CD-R}, by the use of a CD-recording program which
 recognizes the @acronym{BIN/CUE}-format, such as cdrdao@footnote{see
-@url{http://www.ping.de/sites/daneb/cdrdao.html}}, for instance.
+@uref{http://www.ping.de/sites/daneb/cdrdao.html}}, for instance.
 
 @node Features,  , Supplied Tools, Introduction
 @section Features
@@ -241,17 +267,13 @@ rely, include:
 
 @itemize @bullet
 @item
-Video CD 1.1 image output support.
+Support for Video CD 1.1 and 2.0 disc format.
 
 @item
-Video CD 2.0 image output support.
-
-@item
-Super Video CD 1.0@footnote{based on the @acronym{IEC}62107
+Support for Super Video CD 1.0@footnote{based on the @acronym{IEC}62107
 specification with some extensions defined in the socalled `4C SVCD
 System Specification 1.0'. Some support for the @emph{deprecated}
-Chinese SVCD format is available through switches.} image output
-support.
+Chinese SVCD format is available through switches.} disc format.
 
 @item 
 Full @acronym{PBC} support, including customizable play lists, selection
@@ -292,7 +314,7 @@ Image input support for GNU/Linux ioctl()-based cdrom devices,
 This chapter gives some background information regarding the underlying
 Video CD technology.
 
-@strong{Warning:} All information this chapter is presented without
+@strong{Warning:} All information in this chapter is presented without
 any warranty of accuracy or correctness. You are encouraged to send
 corrections and improvements for this manual to
 @email{bug-vcdimager@@gnu.org}.
@@ -301,6 +323,7 @@ corrections and improvements for this manual to
 * Overview::                    
 * Anatomy of Video CDs::        
 * Known Video CD Flavors::      
+* The ISO9660 Track::           
 * Constraints on @acronym{MPEG} streams::  
 @end menu
 
@@ -321,7 +344,7 @@ In general, the layout of a Video CD is as follows:
 
 @itemize @bullet
 @item
-ISO9660 data track.
+ISO9660 data track. @xref{The ISO9660 Track}.
 
 @itemize @bullet 
 @item 
@@ -353,7 +376,7 @@ embedded in lead-in and lead-out empty sectors.
 
 @end itemize
 
-@node Known Video CD Flavors, Constraints on @acronym{MPEG} streams, Anatomy of Video CDs, Video CD Concepts
+@node Known Video CD Flavors, The ISO9660 Track, Anatomy of Video CDs, Video CD Concepts
 @section Known Video CD Flavors
 
 There are different Video CD flavours commonly used. The following
@@ -495,25 +518,119 @@ Just like the XVCD, and thus also known as @dfn{XSVCD}, this is not an
 official standard and may not work with all playing devices supporting
 SVCDs.
 
+@node The ISO9660 Track, Constraints on @acronym{MPEG} streams, Known Video CD Flavors, Video CD Concepts
 @section The ISO9660 Track
 
+@menu
+* Primary Volume Descriptor::   
+* Directory Structure::         
+@end menu
+
+@node Primary Volume Descriptor, Directory Structure, The ISO9660 Track, The ISO9660 Track
 @subsection Primary Volume Descriptor
 
+This ISO9660 sector located at sector @acronym{LSN} 16 contains general
+information about the ISO9660 filesystem, such as volume label, various
+IDs, filesystem size, etc.
+
+@node Directory Structure,  , Primary Volume Descriptor, The ISO9660 Track
 @subsection Directory Structure
 
+@menu
+* @file{/VCD} & @file{/SVCD} Directory::  
+* @file{/MPEGAV} & @file{/MPEG2} Directory::  
+* @file{/CDDA} Directory::      
+* @file{/SEGMENT} Directory::   
+* @file{/EXT} Directory::       
+* @file{/CDI} Directory::       
+@end menu
+
+@node @file{/VCD} & @file{/SVCD} Directory, @file{/MPEGAV} & @file{/MPEG2} Directory, Directory Structure, Directory Structure
 @subsubsection @file{/VCD} & @file{/SVCD} Directory
 
+This directories (@file{/SVCD} is used on Super Video CDs) contain file
+entries to structures contained in the information area of a (Super)
+Video CD.
+
+@table @file
+@item /VCD/INFO.VCD
+General video disc information (e.g. album id, size of volume set and
+number of @acronym{MPEG} items)
+
+@item /VCD/ENTRIES.VCD
+Entry point table.
+
+@item /VCD/LOT.VCD
+List ID Offset table into @file{PSD.VCD} (only allowed for Video CD 2.0
+discs with @acronym{PBC})
+
+@item /VCD/PSD.VCD
+Play sequence descriptor file (only allowed for Video CD 2.0 discs with
+@acronym{PBC}). This file may contain so-called lists (selection lists,
+play lists and end lists) which represent the @acronym{PBC}.
+
+@item /SVCD/INFO.SVD
+@itemx /SVCD/ENTRIES.SVCD
+@itemx /SVCD/LOT.SVD
+@itemx /SVCD/PSD.SVD
+These are the corresponding filenames on Super Video CDs, and fullfill
+the same purpose as those defined for the Video CD 2.0 format.
+
+@item /SVCD/SEARCH.DAT
+This mandatory file contains access point sector addresses.
+
+@item /SVCD/TRACKS.SVD
+In this file additional information (e.g. playing time and stream
+characteristics) about each sequence track is recorded.
+
+@end table
+
+@node @file{/MPEGAV} & @file{/MPEG2} Directory, @file{/CDDA} Directory, @file{/VCD} & @file{/SVCD} Directory, Directory Structure
 @subsubsection @file{/MPEGAV} & @file{/MPEG2} Directory
 
+This file contains file entries pointing to the sequence items contained
+in the tracks after the ISO9660 track.
+
+@node @file{/CDDA} Directory, @file{/SEGMENT} Directory, @file{/MPEGAV} & @file{/MPEG2} Directory, Directory Structure
 @subsubsection @file{/CDDA} Directory
 
+This file contains file entries pointing to optional CDDA tracks after
+the ISO9660 track. This feature is not available for Super Video CDs.
+
+@node @file{/SEGMENT} Directory, @file{/EXT} Directory, @file{/CDDA} Directory, Directory Structure
 @subsubsection @file{/SEGMENT} Directory
 
+This directory contains file entries to segment play items.
+
+@node @file{/EXT} Directory, @file{/CDI} Directory, @file{/SEGMENT} Directory, Directory Structure
 @subsubsection @file{/EXT} Directory
 
+@table @file
+@item /EXT/LOT_X.VCD
+@itemx /EXT/PSD_X.VCD
+These are only defined for Video CD 2.0, and contain the extended
+@acronym{PBC}, which adds area definitions for pointer based selection
+and/or highlighting of selection areas. (On Super Video CDs the extended
+@acronym{PBC} has been merged into the main @file{/SVCD/PSD.SVD} file)
+
+@item /EXT/SCANDATA.DAT
+This file is optional, and defined (but with a different format) for
+Video CD 2.0 and Super Video CD 1.0 formats. It contains playing time
+related access information very similar to the @file{/SVCD/SEARCH.DAT}
+file.
+
+@item /EXT/CAPTnn.DAT
+Closed caption data file entries.
+
+@end table
+
+@node @file{/CDI} Directory,  , @file{/EXT} Directory, Directory Structure
 @subsubsection @file{/CDI} Directory
 
-@node Constraints on @acronym{MPEG} streams,  , Known Video CD Flavors, Video CD Concepts
+This directory is provided for @acronym{CD-i} player applications. (Only
+usefull for Video CDs)
+
+@node Constraints on @acronym{MPEG} streams,  , The ISO9660 Track, Video CD Concepts
 @section Constraints on @acronym{MPEG} streams
 
 GNU VCDImager expects @acronym{MPEG} streams in a format suitable for
@@ -562,14 +679,25 @@ but then you are leaving the SVCD specification behind you...}:
 480 x 576 @@ 25 Hz (@acronym{PAL}).
 @end itemize
 
-There are a few other requirements imposed by the specification, like the
-need to encode scan information as user data in the picture layer of all
-intra coded pictures.
-
 The audio stream must be @acronym{MPEG}-1 layer II, with a bit-rate
-ranging from 32 to 384 kbps kbits/sec bit-rate with up to 2 stereo or 4
-mono channels, or 1 extended @acronym{MPEG}-1/2 multichannel (5+1)
-surround sound stream.
+ranging from 32 to 384 kbps kbits/sec bit-rate (i.e. @acronym{VBR}!) 
+with up to 2 stereo or 4 mono channels, or 1 extended @acronym{MPEG}-1/2
+multichannel (5+1) surround sound stream.
+
+@menu
+* Scan Information Data::       
+@end menu
+
+@node Scan Information Data,  , Super Video CD, Super Video CD
+@subsubsection Scan Information Data
+
+According to the specification, it is mandatory to encode scan
+information data into user data blocks in the picture layer of all intra
+coded picture. It may be used by some playing devices for implementing
+fast forward & fast reverse scanning.
+
+The already existing scan information data can be updated by enabling
+the @code{update scan offsets} option.
 
 @node Common Constraints,  , Super Video CD, Constraints on @acronym{MPEG} streams
 @subsection Common Constraints
@@ -734,7 +862,7 @@ vcdimager alias --cdi \
 @chapter VideoCD @acronym{XML} Description
 
 The @acronym{DTD} the @acronym{XML} description conforms to,, can be
-downloaded from @url{http://www.gnu.org/software/vcdimager/videocd.dtd}.
+downloaded from @uref{http://www.gnu.org/software/vcdimager/videocd.dtd}.
 
 @menu
 * @code{<videocd>} Root::       
@@ -808,7 +936,14 @@ Enables the use of the (deprecated) signature @samp{ENTRYSVD} instead of
 
 @item relaxed aps
 This controls whether @acronym{APS} constraints are strict or
-relaxed. Default: @samp{false}.
+relaxed. Default: @samp{false}. @xref{Access Point Sectors}. 
+
+@item update scan offsets
+This controls whether to update the scan data information contained in
+the @acronym{MPEG}-2 video streams@footnote{It is required, that the
+stream has already user data groups with scan information data, in order
+for this feature to work}. Default: @samp{false}. @xref{Scan Information
+Data}.
 
 @end table
 
@@ -1092,14 +1227,15 @@ $
 @end cartouche
 @end example
 
-@node Tips and Hints, Acronym Expansions, Examples, Top
+@node Tips and Hints, Character Sets, Examples, Top
 @appendix Tips and Hints
 
 @menu
 * SVCD Player Compatibility::   
+* Fast Forward & Fast Rewind with Super Video CDs::  
 @end menu
 
-@node SVCD Player Compatibility,  , Tips and Hints, Tips and Hints
+@node SVCD Player Compatibility, Fast Forward & Fast Rewind with Super Video CDs, Tips and Hints, Tips and Hints
 @appendixsec SVCD Player Compatibility
 
 If you have problems with your playing device failing to @emph{detect} a
@@ -1125,7 +1261,8 @@ of @acronym{SPI}s.
 
 @end enumerate
 
-@appendixsec Fast Forward/Fast Rewind with SVCD
+@node Fast Forward & Fast Rewind with Super Video CDs,  , SVCD Player Compatibility, Tips and Hints
+@appendixsec Fast Forward & Fast Rewind with Super Video CDs
 
 Because of the @acronym{VBR} encoding of the @acronym{MPEG}-2 streams on
 @acronym{SVCD}s, there's no fixed relation between sector index and
@@ -1145,12 +1282,20 @@ specification@footnote{@code{libvcd} warns if scan information is
 missing or syntactically wrong.}
 
 @item
-@emph{more reasons to follow}
+Some playing devices require a sequence header before each @acronym{GOP}
+header. @xref{Access Point Sectors}.
 
 @end itemize
 
+@node Character Sets, Acronym Expansions, Tips and Hints, Top
 @appendix Character Sets
 
+@menu
+* ISO646 d-Characters::         
+* ISO646 a-Characters::         
+@end menu
+
+@node ISO646 d-Characters, ISO646 a-Characters, Character Sets, Character Sets
 @appendixsec ISO646 d-Characters
 
 @example
@@ -1174,6 +1319,7 @@ e |         N
 f |         O _     
 @end example
 
+@node ISO646 a-Characters,  , ISO646 d-Characters, Character Sets
 @appendixsec ISO646 a-Characters
 
 @example
@@ -1197,22 +1343,24 @@ e |     . > N
 f |     / ? O _                    
 @end example
 
-@node Acronym Expansions, GNU GENERAL PUBLIC LICENSE, Tips and Hints, Top
+@node Acronym Expansions, GNU General Public License, Character Sets, Top
 @appendix Glossary
 
 @include glossary.texi
 
 @iftex
+@node GNU General Public License, , Acronym Expansions, Top
 @appendix GNU General Public License
-@end iftex
-@ifinfo
-@node GNU GENERAL PUBLIC LICENSE,  , Acronym Expansions, Top
-@appendix GNU GENERAL PUBLIC LICENSE
-@end ifinfo
-
 @center Version 2, June 1991
-
 @include gpl.texi
+@end iftex
+
+@ifinfo
+@node GNU General Public License, , Acronym Expansions, Top
+@appendix GNU GENERAL PUBLIC LICENSE
+@center Version 2, June 1991
+@include gpl.texi
+@end ifinfo
 
 @bye
 

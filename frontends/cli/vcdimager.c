@@ -37,6 +37,7 @@
 
 #include <libvcd/vcd.h>
 #include <libvcd/vcd_assert.h>
+#include <libvcd/vcd_util.h>
 #include <libvcd/vcd_bytesex.h>
 #include <libvcd/vcd_cd_sector.h>
 #include <libvcd/vcd_image_bincue.h>
@@ -81,6 +82,7 @@ static struct
 
   int sector_2336_flag;
   int broken_svcd_mode_flag;
+  int update_scan_offsets;
 
   int verbose_flag;
   int quiet_flag;
@@ -290,6 +292,9 @@ main (int argc, const char *argv[])
 
         {"broken-svcd-mode", '\0', POPT_ARG_NONE, &gl.broken_svcd_mode_flag, 0,
          "enable non-compliant compatibility mode for broken devices"},
+
+        {"update-scan-offsets", '\0', POPT_ARG_NONE, &gl.update_scan_offsets, 0,
+         "update scan data offsets in video mpeg2 stream"},
         
         {"sector-2336", '\0', POPT_ARG_NONE, &gl.sector_2336_flag, 0,
          "use 2336 byte sectors for output"},
@@ -432,9 +437,13 @@ main (int argc, const char *argv[])
 
   if (type_id == VCD_TYPE_SVCD)
     {
-      bool __tmp = gl.broken_svcd_mode_flag;
-      vcd_obj_set_param_bool (gl_vcd_obj, VCD_PARM_SVCD_VCD3_MPEGAV, __tmp);
-      vcd_obj_set_param_bool (gl_vcd_obj, VCD_PARM_SVCD_VCD3_ENTRYSVD, __tmp);
+      vcd_obj_set_param_bool (gl_vcd_obj, VCD_PARM_SVCD_VCD3_MPEGAV,
+                              gl.broken_svcd_mode_flag);
+      vcd_obj_set_param_bool (gl_vcd_obj, VCD_PARM_SVCD_VCD3_ENTRYSVD,
+                              gl.broken_svcd_mode_flag);
+
+      vcd_obj_set_param_bool (gl_vcd_obj, VCD_PARM_UPDATE_SCAN_OFSSETS, 
+                              gl.update_scan_offsets);
     }
 
   {

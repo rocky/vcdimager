@@ -30,6 +30,7 @@
 #include <libvcd/vcd_mpeg_stream.h>
 
 #include <libvcd/vcd_util.h>
+#include <libvcd/vcd_bytesex.h>
 #include <libvcd/vcd_data_structures.h>
 #include <libvcd/vcd_mpeg.h>
 #include <libvcd/vcd_logging.h>
@@ -235,8 +236,7 @@ vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps)
   if (!state.stream.scan_data && state.stream.version == MPEG_VERS_MPEG2)
     vcd_warn ("mpeg stream contained no scan information (user) data");
 
-  for(n = _vcd_list_begin (aps_list);
-      n; n = _vcd_list_node_next (n))
+  _VCD_LIST_FOREACH (n, aps_list)
     {
       struct aps_data *_data = _vcd_list_node_data (n);
       
@@ -287,9 +287,105 @@ vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps)
     }
 }
 
+static double
+_approx_pts (VcdList *aps_list, uint32_t packet_no)
+{
+  double retval = 0;
+  VcdListNode *node;
+
+  struct aps_data *_laps = NULL;
+
+  double last_pts_ratio = 0;
+
+  _VCD_LIST_FOREACH (node, aps_list)
+    {
+      struct aps_data *_aps = _vcd_list_node_data (node);
+
+      if (_laps)
+        {
+          long p = _aps->packet_no;
+          double t = _aps->timestamp;
+
+          p -= _laps->packet_no;
+          t -= _laps->timestamp;
+
+          last_pts_ratio = t / p;
+        }
+
+      if (_aps->packet_no >= packet_no)
+        break;
+      
+      _laps = _aps;
+    }
+
+  retval = packet_no;
+  retval -= _laps->packet_no;
+  retval *= last_pts_ratio;
+  retval += _laps->timestamp;
+
+  return retval;
+}
+
+void static
+_set_scan_msf (msf_t *_msf, long lsn)
+{
+  if (lsn == -1)
+    {
+      _msf->m = _msf->s = _msf->f = 0xff;
+      return;
+    }
+
+  lba_to_msf (lsn, _msf);
+  _msf->s |= 0x80;
+  _msf->f |= 0x80;
+}
+
+void static
+_fix_scan_info (struct vcd_mpeg_scan_data_t *scan_data_ptr,
+                unsigned packet_no, double pts, VcdList *aps_list)
+{
+  VcdListNode *node;
+  long _next = -1, _prev = -1, _forw = -1, _back = -1;
+
+  _VCD_LIST_FOREACH (node, aps_list)
+    {
+      struct aps_data *_aps = _vcd_list_node_data (node);
+
+      if (_aps->packet_no == packet_no)
+        continue;
+      else if (_aps->packet_no < packet_no)
+        {
+          _prev = _aps->packet_no;
+          
+          if (pts - _aps->timestamp < 10 && _back == -1)
+            _back = _aps->packet_no;
+        }
+      else if (_aps->packet_no > packet_no)
+        {
+          if (_next == -1)
+            _next = _aps->packet_no;
+
+          if (_aps->timestamp - pts < 10)
+            _forw = _aps->packet_no;
+        }
+    }
+
+  if (_back == -1)
+    _back = packet_no;
+
+  if (_forw == -1)
+    _forw = packet_no;
+
+  _set_scan_msf (&scan_data_ptr->prev_ofs, _prev);
+  _set_scan_msf (&scan_data_ptr->next_ofs, _next);
+  _set_scan_msf (&scan_data_ptr->back_ofs, _back);
+  _set_scan_msf (&scan_data_ptr->forw_ofs, _forw);
+}
+
 int
 vcd_mpeg_source_get_packet (VcdMpegSource *obj, unsigned long packet_no,
-			    void *packet_buf, struct vcd_mpeg_packet_flags *flags)
+			    void *packet_buf, struct vcd_mpeg_packet_flags *flags,
+                            bool fix_scan_info)
 {
   unsigned length;
   unsigned pos;
@@ -316,6 +412,7 @@ vcd_mpeg_source_get_packet (VcdMpegSource *obj, unsigned long packet_no,
   memset (&state, 0, sizeof (state));
   state.stream.seen_pts = true;
   state.stream.min_pts = obj->pts_offset;
+  state.stream.scan_data_warnings = VCD_MPEG_SCAN_DATA_WARNS + 1;
 
   pos = obj->_read_pkt_pos;
   pno = obj->_read_pkt_no;
@@ -331,7 +428,8 @@ vcd_mpeg_source_get_packet (VcdMpegSource *obj, unsigned long packet_no,
       
       vcd_data_source_read (obj->data_source, buf, read_len, 1);
 
-      pkt_len = vcd_mpeg_parse_packet (buf, read_len, false, &state);
+      pkt_len = vcd_mpeg_parse_packet (buf, read_len,
+                                       fix_scan_info, &state);
 
       vcd_assert (pkt_len > 0);
 
@@ -340,8 +438,24 @@ vcd_mpeg_source_get_packet (VcdMpegSource *obj, unsigned long packet_no,
 	  obj->_read_pkt_pos = pos;
 	  obj->_read_pkt_no = pno;
 
+          if (fix_scan_info
+              && state.packet.scan_data_ptr
+              && obj->info.version == MPEG_VERS_MPEG2)
+            {
+              double _pts;
+
+              if (state.packet.has_pts)
+                _pts = state.packet.pts;
+              else
+                _pts = _approx_pts (obj->info.aps_list, packet_no);
+
+              _fix_scan_info (state.packet.scan_data_ptr, packet_no, 
+                              _pts, obj->info.aps_list);
+            }
+
 	  memset (packet_buf, 0, 2324);
 	  memcpy (packet_buf, buf, pkt_len);
+
 
           if (flags)
             {

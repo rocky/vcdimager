@@ -81,6 +81,7 @@ struct _VcdObj {
   bool svcd_vcd3_mpegav;
   bool svcd_vcd3_entrysvd;
 
+  bool update_scan_offsets;
   bool relaxed_aps;
 
   unsigned pre_track_gap;

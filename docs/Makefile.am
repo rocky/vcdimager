@@ -7,6 +7,9 @@ vcdimager.ps.gz: vcdimager.ps
 vcdimager.pdf: vcdimager.texi
 	texi2pdf $<
 
+vcdimager.html: vcdimager.texi
+	texi2html $<
+
 man_MANS = vcdimager.1
 
 EXTRA_DIST = $(man_MANS)

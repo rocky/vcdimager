@@ -27,6 +27,17 @@
 #include <libvcd/vcd_mpeg_stream.h>
 #include <libvcd/vcd_logging.h>
 
+struct vcd_mpeg_scan_data_t {
+  uint8_t tag        GNUC_PACKED;
+  uint8_t len        GNUC_PACKED;
+  msf_t prev_ofs     GNUC_PACKED;
+  msf_t next_ofs     GNUC_PACKED;
+  msf_t back_ofs     GNUC_PACKED;
+  msf_t forw_ofs     GNUC_PACKED;
+};
+
+#define VCD_MPEG_SCAN_DATA_WARNS 8
+
 typedef struct {
   struct {
     bool video[3];
@@ -37,6 +48,8 @@ typedef struct {
     bool pem;
     bool zero;
     bool system_header;
+
+    struct vcd_mpeg_scan_data_t *scan_data_ptr; /* points into actual packet memory! */
 
     enum aps_t {
       APS_NONE = 0,

@@ -216,6 +216,7 @@ main (int argc, const char *argv[])
   char *xml_fname = strdup (DEFAULT_XML_FNAME);
   char *type_str = strdup (DEFAULT_TYPE);
   int broken_svcd_mode_flag = 0;
+  int update_scan_offsets_flag = 0;
   int nopbc_flag = 0;
 
   vcd_xml_init (&obj);
@@ -271,6 +272,9 @@ main (int argc, const char *argv[])
 
         {"broken-svcd-mode", '\0', POPT_ARG_NONE, &broken_svcd_mode_flag, 0,
          "enable non-compliant compatibility mode for broken devices"},
+
+        {"update-scan-offsets", '\0', POPT_ARG_NONE, &update_scan_offsets_flag, 0,
+         "update scan data offsets in video mpeg2 stream"},
 
         {"nopbc", '\0', POPT_ARG_NONE, &nopbc_flag, 0, "don't create PBC"},
         
@@ -432,6 +436,17 @@ main (int argc, const char *argv[])
       _pbc->rejected = true;
 
       _vcd_list_append (obj.pbc_list, _pbc);
+    }
+
+  if (obj.vcd_type == VCD_TYPE_SVCD 
+      && update_scan_offsets_flag)
+    {
+      struct option_t *_opt = _vcd_malloc (sizeof (struct option_t));
+      
+      _opt->name = strdup (OPT_UPDATE_SCAN_OFFSETS);
+      _opt->value = strdup ("true");
+
+      _vcd_list_append (obj.option_list, _opt);
     }
 
   if (obj.vcd_type == VCD_TYPE_SVCD 

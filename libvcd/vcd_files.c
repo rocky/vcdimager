@@ -146,8 +146,12 @@ set_entries_vcd (VcdObj *obj, void *buf)
           lba_to_msf(lsect + _closest_aps.packet_no + 150,
                      &(entries_vcd.entry[idx].msf));
 
-          vcd_debug ("requested entry point at %f, closest possible entry point at %f",
-                     _entry->time, _closest_aps.timestamp);
+          vcd_log ((fabs (_closest_aps.timestamp - _entry->time) > 1
+                    ? LOG_WARN
+                    : LOG_DEBUG),
+                   "requested entry point at %f, "
+                   "closest possible entry point at %f",
+                   _entry->time, _closest_aps.timestamp);
 
           idx++;
         }
@@ -297,7 +301,7 @@ set_info_vcd(VcdObj *obj, void *buf)
             _set_bit(info_vcd.pal_flags, n);
           else if (track->info->vsize == 288 || track->info->vsize == 576)
             {
-              vcd_warn ("INFO.{VCD,SVD}: assuming PAL resolution type for track #%d"
+              vcd_warn ("INFO.{VCD,SVD}: assuming PAL-type resolution for track #%d"
                         " -- are we creating a X(S)VCD?", n);
               _set_bit(info_vcd.pal_flags, n);
             }
@@ -396,13 +400,13 @@ set_tracks_svd (VcdObj *obj, void *buf)
         default:
           if (track->info->vsize == 240 || track->info->vsize == 480)
             {
-              vcd_warn ("TRACKS.SVD: assuming NTSC resolution type for track #%d"
+              vcd_warn ("TRACKS.SVD: assuming NTSC-type resolution for track #%d"
                         " -- are we creating a X(S)VCD?", n);
               tracks_svd2->contents[n].video = 0x03;
             }
           else if (track->info->vsize == 288 || track->info->vsize == 576)
             {
-              vcd_warn ("TRACKS.SVD: assuming PAL resolution type for track #%d"
+              vcd_warn ("TRACKS.SVD: assuming PAL-type resolution for track #%d"
                         " -- are we creating a X(S)VCD?", n);
               tracks_svd2->contents[n].video = 0x07;
             }

@@ -580,6 +580,16 @@ vcd_obj_set_param_bool (VcdObj *obj, vcd_parm_t param, bool arg)
         vcd_error ("parameter not applicable for vcd type");
       break;
 
+    case VCD_PARM_UPDATE_SCAN_OFSSETS:
+      if (obj->type == VCD_TYPE_SVCD)
+        {
+          obj->update_scan_offsets = arg ? true : false;
+          vcd_debug ("changing 'update scan offsets' to %d", obj->update_scan_offsets);
+        }
+      else
+        vcd_error ("parameter not applicable for vcd type");
+      break;
+
     default:
       vcd_assert_not_reached ();
       break;
@@ -1262,7 +1272,7 @@ _write_vcd_iso_track (VcdObj *obj)
               bool _need_eor = false;
 
               vcd_mpeg_source_get_packet (_segment->source, packet_no,
-                                          buf, &pkt_flags);
+                                          buf, &pkt_flags, false);
 
               sm = SM_FORM2 | SM_REALT;
               cn = CN_OTHER;
@@ -1474,7 +1484,8 @@ _write_sectors (VcdObj *obj, int track_idx)
     struct vcd_mpeg_packet_flags pkt_flags;
     bool set_trigger = false;
 
-    vcd_mpeg_source_get_packet (track->source, n, buf, &pkt_flags);
+    vcd_mpeg_source_get_packet (track->source, n, buf, &pkt_flags, 
+                                obj->update_scan_offsets);
 
     while (pause_node)
       {
@@ -1619,9 +1630,16 @@ vcd_obj_begin_output (VcdObj *obj)
     vcd_error ("image too big (%d sectors > %d sectors)", 
                image_size, CD_MAX_SECTORS);
 
-  if (image_size > CD_74MIN_SECTORS)
-    vcd_warn ("generated image (%d sectors) may not fit "
-              "on 74min CDRs (%d sectors)", image_size, CD_74MIN_SECTORS);
+  {
+    char *_tmp = _vcd_lba_to_msf_str (image_size);
+
+    if (image_size > CD_74MIN_SECTORS)
+      vcd_warn ("generated image (%d sectors [%s]) may not fit "
+                "on 74min CDRs (%d sectors)", 
+                image_size, _tmp, CD_74MIN_SECTORS);
+
+    free (_tmp);
+  }
 
   return image_size;
 }
@@ -1740,6 +1758,9 @@ vcd_obj_write_image (VcdObj *obj, VcdImageSink *image_sink,
 
     if (_write_vcd_iso_track (obj))
       return 1;
+
+    if (obj->update_scan_offsets)
+      vcd_info ("'update scan offsets' option enabled for the following tracks!");
 
     for (track = 0;track < _vcd_list_length (obj->mpeg_sequence_list);track++)
       {

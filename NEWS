@@ -2,6 +2,14 @@ $Id$
 
 see ChangeLog for more information
 
+version 0.7.5 (unstable/development)
+====================================
+2001-06-..
+
+* new 'update scan offsets' option for fixing scan offset data in
+  video mpeg2 streams
+* more verbose info on mpeg errors
+
 version 0.7.4 (unstable/development)
 ====================================
 2001-06-07

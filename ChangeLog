@@ -1,3 +1,21 @@
+2001-06-11  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* make logging output a bit more readable
+
+	* libvcd/vcd.h: make scan info fixup optional, with VCD_PARM_UPDATE_SCAN_OFSSETS
+
+2001-06-09  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_mpeg_stream.c: experimental scan information data fixup
+
+2001-06-08  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_files.c (set_entries_vcd): warn if entry points 
+		displaced more than 1 sec, otherwise just debug
+
+	* libvcd/vcd_mpeg.c (vcd_mpeg_parse_packet): decrement packet count
+		for truncated or overlengthy packet.
+
 2001-06-07  Herbert Valerio Riedel  <hvr@gnu.org>
 
  	* configure.in: bumped version up to 0.7.4

@@ -249,12 +249,12 @@ _check_scan_data (const char str[], const msf_t *msf,
 {
   char tmp[16];
 
-  if (state->stream.scan_data_warnings > 20)
+  if (state->stream.scan_data_warnings > VCD_MPEG_SCAN_DATA_WARNS)
     return;
 
-  if (state->stream.scan_data_warnings == 20)
+  if (state->stream.scan_data_warnings == VCD_MPEG_SCAN_DATA_WARNS)
     {
-      vcd_warn ("mpeg user scan data: from now on, scan information data errors will not be reported anymore");
+      vcd_warn ("mpeg user scan data: from now on, scan information data errors will not be reported anymore -- consider enabling the 'update scan offsets' option");
       state->stream.scan_data_warnings++;
       return;
     }      
@@ -295,7 +295,8 @@ _check_scan_data (const char str[], const msf_t *msf,
 }
 
 static void
-_parse_user_data (uint8_t streamid, const void *buf, unsigned len,
+_parse_user_data (uint8_t streamid, const void *buf, unsigned len, 
+                  unsigned offset,
                   VcdMpegStreamCtx *state)
 {
   unsigned pos = 0;
@@ -308,21 +309,29 @@ _parse_user_data (uint8_t streamid, const void *buf, unsigned len,
   if (state->stream.version != MPEG_VERS_MPEG2)
     return;
 
-  while (pos < len && udg->tag)
+  while (pos + 2 < len && udg->tag)
     {
       if (pos + udg->len >= len)
+        break;
+
+      if (udg->len < 2)
         break;
 
       switch (udg->tag)
         {
         case 0x10: /* scan information */
-          vcd_assert (udg->len == 14);
-          _check_scan_data ("previous_I_offset", (msf_t *) &udg->data[0], state);
-          _check_scan_data ("next_I_offset", (msf_t *) &udg->data[3], state);
-          _check_scan_data ("backward_I_offset", (msf_t *) &udg->data[6], state);
-          _check_scan_data ("forward_I_offset", (msf_t *) &udg->data[9], state);
-
-          state->stream.scan_data++;
+          {
+            struct vcd_mpeg_scan_data_t *usdi = (void *) udg;
+            vcd_assert (sizeof (struct vcd_mpeg_scan_data_t) == 14);
+            vcd_assert (usdi->len == 14);
+            _check_scan_data ("previous_I_offset", &usdi->prev_ofs, state);
+            _check_scan_data ("next_I_offset    ", &usdi->next_ofs, state);
+            _check_scan_data ("backward_I_offset", &usdi->back_ofs, state);
+            _check_scan_data ("forward_I_offset ", &usdi->forw_ofs, state);
+          
+            state->packet.scan_data_ptr = usdi;
+            state->stream.scan_data++;
+          }
           break;
 
         case 0x11: /* closed caption data */
@@ -538,7 +547,7 @@ _analyze_video_pes (uint8_t streamid, const uint8_t *buf, int len, bool only_pts
 	  pos += 4;
           if (pos + 4 > len)
             break;
-          _parse_user_data (streamid, buf + pos, len - pos, state);
+          _parse_user_data (streamid, buf + pos, len - pos, pos, state);
 	  break;
 
 	case MPEG_EXT_CODE:
@@ -650,8 +659,14 @@ vcd_mpeg_parse_packet (const void *_buf, unsigned buflen, bool parse_pes,
     }
 
   if (vcd_bitvec_peek_bits32 (buf, 0) != MPEG_PACK_HEADER_CODE)
-    vcd_error ("mpeg scan: pack header code expected, but 0x%8.8x found (buflen = %d)",
-               vcd_bitvec_peek_bits32 (buf, 0), buflen);
+    {
+      vcd_warn ("mpeg scan: pack header code (0x%8.8x) expected, "
+                "but 0x%8.8x found (buflen = %d)",
+                MPEG_PACK_HEADER_CODE,
+                vcd_bitvec_peek_bits32 (buf, 0), buflen);
+      ctx->stream.packets--;
+      return 0;
+    }
 
   pos = 0;
   while (pos + 4 <= buflen)
@@ -725,6 +740,7 @@ vcd_mpeg_parse_packet (const void *_buf, unsigned buflen, bool parse_pes,
                         " (pos = %d + size = %d > buflen = %d) "
                         "-- stream may be truncated or packet length > 2324 bytes!",
                         pos, size, buflen);
+              ctx->stream.packets--;
               return 0;
             }
 
