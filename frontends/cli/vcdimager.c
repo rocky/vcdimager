@@ -39,7 +39,6 @@
 #define DEFAULT_CUE_FILE      "videocd.cue"
 #define DEFAULT_BIN_FILE      "videocd.bin"
 #define DEFAULT_VOLUME_LABEL  "VideoCD"
-#define DEFAULT_CDI_DIR       CDIDIR
 
 /* global stuff kept as a singleton makes for less typing effort :-) 
  */
@@ -47,9 +46,6 @@ static struct {
   gchar *image_fname;
   gchar *cue_fname;
   gchar **track_fnames;
-
-  gchar *cdi_path;
-  gboolean disable_cdi_flag;
 
   gchar *add_files_path;
 
@@ -69,17 +65,16 @@ static struct {
 
 static VcdObj *gl_vcd_obj = NULL;
 
-
 static int 
-_progress_callback(long sectors_written, long total_sectors, 
-		   int in_track, int total_tracks, void *user_data)
+_progress_callback(const progress_info_t *info, void *user_data)
 {
-  g_print("#%d/%d: %ld/%ld (%2.0f%%)\r", 
-	  in_track, total_tracks, sectors_written, total_sectors, (double)sectors_written/total_sectors*100);
+  g_print ("#%d/%d: %ld/%ld (%2.0f%%)\r", 
+	   info->in_track, info->total_tracks, info->sectors_written, 
+	   info->total_sectors, 
+	   (double) info->sectors_written / info->total_sectors * 100);
 
   return 0;
 }
-
 
 int
 main(int argc, const char *argv[])
@@ -88,13 +83,11 @@ main(int argc, const char *argv[])
   
   g_set_prgname(argv[0]);
 
-
   gl.cue_fname = DEFAULT_CUE_FILE;
   gl.image_fname = DEFAULT_BIN_FILE;
   gl.track_fnames = NULL;
 
   gl.volume_label = DEFAULT_VOLUME_LABEL;
-  gl.cdi_path = DEFAULT_CDI_DIR;
 
   {
     const gchar **args = NULL;
@@ -111,15 +104,6 @@ main(int argc, const char *argv[])
       { "bin-file", 'b', POPT_ARG_STRING, &gl.image_fname, 0, 
 	"specify bin file for output (default: '" DEFAULT_BIN_FILE "')", "FILE" },
       
-      { "cdi-dir", 0, POPT_ARG_STRING, &gl.cdi_path, 0, 
-	"find CD-i support files in DIR (default: `" DEFAULT_CDI_DIR "')", "DIR" },
-
-      { "disable-cdi", 'e', POPT_ARG_NONE, &gl.disable_cdi_flag, 0, 
-	"disable CD-i support (enabled by default)" },
-
-      { "add-files", 0, POPT_ARG_STRING, &gl.add_files_path, 0,
-	"add files from given DIR directory to ISO9660 fs track", "DIR" },
-
       { "sector-2336", 0, POPT_ARG_NONE, &gl.sector_2336_flag, 0,
 	"use 2336 byte sectors for output" },
 
@@ -172,25 +156,6 @@ main(int argc, const char *argv[])
   gl_vcd_obj = vcd_obj_new(VCD_TYPE_VCD2);
 
   vcd_obj_set_param(gl_vcd_obj, VCD_PARM_VOLUME_LABEL, gl.volume_label);
-
-  if(!gl.disable_cdi_flag) {
-    VcdDataSource *image_file, *text_file, *vcd_file;
-    gchar *fname = NULL;
-
-    fname = g_strconcat(gl.cdi_path, "/", "cdi_imag.rtf", NULL);
-    image_file = vcd_data_source_new_stdio(fname);
-    g_free(fname);
-
-    fname = g_strconcat(gl.cdi_path, "/", "cdi_text.fnt", NULL);
-    text_file = vcd_data_source_new_stdio(fname);
-    g_free(fname);
-
-    fname = g_strconcat(gl.cdi_path, "/", "cdi_vcd.app", NULL);
-    vcd_file = vcd_data_source_new_stdio(fname);
-    g_free(fname);
-
-    vcd_obj_set_cdi_input(gl_vcd_obj, image_file, text_file, vcd_file);
-  }
 
   for(n=0;gl.track_fnames[n] != NULL;n++)
     vcd_obj_append_mpeg_track(gl_vcd_obj,

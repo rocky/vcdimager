@@ -1,3 +1,14 @@
+2000-11-10  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* frontends/cli/vcdimager.c: removed cdi support
+
+	* libvcd/vcd.c: reformating, removed removed vcd_obj_set_cdi_input(),
+	(_callback_wrapper): adapted to new progress_callback_t prototype
+
+	* libvcd/vcd.h: added comments, removed vcd_obj_set_cdi_input(),
+		changed progress_callback_t signature, added progress_info_t 
+		struct
+
 2000-11-09  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd.c (_write_sectors): s/vcd_warning/vcd_warn/
