@@ -1,5 +1,12 @@
 2000-12-23  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* configure.in: bumped version up to 0.5.9alpha1
+
+	* libvcd/vcd.c: made app id customizable,
+		added defaults for non set params
+
+	* libvcd/vcd_iso9660.c (set_iso_pvd): made app id customizable
+
 	* frontends/cli/vcdrip.c: fixed msf conversion, removed 
 		directory source option, #ifdef'ed linux specific stuff
 

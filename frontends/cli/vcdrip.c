@@ -98,7 +98,7 @@ _get_image_size_file (FILE *fd)
 
   if (size % CDDA_SIZE)
     {
-      fprintf (stderr, "file not multiple of blocksize\n");
+      vcd_warn ("image file not multiple of blocksize");
       exit (EXIT_FAILURE);
     }
 
@@ -109,6 +109,24 @@ _get_image_size_file (FILE *fd)
 
 
 /* device */
+
+static void
+_hexdump_full (FILE *fd, char *buf, int len)
+{
+  int i;
+
+  for (i = 0; i < len; i++)
+    {
+      if (i && i % 16)
+        fprintf (fd, "\n");
+
+      if (i % 16)
+        fprintf (fd, "%.4x  ", i);
+
+      fprintf (fd, "%.2x ", buf[i]);
+    }
+  fprintf (fd, "\n");
+}
 
 static int
 _read_mode2_sector_device (FILE *fd, void *data, uint32_t lba, bool form2)
@@ -123,20 +141,21 @@ _read_mode2_sector_device (FILE *fd, void *data, uint32_t lba, bool form2)
       msf_t _msf;
       
       lba_to_msf (lba + 150, &_msf);
+      msf->cdmsf_min0 = from_bcd8(_msf.m);
+      msf->cdmsf_sec0 = from_bcd8(_msf.s);
+      msf->cdmsf_frame0 = from_bcd8(_msf.f);
 
-      msf->cdmsf_min0 = _msf.m;
-      msf->cdmsf_sec0 = _msf.s;
-      msf->cdmsf_frame0 = _msf.f;
-
-      if (!msf->cdmsf_frame0)
-        fprintf (stdout, "debug: %2.2d:%2.2d:%2.2d\r",
-                 msf->cdmsf_min0, msf->cdmsf_sec0, msf->cdmsf_frame0);
-
+      /* if (!msf->cdmsf_frame0) */
+      fprintf (stdout, "reading %2.2d:%2.2d:%2.2d   \r",
+               msf->cdmsf_min0, msf->cdmsf_sec0, msf->cdmsf_frame0);
+      
       if (ioctl (fileno (fd), CDROMREADMODE2, &buf) == -1)
         {
           perror ("ioctl()");
           exit (EXIT_FAILURE);
         }
+
+      memcpy (data, buf, M2RAW_SIZE);
     }
   else
     {
@@ -511,6 +530,15 @@ rip (const char device_fname[])
 
   gl_read_mode2_sector (fd, &entries, ENTRIES_VCD_SECTOR, false);
 
+  if (!strncmp (entries.ID, ENTRIES_ID_VCD, sizeof (entries.ID)))
+    vcd_debug ("found ENTRIES.VCD");
+  else if (!strncmp (entries.ID, "ENTRYSVD", sizeof (entries.ID)))
+    vcd_warn ("found (non-compliant) SVCD ENTRIES.VCD signature");
+  else
+    {
+      vcd_error ("ENTRIES.VCD signature not found");
+    }
+
   for (i = 0; i < UINT16_FROM_BE (entries.tracks); i++)
     {
       uint32_t startlba = msf_to_lba (&(entries.entry[i].msf)) - 150;
@@ -524,7 +552,7 @@ rip (const char device_fname[])
 
       snprintf (fname, sizeof (fname), "track_%2.2d.mpg", i);
 
-      fprintf (stdout, "%s: %d -> %d\n", fname, startlba, endlba);
+      vcd_info ("%s: %d -> %d", fname, startlba, endlba);
 
       if (!(outfd = fopen (fname, "wb")))
         {
@@ -550,7 +578,7 @@ rip (const char device_fname[])
             {
               if (!in_data)
                 {
-                  fprintf (stdout, " stream leadin at %d\n", pos);
+                  vcd_debug (" stream leadin at %d", pos);
                   in_data = true;
                 }
             }
@@ -558,12 +586,14 @@ rip (const char device_fname[])
             {
               if (in_data)
                 {
-                  fprintf (stdout, " stream leadout at %d\n", pos);
+                  vcd_debug (" stream leadout at %d", pos);
                   in_data = false;
                 }
               
               continue;
             }
+
+          assert (in_data);
 
           fwrite (buf.data, 2324, 1, outfd);
 
@@ -589,8 +619,7 @@ static enum
 {
   SOURCE_NONE = 0,
   SOURCE_FILE = 1,
-  SOURCE_DIRECTORY = 2,
-  SOURCE_DEVICE = 3
+  SOURCE_DEVICE = 2
 }
 gl_source_type = SOURCE_NONE;
 
@@ -599,6 +628,7 @@ static enum
   OP_NOOP = 0,
   OP_DUMP = 1 << 4,
   OP_RIP = 1 << 5,
+  OP_VERSION = 1 << 6
 }
 gl_operation = OP_NOOP;
 
@@ -625,7 +655,7 @@ main (int argc, const char *argv[])
     {"rip", '\0', POPT_ARG_NONE, NULL, OP_RIP,
      "rip data tracks"},
 
-    {"version", 'V', POPT_ARG_NONE, NULL, 4,
+    {"version", 'V', POPT_ARG_NONE, NULL, OP_VERSION,
      "display version and copyright information and exit"},
     POPT_AUTOHELP {NULL, 0, 0, NULL, 0}
   };
@@ -637,7 +667,7 @@ main (int argc, const char *argv[])
   while ((opt = poptGetNextOpt (optCon)) != -1)
     switch (opt)
       {
-      case 0:
+      case OP_VERSION:
         fprintf (stdout, "GNU VCDRip " VERSION "\n\n"
                  "Copyright (c) 2000 Herbert Valerio Riedel <hvr@gnu.org>\n\n"
                  "VCDImager may be distributed under the terms of the GNU General Public Licence;\n"
@@ -646,7 +676,6 @@ main (int argc, const char *argv[])
         exit (EXIT_SUCCESS);
         break;
       case SOURCE_FILE:
-      case SOURCE_DIRECTORY:
       case SOURCE_DEVICE:
         if (gl_source_type != SOURCE_NONE)
           {
@@ -668,28 +697,18 @@ main (int argc, const char *argv[])
 
   if (poptGetArgs (optCon) != NULL)
     {
-      fprintf (stderr, "error - no arguments expected!\n");
-      exit (EXIT_FAILURE);
-    }
-
-  if (gl_operation == OP_RIP && gl_source_type == SOURCE_DIRECTORY)
-    {
-      fprintf (stderr, "ripping from directory source not supported\n");
+      fprintf (stderr, "error - no arguments expected! - try --help\n");
       exit (EXIT_FAILURE);
     }
 
   if (gl_operation == OP_NOOP)
     {
-      fprintf (stderr, "no operation requested -- nothing to do\n");
+      fprintf (stderr, "no operation requested, nothing to do - try --help\n");
       exit (EXIT_FAILURE);
     }
 
   switch (gl_source_type)
     {
-    case SOURCE_DIRECTORY:
-      fprintf (stderr, "source type not implemented yet!\n");
-      exit (EXIT_FAILURE);
-      break;
     case SOURCE_DEVICE:
       gl_get_image_size = _get_image_size_device;
       gl_read_mode2_sector = _read_mode2_sector_device;

@@ -1,12 +1,12 @@
 AC_REVISION([$Id$])dnl
 AC_INIT(libvcd/vcd.h)
-AM_INIT_AUTOMAKE(vcdimager, 0.5.1)
+AM_INIT_AUTOMAKE(vcdimager, 0.5.9alpha1)
 AM_MAINTAINER_MODE
 
 AM_SANITY_CHECK
 AM_ACLOCAL_INCLUDE(frontends/gnome/macros)
 
-dnl
+dnl conditionally built frontends
 
 AC_ARG_WITH(gnome-frontend,
 	[  --with-gnome-frontend   enable gnome frontend (not enabled by default)], 

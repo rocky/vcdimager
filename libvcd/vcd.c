@@ -219,6 +219,9 @@ vcd_obj_new (vcd_type_t vcd_type)
 
   new_obj = _vcd_malloc (sizeof (VcdObj));
 
+  new_obj->iso_volume_label = strdup ("");
+  new_obj->iso_application_id = strdup ("");
+
   new_obj->custom_file_list = _vcd_list_new ();
 
   new_obj->type = vcd_type;
@@ -398,6 +401,9 @@ vcd_obj_destroy (VcdObj *obj)
   assert (obj != NULL);
   assert (!obj->in_output);
 
+  free (obj->iso_volume_label);
+  free (obj->iso_application_id);
+
   for(node = _vcd_list_begin (obj->custom_file_list);
       node;
       node = _vcd_list_node_next (node))
@@ -476,7 +482,12 @@ vcd_obj_set_param (VcdObj *obj, vcd_parm_t param, const void *arg)
 
   switch (param) {
   case VCD_PARM_VOLUME_LABEL:
+    free (obj->iso_volume_label);
     obj->iso_volume_label = strdup ((const char *)arg);
+    break;
+  case VCD_PARM_APPLICATION_ID:
+    free (obj->iso_application_id);
+    obj->iso_application_id = strdup ((const char *)arg);
     break;
   case VCD_PARM_SEC_TYPE:
     switch (*(const int *)arg) {
@@ -601,7 +612,11 @@ _finalize_vcd_iso_track (VcdObj *obj)
       uint32_t rc = _vcd_salloc (obj->iso_bitmap, n,1);
       /* assert(rc == SECTOR_NIL); */
       if (rc != SECTOR_NIL)
-        vcd_warn ("blanking... %d", rc);
+        {
+#if 0
+          vcd_debug ("blanking... %d", rc);
+#endif
+        }
     }
 
   switch (obj->type) {
@@ -865,7 +880,9 @@ _write_vcd_iso_track (VcdObj *obj)
       
   /* generate PVD and EVD at last... */
   set_iso_pvd (_dict_get_bykey (obj, "pvd")->buf,
-               obj->iso_volume_label, obj->iso_size, 
+               obj->iso_volume_label, 
+               obj->iso_application_id, 
+               obj->iso_size, 
                _dict_get_bykey (obj, "dir")->buf, 
                _dict_get_bykey (obj, "ptl")->sector,
                _dict_get_bykey (obj, "ptm")->sector,

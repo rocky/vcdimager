@@ -4,7 +4,7 @@
 %define  RELEASE 1
 %define  rel     %{?CUSTOM_RELEASE} %{!?CUSTOM_RELEASE:%RELEASE}
 
-Summary:        VideoCD (pre-)mastering tool
+Summary:        VideoCD (pre-)mastering and ripping tool
 Name:           @PACKAGE@
 Version:        @VERSION@
 Release:        %rel
@@ -14,10 +14,15 @@ Packager:       Herbert Valerio Riedel <hvr@gnu.org>
 Source:         http://www.gnu.org/pub/gnu/%{name}/%{name}-%{version}.tar.gz
 URL:            http://www.gnu.org/software/vcdimager/
 BuildRoot:      %{_tmppath}/%{name}-%{version}-root
-Requires:       glib
 
-%description
-VCDImager allows you to create VideoCD BIN/CUE CD Images from mpeg files which can be burned with cdrdao or any other program capable of burning BIN/CUE files.
+%description 
+VCDImager allows you to create VideoCD BIN/CUE CD images from mpeg
+files which can be burned with cdrdao or any other program capable of
+burning BIN/CUE files.
+
+VCDRip, which comes with VCDImager, does the reverse operation. That
+is, ripping mpeg streams from images (and already burned VideoCDs)
+and showing some information about the VideoCD.
 
 %prep
 %setup -q
@@ -42,11 +47,16 @@ rm -rf "$RPM_BUILD_ROOT"
 %files
 %defattr(-, root, root)
 %doc AUTHORS COPYING ChangeLog INSTALL NEWS README
+%{_bindir}/vcdrip
 %{_bindir}/vcdimager
 %{_infodir}/vcdimager.info*
 %{_mandir}/man1/*
 
 %changelog
+* Sat Dec 23 2000 Herbert Valerio Riedel <hvr@gnu.org>
+- added vcdrip
+- removed glib dependancy
+
 * Sat Aug 26 2000 Herbert Valerio Riedel <hvr@gnu.org>
 - spec file improvements
 

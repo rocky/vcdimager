@@ -46,6 +46,7 @@ struct _VcdObj {
 
   unsigned iso_size;
   char *iso_volume_label;
+  char *iso_application_id;
 
   /* input */
   VcdList *mpeg_track_list; /* mpeg_track_t */

@@ -35,10 +35,11 @@
 #include "vcd_cd_sector.h"
 
 /* defaults */
-#define DEFAULT_CUE_FILE      "videocd.cue"
-#define DEFAULT_BIN_FILE      "videocd.bin"
-#define DEFAULT_VOLUME_LABEL  "VideoCD"
-#define DEFAULT_TYPE          "vcd2"
+#define DEFAULT_CUE_FILE       "videocd.cue"
+#define DEFAULT_BIN_FILE       "videocd.bin"
+#define DEFAULT_VOLUME_LABEL   "VideoCD"
+#define DEFAULT_APPLICATION_ID ""
+#define DEFAULT_TYPE           "vcd2"
 
 /* global stuff kept as a singleton makes for less typing effort :-) 
  */
@@ -59,6 +60,7 @@ static struct
   char *add_files_path;
 
   const char *volume_label;
+  const char *application_id;
 
   int sector_2336_flag;
 
@@ -145,6 +147,7 @@ main (int argc, const char *argv[])
   gl.type = DEFAULT_TYPE;
 
   gl.volume_label = DEFAULT_VOLUME_LABEL;
+  gl.application_id = DEFAULT_APPLICATION_ID;
 
   gl.default_vcd_log_handler = vcd_log_set_handler (_vcd_log_handler);
 
@@ -164,8 +167,12 @@ main (int argc, const char *argv[])
          "select VideoCD type ('vcd11', 'vcd2' or 'svcd') (default: '" DEFAULT_TYPE "')", 
          "TYPE"},
         
-        {"volume-label", 'l', POPT_ARG_STRING, &gl.volume_label, 0,
-         "specify volume label for video cd (default: '" DEFAULT_VOLUME_LABEL
+        {"iso-volume-label", 'l', POPT_ARG_STRING, &gl.volume_label, 0,
+         "specify ISO volume label for video cd (default: '" DEFAULT_VOLUME_LABEL
+         "')", "LABEL"},
+
+        {"iso-application-id", '\0', POPT_ARG_STRING, &gl.application_id, 0,
+         "specify ISO application id for video cd (default: '" DEFAULT_APPLICATION_ID
          "')", "LABEL"},
 
         {"cue-file", 'c', POPT_ARG_STRING, &gl.cue_fname, 0,
@@ -192,7 +199,9 @@ main (int argc, const char *argv[])
         {"version", 'V', POPT_ARG_NONE, NULL, CL_VERSION,
          "display version and copyright information and exit"},
 
-        POPT_AUTOHELP {NULL, 0, 0, NULL, 0}
+        POPT_AUTOHELP 
+
+        {NULL, 0, 0, NULL, 0}
       };
     
     poptContext optCon = poptGetContext ("vcdimager", argc, argv, optionsTable, 0);
@@ -294,6 +303,7 @@ main (int argc, const char *argv[])
   gl_vcd_obj = vcd_obj_new (type_id);
 
   vcd_obj_set_param (gl_vcd_obj, VCD_PARM_VOLUME_LABEL, gl.volume_label);
+  vcd_obj_set_param (gl_vcd_obj, VCD_PARM_APPLICATION_ID, gl.application_id);
 
   {
     struct add_files_t *p = gl.add_files;

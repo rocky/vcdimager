@@ -18,8 +18,8 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef _ISOFS_FS_H
-#define _ISOFS_FS_H
+#ifndef __VCD_ISO9660_H__
+#define __VCD_ISO9660_H__
 
 #include "vcd_types.h"
 
@@ -45,49 +45,50 @@ _vcd_iso_pathname_isofy (const char pathname[]);
 /* volume descriptors */
 
 void
-set_iso_pvd(void * pd, const char volume_id[], uint32_t iso_size,
-            const void * root_dir, uint32_t path_table_l_extent,
-            uint32_t path_table_m_extent, uint32_t path_table_size);
+set_iso_pvd (void *pd, const char volume_id[], const char application_id[],
+             uint32_t iso_size, const void *root_dir, 
+             uint32_t path_table_l_extent, uint32_t path_table_m_extent,
+             uint32_t path_table_size);
 
 void 
-set_iso_evd(void * pd);
+set_iso_evd (void *pd);
 
 /* directory tree */
 
 void
-dir_init_new(void * dir, uint32_t self, uint32_t ssize, uint32_t parent, 
-             uint32_t psize);
+dir_init_new (void *dir, uint32_t self, uint32_t ssize, uint32_t parent, 
+              uint32_t psize);
 
 void
-dir_init_new_su(void * dir, uint32_t self, uint32_t ssize, 
-                const void * ssu_data, unsigned ssu_size, uint32_t parent,
-                uint32_t psize, const void * psu_data, unsigned psu_size);
+dir_init_new_su (void *dir, uint32_t self, uint32_t ssize, 
+                 const void *ssu_data, unsigned ssu_size, uint32_t parent,
+                 uint32_t psize, const void *psu_data, unsigned psu_size);
 
 void
-dir_add_entry_su(void * dir, const char name[], uint32_t extent,
-                 uint32_t size, uint8_t flags, const void * su_data,
-                 unsigned su_size);
+dir_add_entry_su (void *dir, const char name[], uint32_t extent,
+                  uint32_t size, uint8_t flags, const void *su_data,
+                  unsigned su_size);
 
 unsigned
-dir_calc_record_size(unsigned namelen, unsigned su_len);
+dir_calc_record_size (unsigned namelen, unsigned su_len);
 
 /* pathtable */
 
 void
-pathtable_init(void *pt);
+pathtable_init (void *pt);
 
 unsigned
-pathtable_get_size(const void *pt);
+pathtable_get_size (const void *pt);
 
 uint16_t
-pathtable_l_add_entry(void *pt, const char name[], uint32_t extent,
-                      uint16_t parent);
+pathtable_l_add_entry (void *pt, const char name[], uint32_t extent,
+                       uint16_t parent);
 
 uint16_t
-pathtable_m_add_entry(void *pt, const char name[], uint32_t extent,
-                      uint16_t parent);
+pathtable_m_add_entry (void *pt, const char name[], uint32_t extent,
+                       uint16_t parent);
 
-#endif
+#endif /* __VCD_ISO9660_H__ */
 
 
 /* 

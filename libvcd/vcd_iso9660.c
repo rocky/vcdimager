@@ -31,7 +31,6 @@
 /* some parameters... */
 #define SYSTEM_ID         "CD-RTOS CD-BRIDGE"
 
-#define APPLICATION_ID    "CDI/CDI_VCD.APP;1"
 #define VOLUME_SET_ID     ""
 #define PREPARER_ID       "VCDImager " VERSION
 #define PUBLISHER_ID      ""
@@ -70,6 +69,7 @@ set_iso_evd(void *pd)
 void
 set_iso_pvd(void *pd,
             const char volume_id[],
+            const char application_id[],
             uint32_t iso_size,
             const void *root_dir,
             uint32_t path_table_l_extent,
@@ -82,6 +82,7 @@ set_iso_pvd(void *pd,
 
   assert(pd != NULL);
   assert(volume_id != NULL);
+  assert(application_id != NULL);
 
   memset(&ipd,0,sizeof(ipd)); /* paranoia? */
 
@@ -112,7 +113,7 @@ set_iso_pvd(void *pd,
   strncpy_pad(ipd.volume_set_id, VOLUME_SET_ID, 128);
   strncpy_pad(ipd.publisher_id, PUBLISHER_ID, 128);
   strncpy_pad(ipd.preparer_id, PREPARER_ID, 128);
-  strncpy_pad(ipd.application_id, APPLICATION_ID, 128); 
+  strncpy_pad(ipd.application_id, application_id, 128); 
 
   strncpy_pad(ipd.copyright_file_id    , "", 37);
   strncpy_pad(ipd.abstract_file_id     , "", 37);

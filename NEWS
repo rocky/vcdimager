@@ -2,15 +2,16 @@ $Id$
 
 see ChangeLog for more information
 
-version 0.6
-===========
-2000-12-??
+version 0.5.9alpha1
+===================
+2000-12-23
 
 * experimental SVCD support
-* better VCD2.0 compliance
-* gnome-- frontend
+* improved VCD 2.0 and VCD 1.1 support
+* started gnome-- frontend (non functional yet!)
 * bugfixes
 * vcdrip utility
+* removed glib dependancy from cli frontend
 
 version 0.5
 ===========

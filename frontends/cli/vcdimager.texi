@@ -1,10 +1,9 @@
 \input texinfo @c -*-texinfo-*-
 
-
 @c %**start of header
 @setfilename vcdimager.info
 @settitle The GNU VideoCD Image Maker
-@setchapternewpage off
+@setchapternewpage on
 @c %**end of header
 
 @afourpaper
@@ -48,8 +47,6 @@ approved by Herbert Valerio Riedel.
 
 @page
 @vskip 0pt plus 1filll
-@c @acronym{VideoCD} is a registered trademark of ?
-@sp 4
 Copyright @copyright{} 2000 Herbert Valerio Riedel @email{<hvr@@gnu.org>}
 @sp 1
 Permission is granted to make and distribute verbatim copies of this
@@ -76,6 +73,7 @@ instead of in the original English.
 @dircategory Miscellaneous
 @direntry
 * GNU VCDImager: (vcdimager).      The GNU VideoCD Image Maker
+* GNU VCDRip:    (vcdimager).      The GNU VideoCD Image Ripper
 @end direntry
 
 @node Top, , (dir), (dir)
@@ -86,45 +84,95 @@ instead of in the original English.
 
 @dfn{GNU VCDImager}@footnote{see
 @url{http://www.gnu.org/software/vcdimager/}} is a
-tool for pre-mastering @acronym{CDROM} images suitable for being burned to CD
-recordables. It takes @acronym{MPEG} movie files as input and generates
-an image file and a cuesheet file which can be fed to any CD-recording
-program which understands the BIN/CUE-format, e.g. cdrdao@footnote{see
-@url{http://www.ping.de/sites/daneb/cdrdao.html}}.
+tool for pre-mastering @acronym{CDROM} images suitable for being burned
+to CD recordables. It takes @acronym{MPEG} movie files as input and
+generates an image file and a cuesheet file which can be fed to any
+CD-recording program which understands the @acronym{BIN/CUE}-format,
+e.g. cdrdao@footnote{see @url{http://www.ping.de/sites/daneb/cdrdao.html}}.
+
+@noindent
+Features (so far) include:
+
+@itemize @bullet
+@item
+VideoCD 1.1 image output support
+
+@item
+VideoCD 2.0 image output support
+
+@item
+Super VideoCD 1.0 image output support (preliminary, needs testing)
+
+@item
+general facility for adding files as form 1 and form 2 sectors to
+the @acronym{ISO9660} filesystem and setting the @acronym{ISO9660}
+volume label and application id fields.
+
+@item
+support for up to 98 @acronym{MPEG} tracks per VideoCD.
+
+@end itemize
+
+This packages comes with @dfn{GNU VCDRip}, a tool for showing
+information about VideoCD images and extracting the contained
+@acronym{MPEG}-streams.
 
 @c fixme write much more :-)
 
 @unnumbered Commandline Options
 
-There aren't many commandline options at the moment:
-
+There are a few commandline options for @file{vcdimager} at the moment:
 @example
 @cartouche
 $ vcdimager --help
-Usage: /home/hvr/bin/vcdimager [OPTION...]
-  -l, --volume-label=LABEL   specify volume label for video cd 
-                             (default: 'VideoCD')
-  -c, --cue-file=FILE        specify cue file for output 
-                             (default: 'videocd.cue')
-  -b, --bin-file=FILE        specify bin file for output 
-                             (default: 'videocd.bin')
-  --cdi-dir=DIR              find CD-i support files in DIR 
-                             (default: `/usr/share/cdi')
-  -e, --disable-cdi          disable CD-i support (enabled by default)
-  --add-files=DIR            add files from given DIR directory to 
-                             ISO9660 fs track
-  -v, --verbose              be verbose
-  -V, --version              display version and copyright information 
-                             and exit
+Usage: vcdimager [OPTION...]
+  -t, --type=TYPE                     select VideoCD type ('vcd11', 'vcd2' 
+                                      or 'svcd') (default: 'vcd2')
+  -l, --iso-volume-label=LABEL        specify ISO volume label for 
+                                      video cd (default: 'VideoCD')
+  --iso-application-id=LABEL          specify ISO application id for
+                                      video cd (default: '')
+  -c, --cue-file=FILE                 specify cue file for output 
+                                      (default: 'videocd.cue')
+  -b, --bin-file=FILE                 specify bin file for output 
+                                      (default: 'videocd.bin')
+  --sector-2336                       use 2336 byte sectors for output
+  --add-file=FILE,ISO_FILENAME        add file to ISO fs
+  --add-file-2336=FILE,ISO_FILENAME   add file containing full 2336 byte
+                                      sectors to ISO fs
+  -p, --progress                      show progress
+  -v, --verbose                       be verbose
+  -V, --version                       display version and copyright
+                                      information and exit
 
 Help options
-  -?, --help                 Show this help message
-  --usage                    Display brief usage message
+  -?, --help                          Show this help message
+  --usage                             Display brief usage message
+
 $
 @end cartouche
 @end example
 
-@unnumbered Example
+The @file{vcdrip} utility offers just a few arguments:
+@example
+@cartouche
+$ vcdrip
+Usage: vcdrip [OPTION...]
+  --bin-file=FILE         set image file as source
+  --cdrom-device=DEVICE   set CDROM device as source (only linux)
+  --dump                  dump information about VideoCD
+  --rip                   rip data tracks
+  -V, --version           display version and copyright information 
+                          and exit
+
+Help options
+  -?, --help              Show this help message
+  --usage                 Display brief usage message
+$
+@end cartouche
+@end example
+
+@unnumbered Examples
 
 In the following example session, the files @file{track1.mpg},
 @file{track2.mpg} and @file{track3.mpg} are mastered into the default
@@ -133,8 +181,95 @@ is set to `My Test VCD'.
 
 @example
 @cartouche
-$ vcdimager --volume-label="My Test VCD" track@{1,2,3@}.mpg 
+$ vcdimager --iso-volume-label="My Test VCD" track@{1,2,3@}.mpg 
 finished ok, image created with 13421 sectors (31566192 bytes)
+$
+@end cartouche
+@end example
+
+The following shows how to display information of a given VideoCD image
+file @file{test.bin}.
+
+@example
+@cartouche
+$ vcdrip-devel --dump --bin-file=test.bin     
+------------------------------------------------------------------------
+Source: image file `test.bin'
+Image size: 300041 sectors
+------------------------------------------------------------------------
+VCD 2.0 detected
+VCD/INFO.VCD
+ ID: `VIDEO_CD'
+ version: 0x02
+ system profile tag: 0x00
+ album desc: `                '
+ volume count: 1
+ volume number: 1
+ pal flags: 0x00 00 00 00 00 00 00 00 00 00 00 00 00 
+ flags:
+  restriction: 0
+  special info: no
+  user data cc: no
+  start lid#1: no
+  start track#3: no
+ psd size: 72
+ first segment addr: 00:02:00
+ offset multiplier: 0x08 (must be 0x08)
+ highest psd offset: 0x0008 (real offset = 64)
+ item count: 0
+------------------------------------------------------------------------
+VCD/ENTRIES.VCD
+ ID: `ENTRYVCD'
+ version: 0x02
+ entries: 4
+ entry 1 starts in track 2 at (lba) extent 1262 (msf: 00:18:62)
+ entry 2 starts in track 3 at (lba) extent 2555 (msf: 00:36:05)
+ entry 3 starts in track 4 at (lba) extent 101705 (msf: 22:38:05)
+ entry 4 starts in track 5 at (lba) extent 200994 (msf: 44:41:69)
+------------------------------------------------------------------------
+VCD/LOT.VCD
+ offset[0]: 0x0000 (real offset = 0)
+ offset[1]: 0x0002 (real offset = 16)
+ offset[2]: 0x0004 (real offset = 32)
+ offset[3]: 0x0006 (real offset = 48)
+ offset[4]: 0x0008 (real offset = 64)
+------------------------------------------------------------------------
+VCD/PSD.VCD
+ [ 0]: play list descriptor ( NOI: 1 | LID#: 1 | prev: ffff | next: 0002
+  | retn: 0008 | ptime: 0 | wait: 5 | await: 0 | itemid[0]: 2)
+ [ 1]: play list descriptor ( NOI: 1 | LID#: 2 | prev: 0000 | next: 0004
+  | retn: 0008 | ptime: 0 | wait: 5 | await: 0 | itemid[0]: 3)
+ [ 2]: play list descriptor ( NOI: 1 | LID#: 3 | prev: 0002 | next: 0006
+  | retn: 0008 | ptime: 0 | wait: 5 | await: 0 | itemid[0]: 4)
+ [ 3]: play list descriptor ( NOI: 1 | LID#: 4 | prev: 0004 | next: 0008
+  | retn: 0008 | ptime: 0 | wait: 5 | await: 0 | itemid[0]: 5)
+ [ 4]: end of list descriptor ( 00 00 00 00 00 00 00 )
+------------------------------------------------------------------------
+$
+@end cartouche
+@end example
+
+Finally, the last example show how to extract the mpeg streams contained
+in the same image file @file{test.bin} (the resulting streams are
+stored in files named @file{track_##.mpg} with @file{##} being the track
+number, starting with 0).
+
+@example
+@cartouche
+$ vcdrip-devel --rip --bin-file=test.bin     
+--DEBUG: found ENTRIES.VCD
+   INFO: track_00.mpg: 1262 -> 2555
+--DEBUG:  stream leadin at 1292
+--DEBUG:  stream leadout at 2360
+   INFO: track_01.mpg: 2555 -> 101705
+--DEBUG:  stream leadin at 2585
+--DEBUG:  stream leadout at 101510
+   INFO: track_02.mpg: 101705 -> 200994
+--DEBUG:  stream leadin at 101735
+--DEBUG:  stream leadout at 200799
+   INFO: track_03.mpg: 200994 -> 300041
+--DEBUG:  stream leadin at 201024
+--DEBUG:  stream leadout at 299996
 $
 @end cartouche
 @end example
@@ -164,14 +299,27 @@ other program capable of aligning or fixing @acronym{MPEG} blocks.
 
 @unnumbered CD-i Support
 
-The support files needed in order to be able to play Video-CDs on
-@acronym{CD-i} players are @file{cdi_imag.rtf}, @file{cdi_text.fnt} and
-@file{cdi_vcd.app}.
+There is no specific CD-i support in GNU VCDImager. But you
+can use the general facilites for adding some custom CD-i player
+application. 
 
-GNU VCDImager expects them to be in some build-time configured default
-directory which may be overidden by the @option{--cdi-dir=}
-option. @acronym{CD-i} support can be disabled with the
-@option{--disable-cdi} option if those files are missing or
-@acronym{CD-i} support needs to be omitted.
+Say you had a CD-i application consisting of the files
+@file{cdi_imag.rtf}, @file{cdi_text.fnt}, @file{cdi_vcd.app} and
+@file{cdi_vcd.cfg}, with @file{cdi_vcd.app} being the main application
+executable, you could add the following lines to your @file{~/.popt}
+popt@footnote{see documentation for popt for more information about
+option aliasing} aliasing file@footnote{add it to @file{/etc/popt} if
+the setting should be available system-wide}
+
+@example
+vcdimager alias --cdi \
+	--iso-application-id "CDI/CDI_VCD.APP;1" \
+	--add-file-2336 /usr/share/cdi/cdi_imag.rtf,/CDI/CDI_IMAG.RTF \
+	--add-file      /usr/share/cdi/cdi_text.fnt,/CDI/CDI_TEXT.FNT \
+	--add-file      /usr/share/cdi/cdi_vcd.app,/CDI/CDI_VCD.APP \
+	--add-file      /usr/share/cdi/cdi_vcd.app,/CDI/CDI_VCD.CFG 
+@end example
+
+
 
 @bye
