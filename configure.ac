@@ -242,7 +242,6 @@ case $host_os in
      cygwin*)
 	AC_DEFINE([CYGWIN], [1], 
                   [Define 1 if you are compiling using cygwin])
- 	LIBS="$LIBS -mcygwin"
 	;;
      darwin6*)
        AC_CHECK_HEADERS(IOKit/IOKitLib.h CoreFoundation/CFBase.h, 
