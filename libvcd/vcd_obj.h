@@ -43,7 +43,10 @@ typedef struct {
   VcdMpegSource *source;
   char *id;
   const struct vcd_mpeg_source_info *info;
+
   VcdList *pause_list; /* pause_t */
+
+  char *default_entry_id;
   VcdList *entry_list; /* entry_t */
 
   /* computed on sector allocation */

@@ -1,4 +1,25 @@
+2001-07-28  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* frontends/xml/vcd_xml_parse.c (_parse_pbc_selection): set default 
+		for BSN to 1
+
+	* frontends/xml/videocd.dtd: a few minor adaptions to reflect recent 	
+		changes
+
+	* added and implemented 'default-entry' entry point
+
+	* libvcd/vcd_mpeg_stream.c (vcd_mpeg_source_scan): 
+		added framework for progress reporting
+
 2001-07-27  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd.c (vcd_version_string): new function for unifying version 
+		output
+
+	* frontends/xml/vcd_xml_dump.c (_make_xml): fixed stupid cut'n'paste
+		typo
+
+	* pre3
 
 	* reflected changes from vcd_pbc.c to frontends
 	

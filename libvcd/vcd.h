@@ -94,7 +94,8 @@ vcd_obj_add_dir (VcdObj *obj, const char iso_pathname[]);
 
 int 
 vcd_obj_append_sequence_play_item (VcdObj *obj, VcdMpegSource *mpeg_source, 
-                                   const char item_id[]);
+                                   const char item_id[], 
+                                   const char default_entry_id[]);
 
 int 
 vcd_obj_add_sequence_entry (VcdObj *obj, const char sequence_id[], 
@@ -157,6 +158,9 @@ vcd_obj_end_output (VcdObj *obj);
    object created by vcd_obj_new () */
 void 
 vcd_obj_destroy (VcdObj *obj);
+
+const char *
+vcd_version_string (bool full_text);
 
 #ifdef __cplusplus
 }

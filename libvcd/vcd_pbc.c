@@ -182,8 +182,14 @@ _vcd_pbc_pin_lookup (const VcdObj *obj, const char item_id[])
       mpeg_sequence_t *_sequence = _vcd_list_node_data (node);
       VcdListNode *node2;
 
-      /* skip over virtual 0-entry */
+      /* default entry point */
+
+      if (_sequence->default_entry_id 
+	  && !strcmp (item_id, _sequence->default_entry_id))
+	return n + 100;
       n++;
+
+      /* additional entry points */
 
       _VCD_LIST_FOREACH (node2, _sequence->entry_list)
 	{
@@ -375,16 +381,27 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
       {
 	PsdSelectionListDescriptor *_md = buf;
 
+	const unsigned _nos = _vcd_list_length (_pbc->select_id_list);
+
 	if (extended)
 	  _md->type = PSD_TYPE_EXT_SELECTION_LIST;
 	else
 	  _md->type = PSD_TYPE_SELECTION_LIST;
 
-	if (_vcd_list_length (_pbc->select_id_list) + _pbc->bsn > 100)
-	  vcd_error ("selection '%s': BSN + NOS > 100", _pbc->id);
-	
+	if (!IN (_pbc->bsn, 1, 99))
+	  vcd_error ("selection '%s': BSN (%d) not in range [1..99]",
+		     _pbc->id, _pbc->bsn);
+
+	if (!IN (_nos, 0, 99))
+	  vcd_error ("selection '%s': too many selections (%d > 99)",
+		     _pbc->id, _nos);
+
+	if (_nos + _pbc->bsn > 100)
+	  vcd_error ("selection '%s': BSN + NOS (%d + %d) > 100",
+		     _pbc->id, _pbc->bsn, _nos);
+
 	_md->bsn = _pbc->bsn;
-	_md->nos = _vcd_list_length (_pbc->select_id_list);
+	_md->nos = _nos;
 
 	vcd_assert (sizeof (PsdSelectionListFlags) == 1);
 
@@ -445,14 +462,12 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 	  _md->loop |= 0x80;
 
 	{
-	  uint16_t _pin;
-
-	  _pin = _vcd_pbc_pin_lookup (obj, _pbc->item_id);
+	  const uint16_t _pin = _vcd_pbc_pin_lookup (obj, _pbc->item_id);
 
 	  if (!_pin)
 	    vcd_error ("PSD: referenced play item '%s' not found", _pbc->item_id);
 
-	  _md->itemid = UINT16_TO_BE (_pin);
+	  _md->itemid = uint16_to_be (_pin);
 	}
 
 
@@ -477,8 +492,7 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 
 	      if ((_seq = _get_sequence_by_id ((VcdObj *) obj, _pbc->item_id)))
 		{
-		  int _entries = _vcd_list_length (_seq->entry_list) + 1;
-		  int _nos = _vcd_list_length (_pbc->select_id_list);
+		  const unsigned _entries = _vcd_list_length (_seq->entry_list) + 1;
 
 		  if (_nos != _entries)
 		    vcd_error ("selection '%s': number of entrypoints"
@@ -522,9 +536,7 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 	    
 	    /* append extended selection areas */
 
-	    n = _vcd_list_length (_pbc->select_id_list);
-
-	    _md2 = (void *) &_md->ofs[n];
+	    _md2 = (void *) &_md->ofs[_nos];
 
 	    _set_area_helper (&_md2->next_area, _pbc->next_area, _pbc->id);
 	    _set_area_helper (&_md2->prev_area, _pbc->prev_area, _pbc->id);
@@ -542,6 +554,8 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 
 		n++;
 	      }
+
+	    vcd_assert (n == _nos);
 	  }
       }
       break;

@@ -137,8 +137,18 @@ VcdMpegSource *
 vcd_mpeg_source_new (VcdDataSource *mpeg_file);
 
 /* scan the mpeg file... needed to be called only once */
+typedef struct {
+  long current_pack;
+  long current_pos;;
+  long length;
+} vcd_mpeg_prog_info_t;
+
+typedef int (*vcd_mpeg_prog_cb_t) (const vcd_mpeg_prog_info_t *progress_info,
+                                   void *user_data);
+
 void
-vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps);
+vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps,
+                      vcd_mpeg_prog_cb_t callback, void *user_data);
 
 /* gets the packet at given position */
 int

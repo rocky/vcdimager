@@ -222,7 +222,7 @@ vcd_obj_append_segment_play_item (VcdObj *obj, VcdMpegSource *mpeg_source,
 
   vcd_info ("scanning mpeg segment item #%d for scanpoints...", 
             _vcd_list_length (obj->mpeg_segment_list));
-  vcd_mpeg_source_scan (mpeg_source, !obj->relaxed_aps);
+  vcd_mpeg_source_scan (mpeg_source, !obj->relaxed_aps, NULL, NULL);
 
   if (vcd_mpeg_source_get_info (mpeg_source)->packets == 0)
     {
@@ -252,7 +252,8 @@ vcd_obj_append_segment_play_item (VcdObj *obj, VcdMpegSource *mpeg_source,
 
 int
 vcd_obj_append_sequence_play_item (VcdObj *obj, VcdMpegSource *mpeg_source,
-                                   const char item_id[])
+                                   const char item_id[],
+                                   const char default_entry_id[])
 {
   unsigned length;
   mpeg_sequence_t *track = NULL;
@@ -267,8 +268,20 @@ vcd_obj_append_sequence_play_item (VcdObj *obj, VcdMpegSource *mpeg_source,
       return -1;
     }
 
+  if (default_entry_id && _vcd_pbc_lookup (obj, default_entry_id))
+    {
+      vcd_error ("default entry id (%s) exist already", default_entry_id);
+      return -1;
+    }
+
+  if (default_entry_id && item_id && !strcmp (item_id, default_entry_id))
+    {
+      vcd_error ("default entry id == item id (%s)", item_id);
+      return -1;
+    }
+
   vcd_info ("scanning mpeg sequence item #%d for scanpoints...", track_no);
-  vcd_mpeg_source_scan (mpeg_source, !obj->relaxed_aps);
+  vcd_mpeg_source_scan (mpeg_source, !obj->relaxed_aps, NULL, NULL);
 
   track = _vcd_malloc (sizeof (mpeg_sequence_t));
 
@@ -276,6 +289,9 @@ vcd_obj_append_sequence_play_item (VcdObj *obj, VcdMpegSource *mpeg_source,
 
   if (item_id)
     track->id = strdup (item_id);
+
+  if (default_entry_id)
+    track->default_entry_id = strdup (default_entry_id);
   
   track->info = vcd_mpeg_source_get_info (mpeg_source);
   length = track->info->packets;
@@ -1830,6 +1846,23 @@ vcd_obj_write_image (VcdObj *obj, VcdImageSink *image_sink,
     return 0; /* ok */
   }
 }  
+
+const char *
+vcd_version_string (bool full_text)
+{
+  if (!full_text)
+    return ("GNU VCDImager " VERSION " [" HOST_ARCH "]");
+
+  return ("GNU VCDImager " VERSION " [" HOST_ARCH "]\n"
+          "\n"
+          "http://www.gnu.org/software/vcdimager/\n"
+          "\n"
+          "Copyright (c) 2001 Herbert Valerio Riedel <hvr@gnu.org>\n"
+          "\n"         
+          "GNU VCDImager may be distributed under the terms of the GNU General Public\n"
+          "Licence; For details, see the file `COPYING', which is included in the GNU\n"
+          "VCDImager distribution. There is no warranty, to the extent permitted by law.\n");
+}
 
 
 /* 

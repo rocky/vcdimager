@@ -103,7 +103,8 @@ vcd_mpeg_source_stat (VcdMpegSource *obj)
 }
 
 void
-vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps)
+vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps,
+                      vcd_mpeg_prog_cb_t callback, void *user_data)
 {
   unsigned length = 0;
   unsigned pos = 0;
@@ -114,6 +115,7 @@ vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps)
   VcdList *aps_list = 0;
   VcdListNode *n;
   bool _pal = false;
+  vcd_mpeg_prog_info_t _progress = { 0, };
 
   vcd_assert (obj != NULL);
 
@@ -129,6 +131,12 @@ vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps)
 
   vcd_data_source_seek (obj->data_source, 0);
   length = vcd_data_source_stat (obj->data_source);
+
+  if (callback)
+    {
+      _progress.length = length;
+      callback (&_progress, user_data);
+    }
 
   aps_list = _vcd_list_new ();
 
@@ -150,6 +158,13 @@ vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps)
 
           pos = length; /* don't fall into assert... */
           break;
+        }
+
+      if (callback && (pos - _progress.current_pos) > (length / 100))
+        {
+          _progress.current_pos = pos;
+          _progress.current_pack = pno;
+          callback (&_progress, user_data);
         }
 
       switch (state.packet.aps)
@@ -195,6 +210,13 @@ vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps)
     }
 
   vcd_data_source_close (obj->data_source);
+
+  if (callback)
+    {
+      _progress.current_pos = pos;
+      _progress.current_pack = pno;
+      callback (&_progress, user_data);
+    }
 
   vcd_assert (pos == length);
 
