@@ -1,3 +1,33 @@
+2003-02-20 09:21  rocky
+
+	* tests/: svcd1_test0.right, svcd1_test1.right, svcd1_test2.right,
+	vcd11_test0.right, vcd11_test1.right, vcd20_test0.right,
+	vcd20_test1.right: Album descriptions now have blanks stripped off.
+
+2003-02-20 09:19  rocky
+
+	* frontends/xml/: Makefile.am, vcd_xml_rip.c: Start using
+	libvcdinfo.
+
+2003-02-20 09:19  rocky
+
+	* libvcd/: Makefile.am, vcdinf.c, vcdinf.h, vcdinfo.c, vcdinfo.h:
+	Sort of a lower-level vcdinfo for routines that can't use
+	libvcdinfo yet (vcd_xml_rip). This has more of the internal
+	structures, e.g.  info, pvd, segment, exposed.
+
+2003-02-20 09:16  rocky
+
+	* libvcd/vcd_image_cd-sunos.c: Allow one to force access mode.
+
+2003-02-20 00:14  rocky
+
+	* libvcd/vcd_image_cd-linux.c: Sync up with xine and cdio versions
+	a little bit.  Modularity improves a little: remove iso9660
+	include.  Add get_default_device, _vcd_eject_media. Some names made
+	more generic to facilitate cut and past for other OSs, some names
+	made more specific: _vcd_.
+
 2003-02-19 18:47  hvr
 
 	* libvcd/vcd_image_nrg.c: use C99 syntax
