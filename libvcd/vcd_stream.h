@@ -22,6 +22,10 @@
 #ifndef __VCD_STREAM_H__
 #define __VCD_STREAM_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 /* typedef'ed IO functions prototypes */
 
 typedef int(*vcd_data_open_t)(void *user_data);
@@ -97,6 +101,10 @@ vcd_data_source_destroy(VcdDataSource* obj);
 
 void
 vcd_data_source_close(VcdDataSource* obj);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* __VCD_STREAM_H__ */
 

@@ -20,13 +20,13 @@
 
 #include "GVCDImagerApp.hh"
 
+#include <memory>
+
 int main(int argc, const char *argv[])
 {
-  (void) new GVCDImagerApp(argc, argv);
+  auto_ptr<GVCDImagerApp> _app(new GVCDImagerApp(argc, argv));
 
   GVCDImagerApp::app->run();
-
-  delete GVCDImagerApp::app;
 
   return 0;
 }

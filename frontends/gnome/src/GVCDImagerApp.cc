@@ -34,7 +34,8 @@ GVCDImagerApp* GVCDImagerApp::app = 0;
 
 GVCDImagerApp::GVCDImagerApp(int argc, const char *argv[])
   : _main(GPACKAGE, VERSION, argc, const_cast<gchar **>(argv)),
-    _glade_filename("GVCDImager.glade")
+    _glade_filename("GVCDImager.glade"),
+    _current_vcd_type(libvcd::VCD_TYPE_VCD2)
 {
   assert(GVCDImagerApp::app == 0);
 
@@ -51,6 +52,7 @@ GVCDImagerApp::GVCDImagerApp(int argc, const char *argv[])
   _main_win->delete_event.connect(slot(this, &GVCDImagerApp::onWindowDelete));
 
   // toolbar
+
   _track_add_button = Glade::getWidgetPtr<Gtk::Button>(__mwx, "track_add_button");
   _track_add_button->clicked.connect(slot(this, &GVCDImagerApp::onTrackAdd));
 
@@ -76,6 +78,15 @@ GVCDImagerApp::GVCDImagerApp(int argc, const char *argv[])
   _track_del_menuitem = Glade::getWidgetPtr<Gtk::MenuItem>(__mwx, "track_del_menuitem");
   _track_del_menuitem->activate.connect(slot(this, &GVCDImagerApp::onTrackDel));
 
+  _vcd_type_menu = Glade::getWidgetPtr<Gtk::Menu>(__mwx, "vcd_type_submenu");
+  
+  Glade::getWidgetPtr<Gtk::RadioMenuItem>(__mwx, "vcd_11_menuitem")
+    ->activate.connect(bind(slot(this, &GVCDImagerApp::onVcdType), libvcd::VCD_TYPE_VCD11));
+  Glade::getWidgetPtr<Gtk::RadioMenuItem>(__mwx, "vcd_20_menuitem")
+    ->activate.connect(bind(slot(this, &GVCDImagerApp::onVcdType), libvcd::VCD_TYPE_VCD2));
+  Glade::getWidgetPtr<Gtk::RadioMenuItem>(__mwx, "svcd_10_menuitem")
+    ->activate.connect(bind(slot(this, &GVCDImagerApp::onVcdType), libvcd::VCD_TYPE_SVCD));
+    
   _settings_menuitem = Glade::getWidgetPtr<Gtk::MenuItem>(__mwx, "settings_menuitem");
   _settings_menuitem->activate.connect(slot(this, &GVCDImagerApp::onSettings));
 
@@ -126,6 +137,9 @@ GVCDImagerApp::updateSensitivity(void)
   _image_write_menuitem->set_sensitive(tracks_avail && !writing);
   _image_write_button->set_sensitive(tracks_avail && !writing);
 
+  /* this one is only active if not writing and no tracks are added */
+  _vcd_type_menu->set_sensitive(!tracks_avail && !writing);
+  
   //_track_info_button
   _track_del_menuitem->set_sensitive(tracks_avail && track_selected && !writing);
   _track_del_button->set_sensitive(tracks_avail && track_selected && !writing);
@@ -215,6 +229,17 @@ GVCDImagerApp::onFileAdd(void)
 
   updateSensitivity();
 
+}
+
+void 
+GVCDImagerApp::onVcdType(libvcd::vcd_type_t new_type)
+{
+  if (_current_vcd_type == new_type)
+    return; // noop
+  
+  //_vcd_type_optionmenu
+  cerr << "vcd type " << new_type << "(old " << _current_vcd_type << "(" << endl;
+  _current_vcd_type = new_type;
 }
 
 void 

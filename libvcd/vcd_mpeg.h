@@ -23,6 +23,10 @@
 
 #include "vcd_types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 typedef enum {
   MPEG_TYPE_INVALID = 0,
   MPEG_TYPE_VIDEO,
@@ -104,6 +108,10 @@ vcd_mpeg_get_timecode (const void *packet);
 
 int
 vcd_mpeg_get_info (const void *packet, mpeg_info_t *mpeg_info);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* _MPEG_H_ */
 

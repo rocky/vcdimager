@@ -26,6 +26,10 @@
 #include "vcd_stream.h"
 #include "vcd_mpeg.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 /* opaque data structure representing a VideoCD object */
 typedef struct _VcdObj VcdObj;
 
@@ -34,7 +38,7 @@ typedef enum
 {
   VCD_TYPE_INVALID = 0,
   /* VCD_TYPE_VCD1, */
-  /* VCD_TYPE_VCD11, */
+  VCD_TYPE_VCD11,
   VCD_TYPE_VCD2,
   VCD_TYPE_SVCD
   /* VCD_TYPE_HQVCD */
@@ -120,6 +124,10 @@ vcd_obj_end_output (VcdObj *obj);
    object created by vcd_obj_new () */
 void 
 vcd_obj_destroy (VcdObj *obj);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* __VCD_H__ */
 

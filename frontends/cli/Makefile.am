@@ -1,6 +1,6 @@
 bin_PROGRAMS = vcdimager vcdrip
 
-INCLUDES = -I $(top_srcdir)/libvcd/ $(GLIB_CFLAGS) $(CDI_CFLAGS)
+INCLUDES = -I $(top_srcdir)/libvcd/ 
 
 VCD_LIBS = $(top_builddir)/libvcd/libvcd.a
 

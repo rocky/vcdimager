@@ -43,5 +43,6 @@ using SigC::bind;
 using SigC::slot;
 
 #include "GladeHelper.hh"
+#include "LibvcdWrapper.hh"
 
 #endif // __GVCDIMAGER_HH__

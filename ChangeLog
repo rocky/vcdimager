@@ -1,3 +1,16 @@
+2000-12-17  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd.h (vcd_type_t): uncommented VCD11 type
+
+	* configure.in: some cleanup
+
+2000-12-16  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_mpeg.h, libvcd/vcd_stream.h, libvcd/vcd.h:
+	 	added export "C" { } block
+
+	* libvcd/vcd_mpeg.c (vcd_mpeg_get_type): zeroing of extended info
+
 2000-11-26  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_mpeg.h (struct mpeg_type_info_t): workaround for 

@@ -373,6 +373,9 @@ vcd_mpeg_get_type (const void *packet, mpeg_type_info_t *extended_type_info)
 
   assert (packet != NULL);
 
+  if (extended_type_info)
+    memset (extended_type_info, 0, sizeof (mpeg_type_info_t));
+
   code = _bitvec_get_bits32 (data, offset, 32);
   offset += 32;
 

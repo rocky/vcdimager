@@ -6,41 +6,63 @@ AM_MAINTAINER_MODE
 AM_SANITY_CHECK
 AM_ACLOCAL_INCLUDE(frontends/gnome/macros)
 
+dnl
+
+AC_ARG_WITH(gnome-frontend,
+	[  --with-gnome-frontend   enable gnome frontend (not enabled by default)], 
+	enable_gnome_fe="${withval}", enable_gnome_fe=no)
+
+AC_ARG_WITH(cli-frontend,
+	[  --without-cli-frontend  enable cli frontend (enabled by default)], 
+	enable_cli_fe="${withval}", enable_cli_fe=yes)
+
 dnl programs
 
 AC_PROG_CC
 AC_PROG_CPP
-AC_PROG_CXX
+if test "x$enable_gnome_fe" = "xyes"; then
+ AC_PROG_CXX
+fi
 AM_PROG_CC_STDC
 AC_PROG_RANLIB
 
 dnl libs
 
-enable_cli_fe=yes
-enable_gnome_fe=no
+if test "x$enable_cli_fe" = "xyes"; then
+ AC_CHECK_LIB(popt, poptGetContext, POPT_LIBS="-lpopt", enable_cli_fe=no)
+fi
 
-AC_CHECK_LIB(popt, poptGetContext, POPT_LIBS="-lpopt", enable_cli_fe=no)
-
-GNOME_INIT_HOOK(enable_gnome_fe=yes,,)
 if test "x$enable_gnome_fe" = "xyes"; then
-AM_PATH_LIBGLADE(, enable_gnome_fe=no, gnome)
-AM_PATH_GNOMEMM(,, enable_gnome_fe=no)
+ gnome_avail=no
+ GNOME_INIT_HOOK(gnome_avail=yes,,)
+ enable_gnome_fe="${gnome_avail}" 
+fi
+
+if test "x$enable_gnome_fe" = "xyes"; then
+ AM_PATH_LIBGLADE(, enable_gnome_fe=no, gnome)
+fi
+
+if test "x$enable_gnome_fe" = "xyes"; then
+ AM_PATH_GNOMEMM(,, enable_gnome_fe=no)
 fi
 
 dnl headers
 
 AC_DEFINE(_GNU_SOURCE)
-AC_CHECK_HEADER(popt.h,, enable_cli_fe=no)
 AC_STDC_HEADERS
 AC_HAVE_HEADERS(stdint.h)
+
+if test "x$enable_cli_fe" = "xyes"; then
+ AC_CHECK_HEADER(popt.h,, enable_cli_fe=no)
+fi
 
 GNOME_COMPILE_WARNINGS
 
 if test "x$enable_gnome_fe" = "xyes"; then
-GNOME_X_CHECKS
-dnl Subst PACKAGE_PIXMAPS_DIR.
-PACKAGE_PIXMAPS_DIR="`gnome-config --datadir`/pixmaps/${PACKAGE}"
-AC_SUBST(PACKAGE_PIXMAPS_DIR)
+ GNOME_X_CHECKS
+ dnl Subst PACKAGE_PIXMAPS_DIR.
+ PACKAGE_PIXMAPS_DIR="`gnome-config --datadir`/pixmaps/${PACKAGE}"
+ AC_SUBST(PACKAGE_PIXMAPS_DIR)
 fi
 
 dnl compiler
@@ -49,13 +71,6 @@ AC_C_CONST
 AC_C_INLINE
 
 dnl system
-
-AC_ARG_WITH(cdi-path,
-	[  --with-cdi-path=DIR      set irectory where CD-i support files are installed [DATADIR/cdi]], 
-	CDIDIR="${withval}",
-	CDIDIR="${datadir}/cdi")
-
-CDI_CFLAGS="-DCDIDIR=\\\"$CDIDIR\\\""
 WARN_CFLAGS="-Wall -ansi -Wmissing-prototypes -Wunused -Wpointer-arith -Wwrite-strings"
 dnl LIBS="$LIBS"
 CFLAGS="$CFLAGS -ansi $WARN_CFLAGS"
@@ -63,7 +78,6 @@ CFLAGS="$CFLAGS -ansi $WARN_CFLAGS"
 AM_CONDITIONAL(BUILD_CLI_FE, test "x$enable_cli_fe" = "xyes")
 AM_CONDITIONAL(BUILD_GNOME_FE, test "x$enable_gnome_fe" = "xyes")
 
-AC_SUBST(CDI_CFLAGS)
 AC_SUBST(POPT_LIBS)
 
 LIBVCD_CFLAGS='-I$(top_srcdir)/libvcd/'

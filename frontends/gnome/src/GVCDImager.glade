@@ -72,7 +72,6 @@
 	    <widget>
 	      <class>GtkPixmapMenuItem</class>
 	      <name>new_file1</name>
-	      <sensitive>False</sensitive>
 	      <stock_item>GNOMEUIINFO_MENU_NEW_ITEM</stock_item>
 	      <label>_New File</label>
 	    </widget>
@@ -80,35 +79,30 @@
 	    <widget>
 	      <class>GtkPixmapMenuItem</class>
 	      <name>open1</name>
-	      <sensitive>False</sensitive>
 	      <stock_item>GNOMEUIINFO_MENU_OPEN_ITEM</stock_item>
 	    </widget>
 
 	    <widget>
 	      <class>GtkPixmapMenuItem</class>
 	      <name>save1</name>
-	      <sensitive>False</sensitive>
 	      <stock_item>GNOMEUIINFO_MENU_SAVE_ITEM</stock_item>
 	    </widget>
 
 	    <widget>
 	      <class>GtkPixmapMenuItem</class>
 	      <name>save_as1</name>
-	      <sensitive>False</sensitive>
 	      <stock_item>GNOMEUIINFO_MENU_SAVE_AS_ITEM</stock_item>
 	    </widget>
 
 	    <widget>
 	      <class>GtkMenuItem</class>
 	      <name>separator1</name>
-	      <sensitive>False</sensitive>
 	      <right_justify>False</right_justify>
 	    </widget>
 
 	    <widget>
 	      <class>GtkPixmapMenuItem</class>
 	      <name>image_write_menuitem</name>
-	      <sensitive>False</sensitive>
 	      <label>Write Image</label>
 	      <right_justify>False</right_justify>
 	      <stock_icon>GNOME_STOCK_MENU_EXEC</stock_icon>
@@ -117,7 +111,6 @@
 	    <widget>
 	      <class>GtkMenuItem</class>
 	      <name>separator1</name>
-	      <sensitive>False</sensitive>
 	      <right_justify>False</right_justify>
 	    </widget>
 
@@ -150,7 +143,6 @@
 	    <widget>
 	      <class>GtkPixmapMenuItem</class>
 	      <name>track_del_menuitem</name>
-	      <sensitive>False</sensitive>
 	      <label>Del</label>
 	      <right_justify>False</right_justify>
 	      <stock_icon>GNOME_STOCK_MENU_BLANK</stock_icon>
@@ -159,14 +151,12 @@
 	    <widget>
 	      <class>GtkMenuItem</class>
 	      <name>separator1</name>
-	      <sensitive>False</sensitive>
 	      <right_justify>False</right_justify>
 	    </widget>
 
 	    <widget>
 	      <class>GtkPixmapMenuItem</class>
 	      <name>track_info_menuitem</name>
-	      <sensitive>False</sensitive>
 	      <label>Info...</label>
 	      <right_justify>False</right_justify>
 	      <stock_icon>GNOME_STOCK_MENU_INDEX</stock_icon>
@@ -182,6 +172,52 @@
 	  <widget>
 	    <class>GtkMenu</class>
 	    <name>settings1_menu</name>
+
+	    <widget>
+	      <class>GtkMenuItem</class>
+	      <name>vcd_type_menuitem</name>
+	      <label>VideoCD Type</label>
+	      <right_justify>False</right_justify>
+
+	      <widget>
+		<class>GtkMenu</class>
+		<name>vcd_type_submenu</name>
+
+		<widget>
+		  <class>GtkRadioMenuItem</class>
+		  <name>vcd_11_menuitem</name>
+		  <label>VCD 1.1</label>
+		  <active>False</active>
+		  <always_show_toggle>False</always_show_toggle>
+		  <group>vcd_type</group>
+		</widget>
+
+		<widget>
+		  <class>GtkRadioMenuItem</class>
+		  <name>vcd_20_menuitem</name>
+		  <label>VCD 2.0</label>
+		  <active>True</active>
+		  <always_show_toggle>False</always_show_toggle>
+		  <group>vcd_type</group>
+		</widget>
+
+		<widget>
+		  <class>GtkRadioMenuItem</class>
+		  <name>svcd_10_menuitem</name>
+		  <label>SVCD 1.0</label>
+		  <active>False</active>
+		  <always_show_toggle>False</always_show_toggle>
+		  <group>vcd_type</group>
+		</widget>
+	      </widget>
+	    </widget>
+
+	    <widget>
+	      <class>GtkMenuItem</class>
+	      <name>separator2</name>
+	      <sensitive>False</sensitive>
+	      <right_justify>False</right_justify>
+	    </widget>
 
 	    <widget>
 	      <class>GtkPixmapMenuItem</class>
@@ -211,7 +247,6 @@
 	    <widget>
 	      <class>GtkMenuItem</class>
 	      <name>separator1</name>
-	      <sensitive>False</sensitive>
 	      <right_justify>False</right_justify>
 	    </widget>
 
@@ -332,7 +367,7 @@
       <border_width>2</border_width>
       <handle_size>5</handle_size>
       <gutter_size>9</gutter_size>
-      <position>230</position>
+      <position>200</position>
 
       <widget>
 	<class>GtkScrolledWindow</class>
@@ -632,7 +667,7 @@ MODE2/2336
 		<class>GtkTable</class>
 		<name>table1</name>
 		<border_width>6</border_width>
-		<rows>2</rows>
+		<rows>1</rows>
 		<columns>2</columns>
 		<homogeneous>False</homogeneous>
 		<row_spacing>6</row_spacing>
@@ -660,29 +695,6 @@ MODE2/2336
 		    <xshrink>False</xshrink>
 		    <yshrink>False</yshrink>
 		    <xfill>False</xfill>
-		    <yfill>False</yfill>
-		  </child>
-		</widget>
-
-		<widget>
-		  <class>GtkCheckButton</class>
-		  <name>cdi_support_checkbutton</name>
-		  <can_focus>True</can_focus>
-		  <label>enable CD-i support</label>
-		  <active>True</active>
-		  <draw_indicator>True</draw_indicator>
-		  <child>
-		    <left_attach>0</left_attach>
-		    <right_attach>2</right_attach>
-		    <top_attach>1</top_attach>
-		    <bottom_attach>2</bottom_attach>
-		    <xpad>0</xpad>
-		    <ypad>0</ypad>
-		    <xexpand>True</xexpand>
-		    <yexpand>False</yexpand>
-		    <xshrink>False</xshrink>
-		    <yshrink>False</yshrink>
-		    <xfill>True</xfill>
 		    <yfill>False</yfill>
 		  </child>
 		</widget>

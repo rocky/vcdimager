@@ -61,9 +61,13 @@ private:
   void onFileAdd(void);
   void onFileCancel(void);
 
+  void onVcdType(libvcd::vcd_type_t new_type);
+
 private:
   Gnome::Main _main;
   std::string _glade_filename;
+
+  libvcd::vcd_type_t _current_vcd_type;
 
   // model...
   //VcdObj *_vcdobj;
@@ -72,7 +76,7 @@ private:
   GladeXML* _main_win_xml;
   // UI elements
   Gnome::App *_main_win;
-  
+
   Gtk::Button *_track_add_button;
   Gtk::Button *_track_del_button;
   Gtk::Button *_image_write_button;
@@ -82,6 +86,7 @@ private:
   Gtk::MenuItem *_exit_menuitem;
   Gtk::MenuItem *_track_add_menuitem;
   Gtk::MenuItem *_track_del_menuitem;
+  Gtk::Menu *_vcd_type_menu;
   Gtk::MenuItem *_settings_menuitem;
   Gtk::MenuItem *_help_about_menuitem;
   Gtk::MenuItem *_help_homepage_menuitem;

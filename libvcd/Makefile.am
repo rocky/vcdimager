@@ -2,7 +2,7 @@
 
 noinst_LIBRARIES = libvcd.a
 
-INCLUDES = $(GLIB_CFLAGS)
+#INCLUDES = 
 
 libvcd_a_SOURCES = \
 	vcd.c \
