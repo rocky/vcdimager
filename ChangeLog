@@ -1,7 +1,7 @@
 2002-12-27  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* frontends/xml/vcd_xml_build.c: added hidden --file-prefix option to
-	vcdxbuild to aid testsuite
+	vcdxbuild to aid testsuite; added --dump-dtd feature
 
 2002-12-25  Herbert Valerio Riedel  <hvr@gnu.org>
 

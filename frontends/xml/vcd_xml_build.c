@@ -178,7 +178,8 @@ _do_cl (int argc, const char *argv[])
     CL_CUE_FILE,
     CL_CDRDAO_FILE,
     CL_NRG_FILE,
-    CL_2336_FLAG
+    CL_2336_FLAG,
+    CL_DUMP_DTD
   };
   poptContext optCon = NULL;
   struct poptOption optionsTable[] = 
@@ -212,6 +213,9 @@ _do_cl (int argc, const char *argv[])
       {"progress", 'p', POPT_ARG_NONE, &gl.progress_flag, 0,  
        "show progress"}, 
 
+      {"dump-dtd", '\0', POPT_ARG_NONE, NULL, CL_DUMP_DTD,
+       "dump internal DTD to stdout"},
+
       {"check", '\0', POPT_ARG_NONE | POPT_ARGFLAG_DOC_HIDDEN, 
        &gl.check_flag, 0, "enable check mode (undocumented)"},
 
@@ -244,6 +248,12 @@ _do_cl (int argc, const char *argv[])
     switch (opt)
       {
 	const char *opt_arg;
+
+      case CL_DUMP_DTD:
+	fputs (videocd_dtd, stdout);
+	fflush (stdout);
+	exit (EXIT_SUCCESS);
+	break;
 
       case CL_VERSION:
 	vcd_xml_gui_mode = gl.gui_flag;

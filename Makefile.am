@@ -1,7 +1,7 @@
 SUBDIRS = libvcd frontends tests amiga docs
 
 EXTRA_DIST = BUGS FAQ cygwin-dist.sh HACKING libpopt.m4 \
-	debian/changelog debian/control debian/copyright debian/dirs debian/docs debian/info debian/watch
+	debian/changelog debian/control debian/copyright debian/docs debian/info debian/rules debian/watch
 
 dist-hook: vcdimager.spec
 	cp vcdimager.spec $(distdir)
@@ -9,7 +9,7 @@ dist-hook: vcdimager.spec
 snapshot:
 	$(MAKE) dist distdir=$(PACKAGE)-$(VERSION)-`date +"%Y%m%d"`
 
-tar-dist:
+bintar-dist:
 	here=`pwd`; \
 	ipath="$$here/install-tmp/"; \
 	rm -rf "$$ipath"; \

@@ -9,6 +9,8 @@ version 0.7.13 (unstable/development)
 * maintainance release
 * fixes for gcc on linux/arm
 * removed internal popt and gnome frontend code from distribution
+* added --dump-dtd option to vcdxbuild
+* added testsuite to distribution
 
 version 0.7.12 (unstable/development)
 =====================================

@@ -4,7 +4,7 @@
 %define  RELEASE 1
 %define  rel     %{?CUSTOM_RELEASE} %{!?CUSTOM_RELEASE:%RELEASE}
 
-Summary:        VideoCD (pre-)mastering and ripping tool
+Summary:        A VideoCD (VCD) image mastering and ripping tool
 Name:           @PACKAGE@
 Version:        @VERSION@
 Release:        %rel

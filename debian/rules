@@ -52,7 +52,6 @@ install: build
 	dh_testdir
 	dh_testroot
 	dh_clean -k
-	dh_installdirs
 	$(MAKE) install DESTDIR=$(CURDIR)/debian/vcdimager
 
 
@@ -65,7 +64,7 @@ binary-arch: build install
 	dh_testdir -a
 	dh_testroot -a
 	dh_installdocs -a
-	dh_installman -a
+#	dh_installman -a
 	dh_installinfo -a
 	dh_installchangelogs ChangeLog -a
 	dh_strip -a

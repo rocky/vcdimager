@@ -13,5 +13,5 @@ Description: A VideoCD (VCD) image mastering and ripping tool
  either directly from compliant MPEG streams with no PlayBack Control
  (PBC), or out of an XML description for a full-featured (S)VCD.
  .
- This package also contains a videoCD ripping tool to rip mpeg streams
- from VCD images, and some debugging tools.
+ This package also contains a VideoCD ripping tool to rip mpeg streams
+ from VideoCD images, and some debugging tools.
