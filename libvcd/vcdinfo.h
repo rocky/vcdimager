@@ -573,7 +573,11 @@ vcdinfo_get_seg_size(const vcdinfo_obj_t *obj, const unsigned int seg_num);
   
   /*!  
     Return the starting LBA (logical block address) for track number
-    track_num in obj.  Tracks numbers start at 1.
+    track_num in obj.  
+
+    The IS0-9660 filesystem track has number 0. Tracks associated
+    with playable entries numbers start at 1.
+
     The "leadout" track is specified either by
     using track_num LEADOUT_TRACK or the total tracks+1.
     VCDINFO_NULL_LBA is returned on failure.
