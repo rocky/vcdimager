@@ -213,9 +213,6 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
   if (obj->info.use_lid2)
     xmlNewChild (section, ns, "next-volume-use-lid2", NULL);
 
-  if (obj->info.autoplay)
-    xmlNewChild (section, ns, "autoplay", NULL);
-
   snprintf (buf, sizeof (buf), "%d", obj->info.restriction);
   xmlNewChild (section, ns, "restriction", buf);
 

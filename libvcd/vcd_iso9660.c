@@ -70,9 +70,10 @@ _pvd_set_time (char _pvd_date[], const struct tm *_tm)
     return;
 
   snprintf(_pvd_date, 16, 
-           "%4.4d%2.2d%2.2d%2.2d%2.2d%2.2d",
+           "%4.4d%2.2d%2.2d" "%2.2d%2.2d%2.2d" "%2.2d",
            _tm->tm_year + 1900, _tm->tm_mon + 1, _tm->tm_mday,
-           _tm->tm_hour, _tm->tm_min, _tm->tm_sec);
+           _tm->tm_hour, _tm->tm_min, _tm->tm_sec,
+           0 /* 1/100 secs */ );
   
   _pvd_date[16] = (int8_t) 0; /* tz */
 }

@@ -1,3 +1,14 @@
+2001-07-19  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* reverting autoplay experiment
+
+	* frontends/cli/vcd_debug.c (dump_info): dump a bit more infos
+	
+	* libvcd/vcd_files_private.h: adding some SVCD extensions 
+		(OGT, vol start times, extended end list)
+
+	* libvcd/vcd_iso9660.c (_pvd_set_time): set 1/100 sec field to BCD 0's
+
 2001-07-01  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* implemented nero v5 output format

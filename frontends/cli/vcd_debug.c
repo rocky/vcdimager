@@ -301,15 +301,15 @@ _visit_pbc (debug_obj_t *obj, unsigned lid, unsigned offset, bool in_lot, bool e
           (const void *) (psd + _rofs);
 
         if (!ofs->lid)
-          ofs->lid = UINT16_FROM_BE (d->lid) & 0x7fff;
+          ofs->lid = uint16_from_be (d->lid) & 0x7fff;
         else 
-          if (ofs->lid != (UINT16_FROM_BE (d->lid) & 0x7fff))
+          if (ofs->lid != (uint16_from_be (d->lid) & 0x7fff))
             vcd_warn ("LOT entry assigned LID %d, but descriptor has LID %d",
-                      ofs->lid, UINT16_FROM_BE (d->lid) & 0x7fff);
+                      ofs->lid, uint16_from_be (d->lid) & 0x7fff);
 
-        _visit_pbc (obj, 0, UINT16_FROM_BE (d->prev_ofs), false, ext);
-        _visit_pbc (obj, 0, UINT16_FROM_BE (d->next_ofs), false, ext);
-        _visit_pbc (obj, 0, UINT16_FROM_BE (d->return_ofs), false, ext);
+        _visit_pbc (obj, 0, uint16_from_be (d->prev_ofs), false, ext);
+        _visit_pbc (obj, 0, uint16_from_be (d->next_ofs), false, ext);
+        _visit_pbc (obj, 0, uint16_from_be (d->return_ofs), false, ext);
       }
       break;
 
@@ -323,20 +323,20 @@ _visit_pbc (debug_obj_t *obj, unsigned lid, unsigned offset, bool in_lot, bool e
         int idx;
 
         if (!ofs->lid)
-          ofs->lid = UINT16_FROM_BE (d->lid) & 0x7fff;
+          ofs->lid = uint16_from_be (d->lid) & 0x7fff;
         else 
-          if (ofs->lid != (UINT16_FROM_BE (d->lid) & 0x7fff))
+          if (ofs->lid != (uint16_from_be (d->lid) & 0x7fff))
             vcd_warn ("LOT entry assigned LID %d, but descriptor has LID %d",
-                      ofs->lid, UINT16_FROM_BE (d->lid) & 0x7fff);
+                      ofs->lid, uint16_from_be (d->lid) & 0x7fff);
 
-        _visit_pbc (obj, 0, UINT16_FROM_BE (d->prev_ofs), false, ext);
-        _visit_pbc (obj, 0, UINT16_FROM_BE (d->next_ofs), false, ext);
-        _visit_pbc (obj, 0, UINT16_FROM_BE (d->return_ofs), false, ext);
-        _visit_pbc (obj, 0, UINT16_FROM_BE (d->default_ofs), false, ext);
-        _visit_pbc (obj, 0, UINT16_FROM_BE (d->timeout_ofs), false, ext);
+        _visit_pbc (obj, 0, uint16_from_be (d->prev_ofs), false, ext);
+        _visit_pbc (obj, 0, uint16_from_be (d->next_ofs), false, ext);
+        _visit_pbc (obj, 0, uint16_from_be (d->return_ofs), false, ext);
+        _visit_pbc (obj, 0, uint16_from_be (d->default_ofs), false, ext);
+        _visit_pbc (obj, 0, uint16_from_be (d->timeout_ofs), false, ext);
 
         for (idx = 0; idx < d->nos; idx++)
-          _visit_pbc (obj, 0, UINT16_FROM_BE (d->ofs[idx]), false, ext);
+          _visit_pbc (obj, 0, uint16_from_be (d->ofs[idx]), false, ext);
         
       }
       break;
@@ -378,7 +378,7 @@ _visit_lot (debug_obj_t *obj, bool ext)
     return;
 
   for (n = 0; n < LOT_VCD_OFFSETS; n++)
-    if ((tmp = UINT16_FROM_BE (lot->offset[n])) != 0xFFFF)
+    if ((tmp = uint16_from_be (lot->offset[n])) != 0xFFFF)
       _visit_pbc (obj, n + 1, tmp, true, ext);
 
   _vcd_list_sort (ext ? obj->offset_x_list : obj->offset_list, 
@@ -391,7 +391,7 @@ dump_lot (const debug_obj_t *obj, bool ext)
   const LotVcd *lot = ext ? obj->lot_x : obj->lot;
   
   unsigned n, tmp;
-  unsigned max_lid = UINT16_FROM_BE (obj->info.lot_entries);
+  unsigned max_lid = uint16_from_be (obj->info.lot_entries);
   unsigned mult = obj->info.offset_mult;
 
   fprintf (stdout, 
@@ -400,11 +400,11 @@ dump_lot (const debug_obj_t *obj, bool ext)
            : (ext ? "EXT/LOT_X.VCD\n": "VCD/LOT.VCD\n"));
 
   if (lot->reserved)
-    fprintf (stdout, " RESERVED = 0x%4.4x (should be 0x0000)\n", UINT16_FROM_BE (lot->reserved));
+    fprintf (stdout, " RESERVED = 0x%4.4x (should be 0x0000)\n", uint16_from_be (lot->reserved));
 
   for (n = 0; n < LOT_VCD_OFFSETS; n++)
     {
-      if ((tmp = UINT16_FROM_BE (lot->offset[n])) != 0xFFFF)
+      if ((tmp = uint16_from_be (lot->offset[n])) != 0xFFFF)
         {
           if (!n && tmp)
             fprintf (stdout, "warning, LID[1] should have offset = 0!\n");
@@ -456,27 +456,32 @@ dump_psd (const debug_obj_t *obj, bool ext)
                      "  ptime: %d/15s | wait: %ds | await: %ds\n",
                      n, _ofs2str (obj, ofs->offset, ext),
                      d->noi,
-                     UINT16_FROM_BE (d->lid) & 0x7fff,
-                     _vcd_bool_str (UINT16_FROM_BE (d->lid) & 0x8000),
-                     _ofs2str (obj, UINT16_FROM_BE (d->prev_ofs), ext),
-                     _ofs2str (obj, UINT16_FROM_BE (d->next_ofs), ext),
-                     _ofs2str (obj, UINT16_FROM_BE (d->return_ofs), ext),
-                     UINT16_FROM_BE (d->ptime),
+                     uint16_from_be (d->lid) & 0x7fff,
+                     _vcd_bool_str (uint16_from_be (d->lid) & 0x8000),
+                     _ofs2str (obj, uint16_from_be (d->prev_ofs), ext),
+                     _ofs2str (obj, uint16_from_be (d->next_ofs), ext),
+                     _ofs2str (obj, uint16_from_be (d->return_ofs), ext),
+                     uint16_from_be (d->ptime),
                      _calc_psd_wait_time (d->wtime),
                      _calc_psd_wait_time (d->atime));
 
             for (i = 0; i < d->noi; i++)
               {
                 fprintf (stdout, "  item[%d]: %s\n",
-                         i, _pin2str (UINT16_FROM_BE (d->itemid[i])));
+                         i, _pin2str (uint16_from_be (d->itemid[i])));
               }
             fprintf (stdout, "\n");
           }
           break;
 
         case PSD_TYPE_END_LIST:
-          fprintf (stdout, " PSD[%.2d] (%s): end list descriptor\n", n, _ofs2str (obj, ofs->offset, ext));
-          fprintf (stdout, "\n");
+          {
+            const PsdEndListDescriptor *d = (const void *) (psd + _rofs);
+            fprintf (stdout, " PSD[%.2d] (%s): end list descriptor\n", n, _ofs2str (obj, ofs->offset, ext));
+            fprintf (stdout, "  next disc number: %d (if 0 stop PBC handling)\n", d->next_disc);
+            fprintf (stdout, "  change picture item: %s\n", _pin2str (uint16_from_be (d->change_pic)));
+            fprintf (stdout, "\n");
+          }
           break;
 
         case PSD_TYPE_EXT_SELECTION_LIST:
@@ -498,20 +503,20 @@ dump_psd (const debug_obj_t *obj, bool ext)
                      *(uint8_t *) &d->flags,
                      d->nos, 
                      d->bsn,
-                     UINT16_FROM_BE (d->lid) & 0x7fff,
-                     _vcd_bool_str (UINT16_FROM_BE (d->lid) & 0x8000),
-                     _ofs2str (obj, UINT16_FROM_BE (d->prev_ofs), ext),
-                     _ofs2str (obj, UINT16_FROM_BE (d->next_ofs), ext),
-                     _ofs2str (obj, UINT16_FROM_BE (d->return_ofs), ext),
-                     _ofs2str (obj, UINT16_FROM_BE (d->default_ofs), ext),
-                     _ofs2str (obj, UINT16_FROM_BE (d->timeout_ofs), ext),
+                     uint16_from_be (d->lid) & 0x7fff,
+                     _vcd_bool_str (uint16_from_be (d->lid) & 0x8000),
+                     _ofs2str (obj, uint16_from_be (d->prev_ofs), ext),
+                     _ofs2str (obj, uint16_from_be (d->next_ofs), ext),
+                     _ofs2str (obj, uint16_from_be (d->return_ofs), ext),
+                     _ofs2str (obj, uint16_from_be (d->default_ofs), ext),
+                     _ofs2str (obj, uint16_from_be (d->timeout_ofs), ext),
                      _calc_psd_wait_time(d->totime),
                      0x7f & d->loop, _vcd_bool_str (0x80 & d->loop),
-                     _pin2str (UINT16_FROM_BE (d->itemid)));
+                     _pin2str (uint16_from_be (d->itemid)));
 
             for (i = 0; i < d->nos; i++)
               fprintf (stdout, "  ofs[%d]: %s\n", i,
-                       _ofs2str (obj, UINT16_FROM_BE (d->ofs[i]), ext));
+                       _ofs2str (obj, uint16_from_be (d->ofs[i]), ext));
 
             if (type == PSD_TYPE_EXT_SELECTION_LIST 
                 || d->flags.SelectionAreaFlag)
@@ -624,8 +629,8 @@ dump_info (const debug_obj_t *obj)
   fprintf (stdout, " version: 0x%2.2x\n", info->version);
   fprintf (stdout, " system profile tag: 0x%2.2x\n", info->sys_prof_tag);
   fprintf (stdout, " album desc: `%.16s'\n", info->album_desc);
-  fprintf (stdout, " volume count: %d\n", UINT16_FROM_BE (info->vol_count));
-  fprintf (stdout, " volume number: %d\n", UINT16_FROM_BE (info->vol_id));
+  fprintf (stdout, " volume count: %d\n", uint16_from_be (info->vol_count));
+  fprintf (stdout, " volume number: %d\n", uint16_from_be (info->vol_id));
 
   fprintf (stdout, " pal flags:");
   for (n = 0; n < 98; n++)
@@ -639,29 +644,29 @@ dump_info (const debug_obj_t *obj)
   fprintf (stdout, "\n");
 
   fprintf (stdout, " flags:\n");
-  if (info->flags.reserved1)
-    fprintf (stdout, "  reserved1: %s (please report if not false!)\n",
-             _vcd_bool_str (info->flags.reserved1));
+  fprintf (stdout, "  reserved1: %s (must be 'no'!)\n",
+           _vcd_bool_str (info->flags.reserved1));
 
   fprintf (stdout, "  restriction: %d\n", info->flags.restriction);
   fprintf (stdout, "  special info: %s\n", _vcd_bool_str (info->flags.special_info));
   fprintf (stdout, "  user data cc: %s\n", _vcd_bool_str (info->flags.user_data_cc));
   fprintf (stdout, "  start lid #2: %s\n", _vcd_bool_str (info->flags.use_lid2));
   fprintf (stdout, "  start track #2: %s\n", _vcd_bool_str (info->flags.use_track3));
-  fprintf (stdout, "  autoplay (?): %s\n", _vcd_bool_str (info->flags.autoplay));
+  fprintf (stdout, "  reserved2: %s (must be 'no'!)\n",
+           _vcd_bool_str (info->flags.reserved2));
 
   fprintf (stdout, " psd size: %d\n", UINT32_FROM_BE (info->psd_size));
   fprintf (stdout, " first segment addr: %2.2x:%2.2x:%2.2x\n",
            info->first_seg_addr.m, info->first_seg_addr.s, info->first_seg_addr.f);
 
-  fprintf (stdout, " offset multiplier: 0x%2.2x (must be 0x08)\n", info->offset_mult);
+  fprintf (stdout, " offset multiplier: 0x%2.2x (must be 0x08!)\n", info->offset_mult);
 
   fprintf (stdout, " maximum lid: %d\n",
-           UINT16_FROM_BE (info->lot_entries));
+           uint16_from_be (info->lot_entries));
 
-  fprintf (stdout, " maximum segment number: %d\n", UINT16_FROM_BE (info->item_count));
+  fprintf (stdout, " maximum segment number: %d\n", uint16_from_be (info->item_count));
 
-  for (n = 0; n < UINT16_FROM_BE (info->item_count); n++)
+  for (n = 0; n < uint16_from_be (info->item_count); n++)
     {
       const char *audio_types[] =
         {
@@ -683,13 +688,26 @@ dump_info (const debug_obj_t *obj)
           "PAL motion"
         };
 
+      const char *ogt_str[] =
+        {
+          "None",
+          "0 available",
+          "0 & 1 available",
+          "all available"
+        };
+
       fprintf (stdout, " SEGMENT[%d]: audio: %s,"
-               " video: %s, continuation %s\n",
+               " video: %s, continuation %s, OGT substream: %s\n",
                n + 1,
                audio_types[info->spi_contents[n].audio_type],
                video_types[info->spi_contents[n].video_type],
-               _vcd_bool_str (info->spi_contents[n].item_cont));
+               _vcd_bool_str (info->spi_contents[n].item_cont),
+               ogt_str[info->spi_contents[n].ogt]);
     }
+
+  for (n = 0; n < 5; n++)
+    fprintf (stdout, " volume start time[%d]: %d secs\n", 
+             n, uint16_from_be (info->playing_time[n]));
 }
 
 static void
@@ -698,7 +716,7 @@ dump_entries (const debug_obj_t *obj)
   const EntriesVcd *entries = &obj->entries;
   int ntracks, n;
 
-  ntracks = UINT16_FROM_BE (entries->entry_count);
+  ntracks = uint16_from_be (entries->entry_count);
 
   fprintf (stdout, 
            obj->vcd_type == VCD_TYPE_SVCD 
@@ -769,13 +787,22 @@ dump_tracks_svd (const debug_obj_t *obj)
           "PAL stream",
         };
 
-      fprintf (stdout, " track[%.2d]: %2.2x:%2.2x:%2.2x, audio: %s, video: %s\n",
+      const char *ogt_str[] =
+        {
+          "None",
+          "0 available",
+          "0 & 1 available",
+          "all available"
+        };
+
+      fprintf (stdout, " track[%.2d]: %2.2x:%2.2x:%2.2x, audio: %s, video: %s, OGT stream: %s\n",
                j,
                tracks->playing_time[j].m,
                tracks->playing_time[j].s,
                tracks->playing_time[j].f,
                audio_types[tracks2->contents[j].audio],
-               video_types[tracks2->contents[j].video]);
+               video_types[tracks2->contents[j].video],
+               ogt_str[tracks2->contents[j].ogt]);
     }
 }
 
@@ -785,7 +812,7 @@ dump_search_dat (const debug_obj_t *obj)
   const int _printed_points = 15;
   const SearchDat *searchdat = obj->search_buf;
   unsigned m;
-  uint32_t scan_points = UINT16_FROM_BE (searchdat->scan_points);
+  uint32_t scan_points = uint16_from_be (searchdat->scan_points);
 
   fprintf (stdout, "SVCD/SEARCH.DAT\n");
   fprintf (stdout, " ID: `%.8s'\n", searchdat->file_id);
@@ -848,7 +875,7 @@ _xa_attr_str (uint16_t xa_attr)
 {
   char *result = _getbuf();
 
-  xa_attr = UINT16_FROM_BE (xa_attr);
+  xa_attr = uint16_from_be (xa_attr);
 
   result[0] = (xa_attr & XA_ATTR_DIRECTORY) ? 'd' : '-';
   result[1] = (xa_attr & XA_ATTR_CDDA) ? 'a' : '-';
@@ -905,8 +932,8 @@ _dump_fs_recurse (const debug_obj_t *obj, const char pathname[])
                "  %c %s %d %d [fn %.2d] [lsn %6d] %9d  %s\n",
                (statbuf.type == _STAT_DIR) ? 'd' : '-',
                _xa_attr_str (statbuf.xa.attributes),
-               UINT16_FROM_BE (statbuf.xa.user_id),
-               UINT16_FROM_BE (statbuf.xa.group_id),
+               uint16_from_be (statbuf.xa.user_id),
+               uint16_from_be (statbuf.xa.group_id),
                statbuf.xa.filenum,
                statbuf.lsn,
                statbuf.size,
@@ -985,7 +1012,7 @@ dump_pvd (const debug_obj_t *obj)
 }
 
 static void
-dump_all (const debug_obj_t *obj)
+dump_all (debug_obj_t *obj)
 {
   fprintf (stdout, DELIM);
   dump_pvd (obj);
@@ -1139,7 +1166,7 @@ dump (VcdImageSource *img, const char image_fname[])
                                                    statbuf.lsn, false, statbuf.secsize))
             exit (EXIT_FAILURE);
 
-          size = (3 * UINT16_FROM_BE (((SearchDat *)obj.search_buf)->scan_points)) 
+          size = (3 * uint16_from_be (((SearchDat *)obj.search_buf)->scan_points)) 
             + sizeof (SearchDat);
           
           if (size > statbuf.size)

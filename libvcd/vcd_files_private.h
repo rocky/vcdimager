@@ -104,9 +104,9 @@ typedef struct {
                                               id, then start next disc
                                               with track 3, otherwise
                                               start with track 2 */ 
-  uint8_t autoplay : 1;                    /* auto play disc ?? */
+  uint8_t reserved2 : 1;                   /* Reserved, must be zero */
 #else
-  uint8_t autoplay : 1;
+  uint8_t reserved2 : 1;
   uint8_t use_track3 : 1;
   uint8_t use_lid2 : 1;
   uint8_t user_data_cc : 1;
@@ -150,9 +150,13 @@ typedef struct
                                             0x0 - 1st or only segment of item
                                             0x1 - 2nd or later
                                                   segment of item */
-  uint8_t reserved2 : 2;                 /* Reserved, must be zero */
+  uint8_t ogt : 2;                       /* 0x0 - no OGT substream 
+                                            0x1 - sub-stream 0 available
+                                            0x2 - sub-stream 0 & 1 available
+                                            0x3 - all OGT sub-substreams 
+                                                  available */
 #else
-  uint8_t reserved2 : 2;
+  uint8_t ogt : 2;
   uint8_t item_cont : 1;
   uint8_t video_type : 3;
   uint8_t audio_type : 2;
@@ -198,7 +202,8 @@ typedef struct {
                                               byte for each possible segment
                                               play item. Each byte indicates
                                               contents. */
-  char reserved1[12]         GNUC_PACKED;  /* Reserved, must be zero */
+  uint16_t playing_time[5]   GNUC_PACKED;  /* in seconds */
+  char reserved[2]           GNUC_PACKED;  /* Reserved, must be zero */
 } InfoVcd;
 
 /* LOT.VCD
@@ -229,7 +234,8 @@ typedef struct {
    The Selection List defines the action to be taken in response to a set
    of defined user actions: Next, Previous, Default Select, Numeric, Return.
 
-   The End List terminates the control flow.
+   The End List terminates the control flow or switches to the next
+   disc volume.
 
    Each list has a unique list id number. The first must be 1, the others can
    be anything (up to 32767).
@@ -246,15 +252,19 @@ typedef enum
   {
     PSD_TYPE_PLAY_LIST = 0x10,        /* Play List */
     PSD_TYPE_SELECTION_LIST = 0x18,   /* Selection List (+Ext. for SVCD) */
-    PSD_TYPE_EXT_SELECTION_LIST = 0x1a,   /* Extended Selection List (VCD2.0) */
+    PSD_TYPE_EXT_SELECTION_LIST = 0x1a, /* Extended Selection List (VCD2.0) */
     PSD_TYPE_END_LIST = 0x1f,         /* End List */
     PSD_TYPE_COMMAND_LIST = 0x20      /* Command List */
   } psd_descriptor_types;
 
 typedef struct {
-  uint8_t type               GNUC_PACKED;
-  uint8_t reserved[7]        GNUC_PACKED;
-} PsdEndOfListDescriptor;
+  uint8_t  type               GNUC_PACKED;     /* PSD_TYPE_END_LIST */
+  uint8_t  next_disc          GNUC_PACKED;     /* 0x00 to stop PBC or 0xnn
+                                                  to switch to disc no nn */
+  uint16_t change_pic         GNUC_PACKED;     /* 0 or 1000..2979, should 
+                                                  be still image */
+  uint8_t  reserved[4]        GNUC_PACKED;     /* padded with 0x00 */
+} PsdEndListDescriptor;
 
 typedef struct {
 #if defined(BITFIELD_LSBF)
@@ -358,9 +368,13 @@ typedef struct {
                                              0x03 : NTSC video
                                              0x07 : PAL video */
   uint8_t reserved1 : 1;                  /* Reserved, must be zero */
-  uint8_t reserved2 : 2;                  /* Reserved, must be zero */
+  uint8_t ogt : 2;                        /* 0x0 - no OGT substream 
+                                             0x1 - sub-stream 0 available
+                                             0x2 - sub-stream 0 & 1 available
+                                             0x3 - all OGT sub-substreams 
+                                                   available */
 #else
-  uint8_t reserved2 : 2;
+  uint8_t ogt : 2;
   uint8_t reserved1 : 1;
   uint8_t video : 3;
   uint8_t audio : 2;

@@ -292,7 +292,6 @@ set_info_vcd(VcdObj *obj, void *buf)
       info_vcd.flags.restriction = obj->info_restriction;
       info_vcd.flags.use_lid2 = obj->info_use_lid2;
       info_vcd.flags.use_track3 = obj->info_use_seq2;
-      info_vcd.flags.autoplay = obj->info_autoplay;
 
       n = 0;
       _VCD_LIST_FOREACH (node, obj->mpeg_track_list)

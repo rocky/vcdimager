@@ -22,6 +22,7 @@
 #define _BYTESEX_H_
 
 #include "vcd_types.h"
+#include "vcd_logging.h"
 
 #define UINT16_SWAP_LE_BE(val) ((uint16_t) ( \
     (((uint16_t) (val) & (uint16_t) 0x00ffU) << 8) | \
@@ -43,6 +44,24 @@
     (((uint64_t) (val) & (uint64_t) UINT64_C(0x00ff000000000000)) >> 40) | \
     (((uint64_t) (val) & (uint64_t) UINT64_C(0xff00000000000000)) >> 56)))
 
+
+inline static 
+uint16_t uint16_swap_le_be (const uint16_t val)
+{
+  return UINT16_SWAP_LE_BE (val);
+}
+
+inline static 
+uint32_t uint32_swap_le_be (const uint32_t val)
+{
+  return UINT32_SWAP_LE_BE (val);
+}
+
+inline static 
+uint64_t uint64_swap_le_be (const uint64_t val)
+{
+  return UINT64_SWAP_LE_BE (val);
+}
 
 # define UINT8_TO_BE(val)      ((uint8_t) (val))
 # define UINT8_TO_LE(val)      ((uint8_t) (val))
@@ -118,12 +137,15 @@ CVT_TO_FUNC(64)
 static inline uint32_t
 to_723(uint16_t i)
 {
-  return UINT32_SWAP_LE_BE(i) | i;
+  return uint32_swap_le_be(i) | i;
 }
 
 static inline uint16_t 
 from_723 (uint32_t p)
 {
+  if (uint32_swap_le_be (p) != p)
+    vcd_warn ("from_723: broken byte order");
+
   return (0xFFFF & p);
 }
 
@@ -136,12 +158,15 @@ from_723 (uint32_t p)
 static inline uint64_t
 to_733(uint32_t i)
 {
-  return UINT64_SWAP_LE_BE(i) | i;
+  return uint64_swap_le_be(i) | i;
 }
 
 static inline uint32_t 
 from_733 (uint64_t p)
 {
+  if (uint64_swap_le_be (p) != p)
+    vcd_warn ("from_733: broken byte order");
+    
   return (UINT32_C(0xFFFFFFFF) & p);
 }
 

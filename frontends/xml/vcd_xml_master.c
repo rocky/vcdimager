@@ -58,7 +58,6 @@ bool vcd_xml_master (const struct vcdxml_t *obj, const char cue_fname[],
   vcd_obj_set_param_uint (_vcd, VCD_PARM_RESTRICTION, obj->info.restriction);
   vcd_obj_set_param_bool (_vcd, VCD_PARM_NEXT_VOL_SEQ2, obj->info.use_sequence2);
   vcd_obj_set_param_bool (_vcd, VCD_PARM_NEXT_VOL_LID2, obj->info.use_lid2);
-  vcd_obj_set_param_bool (_vcd, VCD_PARM_AUTOPLAY, obj->info.autoplay);
 
   if (obj->pvd.volume_id)
     vcd_obj_set_param_str (_vcd, VCD_PARM_VOLUME_ID, obj->pvd.volume_id);

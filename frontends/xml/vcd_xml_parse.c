@@ -157,8 +157,6 @@ _parse_info (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 	obj->info.use_sequence2 = true;
       GET_ELSE GET_ELEM_ ("next-volume-use-lid2", doc, cur, ns)
 	obj->info.use_lid2 = true;
-      GET_ELSE GET_ELEM_ ("autoplay", doc, cur, ns)
-	obj->info.autoplay = true;
       GET_ELSE vcd_assert_not_reached ();
     }
 

@@ -294,7 +294,7 @@ _vcd_pbc_node_length (const VcdObj *obj, const pbc_t *_pbc, bool extended)
       break;
       
     case PBC_END:
-      retval = sizeof (PsdEndOfListDescriptor);
+      retval = sizeof (PsdEndListDescriptor);
       break;
 
     default:
@@ -559,7 +559,7 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
       
     case PBC_END:
       {
-	PsdEndOfListDescriptor *_md = buf;
+	PsdEndListDescriptor *_md = buf;
 
 	_md->type = PSD_TYPE_END_LIST;
       }

@@ -314,7 +314,6 @@ _parse_info (struct vcdxml_t *obj, VcdImageSource *img)
   obj->info.restriction = info.flags.restriction;
   obj->info.use_lid2 = info.flags.use_lid2;
   obj->info.use_sequence2 = info.flags.use_track3;
-  obj->info.autoplay = info.flags.autoplay;
 
   obj->info.psd_size = UINT32_FROM_BE (info.psd_size);
   obj->info.max_lid = UINT16_FROM_BE (info.lot_entries);

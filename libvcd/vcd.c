@@ -572,11 +572,6 @@ vcd_obj_set_param_bool (VcdObj *obj, vcd_parm_t param, bool arg)
       vcd_debug ("changing 'next volume use sequence 2' to %d", obj->info_use_seq2);
       break;
 
-    case VCD_PARM_AUTOPLAY:
-      obj->info_autoplay = arg ? true : false;
-      vcd_debug ("changing 'autoplay' %d", obj->info_autoplay);
-      break;
-
     case VCD_PARM_SVCD_VCD3_MPEGAV:
       if (obj->type == VCD_TYPE_SVCD)
         {
