@@ -30,6 +30,7 @@
 #include <libxml/parser.h>
 #include <libxml/parserInternals.h>
 #include <libxml/xmlmemory.h>
+#include <libxml/uri.h>
 
 #define FOR_EACH(iter, parent) for(iter = parent->xmlChildrenNode; iter != NULL; iter = iter->next)
 
@@ -102,6 +103,9 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
   dtd = xmlNewDtd (doc, "videocd", VIDEOCD_DTD_PUBID, VIDEOCD_DTD_SYSID);
   xmlAddChild ((xmlNodePtr) doc, (xmlNodePtr) dtd);
 
+  if (obj->comment)
+    xmlAddChild ((xmlNodePtr) doc, xmlNewComment (obj->comment));
+
   vcd_node = xmlNewDocNode (doc, ns, "videocd", NULL);
   xmlAddChild ((xmlNodePtr) doc, vcd_node);
 
@@ -125,6 +129,18 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
     default:
       assert (0);
       break;
+    }
+
+
+  /* options */
+
+  _VCD_LIST_FOREACH (node, obj->option_list)
+    {
+      struct option_t *_option = _vcd_list_node_data (node);
+      
+      section = xmlNewChild (vcd_node, ns, "option", NULL);
+      xmlSetProp (section, "name", _option->name);
+      xmlSetProp (section, "value", _option->value);
     }
 
   /* INFO */
@@ -238,10 +254,10 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 
 	    case PBC_PLAYLIST:
 	      pl = xmlNewChild (section, ns, "playlist", NULL);
-	      if (_pbc->next_id)
-		xmlSetProp (xmlNewChild (pl, ns, "next", NULL), "ref", _pbc->next_id);
 	      if (_pbc->prev_id)
 		xmlSetProp (xmlNewChild (pl, ns, "prev", NULL), "ref", _pbc->prev_id);
+	      if (_pbc->next_id)
+		xmlSetProp (xmlNewChild (pl, ns, "next", NULL), "ref", _pbc->next_id);
 	      if (_pbc->retn_id)
 		xmlSetProp (xmlNewChild (pl, ns, "return", NULL), "ref", _pbc->retn_id);
 
@@ -260,8 +276,8 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 	      _VCD_LIST_FOREACH (node2, _pbc->item_id_list)
 		{
 		  char *_id = _vcd_list_node_data (node2);
-
-		  xmlNewChild (pl, ns, "play-item", _id);
+		  
+		  xmlSetProp (xmlNewChild (pl, ns, "play-item", NULL), "ref", _id);
 		}
 
 	      break;
@@ -272,10 +288,10 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 	      snprintf (buf, sizeof (buf), "%d", _pbc->bsn);
 	      xmlNewChild (pl, ns, "bsn", buf);
 
-	      if (_pbc->next_id)
-		xmlSetProp (xmlNewChild (pl, ns, "next", NULL), "ref", _pbc->next_id);
 	      if (_pbc->prev_id)
 		xmlSetProp (xmlNewChild (pl, ns, "prev", NULL), "ref", _pbc->prev_id);
+	      if (_pbc->next_id)
+		xmlSetProp (xmlNewChild (pl, ns, "next", NULL), "ref", _pbc->next_id);
 	      if (_pbc->retn_id)
 		xmlSetProp (xmlNewChild (pl, ns, "return", NULL), "ref", _pbc->retn_id);
 
@@ -331,3 +347,33 @@ vcd_xml_dump (struct vcdxml_t *obj, const char xml_fname[])
   
   return 0;
 }
+
+char *
+vcd_xml_dump_cl_comment (int argc, const char *argv[])
+{
+  int idx;
+  char *retval;
+  size_t len = 0;
+
+  retval = strdup (" commandline used: ");
+
+  len = strlen (retval);
+
+  for (idx = 0; idx < argc; idx++)
+    {
+      len += strlen (argv[idx]) + 1;
+      
+      retval = realloc (retval, len + 1);
+
+      strcat (retval, argv[idx]);
+      strcat (retval, " ");
+    }
+
+  /* scramble hyphen's */
+  for (idx = 0; retval[idx]; idx++)
+    if (!strncmp (retval + idx, "--", 2))
+      retval[idx + 1] = '=';
+
+  return retval;
+}
+

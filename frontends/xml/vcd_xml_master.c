@@ -25,6 +25,7 @@
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "vcd_xml_master.h"
 
@@ -33,37 +34,6 @@
 #include <libvcd/vcd_stream_stdio.h>
 #include <libvcd/vcd_image_bincue.h>
 
-static vcd_type_t
-_type_id_by_str (const char class[], const char version[])
-{
-  struct {
-    const char *class;
-    const char *version;
-    vcd_type_t id;
-  } type_str[] = {
-    { "vcd", "1.1", VCD_TYPE_VCD11 },
-    { "vcd", "2.0", VCD_TYPE_VCD2 },
-    { "svcd", "1.0", VCD_TYPE_SVCD },
-    { NULL, }
-  };
-      
-  int i = 0;
-
-  while (type_str[i].class) 
-    if (strcasecmp(class, type_str[i].class)
-	|| strcasecmp(version, type_str[i].version))
-      i++;
-    else
-      break;
-
-  if (!type_str[i].class)
-    {
-      vcd_error ("invalid type given");
-      return 0;
-    }
-  
-  return type_str[i].id;
-}
 
 bool vcd_xml_master (const struct vcdxml_t *obj, const char cue_fname[],
 		     const char bin_fname[], bool sector_2336_flag)
@@ -74,10 +44,7 @@ bool vcd_xml_master (const struct vcdxml_t *obj, const char cue_fname[],
 
   assert (obj != NULL);
 
-  assert (obj->class != NULL);
-  assert (obj->version != NULL);
-
-  _vcd = vcd_obj_new (_type_id_by_str (obj->class, obj->version));
+  _vcd = vcd_obj_new (obj->vcd_type);
 
   if (obj->info.album_id)
     vcd_obj_set_param_str (_vcd, VCD_PARM_ALBUM_ID, obj->info.album_id);

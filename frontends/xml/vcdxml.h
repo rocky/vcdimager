@@ -25,16 +25,14 @@
 #include <libvcd/vcd_data_structures.h>
 #include <libvcd/vcd_pbc.h>
 
-#include <libxml/tree.h>
-
 struct vcdxml_t {
-  vcd_type_t vcd_type; /* used for restoring */
-  xmlChar *class;
-  xmlChar *version;
+  char *comment; /* just a xml comment... */
+
+  vcd_type_t vcd_type;
   VcdList *option_list;
 
   struct {
-    xmlChar *album_id;
+    char *album_id;
     unsigned volume_count;
     unsigned volume_number;
     unsigned restriction;
@@ -49,11 +47,11 @@ struct vcdxml_t {
   } info;
 
   struct {
-    xmlChar *volume_id;
-    xmlChar *system_id;
-    xmlChar *application_id;
-    xmlChar *preparer_id;
-    xmlChar *publisher_id;
+    char *volume_id;
+    char *system_id;
+    char *application_id;
+    char *preparer_id;
+    char *publisher_id;
   } pvd;
 
   VcdList *pbc_list;
@@ -66,13 +64,13 @@ struct vcdxml_t {
 };
 
 struct option_t {
-  xmlChar *name;
-  xmlChar *value;
+  char *name;
+  char *value;
 };
 
 struct sequence_t {
-  xmlChar *id;
-  xmlChar *src;
+  char *id;
+  char *src;
   VcdList *entry_point_list; /* entry_point_t */
   VcdList *autopause_list; /* double * */
 
@@ -81,7 +79,7 @@ struct sequence_t {
 };
 
 struct entry_point_t {
-  xmlChar *id;
+  char *id;
   double timestamp;
   
   /* used for restoring */
@@ -90,8 +88,8 @@ struct entry_point_t {
 
 struct segment_t
 {
-  xmlChar *id;
-  xmlChar *src;
+  char *id;
+  char *src;
   
   /* used for restoring vcds */
   unsigned segments_count;

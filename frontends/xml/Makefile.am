@@ -18,21 +18,21 @@ vcdxbuild_SOURCES = \
 	vcd_xml_parse.c \
 	vcd_xml_master.c \
 	vcd_xml_master.h \
-	vcd_xml_dtd.h \
-	vcd_xml_dtd.c
+	vcd_xml_dtd.c \
+	vcd_xml_dtd.h
 
 vcdxrip_LDADD = $(XML_LIBS) $(VCD_LIBS) $(POPT_LIBS)
 vcdxrip_SOURCES = \
+	vcd_xml_rip.c \
 	vcd_xml_dump.h \
 	vcd_xml_dump.c \
-	vcd_xml_rip.c \
 	vcd_xml_dtd.h 
 
 vcdxgen_LDADD = $(XML_LIBS) $(POPT_LIBS) $(VCD_LIBS)
 vcdxgen_SOURCES = \
+	vcd_xml_gen.c \
 	vcd_xml_dump.h \
 	vcd_xml_dump.c \
-	vcd_xml_gen.c \
 	vcd_xml_dtd.h 
 
 videocd_dtd.inc: $(srcdir)/videocd.dtd

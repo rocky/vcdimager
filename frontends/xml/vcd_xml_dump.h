@@ -25,4 +25,6 @@
 
 int vcd_xml_dump (struct vcdxml_t *obj, const char xml_fname[]);
 
+char *vcd_xml_dump_cl_comment (int argc, const char *argv[]);
+
 #endif /* __VCD_XML_DUMP_H__ */

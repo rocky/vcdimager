@@ -595,15 +595,46 @@ _parse_filesystem (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPt
  * top videocd block
  */
 
+static vcd_type_t
+_type_id_by_str (const char class[], const char version[])
+{
+  struct {
+    const char *class;
+    const char *version;
+    vcd_type_t id;
+  } type_str[] = {
+    { "vcd", "1.1", VCD_TYPE_VCD11 },
+    { "vcd", "2.0", VCD_TYPE_VCD2 },
+    { "svcd", "1.0", VCD_TYPE_SVCD },
+    { NULL, NULL, VCD_TYPE_INVALID }
+  };
+      
+  int i = 0;
+
+  while (type_str[i].class) 
+    if (strcasecmp(class, type_str[i].class)
+	|| strcasecmp(version, type_str[i].version))
+      i++;
+    else
+      break;
+
+  return type_str[i].id;
+}
+
 static bool
 _parse_videocd (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
   xmlNodePtr cur;
+  xmlChar *_class = NULL;
+  xmlChar *_version = NULL;
 
   assert (obj != NULL);
 
-  GET_PROP_STR (obj->class, "class", doc, node, ns);
-  GET_PROP_STR (obj->version, "version", doc, node, ns);
+  GET_PROP_STR (_class, "class", doc, node, ns);
+  GET_PROP_STR (_version, "version", doc, node, ns);
+
+  if ((obj->vcd_type = _type_id_by_str (_class, _version)) == VCD_TYPE_INVALID)
+    return true;
 
   obj->segment_list = _vcd_list_new ();
   obj->pbc_list = _vcd_list_new ();

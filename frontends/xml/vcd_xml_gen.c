@@ -221,10 +221,13 @@ main (int argc, const char *argv[])
 
   memset (&obj, 0, sizeof (struct vcdxml_t));
 
+  obj.comment = vcd_xml_dump_cl_comment (argc, argv);
+
   obj.segment_list = _vcd_list_new ();
   obj.sequence_list = _vcd_list_new ();
   obj.pbc_list = _vcd_list_new ();
   obj.filesystem = _vcd_list_new ();
+  obj.option_list = _vcd_list_new ();
 
   obj.pvd.system_id = strdup (DEFAULT_SYSTEM_ID);
   obj.pvd.volume_id = strdup (DEFAULT_VOLUME_ID);
@@ -435,6 +438,18 @@ main (int argc, const char *argv[])
       _pbc->id = strdup ("lid-end");
 
       _vcd_list_append (obj.pbc_list, _pbc);
+    }
+
+  if (obj.vcd_type == VCD_TYPE_SVCD 
+      && broken_svcd_mode_flag)
+    {
+      struct option_t *_opt = _vcd_malloc (sizeof (struct option_t));
+      
+      _opt->name = strdup ("broken svcd mode");
+      _opt->value = strdup ("true");
+
+      _vcd_list_append (obj.option_list, _opt);
+
     }
 
   vcd_xml_dump (&obj, xml_fname);

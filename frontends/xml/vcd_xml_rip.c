@@ -25,6 +25,9 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
+
+#include <popt.h>
 
 #include <libvcd/vcd_types.h>
 #include <libvcd/vcd_files.h>
@@ -36,11 +39,14 @@
 #include <libvcd/vcd_iso9660_private.h>
 #include <libvcd/vcd_bytesex.h>
 #include <libvcd/vcd_util.h>
+#include <libvcd/vcd_cd_sector.h>
 
 #include "vcdxml.h"
 #include "vcd_xml_dtd.h"
 #include "vcd_xml_dump.h"
 
+static int _verbose_flag = 0;
+static int _quiet_flag = 0;
 
 static const char *
 _strip_trail (const char str[], size_t n)
@@ -151,18 +157,12 @@ _parse_info (struct vcdxml_t *obj, VcdImageSource *img)
     {
     case VCD_TYPE_VCD11:
       vcd_debug ("VCD 1.1 detected");
-      obj->class = strdup ("vcd");
-      obj->version = strdup ("1.1");
       break;
     case VCD_TYPE_VCD2:
       vcd_debug ("VCD 2.0 detected");
-      obj->class = strdup ("vcd");
-      obj->version = strdup ("2.0");
       break;
     case VCD_TYPE_SVCD:
       vcd_debug ("SVCD detected");
-      obj->class = strdup ("svcd");
-      obj->version = strdup ("1.0");
       break;
     case VCD_TYPE_INVALID:
       vcd_error ("unknown ID encountered -- maybe not a proper (S)VCD?");
@@ -304,7 +304,7 @@ _parse_entries (struct vcdxml_t *obj, VcdImageSource *img)
 	  _vcd_list_append (_seq->entry_point_list, _entry);
 	}
 
-      vcd_debug ("%d %d %d %d", idx, track, extent, newtrack);
+      /* vcd_debug ("%d %d %d %d", idx, track, extent, newtrack); */
     }
 
   return 0;
@@ -441,10 +441,10 @@ _pbc_node_read (const void *buf, const struct _pbc_ctx *_ctx)
   return _pbc;
 }
 
-  static int
+static int
 _parse_pbc (struct vcdxml_t *obj, VcdImageSource *img)
 {
-  VcdList *_offsets;
+  /* VcdList *_offsets; -- fixme -- detect offsets better */
   LotVcd *lot = NULL;
   uint8_t *psd = NULL;
   int n;
@@ -490,25 +490,191 @@ _parse_pbc (struct vcdxml_t *obj, VcdImageSource *img)
     }
 
   /* fixme -- what about 'rejected' PBC lists... */
-  
 
   return 0;
 }
 
-int main (int argc, const char *argv[])
+static int
+_rip_segments (struct vcdxml_t *obj, VcdImageSource *img)
+{
+  VcdListNode *node;
+  uint32_t start_extent;
+
+  vcd_warn ("NIY");
+
+  start_extent = obj->info.segments_start;
+
+  assert (start_extent % 75 == 0);
+
+  _VCD_LIST_FOREACH (node, obj->segment_list)
+    {
+      struct segment_t *_seg = _vcd_list_node_data (node);
+      uint32_t n;
+      FILE *outfd = NULL;
+
+      assert (_seg->segments_count > 0);
+
+      vcd_info ("extracting %s... (start lsn %d, %d segments)",
+		_seg->src, start_extent, _seg->segments_count);
+
+      if (!(outfd = fopen (_seg->src, "wb")))
+        {
+          perror ("fopen()");
+          exit (EXIT_FAILURE);
+        }
+
+      for (n = 0; n < _seg->segments_count * 150; n++)
+	{
+	  struct m2f2sector
+          {
+            uint8_t subheader[8];
+            uint8_t data[2324];
+            uint8_t spare[4];
+          }
+          buf;
+	  memset (&buf, 0, sizeof (buf));
+	  vcd_image_source_read_mode2_sector (img, &buf, start_extent + n, true);
+	  
+	  if (!buf.subheader[0] 
+              && !buf.subheader[1]
+              && (buf.subheader[2] | SM_FORM2) == SM_FORM2
+              && !buf.subheader[3])
+            {
+              vcd_warn ("no EOF seen, but stream ended");
+              break;
+            }
+
+	  fwrite (buf.data, 2324, 1, outfd);
+
+	  if (buf.subheader[2] & SM_EOF)
+            break;
+	}
+
+      fclose (outfd);
+
+      start_extent += _seg->segments_count * 150;
+    }
+
+  return 0;
+}
+
+static int
+_rip_sequences (struct vcdxml_t *obj, VcdImageSource *img)
+{
+  vcd_warn ("NIY");
+
+  return 0;
+}
+
+#define DEFAULT_XML_FNAME      "videocd.xml"
+#define DEFAULT_IMG_FNAME      "videocd.bin"
+
+int
+main (int argc, const char *argv[])
 {
   VcdDataSource *bin_source;
   VcdImageSource *img_src;
   struct vcdxml_t obj;
 
+  /* cl params */
+  char *xml_fname = NULL;
+  char *img_fname = NULL;
+  char *img_dname = NULL;
+  int norip_flag = 0;
+  int sector_2336_flag = 0;
+
   memset (&obj, 0, sizeof (struct vcdxml_t));
+
+  obj.comment = vcd_xml_dump_cl_comment (argc, argv);
+
+  {
+    enum { CL_VERSION = 1 };
+    poptContext optCon = NULL;
+    int opt;
+
+    struct poptOption optionsTable[] = {
+      {"output-file", 'o', POPT_ARG_STRING, &xml_fname, 0,
+       "specify xml file for output (default: '" DEFAULT_XML_FNAME "')",
+       "FILE"},
+
+      {"bin-file", 'b', POPT_ARG_STRING, &img_fname, 0,
+       "set image file as source (default: '" DEFAULT_IMG_FNAME "')", 
+       "FILE"},
+
+      {"sector-2336", '\0', POPT_ARG_NONE, &sector_2336_flag, 0,
+       "use 2336 byte sector mode for image file"},
+
+#if defined(__linux__)
+      {"cdrom-device", '\0', POPT_ARG_STRING, &img_dname, 0,
+       "set CDROM device as source (linux only)", "DEVICE"},
+#endif
+
+      {"norip", '\0', POPT_ARG_NONE, &norip_flag, 0,
+       "dont rip mpeg streams"},
+
+      {"verbose", 'v', POPT_ARG_NONE, &_verbose_flag, 0, 
+       "be verbose"},
+    
+      {"quiet", 'q', POPT_ARG_NONE, &_quiet_flag, 0, 
+       "show only critical messages"},
+
+      {"version", 'V', POPT_ARG_NONE, NULL, CL_VERSION,
+       "display version and copyright information and exit"},
+      
+      POPT_AUTOHELP {NULL, 0, 0, NULL, 0}
+    };
+
+    optCon = poptGetContext ("vcdimager", argc, argv, optionsTable, 0);
+      
+    if (poptReadDefaultConfig (optCon, 0)) 
+      vcd_warn ("reading popt configuration failed"); 
+
+    while ((opt = poptGetNextOpt (optCon)) != -1)
+      switch (opt)
+	{
+	case CL_VERSION:
+	  fprintf (stdout, "GNU VCDImager " VERSION " [" HOST_ARCH "]\n\n"
+		   "Copyright (c) 2001 Herbert Valerio Riedel <hvr@gnu.org>\n\n"         
+		   "GNU VCDImager may be distributed under the terms of the GNU General Public\n"
+		   "Licence; For details, see the file `COPYING', which is included in the GNU\n"
+		   "VCDImager distribution. There is no warranty, to the extent permitted by law.\n");
+	  exit (EXIT_SUCCESS);
+	  break;
+
+	default:
+	  vcd_error ("error while parsing command line - try --help");
+	  exit (EXIT_FAILURE);
+	  break;
+      }
+
+    if (_verbose_flag && _quiet_flag)
+      vcd_error ("I can't be both, quiet and verbose... either one or another ;-)");
+    
+    if (poptGetArgs (optCon) != NULL)
+      vcd_error ("why are you giving me non-option arguments? -- try --help");
+
+    if (img_fname && img_dname)
+      vcd_error ("file name and device name given at the same time...");
+
+    poptFreeContext (optCon);
+  }
+
+  if (!xml_fname)
+    xml_fname = strdup (DEFAULT_XML_FNAME);
+
+  if (!img_dname && !img_fname)
+    img_fname = strdup (DEFAULT_IMG_FNAME);
+
+  if (!img_fname)
+    vcd_error ("bug: only file sources supported so far...");
 
   obj.segment_list = _vcd_list_new ();
   obj.sequence_list = _vcd_list_new ();
   obj.pbc_list = _vcd_list_new ();
   obj.filesystem = _vcd_list_new ();
+  obj.option_list = _vcd_list_new ();
 
-  bin_source = vcd_data_source_new_stdio (argc == 2 ? argv[1] : "videocd.bin");
+  bin_source = vcd_data_source_new_stdio (img_fname);
   assert (bin_source != NULL);
 
   img_src = vcd_image_source_new_bincue (bin_source, NULL, false);
@@ -517,6 +683,8 @@ int main (int argc, const char *argv[])
   /* start with ISO9660 PVD */
   _parse_pvd (&obj, img_src);
 
+  /* _parse_iso_fs (&obj, img_src); */
+  
   /* needs to be parsed in order */
   _parse_info (&obj, img_src);
   _parse_entries (&obj, img_src);
@@ -524,9 +692,21 @@ int main (int argc, const char *argv[])
   /* needs to be parsed last! */
   _parse_pbc (&obj, img_src);
 
-  vcd_xml_dump (&obj, "videocd.xml");
+  if (norip_flag)
+    vcd_warn ("fyi, entry point and auto pause locations cannot be "
+	      "determined without mpeg extraction -- hope that's ok");
+  else
+    {
+      /* _rip_files (&obj, img_src); */
+      _rip_segments (&obj, img_src);
+      _rip_sequences (&obj, img_src);
+    }
+
+  vcd_info ("writing xml description to `%s'...", xml_fname);
+  vcd_xml_dump (&obj, xml_fname);
 
   vcd_image_source_destroy (img_src);
 
-  return 1;
+  vcd_info ("done");
+  return 0;
 }
