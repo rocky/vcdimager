@@ -35,13 +35,13 @@ MISSING INFORMATION (read `INFO WISHLIST'):
 
  * how are access point sectors defined for VCD 1.1/2.0?
 
- * what does the enhanced end list (4C SVCD spec) look like exactly?
-
- * where is INFO.SVD's playing time offset field?
- 
  * what about command lists? (how are the opcodes defined)
 
  * SCANDATA.DAT for VCD2.0?
+ 
+ * more infos on OGT 
+
+ * more infos on chinese SVCD spec (aka VCD 3.0)
 
  * ...so much more... :-)
 

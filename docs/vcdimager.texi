@@ -1278,7 +1278,6 @@ Data}.
                                          volume-number?,
                                          next-volume-use-sequence2?,
                                          next-volume-use-lid2?,
-                                         autoplay?,
                                          restriction?,
                                          time-offset?)>
 
@@ -1287,7 +1286,6 @@ Data}.
 <!ELEMENT volume-number                 (#PCDATA)>
 <!ELEMENT next-volume-use-sequence2     EMPTY>
 <!ELEMENT next-volume-use-lid2          EMPTY>
-<!ELEMENT autoplay                      EMPTY>
 <!ELEMENT restriction                   (#PCDATA)>
 <!ELEMENT time-offset                   (#PCDATA)>
 @end example
