@@ -1621,7 +1621,8 @@ main (int argc, const char *argv[])
     memset(&gl.show.no, true, sizeof(gl.show.no));
   
   gl_default_vcd_log_handler  = vcd_log_set_handler (_vcd_log_handler);
-  gl_default_cdio_log_handler = cdio_log_set_handler (_vcd_log_handler);
+  gl_default_cdio_log_handler = 
+    cdio_log_set_handler ( (cdio_log_handler_t) _vcd_log_handler);
 
   dump (&source_name);
 

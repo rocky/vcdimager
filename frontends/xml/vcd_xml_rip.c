@@ -1265,7 +1265,8 @@ main (int argc, const char *argv[])
   vcd_xml_init (&obj);
 
   gl_default_vcd_log_handler  = vcd_log_set_handler (_vcd_log_handler);
-  gl_default_cdio_log_handler = cdio_log_set_handler (_vcd_log_handler);
+  gl_default_cdio_log_handler = 
+    cdio_log_set_handler ( (cdio_log_handler_t) _vcd_log_handler);
 
   {
     poptContext optCon = NULL;
