@@ -1967,6 +1967,7 @@ vcdinfo_close(vcdinfo_obj_t *obj)
     free(obj->lot);
     free(obj->lot_x);
     if (obj->psd_x) free(obj->psd_x);
+    if (obj->psd)   free(obj->psd);
     if (obj->scandata_buf) free(obj->scandata_buf);
     free(obj->tracks_buf);
     free(obj->search_buf);
