@@ -608,6 +608,38 @@ vcdinfo_get_bsn(const PsdSelectionListDescriptor *psd)
   return(psd->bsn);
 }
 
+/**
+ \fn vcdinfo_get_default(const vcdinfo_obj_t *obj, unsinged int lid);
+ \brief Get return offset for a given PLD selector descriptor. 
+ \return  VCDINFO_INVALID_OFFSET is returned on error or if pld has no 
+ "return" entry or pld is NULL. Otherwise the LID offset is returned.
+ */
+uint16_t
+vcdinfo_get_default(const vcdinfo_obj_t *obj, unsigned int lid)
+{
+  if (NULL != obj) {
+    
+    PsdListDescriptor pxd;
+
+    /* FIXME: remove unconditional "false" */
+    vcdinfo_get_pxd_from_lid(obj, &pxd, lid, false);
+    
+    switch (pxd.descriptor_type) {
+    case PSD_TYPE_EXT_SELECTION_LIST:
+    case PSD_TYPE_SELECTION_LIST:
+      if (NULL != pxd.psd) 
+        return uint16_from_be (pxd.psd->default_ofs);
+      break;
+    case PSD_TYPE_PLAY_LIST:
+    case PSD_TYPE_END_LIST:
+    case PSD_TYPE_COMMAND_LIST:
+      break;
+    }
+  }
+  return VCDINFO_INVALID_OFFSET;
+}
+
+
 /*!
   Return a string containing the default VCD device if none is specified.
   Return "" if we can't get this information.
@@ -1076,6 +1108,41 @@ vcdinfo_get_pxd_from_lid(const vcdinfo_obj_t *obj, PsdListDescriptor *pxd,
         }
     }
   return;
+}
+
+/**
+ \fn vcdinfo_get_return_from_psd(const PsdPlayListDescriptor *pld);
+ \brief Get return offset for a given PLD selector descriptor. 
+ \return  VCDINFO_INVALID_OFFSET is returned on error or if pld has no 
+ "return" entry or pld is NULL. Otherwise the LID offset is returned.
+ */
+uint16_t
+vcdinfo_get_return(const vcdinfo_obj_t *obj, unsigned int lid)
+{
+  if (NULL != obj) {
+
+    PsdListDescriptor pxd;
+
+    /* FIXME: remove unconditional "false" */
+    vcdinfo_get_pxd_from_lid(obj, &pxd, lid, false);
+    
+    switch (pxd.descriptor_type) {
+    case PSD_TYPE_PLAY_LIST:
+      if (NULL != pxd.pld) 
+        return uint16_from_be (pxd.pld->return_ofs);
+      break;
+    case PSD_TYPE_SELECTION_LIST:
+    case PSD_TYPE_EXT_SELECTION_LIST:
+      if (NULL != pxd.psd) 
+        return uint16_from_be (pxd.psd->return_ofs);
+      break;
+    case PSD_TYPE_END_LIST:
+    case PSD_TYPE_COMMAND_LIST:
+      break;
+    }
+  }
+  
+  return VCDINFO_INVALID_OFFSET;
 }
 
 /**

@@ -293,6 +293,14 @@ char *
 vcdinfo_get_default_device (const vcdinfo_obj_t *obj);
 
 /*!
+  \brief Get default offset. 
+  \return  VCDINFO_INVALID_OFFSET is returned on error or if
+  no "return"  entry. Otherwise the LID offset is returned.
+*/
+uint16_t
+vcdinfo_get_default(const vcdinfo_obj_t *obj, unsigned int lid);
+
+/*!
   Return number of sector units in of an entry. 0 is returned if
   entry_num is invalid.
 */
@@ -505,6 +513,14 @@ vcdinfo_get_publisher_id(const vcdinfo_obj_t *obj);
 void
 vcdinfo_get_pxd_from_lid(const vcdinfo_obj_t *obj, PsdListDescriptor *pxd,
 			 uint16_t lid, bool ext);
+/*!
+  \brief Get return offset. 
+  \return  VCDINFO_INVALID_OFFSET is returned on error or if
+  no "return"  entry. Otherwise the LID offset is returned.
+*/
+uint16_t
+vcdinfo_get_return(const vcdinfo_obj_t *obj, unsigned int lid);
+
 /*!
   \brief Get return offset for a given PSD selector descriptor. 
   \return  VCDINFO_INVALID_OFFSET is returned on error or if pld has 
