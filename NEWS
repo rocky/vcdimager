@@ -4,9 +4,10 @@ see ChangeLog for more information
 
 version 0.5.9alpha2
 ===================
-2001-01-..
+2001-01-03
+
 * creation of scanpoints for SVCDs
-* cygwin fixes
+* compilation fix for cygwin environment
 * vcdrip SVCD detection improved
 * oversize warnings
 

@@ -1,14 +1,14 @@
-FEATURES TODO LIST:
+TODO LIST:
 
 - version 1.0
- * gtk+ and CLI frontend
  * get more information on CDROM-XA and that coding information byte...
- * check for VideoCD2.0 conformance
- * add PBC support
- * SVCD support
- * fix MPEG detection/handling code
+ * check for VideoCD2.0/SuperVideoCD1.0 conformance
+ * optimize/improve MPEG detection/scanning/handling code
+ * gtkmm frontend
+ * code cleanup
 
 - version 2.0+
+ * add support for interactive menus
  * add support for still images
  * add support for audio tracks
 
