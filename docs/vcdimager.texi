@@ -59,11 +59,14 @@ in the section entitled ``GNU Free Documentation License''.
 
 @dircategory Miscellaneous
 @direntry
-* GNU VCDImager: (vcdimager).                   GNU Video CD imaging utilities
-* vcddebug: (vcdimager).                        Video CD debugging tool
-* vcdxgen: (vcdimager).                         Video CD XML template generator
-* vcdxbuild: (vcdimager).                       Video CD XML formatter
-* vcdxrip: (vcdimager).                         Video CD XML dis-assembler
+* VCDImager: (vcdimager).                       GNU Video CD imaging utilities
+* vcdimager: (vcdimager)vcdimager.              Video CD simple formatter
+* vcddebug: (vcdimager)vcddebug.                Video CD debugging tool
+* cdxa2mpeg: (vcdimager)cdxa2mpeg.              Strip CDXA RIFF container
+* vcdxminfo: (vcdimager)vcdxminfo.              Display MPEG stream properties
+* vcdxgen: (vcdimager)vcdxgen.                  Video CD XML template generator
+* vcdxbuild: (vcdimager)vcdxbuild.              Video CD XML formatter
+* vcdxrip: (vcdimager)vcdxrip.                  Video CD XML dis-assembler
 @end direntry
 
 @node Top, Introduction, (dir), (dir)
@@ -1037,6 +1040,7 @@ interactivity.
 * vcdxbuild::                   
 * vcdxrip::                     
 * vcdxminfo::                   
+* cdxa2mpeg::                   
 @end menu
 
 @node vcdimager, vcddebug, Tools, Tools
@@ -1182,12 +1186,21 @@ actually extracting any files or mpeg streams contained.
 
 @emph{FIXME: write more}
 
-@node vcdxminfo,  , vcdxrip, Tools
+@node vcdxminfo, cdxa2mpeg , vcdxrip, Tools
 @subsection @command{vcdxminfo}
 
 This tool allows to show basic properties of @acronym{MPEG} streams as
 seen by the back-end library. Dumping of all @acronym{APS} contained in
 the stream is supported as well.
+
+@emph{FIXME: write more}
+
+@node cdxa2mpeg, , vcdxminfo, Tools
+@subsection @command{cdxa2mpeg}
+
+Simple tool for converting MPEG streams wrapped in RIFF CDXA files, as
+created by some operating systems, to plain mpeg streams suitable for
+vcdimager input.
 
 @emph{FIXME: write more}
 

@@ -57,8 +57,7 @@ struct add_files_t {
   int raw_flag;
 };
 
-static struct
-{
+static struct {
   const char *type;
   const char *image_fname;
   const char *cue_fname;
@@ -82,8 +81,7 @@ static struct
   int check_flag;
 
   vcd_log_handler_t default_vcd_log_handler;
-}
-gl;                             /* global */
+} gl = { 0, };                             /* global */
 
 
 static void

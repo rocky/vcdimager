@@ -30,14 +30,36 @@
 #include <errno.h>
 #include <unistd.h>
 
+#include <popt.h>
+
+#include <libvcd/vcd.h>
 #include <libvcd/vcd_assert.h>
 #include <libvcd/vcd_types.h>
 #include <libvcd/vcd_logging.h>
 #include <libvcd/vcd_bytesex.h>
 #include <libvcd/vcd_util.h>
 
-typedef struct 
+static struct {
+  int quiet_flag;
+  int verbose_flag;
+
+  vcd_log_handler_t default_vcd_log_handler;
+} gl = { 0, }; /* global */
+
+static void 
+_vcd_log_handler (log_level_t level, const char message[])
 {
+  if (level == LOG_DEBUG && !gl.verbose_flag)
+    return;
+
+  if (level == LOG_INFO && gl.quiet_flag)
+    return;
+  
+  gl.default_vcd_log_handler (level, message);
+}
+
+
+typedef struct {
   FILE *fd;
   FILE *fd_out;
   uint32_t size;
@@ -101,7 +123,7 @@ handler_data (riff_context *ctxt)
 	uint8_t subheader[8];
 	uint8_t data[2324];
 	uint8_t edc[4];
-      } sbuf;
+      } GNUC_PACKED sbuf;
       
       vcd_assert (sizeof (sbuf) == 2352);
 
@@ -226,48 +248,77 @@ next_id (riff_context *ctxt)
   return handle (ctxt, id);
 }
 
-static void
-usage (void)
-{
-  printf ("usage: cdxa2mpg infile [outfile]\n\n"
-	  "description: \n"
-	  "  Converts a Video CD RIFF CDXA file to plain mpeg streams\n\n"
-	  "copyright: \n"
-	  "  Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>\n"
-	  "  This is free software; see the source for copying conditions.  There is NO\n"
-	  "  warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n");
-
-  exit (EXIT_FAILURE);
-}
-
 int 
-main (int argc, char *argv[])
+main (int argc, const char *argv[])
 {
   FILE *in = NULL, *out = NULL;
   riff_context ctxt = { 0, };
 
-  if (argc == 2 || argc == 3)
-    {
-      in = fopen (argv[1], "rb");
-      if (!in) 
-	{
-	  vcd_error ("fopen (): %s", strerror (errno));
-	  exit (EXIT_FAILURE);
-	}
-    }
-  else
-    usage ();
+  gl.default_vcd_log_handler = vcd_log_set_handler (_vcd_log_handler);
 
-  if (argc == 3)
-    {
-      out = fopen (argv[2], "wb");
+  {
+    struct poptOption optionsTable[] = 
+      {
+        {"verbose", 'v', POPT_ARG_NONE, &gl.verbose_flag, 0, "be verbose"},
+        {"quiet", 'q', POPT_ARG_NONE, &gl.quiet_flag, 0, "show only critical messages"},
+        {"version", 'V', POPT_ARG_NONE, NULL, 1, "display version and copyright information and exit"},
+        
+        POPT_AUTOHELP 
+        {NULL, 0, 0, NULL, 0}
+      };
+
+    int opt;
+
+    const char **args = NULL;
+
+    poptContext optCon = poptGetContext ("vcdimager", argc, argv, optionsTable, 0);
+    poptSetOtherOptionHelp (optCon, "[OPTION...] <input-cdxa-file> [<output-mpeg-file>]");
+
+    if (poptReadDefaultConfig (optCon, 0)) 
+      fprintf (stderr, "warning, reading popt configuration failed\n"); 
+
+    while ((opt = poptGetNextOpt (optCon)) != -1)
+      switch (opt)
+        {
+        case 1:
+          fprintf (stdout, vcd_version_string (true), "cdxa2mpeg");
+          fflush (stdout);
+          exit (EXIT_SUCCESS);
+          break;
+        default:
+          vcd_error ("error while parsing command line - try --help");
+          break;
+        }
+
+    if (gl.verbose_flag && gl.quiet_flag)
+      vcd_error ("I can't be both, quiet and verbose... either one or another ;-)");
+
+    if ((args = poptGetArgs (optCon)) == NULL)
+      vcd_error ("error: need at least one argument -- try --help");
+
+    vcd_assert (args[0] != 0);
+
+    if (args[1] && args[2])
+      vcd_error ("error: too many arguments -- try --help");
+
+    in = fopen (args[0], "rb");
+    if (!in) 
+      {
+        vcd_error ("fopen (`%s'): %s", args[0], strerror (errno));
+        exit (EXIT_FAILURE);
+      }
+
+    if (args[1]) {
+      out = fopen (args[1], "wb");
       if (!out) 
-	{
-	  vcd_error ("fopen (): %s", strerror (errno));
-	  exit (EXIT_FAILURE);
+        {
+          vcd_error ("fopen (`%s'): %s", args[1], strerror (errno));
+          exit (EXIT_FAILURE);
 	}
     }
-  
+
+  }
+
   ctxt.fd = in;
   ctxt.fd_out = out;
   
