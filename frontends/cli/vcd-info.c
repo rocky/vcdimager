@@ -1247,6 +1247,7 @@ enum {
   OP_SOURCE_UNDEF       = DRIVER_UNKNOWN,
   OP_SOURCE_BINCUE      = DRIVER_BINCUE,
   OP_SOURCE_NRG         = DRIVER_NRG,
+  OP_SOURCE_CDRDAO      = DRIVER_CDRDAO,
   OP_SOURCE_DEVICE      = DRIVER_DEVICE,
   OP_SOURCE_SECTOR_2336,
 
@@ -1352,12 +1353,15 @@ main (int argc, const char *argv[])
     {"cue-file", 'c', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &source_name, 
      OP_SOURCE_BINCUE, "set \"cue\" CD-ROM disk image file as source", "FILE"},
 
+    {"nrg-file", 'N', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &source_name, 
+     OP_SOURCE_NRG, "set Nero CD-ROM disk image file as source", "FILE"},
+
+    {"toc-file", '\0', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &source_name, 
+     OP_SOURCE_CDRDAO, "set \"toc\" CD-ROM disk image file as source", "FILE"},
+
     {"input", 'i', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &source_name, 
      OP_SOURCE_UNDEF,
      "set source and determine if \"bin\" image or device", "FILE"},
-
-    {"nrg-file", 'N', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &source_name, 
-     OP_SOURCE_NRG, "set Nero CD-ROM disk image file as source", "FILE"},
 
     {"no-ext-psd", '\0', POPT_ARG_NONE, &gl.no_ext_psd_flag, 0,
      "ignore information in /EXT/PSD_X.VCD"},
@@ -1530,6 +1534,7 @@ main (int argc, const char *argv[])
 
       case OP_SOURCE_UNDEF:
       case OP_SOURCE_BINCUE: 
+      case OP_SOURCE_CDRDAO: 
       case OP_SOURCE_NRG: 
       case OP_SOURCE_DEVICE: 
       case OP_SOURCE_SECTOR_2336:
@@ -1555,6 +1560,7 @@ main (int argc, const char *argv[])
             okay = OP_SOURCE_DEVICE != opt;
             break;
           case OP_SOURCE_NRG: 
+          case OP_SOURCE_CDRDAO: 
           case OP_SOURCE_DEVICE:
             /* This case is implied, but we'll make it explicit anyway. */
             okay = false;

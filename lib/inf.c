@@ -276,7 +276,7 @@ vcdinf_get_track(const EntriesVcd_t *entries, const unsigned int entry_num)
   const unsigned int entry_count = uint16_from_be (entries->entry_count);
   /* Note entry_num is 0 origin. */
   return entry_num < entry_count ?
-    from_bcd8 (entries->entry[entry_num].n):
+    cdio_from_bcd8 (entries->entry[entry_num].n):
     VCDINFO_INVALID_TRACK;
 }
 

@@ -201,7 +201,7 @@ set_entries_vcd (VcdObj *obj, void *buf)
 
       lsect += obj->iso_size;
 
-      entries_vcd.entry[idx].n = to_bcd8(track_idx);
+      entries_vcd.entry[idx].n = cdio_to_bcd8(track_idx);
       cdio_lba_to_msf(cdio_lsn_to_lba(lsect), 
                       &(entries_vcd.entry[idx].msf));
 
@@ -215,7 +215,7 @@ set_entries_vcd (VcdObj *obj, void *buf)
 
           vcd_assert (idx < MAX_ENTRIES);
 
-          entries_vcd.entry[idx].n = to_bcd8(track_idx);
+          entries_vcd.entry[idx].n = cdio_to_bcd8(track_idx);
           cdio_lba_to_msf(lsect + cdio_lsn_to_lba(_entry->aps.packet_no),
                           &(entries_vcd.entry[idx].msf));
 
@@ -502,7 +502,8 @@ set_tracks_svd_v30 (VcdObj *obj, void *buf)
         f = modf(playtime, &i);
         
         cdio_lba_to_msf (i * 75, &tracks_svd->track[n].cum_playing_time);
-        tracks_svd->track[n].cum_playing_time.f = to_bcd8 (floor (f * 75.0));
+        tracks_svd->track[n].cum_playing_time.f = 
+          cdio_to_bcd8 (floor (f * 75.0));
       }
       
       n++;
@@ -574,7 +575,7 @@ set_tracks_svd (VcdObj *obj, void *buf)
           }
 
         cdio_lba_to_msf (i * 75, &(tracks_svd1->playing_time[n]));
-        tracks_svd1->playing_time[n].f = to_bcd8 (floor (f * 75.0));
+        tracks_svd1->playing_time[n].f = cdio_to_bcd8 (floor (f * 75.0));
       }
       
       n++;
@@ -876,7 +877,7 @@ set_scandata_dat (VcdObj *obj, void *buf)
       vcd_assert (i >= 0);
 
       cdio_lba_to_msf (i * 75, &(scandata_dat1->cum_playtimes[n]));
-      scandata_dat1->cum_playtimes[n].f = to_bcd8 (floor (f * 75.0));
+      scandata_dat1->cum_playtimes[n].f = cdio_to_bcd8 (floor (f * 75.0));
     }
 
   /* struct 2 -- nothing yet */

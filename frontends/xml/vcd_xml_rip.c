@@ -1255,6 +1255,7 @@ main (int argc, const char *argv[])
     CL_SOURCE_UNDEF = DRIVER_UNKNOWN, 
     CL_SOURCE_BINCUE= DRIVER_BINCUE,
     CL_SOURCE_NRG   = DRIVER_NRG,
+    CL_SOURCE_CDRDAO= DRIVER_CDRDAO,
     CL_SOURCE_CDROM = DRIVER_DEVICE,
     CL_VERSION      = 20
   } _img_type = CL_SOURCE_UNDEF;
@@ -1283,19 +1284,21 @@ main (int argc, const char *argv[])
       {"cue-file", 'c', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &img_fname, 
        CL_SOURCE_BINCUE, "set \"cue\" CD-ROM disk image file as source", "FILE"},
 
-      {"sector-2336", '\0', POPT_ARG_NONE, &sector_2336_flag, 0,
-       "use 2336 byte sector mode for image file"},
+      {"nrg-file", 'N', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &img_fname, 
+       CL_SOURCE_NRG, "set Nero CD-ROM disk image image file as source",
+       "FILE"},
 
+      {"toc-file", '\0', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &img_fname, 
+       CL_SOURCE_CDRDAO, "set \"toc\" CD-ROM disk image file as source", "FILE"},
       {"cdrom-device", 'C', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &img_fname,
        CL_SOURCE_CDROM,"set CDROM device as source", "DEVICE"},
+
+      {"sector-2336", '\0', POPT_ARG_NONE, &sector_2336_flag, 0,
+       "use 2336 byte sector mode for image file"},
 
       {"input", 'i', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &img_fname, 
        CL_SOURCE_UNDEF, 
        "set source and determine if \"bin\" image or device", "FILE"},
-
-      {"nrg-file", 'N', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &img_fname, 
-       CL_SOURCE_NRG, "set Nero CD-ROM disk image image file as source",
-       "FILE"},
 
       {"no-ext-psd", '\0', POPT_ARG_NONE, &no_ext_psd_flag, 0,
        "ignore /EXT/PSD_X.VCD"},
@@ -1353,6 +1356,7 @@ main (int argc, const char *argv[])
 	  break;
 
 	case CL_SOURCE_NRG:
+	case CL_SOURCE_CDRDAO:
 	case CL_SOURCE_BINCUE:
 	case CL_SOURCE_CDROM:
 	  if (_img_type)

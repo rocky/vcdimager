@@ -1357,9 +1357,9 @@ vcdinfo_get_track_msf(const vcdinfo_obj_t *obj, track_t track_num,
   
   /* CdIo tracks start at 1 rather than 0. */
   if (cdio_get_track_msf(obj->img, track_num+1, &msf)) {
-    *min   = from_bcd8(msf.m);
-    *sec   = from_bcd8(msf.s);
-    *frame = from_bcd8(msf.f);
+    *min   = cdio_from_bcd8(msf.m);
+    *sec   = cdio_from_bcd8(msf.s);
+    *frame = cdio_from_bcd8(msf.f);
     return 0;
   }
   
