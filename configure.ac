@@ -23,7 +23,7 @@ AC_INIT([GNU VCDimager],0.7.20, [bugs-vcdimager@gnu.org], [vcdimager])
 AC_CONFIG_SRCDIR([lib/vcd.c])
 AM_INIT_AUTOMAKE(1.6.0)
 
-SPEC_VERSION=0.7.20_cvs
+SPEC_VERSION=0.7.20
 AC_SUBST(SPEC_VERSION)
 
 dnl AM_ACLOCAL_INCLUDE(.)
