@@ -97,7 +97,7 @@ mknod_source_mode2_raw(VcdDirectory *dir, VcdDataSink *sink, VcdDataSource *sour
   if(size % M2RAW_SIZE) 
     vcd_error("raw mode2 file must have size multiple of %d \n", M2RAW_SIZE);
 
-  extent = vcd_salloc(iso_bitmap, SECTOR_NIL, sectors);
+  extent = _vcd_salloc(iso_bitmap, SECTOR_NIL, sectors);
 
   _vcd_directory_mkfile(dir, iso_pathname, extent, size, TRUE, 1);
 
@@ -117,7 +117,7 @@ mknod_source_mode2_form1(VcdDirectory *dir, VcdDataSink *sink, VcdDataSource *so
   if(size % M2F1_SIZE)
     sectors++;
 
-  start_extent = vcd_salloc(iso_bitmap, SECTOR_NIL, sectors);
+  start_extent = _vcd_salloc(iso_bitmap, SECTOR_NIL, sectors);
   
   _vcd_directory_mkfile(dir, iso_pathname, start_extent, size, FALSE, 1);
 

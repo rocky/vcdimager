@@ -29,17 +29,17 @@
 
 typedef struct _VcdSalloc VcdSalloc;
 
-VcdSalloc*
-vcd_salloc_new(void);
+VcdSalloc *
+_vcd_salloc_new (void);
 
 void
-vcd_salloc_destroy(VcdSalloc *bitmap);
+_vcd_salloc_destroy (VcdSalloc *bitmap);
 
 uint32_t
-vcd_salloc(VcdSalloc *bitmap, uint32_t hint, uint32_t size);
+_vcd_salloc (VcdSalloc *bitmap, uint32_t hint, uint32_t size);
 
 uint32_t
-vcd_salloc_get_highest(const VcdSalloc *bitmap);
+_vcd_salloc_get_highest (const VcdSalloc *bitmap);
 
 #endif /* _SALLOC_H_ */
 

@@ -228,24 +228,24 @@ _finalize_vcd_iso_track (VcdObj *obj)
   int n;
 
   /* pre-alloc 16 blocks of ISO9660 required silence */
-  if (vcd_salloc (obj->iso_bitmap, 0, 16) == SECTOR_NIL)
+  if (_vcd_salloc (obj->iso_bitmap, 0, 16) == SECTOR_NIL)
     assert (0);
 
   /* keep karaoke sectors blank -- well... guess I'm too paranoid :) */
-  if (vcd_salloc (obj->iso_bitmap, 75, 75) == SECTOR_NIL) 
+  if (_vcd_salloc (obj->iso_bitmap, 75, 75) == SECTOR_NIL) 
     assert (0);
 
   /* keep rest of vcd sector blank -- paranoia */
-  if (vcd_salloc (obj->iso_bitmap, 185,40) == SECTOR_NIL) 
+  if (_vcd_salloc (obj->iso_bitmap, 185,40) == SECTOR_NIL) 
     assert (0);
 
-  obj->pvd_sec = vcd_salloc (obj->iso_bitmap, 16, 2);      /* pre-alloc descriptors, PVD */  /* EOR */
+  obj->pvd_sec = _vcd_salloc (obj->iso_bitmap, 16, 2);      /* pre-alloc descriptors, PVD */  /* EOR */
   obj->evd_sec = obj->pvd_sec+1;                           /* EVD */                         /* EOR+EOF */
-  obj->dir_secs = vcd_salloc (obj->iso_bitmap, 18, 75-18);
-  obj->info_sec = vcd_salloc (obj->iso_bitmap, INFO_VCD_SECTOR, 1);    /* INFO.VCD */        /* EOF */
-  obj->entries_sec = vcd_salloc (obj->iso_bitmap, ENTRIES_VCD_SECTOR, 1); /* ENTRIES.VCD  */ /* EOF */
-  obj->lot_secs = vcd_salloc (obj->iso_bitmap, LOT_VCD_SECTOR, LOT_VCD_SIZE);  /* LOT.VCD */ /* EOF */
-  obj->psd_sec = vcd_salloc (obj->iso_bitmap, PSD_VCD_SECTOR, 1); /* just one sec for now... */
+  obj->dir_secs = _vcd_salloc (obj->iso_bitmap, 18, 75-18);
+  obj->info_sec = _vcd_salloc (obj->iso_bitmap, INFO_VCD_SECTOR, 1);    /* INFO.VCD */        /* EOF */
+  obj->entries_sec = _vcd_salloc (obj->iso_bitmap, ENTRIES_VCD_SECTOR, 1); /* ENTRIES.VCD  */ /* EOF */
+  obj->lot_secs = _vcd_salloc (obj->iso_bitmap, LOT_VCD_SECTOR, LOT_VCD_SIZE);  /* LOT.VCD */ /* EOF */
+  obj->psd_sec = _vcd_salloc (obj->iso_bitmap, PSD_VCD_SECTOR, 1); /* just one sec for now... */
   set_psd_size (obj);
 
   obj->ptl_sec = SECTOR_NIL; /* EOR+EOF */
@@ -300,10 +300,10 @@ _finalize_vcd_iso_track (VcdObj *obj)
   /* calculate iso size -- after this point no sector shall be
      allocated anymore */
 
-  obj->iso_size = MAX (MIN_ISO_SIZE, vcd_salloc_get_highest (obj->iso_bitmap));
+  obj->iso_size = MAX (MIN_ISO_SIZE, _vcd_salloc_get_highest (obj->iso_bitmap));
 
   vcd_debug ("iso9660: highest alloced sector is %d (using %d as isosize)", 
-             vcd_salloc_get_highest (obj->iso_bitmap), obj->iso_size);
+             _vcd_salloc_get_highest (obj->iso_bitmap), obj->iso_size);
 
   /* after this point the ISO9660's size is frozen */
 
@@ -520,7 +520,7 @@ _write_vcd_iso_track (VcdObj *obj)
   }
   
   /* blank unalloced tracks */
-  while ((n = vcd_salloc (obj->iso_bitmap, SECTOR_NIL, 1)) < obj->iso_size)
+  while ((n = _vcd_salloc (obj->iso_bitmap, SECTOR_NIL, 1)) < obj->iso_size)
     _write_m2_image_sector (obj, zero, n, 0, 0, SM_DATA, 0);
 
   free (dir_buf);
@@ -665,7 +665,7 @@ vcd_obj_begin_output (VcdObj *obj)
   obj->in_track = 1;
   obj->sectors_written = 0;
 
-  obj->iso_bitmap = vcd_salloc_new ();
+  obj->iso_bitmap = _vcd_salloc_new ();
 
   obj->dir = _vcd_directory_new ();
 
@@ -716,7 +716,7 @@ vcd_obj_end_output (VcdObj *obj)
   assert (obj != NULL);
 
   _vcd_directory_destroy (obj->dir);
-  vcd_salloc_destroy (obj->iso_bitmap);
+  _vcd_salloc_destroy (obj->iso_bitmap);
 
   if (obj->bin_file)
     vcd_data_sink_destroy (obj->bin_file); /* fixme -- try moving it to

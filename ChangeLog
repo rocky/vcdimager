@@ -1,3 +1,7 @@
+2000-11-13  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_salloc.h: prefixed exported symbols _vcd
+
 2000-11-12  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_obj.h: added VcdDirectory *dir to _VcdObj
