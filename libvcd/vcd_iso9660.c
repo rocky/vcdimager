@@ -449,64 +449,98 @@ pathtable_m_add_entry (void *pt,
   return entrynum;
 }
 
-static int
-is_isochar (int c)
+bool
+_vcd_iso_dirname_valid_p (const char pathname[])
 {
-  return isupper (c)
-    || isdigit (c)
-    || c == '.'
-    || c == '_'
-    || c == '/'
-    || c == ';';
+  const char *p = pathname;
+  int len;
+
+  vcd_assert (pathname != NULL);
+
+  if (*p == '/' || *p == '.' || *p == '\0')
+    return false;
+
+  if (strlen (pathname) > MAX_ISOPATHNAME)
+    return false;
+  
+  len = 0;
+  for (; *p; p++)
+    if (_vcd_isdchar (*p))
+      {
+        len++;
+        if (len > 8)
+          return false;
+      }
+    else if (*p == '/')
+      {
+        if (!len)
+          return false;
+        len = 0;
+      }
+    else
+      return false; /* unexpected char */
+
+  if (!len)
+    return false; /* last char may not be '/' */
+
+  return true;
 }
 
 bool
 _vcd_iso_pathname_valid_p (const char pathname[])
 {
-  const char *p = pathname;
-  int dots;
-  
+  const char *p = NULL;
+
   vcd_assert (pathname != NULL);
+
+  if ((p = strrchr (pathname, '/')))
+    {
+      bool rc;
+      char *_tmp = strdup (pathname);
+      
+      *strrchr (_tmp, '/') = '\0';
+
+      rc = _vcd_iso_dirname_valid_p (_tmp);
+
+      free (_tmp);
+
+      if (!rc)
+        return false;
+
+      p++;
+    }
+  else
+    p = pathname;
 
   if (strlen (pathname) > (MAX_ISOPATHNAME - 6))
     return false;
 
-  if (*p == '/' || *p == '.' || *p == '\0')
-    return false;
+  {
+    int len = 0;
+    int dots = 0;
 
-  dots = 0;
-
-  while (*p) 
-    {
-      if (!is_isochar (*p))
-        return false;
-
-      switch (*p)
+    for (; *p; p++)
+      if (_vcd_isdchar (*p))
         {
-        case ';':
-          return false;
-          break;
-
-        case '/':
-          dots = 0;
-          if (*(p-1) == '/' || *(p-1) == '.' || *(p-1) == '\0')
+          len++;
+          if (dots == 0 ? len > 8 : len > 3)
             return false;
-          break;
-
-        case '.':
+        }
+      else if (*p == '.')
+        {
           dots++;
           if (dots > 1)
             return false;
-          if (*(p-1) == '/' || *(p-1) == '\0')
+          if (!len)
             return false;
-          break;
+          len = 0;
         }
-      
-      p++;
-    }
+      else
+        return false;
 
-  if (!dots)
-    return false;
+    if (dots != 1)
+      return false;
+  }
 
   return true;
 }

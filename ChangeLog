@@ -1,5 +1,14 @@
 2001-06-12  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* tests/mpegscan2.c: new testing tool for dumping scan offset data
+
+	* libvcd/vcd.c (vcd_obj_add_dir): implemented
+	(_finalize_vcd_iso_track_filesystem): don't create '/CDI' by 
+		default anymore
+
+	* libvcd/vcd_iso9660.c (_vcd_iso_dirname_valid_p): new function
+	(_vcd_iso_pathname_valid_p): rewritten from scratch
+
 	* libvcd/vcd_pbc.c: made broken references generate errors instead
 		of warnings.
 

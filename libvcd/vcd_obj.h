@@ -120,6 +120,7 @@ struct _VcdObj {
   unsigned ext_file_start_extent; 
   unsigned custom_file_start_extent; 
   VcdList *custom_file_list; /* custom_file_t */
+  VcdList *custom_dir_list; /* char */
 
   /* dictionary */
   VcdList *buffer_dict_list;

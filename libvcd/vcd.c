@@ -119,6 +119,7 @@ vcd_obj_new (vcd_type_t vcd_type)
   new_obj->info_volume_number = 1;
 
   new_obj->custom_file_list = _vcd_list_new ();
+  new_obj->custom_dir_list = _vcd_list_new ();
 
   new_obj->type = vcd_type;
 
@@ -440,6 +441,8 @@ vcd_obj_destroy (VcdObj *obj)
 
   _vcd_list_free (obj->custom_file_list, true);
 
+  _vcd_list_free (obj->custom_dir_list, true);
+
   while (_vcd_list_length (obj->mpeg_sequence_list))
     _vcd_obj_remove_mpeg_track (obj, 0);
   _vcd_list_free (obj->mpeg_sequence_list, true);
@@ -606,7 +609,25 @@ vcd_obj_set_param_bool (VcdObj *obj, vcd_parm_t param, bool arg)
 int
 vcd_obj_add_dir (VcdObj *obj, const char iso_pathname[])
 {
-  vcd_warn ("vcd_obj_add_dir('%s') not implemented yet!", iso_pathname);
+  char *_iso_pathname;
+
+  vcd_assert (obj != NULL);
+  vcd_assert (iso_pathname != NULL);
+
+  _iso_pathname = _vcd_strdup_upper (iso_pathname);
+    
+  if (!_vcd_iso_dirname_valid_p (_iso_pathname))
+    {
+      vcd_error("pathname `%s' is not a valid iso pathname", 
+                _iso_pathname);
+      free (_iso_pathname);
+      return 1;
+    }
+
+  _vcd_list_append (obj->custom_dir_list, _iso_pathname);
+
+  _vcd_list_sort (obj->custom_dir_list, 
+                  (_vcd_list_cmp_func) strcmp);
 
   return 0;
 }
@@ -656,6 +677,7 @@ vcd_obj_add_file (VcdObj *obj, const char iso_pathname[],
       {
         vcd_error("pathname `%s' is not a valid iso pathname", 
                   _iso_pathname);
+        free (_iso_pathname);
         return 1;
       }
 
@@ -827,8 +849,9 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
   switch (obj->type) {
   case VCD_TYPE_VCD11:
   case VCD_TYPE_VCD2:
+    /* add only necessary directories! */
     /* _vcd_directory_mkdir (obj->dir, "CDDA"); */
-    _vcd_directory_mkdir (obj->dir, "CDI");
+    /* _vcd_directory_mkdir (obj->dir, "CDI"); */
     _vcd_directory_mkdir (obj->dir, "EXT");
     /* _vcd_directory_mkdir (obj->dir, "KARAOKE"); */
     _vcd_directory_mkdir (obj->dir, "MPEGAV");
@@ -973,7 +996,12 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
     }
 
 
-  /* custom files */
+  /* custom files/dirs */
+  _VCD_LIST_FOREACH (node, obj->custom_dir_list)
+    {
+      char *p = _vcd_list_node_data (node);
+      _vcd_directory_mkdir (obj->dir, p);
+    }
 
   _VCD_LIST_FOREACH (node, obj->custom_file_list)
     {

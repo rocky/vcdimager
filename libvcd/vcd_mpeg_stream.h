@@ -127,6 +127,8 @@ struct vcd_mpeg_packet_flags
 
   bool has_pts;
   double pts;
+
+  struct vcd_mpeg_scan_data_t *scan_data_ptr; /* points into actual packet memory! */
 };
 
 /* access functions */

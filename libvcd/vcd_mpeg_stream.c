@@ -461,6 +461,8 @@ vcd_mpeg_source_get_packet (VcdMpegSource *obj, unsigned long packet_no,
             {
               memset (flags, 0, sizeof (struct vcd_mpeg_packet_flags));
 
+              flags->scan_data_ptr = state.packet.scan_data_ptr;
+
               if (state.packet.video[0] 
                   || state.packet.video[1]
                   || state.packet.video[2])

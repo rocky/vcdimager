@@ -44,6 +44,9 @@
 bool
 _vcd_iso_pathname_valid_p (const char pathname[]);
 
+bool
+_vcd_iso_dirname_valid_p (const char pathname[]);
+
 char *
 _vcd_iso_pathname_isofy (const char pathname[], uint16_t version);
 
