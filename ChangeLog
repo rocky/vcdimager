@@ -1,3 +1,7 @@
+2000-12-18  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_data_structures.[ch]: new module
+
 2000-12-17  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_obj.h: moved cust_file struct declaration out of VcdObj

@@ -12,6 +12,8 @@ libvcd_a_SOURCES = \
 	vcd_cd_sector.c \
 	vcd_cd_sector.h \
 	vcd_cd_sector_private.h \
+	vcd_data_structures.c \
+	vcd_data_structures.h \
 	vcd_directory.c \
 	vcd_directory.h \
 	vcd_files.c \
