@@ -124,6 +124,13 @@ do
   fi
 done
 
+touch $srcdir/doc/version.texi
+touch $srcdir/doc/version-vcd-info.texi
+touch $srcdir/doc/version-vcdxrip.texi
+test -f $srcdir/doc/stamp-vti && rm $srcdir/doc/stamp-vti
+test -f $srcdir/doc/stamp-1 && rm $srcdir/doc/stamp-1
+test -f $srcdir/doc/stamp-2 && rm $srcdir/doc/stamp-2
+  
 conf_flags="--enable-maintainer-mode" # --enable-compile-warnings #--enable-iso-c
 
 if test x$NOCONFIGURE = x; then
