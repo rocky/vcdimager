@@ -282,7 +282,7 @@ extern "C" {
     True is returned if everything went okay; 
   */
 
-  bool vcdinf_open(/*out*/ VcdImageSource **img, char source_name[], 
+  bool vcdinf_open(/*out*/ VcdImageSource **img, char *source_name[], 
 		   vcdinfo_source_t source_type, const char access_mode[]);
 
   struct _vcdinf_pbc_ctx {

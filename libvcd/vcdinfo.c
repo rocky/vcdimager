@@ -1530,11 +1530,11 @@ vcdinfo_init(vcdinfo_obj_t *obj)
    medium is something other than a VCD.
  */
 vcdinfo_open_return_t
-vcdinfo_open(vcdinfo_obj_t *obj, char source_name[], 
+vcdinfo_open(vcdinfo_obj_t *obj, char *source_name[], 
              vcdinfo_source_t source_type, const char access_mode[])
 {
   VcdImageSource *img;
-  bool null_source = NULL == source_name;
+  bool null_source = NULL == *source_name;
 
   if (!vcdinf_open(&img, source_name, source_type, access_mode)) 
     return VCDINFO_OPEN_ERROR;
@@ -1569,13 +1569,13 @@ vcdinfo_open(vcdinfo_obj_t *obj, char source_name[],
     return VCDINFO_OPEN_OTHER;
   
   {
-    size_t len = strlen(source_name)+1;
+    size_t len = strlen(*source_name)+1;
     obj->source_name = (char *) malloc(len * sizeof(char));
-    strncpy(obj->source_name, source_name, len);
+    strncpy(obj->source_name, *source_name, len);
   }
 
   if (null_source) {
-    free(source_name);
+    free(*source_name);
   }
 
   if (obj->vcd_type == VCD_TYPE_SVCD || obj->vcd_type == VCD_TYPE_HQVCD) {

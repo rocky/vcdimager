@@ -729,7 +729,7 @@ vcdinfo_get_seg_size(const vcdinfo_obj_t *obj, const unsigned int seg_num);
     medium is something other than a VCD.
   */
   vcdinfo_open_return_t
-  vcdinfo_open(vcdinfo_obj_t *obj, char source_name[], 
+  vcdinfo_open(vcdinfo_obj_t *obj, char *source_name[], 
 	       vcdinfo_source_t source_type, const char access_mode[]);
   
   
