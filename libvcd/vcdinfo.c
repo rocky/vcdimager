@@ -513,7 +513,7 @@ const char *
 vcdinfo_get_application_id(const vcdinfo_obj_t *obj)
 {
   if ( NULL == obj || NULL == &obj->pvd ) return (NULL);
-  return(vcdinfo_strip_trail(obj->pvd.application_id, 128));
+  return(vcdinfo_strip_trail(obj->pvd.application_id, MAX_APPLICATION_ID));
 }
 
 /*!
@@ -891,7 +891,7 @@ const char *
 vcdinfo_get_preparer_id(const vcdinfo_obj_t *obj)
 {
   if ( NULL == obj || NULL == &obj->pvd ) return (NULL);
-  return(vcdinfo_strip_trail(obj->pvd.preparer_id, 128));
+  return(vcdinfo_strip_trail(obj->pvd.preparer_id, MAX_PREPARER_ID));
 }
 
 /**
@@ -1114,7 +1114,7 @@ const char *
 vcdinfo_get_system_id(const vcdinfo_obj_t *obj)
 {
   if ( NULL == obj || NULL == &obj->pvd ) return (NULL);
-  return(vcdinfo_strip_trail(obj->pvd.system_id, 32));
+  return(vcdinfo_strip_trail(obj->pvd.system_id, MAX_SYSTEM_ID));
 }
 
 /*!
@@ -1302,7 +1302,7 @@ const char *
 vcdinfo_get_volumeset_id(const vcdinfo_obj_t *obj)
 {
   if ( NULL == obj || NULL == &obj->pvd ) return (NULL);
-  return(vcdinfo_strip_trail(obj->pvd.volume_set_id, 128));
+  return(vcdinfo_strip_trail(obj->pvd.volume_set_id, MAX_VOLUMESET_ID));
 }
 
 /*!

@@ -31,6 +31,10 @@ extern "C" {
 
 /*! \def Max # characters in an album description. */
 #define MAX_ALBUM_LEN 16   
+#define MAX_APPLICATION_ID 128
+#define MAX_PREPARER_ID 128
+#define MAX_SYSTEM_ID 32
+#define MAX_VOLUMESET_ID 128
 
 /* From vcd_cd_sector.h */
 #define VCDINFO_CDDA_SECTOR_SIZE  2352
@@ -113,7 +117,7 @@ typedef enum {
 
 typedef enum {
   VCDINFO_SOURCE_UNDEF,          /* none of the below, e.g. uninitialized */
-  VCDINFO_SOURCE_AUTO,           /* figure out withther a device or a flie */
+  VCDINFO_SOURCE_AUTO,           /* figure out whether a device or a flie */
   VCDINFO_SOURCE_BIN,            /* bin file; default is 2352 bytes */
   VCDINFO_SOURCE_CUE,            /* cue file */
   VCDINFO_SOURCE_DEVICE,         /* a device like /dev/cdrom */
@@ -124,11 +128,12 @@ typedef struct
 {
   
   psd_descriptor_types descriptor_type;
-  union 
-  {
+  /* Only one of pld or psd is used below. Not all
+     C compiler accept the anonymous unions commented out below. */
+  /* union  { */
     PsdPlayListDescriptor *pld;
     PsdSelectionListDescriptor *psd;
-  };
+  /* }; */
   
 } PsdListDescriptor;
 
@@ -273,6 +278,10 @@ vcdinfo_get_bsn(const PsdSelectionListDescriptor *psd);
 
 /*!
   Return a string containing the default VCD device if none is specified.
+  This might be something like "/dev/cdrom" on Linux or 
+  "/vol/dev/aliases/cdrom0" on Solaris,  or maybe "VIDEOCD.CUE" for 
+  if bin/cue I/O routines are in effect. 
+
   Return "" if we can't get this information.
 */
 char *
