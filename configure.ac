@@ -281,7 +281,8 @@ if test "x$enable_versioned_libs" = "xyes" ; then
     else 
       # Do we have GNU ld? We need that too.
       if test "$with_gnu_ld" != yes; then
-        AC_MSG_ERROR(I don't see GNU ld. Use the --without-versioned-libs option)
+        AC_MSG_WARN(I don't see GNU ld. I'm going to assume --without-versioned-libs)
+	enable_versioned_libs='no'
       fi
     fi
   fi
