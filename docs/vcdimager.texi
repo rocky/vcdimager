@@ -2209,11 +2209,11 @@ time-out wait time, otherwise the target will be unreachable.
 
 @item <multi-default>
 @tgindex @var{numeric}
-When present, causes the selection list to be a multi default selection
+When present, causes the selection list to be a multi-default selection
 list, i.e. that the target list id of the @key{DEFAULT} depends on which
 part of the sequence item is playing. The @code{numeric} attributes, if
 @emph{disabled}, allows to disable the @key{NUMERIC} keys. When using
-multi default selections, the @code{<bsn>} must be set to 1 and the
+multi-default selections, the @code{<bsn>} must be set to 1 and the
 number of selection must match the number of all entry points of the
 sequence referenced by @code{<play-item>}.
 

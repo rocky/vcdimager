@@ -410,6 +410,64 @@ vcdinfo_get_cd_image (const vcdinfo_obj_t *vcd_obj)
 }
 
 
+/*!
+  \fn vcdinfo_selection_get_lid(const vcdinfo_obj_t *obj, lid_t lid,
+                               unsigned int selection);
+
+  \brief Get offset of a selection for a given lid. 
+
+  Return the LID offset associated with a the selection number of the
+  passed-in LID parameter. 
+
+  \return VCDINFO_INVALID_LID is returned if obj on error or obj
+  is NULL. Otherwise the LID offset is returned.
+*/
+lid_t vcdinfo_selection_get_lid(const vcdinfo_obj_t *obj, lid_t lid,
+                                      unsigned int selection) 
+{
+  unsigned int offset = vcdinfo_selection_get_offset(obj, lid, selection);
+  switch (offset) {
+  case VCDINFO_INVALID_OFFSET:
+  case PSD_OFS_MULTI_DEF:
+  case PSD_OFS_MULTI_DEF_NO_NUM:
+    return VCDINFO_INVALID_LID;
+  default: 
+    {
+      vcdinfo_offset_t *ofs = vcdinfo_get_offset_t(obj, offset);
+      return ofs->lid;
+    }
+  }
+}
+
+/*!
+  \fn vcdinfo_selection_get_offset(const vcdinfo_obj_t *obj, lid_t lid,
+  unsigned int selection);
+
+  \brief Get offset of a selection for a given lid. 
+
+  Return the LID offset associated with a the selection number of the
+  passed-in LID parameter. 
+
+  \return VCDINFO_INVALID_OFFSET is returned if obj on error or obj
+  is NULL. Otherwise the LID offset is returned.
+*/
+uint16_t vcdinfo_selection_get_offset(const vcdinfo_obj_t *obj, lid_t lid,
+                                      unsigned int selection) 
+{
+  unsigned int bsn;
+
+  PsdListDescriptor pxd;
+  vcdinfo_lid_get_pxd(obj, &pxd, lid);
+  bsn=vcdinf_get_bsn(pxd.psd);
+
+  if ( (selection - bsn + 1) > 0) {
+    return vcdinfo_lid_get_offset(obj, lid, selection-bsn+1);
+  } else {
+    vcd_warn( "Selection number %u too small. bsn %u", selection, bsn );
+    return VCDINFO_INVALID_OFFSET;
+  }
+}
+
 /**
  \fn vcdinfo_get_default_offset(const vcdinfo_obj_t *obj, unsinged int lid);
  \brief Get return offset for a given PLD selector descriptor. 
@@ -417,7 +475,7 @@ vcdinfo_get_cd_image (const vcdinfo_obj_t *vcd_obj)
  "return" entry or pld is NULL. Otherwise the LID offset is returned.
  */
 uint16_t
-vcdinfo_get_default_offset(const vcdinfo_obj_t *obj, unsigned int lid)
+vcdinfo_get_default_offset(const vcdinfo_obj_t *obj, lid_t lid)
 {
   if (NULL != obj) {
     
@@ -437,6 +495,83 @@ vcdinfo_get_default_offset(const vcdinfo_obj_t *obj, unsigned int lid)
     }
   }
   return VCDINFO_INVALID_OFFSET;
+}
+
+/*!
+  \brief Get default or multi-default LID. 
+  
+  Return the LID offset associated with a the "default" entry of the
+  passed-in LID parameter. Note "default" entries are associated
+  with PSDs that are (extended) selection lists. If the "default"
+  offset is a multi-default, we use entry_num to find the proper
+  "default" LID. Otherwise this routine is exactly like
+  vcdinfo_get_default_lid with the exception of requiring an
+  additional "entry_num" parameter.
+  
+  \return VCDINFO_INVALID_LID is returned on error, or if the LID
+  is not a selection list or no "default" entry. Otherwise the LID
+  offset is returned.
+*/
+lid_t
+vcdinfo_get_multi_default_lid(const vcdinfo_obj_t *obj, lid_t lid, 
+                              unsigned int entry_num)
+{
+  unsigned int offset = vcdinfo_get_multi_default_offset(obj, lid, entry_num);
+  switch (offset) {
+  case VCDINFO_INVALID_OFFSET:
+  case PSD_OFS_MULTI_DEF:
+  case PSD_OFS_MULTI_DEF_NO_NUM:
+    return VCDINFO_INVALID_LID;
+  default: 
+    {
+      vcdinfo_offset_t *ofs = vcdinfo_get_offset_t(obj, offset);
+      return ofs->lid;
+    }
+  }
+}
+
+/*!
+  \brief Get default or multi-default LID offset. 
+  
+  Return the LID offset associated with a the "default" entry of the
+  passed-in LID parameter. Note "default" entries are associated
+  with PSDs that are (extended) selection lists. If the "default"
+  offset is a multi-default, we use entry_num to find the proper
+  "default" offset. Otherwise this routine is exactly like
+  vcdinfo_get_default_offset with the exception of requiring an
+  additional "entry_num" parameter.
+  
+  \return VCDINFO_INVALID_OFFSET is returned on error, or if the LID
+  is not a selection list or no "default" entry. Otherwise the LID
+  offset is returned.
+*/
+uint16_t
+vcdinfo_get_multi_default_offset(const vcdinfo_obj_t *obj, lid_t lid, 
+                                 unsigned int entry_num)
+{
+  uint16_t offset=vcdinfo_get_default_offset(obj, lid);
+
+  switch (offset) {
+  case PSD_OFS_MULTI_DEF:
+  case PSD_OFS_MULTI_DEF_NO_NUM: 
+    {
+      /* Have some work todo... Figure the selection number. */
+      unsigned int selection=0;
+      track_t track=vcdinfo_get_track(obj, entry_num);
+      track_t prev_track=VCDINFO_INVALID_TRACK;
+      for (selection=1;
+           track != VCDINFO_INVALID_TRACK 
+             && track != prev_track 
+             && entry_num > 0;
+           selection++) {
+        prev_track = track;
+        track=vcdinfo_get_track(obj, --entry_num);
+      }
+      return vcdinfo_selection_get_offset(obj, lid, selection);
+    }
+  default: 
+    return offset;
+  }
 }
 
 /*!
@@ -701,7 +836,7 @@ vcdinfo_get_num_segments(const vcdinfo_obj_t *obj)
 }
 
 /*!
-  \fn vcdinfo_get_offset_from_lid(const vcdinfo_obj_t *obj, unsigned int entry_num);
+  \fn vcdinfo_get_offset_lid(const vcdinfo_obj_t *obj, unsigned int entry_num);
   \brief Get offset entry_num for a given LID. 
   \return VCDINFO_INVALID_OFFSET is returned if obj on error or obj
   is NULL. Otherwise the LID offset is returned.

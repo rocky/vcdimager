@@ -5,22 +5,30 @@ see ChangeLog for more information
 version 0.7.20 (unstable/development)
 =====================================
 * Join in libcdio branch (forked after 0.7.14)
+
 * Performance fix: (libvcdinfo) Redo the way we find segment 
-  LSNs to greatly reduce the number of CD reads when 
-  there are many files in the ISO-9660 track or many segments or 
-  continued segments. Requires libcdio 0.65 API change.
+  LSNs to greatly reduce the number of CD reads when there are many
+  files in the ISO-9660 track, or there are many segments or continued
+  segments. Requires libcdio 0.65 API change.
+
+* API completion: (libvcdinfo) now has API for multi-default selections;
+  APIs for mapping a selection number to a LID or LID offset added.
 
 version 0.7.19 (unstable/development)
 =====================================
 * Use VCD CD-drive auto scanning in vcdxrip and vcd-info that is 
   now part of in libcdio
+
 * doc changes, clarification of cdxa2mpeg
+
 * error checking in cdxa2mpeg (from Nicolas Boullis)
+
 * Changes dicted by those in libcdio, libiso9660
 
 version 0.7.18 (unstable/development)
 =====================================
 * Move iso9660 stuff into libcdio. 
+
 * More private files are private. 
 
 version 0.7.17 (unstable/development)
