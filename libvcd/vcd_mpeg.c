@@ -65,7 +65,7 @@ struct {
   unsigned hsize;
   unsigned vsize;
   int frate_idx;
-} const static norm_table[] = {
+} static const norm_table[] = {
   { MPEG_NORM_FILM,   352, 240, 1 },
   { MPEG_NORM_PAL,    352, 288, 3 },
   { MPEG_NORM_NTSC,   352, 240, 4 },
@@ -74,7 +74,7 @@ struct {
   { MPEG_NORM_OTHER, }
 };
 
-const static double frame_rates[16] =  {
+static const double frame_rates[16] =  {
   0.0, 24000.0/1001, 24.0, 25.0, 
   30000.0/1001, 30.0,  50.0, 60000.0/1001, 
   60.0, 0.0, 
