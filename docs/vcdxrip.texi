@@ -231,7 +231,7 @@ By default @value{program} will extract everything it can about a VCD
 image. 
 
 However if you specify something in particular you don't want to
-extract, for example you don't want to extract the tracks (or
+extract, for example you don't want to extract the tracks or
 ``segments'' use  @kbd{--nosegments}.
 
 @node All Options
@@ -405,8 +405,8 @@ MPEGs.
 @node Some Examples
 @chapter Some simple command invocations.
 
-Perhaps all you want to do is ``rip'' CD onto disk to modify it.  If the
-CD is in the  ``default'' location for your OS, then this might
+Perhaps all you want to do is rip a CD onto your disk to modify it.
+If the CD is in the default location for your OS, then this might
 work:
 
 @noindent
@@ -421,7 +421,7 @@ It means the same thing as:
 vcdxrip --cdrom-device
 @end smallexample 
 
-and using the ``short'' option:
+and using the short option:
 
 @noindent
 @smallexample
