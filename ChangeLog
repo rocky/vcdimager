@@ -1,3 +1,19 @@
+2001-01-12  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* frontends/cli/vcdrip.c: fixed LOT max index bug..
+	(dump_lot_and_psd_vcd): #ifdef'ed extended psd stuff
+	(dump_lot_and_psd_vcd): re-prefixed some [] in output
+
+	* libvcd/vcd_files_private.h: added symbolic LOT size #define
+
+2001-01-11  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* frontends/cli/vcdrip.c: 
+		merged in fixes from jbj1:
+		fixed ENTRIES[] index start,
+	      	added _calc_psd_wait_time (),
+		search whole LOT
+
 2001-01-10  Herbert Valerio Riedel  <hvr@gnu.org>
 
         * stream retval fix

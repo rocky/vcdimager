@@ -200,9 +200,12 @@ typedef struct {
    List ID 1 has an offset of 0x0000. All unused or non-user-accessible
    entries must be 0xffff. */
 
+#define LOT_VCD_OFFSETS ((1 << 15)-1)
+
 typedef struct {
-  uint16_t reserved          GNUC_PACKED;  /* Reserved, must be zero */
-  uint16_t offset[32768-1]   GNUC_PACKED;  /* offset given in 8 byte units */
+  uint16_t reserved                 GNUC_PACKED;  /* Reserved, must be zero */
+  uint16_t offset[LOT_VCD_OFFSETS]  GNUC_PACKED;  /* offset given in 8
+                                                     byte units */
 } LotVcd;
 
 /* PSD.VCD
@@ -264,7 +267,7 @@ typedef struct {
   uint8_t loop               GNUC_PACKED;
   uint16_t itemid            GNUC_PACKED;
   uint16_t ofs[0]            GNUC_PACKED; /* variable length */
-  /* PsdSelectionListDescriptor2 */
+  /* PsdSelectionListDescriptorExtended */
 } PsdSelectionListDescriptor;
 
 typedef struct {
@@ -273,7 +276,7 @@ typedef struct {
   struct psd_area_t return_area    GNUC_PACKED;
   struct psd_area_t default_area   GNUC_PACKED;
   struct psd_area_t area[0]        GNUC_PACKED; /* variable length */
-} PsdSelectionListDescriptor2;
+} PsdSelectionListDescriptorExtended;
 
 
 typedef struct {
@@ -289,7 +292,7 @@ typedef struct {
   uint16_t return_ofs          GNUC_PACKED; /* return list offset
                                              (0xffff disables) */
   uint16_t ptime             GNUC_PACKED; /* play time in 1/15 s,
-                                             0x000 meaning full item */
+                                             0x0000 meaning full item */
   uint8_t  wtime             GNUC_PACKED; /* delay after, in seconds,
                                              if 1 <= wtime <= 60
                                                 wait is wtime

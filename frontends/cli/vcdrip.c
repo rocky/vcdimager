@@ -82,7 +82,7 @@ itemid2str (uint16_t itemid)
   else if (itemid < 100)
     snprintf (buf, sizeof (buf), "cd track# %d (0x%4.4x)", itemid, itemid);
   else if (itemid < 600)
-    snprintf (buf, sizeof (buf), "ENTRIES[%d] (0x%4.4x)", itemid-100, itemid);
+    snprintf (buf, sizeof (buf), "ENTRIES[%d] (0x%4.4x)", itemid - 100, itemid);
   else if (itemid < 1000)
     snprintf (buf, sizeof (buf), "spare id (0x%4.4x)", itemid);
   else if (itemid < 2980)
@@ -272,11 +272,22 @@ _ofs2idx (const void *data, uint16_t ofs)
   const LotVcd *lot = data;
   uint16_t n;
   
-  for (n = 0; n < 32768-1;n++)
+  for (n = 0; n < LOT_VCD_OFFSETS; n++)
     if (UINT16_FROM_BE (lot->offset[n]) == ofs)
       return n;
 
   return -1;
+}
+
+static int
+_calc_psd_wait_time (uint16_t wtime)
+{
+  if (wtime < 61)
+    return wtime;
+  else if (wtime < 255)
+    return (wtime - 60) * 10 + 60;
+  else
+    return -1;
 }
 
 static void
@@ -292,10 +303,12 @@ dump_lot_and_psd_vcd (const void *data, const void *data2,
            ? "SVCD/LOT.SVD\n"
            : "VCD/LOT.VCD\n");
 
-  n = 0;
-  while ((tmp = UINT16_FROM_BE (lot->offset[n])) != 0xFFFF)
-    fprintf (stdout, " offset[%d]: 0x%4.4x (real offset = %d)\n", 
-             n++, tmp, tmp << 3);
+  for (n = 0; n < LOT_VCD_OFFSETS; n++)
+    {
+      if ((tmp = UINT16_FROM_BE (lot->offset[n])) != 0xFFFF)
+        fprintf (stdout, " offset[%d]: 0x%4.4x (real offset = %d)\n", 
+                 n, tmp, tmp << 3);
+    }
 
   fprintf (stdout, DELIM);
 
@@ -306,12 +319,12 @@ dump_lot_and_psd_vcd (const void *data, const void *data2,
 
   assert (psd_size % 8 == 0);
 
-  n = 0;
-  while ((tmp = UINT16_FROM_BE (lot->offset[n])) != 0xFFFF)
+  for (n = 0; n < LOT_VCD_OFFSETS; n++)
     {
       uint8_t type;
 
-      n++;
+      if ((tmp = UINT16_FROM_BE (lot->offset[n])) == 0xFFFF)
+        continue;
 
       tmp <<= 3;
       assert (tmp < psd_size);
@@ -326,11 +339,11 @@ dump_lot_and_psd_vcd (const void *data, const void *data2,
             int i;
 
             fprintf (stdout,
-                     " [%.2d]: play list descriptor\n"
+                     " PSD[%.2d]: play list descriptor\n"
                      "  NOI: %d | LID#: %d\n"
                      "  prev: PSD[%d] (0x%4.4x) | next: PSD[%d] (0x%4.4x) | retn: PSD[%d] (0x%4.4x)\n"
-                     "  ptime: %d | wait: %d | await: %d\n",
-                     n - 1,
+                     "  ptime: %d/15s | wait: %ds | await: %ds\n",
+                     n,
                      d->noi,
                      UINT16_FROM_BE (d->lid),
                      _ofs2idx (lot, UINT16_FROM_BE (d->prev_ofs)),
@@ -339,7 +352,9 @@ dump_lot_and_psd_vcd (const void *data, const void *data2,
                      UINT16_FROM_BE (d->next_ofs),
                      _ofs2idx (lot, UINT16_FROM_BE (d->return_ofs)),
                      UINT16_FROM_BE (d->return_ofs),
-                     UINT16_FROM_BE (d->ptime), d->wtime, d->atime);
+                     UINT16_FROM_BE (d->ptime),
+                     _calc_psd_wait_time(d->wtime),
+                     _calc_psd_wait_time(d->atime));
 
             for (i = 0; i < d->noi; i++)
               {
@@ -350,24 +365,23 @@ dump_lot_and_psd_vcd (const void *data, const void *data2,
           }
           break;
         case PSD_TYPE_END_OF_LIST:
-          fprintf (stdout, " [%.2d]: end of list descriptor\n", n - 1);
+          fprintf (stdout, " PSD[%.2d]: end of list descriptor\n", n);
           fprintf (stdout, "\n");
           break;
         case PSD_TYPE_SELECTION_LIST:
           {
             const PsdSelectionListDescriptor *d =
               (const void *) (psd_data + tmp);
-            const PsdSelectionListDescriptor2 *d2 =
-              (const void *) &(d->ofs[d->nos]);
             int i;
+
             fprintf (stdout,
-                     " [%.2d]: selection list descriptor\n"
+                     " PSD[%.2d]: selection list descriptor\n"
                      "  NOS: %d | BSN: %d | LID: %d\n"
                      "  prev: PSD[%d] (0x%4.4x) | next: PSD[%d] (0x%4.4x) | return: PSD[%d] (0x%4.4x)\n"
                      "  default: PSD[%d] (0x%4.4x) | timeout: PSD[%d] (0x%4.4x)\n"
-                     "  wtime: %d | loop: %d\n"
+                     "  wtime: %ds | loop: %d (delayed: %s)\n"
                      "  itemid: %s\n",
-                     n - 1,
+                     n,
                      d->nos, 
                      d->bsn,
                      UINT16_FROM_BE (d->lid),
@@ -381,8 +395,8 @@ dump_lot_and_psd_vcd (const void *data, const void *data2,
                      UINT16_FROM_BE (d->default_ofs),
                      _ofs2idx (lot, UINT16_FROM_BE (d->timeout_ofs)),
                      UINT16_FROM_BE (d->timeout_ofs),
-                     d->wtime,
-                     d->loop,
+                     _calc_psd_wait_time(d->wtime),
+                     0x7f & d->loop, bool_str (0x80 & d->loop),
                      itemid2str (UINT16_FROM_BE (d->itemid)));
 
             for (i = 0; i < d->nos; i++)
@@ -390,33 +404,40 @@ dump_lot_and_psd_vcd (const void *data, const void *data2,
                        _ofs2idx (lot, UINT16_FROM_BE (d->ofs[i])),
                        UINT16_FROM_BE (d->ofs[i]));
 
-            fprintf (stdout, "  prev_area: (%d,%d) (%d,%d) ",
-                     d2->prev_area.x1, d2->prev_area.y1, 
-                     d2->prev_area.x2, d2->prev_area.y2);
+#ifdef EXTENDED_PSD            
+            {
+              const PsdSelectionListDescriptorExtended *d2 =
+                (const void *) &(d->ofs[d->nos]);
 
-            fprintf (stdout, "| next_area: (%d,%d) (%d,%d)\n",
-                     d2->next_area.x1, d2->next_area.y1, 
-                     d2->next_area.x2, d2->next_area.y2);
+              fprintf (stdout, "  prev_area: (%d,%d) (%d,%d) ",
+                       d2->prev_area.x1, d2->prev_area.y1, 
+                       d2->prev_area.x2, d2->prev_area.y2);
 
-            fprintf (stdout, "  return_area: (%d,%d) (%d,%d) ",
-                     d2->return_area.x1, d2->return_area.y1, 
-                     d2->return_area.x2, d2->return_area.y2);
+              fprintf (stdout, "| next_area: (%d,%d) (%d,%d)\n",
+                       d2->next_area.x1, d2->next_area.y1, 
+                       d2->next_area.x2, d2->next_area.y2);
 
-            fprintf (stdout, "| default_area: (%d,%d) (%d,%d)\n",
-                     d2->default_area.x1, d2->default_area.y1, 
-                     d2->default_area.x2, d2->default_area.y2);
+              fprintf (stdout, "  return_area: (%d,%d) (%d,%d) ",
+                       d2->return_area.x1, d2->return_area.y1, 
+                       d2->return_area.x2, d2->return_area.y2);
 
-            for (i = 0; i < d->nos; i++)
-              fprintf (stdout, "  area[%d]: (%d,%d) (%d,%d)\n", i,
-                       d2->area[i].x1, d2->area[i].y1, 
-                       d2->area[i].x2, d2->area[i].y2);
+              fprintf (stdout, "| default_area: (%d,%d) (%d,%d)\n",
+                       d2->default_area.x1, d2->default_area.y1, 
+                       d2->default_area.x2, d2->default_area.y2);
+
+              for (i = 0; i < d->nos; i++)
+                fprintf (stdout, "  area[%d]: (%d,%d) (%d,%d)\n", i,
+                         d2->area[i].x1, d2->area[i].y1, 
+                         d2->area[i].x2, d2->area[i].y2);
+            }
+#endif
 
             fprintf (stdout, "\n");
           }
           break;
         default:
-          fprintf (stdout, " [%2d] unkown descriptor type (0x%2.2x) at %d\n", 
-                   n - 1, type, tmp);
+          fprintf (stdout, " PSD[%2d] unkown descriptor type (0x%2.2x) at %d\n", 
+                   n, type, tmp);
 
           fprintf (stdout, "  hexdump: ");
           _hexdump (&psd_data[tmp], 24);
@@ -424,7 +445,6 @@ dump_lot_and_psd_vcd (const void *data, const void *data2,
           break;
         }
     }
-
 
 }
 
@@ -589,9 +609,9 @@ dump_entries_vcd (const void *data)
       uint32_t extent = msf_to_lba(msf);
       extent -= 150;
 
-      fprintf (stdout, " entry %d starts in track %d at (lba) extent %d "
+      fprintf (stdout, " ENTRY[%2.2d]: track %d, (lba) extent %d "
                "(msf: %2.2x:%2.2x:%2.2x)\n",
-               n + 1, from_bcd8 (entries.entry[n].n), extent,
+               n, from_bcd8 (entries.entry[n].n), extent,
                msf->m, msf->s, msf->f);
     }
 
