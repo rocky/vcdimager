@@ -1145,7 +1145,7 @@ dump (char image_fname[])
 
   psd_size = vcdinfo_get_psd_size (&obj);
 
-  if (vcdinfo_read_psd (&obj) && vcdinfo_read_psd (&obj))
+  if (vcdinfo_read_psd (&obj))
     {
       /* ISO9660 crosscheck */
       if (vcd_image_source_fs_stat (obj.img, 
