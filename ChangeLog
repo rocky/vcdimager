@@ -1,3 +1,11 @@
+2000-11-17  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_mpeg.c (mpeg_analyze_start_seq): widened range of fixup-hack
+
+	* libvcd/vcd_mpeg.h: renamed new norm tags
+
+	* libvcd/vcd.c (_write_sectors): -"-
+	
 2000-11-16  Mike Bernson  <mike@mlb.org>
 
 	* libvcd/vcd_mpeg.h: new resolutions

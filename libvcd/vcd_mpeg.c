@@ -20,7 +20,6 @@
 
 #include <string.h>
 #include <assert.h>
-#include <stdio.h>
 
 #include "vcd_types.h"
 #include "vcd_mpeg.h"
@@ -69,14 +68,16 @@ mpeg_type (const void *mpeg_block)
       return MPEG_NULL;
     }
 
+  /* fixme -- detect mpeg verson!!! */
+
   /*
    * data from mpeg-1 stream
    */
-  if ((data[15] == 0xe0) ||
+  if ((data[15] == 0xe0) || 
       (data[15] == 0xbb && data[24] == 0xe0))
     return MPEG_VIDEO;
   
-  if ((data[15] == 0xc0) ||
+  if ((data[15] == 0xc0) || 
       (data[15] == 0xbb && data[24] == 0xc0))
     return MPEG_AUDIO;
 
@@ -89,14 +90,10 @@ mpeg_type (const void *mpeg_block)
   if (data[17] == 0xc0)
 	return MPEG_AUDIO;
 
-#ifdef	NEVER
-{int i; for(i=0; i < 32; i++) fprintf(stderr, "%02x ", data[i]);fprintf(stderr, "\n");}
-fprintf(stderr, "unknown: data 15=%x 16=%x 17=%x 18=%x 19=%x 20=%x\n",
-data[15], data[16], data[17], data[18], data[19], data[20]);
-#endif
-
   return MPEG_UNKNOWN;
 }
+
+/* fixme -- mpeg version needs to be detected too! */
 
 int
 mpeg_analyze_start_seq(const void *packet, mpeg_info_t *info)
@@ -108,8 +105,10 @@ mpeg_analyze_start_seq(const void *packet, mpeg_info_t *info)
 
   if(memcmp(pkt, mpeg_sync, sizeof(mpeg_sync)))
     return FALSE;
-
-  for(fixup = 0;fixup < 4;fixup++, pkt++)
+  
+  /* fixme -- this is just a hack, due to little understanding of mpeg format */
+  
+  for(fixup = -6;fixup < 6;fixup++, pkt++)
     if(!memcmp(pkt+30, mpeg_seq_start, sizeof(mpeg_seq_start)) ) {
       unsigned hsize, vsize, aratio, frate, brate, bufsize;
 
@@ -142,10 +141,10 @@ mpeg_analyze_start_seq(const void *packet, mpeg_info_t *info)
         info->norm = MPEG_NORM_FILM;
       else if(hsize == 352 && vsize == 240 && frate == 4)
         info->norm = MPEG_NORM_NTSC;
-      else if (hsize == 480 && vsize == 480 && frate == 1)
-	info->norm = MPEG_SVHS_NTSC;
+      else if (hsize == 480 && vsize == 480 && frate == 4)
+	info->norm = MPEG_NORM_NTSC_S;
       else if (hsize == 480 && vsize == 576 && frate == 3)
-	info->norm = MPEG_SVHS_PAL;
+	info->norm = MPEG_NORM_PAL_S;
       else
         info->norm = MPEG_NORM_OTHER;
 

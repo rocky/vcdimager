@@ -38,8 +38,8 @@ typedef enum {
   MPEG_NORM_PAL,
   MPEG_NORM_NTSC,
   MPEG_NORM_FILM,
-  MPEG_SVHS_PAL,
-  MPEG_SVHS_NTSC,
+  MPEG_NORM_PAL_S,
+  MPEG_NORM_NTSC_S
 } mpeg_norm_t;
 
 typedef struct {
