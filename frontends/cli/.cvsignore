@@ -4,8 +4,6 @@ Makefile
 .libs
 cdxa2mpeg
 cdxa2mpeg.1
-vcddebug
-vcddebug.1
 vcdimager
 vcdimager.1
 vcd-info
