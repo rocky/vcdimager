@@ -179,6 +179,9 @@ typedef uint32_t lsn_t;
 /* The type of an playback control list ID (LID). */
 typedef uint16_t lid_t;
 
+/* The type of an track number. */
+typedef uint8_t track_t;
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
