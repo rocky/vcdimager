@@ -19,7 +19,7 @@ dnl 02111-1307, USA.
 AC_PREREQ(2.52)
 AC_REVISION([$Id$])dnl
 
-AC_INIT([GNU VCDimager],0.7.20, [bugs-vcdimager@gnu.org], [vcdimager])
+AC_INIT([GNU VCDimager],0.7.21cvs, [bugs-vcdimager@gnu.org], [vcdimager])
 AC_CONFIG_SRCDIR([lib/vcd.c])
 AM_INIT_AUTOMAKE(1.6.0)
 
@@ -301,7 +301,8 @@ then
 ****************************************************************************
 ***                                                                      ***
 ***         WARNING: BUILDING ONLY LIBVCD W/O ANY FRONTENDS              ***
-***      (maybe you are missing some library (libpopt, libxml2)?         ***
+***      (maybe you are missing some libraries (libpopt 1.7 or greater   ***
+***       and libxml2)?                                                  ***
 ***                                                                      ***
 ****************************************************************************
 ****************************************************************************
