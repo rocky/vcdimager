@@ -212,7 +212,7 @@ _vcd_list_at (VcdList *list, int idx)
 }
 
 VcdListNode *
-_vcd_list_begin (VcdList *list)
+_vcd_list_begin (const VcdList *list)
 {
   vcd_assert (list != NULL);
 

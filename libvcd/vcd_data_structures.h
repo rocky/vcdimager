@@ -55,7 +55,7 @@ VcdListNode *_vcd_list_find (VcdList *list, _vcd_list_iterfunc cmp_func, void *u
 
 VcdListNode *_vcd_list_at (VcdList *list, int idx);
 
-VcdListNode *_vcd_list_begin (VcdList *list);
+VcdListNode *_vcd_list_begin (const VcdList *list);
 
 VcdListNode *_vcd_list_end (VcdList *list);
 
