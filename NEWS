@@ -7,7 +7,12 @@ version 0.7.14 (unstable/development)
 2003-0.-..
 
 * almost ISO C99 compliant now
-* ...
+* fixed bug in vcddump if no device specified
+* vcdxrip:
+    uses lower-level vcdinf library (so --input option added)
+    separate and more complete documentation
+    added --track option to rip specific track
+    added to regression testing
 
 version 0.7.13 (unstable/development)
 =====================================
