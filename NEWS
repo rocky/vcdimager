@@ -4,7 +4,7 @@ see ChangeLog for more information
 
 version 0.7.6 (unstable/development)
 ====================================
-2001-06-??
+2001-06-16
 
 * fixed boundary checks for segment play items
 * fix/workaround for cygwin stack bug exposed in vcddebug

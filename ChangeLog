@@ -1,5 +1,7 @@
 2001-06-16  Herbert Valerio Riedel  <hvr@gnu.org>
 
+ 	* configure.in: bumped version up to 0.7.6
+	
 	* libvcd/vcd.c: improved on svcd_vcd3_mpegav compat mode
 
 2001-06-15  Herbert Valerio Riedel  <hvr@gnu.org>

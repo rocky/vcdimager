@@ -13,7 +13,7 @@
 @ifinfo
 This file documents GNU VCDImager, The GNU Video CD Authoring Tools.
 
-Copyright (C) Herbert Valerio Riedel @email{hvr@@gnu.org}
+Copyright (C) Herbert Valerio Riedel @email{<hvr@@gnu.org>}
 
 @sp 2
 Permission is granted to make and distributed verbatim copies of this
@@ -184,7 +184,7 @@ Tools
 * @command{vcdxbuild}::         
 * @command{vcdxrip}::           
 
-@command{vcdimager}
+@command{vcdxgen}
 
 * Adding Files to the Video CD ::  
 * CD-i Support::                
@@ -242,11 +242,11 @@ Character Sets
 @end menu
 
 @node Introduction, Video CD Concepts, Top, Top
-@chapter Introduction
+@unnumbered Introduction
 
 This manual describes the @dfn{GNU VCDImager}@footnote{see
 @uref{http://www.gnu.org/software/vcdimager/}} package, a toolset for
-authoring, disassembling and analyzing Video CDs and Super Video CDs.
+authoring, disassembling and analyzing Video CD's and Super Video CD's.
 
 @menu
 * Supplied Tools::              
@@ -318,14 +318,14 @@ Support for segment (play) items (@acronym{SPI}).
 Support for up to 98 sequence items (@acronym{MPEG} tracks) per (Super) Video CD.
 
 @item
-Support for additonal entry points into sequence items.
+Support for additional entry points into sequence items.
 
 @item
 Support for defining auto pause points in sequence items.
 
 @item
 General facility for adding files as mode 2 form 1 and 2 sectors to the
-@acronym{ISO9660} filesystem and setting some labels in the
+@acronym{ISO9660} file-system and setting some labels in the
 @acronym{ISO9660} @acronym{PVD}
 
 @item
@@ -367,12 +367,12 @@ corrections and improvements for this manual to
 The Video Compact Disc (@dfn{Video CD} or @dfn{VCD}) is a standardized
 digital video storage format. It is based on the commonly available
 Compact Disc technology, which allows for low cost video authoring.
-Video CDs can be played in most @acronym{DVD} standalone player,
+Video CD's can be played in most @acronym{DVD} standalone player,
 dedicated VCD players and finally, modern Personal Computers with
 multimedia support.
 
 @node Anatomy of Video CDs, Known Video CD Flavors, Overview, Video CD Concepts
-@section Anatomy of Video CDs
+@section Anatomy of Video CD's
 
 In general, the layout of a Video CD is as follows:
 
@@ -413,7 +413,7 @@ embedded in lead-in and lead-out empty sectors.
 @node Known Video CD Flavors, The ISO9660 Track, Anatomy of Video CDs, Video CD Concepts
 @section Known Video CD Flavors
 
-There are different Video CD flavours commonly used. The following
+There are different Video CD flavors commonly used. The following
 sections tries to explain the differences amongst them.
 
 @menu
@@ -428,7 +428,7 @@ sections tries to explain the differences amongst them.
 @subsection Video CD 1.1
 
 This is the most basic Video CD specification dating back to
-1993@footnote{actually this flavour was based on the Karaoke-CD, which
+1993@footnote{actually this flavor was based on the Karaoke-CD, which
 was the first @acronym{MPEG} based @acronym{CD-ROM} format.}, which has
 the following characteristics:
 
@@ -438,7 +438,7 @@ One mode 2 mixed form ISO9660 track containing file pointers to the
 information areas.
 
 @item
-Up to 98 multiplexed @acronym{MPEG}-1 audio/video streams or
+Up to 98 multiplex-ed @acronym{MPEG}-1 audio/video streams or
 @acronym{CD-DA} audio tracks.
 
 @item
@@ -446,7 +446,7 @@ Up to 500 @acronym{MPEG} track entry points.
 
 @end itemize
 
-The Video CD specification requires the multiplexed @acronym{MPEG}-1
+The Video CD specification requires the multiplex-ed @acronym{MPEG}-1
 stream to have a @acronym{CBR} of about 174300 bytes per
 second@footnote{2324 bytes of payload per sector * 75 sectors per
 second = 174300 bytes per second} in order to accommodate single speed
@@ -503,10 +503,10 @@ resolutions became available:
 @subsection Extended Video CD
 
 Also known as @dfn{XVCD}, this is not an official standard. It's
-actually just a name for VCDs which do not conform with the official
+actually just a name for VCD's which do not conform with the official
 standards in order to use the additional performance of the
 @acronym{DVD} decoders and thus achieve better image quality. Such an
-XVCD may be unsupported by many available standalone playing devices.
+XVCD may be unsupported by many available stand-alone playing devices.
 
 @node Super Video CD 1.0, Extended Super Video CD, Extended Video CD, Known Video CD Flavors
 @subsection Super Video CD 1.0
@@ -515,8 +515,8 @@ With the upcoming of the @acronym{DVD} media, a new VCD standard had to
 be published in order to be able to keep up with technology, so the
 Super Video CD specification was called into life. Most notably a switch
 from @acronym{MPEG}-1 CBR to @acronym{MPEG}-2 VBR encoding for the video
-stream was performed. The following new features are based upon the Video 
-CD specification.
+stream was performed. The following new features---based upon the Video 
+CD 2.0 specification---are:
 
 @itemize @bullet 
 @item 
@@ -550,7 +550,7 @@ for motion pictures:
 
 Just like the XVCD, and thus also known as @dfn{XSVCD}, this is not an
 official standard and may not work with all playing devices supporting
-SVCDs.
+SVCD's.
 
 @node The ISO9660 Track, Constraints on @acronym{MPEG} streams, Known Video CD Flavors, Video CD Concepts
 @section The ISO9660 Track
@@ -582,7 +582,7 @@ IDs, filesystem size, etc.
 @node @file{/VCD} & @file{/SVCD} Directory, @file{/MPEGAV} & @file{/MPEG2} Directory, Directory Structure, Directory Structure
 @subsubsection @file{/VCD} & @file{/SVCD} Directory
 
-This directories (@file{/SVCD} is used on Super Video CDs) contain file
+This directories (@file{/SVCD} is used on Super Video CD's) contain file
 entries to structures contained in the information area of a (Super)
 Video CD.
 
@@ -607,7 +607,7 @@ play lists and end lists) which represent the @acronym{PBC}.
 @itemx /SVCD/ENTRIES.SVCD
 @itemx /SVCD/LOT.SVD
 @itemx /SVCD/PSD.SVD
-These are the corresponding filenames on Super Video CDs, and fullfill
+These are the corresponding file names on Super Video CD's, and fulfill
 the same purpose as those defined for the Video CD 2.0 format.
 
 @item /SVCD/SEARCH.DAT
@@ -629,7 +629,7 @@ in the tracks after the ISO9660 track.
 @subsubsection @file{/CDDA} Directory
 
 This file contains file entries pointing to optional CDDA tracks after
-the ISO9660 track. This feature is not available for Super Video CDs.
+the ISO9660 track. This feature is not available for Super Video CD's.
 
 @node @file{/SEGMENT} Directory, @file{/EXT} Directory, @file{/CDDA} Directory, Directory Structure
 @subsubsection @file{/SEGMENT} Directory
@@ -644,7 +644,7 @@ This directory contains file entries to segment play items.
 @itemx /EXT/PSD_X.VCD
 These are only defined for Video CD 2.0, and contain the extended
 @acronym{PBC}, which adds area definitions for pointer based selection
-and/or highlighting of selection areas. (On Super Video CDs the extended
+and/or highlighting of selection areas. (On Super Video CD's the extended
 @acronym{PBC} has been merged into the main @file{/SVCD/PSD.SVD} file)
 
 @item /EXT/SCANDATA.DAT
@@ -662,7 +662,7 @@ Closed caption data file entries.
 @subsubsection @file{/CDI} Directory
 
 This directory is provided for @acronym{CD-i} player applications. (Only
-usefull for Video CDs)
+useful for Video CD's)
 
 @node Constraints on @acronym{MPEG} streams, Play Items, The ISO9660 Track, Video CD Concepts
 @section Constraints on @acronym{MPEG} streams
@@ -670,7 +670,7 @@ usefull for Video CDs)
 GNU VCDImager expects @acronym{MPEG} streams in a format suitable for
 (Super) Video CD production. Only a few cases where the @acronym{MPEG}
 streams fail to adhere to this requirement are detected, thus it's up to
-the user to ensure that the constraints are fullfilled.
+the user to ensure that the constraints are fulfilled.
 
 @menu
 * Video CD::                    
@@ -681,7 +681,7 @@ the user to ensure that the constraints are fullfilled.
 @node Video CD, Super Video CD, Constraints on @acronym{MPEG} streams, Constraints on @acronym{MPEG} streams
 @subsection Video CD
 
-The Video CD specification requires the multiplexed @acronym{MPEG}-1
+The Video CD specification requires the multiplex-ed @acronym{MPEG}-1
 stream to have a bit rate of about 174300 bytes per second. The video
 stream is required to have one of the following resolutions:
 
@@ -703,7 +703,7 @@ kbits/sec @acronym{CBR} with 1 stereo or 2 mono audio channels.
 When creating Super Video CD images @acronym{MPEG}-2 @acronym{VBR}
 streams are expected with a maximum allowed bit-rate of approximately
 2.6 mbits/sec.  The following video resolutions are (officially)
-supported@footnote{actually you can try other resoulutions as well,
+supported@footnote{actually you can try other resolutions as well,
 but then you are leaving the SVCD specification behind you...}:
 
 @itemize @bullet
@@ -714,7 +714,7 @@ but then you are leaving the SVCD specification behind you...}:
 @end itemize
 
 The audio stream must be @acronym{MPEG}-1 layer II, with a bit-rate
-ranging from 32 to 384 kbps kbits/sec bit-rate (i.e. @acronym{VBR}!) 
+ranging from 32 to 384 kbits/sec bit-rate (i.e. @acronym{VBR}!) 
 with up to 2 stereo or 4 mono channels, or 1 extended @acronym{MPEG}-1/2
 multichannel (5+1) surround sound stream.
 
@@ -782,7 +782,7 @@ points.
 @section Play Items
 
 @dfn{Play items} are the @acronym{MPEG} payload on (Super) Video
-CDs. Sequences are usefull for seamless play of larger video sections,
+CD's. Sequences are usefull for seamless play of larger video sections,
 whereas segments are better for smaller items in interactive
 applications.
 
@@ -971,7 +971,7 @@ An @dfn{end list} can be used to terminate the interpretation of the
 @node Command List,  , End List, PBC Lists
 @subsubsection Command List
 
-@dfn{Command lists} are an optional feature defined for Super Video CDs,
+@dfn{Command lists} are an optional feature defined for Super Video CD's,
 allowing to execute opcodes in a virtual machine, allowing for enhanced
 interactivity.
 
@@ -1001,19 +1001,49 @@ interactivity.
 @node @command{vcdimager}, @command{vcddebug}, Tools, Tools
 @subsection @command{vcdimager}
 
-There are a few command-line options for @command{vcdimager} at the moment:
-@example
-@cartouche
-$ vcdimager --help
-@end cartouche
-@end example
+This is the classic frontend, which is maintained only for ease of use
+and because it does not relay on @command{libxml2} and thus may be the
+only built frontend. @command{vcdimager} does not create a dummy
+@acronym{PBC} anymore as in the past. It is recommended to familarize
+with the @acronym{XML} frontends, in order to be able to use the
+extended features offered by GNU VCDImager.
+
+There are a few command-line options for @command{vcdimager} at the
+moment, please issue @samp{vcdimager --help} for an actual list of
+available options.
+
+@node @command{vcddebug}, @command{vcdxgen}, @command{vcdimager}, Tools
+@subsection @command{vcddebug}
+
+While this project went along, @command{vcddebug} was used to analyze
+and reverse engineer existing Video CD's and later Super Video CD's. It
+has grown into a valuable debugging tool and report generator for
+(Super) Video CD's. 
+
+It is recommended to make use of this tool if compatibility problems
+arise, to identify what the difference between working discs and
+non-working discs are, and thus help to improve GNU VCDImager.
+
+
+@node @command{vcdxgen}, @command{vcdxbuild}, @command{vcddebug}, Tools
+@subsection @command{vcdxgen}
+
+This tool works almost like the @command{vcdimager} tool, except that it
+creates an intermediate @acronym{XML} description, instead of directly
+building the disc image. This @acronym{XML} can be used as a starting
+point for customization.
+
+The @acronym{XML} file can then be fed to @command{vcdxbuild} for
+building the actual image file(s).
+
+@emph{FIXME: write more}
 
 @menu
 * Adding Files to the Video CD ::  
 * CD-i Support::                
 @end menu
 
-@node Adding Files to the Video CD , CD-i Support, @command{vcdimager}, @command{vcdimager}
+@node Adding Files to the Video CD , CD-i Support, @command{vcdxgen}, @command{vcdxgen}
 @subsubsection Adding Files to the Video CD 
 
 Files can be added to the @acronym{ISO} file-system, that is the first
@@ -1051,7 +1081,7 @@ slashes following directly each other.
 If the parent directory for a file entry does not exist it will be
 created automatically on demand.
 
-@node CD-i Support,  , Adding Files to the Video CD , @command{vcdimager}
+@node CD-i Support,  , Adding Files to the Video CD , @command{vcdxgen}
 @subsubsection CD-i Support
 There is no specific CD-i support in GNU VCDImager. But you
 can use the general facilities for adding a custom CD-i player
@@ -1074,33 +1104,36 @@ vcdimager alias --cdi \
 	--add-file      /usr/share/cdi/cdi_vcd.cfg,CDI/CDI_VCD.CFG 
 @end example
 
-@node @command{vcddebug}, @command{vcdxgen}, @command{vcdimager}, Tools
-@subsection @command{vcddebug}
-
-@emph{...not written yet...}
-
-@node @command{vcdxgen}, @command{vcdxbuild}, @command{vcddebug}, Tools
-@subsection @command{vcdxgen}
-
-This tool works almost like the @command{vcdimager} tool, except that it
-creates an intermediate @acronym{XML} description, instead of directly
-building the disc image. This @acronym{XML} can be used as a starting
-point for customization.
-
-The @acronym{XML} file can then be fed to @command{vcdxbuild} for
-building the actual image file(s).
-
-@emph{FIXME: write more}
-
 @node @command{vcdxbuild}, @command{vcdxrip}, @command{vcdxgen}, Tools
 @subsection @command{vcdxbuild}
 
-@emph{...not written yet...}
+This program allows to actually build a disc image, based on a given
+@acronym{XML} description and the files referenced therein. It can be
+thought of a Video CD @emph{compiler} for @acronym{XML} descriptions of
+Video CD's.
+
+@emph{FIXME: write more}
 
 @node @command{vcdxrip},  , @command{vcdxbuild}, Tools
 @subsection @command{vcdxrip}
 
-@emph{...not written yet...}
+This tool implements the inverse operation to @command{vcdxbuild}, i.e.,
+taking an already built disc image and outputting all the file items and
+the @acronym{XML} description necessary to recreate this (Super) Video
+CD including any @acronym{PBC} information.
+
+@table @option
+@item --output-file
+@itemx -o
+This option allows to specify the xml file name for output. default:
+@file{videocd.xml}.
+
+@item --norip
+By the use of this option, only the XML description is created, without
+actually extracting any files or mpeg streams contained.
+@end table
+
+@emph{FIXME: write more}
 
 @node VideoCD XML Description, Examples, Reference, Top
 @chapter VideoCD XML Description
@@ -1110,6 +1143,12 @@ downloaded from @uref{http://www.gnu.org/software/vcdimager/videocd.dtd}.
 
 XML examples are available at
 @uref{http://www.hvrlab.org/~hvr/vcdimager/xml_repository.html}.
+
+The use of @command{vcdxgen} is recommended as a starting point point,
+when creating an advanced @acronym{XML} description.@footnote{Graphical user
+interfaces to aid @acronym{XML} editing are in development, if you want
+to join the @acronym{GUI} development group, please get into contact
+with me at @email{<hvr@@gnu.org>}.}
 
 @menu
 * Common Rules::                
@@ -1326,6 +1365,21 @@ Data}.
 >
 @end example
 
+@table @code
+@item <segment-item>
+Element representing a segment item. Segment play items need to be
+referenced from the @command{<pbc>} section in order to be accessible at
+all.
+
+@item id
+ID value referenced in @code{ref} attributes.
+
+@item src
+This attribute specifies the external file name of the item,
+i.e. @acronym{MPEG} stream, to be included.
+
+@end table
+
 @node @code{<sequence-items>} Container, @code{<pbc>} Container, @code{<segment-items>} Container, @code{<videocd>} Root
 @subsection @code{<sequence-items>} Container
 
@@ -1355,6 +1409,36 @@ Data}.
   id           ID     #REQUIRED
 >
 @end example
+
+@table @code
+@item <sequence-item>
+Element representing a sequence item. Each sequence item corresponds to
+a single track in the resulting disc.
+
+@item id
+ID value referenced in @code{ref} attributes.
+
+@item src
+This attribute specifies the external file name of the item,
+i.e. @acronym{MPEG} stream, to be included.
+
+@item <auto-pause>
+This element specifies where to insert auto pause points, whose wait
+time is controlled by play lists. The time is given in seconds from the
+beginning of the sequence.
+
+@item <entry>
+Defines an additional entry point into the sequence item. Up to 99 entry
+can be defined per sequence, while only a maximum of 500 entry
+points@footnote{every sequence point has automatically an entry point
+defined, which must be substracted from the maximum of 500 entry points}
+can be present in the whole disc. The entry point time is given in
+seconds from the beginning of the sequence.
+
+@item id
+ID value referenced in @code{ref} attributes. 
+
+@end table
 
 @node @code{<pbc>} Container,  , @code{<sequence-items>} Container, @code{<videocd>} Root
 @subsection @code{<pbc>} Container
@@ -1649,7 +1733,7 @@ of @acronym{SPI}s.
 @end enumerate
 
 @node Fast Forward & Fast Rewind with Super Video CDs,  , SVCD Player Compatibility, Tips and Hints
-@appendixsec Fast Forward & Fast Rewind with Super Video CDs
+@appendixsec Fast Forward & Fast Rewind with Super Video CD's
 
 Because of the @acronym{VBR} encoding of the @acronym{MPEG}-2 streams on
 @acronym{SVCD}s, there's no fixed relation between sector index and
