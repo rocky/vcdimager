@@ -21,7 +21,7 @@ check_DATA = avseq00.m1p item0000.m1p \
 	vcd11_test0.right vcd20_test0.right svcd1_test0.right \
 	vcd11_test1.right vcd20_test1.right svcd1_test1.right \
 	vcd11_test2.right vcd20_test2.right svcd1_test2.right \
-	vcd20_test1.xml-right svcd1_test1.xml-right
+	vcd11_test1.xml-right vcd20_test1.xml-right svcd1_test1.xml-right
 
 EXTRA_DIST = $(check_SCRIPTS) $(check_DATA) \
 	check_common_fn check_vcddump_fn check_vcdimager_fn \

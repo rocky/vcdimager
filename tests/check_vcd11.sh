@@ -9,6 +9,7 @@ fi
 . ${srcdir}/check_vcddump_fn
 . ${srcdir}/check_vcdimager_fn
 . ${srcdir}/check_vcdxbuild_fn
+. ${srcdir}/check_vcdxrip_fn
 
 BASE=`basename $0 .sh`
 RC=0
@@ -71,6 +72,14 @@ else
 fi
 
 echo "$0: vcdxbuild cksum(1) checksums matched :-)"
+
+if test_vcdxrip '--norip --input videocd.bin --output-file vcd11_test1.xml' \
+    vcd11_test1.xml ${srcdir}/vcd11_test1.xml-right ; then 
+    :
+else
+    echo "$0: vcdxrip test 1 failed "
+    exit 1
+fi
 
 if test_vcddump '-B -i videocd.bin -I --show-filesystem' \
     vcd11_test1.dump ${srcdir}/vcd11_test1.right ; then 
