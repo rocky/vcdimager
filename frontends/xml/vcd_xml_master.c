@@ -37,6 +37,26 @@
 
 static const char _rcsid[] = "$Id$";
 
+
+static VcdDataSource *
+mk_dsource (const char prefix[], const char pathname[])
+{
+  vcd_assert (pathname != 0);
+
+  if (prefix) 
+    {
+      VcdDataSource *retval = 0;
+      char *tmp = _vcd_malloc (strlen (prefix) + strlen (pathname) + 1);
+      strcpy (tmp, prefix);
+      strcat (tmp, pathname);
+      retval = vcd_data_source_new_stdio (tmp);
+      free (tmp);
+      return retval;
+    }
+
+  return vcd_data_source_new_stdio (pathname);
+}
+
 bool vcd_xml_master (const struct vcdxml_t *obj, VcdImageSink *image_sink)
 {
   VcdObj *_vcd;
@@ -182,8 +202,7 @@ bool vcd_xml_master (const struct vcdxml_t *obj, VcdImageSink *image_sink)
       
       if (dentry->file_src) 
 	{
-	  VcdDataSource *_source = 
-	    vcd_data_source_new_stdio (dentry->file_src);
+	  VcdDataSource *_source = mk_dsource (obj->file_prefix, dentry->file_src);
 	  
 	  vcd_assert (_source != NULL);
 
@@ -198,7 +217,7 @@ bool vcd_xml_master (const struct vcdxml_t *obj, VcdImageSink *image_sink)
   _VCD_LIST_FOREACH (node, obj->segment_list)
     {
       struct segment_t *segment = _vcd_list_node_data (node);
-      VcdDataSource *_source = vcd_data_source_new_stdio (segment->src);
+      VcdDataSource *_source = mk_dsource (obj->file_prefix, segment->src);
       VcdListNode *node2;
       VcdMpegSource *_mpeg_src;
 
@@ -236,7 +255,7 @@ bool vcd_xml_master (const struct vcdxml_t *obj, VcdImageSink *image_sink)
 
       vcd_debug ("adding sequence #%d, %s", idx, sequence->src);
 
-      data_source = vcd_data_source_new_stdio (sequence->src);
+      data_source = mk_dsource (obj->file_prefix, sequence->src);
       vcd_assert (data_source != NULL);
 
       _mpeg_src = vcd_mpeg_source_new (data_source);

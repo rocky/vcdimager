@@ -135,6 +135,7 @@ static struct {
   VcdList *img_options;
 
   char *xml_fname;
+  char *file_prefix;
 
   int verbose_flag;
   int check_flag;
@@ -212,7 +213,10 @@ _do_cl (int argc, const char *argv[])
        "show progress"}, 
 
       {"check", '\0', POPT_ARG_NONE | POPT_ARGFLAG_DOC_HIDDEN, 
-       &gl.check_flag, 0, "enable check mode"},
+       &gl.check_flag, 0, "enable check mode (undocumented)"},
+
+      {"file-prefix", '\0', POPT_ARG_STRING | POPT_ARGFLAG_DOC_HIDDEN,
+       &gl.file_prefix, 0, "add prefix string to all filenames (undocumented)"}, 
 
       {"verbose", 'v', POPT_ARG_NONE, &gl.verbose_flag, 0, 
        "be verbose"},
@@ -441,6 +445,8 @@ main (int argc, const char *argv[])
         vcd_error ("failed to create image object");
         exit (EXIT_FAILURE);
       }
+
+    obj.file_prefix = gl.file_prefix;
     
     if (vcd_xml_master (&obj, image_sink))
       vcd_error ("building videocd failed");

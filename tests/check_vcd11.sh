@@ -13,7 +13,7 @@ if [ ! -x "${VCDXBUILD}" ]; then
     exit 77
 fi
 
-if ! ${VCDXBUILD} --check ${srcdir}/check_vcd11.xml; then
+if ! ${VCDXBUILD} --check --file-prefix "${srcdir}/" ${srcdir}/check_vcd11.xml; then
     echo "$0: execution failed"
     rm -vf core videocd.{bin,cue}
     exit 1

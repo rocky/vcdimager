@@ -31,6 +31,8 @@
 struct vcdxml_t {
   char *comment; /* just a xml comment... */
 
+  char *file_prefix;
+
   vcd_type_t vcd_type;
   VcdList *option_list;
 

@@ -1,3 +1,8 @@
+2002-12-27  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* frontends/xml/vcd_xml_build.c: added hidden --file-prefix option to
+	vcdxbuild to aid testsuite
+
 2002-12-25  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_cd_sector.c: replaced 2 endian conversion macros by
