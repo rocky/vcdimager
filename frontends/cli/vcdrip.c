@@ -412,7 +412,7 @@ dump_lot_and_psd_vcd (const void *data, const void *data2,
                      "  NOS: %d | BSN: %d | LID: %d\n"
                      "  prev: PSD[%d] (0x%4.4x) | next: PSD[%d] (0x%4.4x) | return: PSD[%d] (0x%4.4x)\n"
                      "  default: PSD[%d] (0x%4.4x) | timeout: PSD[%d] (0x%4.4x)\n"
-                     "  wtime: %ds | loop: %d (delayed: %s)\n"
+                     "  totime: %ds | loop: %d (delayed: %s)\n"
                      "  item: %s\n",
                      n,
                      d->nos, 
@@ -428,7 +428,7 @@ dump_lot_and_psd_vcd (const void *data, const void *data2,
                      UINT16_FROM_BE (d->default_ofs),
                      _ofs2idx (lot, UINT16_FROM_BE (d->timeout_ofs)),
                      UINT16_FROM_BE (d->timeout_ofs),
-                     _calc_psd_wait_time(d->wtime),
+                     _calc_psd_wait_time(d->totime),
                      0x7f & d->loop, bool_str (0x80 & d->loop),
                      itemid2str (UINT16_FROM_BE (d->itemid)));
 

@@ -1182,10 +1182,7 @@ _write_vcd_iso_track (VcdObj *obj)
               ci = 0x80; /* fixme -- different for VCD2.0 */
 
               if (packet_no + 1 == _segment->info->packets)
-                {
-                  sm |= SM_EOF;
-                  vcd_debug ("eof at %d %d", n, packet_no);
-                }
+                sm |= SM_EOF;
 
               vcd_mpeg_source_get_packet (_segment->source, packet_no, buf, NULL);
             }

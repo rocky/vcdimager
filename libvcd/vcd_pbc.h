@@ -92,7 +92,7 @@ _vcd_pbc_lid_lookup (const VcdObj *obj, const char item_id[]);
 enum item_type_t
 _vcd_pbc_lookup (const VcdObj *obj, const char item_id[]);
 
-uint32_t
+uint16_t
 _vcd_pbc_pin_lookup (const VcdObj *obj, const char item_id[]);
 
 unsigned 
@@ -108,6 +108,7 @@ uint32_t
 _vcd_pbc_max_lid (const VcdObj *obj);
 
 void
-_vcd_pbc_node_write (const pbc_t *_pbc, void *buf, bool extended);
+_vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
+		     bool extended);
 
 #endif /* __VCD_PBC_H__ */

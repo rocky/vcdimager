@@ -59,6 +59,18 @@
 #define UINT32_FROM_BE(val)    (UINT32_TO_BE (val))
 #define UINT32_FROM_LE(val)    (UINT32_TO_LE (val))
 
+static inline uint16_t
+uint16_to_be (uint16_t val) 
+{
+  return UINT16_TO_BE (val);
+}
+
+static inline uint16_t
+uint32_to_be (uint32_t val) 
+{
+  return UINT32_TO_BE (val);
+}
+
 #define  to_711(val)  ((uint8_t) (val))
 
 uint16_t to_721(uint16_t i);

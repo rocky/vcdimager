@@ -25,6 +25,7 @@
 #include <string.h>
 #include <assert.h>
 #include <stddef.h>
+#include <math.h>
 
 #include <libvcd/vcd_util.h>
 #include <libvcd/vcd_pbc.h>
@@ -32,6 +33,32 @@
 #include <libvcd/vcd_obj.h>
 #include <libvcd/vcd_files_private.h>
 #include <libvcd/vcd_bytesex.h>
+
+static uint8_t
+_wtime (int seconds)
+{
+  if (seconds < 0)
+    return 255;
+
+  if (seconds <= 60)
+    return seconds;
+
+  if (seconds <= 2000)
+    {
+      double _tmp;
+
+      _tmp = seconds;
+      _tmp -= 60;
+      _tmp /= 10;
+      _tmp += 60;
+
+      return rint (_tmp);
+    }
+
+  vcd_warn ("wait time of %ds clipped to 2000s", seconds);
+
+  return 254;
+}
 
 unsigned
 _vcd_pbc_lid_lookup (const VcdObj *obj, const char item_id[])
@@ -60,9 +87,13 @@ _vcd_pbc_lookup (const VcdObj *obj, const char item_id[])
 {
   unsigned id;
 
+  assert (item_id != NULL);
+
   if ((id = _vcd_pbc_pin_lookup (obj, item_id)))
     {
-      if (id < 100)
+      if (id < 2)
+	return ITEM_TYPE_NOTFOUND;
+      else if (id < 100)
 	return ITEM_TYPE_TRACK;
       else if (id < 600)
 	return ITEM_TYPE_ENTRY;
@@ -77,11 +108,14 @@ _vcd_pbc_lookup (const VcdObj *obj, const char item_id[])
   return ITEM_TYPE_NOTFOUND;
 }
 
-uint32_t
+uint16_t
 _vcd_pbc_pin_lookup (const VcdObj *obj, const char item_id[])
 {
   int n;
   VcdListNode *node;
+
+  if (!item_id)
+    return 0;
 
   /* check sequence items */
 
@@ -227,38 +261,204 @@ _vcd_pbc_node_length (const pbc_t *_pbc, bool extended)
   return retval;
 }
 
+static uint16_t 
+_lookup_psd_offset (const VcdObj *obj, const char item_id[], bool extended)
+{
+  VcdListNode *node;
+
+  /* disable it */
+  if (!item_id)
+    return 0xffff;
+
+  _VCD_LIST_FOREACH (node, obj->pbc_list)
+    {
+      pbc_t *_pbc = _vcd_list_node_data (node);
+
+      if (!_pbc->id || strcmp (item_id, _pbc->id))
+	continue;
+	
+      return (extended ? _pbc->offset_ext : _pbc->offset) / INFO_OFFSET_MULT;
+    }
+
+  vcd_warn ("PSD: referenced PSD '%s' not found", item_id);
+	    
+  /* not found */
+  return 0xffff;
+}
+
+
 void
-_vcd_pbc_node_write (const pbc_t *_pbc, void *buf, bool extended)
+_vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
+		     bool extended)
 {
   switch (_pbc->type)
     {
     case PBC_PLAYLIST:
       {
 	PsdPlayListDescriptor *_md = buf;
-
+	VcdListNode *node;
+	int n;
+	
 	_md->type = PSD_TYPE_PLAY_LIST;
-	_md->noi = 0;
+	_md->noi = _vcd_list_length (_pbc->item_id_list);
 	_md->lid = UINT16_TO_BE (_pbc->lid);
-	_md->prev_ofs = UINT16_TO_BE (0xffff);
-	_md->next_ofs = UINT16_TO_BE (0xffff);
-	_md->return_ofs = UINT16_TO_BE (0xffff);
-	_md->ptime = UINT16_TO_BE (0x0000);
-	_md->wtime = 0x00;
-	_md->atime = 0x00;
-	/* _md->itemid[0] = UINT16_TO_BE (0); */
+	_md->prev_ofs = 
+	  uint16_to_be (_lookup_psd_offset (obj, _pbc->prev_id, extended));
+	_md->next_ofs = 
+	  uint16_to_be (_lookup_psd_offset (obj, _pbc->next_id, extended));
+	_md->return_ofs =
+	  uint16_to_be (_lookup_psd_offset (obj, _pbc->retn_id, extended));
+	_md->ptime = uint16_to_be (rint (_pbc->playing_time * 15.0));
+	_md->wtime = _wtime (_pbc->wait_time);
+	_md->atime = _wtime (_pbc->auto_pause_time);
+	
+	n = 0;
+	_VCD_LIST_FOREACH (node, _pbc->item_id_list)
+	  {
+	    char *_id = _vcd_list_node_data (node);
+	    uint16_t _pin;
+
+	    assert (_id != NULL);
+
+	    _pin = _vcd_pbc_pin_lookup (obj, _id);
+
+	    if (!_pin)
+	      vcd_warn ("PSD: referenced PIN '%s' not found", _id);
+
+	    _md->itemid[n] = UINT16_TO_BE (_pin);
+	    n++;
+	  }
       }
       break;
 
     case PBC_SELECTION:
       {
 	PsdSelectionListDescriptor *_md = buf;
+	enum {
+	  _SEL_MODE_NORMAL,
+	  _SEL_MODE_MULTI,
+	  _SEL_MODE_MULTI_ONLY
+	} _mode = _SEL_MODE_NORMAL;
+
+	if (_vcd_list_length (_pbc->default_id_list) > 1)
+	  _mode = _SEL_MODE_MULTI_ONLY;
+
+	if (_mode == _SEL_MODE_MULTI_ONLY 
+	    && _vcd_list_length (_pbc->select_id_list))
+	  {
+	    assert (_vcd_list_length (_pbc->default_id_list)
+		    == _vcd_list_length (_pbc->select_id_list));
+
+	    _mode = _SEL_MODE_MULTI;
+	  }
+
+	_md->bsn = _pbc->bsn;
+	_md->nos = _vcd_list_length (_pbc->select_id_list);
+	_md->default_ofs = UINT16_TO_BE (0xffff);
+
 
 	_md->type = PSD_TYPE_SELECTION_LIST;
-
+	_md->reserved = 0x00;
 	_md->lid = UINT16_TO_BE (_pbc->lid);
-	_md->prev_ofs = UINT16_TO_BE (0xffff);
-	_md->next_ofs = UINT16_TO_BE (0xffff);
-	_md->return_ofs = UINT16_TO_BE (0xffff);
+
+	_md->prev_ofs = 
+	  uint16_to_be (_lookup_psd_offset (obj, _pbc->prev_id, extended));
+	_md->next_ofs = 
+	  uint16_to_be (_lookup_psd_offset (obj, _pbc->next_id, extended));
+	_md->return_ofs =
+	  uint16_to_be (_lookup_psd_offset (obj, _pbc->retn_id, extended));
+	_md->timeout_ofs =
+	  uint16_to_be (_lookup_psd_offset (obj, _pbc->timeout_id, extended));
+	_md->totime = _wtime (_pbc->timeout_time);
+
+	if (_pbc->loop_count > 0x7f)
+	  vcd_warn ("loop count %d > 127", _pbc->loop_count);
+
+	_md->loop = (_pbc->loop_count > 0x7f) ? 0x7f : _pbc->loop_count;
+	
+	if (_pbc->jump_delayed)
+	  _md->loop |= 0x80;
+
+	{
+	  uint16_t _pin;
+
+	  _pin = _vcd_pbc_pin_lookup (obj, _pbc->item_id);
+
+	  if (!_pin)
+	    vcd_warn ("PSD: referenced PIN '%s' not found", _pbc->item_id);
+
+	  _md->itemid = UINT16_TO_BE (_pin);
+	}
+
+	switch (_mode)
+	  {
+	    VcdListNode *node;
+	    int idx;
+	    
+	  case _SEL_MODE_MULTI:
+	    assert (_md->bsn == 1);
+	    _md->default_ofs = UINT16_TO_BE (0xfffd);
+
+	    idx = 0;
+	    _VCD_LIST_FOREACH (node, _pbc->select_id_list)
+	      {
+		char *_id = _vcd_list_node_data (node);
+		
+		_md->ofs[idx] = uint16_to_be (_lookup_psd_offset (obj, _id, extended));
+
+		idx += 2;
+	      }
+
+	    idx = 1;
+	    _VCD_LIST_FOREACH (node, _pbc->default_id_list)
+	      {
+		char *_id = _vcd_list_node_data (node);
+		
+		_md->ofs[idx] = uint16_to_be (_lookup_psd_offset (obj, _id, extended));
+
+		idx += 2;
+	      }
+	    break;
+
+	  case _SEL_MODE_MULTI_ONLY:
+	    assert (_md->bsn == 1);
+	    _md->default_ofs = UINT16_TO_BE (0xfffe);
+	    _md->nos = _vcd_list_length (_pbc->default_id_list);
+	    /* fixme -- assert entry nums */
+
+	    idx = 0;
+	    _VCD_LIST_FOREACH (node, _pbc->default_id_list)
+	      {
+		char *_id = _vcd_list_node_data (node);
+		
+		_md->ofs[idx] = uint16_to_be (_lookup_psd_offset (obj, _id, extended));
+
+		idx++;
+	      }
+
+	    break;
+
+	  case _SEL_MODE_NORMAL:
+	    if (_vcd_list_length (_pbc->default_id_list))
+	      {
+		char *_default_id = _vcd_list_node_data (_vcd_list_begin (_pbc->default_id_list));
+		_md->default_ofs = uint16_to_be (_lookup_psd_offset (obj, _default_id, extended));
+	      }
+
+	    idx = 0;
+	    _VCD_LIST_FOREACH (node, _pbc->select_id_list)
+	      {
+		char *_id = _vcd_list_node_data (node);
+		
+		_md->ofs[idx] = uint16_to_be (_lookup_psd_offset (obj, _id, extended));
+
+		idx++;
+	      }
+	    break;
+
+	  default:
+	    assert (1);
+	  }
       }
       break;
       
@@ -335,7 +535,7 @@ _vcd_pbc_finalize (VcdObj *obj)
       _pbc->offset = offset;
       _pbc->offset_ext = offset_ext;
       _pbc->lid = lid;
-      vcd_debug ("pbc %d+%d (%d+%d)", offset, length, offset_ext, length_ext);
+      /* vcd_debug ("pbc %d+%d (%d+%d)", offset, length, offset_ext, length_ext); */
 
       offset += _vcd_len2blocks (length, INFO_OFFSET_MULT) * INFO_OFFSET_MULT;
       offset_ext += _vcd_len2blocks (length_ext, INFO_OFFSET_MULT) * INFO_OFFSET_MULT;
@@ -345,11 +545,7 @@ _vcd_pbc_finalize (VcdObj *obj)
   obj->psd_size = offset;
   obj->psdx_size = offset_ext;
 
-  vcd_debug ("pbc size %d (%d)", offset, offset_ext);
-
-  vcd_warn ("%s not implemented yet", __PRETTY_FUNCTION__);
-
-  
+  vcd_debug ("pbc size %d (extended %d)", offset, offset_ext);
 
   return true;
 }

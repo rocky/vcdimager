@@ -197,7 +197,7 @@ set_psd_vcd (VcdObj *obj, void *buf, bool extended)
       
       assert (offset % INFO_OFFSET_MULT == 0);
 
-      _vcd_pbc_node_write (_pbc, _buf + offset, extended);
+      _vcd_pbc_node_write (obj, _pbc, _buf + offset, extended);
     }
 }
 

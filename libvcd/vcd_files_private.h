@@ -262,7 +262,7 @@ typedef struct {
   uint16_t return_ofs        GNUC_PACKED;
   uint16_t default_ofs       GNUC_PACKED;
   uint16_t timeout_ofs       GNUC_PACKED;
-  uint8_t wtime              GNUC_PACKED;
+  uint8_t totime             GNUC_PACKED;
   uint8_t loop               GNUC_PACKED;
   uint16_t itemid            GNUC_PACKED;
   uint16_t ofs[EMPTY_ARRAY_SIZE] GNUC_PACKED; /* variable length */
