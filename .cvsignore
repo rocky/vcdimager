@@ -1,9 +1,13 @@
-aclocal.m4
-configure
-config.log
 Makefile
 Makefile.in
-config.status
+aclocal.m4
 config.cache
+config.h
+config.h.in
+config.log
+config.status
+configure
+stamp-h
+stamp-h.in
 vcdimager.spec
 *.tar.gz

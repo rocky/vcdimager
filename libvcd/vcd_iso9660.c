@@ -18,6 +18,10 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
 #include <ctype.h>
 #include <string.h>
 #include <stdio.h>
@@ -34,7 +38,7 @@ static const char _rcsid[] = "$Id$";
 #define SYSTEM_ID         "CD-RTOS CD-BRIDGE"
 
 #define VOLUME_SET_ID     ""
-#define PREPARER_ID       "GNU VCDImager " VERSION
+#define PREPARER_ID       "GNU VCDImager " VERSION " " HOST_ARCH
 #define PUBLISHER_ID      ""
 
 static void

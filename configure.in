@@ -1,10 +1,14 @@
 AC_REVISION([$Id$])dnl
 AC_INIT(libvcd/vcd.h)
+AM_CONFIG_HEADER(config.h)
 AM_INIT_AUTOMAKE(vcdimager, 0.5.9beta2)
 AM_MAINTAINER_MODE
 
 AM_SANITY_CHECK
+AC_CANONICAL_HOST
 AM_ACLOCAL_INCLUDE(frontends/gnome/macros)
+
+AC_DEFINE_UNQUOTED(HOST_ARCH, "$host_os/$host_cpu", [host os/cpu identifier])
 
 dnl conditionally built frontends
 
@@ -29,8 +33,10 @@ AC_PROG_RANLIB
 dnl libs
 AC_CHECK_FUNCS(snprintf vsnprintf, , [AC_MSG_ERROR(required function not found)])
 
+enable_cli_fe_popt=no
+
 if test "x$enable_cli_fe" = "xyes"; then
- AC_CHECK_LIB(popt, poptGetContext, POPT_LIBS="-lpopt", enable_cli_fe=no)
+ AC_CHECK_LIB(popt, poptGetContext, POPT_LIBS="-lpopt", enable_cli_fe_popt=yes)
 fi
 
 if test "x$enable_gnome_fe" = "xyes"; then
@@ -49,11 +55,9 @@ fi
 
 dnl headers
 
-AC_DEFINE(_GNU_SOURCE)
+AC_DEFINE(_GNU_SOURCE, [], enable GNU libc extension)
 AC_STDC_HEADERS
-AC_HAVE_HEADERS(stdint.h)
-AC_HAVE_HEADERS(inttypes.h)
-AC_HAVE_HEADERS(stdbool.h)
+AC_CHECK_HEADERS(stdint.h inttypes.h stdbool.h alloca.h)
 
 if test "x$ac_cv_header_stdint_h" != "xyes" \
  	-a "x$ac_cv_header_inttypes_h" != "xyes"
@@ -66,8 +70,10 @@ dnl ...we check for sizes but we dont actually use this information yet
    AC_CHECK_SIZEOF(long long, 8)
 fi
 
-if test "x$enable_cli_fe" = "xyes"; then
- AC_CHECK_HEADER(popt.h,, enable_cli_fe=no)
+if test "x$enable_cli_fe" = "xyes" \
+	-a "x$enable_cli_fe_popt" != "xyes"
+then
+ AC_CHECK_HEADER(popt.h, , enable_cli_fe_popt=yes)
 fi
 
 GNOME_COMPILE_WARNINGS
@@ -98,7 +104,8 @@ if test "x$empty_array_size" = "xxxx"
 then
   AC_MSG_ERROR([compiler is unable to creaty empty arrays])
 else
-  AC_DEFINE_UNQUOTED(EMPTY_ARRAY_SIZE, $empty_array_size)
+  AC_DEFINE_UNQUOTED(EMPTY_ARRAY_SIZE, $empty_array_size, 
+	[what to put between the brackets for empty arrays])
   changequote(`,')
   msg="[${empty_array_size}]"
   changequote([,])
@@ -114,6 +121,7 @@ fi
 LIBS="$LIBS -lm"
 CFLAGS="$CFLAGS $WARN_CFLAGS"
 
+AM_CONDITIONAL(BUILD_CLI_FE_POPT, test "x$enable_cli_fe_popt" = "xyes")
 AM_CONDITIONAL(BUILD_CLI_FE, test "x$enable_cli_fe" = "xyes")
 AM_CONDITIONAL(BUILD_GNOME_FE, test "x$enable_gnome_fe" = "xyes")
 
@@ -129,6 +137,7 @@ AC_OUTPUT([ \
 	libvcd/Makefile \
 	frontends/Makefile \
 	frontends/cli/Makefile \
+	frontends/cli/popt/Makefile \
 	frontends/gnome/Makefile \
 	frontends/gnome/macros/Makefile \
 	frontends/gnome/src/Makefile \
@@ -137,9 +146,10 @@ AC_OUTPUT([ \
 
 echo "
 Setup:
-  Install path:		${prefix}
-  Build CLI FE:		$enable_cli_fe
-  Build Gnome FE:	$enable_gnome_fe
+  Install path:     ${prefix}
+  Build CLI FE:	    $enable_cli_fe
+  Use own popt lib: $enable_cli_fe_popt
+  Build Gnome FE:   $enable_gnome_fe
 "
 
 if test "x$enable_gnome_fe" = "xyes"

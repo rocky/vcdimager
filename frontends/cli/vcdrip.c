@@ -18,6 +18,10 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
@@ -1122,7 +1126,7 @@ main (int argc, const char *argv[])
     switch (opt)
       {
       case OP_VERSION:
-        fprintf (stdout, "GNU VCDRip " VERSION "\n\n"
+        fprintf (stdout, "GNU VCDRip " VERSION " [" HOST_ARCH "]\n\n"
                  "Copyright (c) 2001 Herbert Valerio Riedel <hvr@gnu.org>\n\n"
                  "GNU VCDRip may be distributed under the terms of the GNU General Public Licence;\n"
                  "For details, see the file `COPYING', which is included in the GNU VCDImager\n"

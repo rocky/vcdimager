@@ -18,6 +18,10 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -226,7 +230,7 @@ main (int argc, const char *argv[])
       switch (opt)
         {
         case CL_VERSION:
-          fprintf (stdout, "GNU VCDImager " VERSION "\n\n"
+          fprintf (stdout, "GNU VCDImager " VERSION " [" HOST_ARCH "]\n\n"
                    "Copyright (c) 2001 Herbert Valerio Riedel <hvr@gnu.org>\n\n"
                    "GNU VCDImager may be distributed under the terms of the GNU General Public\n"
                    "Licence; For details, see the file `COPYING', which is included in the GNU\n"
