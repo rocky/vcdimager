@@ -1380,7 +1380,7 @@ main (int argc, const char *argv[])
     {"access-mode", 'a', 
      POPT_ARG_STRING, &gl.access_mode, 
      OP_ACCESS_MODE,
-     "set CD-ROM access mode", "ACCESS"},
+     "set CD-ROM access mode (IOCTL, READ_10, READ_CD)", "ACCESS"},
 
     {"bin-file", 'b', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &source_name, 
      OP_SOURCE_BIN, "set \"bin\" CD-ROM disk image file as source", "FILE"},
