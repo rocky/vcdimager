@@ -23,12 +23,17 @@
   src       %URI;        #REQUIRED"
 >
 
-<!ELEMENT videocd (info,pvd,filesystem,items,tracks,pbc)>
+<!ELEMENT videocd (option*,info,pvd,filesystem?,items?,tracks,pbc?)>
 <!ATTLIST videocd
   class     CDATA                    #REQUIRED
   version   CDATA                    #REQUIRED
-  options   CDATA                    #IMPLIED
   xmlns     %URI;                    #FIXED 'http://www.gnu.org/software/vcdimager/1.0/'
+>
+
+<!ELEMENT option EMPTY>
+<!ATTLIST option 
+  name		CDATA	#REQUIRED
+  value 	CDATA   #IMPLIED
 >
 
 <!ELEMENT info (album-id?,volume-count?,volume-number?,restriction?,time-offset?)>

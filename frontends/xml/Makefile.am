@@ -6,7 +6,17 @@ INCLUDES = $(POPT_INCLUDES) $(LIBVCD_CFLAGS) $(LIBXML2_CFLAGS)
 
 VCD_LIBS = $(top_builddir)/libvcd/libvcd.a
 
-vcdxml_SOURCES = vcdxml.c
+EXTRA_DIST = videocd.dtd
+BUILT_SOURCES = videocd_dtd.h
+#DISTCLEANFILES = videocd_dtd.h
+
+vcdxml_SOURCES = \
+	vcdxml.c \
+	vcdxml.h \
+	vcd_xml_parse.h \
+	vcd_xml_parse.c \
+	videocd_dtd.h
+
 vcdxml_LDADD = $(LIBXML2_LIBS) $(VCD_LIBS) $(POPT_LIBS)
 
 videocd_dtd.h: videocd.dtd

@@ -1,3 +1,9 @@
+2001-05-09  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* frontends/xml/vcdxml.c: moved parsing routines into module of its own
+
+	* frontends/xml/vcd_xml_parse.c: new module for parsing xml tree to vcdxml_t struct
+
 2001-05-07  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* frontends/cli/vcdimager.c (main): check bin and cue file 

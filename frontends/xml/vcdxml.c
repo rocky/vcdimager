@@ -33,17 +33,14 @@
 
 #include "vcd_types.h"
 
+#include "vcdxml.h"
+#include "vcd_xml_parse.h"
+
 #define VIDEOCD_DTD_PUBID "-//GNU//DTD VideoCD//EN"
 #define VIDEOCD_DTD_SYSID "http://www.gnu.org/software/vcdimager/videocd.dtd"
 #define VIDEOCD_DTD_XMLNS "http://www.gnu.org/software/vcdimager/1.0/"
 
 static xmlExternalEntityLoader _xmlEEL = 0;
-
-#define FOR_EACH(iter, parent) for(iter = parent->xmlChildrenNode; iter != NULL; iter = iter->next)
-
-#define GET_ELEM_STR(str, id, doc, node, ns) \
- if ((!xmlStrcmp (node->name, (const xmlChar *) id)) && (node->ns == ns)) \
-   free (str), str = xmlNodeListGetString (doc, node->xmlChildrenNode, 1)
 
 static xmlParserInputPtr 
 _myEEL (const char *URL, const char *ID, xmlParserCtxtPtr context)
@@ -85,155 +82,6 @@ _init_xml (void)
   xmlSetExternalEntityLoader (_myEEL);
 }
 
-typedef bool (*_parse_node_func) (xmlDocPtr, xmlNodePtr, xmlNsPtr);
-
-struct {
-  xmlChar *class;
-  xmlChar *version;
-  xmlChar *options;
-  struct {
-    xmlChar *album_id;
-    xmlChar *volume_count;
-    xmlChar *volume_number;
-    xmlChar *restriction;
-    xmlChar *time_offset;
-  } info;
-  struct {
-    xmlChar *volume_id;
-    xmlChar *system_id;
-    xmlChar *application_id;
-    xmlChar *preparer_id;
-    xmlChar *publisher_id;
-  } pvd;
-
-  unsigned mpeg_tracks_count;
-  struct {
-    xmlChar *id;
-    unsigned entry_point_count;
-    struct {
-      xmlChar *id;
-      xmlChar *timestamp;
-    } *entry_points;
-  } *mpeg_tracks;
-
-} gl_data;
-
-static bool
-_parse_info (xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
-{
-  xmlNodePtr cur;
-
-  FOR_EACH (cur, node)
-    {
-      GET_ELEM_STR (gl_data.info.album_id, "album-id", doc, cur, ns);
-      else GET_ELEM_STR (gl_data.info.volume_count, "volume-count", doc, cur, ns);
-      else GET_ELEM_STR (gl_data.info.volume_number, "volume-number", doc, cur, ns);
-      else GET_ELEM_STR (gl_data.info.restriction, "restriction", doc, cur, ns);
-      else printf ("??? %s\n", cur->name); 
-    }
-
-  return false;
-}
-
-static bool
-_parse_pvd (xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
-{
-  xmlNodePtr cur;
-
-  FOR_EACH (cur, node)
-    {
-      GET_ELEM_STR (gl_data.pvd.volume_id, "volume-id", doc, cur, ns);
-      else GET_ELEM_STR (gl_data.pvd.system_id, "system-id", doc, cur, ns);
-      else GET_ELEM_STR (gl_data.pvd.application_id, "application-id", doc, cur, ns);
-      else GET_ELEM_STR (gl_data.pvd.preparer_id, "preparer-id", doc, cur, ns);
-      else GET_ELEM_STR (gl_data.pvd.publisher_id, "publisher-id", doc, cur, ns);
-      else printf ("??? %s\n", cur->name); 
-    }
-
-  return false;
-}
-
-static bool
-_parse_mpeg_track (xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
-{
-  xmlNodePtr cur;
-
-  printf ("%s\n", __PRETTY_FUNCTION__);
-
-  if (gl_data.mpeg_tracks_count >= 98)
-    {
-      printf "too many tracks\n";
-      return true;
-    }
-
-  FOR_EACH (cur, node)
-    {
-      xmlChar *_tmp = NULL;
-
-      GET_ELEM_STR (_tmp, "entry", doc, cur, ns);
-      else printf ("??? %s\n", cur->name); 
-    }  
-
-  return false;
-}
-
-static bool
-_parse_tracks (xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
-{
-  xmlNodePtr cur;
-
-  FOR_EACH (cur, node)
-    {
-      bool rc = false;
-
-      if (!xmlStrcmp (cur->name, "mpeg-track")) rc = _parse_mpeg_track (doc, cur, ns);
-      else printf ("unexpected element: %s\n", cur->name);
-
-      if (rc)
-	return rc;
-    }
-
-  return false;
-}
-
-static bool
-_traverse_doc (xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
-{
-  xmlNodePtr cur;
-
-  if (xmlStrcmp (node->name, "videocd") || (node->ns != ns))
-    {
-      printf ("root element not videocd...\n");
-      return true;
-    }
-
-  
-
-  for (cur = node->children; cur; cur = cur->next)
-    {
-      bool rc = false;
-      if (cur->ns != ns)
-	{
-	  printf ("foreign namespace ignored (%s)\n", cur->name);
-	  continue;
-	}
-
-      gl_data.class = xmlGetProp (cur, "class");
-      gl_data.version = xmlGetProp (cur, "version");
-      gl_data.options = xmlGetProp (cur, "options");
-
-      if (!xmlStrcmp (cur->name, "info")) rc = _parse_info (doc, cur, ns);
-      else if (!xmlStrcmp (cur->name, "pvd")) rc = _parse_pvd (doc, cur, ns);
-      else if (!xmlStrcmp (cur->name, "tracks")) rc = _parse_tracks (doc, cur, ns);
-      else printf ("unexpected element: %s\n", cur->name);
-
-      if (rc)
-	return rc;
-    }
-
-  return false;
-}
-
 int 
 main (int argc, const char *argv[])
 {
@@ -257,6 +105,9 @@ main (int argc, const char *argv[])
   do {
     xmlNodePtr root;
     xmlNsPtr ns;
+    struct vcdxml_t obj;
+    
+    memset (&obj, 0, sizeof (struct vcdxml_t));
 
     if (!(root = xmlDocGetRootElement (vcd_doc)))
       {
@@ -270,7 +121,7 @@ main (int argc, const char *argv[])
 	break;
       }
 
-    if (_traverse_doc (vcd_doc, root, ns))
+    if (vcd_xml_parse (&obj, vcd_doc, root, ns))
       {
 	printf ("sorry, parsing failed\n");
 	break;
@@ -281,7 +132,7 @@ main (int argc, const char *argv[])
 
   xmlFreeDoc (vcd_doc);
 
-  //xmlDocDump (stdout, vcd_doc);
+  /* xmlDocDump (stdout, vcd_doc); */
 
   return rc;
 }
