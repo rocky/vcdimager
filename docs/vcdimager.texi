@@ -1003,18 +1003,28 @@ and are stored in the @dfn{play sequence descriptor} file.
 A @dfn{Play list} is basically a collection of play items which are to
 be played in the order specified. Play lists allow to define target
 lists for the @key{NEXT}, @key{PREVIOUS} and @key{RETURN} keys on the
-remote control.
+remote control. Navigation for @key{NEXT}, @key{PREVIOUS} and
+@key{RETURN} are associated with the entire play-list. Thus,
+navigation is not updated if an entry passes through to the next
+entry, but only when passing from one list id to another.
 
 @node Selection List, End List, Play List, PBC Lists
 @subsubsection Selection List
 @cindex Menus
 
-@dfn{Selection lists} are used to offer a user selection based on
+@dfn{Selection lists} can be used to offer a user selection based on
 numeric (@key{NUMERIC}) input or---if available---pointer device based
 selection, while showing a play item.
 
-Also features such as random selection, default target (@key{DEFAULT}),
-timeout target and looping are supported.
+All of the navigation units available in a play list (@key{NEXT},
+@key{PREVIOUS}, @key{RETURN} can be used in a selection list. But in
+contrast to a play list, there are additional features: menu selection
+(mentioned above), random selection, default target (@key{DEFAULT}),
+timeout target and looping.
+
+As with play lists, the navigation is associated with the entire list
+id. Thus, navigation is not updated if an entry passes through to the
+next entry; only when passing from one list id to another.
 
 @subsubheading Hot-spots
 @cindex Menu selection areas
@@ -1969,15 +1979,17 @@ sequence as defined by the TOC, while the default entry id gets defined
 by the address defined in the @file{ENTRY.VCD} or @file{ENTRY.SVD}}.
 
 @item <entry>
-Defines an additional entry point into the sequence item. Up to 99 entry
-points (including the default entry point) can be defined per sequence,
-while only a maximum of 500 entry points@footnote{every sequence point
-has automatically an entry point defined, which must be subtracted from
-the maximum of 500 entry points} can be present in the whole disc. The
-entry point time is given in seconds from the beginning of the sequence.
-If referenced from @acronym{PBC} the sequence which contains the entry
-point is played from the entry point to the end of the sequence
-(@emph{not} to the next entry point!). @xref{Access Point Sectors}.
+Defines an additional entry point into the sequence item. Up to 99
+entry points (including the default entry point) can be defined per
+sequence, while only a maximum of 500 entry points@footnote{every
+sequence point has automatically an entry point defined, which must be
+subtracted from the maximum of 500 entry points} can be present in the
+whole disc. The entry point time is given in seconds from the
+beginning of the sequence.  If referenced from @acronym{PBC} the
+sequence which contains the entry point is played from the entry point
+to the end of the sequence, @emph{not} to the next entry point!
+Similarly navigation values do not change if the next entry point is
+passed. @xref{Access Point Sectors}.
 
 @item id
 Play item ID value referenced in @code{ref} attributes. 
@@ -2450,9 +2462,9 @@ $ vcdimager --iso-volume-label="MY_TEST_VCD" track1.mpg track2 track3.mpg
    INFO: scanning mpeg sequence item #1 for scanpoints...
    INFO: scanning mpeg sequence item #2 for scanpoints...
    INFO: writing track 1 (ISO-9660)...
-   INFO: writing track 2, MPEG1, NTSC (352x240/30fps), 1 audio stream...
-   INFO: writing track 3, MPEG1, PAL (352x288/25fps), 1 audio stream...
-   INFO: writing track 4, MPEG1, NTSC (352x240/30fps), 1 audio stream...
+   INFO: writing track 2, MPEG1, NTSC SIF (352x240/29.97fps), 1 audio stream...
+   INFO: writing track 3, MPEG1, PAL SIF (352x288/25fps), 1 audio stream...
+   INFO: writing track 4, MPEG1, NTSC SIF (352x240/29.97fps), 1 audio stream...
 finished ok, image created with 13626 sectors [03:01.51]
 $
 @end cartouche
@@ -2469,9 +2481,9 @@ $ vcdxbuild videocd.xml
    INFO: scanning mpeg sequence item #1 for scanpoints...
    INFO: scanning mpeg sequence item #2 for scanpoints...
    INFO: writing track 1 (ISO-9660)...
-   INFO: writing track 2, MPEG1, NTSC (352x240/30fps), 1 audio stream...
-   INFO: writing track 3, MPEG1, PAL (352x288/25fps), 1 audio stream...
-   INFO: writing track 4, MPEG1, NTSC (352x240/30fps), 1 audio stream...
+   INFO: writing track 2, MPEG1, NTSC SIF (352x240/29.97fps), 1 audio stream...
+   INFO: writing track 3, MPEG1, PAL SIF (352x288/25fps), 1 audio stream...
+   INFO: writing track 4, MPEG1, MPEG1, NTSC SIF (352x240/29.97fps), 1 audio stream...
 finished ok, image created with 13626 sectors [03:01.51]
 $
 @end cartouche
