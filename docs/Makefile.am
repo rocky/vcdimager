@@ -1,4 +1,4 @@
-info_TEXINFOS = vcdimager.texi
+info_TEXINFOS = vcdimager.texi vcddump.texi
 vcdimager_TEXINFOS = fdl.texi gpl.texi glossary.texi
 
 vcdimager.ps.gz: vcdimager.ps
@@ -9,7 +9,7 @@ vcdimager.pdf: vcdimager.texi
 
 pdf: vcdimager.pdf
 
-vcdimager.html: vcdimager.texi
+.texi.html:
 	texi2html $<
 
 vcdimager.txt: vcdimager.texi
@@ -17,4 +17,4 @@ vcdimager.txt: vcdimager.texi
 
 all-formats: vcdimager.txt vcdimager.html vcdimager.dvi vcdimager.ps vcdimager.pdf
 
-MOSTLYCLEANFILES = vcdimager.tgs vcdimager.ps.gz vcdimager.pdf vcdimager.html vcdimager_toc.html vcdimager_foot.html
+MOSTLYCLEANFILES = vcdimager.tgs vcdimager.ps.gz vcdimager.pdf vcdimager.html vcdimager_toc.html vcdimager_foot.html vcddump.html
