@@ -610,6 +610,13 @@ _write_sectors(VcdObj *obj, int track)
       sm = SM_FORM2|SM_REALT;
       ci = 0;
       break;
+    case MPEG_END:
+      if(n < obj->mpeg_tracks[track].length_sectors)
+        vcd_warning("Program end marker seen at packet %d"
+                    " -- before actual end of stream", n);
+      sm = SM_FORM2|SM_REALT;
+      ci = 0;
+      break;
     case MPEG_INVALID:
       vcd_error("invalid mpeg packet found at packet# %d"
                 " -- please fix this mpeg file!", n);

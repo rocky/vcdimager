@@ -28,6 +28,7 @@ typedef enum {
   MPEG_VIDEO,
   MPEG_AUDIO,
   MPEG_NULL,
+  MPEG_END,
   MPEG_UNKNOWN
 } mpeg_type_t;
 

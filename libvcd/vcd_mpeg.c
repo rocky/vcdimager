@@ -33,6 +33,10 @@ const uint8_t mpeg_seq_start[] = {
   0x00, 0x00, 0x01, 0xb3 
 };
 
+const uint8_t mpeg_end[] = {
+  0x00, 0x00, 0x01, 0xb9 
+};
+
 const double frame_rates[16] = {
    0.00, 23.976, 24.0, 25.0, 
   29.97, 30.0,   50.0, 59.94, 
@@ -47,25 +51,29 @@ const double aspect_ratios[16] = {
 };
 
 mpeg_type_t 
-mpeg_type(const void * mpeg_block)
+mpeg_type (const void *mpeg_block)
 {
   const uint8_t *data = mpeg_block;
   int n;
 
-  if(memcmp(data, mpeg_sync, sizeof(mpeg_sync))) {
-    for(n = 0;n < 2324;n++)
-      if(data[n])
-        return MPEG_INVALID;
+  if (!memcmp (data, mpeg_end, sizeof (mpeg_end)))
+    return MPEG_END;
+  
+  if (memcmp(data, mpeg_sync, sizeof (mpeg_sync))) 
+    {
+      for (n = 0;n < 2324;n++)
+        if (data[n])
+          return MPEG_INVALID;
 
-    return MPEG_NULL;
-  }
+      return MPEG_NULL;
+    }
 
-  if((data[15] == 0xe0) ||
-     (data[15] == 0xbb && data[24] == 0xe0))
+  if ((data[15] == 0xe0) ||
+      (data[15] == 0xbb && data[24] == 0xe0))
     return MPEG_VIDEO;
-
-  if((data[15] == 0xc0) ||
-     (data[15] == 0xbb && data[24] == 0xc0))
+  
+  if ((data[15] == 0xc0) ||
+      (data[15] == 0xbb && data[24] == 0xc0))
     return MPEG_AUDIO;
 
   return MPEG_UNKNOWN;

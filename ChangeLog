@@ -1,3 +1,14 @@
+2000-11-08  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* applied fix for program end markers in mpeg streams from
+		Andrew Stevens <Andrew.Stevens@comlab.ox.ac.uk>
+	
+	* libvcd/vcd_mpeg.h: added new mpeg_type MPEG_END
+	
+	* libvcd/vcd_mpeg.c (mpeg_type): detection for -"-
+
+	* libvcd/vcd.c (_write_sectors): added warning output for -"-
+	
 2000-09-20  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_files_private.h: tiny fixups
