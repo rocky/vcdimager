@@ -45,6 +45,8 @@
 #include "vcd_xml_master.h"
 #include "vcd_xml_dtd.h"
 
+static const char _rcsid[] = "$Id$";
+
 static void
 _init_xml (void)
 {

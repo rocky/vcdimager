@@ -31,6 +31,8 @@
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
 
+static const char _rcsid[] = "$Id$";
+
 /*
  * shortcut templates...
  */

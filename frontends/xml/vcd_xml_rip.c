@@ -46,6 +46,8 @@
 #include "vcd_xml_dtd.h"
 #include "vcd_xml_dump.h"
 
+static const char _rcsid[] = "$Id$";
+
 static int _verbose_flag = 0;
 static int _quiet_flag = 0;
 

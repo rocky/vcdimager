@@ -34,6 +34,7 @@
 #include <libvcd/vcd_stream_stdio.h>
 #include <libvcd/vcd_image_bincue.h>
 
+static const char _rcsid[] = "$Id$";
 
 bool vcd_xml_master (const struct vcdxml_t *obj, const char cue_fname[],
 		     const char bin_fname[], bool sector_2336_flag)

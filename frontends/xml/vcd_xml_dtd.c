@@ -29,7 +29,9 @@
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 
-int vcd_xml_dtd_loaded = -1;
+static const char _rcsid[] = "$Id$";
+
+int vcd_xml_dtd_loaded = -1; /* extern */
 
 static xmlExternalEntityLoader _xmlExternalEntityLoaderDefault = 0;
 

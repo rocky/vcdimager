@@ -37,6 +37,8 @@
 #include "vcd_xml_dump.h"
 #include "vcd_xml_dtd.h"
 
+static const char _rcsid[] = "$Id$";
+
 static xmlNodePtr 
 _get_file_node (xmlDocPtr doc, xmlNodePtr cur, xmlNsPtr ns, const char pathname[])
 {
