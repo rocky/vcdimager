@@ -27,18 +27,18 @@
 #include <libvcd/vcd_logging.h>
 
 #define vcd_assert(expr) \
- (void) ({ \
+ { \
    if (GNUC_UNLIKELY (!(expr))) vcd_log (LOG_ASSERT, \
      "file %s: line %d (%s): assertion failed: (%s)", \
      __FILE__, __LINE__, __PRETTY_FUNCTION__, #expr); \
- }) 
+ } 
 
 #define vcd_assert_not_reached() \
- (void) ({ \
+ { \
    vcd_log (LOG_ASSERT, \
      "file %s: line %d (%s): should not be reached", \
      __FILE__, __LINE__, __PRETTY_FUNCTION__); \
- })
+ }
 
 #else /* non GNU C */
 

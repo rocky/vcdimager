@@ -8,10 +8,10 @@ taken to stay compatible with other compilers, but there's been no
 testing or whatsoever to ensure anything. 
 
 Most of the code is ISO C99 compliant, with the exception of the
-following features not contained in ISO C99:
+following features not allowed or required in ISO C99:
 
- *) uint8_t used as bit-field type 
- *) use of braced-groups within expressions
+ *) uint8_t used as bit-field type (see bitfield_t in libvcd/vcd_types.h)
+ *) string greater than `4095' chars (see frontends/xml/videocd_dtd.inc)
 
 This package has been tested at least on ppc, alpha and ia32
 architectures -- it should work on 64bit big endian as well.  If in
