@@ -34,6 +34,8 @@ vcdxbuild_SOURCES = \
 vcdxrip_LDADD = $(XML_LIBS) $(VCD_LIBS) $(POPT_LIBS)
 vcdxrip_SOURCES = \
 	vcd_xml_rip.c \
+	vcd_xml_common.c \
+	vcd_xml_common.h \
 	vcd_xml_dump.h \
 	vcd_xml_dump.c \
 	vcd_xml_dtd.h 

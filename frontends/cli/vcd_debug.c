@@ -273,6 +273,12 @@ _visit_pbc (debug_obj_t *obj, unsigned lid, unsigned offset, bool in_lot, bool e
       || offset == PSD_OFS_MULTI_DEF_NO_NUM)
     return;
 
+  if (_rofs >= psd_size)
+    {
+      vcd_warn ("psd offset out of range (%d >= %d)", _rofs, psd_size);
+      return;
+    }
+
   vcd_assert (_rofs < psd_size);
 
   if (!obj->offset_list)
@@ -1120,9 +1126,8 @@ dump_all (debug_obj_t *obj)
   dump_entries (obj);
   if (_get_psd_size (obj))
     {
-      _visit_lot (obj, false);
-
       fprintf (stdout, DELIM);
+      _visit_lot (obj, false);
       dump_lot (obj, false);
       fprintf (stdout, DELIM);
       dump_psd (obj, false);
@@ -1130,9 +1135,8 @@ dump_all (debug_obj_t *obj)
 
   if (obj->psd_x_size)
     {
-      _visit_lot (obj, true);
-
       fprintf (stdout, DELIM);
+      _visit_lot (obj, true);
       dump_lot (obj, true);
       fprintf (stdout, DELIM);
       dump_psd (obj, true);

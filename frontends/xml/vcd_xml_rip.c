@@ -50,11 +50,13 @@
 #include "vcdxml.h"
 #include "vcd_xml_dtd.h"
 #include "vcd_xml_dump.h"
+#include "vcd_xml_common.h"
 
 static const char _rcsid[] = "$Id$";
 
 static int _verbose_flag = 0;
 static int _quiet_flag = 0;
+static int _gui_flag = 0;
 
 static const char *
 _strip_trail (const char str[], size_t n)
@@ -267,7 +269,7 @@ _parse_info (struct vcdxml_t *obj, VcdImageSource *img)
       vcd_debug ("SVCD detected");
       break;
     case VCD_TYPE_HQVCD:
-      vcd_debug ("HQVCD detected\n");
+      vcd_debug ("HQ-VCD detected\n");
       break;
     case VCD_TYPE_INVALID:
       vcd_error ("unknown ID encountered -- maybe not a proper (S)VCD?");
@@ -713,6 +715,9 @@ _visit_pbc (struct _pbc_ctx *obj, unsigned lid, unsigned offset, bool in_lot)
       break;
     }
 
+  if (_rofs >= obj->psd_size)
+    vcd_error ("psd offset out of range (try --no-ext-psd option)");
+
   vcd_assert (_rofs < obj->psd_size);
 
   if (!obj->offset_list)
@@ -833,7 +838,7 @@ _visit_lot (struct _pbc_ctx *obj)
 }
 
 static int
-_parse_pbc (struct vcdxml_t *obj, VcdImageSource *img)
+_parse_pbc (struct vcdxml_t *obj, VcdImageSource *img, bool no_ext_psd)
 {
   int n;
   struct _pbc_ctx _pctx;
@@ -868,6 +873,9 @@ _parse_pbc (struct vcdxml_t *obj, VcdImageSource *img)
       else
 	extended = false;
     }
+
+  if (extended && no_ext_psd)
+    vcd_info ("ignoring detected extended VCD2.0 PBC files");
 
   if (extended)
     vcd_info ("detected extended VCD2.0 PBC files");
@@ -1249,6 +1257,7 @@ main (int argc, const char *argv[])
   char *xml_fname = NULL;
   char *img_fname = NULL;
   int norip_flag = 0;
+  int no_ext_psd_flag = 0;
   int sector_2336_flag = 0;
 
   enum { 
@@ -1259,6 +1268,8 @@ main (int argc, const char *argv[])
   } _img_type = 0;
 
   vcd_xml_init (&obj);
+
+  vcd_xml_log_init ();
 
   obj.comment = vcd_xml_dump_cl_comment (argc, argv);
 
@@ -1287,6 +1298,9 @@ main (int argc, const char *argv[])
        "set NRG image file as source",
        "FILE"},
 
+      {"no-ext-psd", '\0', POPT_ARG_NONE, &no_ext_psd_flag, 0,
+       "ignore /EXT/PSD_X.VCD"},
+
       {"norip", '\0', POPT_ARG_NONE, &norip_flag, 0,
        "dont rip mpeg streams"},
 
@@ -1295,6 +1309,8 @@ main (int argc, const char *argv[])
     
       {"quiet", 'q', POPT_ARG_NONE, &_quiet_flag, 0, 
        "show only critical messages"},
+
+      {"gui", '\0', POPT_ARG_NONE, &_gui_flag, 0, "enable GUI mode"},
 
       {"version", 'V', POPT_ARG_NONE, NULL, CL_VERSION,
        "display version and copyright information and exit"},
@@ -1341,6 +1357,16 @@ main (int argc, const char *argv[])
 
     poptFreeContext (optCon);
   }
+
+  if (_quiet_flag)
+    vcd_xml_verbosity = LOG_WARN;
+  else if (_verbose_flag)
+    vcd_xml_verbosity = LOG_DEBUG;
+  else
+    vcd_xml_verbosity = LOG_INFO;
+
+  if (_gui_flag)
+    vcd_xml_gui_mode = true;
 
   if (!xml_fname)
     xml_fname = strdup (DEFAULT_XML_FNAME);
@@ -1391,7 +1417,7 @@ main (int argc, const char *argv[])
   _parse_entries (&obj, img_src);
 
   /* needs to be parsed last! */
-  _parse_pbc (&obj, img_src);
+  _parse_pbc (&obj, img_src, no_ext_psd_flag);
 
   if (norip_flag)
     vcd_warn ("fyi, entry point and auto pause locations cannot be "

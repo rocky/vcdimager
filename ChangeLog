@@ -1,3 +1,17 @@
+2001-08-15  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* frontends/xml/vcd_xml_rip.c: new option for ignoring extended pbc 
+		files
+	
+	* frontends/cli/vcd_debug.c: handle broken psd offsets less 
+		assert'ing ;)
+
+2001-08-12  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* frontends/xml/vcd_xml_rip.c: integrated common xml logging functions
+
+	* libvcd/vcd_pbc.c (_vcd_pbc_node_write): fixed wrong warning
+
 2001-08-08  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd.c (_vcd_obj_get_sequence_by_entry_id): 
