@@ -114,9 +114,9 @@ typedef struct {
                                               id, then start next disc
                                               with track 3, otherwise
                                               start with track 2 */ 
-  uint8_t reserved2 : 1;                   /* Reserved, must be zero */
+  uint8_t pbc_x : 1;                       /* extended PBC available */
 #else
-  uint8_t reserved2 : 1;
+  uint8_t pbc_x : 1;
   uint8_t use_track3 : 1;
   uint8_t use_lid2 : 1;
   uint8_t user_data_cc : 1;

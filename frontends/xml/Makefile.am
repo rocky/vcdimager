@@ -22,12 +22,14 @@ vcdxbuild_LDADD = $(XML_LIBS) $(VCD_LIBS) $(POPT_LIBS)
 vcdxbuild_SOURCES = \
 	vcdxml.h \
 	vcd_xml_build.c \
-	vcd_xml_parse.h \
-	vcd_xml_parse.c \
+	vcd_xml_common.c \
+	vcd_xml_common.h \
+	vcd_xml_dtd.c \
+	vcd_xml_dtd.h \
 	vcd_xml_master.c \
 	vcd_xml_master.h \
-	vcd_xml_dtd.c \
-	vcd_xml_dtd.h
+	vcd_xml_parse.c \
+	vcd_xml_parse.h 
 
 vcdxrip_LDADD = $(XML_LIBS) $(VCD_LIBS) $(POPT_LIBS)
 vcdxrip_SOURCES = \

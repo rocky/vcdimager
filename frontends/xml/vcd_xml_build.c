@@ -43,6 +43,7 @@
 #include "vcd_xml_parse.h"
 #include "vcd_xml_master.h"
 #include "vcd_xml_dtd.h"
+#include "vcd_xml_common.h"
 
 static const char _rcsid[] = "$Id$";
 
@@ -113,21 +114,9 @@ static struct {
   int verbose_flag;
   int quiet_flag;
   int progress_flag;
-
-  vcd_log_handler_t default_vcd_log_handler;
+  int gui_flag;
 } gl;
 
-static void 
-_vcd_log_handler (log_level_t level, const char message[])
-{
-  if (level == LOG_DEBUG && !gl.verbose_flag)
-    return;
-
-  if (level == LOG_INFO && gl.quiet_flag)
-    return;
-  
-  gl.default_vcd_log_handler (level, message);
-}
 
 static int
 _do_cl (int argc, const char *argv[])
@@ -155,14 +144,16 @@ _do_cl (int argc, const char *argv[])
       { "sector-2336", '\0', POPT_ARG_NONE, &gl.sector_2336_flag, 0,
 	"use 2336 byte sectors for output"},
 
-/*       {"progress", 'p', POPT_ARG_NONE, &gl.progress_flag, 0,  */
-/*        "show progress"},  */
+      {"progress", 'p', POPT_ARG_NONE, &gl.progress_flag, 0,  
+       "show progress"}, 
 
       {"verbose", 'v', POPT_ARG_NONE, &gl.verbose_flag, 0, 
        "be verbose"},
 	
       {"quiet", 'q', POPT_ARG_NONE, &gl.quiet_flag, 0, 
        "show only critical messages"},
+
+      {"gui", '\0', POPT_ARG_NONE, &gl.gui_flag, 0, "enable GUI mode"},
 
       {"version", 'V', POPT_ARG_NONE, NULL, CL_VERSION,
        "display version and copyright information and exit"},
@@ -219,10 +210,23 @@ main (int argc, const char *argv[])
 
   _init_xml ();
 
-  gl.default_vcd_log_handler = vcd_log_set_handler (_vcd_log_handler);
+  vcd_xml_log_init ();
 
   if (_do_cl (argc, argv))
     return EXIT_FAILURE;
+
+  if (gl.quiet_flag)
+    vcd_xml_verbosity = LOG_WARN;
+  else if (gl.verbose_flag)
+    vcd_xml_verbosity = LOG_DEBUG;
+  else
+    vcd_xml_verbosity = LOG_INFO;
+
+  if (gl.gui_flag)
+    vcd_xml_gui_mode = true;
+
+  if (gl.progress_flag)
+    vcd_xml_show_progress = true;
 
   errno = 0;
   if (!(vcd_doc = _xmlParseFile (gl.xml_fname)))
@@ -249,7 +253,7 @@ main (int argc, const char *argv[])
     vcd_xml_init (&obj);
     
     if (!(root = xmlDocGetRootElement (vcd_doc)))
-      vcd_error ("XML document seems to be empy (no root node found)");
+      vcd_error ("XML document seems to be empty (no root node found)");
 
     if (!(ns = xmlSearchNsByHref (vcd_doc, root, VIDEOCD_DTD_XMLNS)))
       vcd_error ("Namespace not found in document");
@@ -257,8 +261,7 @@ main (int argc, const char *argv[])
     if (vcd_xml_parse (&obj, vcd_doc, root, ns))
       vcd_error ("parsing tree failed");
 
-    if (vcd_xml_master (&obj,
-			gl.cue_fname, gl.bin_fname,
+    if (vcd_xml_master (&obj, gl.cue_fname, gl.bin_fname,
 			gl.cdrdao_base, 
 			gl.nrg_fname, 
 			gl.sector_2336_flag))

@@ -338,6 +338,7 @@ vcd_obj_append_segment_play_item (VcdObj *obj, VcdMpegSource *mpeg_source,
 
   vcd_info ("scanning mpeg segment item #%d for scanpoints...", 
             _vcd_list_length (obj->mpeg_segment_list));
+
   vcd_mpeg_source_scan (mpeg_source, !obj->relaxed_aps, NULL, NULL);
 
   if (vcd_mpeg_source_get_info (mpeg_source)->packets == 0)
@@ -1199,6 +1200,10 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
       switch (obj->type) 
         {
         case VCD_TYPE_VCD:
+          fmt = "MPEGAV/MUSIC%2.2d.DAT";
+          file_num = n + 1;
+          break;
+
         case VCD_TYPE_VCD11:
         case VCD_TYPE_VCD2:
           fmt = "MPEGAV/AVSEQ%2.2d.DAT";

@@ -27,6 +27,7 @@
 #include <stdio.h>
 
 #include "vcd_xml_master.h"
+#include "vcd_xml_common.h"
 
 #include <libvcd/vcd.h>
 #include <libvcd/vcd_logging.h>
@@ -45,6 +46,7 @@ bool vcd_xml_master (const struct vcdxml_t *obj, const char cue_fname[],
   VcdObj *_vcd;
   VcdListNode *node;
   int idx;
+  bool _relaxed_aps = false;
 
   vcd_assert (obj != NULL);
 
@@ -97,7 +99,10 @@ bool vcd_xml_master (const struct vcdxml_t *obj, const char cue_fname[],
       else if (!strcmp (_option->name, OPT_SVCD_VCD3_ENTRYSVD))
 	vcd_obj_set_param_bool (_vcd, VCD_PARM_SVCD_VCD3_ENTRYSVD, _value);
       else if (!strcmp (_option->name, OPT_RELAXED_APS))
-	vcd_obj_set_param_bool (_vcd, VCD_PARM_RELAXED_APS, _value);
+	{
+	  vcd_obj_set_param_bool (_vcd, VCD_PARM_RELAXED_APS, _value);
+	  _relaxed_aps = _value;
+	}
       else if (!strcmp (_option->name, OPT_UPDATE_SCAN_OFFSETS))
 	vcd_obj_set_param_bool (_vcd, VCD_PARM_UPDATE_SCAN_OFFSETS, _value);
       else if (!strcmp (_option->name, OPT_LEADOUT_PAUSE))
@@ -139,14 +144,19 @@ bool vcd_xml_master (const struct vcdxml_t *obj, const char cue_fname[],
       struct segment_t *segment = _vcd_list_node_data (node);
       VcdDataSource *_source = vcd_data_source_new_stdio (segment->src);
       VcdListNode *node2;
+      VcdMpegSource *_mpeg_src;
 
       vcd_debug ("adding segment #%d, %s", idx, segment->src);
 
       vcd_assert (_source != NULL);
 
-      vcd_obj_append_segment_play_item (_vcd,
-					vcd_mpeg_source_new (_source),
-					segment->id);
+      _mpeg_src = vcd_mpeg_source_new (_source);
+
+      vcd_mpeg_source_scan (_mpeg_src, !_relaxed_aps,
+			    vcd_xml_show_progress ? vcd_xml_scan_progress_cb : NULL,
+			    segment->id);
+
+      vcd_obj_append_segment_play_item (_vcd, _mpeg_src, segment->id);
       
       _VCD_LIST_FOREACH (node2, segment->autopause_list)
 	{
@@ -166,16 +176,21 @@ bool vcd_xml_master (const struct vcdxml_t *obj, const char cue_fname[],
       struct sequence_t *sequence = _vcd_list_node_data (node);
       VcdDataSource *data_source;
       VcdListNode *node2;
+      VcdMpegSource *_mpeg_src;
 
       vcd_debug ("adding sequence #%d, %s", idx, sequence->src);
 
       data_source = vcd_data_source_new_stdio (sequence->src);
       vcd_assert (data_source != NULL);
 
-      vcd_obj_append_sequence_play_item (_vcd,
-					 vcd_mpeg_source_new (data_source),
-					 sequence->id, 
-					 sequence->default_entry_id);
+      _mpeg_src = vcd_mpeg_source_new (data_source);
+
+      vcd_mpeg_source_scan (_mpeg_src, !_relaxed_aps,
+			    vcd_xml_show_progress ? vcd_xml_scan_progress_cb : NULL,
+			    sequence->id);
+
+      vcd_obj_append_sequence_play_item (_vcd, _mpeg_src,
+					 sequence->id, sequence->default_entry_id);
 
       _VCD_LIST_FOREACH (node2, sequence->entry_point_list)
 	{
@@ -234,13 +249,13 @@ bool vcd_xml_master (const struct vcdxml_t *obj, const char cue_fname[],
 
     sectors = vcd_obj_begin_output (_vcd);
 
-    vcd_obj_write_image (_vcd, image_sink, NULL, NULL);
+    vcd_obj_write_image (_vcd, image_sink, 
+			 vcd_xml_show_progress ? vcd_xml_write_progress_cb : NULL, NULL);
 
     vcd_obj_end_output (_vcd);
 
-    fprintf (stdout, 
-	     "finished ok, image created with %d sectors [%s]\n",
-	     sectors, _tmp = _vcd_lba_to_msf_str (sectors));
+    vcd_info ("finished ok, image created with %d sectors [%s]",
+	      sectors, _tmp = _vcd_lba_to_msf_str (sectors));
 
     free (_tmp);
   }

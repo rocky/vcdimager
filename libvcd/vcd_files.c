@@ -346,6 +346,10 @@ set_info_vcd(VcdObj *obj, void *buf)
       info_vcd.flags.restriction = obj->info_restriction;
       info_vcd.flags.use_lid2 = obj->info_use_lid2;
       info_vcd.flags.use_track3 = obj->info_use_seq2;
+
+      if (_vcd_obj_has_cap_p (obj, _CAP_PBC_X)
+          &&_vcd_pbc_available (obj))
+        info_vcd.flags.pbc_x = true;
       
       info_vcd.psd_size = uint32_to_be (get_psd_size (obj, false));
       info_vcd.offset_mult = _vcd_pbc_available (obj) ? INFO_OFFSET_MULT : 0;

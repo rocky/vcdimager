@@ -38,6 +38,7 @@ default_vcd_log_handler (log_level_t level, const char message[])
     {
     case LOG_ERROR:
       fprintf (stderr, "**ERROR: %s\n", message);
+      fflush (stderr);
       exit (EXIT_FAILURE);
       break;
     case LOG_DEBUG:
@@ -51,12 +52,15 @@ default_vcd_log_handler (log_level_t level, const char message[])
       break;
     case LOG_ASSERT:
       fprintf (stderr, "!ASSERT: %s\n", message);
+      fflush (stderr);
       abort ();
       break;
     default:
       vcd_assert_not_reached ();
       break;
     }
+
+  fflush (stdout);
 }
 
 static vcd_log_handler_t _handler = default_vcd_log_handler;

@@ -2,9 +2,16 @@ $Id$
 
 see ChangeLog for more information
 
+version 0.7.10 (unstable/development)
+=====================================
+2001-0...
+
+* gui mode added
+* progress display added to vcdxbuild
+
 version 0.7.9 (unstable/development)
 ====================================
-2001-07-01
+2001-08-01
 
 * fixed assertion bug in vcdimager cli frontend
 * added support for HQ-VCD and VCD 1.0 formats
