@@ -91,7 +91,7 @@
 <!ENTITY % XY "CDATA">
 
 <!ENTITY % ofsattrs
- " ref       IDREF       #REQUIRED
+ " ref       IDREF       #IMPLIED
    x1        %XY;        #IMPLIED
    y1        %XY;        #IMPLIED
    x2        %XY;        #IMPLIED
@@ -150,11 +150,11 @@
 >
 
 <!ATTLIST timeout
-  ref       IDREF       #REQUIRED
+  ref       IDREF       #IMPLIED
 >
 
 <!ATTLIST play-item
-  ref       IDREF       #REQUIRED
+  ref       IDREF       #IMPLIED
 >
 
 <!ATTLIST select
