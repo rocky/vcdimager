@@ -34,7 +34,7 @@ AM_MISSING_PROG(HELP2MAN, help2man, $missing_dir)
 AM_MAINTAINER_MODE
 
 AM_SANITY_CHECK
-dnl AC_CANONICAL_HOST
+AC_CANONICAL_HOST
 
 AC_DEFINE_UNQUOTED(HOST_ARCH, "$host_os/$host_cpu", [host os/cpu identifier])
 
