@@ -2,6 +2,22 @@ $Id$
 
 see ChangeLog for more information
 
+version 0.7.2 (unstable/development)
+====================================
+2001-05-31
+
+* vcddebug: fixed for pbc less vcds
+* improved subheader generation for SPIs
+* handle hybrid stills better
+* implemented option-tag parsing
+* new <option name="relaxed aps" value="true"/> for relaxed aps
+  constrains (see manual on access point sectors as well for important
+  warnings) 
+* handle truncated streams more tolerant
+* started updating manual
+* 'broken svcd mode' xml-<option> splitted up into "svcd vcd30 mpegav"
+  and "svcd vcd30 entrysvd" (see manual as well)
+
 version 0.7.1 (unstable/development)
 ====================================
 2001-05-27
@@ -17,7 +33,8 @@ version 0.7.0 (unstable/development)
 ====================================
 2001-05-24
 
-* dummy PBC generation disabled for classic vcdimager frontend (use vcdxgen instead)
+* dummy PBC generation disabled for classic vcdimager frontend 
+  (use vcdxgen instead)
 * warn if labels are non-conforming
 * use PTS times instead of inaccurate GOP timecodes
 * support for segment items added

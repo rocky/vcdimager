@@ -1,5 +1,5 @@
 info_TEXINFOS = vcdimager.texi
-vcdimager_TEXINFOS = gpl.texi
+vcdimager_TEXINFOS = gpl.texi glossary.texi
 
 vcdimager.ps.gz: vcdimager.ps
 	gzip -9c $< > $@
