@@ -84,6 +84,16 @@ extern "C" {
 */
 #define VCDINFO_INVALID_ENTRY  0xFFFF
 
+/*! 
+  Constant for invalid LID
+*/
+#define VCDINFO_INVALID_LID  0xFFFF
+
+/*! 
+  Constant for invalid itemid
+*/
+#define VCDINFO_INVALID_ITEMID  0xFFFF
+
 /* See enum in vcd_files_private.h */
 typedef enum {
   VCDINFO_FILES_VIDEO_NOSTREAM = 0,
@@ -235,6 +245,12 @@ int
 vcdinfo_get_autowait_time (const PsdPlayListDescriptor *d);
 
 /*!
+   Return the base selection number.
+*/
+unsigned int
+vcdinfo_get_bsn(const PsdSelectionListDescriptor *psd);
+
+/*!
   Return a string containing the default VCD device if none is specified.
   Return "" if we can't get this information.
 */
@@ -246,7 +262,8 @@ vcdinfo_get_default_device (const vcdinfo_obj_t *obj);
   entry_num is invalid.
 */
 uint32_t
-vcdinfo_get_entry_size (const vcdinfo_obj_t *obj, unsigned int entry_num);
+vcdinfo_get_entry_sect_count (const vcdinfo_obj_t *obj, 
+			      unsigned int entry_num);
 
 /*!  Return the starting LBA (logical block address) for sequence
   entry_num in obj.  VCDINFO_NULL_LBA is returned if there is no entry.
@@ -294,7 +311,7 @@ uint16_t
 vcdinfo_get_itemid_from_psd(const PsdSelectionListDescriptor *d);
 
 /*!
-  Get the LID from a given PSD paly-list descriptor. 
+  Get the LID from a given PSD play-list descriptor. 
   VCDINFO_REJECTED_MASK is returned d on error or d is NULL. 
 */
 uint16_t
@@ -315,10 +332,16 @@ bool
 vcdinfo_get_lid_rejected_from_psd(const PsdSelectionListDescriptor *d);
 
 /*!
-  Return highest LID value. 
+  Return true if item is to be looped. 
 */
 uint16_t
-vcdinfo_get_max_lid (const vcdinfo_obj_t *obj);
+vcdinfo_get_loop_count (const PsdSelectionListDescriptor *d);
+
+/*!
+  Return Number of LIDs. 
+*/
+uint16_t
+vcdinfo_get_num_LIDs (const vcdinfo_obj_t *obj);
 
 /**
  * \fn vcdinfo_get_next_from_pld(const PsdPlayListDescriptor *pld);
@@ -475,6 +498,19 @@ vcdinfo_get_seg_sector_count(const vcdinfo_obj_t *obj,
 			     const unsigned int seg_num);
 
 /*!
+  Get timeout LID for PsdPlayListDescriptor *d.
+*/
+int
+vcdinfo_get_timeout_LID (const PsdSelectionListDescriptor *d);
+
+/*!
+  Get timeout wait value for PsdPlayListDescriptor *d.
+  Time is in seconds unless it is -1 (unlimited).
+*/
+int
+vcdinfo_get_timeout_time (const PsdSelectionListDescriptor *d);
+
+/*!
   Return the track number for entry n in obj. The first track starts
   at 1. Note this is one less than the track number reported in vcddump.
   We don't count the track that contains ISO9660 and metadata information.
@@ -488,7 +524,7 @@ vcdinfo_get_track(const vcdinfo_obj_t *obj, const unsigned int entry_num);
   the track that contains ISO9660 and metadata information.
 */
 unsigned int
-vcdinfo_get_track_count(const vcdinfo_obj_t *obj);
+vcdinfo_get_num_tracks(const vcdinfo_obj_t *obj);
 
 /*!  
   Return the starting LBA (logical block address) for track number

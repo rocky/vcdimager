@@ -233,7 +233,7 @@ _offset_t_cmp (vcdinfo_offset_t *a, vcdinfo_offset_t *b)
 }
 
 static void
-_visit_pbc (vcdinfo_obj_t *obj, unsigned lid, unsigned int offset, 
+_visit_pbc (vcdinfo_obj_t *obj, unsigned int lid, unsigned int offset, 
                    bool in_lot, bool ext)
 {
   VcdListNode *node;
@@ -422,6 +422,15 @@ vcdinfo_get_album_description(vcdinfo_obj_t *obj)
 }
 
 /*!
+   Return the base selection number.
+*/
+unsigned int
+vcdinfo_get_bsn(const PsdSelectionListDescriptor *psd)
+{
+  return(psd->bsn);
+}
+
+/*!
   Get autowait time value for PsdPlayListDescriptor *d.
   Time is in seconds unless it is -1 (unlimited).
 */
@@ -460,7 +469,7 @@ vcdinfo_get_default_device (const vcdinfo_obj_t *obj)
   The first entry number is 0.
 */
 uint32_t
-vcdinfo_get_entry_size (const vcdinfo_obj_t *obj, unsigned int entry_num)
+vcdinfo_get_entry_sect_count (const vcdinfo_obj_t *obj, unsigned int entry_num)
 {
   const EntriesVcd *entries = &obj->entries;
   const unsigned int entry_count = uint16_from_be (entries->entry_count);
@@ -635,10 +644,19 @@ vcdinfo_get_lid_rejected_from_psd(const PsdSelectionListDescriptor *d)
 }
 
 /*!
-  Return highest LID value. 
+  Return number of times PLD loops.
 */
 uint16_t
-vcdinfo_get_max_lid (const vcdinfo_obj_t *obj) 
+vcdinfo_get_loop_count (const PsdSelectionListDescriptor *d) 
+{
+  return 0x7f & d->loop;
+}
+
+/*!
+  Return number of LIDs. 
+*/
+uint16_t
+vcdinfo_get_num_LIDs (const vcdinfo_obj_t *obj) 
 {
   // Should probably use _vcd_pbc_max_lid instead? 
   return uint16_from_be (obj->info.lot_entries);
@@ -961,6 +979,26 @@ vcdinfo_get_seg_sector_count(const vcdinfo_obj_t *obj,
 }
 
 /*!
+  Get timeout wait time value for PsdPlayListDescriptor *d.
+  Time is in seconds unless it is -1 (unlimited).
+*/
+int
+vcdinfo_get_timeout_LID (const PsdSelectionListDescriptor *d)
+{
+  return uint16_from_be (d->timeout_ofs);
+}
+
+/*!
+  Get timeout wait time value for PsdPlayListDescriptor *d.
+  Time is in seconds unless it is -1 (unlimited).
+*/
+int
+vcdinfo_get_timeout_time (const PsdSelectionListDescriptor *d)
+{
+  return vcdinfo_calc_psd_wait_time (d->totime);
+}
+
+/*!
   Return the track number for entry n in obj. The first track starts
   at 1. Note this is one less than the track number reported in vcddump.
   (We don't count the header track?)
@@ -980,7 +1018,7 @@ vcdinfo_get_track(const vcdinfo_obj_t *obj, const unsigned int entry_num)
   Return the number of tracks in the current medium.
 */
 unsigned int
-vcdinfo_get_track_count(const vcdinfo_obj_t *obj)
+vcdinfo_get_num_tracks(const vcdinfo_obj_t *obj)
 {
   if (obj != NULL && obj->img != NULL && 
       obj->img->op.get_track_count != NULL) 
