@@ -15,7 +15,7 @@ tar-dist:
 	here=`pwd`; \
 	ipath="$$here/install-tmp/"; \
 	rm -rf "$$ipath"; \
-	$(MAKE) install prefix="$$ipath/usr/local/"; \
+	$(MAKE) install-strip prefix="$$ipath/usr/local/"; \
 	$(TAR) -C "$$ipath" -cvzf $(PACKAGE)-$(VERSION)-$(host_alias).tar.gz usr
 
 if CYGWIN
