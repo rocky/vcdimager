@@ -222,6 +222,9 @@ _do_cl (int argc, const char *argv[])
       {"file-prefix", '\0', POPT_ARG_STRING | POPT_ARGFLAG_DOC_HIDDEN,
        &gl.file_prefix, 0, "add prefix string to all filenames (undocumented)"}, 
 
+      { "filename-encoding", '\0', POPT_ARG_STRING, &vcd_xml_filename_charset, 0,
+        "use given charset encoding for filenames instead of UTF8" },
+
       {"verbose", 'v', POPT_ARG_NONE, &gl.verbose_flag, 0, 
        "be verbose"},
 	

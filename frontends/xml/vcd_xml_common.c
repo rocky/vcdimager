@@ -28,6 +28,8 @@
 #include <libvcd/vcd.h>
 #include <libvcd/vcd_assert.h>
 
+#include <libxml/parser.h>
+
 #include "vcd_xml_common.h"
 
 static const char _rcsid[] = "$Id$";
@@ -35,6 +37,8 @@ static const char _rcsid[] = "$Id$";
 bool vcd_xml_gui_mode = false;
 
 const char *vcd_xml_progname = "UNSET";
+
+const char *vcd_xml_filename_charset = "UTF-8";
 
 log_level_t vcd_xml_verbosity = LOG_INFO;
 
@@ -215,4 +219,55 @@ void vcd_xml_print_version (void)
     fprintf (stdout, vcd_version_string (true), vcd_xml_progname);
 
   fflush (stdout);
+}
+
+static char *
+_convert (const char in[], const char encoding[], bool from)
+{
+  unsigned char *out;
+  int ret, size, out_size, temp;
+
+  if (!in)
+    return 0;
+
+  xmlCharEncodingHandlerPtr handler = 0;
+
+  if (!(handler = xmlFindCharEncodingHandler (encoding))) {
+    vcd_error ("could not find charset conversion handler for '%s'", encoding);
+    return 0;
+  }
+
+  size = (int) strlen (in) + 1;
+  out_size = size * 2 - 1;
+  out = malloc ((size_t) out_size);
+
+  vcd_assert (out != 0);
+
+  temp = size - 1;
+  ret = (from ? handler->output : handler->input) (out, &out_size, (const unsigned char *) in, &temp);
+
+  if (ret || (temp - size + 1))
+    {
+      free (out);
+      vcd_error ("charset conversion failed");
+      return 0;
+    }
+
+  out = realloc (out, out_size + 1);
+  out[out_size] = 0;
+
+  return (char *) out;
+}
+
+
+unsigned char *
+vcd_xml_filename_to_utf8 (const char fname[])
+{
+  return (unsigned char *) _convert (fname, vcd_xml_filename_charset, false);
+}
+
+char *
+vcd_xml_utf8_to_filename (const unsigned char fname[])
+{
+  return _convert ((const char *) fname, vcd_xml_filename_charset, true);
 }

@@ -35,6 +35,7 @@
 
 #include "vcd_xml_dump.h"
 #include "vcd_xml_dtd.h"
+#include "vcd_xml_common.h"
 
 static const char _rcsid[] = "$Id$";
 
@@ -263,7 +264,7 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 	    { /* file */
 	      xmlNodePtr filenode = _get_node_pathname (doc, section, ns, p->name, false);
 
-	      xmlSetProp (filenode, (const xmlChar *) "src", (const xmlChar *) p->file_src);
+	      xmlSetProp (filenode, (const xmlChar *) "src", vcd_xml_filename_to_utf8 (p->file_src));
 
 	      if (p->file_raw)
 		xmlSetProp (filenode, (const xmlChar *) "format", (const xmlChar *) "mixed");
@@ -286,7 +287,7 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 	  VcdListNode *node2;
 	  
 	  seg_node = xmlNewChild (section, ns, (const xmlChar *) "segment-item", NULL);
-	  xmlSetProp (seg_node, (const xmlChar *) "src", (const xmlChar *) _segment->src);
+	  xmlSetProp (seg_node, (const xmlChar *) "src", vcd_xml_filename_to_utf8 (_segment->src));
 	  xmlSetProp (seg_node, (const xmlChar *) "id", (const xmlChar *) _segment->id);
 
 	  _VCD_LIST_FOREACH (node2, _segment->autopause_list)
@@ -311,7 +312,7 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
       VcdListNode *node2;
 
       seq_node = xmlNewChild (section, ns, (const xmlChar *) "sequence-item", NULL);
-      xmlSetProp (seq_node, (const xmlChar *) "src", (const xmlChar *) _sequence->src);
+      xmlSetProp (seq_node, (const xmlChar *) "src", vcd_xml_filename_to_utf8 (_sequence->src));
       xmlSetProp (seq_node, (const xmlChar *) "id", (const xmlChar *) _sequence->id);
 
       if (_sequence->default_entry_id)

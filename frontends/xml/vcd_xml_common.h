@@ -33,6 +33,7 @@ extern log_level_t vcd_xml_verbosity;
 
 extern const char *vcd_xml_progname;
 
+
 void vcd_xml_log_init (void);
 
 int vcd_xml_scan_progress_cb (const vcd_mpeg_prog_info_t *info, void *user_data);
@@ -47,5 +48,10 @@ typedef struct {
 int vcd_xml_read_progress_cb (const _read_progress_t *info, void *user_data);
 
 void vcd_xml_print_version (void);
+
+extern const char *vcd_xml_filename_charset;
+
+unsigned char *vcd_xml_filename_to_utf8 (const char fname[]);
+char *vcd_xml_utf8_to_filename (const unsigned char fname[]);
 
 #endif /* __VCD_XML_COMMON_H__ */

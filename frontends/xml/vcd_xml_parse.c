@@ -23,6 +23,7 @@
 #endif
 
 #include "vcd_xml_parse.h"
+#include "vcd_xml_common.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -208,6 +209,7 @@ _parse_mpeg_segment (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNs
 
   GET_PROP_STR (segment->id, "id", doc, node, ns);
   GET_PROP_STR (segment->src, "src", doc, node, ns);
+  segment->src = vcd_xml_utf8_to_filename ((unsigned char *)segment->src); // memleak
 
   segment->autopause_list = _vcd_list_new ();
 
@@ -519,6 +521,7 @@ _parse_mpeg_sequence (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlN
 
   GET_PROP_STR (sequence->id, "id", doc, node, ns);
   GET_PROP_STR (sequence->src, "src", doc, node, ns);
+  sequence->src = vcd_xml_utf8_to_filename ((unsigned char *)sequence->src); // memleak
 
   sequence->entry_point_list = _vcd_list_new ();
   sequence->autopause_list = _vcd_list_new ();
@@ -598,6 +601,7 @@ _parse_file (struct vcdxml_t *obj, const char path[], xmlDocPtr doc, xmlNodePtr 
 
   GET_PROP_STR (_src, "src", doc, node, ns);
   vcd_assert (_src != NULL);
+  _src = vcd_xml_utf8_to_filename ((unsigned char *) _src); // memleak
 
   GET_PROP_STR (_format, "format", doc, node, ns);
 

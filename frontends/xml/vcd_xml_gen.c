@@ -316,6 +316,9 @@ main (int argc, const char *argv[])
          "add file containing full 2336 byte sectors to ISO fs",
          "FILE,ISO_FILENAME"},
 
+        { "filename-encoding", '\0', POPT_ARG_STRING, &vcd_xml_filename_charset, 0,
+          "use given charset encoding for filenames instead of UTF8" },
+
         {"verbose", 'v', POPT_ARG_NONE, &_verbose_flag, 0, "be verbose"},
 
         {"quiet", 'q', POPT_ARG_NONE, &_quiet_flag, 0, "show only critical messages"},

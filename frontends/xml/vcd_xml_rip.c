@@ -1333,6 +1333,12 @@ main (int argc, const char *argv[])
       {"progress", 'p', POPT_ARG_NONE, &_progress_flag, 0,  
        "show progress"}, 
 
+      { "track", 't', POPT_ARG_INT, &_track_flag, 0,
+	"rip only this track"},
+
+      { "filename-encoding", '\0', POPT_ARG_STRING, &vcd_xml_filename_charset, 0,
+        "use given charset encoding for filenames instead of UTF8" },
+
       {"verbose", 'v', POPT_ARG_NONE, &_verbose_flag, 0, 
        "be verbose"},
     
@@ -1344,8 +1350,6 @@ main (int argc, const char *argv[])
       {"version", 'V', POPT_ARG_NONE, NULL, CL_VERSION,
        "display version and copyright information and exit"},
 	   
-      { "track", 't', POPT_ARG_INT, &_track_flag, 0,
-	"rip only this track"},
       
       POPT_AUTOHELP {NULL, 0, 0, NULL, 0}
     };
