@@ -430,8 +430,11 @@ information about what is in this section.
 @item --show-format
 @itemx -f 
 @kindex @code{--show-format}
-Show the format that the VCD is in. The value will be one of ``VCD 1.1'',
-``VCD 2.0'', ``SVCD'', or ``HQVCD''.
+Show the format that the VCD is in. The value will be one of ``VCD
+1.1'', ``VCD 2.0'', ``SVCD'', or ``HQVCD''. Note that @value{program}
+does not do validate that the CD image conforms rigorously to any set
+of standards. However this does suggest what it might most closely
+conform to.
 
 @item --show-info-all
 @kindex @code{--show-info-all}
@@ -456,9 +459,10 @@ user data cc. See line 14 of the example in @ref{Info,,Info Section}.
 The number of disks in the volume, an integer. The XML tag for this is
 <volume-count>. See line 6 of the example in @ref{Info,,Info Section}.
 @item id
-A string representing the VCD format. ``VIDEO_CD'' for VCD 1.0, VCD 1.1,
-or VCD 2.0, ``SUPERVCD'' for SVCD or HQ-VCD. A Maxiumum of 8
-characters. See line 2 of the example in @ref{Info,,Info Section}.
+A string representing the VCD format. ``VIDEO_CD'' for VCD 1.0, VCD
+1.1, or VCD 2.0, ``SUPERVCD'' for SVCD, XVCD, CVD, or HQVCD. A
+Maxiumum of 8 characters. See line 2 of the example in @ref{Info,,Info
+Section}.
 @item ofm
 offset multiplier. Value is given is in hexadecimal. See line 20 of
 the example in @ref{Info,,Info Section}.
@@ -576,18 +580,30 @@ Section}.
 @end ftable
 
 @item --show-scandata
+This option is relevant only if the program streams are MPEG2's. That is
+the VCD image is not VCD 1.0, VCD 1.1 VCD 2.0. 
+
 @itemx -s
 @kindex @code{--show-scandata}
 
 @item --show-search
 @itemx -X
 @kindex @code{--show-search}
+This option is relevant only if the program streams are MPEG2's. That is
+the VCD image is not VCD 1.0, VCD 1.1 VCD 2.0. 
 
 @item --show-source
 @itemx -S
 @kindex @code{--show-source}
 
 Just list out where you are reading from and the size of the image.
+
+Here's an example of the output of this: 
+
+@smallexample
+Source: image file `/src/dvdrip/dumbo/dumbo.cue'
+Image size: 275792 sectors
+@end smallexample
 
 @item --show-tracks
 @itemx -T
@@ -762,10 +778,10 @@ Here is part of sample output from the VCD used above.
 
 In the above example, in the first line corresponds the ``filename''
 in the files section that starts at logical sector number 151. If this
-VCD were in SVCD format that line would probably say
-``SVCD/ENTRIES.SVD.'' As shown In line 5, I made 31 entries for the
-VCD; only the first 4 are shown. Depending on how playback control is
-set up you should be able to randomly access up to 31 different
+VCD were in SVCD, XVCD, HQVCD or CVD format that line would probably
+say ``SVCD/ENTRIES.SVD.'' As shown In line 5, I made 31 entries for
+the VCD; only the first 4 are shown. Depending on how playback control
+is set up you should be able to randomly access up to 31 different
 playback locations on this VCD. If you use a media player like xine
 and my plugin for it, there is a way jump to the beginning of each of
 these entries.
@@ -950,30 +966,46 @@ from:
 @url{http://www.vcdimager.org/pub/vcdimager/examples/test_svcd/test_svcd_pal.zip}
 
 @smallexample
+ 1. SVCD/TRACKS.SVD
+ 2.  ID: `TRACKSVD'
+ 3.  version: 0x01
+ 4. tracks: 1
+ 5.  track[00]: 00:59:61, audio: 2 streams, video: PAL stream, OGT stream: 
+     all available
+ 6. CVD interpretation (probably)
+ 7. (track[00]: 00:59:61 (cumulated), audio: 00, ogt: de)
+ 8. ------------------------------------------------------------------------
+ 9. CDROM TRACKS
+10.  tracks:  1
+11.  track #  1: 00:23:01, size:   13547520
+12.  leadout   : 01:39:61
+@end smallexample
 
-SVCD/TRACKS.SVD
- ID: `TRACKSVD'
- version: 0x01
- tracks: 1
- track[00]: 00:59:61, audio: 2 streams, video: PAL stream, OGT stream: all available
+Lines 1 and 2 you will see if the format is a SVCD, XVCD, or CVD. 
+If the format is some sort of VCD you will lines 1 and 2 will be:
 
-(VCD3.0 interpretation)
-(track[00]: 00:59:61 (cumulated), audio: 00, ogt: de)
-----------------------------------------------------------------------------
-CDROM TRACKS
- tracks:  1
- track #  1: 00:23:01, size:   13547520
- leadout   : 01:39:61
+@smallexample
+VCD/INFO.VCD
+ ID: `VIDEO_CD'
 @end smallexample
 
 There is one track on this SVCD with two audio streams (channel 0 is
 in German and stream 1 is in English but the language information
-can't be determined from information on the dist). The video stream is
-in PAL format and there is a subtitle as OGT (Overlay Graphics
-Text). 
+can't be determined from information on the image). The video stream
+on the single stream is in PAL format and there is a subtitle.
+Actually the subtitle may be in one of at least two format, a format
+defined by Philips called OGT (Overlay Graphics Text) as it is listed
+above or it might be in another format used in CVD's.  
 
-The VCD3.0 interpretation is a bit of a guess. The subtitle's a
-private stream id in the MPEG file has hexidecimal number 0xde.
+On line 6, the CVD interpretation is a bit of a guess, and lines 6--7
+only appears if the VCD image is not VCD 1.@emph{x} or VCD 2.0.  There
+are all sorts of ways to violate standards and @value{program} doesn't
+do a rigorous job in determining if they have been violated. So it
+doesn't really know if the CD image is a CVD or not. Worse, we really
+don't have a firm grasp of what the CVD specifications are.  Having
+written all this though, a guess is that if the subtitle's a private
+stream id in the MPEG file has hexidecimal number 0xde. This may be
+completely bogus though.
 
 The bottom part of the display shows track info obtained in a
 lower-level way. The information above CDROM TRACKS comes from
@@ -1050,9 +1082,9 @@ Descriptor section (PVD) try this:
 
 Okay, now for for some more obscure stuff. Let's say I'm writing a
 front-end GUI to do all sorts of stuff and I just need something to
-pick out the format (VCD 1.1, VCD 2.0, SVCD, HQVCD) that a VCD in
-drive is located. Since I have to read in this output, I don't want
-any extra lines not relevant other than the version. 
+pick out the format (VCD 1.1, VCD 2.0, SVCD, CVD, XVCD, or HQVCD) that
+a VCD in drive is located. Since I have to read in this output, I
+don't want any extra lines not relevant other than the version.
 
 @smallexample
   vcddump --no-banner --show-format
