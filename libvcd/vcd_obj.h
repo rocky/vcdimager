@@ -62,6 +62,9 @@ struct _VcdObj {
     struct cust_file *next;
   } *custom_files;
 
+  /* dictionary */
+  struct _dict_t *buf_dict;
+
   /* fixme -- vcd files */
   char info_vcd_buf[ISO_BLOCKSIZE];
   char entries_vcd_buf[ISO_BLOCKSIZE];
@@ -71,10 +74,6 @@ struct _VcdObj {
   char tracks_svd_buf[ISO_BLOCKSIZE];
   char search_dat_buf[ISO_BLOCKSIZE]; /* fixme */
 
-  uint32_t pvd_sec;
-  uint32_t evd_sec;
-  uint32_t dir_secs;
-
   uint32_t info_sec;
   uint32_t entries_sec;
   uint32_t lot_secs;
@@ -83,9 +82,6 @@ struct _VcdObj {
   
   uint32_t tracks_sec;
   uint32_t search_secs;
-
-  uint32_t ptl_sec;
-  uint32_t ptm_sec;
 
   unsigned dirs_size;
 

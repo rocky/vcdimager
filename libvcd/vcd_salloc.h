@@ -38,6 +38,9 @@ _vcd_salloc_destroy (VcdSalloc *bitmap);
 uint32_t
 _vcd_salloc (VcdSalloc *bitmap, uint32_t hint, uint32_t size);
 
+void
+_vcd_salloc_free (VcdSalloc *bitmap, uint32_t sec, uint32_t size);
+
 uint32_t
 _vcd_salloc_get_highest (const VcdSalloc *bitmap);
 

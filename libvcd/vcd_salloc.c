@@ -88,6 +88,18 @@ _vcd_salloc_set (VcdSalloc *bitmap, uint32_t sector)
   bitmap->data[_byte] |= (1 << _bit);
 }
 
+static void
+_vcd_salloc_unset (VcdSalloc *bitmap, uint32_t sector)
+{
+  unsigned _byte = sector / 8;
+  unsigned _bit = sector % 8;
+
+  if (_byte >= bitmap->len)
+    assert (0);
+
+  bitmap->data[_byte] &= ~(1 << _bit);
+}
+
 /* exported */
 
 uint32_t _vcd_salloc (VcdSalloc *bitmap, uint32_t hint, uint32_t size)
@@ -127,6 +139,19 @@ uint32_t _vcd_salloc (VcdSalloc *bitmap, uint32_t hint, uint32_t size)
     hint++;
 
   return hint;
+}
+
+void
+_vcd_salloc_free (VcdSalloc *bitmap, uint32_t sec, uint32_t size)
+{
+  uint32_t i;
+
+  for (i = 0; i < size; i++) 
+    {
+      assert (_vcd_salloc_is_set (bitmap, sec + i));
+      
+      _vcd_salloc_unset (bitmap, sec + i);
+    }
 }
 
 VcdSalloc *

@@ -46,6 +46,133 @@
 
 static const char zero[ISO_BLOCKSIZE] = { 0, };
 
+/*
+ */
+
+struct _dict_t
+{
+  char *key;
+  uint32_t sector;
+  uint32_t length;
+  void *buf;
+  int flags;
+
+  struct _dict_t *next;
+};
+
+static void
+_dict_insert (VcdObj *obj, const char key[], uint32_t sector, uint32_t length, int end_flags)
+{
+  struct _dict_t *_new_node;
+
+  assert (key != NULL);
+  assert (sector != SECTOR_NIL);
+  assert (length > 0);
+
+  if (_vcd_salloc (obj->iso_bitmap, sector, length) == SECTOR_NIL)
+    assert (0);
+
+  _new_node = malloc (sizeof (struct _dict_t));
+
+  _new_node->key = strdup (key);
+  _new_node->sector = sector;
+  _new_node->length = length;
+  _new_node->buf = malloc (length * ISO_BLOCKSIZE);
+  _new_node->flags = end_flags;
+
+  _new_node->next = obj->buf_dict;
+  obj->buf_dict = _new_node;
+}
+
+static const struct _dict_t *
+_dict_get_bykey (VcdObj *obj, const char key[])
+{
+  struct _dict_t *p = obj->buf_dict;
+
+  assert (key != NULL);
+
+  while (p)
+    {
+      if (!strcmp (p->key, key))
+        return p;
+
+      p = p->next;
+    }
+
+  return NULL;
+}
+
+static const struct _dict_t *
+_dict_get_bysector (VcdObj *obj, uint32_t sector)
+{
+  struct _dict_t *p = obj->buf_dict;
+
+  assert (sector != SECTOR_NIL);
+
+  while (p)
+    {
+      if (p->sector <= sector && (sector - p->sector) < p->length)
+        return p;
+
+      p = p->next;
+    }
+
+  return NULL;
+}
+
+static int
+_dict_get_sector_flags (VcdObj *obj, uint32_t sector)
+{
+  const struct _dict_t *p;
+
+  assert (sector != SECTOR_NIL);
+
+  p = _dict_get_bysector (obj, sector);
+
+  if (p)
+    return (((sector - p->sector)+1 == p->length)
+            ? p->flags : 0);
+
+  return 0;
+}
+
+static void *
+_dict_get_sector (VcdObj *obj, uint32_t sector)
+{
+  const struct _dict_t *p;
+
+  assert (sector != SECTOR_NIL);
+
+  p = _dict_get_bysector (obj, sector);
+
+  if (p)
+    return ((char *)p->buf) + ((sector - p->sector) * ISO_BLOCKSIZE);
+
+  return NULL;
+}
+
+static void
+_dict_destroy (VcdObj *obj)
+{
+  struct _dict_t *p = obj->buf_dict;
+
+  while (p)
+    {
+      struct _dict_t *tmp = p;
+      p = p->next;
+
+      free (tmp->buf);
+      free (tmp->key);
+      free (tmp);
+    }
+
+  obj->buf_dict = NULL;
+}
+
+
+/*
+ */
+
 VcdObj *
 vcd_obj_new (vcd_type_t vcd_type)
 {
@@ -147,7 +274,7 @@ vcd_obj_append_mpeg_track (VcdObj *obj, VcdDataSource *mpeg_file)
               && track->mpeg_info.version == MPEG_VERS_MPEG1)
             vcd_warn ("SVCD should not contain MPEG1 tracks!");
           
-          if (obj->type == VCD_TYPE_VCD2
+          if ((obj->type == VCD_TYPE_VCD2 || obj->type == VCD_TYPE_VCD11)
               && track->mpeg_info.version == MPEG_VERS_MPEG2)
             vcd_warn ("VCD should not contain MPEG2 tracks!");
           
@@ -370,6 +497,10 @@ _finalize_vcd_iso_track (VcdObj *obj)
 {
   int n;
 
+  uint32_t dir_secs = SECTOR_NIL;
+
+  _dict_destroy (obj);
+
   /* pre-alloc 16 blocks of ISO9660 required silence */
   if (_vcd_salloc (obj->iso_bitmap, 0, 16) == SECTOR_NIL)
     assert (0);
@@ -378,14 +509,17 @@ _finalize_vcd_iso_track (VcdObj *obj)
   if (_vcd_salloc (obj->iso_bitmap, 75, 75) == SECTOR_NIL) 
     assert (0);
 
-
   /* keep info area blank -- paranoid ? */
   if (_vcd_salloc (obj->iso_bitmap, 187, 38) == SECTOR_NIL) 
     assert (0);
 
-  obj->pvd_sec = _vcd_salloc (obj->iso_bitmap, 16, 2);      /* pre-alloc descriptors, PVD */  /* EOR */
-  obj->evd_sec = obj->pvd_sec+1;                           /* EVD */                         /* EOR+EOF */
-  obj->dir_secs = _vcd_salloc (obj->iso_bitmap, 18, 75-18);
+  _dict_insert (obj, "pvd", 16, 1, SM_EOR);        /* pre-alloc descriptors, PVD */  /* EOR */
+  _dict_insert (obj, "evd", 17, 1, SM_EOR|SM_EOF); /* EVD */                         /* EOR+EOF */
+
+  /* reserve for iso directory */
+  dir_secs = _vcd_salloc (obj->iso_bitmap, 18, 75-18);
+
+  /* ... */
   obj->info_sec = _vcd_salloc (obj->iso_bitmap, INFO_VCD_SECTOR, 1);    /* INFO.VCD */        /* EOF */
   obj->entries_sec = _vcd_salloc (obj->iso_bitmap, ENTRIES_VCD_SECTOR, 1); /* ENTRIES.VCD  */ /* EOF */
   obj->lot_secs = _vcd_salloc (obj->iso_bitmap, LOT_VCD_SECTOR, LOT_VCD_SIZE);  /* LOT.VCD */ /* EOF */
@@ -404,6 +538,7 @@ _finalize_vcd_iso_track (VcdObj *obj)
       break;
 
     case VCD_TYPE_VCD2:
+    case VCD_TYPE_VCD11:
       {
         uint32_t rc = _vcd_salloc (obj->iso_bitmap, 185,2);
         assert(rc != SECTOR_NIL);
@@ -424,19 +559,14 @@ _finalize_vcd_iso_track (VcdObj *obj)
     }
 
   set_psd_size (obj);
-
-  /* these are set/put after the directory tree/records have been created */
-  obj->ptl_sec = SECTOR_NIL; /* EOR+EOF */
-  obj->ptm_sec = SECTOR_NIL; /* EOR+EOF */
     
-  assert (obj->dir_secs != SECTOR_NIL);
-  assert (obj->pvd_sec != SECTOR_NIL);
   assert (obj->info_sec != SECTOR_NIL);
   assert (obj->entries_sec != SECTOR_NIL);
   assert (obj->lot_secs != SECTOR_NIL);
   assert (obj->psd_sec != SECTOR_NIL);
 
-  switch(obj->type) {
+  switch (obj->type) {
+  case VCD_TYPE_VCD11:
   case VCD_TYPE_VCD2:
     /* _vcd_directory_mkdir (obj->dir, "CDDA"); */
     _vcd_directory_mkdir (obj->dir, "CDI");
@@ -450,8 +580,11 @@ _finalize_vcd_iso_track (VcdObj *obj)
     _vcd_directory_mkfile (obj->dir, "VCD/INFO.VCD;1", obj->info_sec, ISO_BLOCKSIZE, FALSE, 0);
 
     /* only for vcd2.0 */
-    _vcd_directory_mkfile (obj->dir, "VCD/LOT.VCD;1", obj->lot_secs, ISO_BLOCKSIZE*LOT_VCD_SIZE, FALSE, 0);
-    _vcd_directory_mkfile (obj->dir, "VCD/PSD.VCD;1", obj->psd_sec, obj->psd_size, FALSE, 0);
+    if (obj->type == VCD_TYPE_VCD2)
+      {
+        _vcd_directory_mkfile (obj->dir, "VCD/LOT.VCD;1", obj->lot_secs, ISO_BLOCKSIZE*LOT_VCD_SIZE, FALSE, 0);
+        _vcd_directory_mkfile (obj->dir, "VCD/PSD.VCD;1", obj->psd_sec, obj->psd_size, FALSE, 0);
+      }
     break;
 
   case VCD_TYPE_SVCD:
@@ -510,6 +643,7 @@ _finalize_vcd_iso_track (VcdObj *obj)
     uint32_t extent = obj->mpeg_tracks[n].relative_start_extent;
       
     switch (obj->type) {
+    case VCD_TYPE_VCD11:
     case VCD_TYPE_VCD2:
       fmt = "MPEGAV/AVSEQ%2.2d.DAT;1";
       break;
@@ -529,13 +663,16 @@ _finalize_vcd_iso_track (VcdObj *obj)
                            TRUE, n+1);
   }
 
+  /* register is fs stuff */
   obj->dirs_size = _vcd_directory_get_size (obj->dir);
-
-  obj->ptl_sec = obj->dir_secs + obj->dirs_size;
-  obj->ptm_sec = obj->ptl_sec + 1;
-
-  if (obj->ptm_sec >= 75)
+  if (obj->dirs_size+2 >= 75)
     vcd_error ("directory section to big");
+
+  _vcd_salloc_free (obj->iso_bitmap, 18, obj->dirs_size + 2);
+
+  _dict_insert (obj, "dir", 18, obj->dirs_size, SM_EOR|SM_EOF);
+  _dict_insert (obj, "ptl", 18 + obj->dirs_size, 1, SM_EOR|SM_EOF);
+  _dict_insert (obj, "ptm", 18 + obj->dirs_size + 1, 1, SM_EOR|SM_EOF);
 }
 
 static int
@@ -642,31 +779,38 @@ _write_source_mode2_form1 (VcdObj *obj, VcdDataSource *source, uint32_t extent)
 static int
 _write_vcd_iso_track (VcdObj *obj)
 {
-  char *dir_buf = NULL;
-  char
-    ptm_buf[ISO_BLOCKSIZE], ptl_buf[ISO_BLOCKSIZE], 
-    pvd_buf[ISO_BLOCKSIZE], evd_buf[ISO_BLOCKSIZE];
   int n;
 
   /* generate dir sectors */
   
-  dir_buf = malloc (ISO_BLOCKSIZE*obj->dirs_size);
+  _vcd_directory_dump_entries (obj->dir, 
+                               _dict_get_bykey (obj, "dir")->buf, 
+                               _dict_get_bykey (obj, "dir")->sector);
 
-  _vcd_directory_dump_entries (obj->dir, dir_buf, 18);
-  _vcd_directory_dump_pathtables (obj->dir, ptl_buf, ptm_buf);
+  _vcd_directory_dump_pathtables (obj->dir, 
+                                  _dict_get_bykey (obj, "ptl")->buf, 
+                                  _dict_get_bykey (obj, "ptm")->buf);
       
   /* generate PVD and EVD at last... */
-  set_iso_pvd (pvd_buf, obj->iso_volume_label, obj->iso_size, dir_buf,
-               obj->ptl_sec, obj->ptm_sec, pathtable_get_size (ptm_buf));
+  set_iso_pvd (_dict_get_bykey (obj, "pvd")->buf,
+               obj->iso_volume_label, obj->iso_size, 
+               _dict_get_bykey (obj, "dir")->buf, 
+               _dict_get_bykey (obj, "ptl")->sector,
+               _dict_get_bykey (obj, "ptm")->sector,
+               pathtable_get_size (_dict_get_bykey (obj, "ptm")->buf));
     
-  set_iso_evd (evd_buf);
+  set_iso_evd (_dict_get_bykey (obj, "evd")->buf);
 
   /* fill VCD relevant files with data */
 
   set_info_vcd (obj);
   set_entries_vcd (obj);
-  set_lot_vcd (obj);
-  set_psd_vcd (obj);
+
+  if (obj->type == VCD_TYPE_VCD2) 
+    {
+      set_lot_vcd (obj);
+      set_psd_vcd (obj);
+    }
 
   if (obj->type == VCD_TYPE_SVCD) 
     {
@@ -680,25 +824,37 @@ _write_vcd_iso_track (VcdObj *obj)
 
   /* 00:00:00 */
 
-  for (n = 0;n < 16; n++)
-    _write_m2_image_sector (obj, zero, n, 0, 0, SM_DATA, 0);
+  for (n = 0;n < 75; n++)
+    {
+      const void *content = NULL;
+      int flags = SM_DATA;
 
-  _write_m2_image_sector (obj, pvd_buf, obj->pvd_sec, 0, 0, SM_DATA|SM_EOR, 0);
-  _write_m2_image_sector (obj, evd_buf, obj->evd_sec, 0, 0, 
-                          SM_DATA|SM_EOR|SM_EOF, 0);
+      content = _dict_get_sector (obj, n);
+      flags |= _dict_get_sector_flags (obj, n);
+      
+      if (content == NULL)
+        content = zero;
 
-  for (n = 0;n < obj->dirs_size;n++)
-    _write_m2_image_sector (obj, dir_buf+ (ISO_BLOCKSIZE*n), 18+n, 0, 0,
-                            n+1 != obj->dirs_size ? SM_DATA : SM_DATA|SM_EOR|SM_EOF,
-                            0);
+      _write_m2_image_sector (obj, content, n, 0, 0, flags, 0);
+    }
 
-  _write_m2_image_sector (obj, ptl_buf, obj->ptl_sec, 0, 0,
-                          SM_DATA|SM_EOR|SM_EOF, 0);
-  _write_m2_image_sector (obj, ptm_buf, obj->ptm_sec, 0, 0,
-                          SM_DATA|SM_EOR|SM_EOF, 0);
+/*   _write_m2_image_sector (obj, pvd_buf, _dict_get_bykey (obj, "pvd")->sector, 0, 0, */
+/*                           SM_DATA|SM_EOR, 0); */
+/*   _write_m2_image_sector (obj, evd_buf, _dict_get_bykey (obj, "evd")->sector, 0, 0,  */
+/*                           SM_DATA|SM_EOR|SM_EOF, 0); */
 
-  for (n = obj->ptm_sec+1;n < 75;n++)
-    _write_m2_image_sector (obj, zero, n, 0, 0, SM_DATA, 0);
+/*   for (n = 0;n < obj->dirs_size;n++) */
+/*     _write_m2_image_sector (obj, dir_buf + (ISO_BLOCKSIZE*n), 18+n, 0, 0, */
+/*                             n+1 != obj->dirs_size ? SM_DATA : SM_DATA|SM_EOR|SM_EOF, */
+/*                             0); */
+
+/*   _write_m2_image_sector (obj, ptl_buf, obj->ptl_sec, 0, 0, */
+/*                           SM_DATA|SM_EOR|SM_EOF, 0); */
+/*   _write_m2_image_sector (obj, ptm_buf, obj->ptm_sec, 0, 0, */
+/*                           SM_DATA|SM_EOR|SM_EOF, 0); */
+
+/*   for (n = obj->ptm_sec+1;n < 75;n++) */
+/*     _write_m2_image_sector (obj, zero, n, 0, 0, SM_DATA, 0); */
   
   /* 00:01:00 */
 
@@ -713,15 +869,28 @@ _write_vcd_iso_track (VcdObj *obj)
   _write_m2_image_sector (obj, obj->entries_vcd_buf, obj->entries_sec, 
                           0, 0, SM_DATA|SM_EOF, 0);
 
-  for (n = 0;n < LOT_VCD_SIZE; n++)
-    _write_m2_image_sector (obj, obj->lot_vcd_buf+ (ISO_BLOCKSIZE*n), 
-                            obj->lot_secs+n, 0, 0, 
-                            ((n+1 < LOT_VCD_SIZE) ? SM_DATA : SM_DATA|SM_EOF),
-                            0);
 
-  _write_m2_image_sector (obj, obj->psd_vcd_buf, obj->psd_sec,
-                          0, 0, SM_DATA|SM_EOF, 0);
+  /* PSD & LOT only for VCD2.0 and SVCD1.0 */
+  if(obj->type == VCD_TYPE_VCD2 || obj->type == VCD_TYPE_SVCD) 
+    {
+      for (n = 0;n < LOT_VCD_SIZE; n++)
+        _write_m2_image_sector (obj, obj->lot_vcd_buf+ (ISO_BLOCKSIZE*n), 
+                                obj->lot_secs+n, 0, 0, 
+                                ((n+1 < LOT_VCD_SIZE) ? SM_DATA : SM_DATA|SM_EOF),
+                                0);
 
+      _write_m2_image_sector (obj, obj->psd_vcd_buf, obj->psd_sec,
+                              0, 0, SM_DATA|SM_EOF, 0);
+    }
+  else
+    {
+      for (n = 0;n < LOT_VCD_SIZE; n++)
+        _write_m2_image_sector (obj, zero, obj->lot_secs+n, 0, 0, SM_DATA, 0);
+
+      _write_m2_image_sector (obj, zero, obj->psd_sec, 0, 0, SM_DATA, 0);
+    }
+    
+  /* TRACKS.SVD & SEARCH.DAT only for SVCD1.0 */
   if(obj->type == VCD_TYPE_SVCD) 
     {
       _write_m2_image_sector (obj, obj->tracks_svd_buf, obj->tracks_sec,
@@ -758,8 +927,6 @@ _write_vcd_iso_track (VcdObj *obj)
   /* blank unalloced tracks */
   while ((n = _vcd_salloc (obj->iso_bitmap, SECTOR_NIL, 1)) < obj->iso_size)
     _write_m2_image_sector (obj, zero, n, 0, 0, SM_DATA, 0);
-
-  free (dir_buf);
 
   return 0;
 }
@@ -964,6 +1131,8 @@ vcd_obj_end_output (VcdObj *obj)
 
   _vcd_directory_destroy (obj->dir);
   _vcd_salloc_destroy (obj->iso_bitmap);
+
+  _dict_destroy (obj);
 
   if (obj->bin_file)
     vcd_data_sink_destroy (obj->bin_file); /* fixme -- try moving it to

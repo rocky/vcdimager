@@ -64,12 +64,23 @@ static struct
 
   int verbose_flag;
   int progress_flag;
+
+  vcd_log_handler_t default_vcd_log_handler;
 }
 gl;                             /* global */
 
 /****************************************************************************/
 
 static VcdObj *gl_vcd_obj = NULL;
+
+static void 
+_vcd_log_handler (log_level_t level, const char message[])
+{
+  if (level == LOG_DEBUG && !gl.verbose_flag)
+    return;
+  
+  gl.default_vcd_log_handler (level, message);
+}
 
 static int
 _progress_callback (const progress_info_t * info, void *user_data)
@@ -134,6 +145,8 @@ main (int argc, const char *argv[])
   gl.type = DEFAULT_TYPE;
 
   gl.volume_label = DEFAULT_VOLUME_LABEL;
+
+  gl.default_vcd_log_handler = vcd_log_set_handler (_vcd_log_handler);
 
   {
     const char **args = NULL;

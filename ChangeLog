@@ -1,5 +1,20 @@
 2000-12-17  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* libvcd/vcd_obj.h: moved some buffers/sector ptr's to new 
+		dictionary
+
+	* libvcd/vcd_salloc.c (_vcd_salloc_unset): new function
+	(_vcd_salloc_free): added new function for free'ing previously 
+		allocated sectors
+
+	* libvcd/vcd.c: begun rewrite of buffer allocation
+	
+	* libvcd/vcd.c (_dict_insert): added new functions for dictionary 
+		based buffer allocation
+
+	* frontends/cli/vcdimager.c (_vcd_log_handler): new function, 
+		implemented non verbose output
+
 	* libvcd/vcd.h (vcd_type_t): uncommented VCD11 type
 
 	* configure.in: some cleanup
