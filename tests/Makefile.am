@@ -16,6 +16,13 @@ testimage_LDADD = $(LIBVCD_LIBS)
 
 check_PROGRAMS = check_sizeof check_bitfield
 
+check_SCRIPTS = check_vcd11.sh check_vcd20.sh check_svcd1.sh
+
+EXTRA_DIST = avseq00.m1p item0000.m1p check_vcd11.xml check_vcd20.xml check_svcd1.xml
+
 TESTS = \
 	check_sizeof \
-	check_bitfield
+	check_bitfield \
+	check_vcd11.sh \
+	check_vcd20.sh \
+	check_svcd1.sh
