@@ -806,16 +806,6 @@ vcdinfo_get_offset_t (const vcdinfo_obj_t *obj, unsigned int offset)
 }
 
 /*!
-  Get autowait time value for PsdPlayListDescriptor *d.
-  Time is in seconds.
-*/
-uint16_t
-vcdinfo_get_play_time (const PsdPlayListDescriptor *d) 
-{
-  return uint16_from_be (d->ptime);
-}
-
-/*!
    Return a string containing the VCD publisher id with trailing
    blanks removed, or NULL if there is some problem in getting this.
 */

@@ -197,6 +197,7 @@ extern "C" {
     Used in working with LOT - list of offsets and lid's 
   */
   typedef struct {
+    uint8_t type;
     lid_t lid;
     uint16_t offset;
     bool in_lot;   /* Is listed in LOT. */
@@ -447,13 +448,6 @@ extern "C" {
   vcdinfo_get_offset_t (const vcdinfo_obj_t *obj, unsigned int offset);
   
   /*!
-    Get play-time value for PsdPlayListDescriptor *d.
-    Time is in seconds.
-  */
-  uint16_t
-  vcdinfo_get_play_time (const PsdPlayListDescriptor *d);
-  
-  /*!
     Return a string containing the VCD preparer id with trailing
     blanks removed, or NULL if there is some problem in getting this.
   */
@@ -689,7 +683,7 @@ vcdinfo_get_seg_size(const vcdinfo_obj_t *obj, const unsigned int seg_num);
   vcdinfo_get_xa_attr_str (uint16_t xa_attr);
   
   /*!
-    Return true is there is playback control. 
+    Return true if there is playback control. 
   */
   bool vcdinfo_has_pbc (const vcdinfo_obj_t *obj);
   

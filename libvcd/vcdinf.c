@@ -69,12 +69,15 @@
 
 static const char _rcsid[] = "$Id$";
 
-/* Comparison routine used in sorting. We compare LIDs and if those are 
-   equal, use the offset.
-   Note: we assume an unnassigned LID is 0 and this compares as a high value.
+/*! 
+  Comparison routine used in sorting. We compare LIDs and if those are 
+  equal, use the offset.
+  Note: we assume an unassigned LID is 0 and this compares as a high value.
+  
+  NOTE: Consider making static.
 */
-static int
-_lid_t_cmp (vcdinfo_offset_t *a, vcdinfo_offset_t *b)
+int
+vcdinf_lid_t_cmp (vcdinfo_offset_t *a, vcdinfo_offset_t *b)
 {
   if (a->lid && b->lid)
     {
@@ -166,7 +169,7 @@ vcdinf_visit_lot (struct _vcdinf_pbc_ctx *obj)
       vcdinf_visit_pbc (obj, n + 1, tmp, true);
 
   _vcd_list_sort (obj->extended ? obj->offset_x_list : obj->offset_list, 
-                  (_vcd_list_cmp_func) _lid_t_cmp);
+                  (_vcd_list_cmp_func) vcdinf_lid_t_cmp);
 
   /* Now really complete the offset table with LIDs.  This routine
      might obviate the need for vcdinf_visit_pbc() or some of it which is
@@ -184,7 +187,7 @@ vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, unsigned int offset,
 {
   VcdListNode *node;
   vcdinfo_offset_t *ofs;
-  unsigned psd_size  = obj->extended ? obj->psd_x_size : obj->psd_size;
+  unsigned int psd_size  = obj->extended ? obj->psd_x_size : obj->psd_size;
   const uint8_t *psd = obj->extended ? obj->psd_x : obj->psd;
   unsigned int _rofs = offset * obj->offset_mult;
   VcdList *offset_list;
@@ -255,8 +258,9 @@ vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, unsigned int offset,
   ofs->in_lot = in_lot;
   ofs->lid    = lid;
   ofs->offset = offset;
+  ofs->type   = psd[_rofs];
 
-  switch (psd[_rofs])
+  switch (ofs->type)
     {
     case PSD_TYPE_PLAY_LIST:
       _vcd_list_append (offset_list, ofs);
@@ -485,7 +489,28 @@ vcdinf_get_num_LIDs (const InfoVcd *info)
 }
 
 /*!
-   Return a string containing the VCD publisher id with trailing
+  Return the playlist item i in d. 
+*/
+uint16_t
+vcdinf_get_play_item_from_pld(const PsdPlayListDescriptor *pld, unsigned int i)
+{
+  if (NULL==pld) return 0;
+  return  uint16_from_be(pld->itemid[i]);
+}
+
+/*!
+  Get play time value for PsdPlayListDescriptor *d.
+  Time is in 1/15-second units.
+*/
+uint16_t
+vcdinf_get_play_time (const PsdPlayListDescriptor *d) 
+{
+  if (NULL==d) return 0;
+  return uint16_from_be (d->ptime);
+}
+
+/*!
+   Return a string containing the VCD preparer id with trailing
    blanks removed.
 */
 const char *
@@ -648,6 +673,16 @@ vcdinf_get_wait_time (uint16_t wtime)
     return -1;
 }
 
+/*!
+  Return true if loop has a jump delay
+*/
+bool
+vcdinf_has_jump_delay (const PsdSelectionListDescriptor *psd) 
+{
+  if (NULL==psd) return false;
+  return ((0x80 & psd->loop) != 0);
+}
+  
 
 /* 
  * Local variables:

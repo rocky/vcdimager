@@ -33,6 +33,15 @@ extern "C" {
 #endif /* __cplusplus */
 
   /*!
+    Comparison routine used in sorting. We compare LIDs and if those are 
+    equal, use the offset.
+    Note: we assume an unassigned LID is 0 and this compares as a high value.
+
+    NOTE: Consider making static.
+  */
+  int vcdinf_lid_t_cmp (vcdinfo_offset_t *a, vcdinfo_offset_t *b);
+
+  /*!
     Return a string containing the VCD album id.
   */
   const char * vcdinf_get_album_id(const InfoVcd *info);
@@ -110,7 +119,19 @@ extern "C" {
   unsigned int vcdinf_get_num_segments(const InfoVcd *info);
 
   /*!
-    Return a string containing the VCD publisher id with trailing
+    Return the playlist item i in d. 
+  */
+  uint16_t vcdinf_get_play_item_from_pld(const PsdPlayListDescriptor *pld, 
+					 unsigned int i);
+
+  /*!
+    Get play-time value for PsdPlayListDescriptor *d.
+    Time is in 1/15-second units.
+  */
+  uint16_t vcdinf_get_play_time (const PsdPlayListDescriptor *d);
+  
+  /*!
+    Return a string containing the VCD preparer id with trailing
     blanks removed.
     NULL is returned if there is some problem in getting this. 
   */
@@ -228,6 +249,11 @@ extern "C" {
   */
   void vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, 
 			 unsigned int offset, bool in_lot);
+
+  /*!
+    Return true if loop has a jump delay
+  */
+  bool vcdinf_has_jump_delay (const PsdSelectionListDescriptor *psd);
 
 #ifdef __cplusplus
 }
