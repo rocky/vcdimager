@@ -55,8 +55,6 @@ libvcd_la_LIBADD = $(LIBCDIO_LIBS) $(LIBISO9660_LIBS)
 libvcd_la_SOURCES = \
 	vcd_assert.h \
 	bitvec.h \
-	bytesex_asm.h \
-	bytesex.h \
 	data_structures.h \
 	dict.h \
 	directory.h \
