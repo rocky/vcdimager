@@ -3,3 +3,9 @@ Makefile
 .deps
 .libs
 *.1
+vcdxbuild
+vcdxgen
+vcdxminfo
+vcdxrip
+videocd_dtd.inc
+
