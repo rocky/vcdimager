@@ -91,9 +91,11 @@ dump_lot_and_psd_vcd (const void *data, const void *data2,
   assert (psd_size % 8 == 0);
 
   n = 0;
-  while ((tmp = UINT16_FROM_BE (lot->offset[n++])) != 0xFFFF)
+  while ((tmp = UINT16_FROM_BE (lot->offset[n])) != 0xFFFF)
     {
       uint8_t type;
+
+      n++;
 
       tmp <<= 3;
       assert (tmp < psd_size);
