@@ -3,6 +3,7 @@ Section: otherosfs
 Priority: optional
 Maintainer: Nicolas Boullis <nboullis@debian.org>
 Build-Depends: debhelper (>> 3.0.0), libxml2-dev, libpopt-dev, texinfo
+Build-Conflicts: libpopt0 (= 1.7-1) [m68k], libpopt0 (= 1.7-2) [m68k], libpopt0 (= 1.7-3) [m68k]
 Standards-Version: 3.6.1
 
 Package: vcdimager

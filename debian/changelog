@@ -1,3 +1,33 @@
+vcdimager (0.7.14.debian.1-1) unstable; urgency=medium
+
+  * New "orig" tarball:
+    - remove non-free code, thanks to Joerg Schilling and Andreas Metzler
+      for noticing and reporting the problem and to Rocky Bernstein for
+      doing the work. (Closes: #223587)
+  * Also build-conflicts against libpopt0 1.7-3 on m68k as it was only
+    partly fixed.
+  * Remove the hack introduced in 0.7.14-5 to fix the versionned
+    dependency against libpopt0 on m68k.
+
+ -- Nicolas Boullis <nboullis@debian.org>  Tue,  3 Feb 2004 01:48:31 +0100
+
+vcdimager (0.7.14-5) unstable; urgency=low
+
+  * The "I am stupid" release.
+  * Really build-conflicts against versions 1.7-1 and 1.7-2 on m68k, not
+    0.7-1 and 0.7-2.
+
+ -- Nicolas Boullis <nboullis@debian.org>  Tue, 18 Nov 2003 19:11:14 +0100
+
+vcdimager (0.7.14-4) unstable; urgency=low
+
+  * Build-conflicts against version 1.7-1 and 1.7-2 of libpopt0 on m68k.
+  * Add a hack to generate a debian/shlibs.local file to fix the
+    dependency against libpopt0 on m68k.
+  * Also specify the build architecture to configure.
+
+ -- Nicolas Boullis <nboullis@debian.org>  Mon, 17 Nov 2003 01:33:35 +0100
+
 vcdimager (0.7.14-3) unstable; urgency=low
 
   * Re-run the autotools to prevent the installation of
