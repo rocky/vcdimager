@@ -1,3 +1,9 @@
+vcdimager (0.7.12-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Herbert Valerio Riedel <hvr@gnu.org>  Tue, 23 Jul 2002 19:29:21 +0200
+
 vcdimager (0.7.9-1) unstable; urgency=low
 
   * New upstream release
