@@ -72,7 +72,7 @@ struct _pbc_t {
   double playing_time;
   int wait_time;
   int auto_pause_time;
-  VcdList *item_id_list; /* char */
+  CdioList *item_id_list; /* char */
 
   /* used for selection lists */
   enum selection_type_t {
@@ -85,7 +85,7 @@ struct _pbc_t {
   pbc_area_t *next_area;
   pbc_area_t *return_area;
   pbc_area_t *default_area; /* depends on selection_type */
-  VcdList *select_area_list; /* pbc_area_t */
+  CdioList *select_area_list; /* pbc_area_t */
 
   unsigned bsn;
   char *default_id;
@@ -94,7 +94,7 @@ struct _pbc_t {
   unsigned loop_count;
   bool jump_delayed;
   char *item_id;
-  VcdList *select_id_list; /* char */
+  CdioList *select_id_list; /* char */
 
   /* used for end lists */
   char *image_id;

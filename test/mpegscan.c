@@ -41,7 +41,7 @@ int
 main (int argc, const char *argv[])
 {
   VcdMpegSource *src;
-  VcdListNode *n;
+  CdioListNode *n;
   double t = 0;
 
   if (argc != 2)
@@ -53,29 +53,31 @@ main (int argc, const char *argv[])
 
   printf ("packets: %d\n", vcd_mpeg_source_get_info (src)->packets);
 
-  _VCD_LIST_FOREACH (n, vcd_mpeg_source_get_info (src)->shdr[0].aps_list)
+  _CDIO_LIST_FOREACH (n, vcd_mpeg_source_get_info (src)->shdr[0].aps_list)
     {
-      struct aps_data *_data = _vcd_list_node_data (n);
+      struct aps_data *_data = _cdio_list_node_data (n);
       
       printf ("aps: %u %f\n", _data->packet_no, _data->timestamp);
     }
 
   {
-    VcdListNode *aps_node = _vcd_list_begin (vcd_mpeg_source_get_info (src)->shdr[0].aps_list);
+    CdioListNode *aps_node = 
+      _cdio_list_begin (vcd_mpeg_source_get_info (src)->shdr[0].aps_list);
     struct aps_data *_data;
     double aps_time;
     int aps_packet;
 
-    _data = _vcd_list_node_data (aps_node);
+    _data = _cdio_list_node_data (aps_node);
     aps_time = _data->timestamp;
     aps_packet = _data->packet_no;
 
 
     for (t = 0; t <= vcd_mpeg_source_get_info (src)->playing_time; t += 0.5)
       {
-        for(n = _vcd_list_node_next (aps_node); n; n = _vcd_list_node_next (n))
+        for(n = _cdio_list_node_next (aps_node); n; 
+	    n = _cdio_list_node_next (n))
           {
-            _data = _vcd_list_node_data (n);
+            _data = _cdio_list_node_data (n);
 
             if (fabs (_data->timestamp - t) < fabs (aps_time - t))
               {

@@ -103,7 +103,7 @@ typedef struct {
       unsigned vbvsize;
       bool constrained_flag;
 
-      VcdList *aps_list; /* filled up by vcd_mpeg_source */
+      CdioList *aps_list; /* filled up by vcd_mpeg_source */
       double last_aps_pts; /* temp, see ->packet */
       
     } shdr[3];

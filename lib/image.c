@@ -68,7 +68,7 @@ vcd_image_sink_destroy (VcdImageSink *obj)
 }
 
 int
-vcd_image_sink_set_cuesheet (VcdImageSink *obj, const VcdList *vcd_cue_list)
+vcd_image_sink_set_cuesheet (VcdImageSink *obj, const CdioList *vcd_cue_list)
 {
   vcd_assert (obj != NULL);
 

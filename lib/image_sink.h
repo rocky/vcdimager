@@ -48,7 +48,7 @@ typedef struct {
 } vcd_cue_t;
 
 typedef struct {
-  int (*set_cuesheet) (void *user_data, const VcdList *vcd_cue_list);
+  int (*set_cuesheet) (void *user_data, const CdioList *vcd_cue_list);
   int (*write) (void *user_data, const void *buf, lsn_t lsn);
   void (*free) (void *user_data);
   int (*set_arg) (void *user_data, const char key[], const char value[]);
@@ -61,7 +61,7 @@ void
 vcd_image_sink_destroy (VcdImageSink *obj);
 
 int
-vcd_image_sink_set_cuesheet (VcdImageSink *obj, const VcdList *vcd_cue_list);
+vcd_image_sink_set_cuesheet (VcdImageSink *obj, const CdioList *vcd_cue_list);
 
 int
 vcd_image_sink_write (VcdImageSink *obj, void *buf, lsn_t lsn);

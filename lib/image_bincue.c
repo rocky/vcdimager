@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2001, 2004 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -88,10 +88,10 @@ _sink_free (void *user_data)
 }
 
 static int
-_set_cuesheet (void *user_data, const VcdList *vcd_cue_list)
+_set_cuesheet (void *user_data, const CdioList *vcd_cue_list)
 {
   _img_bincue_snk_t *_obj = user_data;
-  VcdListNode *node;
+  CdioListNode *node;
   int track_no, index_no;
   const vcd_cue_t *_last_cue = 0;
   
@@ -102,9 +102,9 @@ _set_cuesheet (void *user_data, const VcdList *vcd_cue_list)
 
   track_no = 0;
   index_no = 0;
-  _VCD_LIST_FOREACH (node, (VcdList *) vcd_cue_list)
+  _CDIO_LIST_FOREACH (node, (CdioList *) vcd_cue_list)
     {
-      const vcd_cue_t *_cue = _vcd_list_node_data (node);
+      const vcd_cue_t *_cue = _cdio_list_node_data (node);
       char *psz_msf;
       
       msf_t _msf = { 0, 0, 0 };

@@ -107,7 +107,7 @@ typedef struct {
   VcdDataSink *nrg_snk;
   char *nrg_fname;
 
-  VcdList *vcd_cue_list;
+  CdioList *vcd_cue_list;
   int tracks;
   uint32_t cue_end_lsn;
 
@@ -139,23 +139,23 @@ _sink_free (void *user_data)
 }
 
 static int
-_set_cuesheet (void *user_data, const VcdList *vcd_cue_list)
+_set_cuesheet (void *user_data, const CdioList *vcd_cue_list)
 {
   _img_nrg_snk_t *_obj = user_data;
-  VcdListNode *node;
+  CdioListNode *node;
   int num;
 
   _sink_init (_obj);
 
-  _obj->vcd_cue_list = _vcd_list_new ();
+  _obj->vcd_cue_list = _cdio_list_new ();
 
   num = 0;
-  _VCD_LIST_FOREACH (node, (VcdList *) vcd_cue_list)
+  _CDIO_LIST_FOREACH (node, (CdioList *) vcd_cue_list)
     {
-      const vcd_cue_t *_cue = _vcd_list_node_data (node);
+      const vcd_cue_t *_cue = _cdio_list_node_data (node);
       vcd_cue_t *_cue2 = _vcd_malloc (sizeof (vcd_cue_t));
       *_cue2 = *_cue;
-      _vcd_list_append (_obj->vcd_cue_list, _cue2);
+      _cdio_list_append (_obj->vcd_cue_list, _cue2);
   
       if (_cue->type == VCD_CUE_TRACK_START)
 	num++;
@@ -174,15 +174,15 @@ _set_cuesheet (void *user_data, const VcdList *vcd_cue_list)
 static uint32_t
 _map (_img_nrg_snk_t *_obj, uint32_t lsn)
 {
-  VcdListNode *node;
+  CdioListNode *node;
   uint32_t result = lsn;
   vcd_cue_t *_cue = NULL, *_last = NULL;
 
   vcd_assert (_obj->cue_end_lsn > lsn);
 
-  _VCD_LIST_FOREACH (node, _obj->vcd_cue_list)
+  _CDIO_LIST_FOREACH (node, _obj->vcd_cue_list)
     {
-      _cue = _vcd_list_node_data (node);
+      _cue = _cdio_list_node_data (node);
       
       if (lsn < _cue->lsn)
 	break;
@@ -226,7 +226,7 @@ _map (_img_nrg_snk_t *_obj, uint32_t lsn)
 static int
 _write_tail (_img_nrg_snk_t *_obj, uint32_t offset)
 {
-  VcdListNode *node;
+  CdioListNode *node;
   int _size;
   _chunk_t _chunk;
 
@@ -238,13 +238,14 @@ _write_tail (_img_nrg_snk_t *_obj, uint32_t offset)
 
   vcd_data_sink_write (_obj->nrg_snk, &_chunk, sizeof (_chunk_t), 1);
 
-  _VCD_LIST_FOREACH (node, _obj->vcd_cue_list)
+  _CDIO_LIST_FOREACH (node, _obj->vcd_cue_list)
     {
-      vcd_cue_t *_cue = _vcd_list_node_data (node);
+      vcd_cue_t *_cue = _cdio_list_node_data (node);
       
       if (_cue->type == VCD_CUE_TRACK_START)
 	{
-	  vcd_cue_t *_cue2 = _vcd_list_node_data (_vcd_list_node_next (node));
+	  vcd_cue_t *_cue2 = 
+	    _cdio_list_node_data (_cdio_list_node_next (node));
 
 	  _etnf_array_t _etnf = { 0, };
 

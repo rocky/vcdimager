@@ -33,6 +33,7 @@
 #include <libvcd/types.h>
 #include <libvcd/files.h>
 #include <cdio/cdio.h>
+#include <cdio/ds.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -431,12 +432,12 @@ extern "C" {
   /*!
     Get the VCD info list.
   */
-  VcdList *vcdinfo_get_offset_list(const vcdinfo_obj_t *obj);
+  CdioList *vcdinfo_get_offset_list(const vcdinfo_obj_t *obj);
 
   /*!
     Get the VCD info extended offset list.
   */
-  VcdList *vcdinfo_get_offset_x_list(const vcdinfo_obj_t *obj);
+  CdioList *vcdinfo_get_offset_x_list(const vcdinfo_obj_t *obj);
 
   /*!
     Get the VCD info offset multiplier.

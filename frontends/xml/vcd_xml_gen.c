@@ -145,7 +145,7 @@ _add_dir (struct vcdxml_t *obj, const char pathname[])
     _file->file_src = NULL;
     _file->file_raw = false;
 
-    _vcd_list_append (obj->filesystem, _file);
+    _cdio_list_append (obj->filesystem, _file);
   }
 }
 
@@ -201,7 +201,7 @@ _add_dirtree (struct vcdxml_t *obj, const char pathname[],
           _file->file_src = strdup (buf);
           _file->file_raw = false;
 
-          _vcd_list_append (obj->filesystem, _file);
+          _cdio_list_append (obj->filesystem, _file);
         }
       else
         fprintf (stdout, "ignoring %s\n", buf);
@@ -383,7 +383,7 @@ main (int argc, const char *argv[])
                 _file->file_src = strdup (fname1);
                 _file->file_raw = (opt == CL_ADD_FILE_RAW);
 
-                _vcd_list_append (obj.filesystem, _file);
+                _cdio_list_append (obj.filesystem, _file);
               }
             else
               {
@@ -413,15 +413,15 @@ main (int argc, const char *argv[])
       {
         struct sequence_t *_seq = _vcd_malloc (sizeof (struct sequence_t));
 
-        _seq->entry_point_list = _vcd_list_new ();
-        _seq->autopause_list = _vcd_list_new ();
+        _seq->entry_point_list = _cdio_list_new ();
+        _seq->autopause_list = _cdio_list_new ();
         _seq->src = strdup (args[n]);
         _seq->id = strdup (_sequence_str (n));
 
-        _vcd_list_append (obj.sequence_list, _seq);
+        _cdio_list_append (obj.sequence_list, _seq);
       }
 
-    if (_vcd_list_length (obj.sequence_list) > CDIO_CD_MAX_TRACKS - 1)
+    if (_cdio_list_length (obj.sequence_list) > CDIO_CD_MAX_TRACKS - 1)
       {
         fprintf (stderr, "error: maximal number of supported mpeg tracks (%d) reached",
                  CDIO_CD_MAX_TRACKS - 1);
@@ -450,12 +450,12 @@ main (int argc, const char *argv[])
   if (!nopbc_flag) 
     {
       pbc_t *_pbc;
-      VcdListNode *node;
+      CdioListNode *node;
 
       int n = 0;
-      _VCD_LIST_FOREACH (node, obj.sequence_list)
+      _CDIO_LIST_FOREACH (node, obj.sequence_list)
         {
-          struct sequence_t *_sequence = _vcd_list_node_data (node);
+          struct sequence_t *_sequence = _cdio_list_node_data (node);
 
           _pbc = vcd_pbc_new (PBC_PLAYLIST);
 
@@ -464,7 +464,7 @@ main (int argc, const char *argv[])
           if (n)
             _pbc->prev_id = strdup (_lid_str (n - 1));
 
-          if (_vcd_list_node_next (node))
+          if (_cdio_list_node_next (node))
             _pbc->next_id = strdup (_lid_str (n + 1));
           else
             _pbc->next_id = strdup ("lid-end");
@@ -473,9 +473,9 @@ main (int argc, const char *argv[])
 
           _pbc->wait_time = 5;
 
-          _vcd_list_append (_pbc->item_id_list, strdup (_sequence->id));
+          _cdio_list_append (_pbc->item_id_list, strdup (_sequence->id));
           
-          _vcd_list_append (obj.pbc_list, _pbc);
+          _cdio_list_append (obj.pbc_list, _pbc);
 
           n++;
         }
@@ -486,7 +486,7 @@ main (int argc, const char *argv[])
       _pbc->id = strdup ("lid-end");
       _pbc->rejected = true;
 
-      _vcd_list_append (obj.pbc_list, _pbc);
+      _cdio_list_append (obj.pbc_list, _pbc);
     }
 
   if ((obj.vcd_type == VCD_TYPE_SVCD 
@@ -498,7 +498,7 @@ main (int argc, const char *argv[])
       _opt->name = strdup (OPT_UPDATE_SCAN_OFFSETS);
       _opt->value = strdup ("true");
 
-      _vcd_list_append (obj.option_list, _opt);
+      _cdio_list_append (obj.option_list, _opt);
     }
 
   if (obj.vcd_type == VCD_TYPE_SVCD 
@@ -509,14 +509,14 @@ main (int argc, const char *argv[])
       _opt->name = strdup (OPT_SVCD_VCD3_MPEGAV);
       _opt->value = strdup ("true");
 
-      _vcd_list_append (obj.option_list, _opt);
+      _cdio_list_append (obj.option_list, _opt);
 
       _opt = _vcd_malloc (sizeof (struct option_t));
       
       _opt->name = strdup (OPT_SVCD_VCD3_ENTRYSVD);
       _opt->value = strdup ("true");
 
-      _vcd_list_append (obj.option_list, _opt);
+      _cdio_list_append (obj.option_list, _opt);
     }
 
   vcd_xml_dump (&obj, xml_fname);

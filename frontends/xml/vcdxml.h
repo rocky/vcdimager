@@ -37,7 +37,7 @@ struct vcdxml_t {
   char *file_prefix;
 
   vcd_type_t vcd_type;
-  VcdList *option_list;
+  CdioList *option_list;
 
   struct {
     char *album_id;
@@ -62,13 +62,13 @@ struct vcdxml_t {
     char *publisher_id;
   } pvd;
 
-  VcdList *pbc_list;
+  CdioList *pbc_list;
 
-  VcdList *sequence_list;
+  CdioList *sequence_list;
 
-  VcdList *segment_list;
+  CdioList *segment_list;
 
-  VcdList *filesystem;
+  CdioList *filesystem;
 };
 
 #define OPT_LEADOUT_PREGAP          "leadout pregap"
@@ -92,8 +92,8 @@ struct sequence_t {
   char *src;
 
   char *default_entry_id;
-  VcdList *entry_point_list; /* entry_point_t */
-  VcdList *autopause_list; /* double * */
+  CdioList *entry_point_list; /* entry_point_t */
+  CdioList *autopause_list; /* double * */
 
   /* used for restoring */
   uint32_t start_extent;
@@ -112,7 +112,7 @@ struct segment_t
   char *id;
   char *src;
   
-  VcdList *autopause_list; /* double * */
+  CdioList *autopause_list; /* double * */
 
   /* used for restoring vcds */
   unsigned segments_count;
@@ -136,11 +136,11 @@ vcd_xml_init (struct vcdxml_t *obj)
 
   memset (obj, 0, sizeof (struct vcdxml_t));
 
-  obj->option_list = _vcd_list_new ();
-  obj->segment_list = _vcd_list_new ();
-  obj->filesystem = _vcd_list_new ();
-  obj->sequence_list = _vcd_list_new ();
-  obj->pbc_list = _vcd_list_new ();
+  obj->option_list = _cdio_list_new ();
+  obj->segment_list = _cdio_list_new ();
+  obj->filesystem = _cdio_list_new ();
+  obj->sequence_list = _cdio_list_new ();
+  obj->pbc_list = _cdio_list_new ();
 }
 
 #endif /* __VCDXML_H__ */

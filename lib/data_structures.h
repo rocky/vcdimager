@@ -21,48 +21,14 @@
 #ifndef __VCD_DATA_STRUCTURES_H__
 #define __VCD_DATA_STRUCTURES_H__
 
+#include <cdio/ds.h>
 #include <libvcd/types.h>
-
-/* opaque... */
-
-typedef int (*_vcd_list_cmp_func) (void *data1, void *data2);
-
-typedef int (*_vcd_list_iterfunc) (void *data, void *user_data);
-
-/* methods */
-VcdList *_vcd_list_new (void);
-
-void _vcd_list_free (VcdList *list, int free_data);
-
-unsigned _vcd_list_length (const VcdList *list);
-
-void _vcd_list_sort (VcdList *list, _vcd_list_cmp_func cmp_func);
-
-void _vcd_list_prepend (VcdList *list, void *data);
-
-void _vcd_list_append (VcdList *list, void *data);
-
-void _vcd_list_foreach (VcdList *list, _vcd_list_iterfunc func, void *user_data);
-
-VcdListNode *_vcd_list_find (VcdList *list, _vcd_list_iterfunc cmp_func, void *user_data);
-
-#define _VCD_LIST_FOREACH(node, list) \
- for (node = _vcd_list_begin (list); node; node = _vcd_list_node_next (node))
 
 /* node ops */
 
-VcdListNode *_vcd_list_at (VcdList *list, int idx);
+CdioListNode *_vcd_list_at (CdioList *list, int idx);
 
-VcdListNode *_vcd_list_begin (const VcdList *list);
-
-VcdListNode *_vcd_list_end (VcdList *list);
-
-VcdListNode *_vcd_list_node_next (VcdListNode *node);
-
-void _vcd_list_node_free (VcdListNode *node, int free_data);
-
-void *_vcd_list_node_data (VcdListNode *node);
-
+void _vcd_list_sort (CdioList *list, _cdio_list_cmp_func cmp_func);
 
 /* n-way tree */
 

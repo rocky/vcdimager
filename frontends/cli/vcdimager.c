@@ -67,7 +67,7 @@ static struct {
   const char *create_timestr;
   char **track_fnames;
 
-  VcdList *add_files;
+  CdioList *add_files;
 
   const char *volume_label;
   const char *application_id;
@@ -93,7 +93,7 @@ gl_add_file (char *fname, char *iso_fname, int raw_flag)
 {
   struct add_files_t *tmp = _vcd_malloc (sizeof (struct add_files_t));
 
-  _vcd_list_append (gl.add_files, tmp);
+  _cdio_list_append (gl.add_files, tmp);
 
   tmp->fname = fname;
   tmp->iso_fname = iso_fname;
@@ -165,7 +165,7 @@ main (int argc, const char *argv[])
 {
   int n = 0;
   vcd_type_t type_id;
-  VcdListNode *node;
+  CdioListNode *node;
   time_t create_time;
 
   /* g_set_prgname (argv[0]); */
@@ -186,7 +186,7 @@ main (int argc, const char *argv[])
 
   gl.default_vcd_log_handler = vcd_log_set_handler (_vcd_log_handler);
 
-  gl.add_files = _vcd_list_new ();
+  gl.add_files = _cdio_list_new ();
 
   {
     const char **args = NULL;
@@ -423,9 +423,9 @@ main (int argc, const char *argv[])
     }
   }
 
-  _VCD_LIST_FOREACH (node, gl.add_files)
+  _CDIO_LIST_FOREACH (node, gl.add_files)
   {
-    struct add_files_t *p = _vcd_list_node_data (node);
+    struct add_files_t *p = _cdio_list_node_data (node);
 
     if (p->fname)
       {
@@ -453,7 +453,7 @@ main (int argc, const char *argv[])
             exit (EXIT_FAILURE);
           }
       }
-  } /* _VCD_LIST_FOREACH */
+  } /* _CDIO_LIST_FOREACH */
 
   for (n = 0; gl.track_fnames[n] != NULL; n++)
     {

@@ -31,6 +31,7 @@
 #endif
 
 #include <cdio/cdio.h>
+#include <cdio/ds.h>
 #include <cdio/iso9660.h>
 #include <libvcd/types.h>
 #include <libvcd/files_private.h>
@@ -49,8 +50,8 @@ extern "C" {
     InfoVcd_t info;
     EntriesVcd_t entries;
     
-    VcdList *offset_list;
-    VcdList *offset_x_list;
+    CdioList *offset_list;
+    CdioList *offset_x_list;
     uint32_t *seg_sizes; 
     lsn_t   first_segment_lsn;
     
@@ -82,8 +83,8 @@ extern "C" {
     unsigned int psd_size;
     lid_t maximum_lid;
     unsigned offset_mult;
-    VcdList *offset_x_list;
-    VcdList *offset_list;
+    CdioList *offset_x_list;
+    CdioList *offset_list;
     
     LotVcd_t *lot;
     LotVcd_t *lot_x;

@@ -75,25 +75,25 @@ vcdinf_update_offset_list(struct _vcdinf_pbc_ctx *obj, bool extended)
 {
   if (NULL==obj) return;
   {
-    VcdListNode *node;
-    VcdList *unused_lids = _vcd_list_new();
-    VcdListNode *next_unused_node = _vcd_list_begin(unused_lids);
+    CdioListNode *node;
+    CdioList *unused_lids = _cdio_list_new();
+    CdioListNode *next_unused_node = _cdio_list_begin(unused_lids);
     
     unsigned int last_lid=0;
-    VcdList *offset_list = extended ? obj->offset_x_list : obj->offset_list;
+    CdioList *offset_list = extended ? obj->offset_x_list : obj->offset_list;
     
     lid_t max_seen_lid=0;
 
-    _VCD_LIST_FOREACH (node, offset_list)
+    _CDIO_LIST_FOREACH (node, offset_list)
       {
-        vcdinfo_offset_t *ofs = _vcd_list_node_data (node);
+        vcdinfo_offset_t *ofs = _cdio_list_node_data (node);
         if (!ofs->lid) {
           /* We have a customer! Assign a LID from the free pool
              or take one from the end if no skipped LIDs.
           */
-          VcdListNode *node=_vcd_list_node_next(next_unused_node);
+          CdioListNode *node=_cdio_list_node_next(next_unused_node);
           if (node != NULL) {
-            lid_t *next_unused_lid=_vcd_list_node_data(node);
+            lid_t *next_unused_lid=_cdio_list_node_data(node);
             ofs->lid = *next_unused_lid;
             next_unused_node=node;
           } else {
@@ -106,12 +106,12 @@ vcdinf_update_offset_list(struct _vcdinf_pbc_ctx *obj, bool extended)
           while (last_lid != ofs->lid ) {
             lid_t * lid=_vcd_malloc (sizeof(lid_t));
             *lid = last_lid;
-            _vcd_list_append(unused_lids, lid);
+            _cdio_list_append(unused_lids, lid);
           }
           if (last_lid > max_seen_lid) max_seen_lid=last_lid;
         }
       }
-    _vcd_list_free(unused_lids, true);
+    _cdio_list_free(unused_lids, true);
   }
 }
 
@@ -137,7 +137,7 @@ vcdinf_visit_lot (struct _vcdinf_pbc_ctx *obj)
       ret &= vcdinf_visit_pbc (obj, n + 1, tmp, true);
 
   _vcd_list_sort (obj->extended ? obj->offset_x_list : obj->offset_list, 
-                  (_vcd_list_cmp_func) vcdinf_lid_t_cmp);
+                  (_cdio_list_cmp_func) vcdinf_lid_t_cmp);
 
   /* Now really complete the offset table with LIDs.  This routine
      might obviate the need for vcdinf_visit_pbc() or some of it which is
@@ -156,12 +156,12 @@ bool
 vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, unsigned int offset, 
                   bool in_lot)
 {
-  VcdListNode *node;
+  CdioListNode *node;
   vcdinfo_offset_t *ofs;
   unsigned int psd_size  = obj->extended ? obj->psd_x_size : obj->psd_size;
   const uint8_t *psd = obj->extended ? obj->psd_x : obj->psd;
   unsigned int _rofs = offset * obj->offset_mult;
-  VcdList *offset_list;
+  CdioList *offset_list;
   bool ret=true;
 
   vcd_assert (psd_size % 8 == 0);
@@ -188,19 +188,19 @@ vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, unsigned int offset,
     }
 
   if (!obj->offset_list)
-    obj->offset_list = _vcd_list_new ();
+    obj->offset_list = _cdio_list_new ();
 
   if (!obj->offset_x_list)
-    obj->offset_x_list = _vcd_list_new ();
+    obj->offset_x_list = _cdio_list_new ();
 
   if (obj->extended) {
     offset_list = obj->offset_x_list;
   } else 
     offset_list = obj->offset_list;
 
-  _VCD_LIST_FOREACH (node, offset_list)
+  _CDIO_LIST_FOREACH (node, offset_list)
     {
-      ofs = _vcd_list_node_data (node);
+      ofs = _cdio_list_node_data (node);
 
       if (offset == ofs->offset)
         {
@@ -232,7 +232,7 @@ vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, unsigned int offset,
   switch (ofs->type)
     {
     case PSD_TYPE_PLAY_LIST:
-      _vcd_list_append (offset_list, ofs);
+      _cdio_list_append (offset_list, ofs);
       {
         const PsdPlayListDescriptor_t *d = (const void *) (psd + _rofs);
         const lid_t lid = vcdinf_pld_get_lid(d);
@@ -253,7 +253,7 @@ vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, unsigned int offset,
 
     case PSD_TYPE_EXT_SELECTION_LIST:
     case PSD_TYPE_SELECTION_LIST:
-      _vcd_list_append (offset_list, ofs);
+      _cdio_list_append (offset_list, ofs);
       {
         const PsdSelectionListDescriptor_t *d =
           (const void *) (psd + _rofs);
@@ -283,7 +283,7 @@ vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, unsigned int offset,
       break;
 
     case PSD_TYPE_END_LIST:
-      _vcd_list_append (offset_list, ofs);
+      _cdio_list_append (offset_list, ofs);
       break;
 
     default:

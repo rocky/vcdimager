@@ -156,7 +156,7 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
   xmlNodePtr vcd_node, section;
   xmlNsPtr ns = NULL;
   char buf[1024];
-  VcdListNode *node;
+  CdioListNode *node;
 
   xmlKeepBlanksDefault(0);
 
@@ -210,9 +210,9 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 
   /* options */
 
-  _VCD_LIST_FOREACH (node, obj->option_list)
+  _CDIO_LIST_FOREACH (node, obj->option_list)
     {
-      struct option_t *_option = _vcd_list_node_data (node);
+      struct option_t *_option = _cdio_list_node_data (node);
       
       section = xmlNewChild (vcd_node, ns, (const xmlChar *) "option", NULL);
       xmlSetProp (section, (const xmlChar *) "name", (const xmlChar *) _option->name);
@@ -252,13 +252,13 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 
   /* filesystem */
 
-  if (_vcd_list_length (obj->filesystem))
+  if (_cdio_list_length (obj->filesystem))
     {
       section = xmlNewChild (vcd_node, ns, (const xmlChar *) "filesystem", NULL);
 
-      _VCD_LIST_FOREACH (node, obj->filesystem)
+      _CDIO_LIST_FOREACH (node, obj->filesystem)
 	{
-	  struct filesystem_t *p = _vcd_list_node_data (node);
+	  struct filesystem_t *p = _cdio_list_node_data (node);
 	  
 	  if (p->file_src)
 	    { /* file */
@@ -276,23 +276,23 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 
   /* segments */
 
-  if (_vcd_list_length (obj->segment_list))
+  if (_cdio_list_length (obj->segment_list))
     {
       section = xmlNewChild (vcd_node, ns, (const xmlChar *) "segment-items", NULL);
 
-      _VCD_LIST_FOREACH (node, obj->segment_list)
+      _CDIO_LIST_FOREACH (node, obj->segment_list)
 	{
-	  struct segment_t *_segment =  _vcd_list_node_data (node);
+	  struct segment_t *_segment =  _cdio_list_node_data (node);
 	  xmlNodePtr seg_node;
-	  VcdListNode *node2;
+	  CdioListNode *node2;
 	  
 	  seg_node = xmlNewChild (section, ns, (const xmlChar *) "segment-item", NULL);
 	  xmlSetProp (seg_node, (const xmlChar *) "src", vcd_xml_filename_to_utf8 (_segment->src));
 	  xmlSetProp (seg_node, (const xmlChar *) "id", (const xmlChar *) _segment->id);
 
-	  _VCD_LIST_FOREACH (node2, _segment->autopause_list)
+	  _CDIO_LIST_FOREACH (node2, _segment->autopause_list)
 	    {
-	      double *_ap_ts = _vcd_list_node_data (node2);
+	      double *_ap_ts = _cdio_list_node_data (node2);
 	      char buf[80];
 
 	      snprintf (buf, sizeof (buf), "%f", *_ap_ts);
@@ -305,11 +305,11 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
     
   section = xmlNewChild (vcd_node, ns, (const xmlChar *) "sequence-items", NULL);
 
-  _VCD_LIST_FOREACH (node, obj->sequence_list)
+  _CDIO_LIST_FOREACH (node, obj->sequence_list)
     {
-      struct sequence_t *_sequence =  _vcd_list_node_data (node);
+      struct sequence_t *_sequence =  _cdio_list_node_data (node);
       xmlNodePtr seq_node;
-      VcdListNode *node2;
+      CdioListNode *node2;
 
       seq_node = xmlNewChild (section, ns, (const xmlChar *) "sequence-item", NULL);
       xmlSetProp (seq_node, (const xmlChar *) "src", vcd_xml_filename_to_utf8 (_sequence->src));
@@ -323,9 +323,9 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 	  xmlSetProp (ent_node, (const xmlChar *) "id", (const xmlChar *) _sequence->default_entry_id);
 	}
 
-      _VCD_LIST_FOREACH (node2, _sequence->entry_point_list)
+      _CDIO_LIST_FOREACH (node2, _sequence->entry_point_list)
 	{
-	  struct entry_point_t *_entry = _vcd_list_node_data (node2);
+	  struct entry_point_t *_entry = _cdio_list_node_data (node2);
 	  xmlNodePtr ent_node;
 	  char buf[80];
 
@@ -334,9 +334,9 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 	  xmlSetProp (ent_node, (const xmlChar *) "id", (const xmlChar *) _entry->id);
 	}
 
-      _VCD_LIST_FOREACH (node2, _sequence->autopause_list)
+      _CDIO_LIST_FOREACH (node2, _sequence->autopause_list)
 	{
-	  double *_ap_ts = _vcd_list_node_data (node2);
+	  double *_ap_ts = _cdio_list_node_data (node2);
 	  char buf[80];
 
 	  snprintf (buf, sizeof (buf), "%f", *_ap_ts);
@@ -346,19 +346,19 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 
   /* PBC */
 
-  if (_vcd_list_length (obj->pbc_list))
+  if (_cdio_list_length (obj->pbc_list))
     {
       section = xmlNewChild (vcd_node, ns, (const xmlChar *) "pbc", NULL);
 
-      _VCD_LIST_FOREACH (node, obj->pbc_list)
+      _CDIO_LIST_FOREACH (node, obj->pbc_list)
 	{
-	  pbc_t *_pbc = _vcd_list_node_data (node);
+	  pbc_t *_pbc = _cdio_list_node_data (node);
 	  xmlNodePtr pl = NULL;
 	  
 	  switch (_pbc->type)
 	    {
 	      char buf[80];
-	      VcdListNode *node2;
+	      CdioListNode *node2;
 
 	    case PBC_PLAYLIST:
 	      pl = xmlNewChild (section, ns, (const xmlChar *) "playlist", NULL);
@@ -379,9 +379,9 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 	      snprintf (buf, sizeof (buf), "%d", _pbc->auto_pause_time);
 	      xmlNewChild (pl, ns, (const xmlChar *) "autowait", (const xmlChar *) buf);
 
-	      _VCD_LIST_FOREACH (node2, _pbc->item_id_list)
+	      _CDIO_LIST_FOREACH (node2, _pbc->item_id_list)
 		{
-		  const char *_id = _vcd_list_node_data (node2);
+		  const char *_id = _cdio_list_node_data (node2);
 		  
 		  if (_id)
 		    xmlSetProp (xmlNewChild (pl, ns, (const xmlChar *) "play-item", NULL), 
@@ -432,24 +432,27 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 			  (_pbc->jump_delayed ? (const xmlChar *) "delayed" : (const xmlChar *) "immediate"));
 
 	      if (_pbc->item_id)
-		xmlSetProp (xmlNewChild (pl, ns, (const xmlChar *) "play-item", NULL), 
-			    (const xmlChar *) "ref", (const xmlChar *) _pbc->item_id);
+		xmlSetProp (xmlNewChild (pl, ns, 
+					 (const xmlChar *) "play-item", NULL), 
+			    (const xmlChar *) "ref", 
+			    (const xmlChar *) _pbc->item_id);
 
 	      {
-		VcdListNode *node3 = _vcd_list_begin (_pbc->select_area_list);
+		CdioListNode *node3 = 
+		  _cdio_list_begin (_pbc->select_area_list);
 
-		_VCD_LIST_FOREACH (node2, _pbc->select_id_list)
+		_CDIO_LIST_FOREACH (node2, _pbc->select_id_list)
 		  {
-		    char *_id = _vcd_list_node_data (node2);
-		    pbc_area_t *_area = node3 ? _vcd_list_node_data (node3) : NULL;
+		    char *_id = _cdio_list_node_data (node2);
+		    pbc_area_t *_area = node3 ? _cdio_list_node_data (node3) : NULL;
 
 		    if (_id)
 		      _ref_area_helper (pl, ns, "select", _id, _area);
 		    else
 		      xmlNewChild (pl, ns, (const xmlChar *) "select", NULL);
 
-		    if (_vcd_list_length (_pbc->select_area_list))
-		      node3 = _vcd_list_node_next (node3);
+		    if (_cdio_list_length (_pbc->select_area_list))
+		      node3 = _cdio_list_node_next (node3);
 		  }
 	      }
 	      break;

@@ -239,7 +239,7 @@ main (int argc, const char *argv[])
 
   {
     VcdMpegSource *src;
-    VcdListNode *n;
+    CdioListNode *n;
 
     vcd_debug ("trying to open mpeg stream...");
 
@@ -311,9 +311,9 @@ main (int argc, const char *argv[])
                 if (_relaxed_aps)
                   _TAG_COMMENT ("relaxed aps");
 
-                _VCD_LIST_FOREACH (n, _vinfo->aps_list)
+                _CDIO_LIST_FOREACH (n, _vinfo->aps_list)
                   {
-                    struct aps_data *_data = _vcd_list_node_data (n);
+                    struct aps_data *_data = _cdio_list_node_data (n);
                     
                     _TAG_INDENT ();
                     fprintf (_TAG_FD, "<aps packet-no=\"%u\">%f</aps>\n",

@@ -75,11 +75,11 @@ _wtime (int seconds)
 static pbc_t *
 _vcd_pbc_byid(const VcdObj *obj, const char item_id[])
 {
-  VcdListNode *node;
+  CdioListNode *node;
 
-  _VCD_LIST_FOREACH (node, obj->pbc_list)
+  _CDIO_LIST_FOREACH (node, obj->pbc_list)
     {
-      pbc_t *_pbc = _vcd_list_node_data (node);
+      pbc_t *_pbc = _cdio_list_node_data (node);
 
       if (_pbc->id && !strcmp (item_id, _pbc->id))
 	return _pbc;
@@ -92,12 +92,12 @@ _vcd_pbc_byid(const VcdObj *obj, const char item_id[])
 unsigned
 _vcd_pbc_lid_lookup (const VcdObj *obj, const char item_id[])
 {
-  VcdListNode *node;
+  CdioListNode *node;
   unsigned n = 1;
 
-  _VCD_LIST_FOREACH (node, obj->pbc_list)
+  _CDIO_LIST_FOREACH (node, obj->pbc_list)
     {
-      pbc_t *_pbc = _vcd_list_node_data (node);
+      pbc_t *_pbc = _cdio_list_node_data (node);
 
       vcd_assert (n < 0x8000);
 
@@ -163,7 +163,7 @@ uint16_t
 _vcd_pbc_pin_lookup (const VcdObj *obj, const char item_id[])
 {
   int n;
-  VcdListNode *node;
+  CdioListNode *node;
 
   if (!item_id)
     return 0;
@@ -171,9 +171,9 @@ _vcd_pbc_pin_lookup (const VcdObj *obj, const char item_id[])
   /* check sequence items */
 
   n = 0;
-  _VCD_LIST_FOREACH (node, obj->mpeg_sequence_list)
+  _CDIO_LIST_FOREACH (node, obj->mpeg_sequence_list)
     {
-      mpeg_sequence_t *_sequence = _vcd_list_node_data (node);
+      mpeg_sequence_t *_sequence = _cdio_list_node_data (node);
 
       vcd_assert (n < 98);
 
@@ -186,10 +186,10 @@ _vcd_pbc_pin_lookup (const VcdObj *obj, const char item_id[])
   /* check entry points */
 
   n = 0;
-  _VCD_LIST_FOREACH (node, obj->mpeg_sequence_list)
+  _CDIO_LIST_FOREACH (node, obj->mpeg_sequence_list)
     {
-      mpeg_sequence_t *_sequence = _vcd_list_node_data (node);
-      VcdListNode *node2;
+      mpeg_sequence_t *_sequence = _cdio_list_node_data (node);
+      CdioListNode *node2;
 
       /* default entry point */
 
@@ -200,9 +200,9 @@ _vcd_pbc_pin_lookup (const VcdObj *obj, const char item_id[])
 
       /* additional entry points */
 
-      _VCD_LIST_FOREACH (node2, _sequence->entry_list)
+      _CDIO_LIST_FOREACH (node2, _sequence->entry_list)
 	{
-	  entry_t *_entry = _vcd_list_node_data (node2);
+	  entry_t *_entry = _cdio_list_node_data (node2);
 
 	  vcd_assert (n < 500);
 
@@ -216,9 +216,9 @@ _vcd_pbc_pin_lookup (const VcdObj *obj, const char item_id[])
   /* check sequence items */
 
   n = 0;
-  _VCD_LIST_FOREACH (node, obj->mpeg_segment_list)
+  _CDIO_LIST_FOREACH (node, obj->mpeg_segment_list)
     {
-      mpeg_segment_t *_segment = _vcd_list_node_data (node);
+      mpeg_segment_t *_segment = _cdio_list_node_data (node);
 
       vcd_assert (n < 1980);
 
@@ -237,7 +237,7 @@ _vcd_pbc_available (const VcdObj *obj)
   vcd_assert (obj != NULL);
   vcd_assert (obj->pbc_list != NULL);
 
-  if (!_vcd_list_length (obj->pbc_list))
+  if (!_cdio_list_length (obj->pbc_list))
     return false;
 
   if (!_vcd_obj_has_cap_p (obj, _CAP_PBC))
@@ -255,7 +255,7 @@ _vcd_pbc_max_lid (const VcdObj *obj)
   uint16_t retval = 0;
   
   if (_vcd_pbc_available (obj))
-    retval = _vcd_list_length (obj->pbc_list);
+    retval = _cdio_list_length (obj->pbc_list);
 
   return retval;
 }
@@ -273,12 +273,12 @@ _vcd_pbc_node_length (const VcdObj *obj, const pbc_t *_pbc, bool extended)
       int n;
 
     case PBC_PLAYLIST:
-      n = _vcd_list_length (_pbc->item_id_list);
+      n = _cdio_list_length (_pbc->item_id_list);
       retval = __cd_offsetof (_PsdPlayListDescriptor, itemid[n]);
       break;
 
     case PBC_SELECTION:
-      n = _vcd_list_length (_pbc->select_id_list);
+      n = _cdio_list_length (_pbc->select_id_list);
 
       retval = __cd_offsetof (PsdSelectionListDescriptor_t, ofs[n]);
 
@@ -301,7 +301,7 @@ _vcd_pbc_node_length (const VcdObj *obj, const pbc_t *_pbc, bool extended)
 static uint16_t 
 _lookup_psd_offset (const VcdObj *obj, const char item_id[], bool extended)
 {
-  VcdListNode *node;
+  CdioListNode *node;
 
   if (extended)
     vcd_assert (_vcd_obj_has_cap_p (obj, _CAP_PBC_X));
@@ -310,9 +310,9 @@ _lookup_psd_offset (const VcdObj *obj, const char item_id[], bool extended)
   if (!item_id)
     return PSD_OFS_DISABLED;
 
-  _VCD_LIST_FOREACH (node, obj->pbc_list)
+  _CDIO_LIST_FOREACH (node, obj->pbc_list)
     {
-      pbc_t *_pbc = _vcd_list_node_data (node);
+      pbc_t *_pbc = _cdio_list_node_data (node);
 
       if (!_pbc->id || strcmp (item_id, _pbc->id))
 	continue;
@@ -368,15 +368,15 @@ _vcd_pbc_mark_id (const VcdObj *obj, const char _id[])
     {
     case PBC_PLAYLIST:
       {
-	VcdListNode *node;
+	CdioListNode *node;
 	
 	_vcd_pbc_mark_id (obj, _pbc->prev_id);
 	_vcd_pbc_mark_id (obj, _pbc->next_id);
 	_vcd_pbc_mark_id (obj, _pbc->retn_id);
 
-	_VCD_LIST_FOREACH (node, _pbc->item_id_list)
+	_CDIO_LIST_FOREACH (node, _pbc->item_id_list)
 	  {
-	    const char *_id = _vcd_list_node_data (node);
+	    const char *_id = _cdio_list_node_data (node);
 
 	    _vcd_pin_mark_id (obj, _id);
 	  }
@@ -385,7 +385,7 @@ _vcd_pbc_mark_id (const VcdObj *obj, const char _id[])
 
     case PBC_SELECTION:
       {
-	VcdListNode *node;
+	CdioListNode *node;
 
 	_vcd_pbc_mark_id (obj, _pbc->prev_id);
 	_vcd_pbc_mark_id (obj, _pbc->next_id);
@@ -398,9 +398,9 @@ _vcd_pbc_mark_id (const VcdObj *obj, const char _id[])
 
 	_vcd_pin_mark_id (obj, _pbc->item_id);
 
-	_VCD_LIST_FOREACH (node, _pbc->select_id_list)
+	_CDIO_LIST_FOREACH (node, _pbc->select_id_list)
 	  {
-	    const char *_id = _vcd_list_node_data (node);
+	    const char *_id = _cdio_list_node_data (node);
 
 	    _vcd_pbc_mark_id (obj, _id);
 	  }
@@ -420,36 +420,36 @@ _vcd_pbc_mark_id (const VcdObj *obj, const char _id[])
 void
 _vcd_pbc_check_unreferenced (const VcdObj *obj)
 {
-  VcdListNode *node;
+  CdioListNode *node;
 
   /* clear all flags */
 
-  _VCD_LIST_FOREACH (node, obj->pbc_list)
+  _CDIO_LIST_FOREACH (node, obj->pbc_list)
     {
-      pbc_t *_pbc = _vcd_list_node_data (node);
+      pbc_t *_pbc = _cdio_list_node_data (node);
 
       _pbc->referenced = false;
     }
 
-  _VCD_LIST_FOREACH (node, obj->mpeg_sequence_list)
+  _CDIO_LIST_FOREACH (node, obj->mpeg_sequence_list)
     {
-      mpeg_sequence_t *_sequence = _vcd_list_node_data (node);
+      mpeg_sequence_t *_sequence = _cdio_list_node_data (node);
 
       _sequence->referenced = false;
     }
 
-  _VCD_LIST_FOREACH (node, obj->mpeg_segment_list)
+  _CDIO_LIST_FOREACH (node, obj->mpeg_segment_list)
     {
-      mpeg_segment_t *_segment = _vcd_list_node_data (node);
+      mpeg_segment_t *_segment = _cdio_list_node_data (node);
 
       _segment->referenced = false;
     }
 
   /* start from non-rejected lists */
 
-  _VCD_LIST_FOREACH (node, obj->pbc_list)
+  _CDIO_LIST_FOREACH (node, obj->pbc_list)
     {
-      pbc_t *_pbc = _vcd_list_node_data (node);
+      pbc_t *_pbc = _cdio_list_node_data (node);
 
       vcd_assert (_pbc->id != NULL);
 
@@ -461,25 +461,25 @@ _vcd_pbc_check_unreferenced (const VcdObj *obj)
 
   /* collect flags */
 
-  _VCD_LIST_FOREACH (node, obj->pbc_list)
+  _CDIO_LIST_FOREACH (node, obj->pbc_list)
     {
-      pbc_t *_pbc = _vcd_list_node_data (node);
+      pbc_t *_pbc = _cdio_list_node_data (node);
 
       if (!_pbc->referenced)
 	vcd_warn ("PSD item '%s' is unreachable", _pbc->id);
     }
 
-  _VCD_LIST_FOREACH (node, obj->mpeg_sequence_list)
+  _CDIO_LIST_FOREACH (node, obj->mpeg_sequence_list)
     {
-      mpeg_sequence_t *_sequence = _vcd_list_node_data (node);
+      mpeg_sequence_t *_sequence = _cdio_list_node_data (node);
 
       if (!_sequence->referenced)
 	vcd_warn ("sequence '%s' is not reachable by PBC", _sequence->id);
     }
 
-  _VCD_LIST_FOREACH (node, obj->mpeg_segment_list)
+  _CDIO_LIST_FOREACH (node, obj->mpeg_segment_list)
     {
-      mpeg_segment_t *_segment = _vcd_list_node_data (node);
+      mpeg_segment_t *_segment = _cdio_list_node_data (node);
 
       if (!_segment->referenced)
 	vcd_warn ("segment item '%s' is unreachable", _segment->id);
@@ -503,11 +503,11 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
     case PBC_PLAYLIST:
       {
 	_PsdPlayListDescriptor *_md = buf;
-	VcdListNode *node;
+	CdioListNode *node;
 	int n;
 	
 	_md->type = PSD_TYPE_PLAY_LIST;
-	_md->noi = _vcd_list_length (_pbc->item_id_list);
+	_md->noi = _cdio_list_length (_pbc->item_id_list);
 	
 	vcd_assert (_pbc->lid < 0x8000);
 	_md->lid = uint16_to_be (_pbc->lid | (_pbc->rejected ? 0x8000 : 0));
@@ -523,9 +523,9 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 	_md->atime = _wtime (_pbc->auto_pause_time);
 	
 	n = 0;
-	_VCD_LIST_FOREACH (node, _pbc->item_id_list)
+	_CDIO_LIST_FOREACH (node, _pbc->item_id_list)
 	  {
-	    const char *_id = _vcd_list_node_data (node);
+	    const char *_id = _cdio_list_node_data (node);
 	    uint16_t _pin;
 
 	    if (_id)
@@ -549,7 +549,7 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
       {
 	PsdSelectionListDescriptor_t *_md = buf;
 
-	const unsigned int _nos = _vcd_list_length (_pbc->select_id_list);
+	const unsigned int _nos = _cdio_list_length (_pbc->select_id_list);
 
 	if (extended)
 	  _md->type = PSD_TYPE_EXT_SELECTION_LIST;
@@ -677,7 +677,8 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 	      if ((_seq = _vcd_obj_get_sequence_by_id ((VcdObj *) obj, _pbc->item_id))
 		  || (_seq = _vcd_obj_get_sequence_by_entry_id ((VcdObj *) obj, _pbc->item_id)))
 		{
-		  const unsigned _entries = _vcd_list_length (_seq->entry_list) + 1;
+		  const unsigned _entries = 
+		    _cdio_list_length (_seq->entry_list) + 1;
 
 		  if (_nos != _entries)
 		    vcd_error ("selection '%s': number of entrypoints"
@@ -700,13 +701,13 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 
 	/* fill selection array */
 	{
-	  VcdListNode *node = NULL;
+	  CdioListNode *node = NULL;
 	  int idx = 0;
 
 	  idx = 0;
-	  _VCD_LIST_FOREACH (node, _pbc->select_id_list)
+	  _CDIO_LIST_FOREACH (node, _pbc->select_id_list)
 	    {
-	      const char *_id = _vcd_list_node_data (node);
+	      const char *_id = _cdio_list_node_data (node);
 	    
 	      _md->ofs[idx] = 
 		uint16_to_be (_lookup_psd_offset (obj, _id, extended));
@@ -718,7 +719,7 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 	if (extended || _vcd_obj_has_cap_p (obj, _CAP_4C_SVCD))
 	  {
 	    PsdSelectionListDescriptorExtended *_md2;
-	    VcdListNode *node;
+	    CdioListNode *node;
 	    int n;
 	    
 	    /* append extended selection areas */
@@ -733,9 +734,9 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 
 	    n = 0;
 	    if (_pbc->select_area_list)
-	      _VCD_LIST_FOREACH (node, _pbc->select_area_list)
+	      _CDIO_LIST_FOREACH (node, _pbc->select_area_list)
 	      {
-		const pbc_area_t *_area = _vcd_list_node_data (node);
+		const pbc_area_t *_area = _cdio_list_node_data (node);
 
 		_set_area_helper (&_md2->area[n], _area, _pbc->id);
 
@@ -810,12 +811,12 @@ vcd_pbc_new (enum pbc_type_t type)
   switch (type)
     {
     case PBC_PLAYLIST:
-      _pbc->item_id_list = _vcd_list_new ();
+      _pbc->item_id_list = _cdio_list_new ();
       break;
 
     case PBC_SELECTION:
-      _pbc->select_id_list = _vcd_list_new ();
-      _pbc->select_area_list = _vcd_list_new ();
+      _pbc->select_id_list = _cdio_list_new ();
+      _pbc->select_area_list = _cdio_list_new ();
       break;
       
     case PBC_END:
@@ -835,14 +836,14 @@ vcd_pbc_new (enum pbc_type_t type)
 bool
 _vcd_pbc_finalize (VcdObj *obj)
 {
-  VcdListNode *node;
+  CdioListNode *node;
   unsigned offset = 0, offset_ext = 0;
   unsigned lid;
 
   lid = 1;
-  _VCD_LIST_FOREACH (node, obj->pbc_list)
+  _CDIO_LIST_FOREACH (node, obj->pbc_list)
     {
-      pbc_t *_pbc = _vcd_list_node_data (node);
+      pbc_t *_pbc = _cdio_list_node_data (node);
       unsigned length, length_ext = 0;
 
       length = _vcd_pbc_node_length (obj, _pbc, false);

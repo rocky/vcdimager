@@ -96,8 +96,8 @@ _init_segments (vcdinfo_obj_t *obj)
 {
   InfoVcd_t *info = vcdinfo_get_infoVcd(obj);
   segnum_t num_segments = vcdinfo_get_num_segments(obj);
-  VcdListNode *entnode;
-  VcdList *entlist;
+  CdioListNode *entnode;
+  CdioList *entlist;
   int i;
   lsn_t last_lsn=0;
   
@@ -109,8 +109,8 @@ _init_segments (vcdinfo_obj_t *obj)
   entlist = iso9660_fs_readdir(obj->img, "SEGMENT", true);
 
   i=0;
-  _VCD_LIST_FOREACH (entnode, entlist) {
-    iso9660_stat_t *statbuf = _vcd_list_node_data (entnode);
+  _CDIO_LIST_FOREACH (entnode, entlist) {
+    iso9660_stat_t *statbuf = _cdio_list_node_data (entnode);
 
     if (statbuf->type == _STAT_DIR) continue;
 
@@ -141,7 +141,7 @@ _init_segments (vcdinfo_obj_t *obj)
     vcd_warn ("Number of segments found %d is not number of segments %d", 
               i, num_segments);
 
-  _vcd_list_free (entlist, true);
+  _cdio_list_free (entlist, true);
 
   
 #if 0
@@ -922,8 +922,8 @@ vcdinfo_lid_get_offset(const vcdinfo_obj_t *obj, lid_t lid,
 static vcdinfo_offset_t *
 _vcdinfo_get_offset_t (const vcdinfo_obj_t *obj, unsigned int offset, bool ext)
 {
-  VcdListNode *node;
-  VcdList *offset_list = ext ? obj->offset_x_list : obj->offset_list;
+  CdioListNode *node;
+  CdioList *offset_list = ext ? obj->offset_x_list : obj->offset_list;
 
   switch (offset) {
   case PSD_OFS_DISABLED:
@@ -933,9 +933,9 @@ _vcdinfo_get_offset_t (const vcdinfo_obj_t *obj, unsigned int offset, bool ext)
   default: ;
   }
   
-  _VCD_LIST_FOREACH (node, offset_list)
+  _CDIO_LIST_FOREACH (node, offset_list)
     {
-      vcdinfo_offset_t *ofs = _vcd_list_node_data (node);
+      vcdinfo_offset_t *ofs = _cdio_list_node_data (node);
       if (offset == ofs->offset)
         return ofs;
     }
@@ -945,7 +945,7 @@ _vcdinfo_get_offset_t (const vcdinfo_obj_t *obj, unsigned int offset, bool ext)
 /*!
   Get the VCD info list.
 */
-VcdList *
+CdioList *
 vcdinfo_get_offset_list(const vcdinfo_obj_t *obj)
 {
   if (NULL == obj) return NULL;
@@ -956,7 +956,7 @@ vcdinfo_get_offset_list(const vcdinfo_obj_t *obj)
 /*!
   Get the VCD info extended offset list.
 */
-VcdList *
+CdioList *
 vcdinfo_get_offset_x_list(const vcdinfo_obj_t *obj)
 {
   if (NULL == obj) return NULL;
@@ -1055,16 +1055,16 @@ static bool
 _vcdinfo_lid_get_pxd(const vcdinfo_obj_t *obj, PsdListDescriptor_t *pxd,
                      uint16_t lid, bool ext) 
 {
-  VcdListNode *node;
+  CdioListNode *node;
   unsigned mult = obj->info.offset_mult;
   const uint8_t *psd = ext ? obj->psd_x : obj->psd;
-  VcdList *offset_list = ext ? obj->offset_x_list : obj->offset_list;
+  CdioList *offset_list = ext ? obj->offset_x_list : obj->offset_list;
 
   if (offset_list == NULL) return false;
   
-  _VCD_LIST_FOREACH (node, offset_list)
+  _CDIO_LIST_FOREACH (node, offset_list)
     {
-      vcdinfo_offset_t *ofs = _vcd_list_node_data (node);
+      vcdinfo_offset_t *ofs = _cdio_list_node_data (node);
       unsigned _rofs = ofs->offset * mult;
 
       pxd->descriptor_type = psd[_rofs];
@@ -1698,10 +1698,10 @@ vcdinfo_visit_lot (vcdinfo_obj_t *obj, bool extended)
 
   ret = vcdinf_visit_lot(&pbc_ctx);
   if (NULL != obj->offset_x_list) 
-    _vcd_list_free(obj->offset_x_list, true);
+    _cdio_list_free(obj->offset_x_list, true);
   obj->offset_x_list = pbc_ctx.offset_x_list;
   if (NULL != obj->offset_list) 
-    _vcd_list_free(obj->offset_list, true);
+    _cdio_list_free(obj->offset_list, true);
   obj->offset_list   = pbc_ctx.offset_list;
   return ret;
 }
@@ -2017,9 +2017,9 @@ vcdinfo_close(vcdinfo_obj_t *obj)
 {
   if (obj != NULL) {
     if (obj->offset_list != NULL) 
-      _vcd_list_free(obj->offset_list, true);
+      _cdio_list_free(obj->offset_list, true);
     if (obj->offset_x_list != NULL) 
-      _vcd_list_free(obj->offset_x_list, true);
+      _cdio_list_free(obj->offset_x_list, true);
     free(obj->seg_sizes);
     free(obj->lot);
     free(obj->lot_x);

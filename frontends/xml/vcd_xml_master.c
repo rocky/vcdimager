@@ -67,7 +67,7 @@ bool vcd_xml_master (const struct vcdxml_t *obj, VcdImageSink *image_sink,
 		     time_t *create_time)
 {
   VcdObj *_vcd;
-  VcdListNode *node;
+  CdioListNode *node;
   int idx;
   bool _relaxed_aps = false;
   bool _update_scan_offsets = false;
@@ -98,9 +98,9 @@ bool vcd_xml_master (const struct vcdxml_t *obj, VcdImageSink *image_sink,
   if (obj->pvd.application_id)
     vcd_obj_set_param_str (_vcd, VCD_PARM_APPLICATION_ID, obj->pvd.application_id);
 
-  _VCD_LIST_FOREACH (node, obj->option_list)
+  _CDIO_LIST_FOREACH (node, obj->option_list)
     {
-      const struct option_t *_option = _vcd_list_node_data (node);
+      const struct option_t *_option = _cdio_list_node_data (node);
 
       struct {
 	const char *str;
@@ -194,18 +194,18 @@ bool vcd_xml_master (const struct vcdxml_t *obj, VcdImageSink *image_sink,
 	}
     }  
 
-  _VCD_LIST_FOREACH (node, obj->pbc_list)
+  _CDIO_LIST_FOREACH (node, obj->pbc_list)
     {
-      pbc_t *_pbc = _vcd_list_node_data (node);
+      pbc_t *_pbc = _cdio_list_node_data (node);
 
       vcd_debug ("adding pbc (%s/%d)", _pbc->id, _pbc->type);
 
       vcd_obj_append_pbc_node (_vcd, _pbc);
     }
 
-  _VCD_LIST_FOREACH (node, obj->filesystem)
+  _CDIO_LIST_FOREACH (node, obj->filesystem)
     {
-      struct filesystem_t *dentry = _vcd_list_node_data (node);
+      struct filesystem_t *dentry = _cdio_list_node_data (node);
       
       if (dentry->file_src) 
 	{
@@ -221,11 +221,11 @@ bool vcd_xml_master (const struct vcdxml_t *obj, VcdImageSink *image_sink,
     }
 
   idx = 0;
-  _VCD_LIST_FOREACH (node, obj->segment_list)
+  _CDIO_LIST_FOREACH (node, obj->segment_list)
     {
-      struct segment_t *segment = _vcd_list_node_data (node);
+      struct segment_t *segment = _cdio_list_node_data (node);
       VcdDataSource *_source = mk_dsource (obj->file_prefix, segment->src);
-      VcdListNode *node2;
+      CdioListNode *node2;
       VcdMpegSource *_mpeg_src;
 
       vcd_debug ("adding segment #%d, %s", idx, segment->src);
@@ -240,9 +240,9 @@ bool vcd_xml_master (const struct vcdxml_t *obj, VcdImageSink *image_sink,
 
       vcd_obj_append_segment_play_item (_vcd, _mpeg_src, segment->id);
       
-      _VCD_LIST_FOREACH (node2, segment->autopause_list)
+      _CDIO_LIST_FOREACH (node2, segment->autopause_list)
 	{
-	  double *_ap_ts = _vcd_list_node_data (node2);
+	  double *_ap_ts = _cdio_list_node_data (node2);
 
 	  vcd_obj_add_segment_pause (_vcd, segment->id, *_ap_ts, NULL);
 	}
@@ -250,14 +250,14 @@ bool vcd_xml_master (const struct vcdxml_t *obj, VcdImageSink *image_sink,
       idx++;
     }
 
-  vcd_debug ("sequence count %d", _vcd_list_length (obj->sequence_list));
+  vcd_debug ("sequence count %d", _cdio_list_length (obj->sequence_list));
   
   idx = 0;
-  _VCD_LIST_FOREACH (node, obj->sequence_list)
+  _CDIO_LIST_FOREACH (node, obj->sequence_list)
     {
-      struct sequence_t *sequence = _vcd_list_node_data (node);
+      struct sequence_t *sequence = _cdio_list_node_data (node);
       VcdDataSource *data_source;
-      VcdListNode *node2;
+      CdioListNode *node2;
       VcdMpegSource *_mpeg_src;
 
       vcd_debug ("adding sequence #%d, %s", idx, sequence->src);
@@ -274,16 +274,16 @@ bool vcd_xml_master (const struct vcdxml_t *obj, VcdImageSink *image_sink,
       vcd_obj_append_sequence_play_item (_vcd, _mpeg_src,
 					 sequence->id, sequence->default_entry_id);
 
-      _VCD_LIST_FOREACH (node2, sequence->entry_point_list)
+      _CDIO_LIST_FOREACH (node2, sequence->entry_point_list)
 	{
-	  struct entry_point_t *entry = _vcd_list_node_data (node2);
+	  struct entry_point_t *entry = _cdio_list_node_data (node2);
 
 	  vcd_obj_add_sequence_entry (_vcd, sequence->id, entry->timestamp, entry->id);
 	}
 
-      _VCD_LIST_FOREACH (node2, sequence->autopause_list)
+      _CDIO_LIST_FOREACH (node2, sequence->autopause_list)
 	{
-	  double *_ap_ts = _vcd_list_node_data (node2);
+	  double *_ap_ts = _cdio_list_node_data (node2);
 
 	  vcd_obj_add_sequence_pause (_vcd, sequence->id, *_ap_ts, NULL);
 	}

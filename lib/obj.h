@@ -48,10 +48,10 @@ typedef struct {
   char *id;
   const struct vcd_mpeg_stream_info *info;
 
-  VcdList *pause_list; /* pause_t */
+  CdioList *pause_list; /* pause_t */
 
   char *default_entry_id;
-  VcdList *entry_list; /* entry_t */
+  CdioList *entry_list; /* entry_t */
 
   /* pbc ref check */
   bool referenced;
@@ -69,7 +69,7 @@ typedef struct {
   char *id;
   const struct vcd_mpeg_stream_info *info;
 
-  VcdList *pause_list; /* pause_t */
+  CdioList *pause_list; /* pause_t */
 
   /* pbc ref check */
   bool referenced;
@@ -128,25 +128,25 @@ struct _VcdObj {
 
   /* input */
   unsigned mpeg_segment_start_extent;
-  VcdList *mpeg_segment_list; /* mpeg_segment_t */
+  CdioList *mpeg_segment_list; /* mpeg_segment_t */
 
-  VcdList *mpeg_sequence_list; /* mpeg_sequence_t */
+  CdioList *mpeg_sequence_list; /* mpeg_sequence_t */
 
   unsigned relative_end_extent; /* last mpeg sequence track end extent */
 
   /* PBC */
-  VcdList *pbc_list; /* pbc_t */
+  CdioList *pbc_list; /* pbc_t */
   unsigned psd_size;
   unsigned psdx_size;
 
   /* custom files */
   unsigned ext_file_start_extent; 
   unsigned custom_file_start_extent; 
-  VcdList *custom_file_list; /* custom_file_t */
-  VcdList *custom_dir_list; /* char */
+  CdioList *custom_file_list; /* custom_file_t */
+  CdioList *custom_dir_list; /* char */
 
   /* dictionary */
-  VcdList *buffer_dict_list;
+  CdioList *buffer_dict_list;
 
   /* aggregates */
   VcdSalloc *iso_bitmap;

@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2000, 2004 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -58,7 +58,7 @@ _dict_insert (VcdObj *obj, const char key[], uint32_t sector, uint32_t length,
   _new_node->buf = _vcd_malloc (length * ISO_BLOCKSIZE);
   _new_node->flags = end_flags;
 
-  _vcd_list_prepend (obj->buffer_dict_list, _new_node);
+  _cdio_list_prepend (obj->buffer_dict_list, _new_node);
 }
 
 static 
@@ -82,17 +82,17 @@ int _dict_sector_cmp (struct _dict_t *a, uint32_t *b)
 static const struct _dict_t *
 _dict_get_bykey (VcdObj *obj, const char key[])
 {
-  VcdListNode *node;
+  CdioListNode *node;
 
   vcd_assert (obj != NULL);
   vcd_assert (key != NULL);
 
-  node = _vcd_list_find (obj->buffer_dict_list,
-                         (_vcd_list_iterfunc) _dict_key_cmp,
-                         (char *) key);
+  node = _cdio_list_find (obj->buffer_dict_list,
+			  (_cdio_list_iterfunc) _dict_key_cmp,
+			  (char *) key);
   
   if (node)
-    return _vcd_list_node_data (node);
+    return _cdio_list_node_data (node);
 
   return NULL;
 }
@@ -100,17 +100,17 @@ _dict_get_bykey (VcdObj *obj, const char key[])
 static const struct _dict_t *
 _dict_get_bysector (VcdObj *obj, uint32_t sector)
 {
-  VcdListNode *node;
+  CdioListNode *node;
 
   vcd_assert (obj != NULL);
   vcd_assert (sector != SECTOR_NIL);
 
-  node = _vcd_list_find (obj->buffer_dict_list, 
-                         (_vcd_list_iterfunc) _dict_sector_cmp, 
-                         &sector);
+  node = _cdio_list_find (obj->buffer_dict_list, 
+			  (_cdio_list_iterfunc) _dict_sector_cmp, 
+			  &sector);
 
   if (node)
-    return _vcd_list_node_data (node);
+    return _cdio_list_node_data (node);
 
   return NULL;
 }
@@ -149,16 +149,16 @@ _dict_get_sector (VcdObj *obj, uint32_t sector)
 static void
 _dict_clean (VcdObj *obj)
 {
-  VcdListNode *node;
+  CdioListNode *node;
 
-  while ((node = _vcd_list_begin (obj->buffer_dict_list)))
+  while ((node = _cdio_list_begin (obj->buffer_dict_list)))
     {
-      struct _dict_t *p = _vcd_list_node_data (node);
+      struct _dict_t *p = _cdio_list_node_data (node);
 
       free (p->key);
       free (p->buf);
 
-      _vcd_list_node_free (node, true);
+      _cdio_list_node_free (node, true);
     }
 }
 

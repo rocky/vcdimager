@@ -266,12 +266,12 @@ dump_lot (const vcdinfo_obj_t *obj, bool ext)
 static void
 dump_psd (const vcdinfo_obj_t *obj, bool ext)
 {
-  VcdListNode *node;
+  CdioListNode *node;
   unsigned n = 0;
   unsigned int mult = vcdinfo_get_offset_mult(obj);
   const uint8_t *psd = ext 
     ? vcdinfo_get_psd_x(obj) : vcdinfo_get_psd(obj);
-  VcdList *offset_list = ext 
+  CdioList *offset_list = ext 
     ? vcdinfo_get_offset_x_list(obj) : vcdinfo_get_offset_list(obj);
 
   fprintf (stdout, 
@@ -280,9 +280,9 @@ dump_psd (const vcdinfo_obj_t *obj, bool ext)
            ? "SVCD/PSD.SVD\n"
            : (ext ? "EXT/PSD_X.VCD\n": "VCD/PSD.VCD\n"));
 
-  _VCD_LIST_FOREACH (node, offset_list)
+  _CDIO_LIST_FOREACH (node, offset_list)
     {
-      vcdinfo_offset_t *ofs = _vcd_list_node_data (node);
+      vcdinfo_offset_t *ofs = _cdio_list_node_data (node);
       unsigned _rofs = ofs->offset * mult;
 
       uint8_t type;
@@ -897,9 +897,9 @@ dump_search_dat (vcdinfo_obj_t *obj)
 static void
 _dump_fs_recurse (const vcdinfo_obj_t *obj, const char pathname[])
 {
-  VcdList *entlist;
-  VcdList *dirlist =  _vcd_list_new ();
-  VcdListNode *entnode;
+  CdioList *entlist;
+  CdioList *dirlist =  _cdio_list_new ();
+  CdioListNode *entnode;
   CdIo *cdio = vcdinfo_get_cd_image(obj);
 
   entlist = iso9660_fs_readdir (cdio, pathname, true);
@@ -910,9 +910,9 @@ _dump_fs_recurse (const vcdinfo_obj_t *obj, const char pathname[])
 
   /* just iterate */
   
-  _VCD_LIST_FOREACH (entnode, entlist)
+  _CDIO_LIST_FOREACH (entnode, entlist)
     {
-      iso9660_stat_t *statbuf = _vcd_list_node_data (entnode);
+      iso9660_stat_t *statbuf = _cdio_list_node_data (entnode);
       char *_name = statbuf->filename;
       char _fullname[4096] = { 0, };
 
@@ -923,7 +923,7 @@ _dump_fs_recurse (const vcdinfo_obj_t *obj, const char pathname[])
       if (statbuf->type == _STAT_DIR
           && strcmp (_name, ".") 
           && strcmp (_name, ".."))
-        _vcd_list_append (dirlist, strdup (_fullname));
+        _cdio_list_append (dirlist, strdup (_fullname));
 
       fprintf (stdout, 
                "  %c %s %d %d [fn %.2d] [LSN %6lu] ",
@@ -945,20 +945,20 @@ _dump_fs_recurse (const vcdinfo_obj_t *obj, const char pathname[])
 
     }
 
-  _vcd_list_free (entlist, true);
+  _cdio_list_free (entlist, true);
 
   fprintf (stdout, "\n");
 
   /* now recurse */
 
-  _VCD_LIST_FOREACH (entnode, dirlist)
+  _CDIO_LIST_FOREACH (entnode, dirlist)
     {
-      char *_fullname = _vcd_list_node_data (entnode);
+      char *_fullname = _cdio_list_node_data (entnode);
 
       _dump_fs_recurse (obj, _fullname);
     }
 
-  _vcd_list_free (dirlist, true);
+  _cdio_list_free (dirlist, true);
 }
 
 static void

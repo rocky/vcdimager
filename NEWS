@@ -7,6 +7,9 @@ version 0.7.21 (unstable/development)
 
 * More libcdio things moved into libcdio (e.g. MSF printing, 
   iso9660 PVD handling)
+* use generic list things from libcdio. Eventually everything will
+  use glib. But this moves in the right direction by consolidating code 
+  a little
 * add --without-versioned-libs option
 * Fix bug in vcd-info showing sequence number
 * make -mno-cygwin work

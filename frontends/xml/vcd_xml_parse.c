@@ -134,7 +134,7 @@ _parse_option (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns
       GET_PROP_STR (_option->name, "name", doc, node, ns);
       GET_PROP_STR (_option->value, "value", doc, node, ns);
 
-      _vcd_list_append (obj->option_list, _option);
+      _cdio_list_append (obj->option_list, _option);
     }
   else
     vcd_assert_not_reached ();
@@ -208,14 +208,14 @@ _parse_mpeg_segment (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNs
 
   segment = _vcd_malloc (sizeof (struct segment_t));
 
-  _vcd_list_append (obj->segment_list, segment);
+  _cdio_list_append (obj->segment_list, segment);
 
   GET_PROP_STR (segment->id, "id", doc, node, ns);
   segment->src = vcd_xml_utf8_to_filename ((unsigned char *)segment->src); // memleak
   GET_PROP_STR (segment->src, "src", doc, node, ns);
   segment->src = vcd_xml_utf8_to_filename ((unsigned char *)segment->src); // memleak
 
-  segment->autopause_list = _vcd_list_new ();
+  segment->autopause_list = _cdio_list_new ();
 
   FOR_EACH (cur, node)
     {
@@ -229,7 +229,7 @@ _parse_mpeg_segment (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNs
 	  
 	  GET_ELEM_DOUBLE (*_ap_ts, "auto-pause", doc, cur, ns);
 
-	  _vcd_list_append (segment->autopause_list, _ap_ts);
+	  _cdio_list_append (segment->autopause_list, _ap_ts);
 	}
       else
 	vcd_assert_not_reached ();
@@ -390,13 +390,13 @@ _parse_pbc_selection (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlN
 
 	  GET_PROP_STR (_select_ref, "ref", doc, cur, ns); 
 
-	  _vcd_list_append (_pbc->select_id_list, _select_ref);
+	  _cdio_list_append (_pbc->select_id_list, _select_ref);
 
 	  {
 	    pbc_area_t *_area = NULL;
 
 	    _get_area_props (&_area, doc, cur, ns);
-	    _vcd_list_append (_pbc->select_area_list, _area);
+	    _cdio_list_append (_pbc->select_area_list, _area);
 	  }
 	  
 	}
@@ -404,7 +404,7 @@ _parse_pbc_selection (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlN
 	vcd_assert_not_reached ();
     }
 
-  _vcd_list_append (obj->pbc_list, _pbc);
+  _cdio_list_append (obj->pbc_list, _pbc);
 
   return false;
 }
@@ -442,13 +442,13 @@ _parse_pbc_playlist (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNs
 
 	  GET_PROP_STR (_item_ref, "ref", doc, cur, ns); 
 
-	  _vcd_list_append (_pbc->item_id_list, _item_ref);
+	  _cdio_list_append (_pbc->item_id_list, _item_ref);
 	}
       else
 	vcd_assert_not_reached ();
     }
 
-  _vcd_list_append (obj->pbc_list, _pbc);
+  _cdio_list_append (obj->pbc_list, _pbc);
 
   return false;
 }
@@ -476,7 +476,7 @@ _parse_pbc_endlist (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsP
 	vcd_assert_not_reached ();
     }
 
-  _vcd_list_append (obj->pbc_list, _pbc);
+  _cdio_list_append (obj->pbc_list, _pbc);
 
   return false;
 }
@@ -521,15 +521,15 @@ _parse_mpeg_sequence (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlN
 
   sequence = _vcd_malloc (sizeof (struct sequence_t));
 
-  _vcd_list_append (obj->sequence_list, sequence);
+  _cdio_list_append (obj->sequence_list, sequence);
 
   GET_PROP_STR (sequence->id, "id", doc, node, ns);
   sequence->src = vcd_xml_utf8_to_filename ((unsigned char *)sequence->src); // memleak
   GET_PROP_STR (sequence->src, "src", doc, node, ns);
   sequence->src = vcd_xml_utf8_to_filename ((unsigned char *)sequence->src); // memleak
 
-  sequence->entry_point_list = _vcd_list_new ();
-  sequence->autopause_list = _vcd_list_new ();
+  sequence->entry_point_list = _cdio_list_new ();
+  sequence->autopause_list = _cdio_list_new ();
 
   FOR_EACH (cur, node)
     {
@@ -547,7 +547,7 @@ _parse_mpeg_sequence (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlN
 	  GET_PROP_STR (entry->id, "id", doc, cur, ns);
 	  GET_ELEM_DOUBLE (entry->timestamp, "entry", doc, cur, ns);
 
-	  _vcd_list_append (sequence->entry_point_list, entry);
+	  _cdio_list_append (sequence->entry_point_list, entry);
 	}
       else if (!xmlStrcmp (cur->name, (const xmlChar *) "auto-pause"))
 	{
@@ -556,7 +556,7 @@ _parse_mpeg_sequence (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlN
 	  
 	  GET_ELEM_DOUBLE (*_ap_ts, "auto-pause", doc, cur, ns);
 
-	  _vcd_list_append (sequence->autopause_list, _ap_ts);
+	  _cdio_list_append (sequence->autopause_list, _ap_ts);
 	}
       else
 	vcd_assert_not_reached ();
@@ -638,7 +638,7 @@ _parse_file (struct vcdxml_t *obj, const char path[], xmlDocPtr doc, xmlNodePtr 
     _data->file_src = strdup (_src);
     _data->file_raw = (_format && !strcmp (_format, "mixed"));
 
-    _vcd_list_append (obj->filesystem, _data);
+    _cdio_list_append (obj->filesystem, _data);
   }
 
   return false;
@@ -680,7 +680,7 @@ _parse_folder (struct vcdxml_t *obj, const char path[], xmlDocPtr doc, xmlNodePt
 	    _data->name = strdup (new_path);
 	    _data->file_src = NULL;
 
-	    _vcd_list_append (obj->filesystem, _data);
+	    _cdio_list_append (obj->filesystem, _data);
 	  }
 	  
 

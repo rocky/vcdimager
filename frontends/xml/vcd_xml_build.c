@@ -132,7 +132,7 @@ static struct {
     IMG_TYPE_NRG
   } img_type;
 
-  VcdList *img_options;
+  CdioList *img_options;
 
   char *xml_fname;
   char *file_prefix;
@@ -162,7 +162,7 @@ _set_img_opt (const char key[], const char val[])
   _cons->key = strdup (key);
   _cons->val = strdup (val);
 
-  _vcd_list_append (gl.img_options, _cons);
+  _cdio_list_append (gl.img_options, _cons);
 }
 
 
@@ -357,7 +357,7 @@ static VcdImageSink *
 _create_sink (void)
 {
   VcdImageSink *image_sink = NULL;
-  VcdListNode *node;
+  CdioListNode *node;
 
   switch (gl.img_type)
     {
@@ -377,9 +377,9 @@ _create_sink (void)
   if (!image_sink)
     return image_sink;
 
-  _VCD_LIST_FOREACH (node, gl.img_options)
+  _CDIO_LIST_FOREACH (node, gl.img_options)
     {
-      struct key_val_t *_cons = _vcd_list_node_data (node);
+      struct key_val_t *_cons = _cdio_list_node_data (node);
       
       if (vcd_image_sink_set_arg (image_sink, _cons->key, _cons->val))
 	vcd_error ("error while setting image option '%s' (key='%s')", 
@@ -401,7 +401,7 @@ main (int argc, const char *argv[])
 
   vcd_xml_log_init ();
 
-  gl.img_options = _vcd_list_new ();
+  gl.img_options = _cdio_list_new ();
   gl.create_timestr = NULL;
 
   if (_do_cl (argc, argv))

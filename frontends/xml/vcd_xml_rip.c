@@ -82,7 +82,7 @@ _register_file (struct vcdxml_t *obj, const char *pathname,
 	{
 	  struct filesystem_t *_fs 
 	    = _vcd_malloc (sizeof (struct filesystem_t));
-	  _vcd_list_append (obj->filesystem, _fs);
+	  _cdio_list_append (obj->filesystem, _fs);
 	  
 	  _fs->name = strdup (pathname);
 	}
@@ -92,7 +92,7 @@ _register_file (struct vcdxml_t *obj, const char *pathname,
       {
 	char *namebuf = strdup (pathname);
 	struct filesystem_t *_fs = _vcd_malloc (sizeof (struct filesystem_t));
-	_vcd_list_append (obj->filesystem, _fs);
+	_cdio_list_append (obj->filesystem, _fs);
 
 	if (strrchr (namebuf, ';'))
 	  *strrchr (namebuf, ';') = '\0';
@@ -143,15 +143,15 @@ _register_file (struct vcdxml_t *obj, const char *pathname,
 static int
 _parse_isofs_r (struct vcdxml_t *obj, CdIo *img, const char pathname[])
 { 
-  VcdList *entlist = iso9660_fs_readdir (img, pathname, true);
-  VcdListNode *entnode;
+  CdioList *entlist = iso9660_fs_readdir (img, pathname, true);
+  CdioListNode *entnode;
 
   if (entlist == NULL)
     return -1;
 
-  _VCD_LIST_FOREACH (entnode, entlist)
+  _CDIO_LIST_FOREACH (entnode, entlist)
     {
-      iso9660_stat_t *statbuf = _vcd_list_node_data (entnode);
+      iso9660_stat_t *statbuf = _cdio_list_node_data (entnode);
       char _fullname[4096] = { 0, };
       char *_name = statbuf->filename;
 
@@ -182,7 +182,7 @@ _parse_isofs_r (struct vcdxml_t *obj, CdIo *img, const char pathname[])
       }
     }
 
-  _vcd_list_free (entlist, true);
+  _cdio_list_free (entlist, true);
 
   return 0;
 }
@@ -275,9 +275,9 @@ _parse_info (struct vcdxml_t *obj, CdIo *img)
 	    snprintf (buf, sizeof (buf), "item%4.4d.mpg", idx + 1);
 	    _segment->src = strdup (buf);
 
-	    _segment->autopause_list = _vcd_list_new ();
+	    _segment->autopause_list = _cdio_list_new ();
 
-	    _vcd_list_append (obj->segment_list, _segment);
+	    _cdio_list_append (obj->segment_list, _segment);
 	    n++;
 	  }
 
@@ -331,20 +331,20 @@ _parse_entries (struct vcdxml_t *obj, CdIo *img)
 	  snprintf (buf, sizeof (buf), "avseq%2.2d.mpg", track + 1);
 	  _new_sequence->src = strdup (buf);
 
-	  _new_sequence->entry_point_list = _vcd_list_new ();
-	  _new_sequence->autopause_list = _vcd_list_new ();
+	  _new_sequence->entry_point_list = _cdio_list_new ();
+	  _new_sequence->autopause_list = _cdio_list_new ();
 	  _new_sequence->start_extent = extent;
 
 	  snprintf (buf, sizeof (buf), "entry-%3.3d", idx);
 	  _new_sequence->default_entry_id = strdup (buf);
 	  
-	  _vcd_list_append (obj->sequence_list, _new_sequence);
+	  _cdio_list_append (obj->sequence_list, _new_sequence);
 	}
       else
 	{
 	  char buf[80];
 	  struct sequence_t *_seq =
-	    _vcd_list_node_data (_vcd_list_end (obj->sequence_list));
+	    _cdio_list_node_data (_cdio_list_end (obj->sequence_list));
 
 	  struct entry_point_t *_entry = _vcd_malloc (sizeof (struct entry_point_t));
 
@@ -353,7 +353,7 @@ _parse_entries (struct vcdxml_t *obj, CdIo *img)
 
 	  _entry->extent = extent;
 
-	  _vcd_list_append (_seq->entry_point_list, _entry);
+	  _cdio_list_append (_seq->entry_point_list, _entry);
 	}
 
       /* vcd_debug ("%d %d %d %d", idx, track, extent, newtrack); */
@@ -375,7 +375,7 @@ struct _pbc_ctx {
   unsigned psd_size;
   unsigned maximum_lid;
   unsigned offset_mult;
-  VcdList *offset_list;
+  CdioList *offset_list;
 
   uint8_t *psd;
   LotVcd_t *lot;
@@ -412,7 +412,7 @@ _pin2id (unsigned pin)
 static const char *
 _ofs2id (unsigned offset, const struct _pbc_ctx *_ctx)
 {
-  VcdListNode *node;
+  CdioListNode *node;
   static char buf[80];
   unsigned sl_num = 0, el_num = 0, pl_num = 0;
   vcdinfo_offset_t *ofs = NULL;
@@ -420,9 +420,9 @@ _ofs2id (unsigned offset, const struct _pbc_ctx *_ctx)
   if (offset == PSD_OFS_DISABLED)
     return NULL;
 
-  _VCD_LIST_FOREACH (node, _ctx->offset_list)
+  _CDIO_LIST_FOREACH (node, _ctx->offset_list)
     {
-      ofs = _vcd_list_node_data (node);
+      ofs = _cdio_list_node_data (node);
 	
       switch (ofs->type)
 	{
@@ -484,10 +484,10 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
   vcdinfo_offset_t *ofs = NULL;
 
   {
-    VcdListNode *node;
-    _VCD_LIST_FOREACH (node, _ctx->offset_list)
+    CdioListNode *node;
+    _CDIO_LIST_FOREACH (node, _ctx->offset_list)
       {
-	ofs = _vcd_list_node_data (node);
+	ofs = _cdio_list_node_data (node);
 
 	if (ofs->offset == offset)
 	  break;
@@ -515,7 +515,7 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
 	_pbc->auto_pause_time = vcdinf_get_autowait_time(d);
 
 	for (n = 0; n < vcdinf_pld_get_noi(d); n++) {
-	  _vcd_list_append (_pbc->item_id_list, 
+	  _cdio_list_append (_pbc->item_id_list, 
 			    _xstrdup(_pin2id(vcdinf_pld_get_play_item(d,n)
 					     )));
 	  }
@@ -568,7 +568,7 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
 
 	for (n = 0; n < vcdinf_get_num_selections(d); n++)
 	  {
-	    _vcd_list_append (_pbc->select_id_list, 
+	    _cdio_list_append (_pbc->select_id_list, 
 			      _xstrdup(_ofs2id(vcdinf_psd_get_offset(d,n),
 					       _ctx)));
 	  }
@@ -594,11 +594,11 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
 
 		*_area = d2->area[n];
 
-		_vcd_list_append (_pbc->select_area_list, _area);
+		_cdio_list_append (_pbc->select_area_list, _area);
 	      }
 
-	    vcd_assert (_vcd_list_length (_pbc->select_area_list) 
-			== _vcd_list_length (_pbc->select_id_list));
+	    vcd_assert (_cdio_list_length (_pbc->select_area_list) 
+			== _cdio_list_length (_pbc->select_id_list));
 	  }
       }
       break;
@@ -630,7 +630,7 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
 static void
 _visit_pbc (struct _pbc_ctx *obj, lid_t lid, unsigned int offset, bool in_lot)
 {
-  VcdListNode *node;
+  CdioListNode *node;
   vcdinfo_offset_t *ofs;
   unsigned _rofs = offset * obj->offset_mult;
 
@@ -660,11 +660,11 @@ _visit_pbc (struct _pbc_ctx *obj, lid_t lid, unsigned int offset, bool in_lot)
   vcd_assert (_rofs < obj->psd_size);
 
   if (!obj->offset_list)
-    obj->offset_list = _vcd_list_new ();
+    obj->offset_list = _cdio_list_new ();
 
-  _VCD_LIST_FOREACH (node, obj->offset_list)
+  _CDIO_LIST_FOREACH (node, obj->offset_list)
     {
-      ofs = _vcd_list_node_data (node);
+      ofs = _cdio_list_node_data (node);
 
       if (offset == ofs->offset)
         {
@@ -693,7 +693,7 @@ _visit_pbc (struct _pbc_ctx *obj, lid_t lid, unsigned int offset, bool in_lot)
   switch (ofs->type)
     {
     case PSD_TYPE_PLAY_LIST:
-      _vcd_list_append (obj->offset_list, ofs);
+      _cdio_list_append (obj->offset_list, ofs);
       {
         const PsdPlayListDescriptor_t *d = (const void *) (obj->psd + _rofs);
         const lid_t lid = vcdinf_pld_get_lid(d);
@@ -713,7 +713,7 @@ _visit_pbc (struct _pbc_ctx *obj, lid_t lid, unsigned int offset, bool in_lot)
 
     case PSD_TYPE_EXT_SELECTION_LIST:
     case PSD_TYPE_SELECTION_LIST:
-      _vcd_list_append (obj->offset_list, ofs);
+      _cdio_list_append (obj->offset_list, ofs);
       {
         const PsdSelectionListDescriptor_t *d =
           (const void *) (obj->psd + _rofs);
@@ -741,7 +741,7 @@ _visit_pbc (struct _pbc_ctx *obj, lid_t lid, unsigned int offset, bool in_lot)
       break;
 
     case PSD_TYPE_END_LIST:
-      _vcd_list_append (obj->offset_list, ofs);
+      _cdio_list_append (obj->offset_list, ofs);
       break;
 
     default:
@@ -762,7 +762,7 @@ _visit_lot (struct _pbc_ctx *obj)
     if ((tmp = vcdinf_get_lot_offset(lot, n)) != PSD_OFS_DISABLED)
       _visit_pbc (obj, n + 1, tmp, true);
 
-  _vcd_list_sort (obj->offset_list, (_vcd_list_cmp_func) vcdinf_lid_t_cmp);
+  _vcd_list_sort (obj->offset_list, (_cdio_list_cmp_func) vcdinf_lid_t_cmp);
 }
 
 static int
@@ -770,7 +770,7 @@ _parse_pbc (struct vcdxml_t *obj, CdIo *img, bool no_ext_psd)
 {
   int n;
   struct _pbc_ctx _pctx;
-  VcdListNode *node;
+  CdioListNode *node;
   bool extended = false;
   uint32_t _lot_vcd_sector = -1;
   uint32_t _psd_vcd_sector = -1;
@@ -821,7 +821,7 @@ _parse_pbc (struct vcdxml_t *obj, CdIo *img, bool no_ext_psd)
   _pctx.offset_mult = 8;
   _pctx.maximum_lid = obj->info.max_lid;
 
-  _pctx.offset_list = _vcd_list_new ();
+  _pctx.offset_list = _cdio_list_new ();
 
   /* read in LOT */
   
@@ -844,15 +844,15 @@ _parse_pbc (struct vcdxml_t *obj, CdIo *img, bool no_ext_psd)
 
   _visit_lot (&_pctx);
 
-  _VCD_LIST_FOREACH (node, _pctx.offset_list)
+  _CDIO_LIST_FOREACH (node, _pctx.offset_list)
     {
-      vcdinfo_offset_t *ofs = _vcd_list_node_data (node);
+      vcdinfo_offset_t *ofs = _cdio_list_node_data (node);
       pbc_t *_pbc;
 
       vcd_assert (ofs->offset != PSD_OFS_DISABLED);
       
       if ((_pbc = _pbc_node_read (&_pctx, ofs->offset)))
-	_vcd_list_append (obj->pbc_list, _pbc);
+	_cdio_list_append (obj->pbc_list, _pbc);
     }
 
   return 0;
@@ -861,11 +861,11 @@ _parse_pbc (struct vcdxml_t *obj, CdIo *img, bool no_ext_psd)
 static int
 _rip_isofs (struct vcdxml_t *obj, CdIo *img)
 {
-  VcdListNode *node;
+  CdioListNode *node;
   
-  _VCD_LIST_FOREACH (node, obj->filesystem)
+  _CDIO_LIST_FOREACH (node, obj->filesystem)
     {
-      struct filesystem_t *_fs = _vcd_list_node_data (node);
+      struct filesystem_t *_fs = _cdio_list_node_data (node);
       int idx;
       FILE *outfd;
       const int blocksize = _fs->file_raw ? M2RAW_SECTOR_SIZE : ISO_BLOCKSIZE;
@@ -917,16 +917,16 @@ _rip_isofs (struct vcdxml_t *obj, CdIo *img)
 static int
 _rip_segments (struct vcdxml_t *obj, CdIo *img)
 {
-  VcdListNode *node;
+  CdioListNode *node;
   lsn_t start_extent;
 
   start_extent = obj->info.segments_start;
 
   vcd_assert (start_extent % CDIO_CD_FRAMES_PER_SEC == 0);
 
-  _VCD_LIST_FOREACH (node, obj->segment_list)
+  _CDIO_LIST_FOREACH (node, obj->segment_list)
     {
-      struct segment_t *_seg = _vcd_list_node_data (node);
+      struct segment_t *_seg = _cdio_list_node_data (node);
       uint32_t n;
       FILE *outfd = NULL;
       VcdMpegStreamCtx mpeg_ctx;
@@ -986,7 +986,7 @@ _rip_segments (struct vcdxml_t *obj, CdIo *img)
 	      vcd_debug ("autopause @%u (%f)", (unsigned int) n, last_pts);
 	      *_ap_ts = last_pts;
 
-	      _vcd_list_append (_seg->autopause_list, _ap_ts);
+	      _cdio_list_append (_seg->autopause_list, _ap_ts);
 	    }
 
 	  fwrite (buf.data, M2F2_SECTOR_SIZE, 1, outfd);
@@ -1012,14 +1012,14 @@ _rip_segments (struct vcdxml_t *obj, CdIo *img)
 static int
 _rip_sequences (struct vcdxml_t *obj, CdIo *img, int tracknum)
 {
-  VcdListNode *node;
+  CdioListNode *node;
   int counter=1;
 
-  _VCD_LIST_FOREACH (node, obj->sequence_list)
+  _CDIO_LIST_FOREACH (node, obj->sequence_list)
     {
-      struct sequence_t *_seq = _vcd_list_node_data (node);
-      VcdListNode *nnode = _vcd_list_node_next (node);
-      struct sequence_t *_nseq = nnode ? _vcd_list_node_data (nnode) : NULL;
+      struct sequence_t *_seq = _cdio_list_node_data (node);
+      CdioListNode *nnode = _cdio_list_node_next (node);
+      struct sequence_t *_nseq = nnode ? _cdio_list_node_data (nnode) : NULL;
       FILE *outfd = NULL;
       bool in_data = false;
       VcdMpegStreamCtx mpeg_ctx;
@@ -1123,7 +1123,7 @@ _rip_sequences (struct vcdxml_t *obj, CdIo *img, int tracknum)
 
 	  if (in_data)
 	    {
-	      VcdListNode *_node;
+	      CdioListNode *_node;
 
 	      vcd_mpeg_parse_packet (buf[buf_idx].data, M2F2_SECTOR_SIZE, 
 				     false, &mpeg_ctx);
@@ -1152,12 +1152,12 @@ _rip_sequences (struct vcdxml_t *obj, CdIo *img, int tracknum)
 			     last_pts);
 		  *_ap_ts = last_pts;
 
-		  _vcd_list_append (_seq->autopause_list, _ap_ts);
+		  _cdio_list_append (_seq->autopause_list, _ap_ts);
 		}
 	      
-	      _VCD_LIST_FOREACH (_node, _seq->entry_point_list)
+	      _CDIO_LIST_FOREACH (_node, _seq->entry_point_list)
 		{
-		  struct entry_point_t *_ep = _vcd_list_node_data (_node);
+		  struct entry_point_t *_ep = _cdio_list_node_data (_node);
 
 		  if (_ep->extent == n)
 		    {
@@ -1208,7 +1208,7 @@ _rip_sequences (struct vcdxml_t *obj, CdIo *img, int tracknum)
 	}
 
       fclose (outfd);
-    } /* _VCD_LIST_FOREACH */
+    } /* _CDIO_LIST_FOREACH */
 
   return 0;
 }
