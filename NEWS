@@ -2,6 +2,14 @@ $Id$
 
 see ChangeLog for more information
 
+version 0.7.6 (unstable/development)
+====================================
+2001-06-??
+
+* fixed boundary checks for segment play items
+* fix/workaround for cygwin stack bug exposed in vcddebug
+* made vcd30 mpegav more accurate
+
 version 0.7.5 (unstable/development)
 ====================================
 2001-06-12

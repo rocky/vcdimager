@@ -1,3 +1,7 @@
+2001-06-16  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd.c: improved on svcd_vcd3_mpegav compat mode
+
 2001-06-15  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_mpeg_stream.c (vcd_mpeg_source_scan): added more verbose

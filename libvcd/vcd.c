@@ -1040,10 +1040,16 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
           file_num = n + 1;
           break;
         case VCD_TYPE_SVCD:
-          fmt = (obj->svcd_vcd3_mpegav 
-                 ? "MPEGAV/AVSEQ%2.2d.MPG" 
-                 : "MPEG2/AVSEQ%2.2d.MPG");
+          fmt = "MPEG2/AVSEQ%2.2d.MPG";
           file_num = 0;
+
+          /* if vcd3 compat mode, override */
+          if (obj->svcd_vcd3_mpegav)
+            {
+              fmt = "MPEGAV/AVSEQ%2.2d.MPG";
+              file_num = n + 1;
+            }
+            
           break;
         default:
           vcd_assert_not_reached ();
@@ -1601,7 +1607,8 @@ _write_sectors (VcdObj *obj, int track_idx)
 
     fnum = track_idx + 1;
       
-    if (obj->type == VCD_TYPE_SVCD) /* svcds have a simplified subheader */
+    if (obj->type == VCD_TYPE_SVCD
+        && !obj->svcd_vcd3_mpegav) /* IEC62107 SVCDs have a simplified subheader */
       {
         fnum = 1;
         ci = 0x80;
