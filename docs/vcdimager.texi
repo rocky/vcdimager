@@ -563,9 +563,11 @@ SVCD's.
 @node Primary Volume Descriptor, Directory Structure, The ISO-9660 Track, The ISO-9660 Track
 @subsection Primary Volume Descriptor
 
-This ISO-9660 sector located at sector @acronym{LSN} 16 contains general
-information about the ISO-9660 file-system, such as volume label, various
-IDs, file-system size, pointer to the root directory and so on@dots{}
+This ISO-9660 sector located at sector @acronym{LSN} 16 contains
+general information about the ISO-9660 file-system, such as volume
+label, the application used to create the CD, the preparer, the
+publisher, file-system size, pointer to the root directory and so
+on@dots{}
 
 @node Directory Structure,  , Primary Volume Descriptor, The ISO-9660 Track
 @subsection Directory Structure
