@@ -28,10 +28,11 @@
 #include <stdio.h>
 #include <math.h>
 
-#include <libvcd/vcd_types.h>
-#include <libvcd/vcd_mpeg_stream.h>
+#include <libvcd/vcd_bytesex.h>
 #include <libvcd/vcd_mpeg.h>
+#include <libvcd/vcd_mpeg_stream.h>
 #include <libvcd/vcd_stream_stdio.h>
+#include <libvcd/vcd_types.h>
 
 static inline
 void _dump_msf (const msf_t *__msf)
@@ -45,17 +46,13 @@ void _dump_msf (const msf_t *__msf)
     }
 	  
   printf (" %.2x:%.2x.%.2x ", 
-	  _msf.m,
-	  _msf.s,
-	  _msf.f);
+	  _msf.m, _msf.s, _msf.f);
 }
 
 int 
 main (int argc, const char *argv[])
 {
   VcdMpegSource *src;
-  VcdListNode *n;
-  double t = 0;
   unsigned packets, packet_no;
   VcdMpegStreamCtx ctx;
 
@@ -78,7 +75,7 @@ main (int argc, const char *argv[])
 
   for (packet_no = 0; packet_no < packets; packet_no++)
     {
-      struct vcd_mpeg_packet_flags pkt_flags;
+      /* struct vcd_mpeg_packet_flags pkt_flags; */
       char buf[2324];
 
       vcd_mpeg_source_get_packet (src, packet_no,

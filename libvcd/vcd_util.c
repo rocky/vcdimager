@@ -222,7 +222,8 @@ _vcd_strncpy_pad(char dst[], const char src[], size_t len,
   rlen = strlen (src);
 
   if (rlen > len)
-    vcd_warn ("string '%s' is getting truncated to %d characters",  src, len);
+    vcd_warn ("string '%s' is getting truncated to %d characters",  
+              src, (unsigned) len);
 
   strncpy (dst, src, len);
   if (rlen < len)

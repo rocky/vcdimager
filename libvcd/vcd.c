@@ -1674,7 +1674,7 @@ vcd_obj_begin_output (VcdObj *obj)
 
   if (image_size > CD_MAX_SECTORS)
     vcd_error ("image too big (%d sectors > %d sectors)", 
-               image_size, CD_MAX_SECTORS);
+               (unsigned) image_size, CD_MAX_SECTORS);
 
   {
     char *_tmp = _vcd_lba_to_msf_str (image_size);
@@ -1682,7 +1682,7 @@ vcd_obj_begin_output (VcdObj *obj)
     if (image_size > CD_74MIN_SECTORS)
       vcd_warn ("generated image (%d sectors [%s]) may not fit "
                 "on 74min CDRs (%d sectors)", 
-                image_size, _tmp, CD_74MIN_SECTORS);
+                (unsigned) image_size, _tmp, CD_74MIN_SECTORS);
 
     free (_tmp);
   }
