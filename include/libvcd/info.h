@@ -1,7 +1,7 @@
 /*!
    \file info.h
 
-    Copyright (C) 2002, 2003, 2004 Rocky Bernstein <rocky@panix.com>
+    Copyright (C) 2002, 2003, 2004, 2005 Rocky Bernstein <rocky@panix.com>
 
  \verbatim
     This program is free software; you can redistribute it and/or modify
@@ -742,13 +742,6 @@ extern "C" {
   
   /*!
     Convert minutes, seconds and frame (MSF components) into a
-    logical block address (or LBA). 
-    See also msf_to_lba which uses msf_t as its single parameter.
-  */
-  lba_t vcdinfo_msf2lba (uint8_t min, uint8_t sec, int8_t frame);
-  
-  /*!
-    Convert minutes, seconds and frame (MSF components) into a
     logical sector number (or LSN). 
   */
   lsn_t vcdinfo_msf2lsn (uint8_t min, uint8_t sec, int8_t frame);
@@ -857,4 +850,7 @@ extern "C" {
 }
 #endif /* __cplusplus */
 
+/** Depricated */
+#define vcdinfo_msf2lba cdio_msf3_to_lba
+  
 #endif /*_VCD_INFO_H*/

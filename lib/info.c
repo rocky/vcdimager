@@ -1551,15 +1551,15 @@ vcdinfo_has_xa(const vcdinfo_obj_t *p_obj)
   Add one to the MSF.
 */
 void
-vcdinfo_inc_msf (uint8_t *min, uint8_t *sec, int8_t *frame)
+vcdinfo_inc_msf (uint8_t *p_min, uint8_t *p_sec, int8_t *p_frame)
 {
-  (*frame)++;
-  if (*frame>=CDIO_CD_FRAMES_PER_SEC) {
-    *frame = 0;
-    (*sec)++;
-    if (*sec>=CDIO_CD_SECS_PER_MIN) {
-      *sec = 0;
-      (*min)++;
+  (*p_frame)++;
+  if (*p_frame>=CDIO_CD_FRAMES_PER_SEC) {
+    *p_frame = 0;
+    (*p_sec)++;
+    if (*p_sec>=CDIO_CD_SECS_PER_MIN) {
+      *p_sec = 0;
+      (*p_min)++;
     }
   }
 }
@@ -1569,24 +1569,13 @@ vcdinfo_inc_msf (uint8_t *min, uint8_t *sec, int8_t *frame)
   logical block address (or LBA). 
   See also cdio_msf_to_lba which uses msf_t as its single parameter.
 */
-lba_t
-vcdinfo_msf2lba (uint8_t min, uint8_t sec, int8_t frame)
-{
-  return CDIO_CD_FRAMES_PER_SEC*(CDIO_CD_SECS_PER_MIN*min + sec) + frame;
-}
-
-/*!
-  Convert minutes, seconds and frame (MSF components) into a
-  logical block address (or LBA). 
-  See also cdio_msf_to_lba which uses msf_t as its single parameter.
-*/
 void 
-vcdinfo_lba2msf (lba_t lba, uint8_t *min, uint8_t *sec, uint8_t *frame) 
+vcdinfo_lba2msf (lba_t lba, uint8_t *p_min, uint8_t *p_sec, uint8_t *p_frame) 
 {
-  *min = lba / (60*75);
-  lba %= (60*75);
-  *sec = lba / 75; 
-  *frame = lba % 75; 
+  *p_min = lba / (CDIO_CD_SECS_PER_MIN*CDIO_CD_FRAMES_PER_SEC);
+  lba %= (CDIO_CD_SECS_PER_MIN*CDIO_CD_FRAMES_PER_SEC);
+  *p_sec = lba / CDIO_CD_FRAMES_PER_SEC; 
+  *p_frame = lba % CDIO_CD_FRAMES_PER_SEC; 
 }
 
 /*!
@@ -1596,7 +1585,7 @@ vcdinfo_lba2msf (lba_t lba, uint8_t *min, uint8_t *sec, uint8_t *frame)
 lsn_t
 vcdinfo_msf2lsn (uint8_t min, uint8_t sec, int8_t frame)
 {
-  lba_t lba=75*(60*min + sec) + frame;
+  lba_t lba=CDIO_CD_FRAMES_PER_SEC*(CDIO_CD_SECS_PER_MIN*min + sec) + frame;
   if (lba < CDIO_PREGAP_SECTORS) {
     vcd_error ("lba (%u) less than pregap sector (%u)", 
                (unsigned int) lba, CDIO_PREGAP_SECTORS);
