@@ -7,6 +7,15 @@ version 0.7.8 (unstable/development)
 2001-??-??
 
 * fixed minor ISO9660 PVD bug
+* renamed --add-dir to --add-dirtree and implemented a 'real'
+  --add-dir (e.g. for adding an empty SEGMENT dir)
+* implemented end list extension for SVCDs
+* reverted autoplay experiment
+* minor compatibility change for SVCD compatibility
+* fixed non working 
+* added new tool for dumping mpeg infos/aps addresses
+* added support for empty (ref-less) <select> and <play-item>'s
+* fixed/added support for multi default selections
 
 version 0.7.7 (unstable/development)
 ====================================
