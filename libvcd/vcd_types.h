@@ -160,6 +160,9 @@ typedef uint32_t lba_t;
 /* The type of an Logical Sector Number. */
 typedef uint32_t lsn_t;
 
+/* The type of an playback control list ID (LID). */
+typedef uint16_t lid_t;
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -180,9 +180,10 @@ struct _VcdImageSource {
   Used in working with LOT - list of offsets and lid's 
 */
 typedef struct {
-  uint16_t lid;
+  lid_t lid;
   uint16_t offset;
-  bool in_lot;
+  bool in_lot;   /* Is listed in LOT. */
+  bool ext;      /* True if entry comes from offset_x_list. */
 } vcdinfo_offset_t;
 
 /*!
@@ -338,13 +339,11 @@ const char *
 vcdinfo_get_format_version_str (const vcdinfo_obj_t *obj);
 
 /*!
-  FIXME: THIS NEEDS TO BE RETHOUGHT! 
-
   Get the item id for a given list ID. 
   VCDINFO_REJECTED_MASK is returned on error or if obj is NULL. 
 */
 uint16_t
-vcdinfo_get_itemid_from_lid(const vcdinfo_obj_t *obj, uint16_t lid, bool ext);
+vcdinfo_get_itemid_from_lid(const vcdinfo_obj_t *obj, lid_t lid);
 
 /*!
   Get the item id for a given PSD selector descriptor. 
@@ -383,7 +382,7 @@ vcdinfo_get_loop_count (const PsdSelectionListDescriptor *d);
 /*!
   Return Number of LIDs. 
 */
-uint16_t
+lid_t
 vcdinfo_get_num_LIDs (const vcdinfo_obj_t *obj);
 
 /**
@@ -392,7 +391,7 @@ vcdinfo_get_num_LIDs (const vcdinfo_obj_t *obj);
  \return  VCDINFO_INVALID_OFFSET is returned on error or if pld has no "next"
  entry or pld is NULL. Otherwise the LID offset is returned.
  */
-uint16_t
+lid_t
 vcdinfo_get_next_from_pld(const PsdPlayListDescriptor *pld);
 
 /**
@@ -401,7 +400,7 @@ vcdinfo_get_next_from_pld(const PsdPlayListDescriptor *pld);
  \return  VCDINFO_INVALID_OFFSET is returned on error or if psd has no "next"
  entry or psd is NULL. Otherwise the LID offset is returned.
  */
-uint16_t
+lid_t
 vcdinfo_get_next_from_psd(const PsdSelectionListDescriptor *psd);
 
 /*!
@@ -432,16 +431,14 @@ unsigned int
 vcdinfo_get_num_tracks(const vcdinfo_obj_t *obj);
 
 /*!
-  FIXME: THIS NEEDS TO BE RETHOUGHT! 
-
   \fn vcdinfo_get_offset_from_lid(const vcdinfo_obj_t *obj, unsigned int entry_num);
   \brief Get offset entry_num for a given LID. 
   \return VCDINFO_INVALID_OFFSET is returned if obj on error or obj
   is NULL. Otherwise the LID offset is returned.
 */
 uint16_t
-vcdinfo_get_offset_from_lid(const vcdinfo_obj_t *obj, uint16_t lid,
-			    unsigned int entry_num, bool ext);
+vcdinfo_get_offset_from_lid(const vcdinfo_obj_t *obj, lid_t lid,
+			    unsigned int entry_num);
 
 /*!
   \brief Get offset entry_num for a given PSD selector descriptor. 
@@ -456,10 +453,11 @@ vcdinfo_get_offset_from_psd(const PsdSelectionListDescriptor *d,
 
 
 /*! 
-  NULL is returned on error. 
+  Get entry in offset list for the item that has offset. This entry 
+  has for example the LID. NULL is returned on error. 
 */
 vcdinfo_offset_t *
-vcdinfo_get_offset_t (const vcdinfo_obj_t *obj, unsigned int offset, bool ext);
+vcdinfo_get_offset_t (const vcdinfo_obj_t *obj, unsigned int offset);
 
 /*!
   Get play-time value for PsdPlayListDescriptor *d.
@@ -481,7 +479,7 @@ vcdinfo_get_preparer_id(const vcdinfo_obj_t *obj);
  \return  VCDINFO_INVALID_OFFSET is returned on error or if pld has no "prev"
  entry or pld is NULL. Otherwise the LID offset is returned.
  */
-uint16_t
+lid_t
 vcdinfo_get_prev_from_pld(const PsdPlayListDescriptor *pld);
 
 /**
@@ -490,7 +488,7 @@ vcdinfo_get_prev_from_pld(const PsdPlayListDescriptor *pld);
  \return  VCDINFO_INVALID_OFFSET is returned on error or if psd has no "prev"
  entry or psd is NULL. Otherwise the LID offset is returned.
  */
-uint16_t
+lid_t
 vcdinfo_get_prev_from_psd(const PsdSelectionListDescriptor *psd);
 
 /*!
@@ -507,18 +505,19 @@ const char *
 vcdinfo_get_publisher_id(const vcdinfo_obj_t *obj);
 
 /*!
-  Get the PSD Selection List Descriptor for a given list id.
-  NULL is returned if error or not found.
+  Get the PSD Selection List Descriptor for a given lid.
+  False is returned if not found.
 */
-void
-vcdinfo_get_pxd_from_lid(const vcdinfo_obj_t *obj, PsdListDescriptor *pxd,
-			 uint16_t lid, bool ext);
+bool
+vcdinfo_get_pxd_from_lid(const vcdinfo_obj_t *obj, 
+			 PsdListDescriptor *pxd, uint16_t lid);
+
 /*!
   \brief Get return offset. 
   \return  VCDINFO_INVALID_OFFSET is returned on error or if
   no "return"  entry. Otherwise the LID offset is returned.
 */
-uint16_t
+lid_t
 vcdinfo_get_return(const vcdinfo_obj_t *obj, unsigned int lid);
 
 /*!
@@ -526,7 +525,7 @@ vcdinfo_get_return(const vcdinfo_obj_t *obj, unsigned int lid);
   \return  VCDINFO_INVALID_OFFSET is returned on error or if pld has 
   no "return"  entry or pld is NULL. Otherwise the LID offset is returned.
 */
-uint16_t
+lid_t
 vcdinfo_get_return_from_pld(const PsdPlayListDescriptor *pld);
 
 /*!
@@ -534,7 +533,7 @@ vcdinfo_get_return_from_pld(const PsdPlayListDescriptor *pld);
   \return  VCDINFO_INVALID_OFFSET is returned on error or if psd has 
   no "return" entry or psd is NULL. Otherwise the LID offset is returned.
 */
-uint16_t
+lid_t
 vcdinfo_get_return_from_psd(const PsdSelectionListDescriptor *psd);
 
 /*!

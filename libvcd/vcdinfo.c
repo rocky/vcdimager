@@ -434,6 +434,8 @@ _visit_pbc (vcdinfo_obj_t *obj, unsigned int lid, unsigned int offset,
              */
             ofs->lid = lid;
 
+          ofs->ext = ext;
+
           return; /* already been there... */
         }
     }
@@ -441,8 +443,9 @@ _visit_pbc (vcdinfo_obj_t *obj, unsigned int lid, unsigned int offset,
   ofs = _vcd_malloc (sizeof (vcdinfo_offset_t));
 
   ofs->offset = offset;
-  ofs->lid = lid;
+  ofs->lid    = lid;
   ofs->in_lot = in_lot;
+  ofs->ext    = ext;
 
   switch (psd[_rofs])
     {
@@ -450,7 +453,7 @@ _visit_pbc (vcdinfo_obj_t *obj, unsigned int lid, unsigned int offset,
       _vcd_list_append (offset_list, ofs);
       {
         const PsdPlayListDescriptor *d = (const void *) (psd + _rofs);
-        const uint16_t lid = vcdinfo_get_lid_from_pld(d);
+        const lid_t lid = vcdinfo_get_lid_from_pld(d);
 
         if (!ofs->lid)
           ofs->lid = lid;
@@ -614,15 +617,14 @@ vcdinfo_get_bsn(const PsdSelectionListDescriptor *psd)
  \return  VCDINFO_INVALID_OFFSET is returned on error or if pld has no 
  "return" entry or pld is NULL. Otherwise the LID offset is returned.
  */
-uint16_t
+lid_t
 vcdinfo_get_default(const vcdinfo_obj_t *obj, unsigned int lid)
 {
   if (NULL != obj) {
     
     PsdListDescriptor pxd;
 
-    /* FIXME: remove unconditional "false" */
-    vcdinfo_get_pxd_from_lid(obj, &pxd, lid, false);
+    vcdinfo_get_pxd_from_lid(obj, &pxd, lid);
     
     switch (pxd.descriptor_type) {
     case PSD_TYPE_EXT_SELECTION_LIST:
@@ -783,18 +785,16 @@ vcdinfo_get_format_version_str (const vcdinfo_obj_t *obj)
 }
 
 /*!
-  FIXME: THIS NEEDS TO BE RETHOUGHT! 
-
   Get the itemid for a given list ID. 
   VCDINFO_REJECTED_MASK is returned on error or if obj is NULL. 
 */
 uint16_t
-vcdinfo_get_itemid_from_lid(const vcdinfo_obj_t *obj, uint16_t lid, bool ext)
+vcdinfo_get_itemid_from_lid(const vcdinfo_obj_t *obj, lid_t lid)
 {
   PsdListDescriptor pxd;
 
   if (obj == NULL) return VCDINFO_REJECTED_MASK;
-  vcdinfo_get_pxd_from_lid(obj, &pxd, lid, ext);
+  vcdinfo_get_pxd_from_lid(obj, &pxd, lid);
   switch (pxd.descriptor_type) {
   case PSD_TYPE_SELECTION_LIST:
   case PSD_TYPE_EXT_SELECTION_LIST:
@@ -825,7 +825,7 @@ vcdinfo_get_itemid_from_psd(const PsdSelectionListDescriptor *psd)
 /* Get the LID from a given PSD selector descriptor. 
    VCDINFO_REJECTED_MASK is returned d on error or d is NULL. 
 */
-uint16_t
+lid_t
 vcdinfo_get_lid_from_pld(const PsdPlayListDescriptor *d)
 {
   return (d != NULL) 
@@ -837,7 +837,7 @@ vcdinfo_get_lid_from_pld(const PsdPlayListDescriptor *d)
   Get the LID from a given PSD play-list descriptor. 
   VCDINFO_REJECTED_MASK is returned d on error or d is NULL. 
 */
-uint16_t
+lid_t
 vcdinfo_get_lid_from_psd(const PsdSelectionListDescriptor *d)
 {
   return (d != NULL) 
@@ -869,7 +869,7 @@ vcdinfo_get_loop_count (const PsdSelectionListDescriptor *d)
 /*!
   Return number of LIDs. 
 */
-uint16_t
+lid_t
 vcdinfo_get_num_LIDs (const vcdinfo_obj_t *obj) 
 {
   /* Should probably use _vcd_pbc_max_lid instead? */
@@ -882,7 +882,7 @@ vcdinfo_get_num_LIDs (const vcdinfo_obj_t *obj)
  \return  VCDINFO_INVALID_OFFSET is returned on error or if pld has no "next"
  entry or pld is NULL. Otherwise the LID offset is returned.
  */
-uint16_t
+lid_t
 vcdinfo_get_next_from_pld(const PsdPlayListDescriptor *pld)
 {
   return (pld != NULL) 
@@ -895,7 +895,7 @@ vcdinfo_get_next_from_pld(const PsdPlayListDescriptor *pld)
  * \return VCDINFO_INVALID_OFFSET is returned on error or if psd is
  * NULL. Otherwise the LID offset is returned.
  */
-uint16_t
+lid_t
 vcdinfo_get_next_from_psd(const PsdSelectionListDescriptor *psd)
 {
   return (psd != NULL) 
@@ -923,21 +923,19 @@ vcdinfo_get_num_segments(const vcdinfo_obj_t *obj)
 }
 
 /*!
-  FIXME: THIS NEEDS TO BE RETHOUGHT! 
-
   \fn vcdinfo_get_offset_from_lid(const vcdinfo_obj_t *obj, unsigned int entry_num);
   \brief Get offset entry_num for a given LID. 
   \return VCDINFO_INVALID_OFFSET is returned if obj on error or obj
   is NULL. Otherwise the LID offset is returned.
 */
 uint16_t
-vcdinfo_get_offset_from_lid(const vcdinfo_obj_t *obj, uint16_t lid,
-			    unsigned int entry_num, bool ext) 
+vcdinfo_get_offset_from_lid(const vcdinfo_obj_t *obj, lid_t lid,
+			    unsigned int entry_num) 
 {
   PsdListDescriptor pxd;
 
   if (obj == NULL) return VCDINFO_INVALID_OFFSET;
-  vcdinfo_get_pxd_from_lid(obj, &pxd, lid, ext);
+  vcdinfo_get_pxd_from_lid(obj, &pxd, lid);
 
   switch (pxd.descriptor_type) {
   case PSD_TYPE_SELECTION_LIST:
@@ -972,8 +970,8 @@ vcdinfo_get_offset_from_psd(const PsdSelectionListDescriptor *d,
 /*! 
   NULL is returned on error. 
 */
-vcdinfo_offset_t *
-vcdinfo_get_offset_t (const vcdinfo_obj_t *obj, unsigned int offset, bool ext)
+static vcdinfo_offset_t *
+_vcdinfo_get_offset_t (const vcdinfo_obj_t *obj, unsigned int offset, bool ext)
 {
   VcdListNode *node;
   VcdList *offset_list = ext ? obj->offset_x_list : obj->offset_list;
@@ -993,6 +991,19 @@ vcdinfo_get_offset_t (const vcdinfo_obj_t *obj, unsigned int offset, bool ext)
         return ofs;
     }
   return NULL;
+}
+
+/*! 
+  Get entry in offset list for the item that has offset. This entry 
+  has for example the LID. NULL is returned on error. 
+*/
+vcdinfo_offset_t *
+vcdinfo_get_offset_t (const vcdinfo_obj_t *obj, unsigned int offset)
+{
+  vcdinfo_offset_t *off_p= _vcdinfo_get_offset_t (obj, offset, true);
+  if (NULL != off_p) 
+    return off_p;
+  return _vcdinfo_get_offset_t (obj, offset, false);
 }
 
 /*!
@@ -1022,7 +1033,7 @@ vcdinfo_get_preparer_id(const vcdinfo_obj_t *obj)
  \return  VCDINFO_INVALID_OFFSET is returned on error or if pld has no "prev"
  entry or pld is NULL. Otherwise the LID offset is returned.
  */
-uint16_t
+lid_t
 vcdinfo_get_prev_from_pld(const PsdPlayListDescriptor *pld)
 {
   return (pld != NULL) ? 
@@ -1035,7 +1046,7 @@ vcdinfo_get_prev_from_pld(const PsdPlayListDescriptor *pld)
  \return  VCDINFO_INVALID_OFFSET is returned on error or if psd has no "prev"
  entry or psd is NULL. Otherwise the LID offset is returned.
  */
-uint16_t
+lid_t
 vcdinfo_get_prev_from_psd(const PsdSelectionListDescriptor *psd)
 {
   return (psd != NULL) ? 
@@ -1066,16 +1077,16 @@ vcdinfo_get_publisher_id(const vcdinfo_obj_t *obj)
   Get the PSD Selection List Descriptor for a given lid.
   NULL is returned if error or not found.
 */
-void
-vcdinfo_get_pxd_from_lid(const vcdinfo_obj_t *obj, PsdListDescriptor *pxd,
-                         uint16_t lid, bool ext) 
+static bool
+_vcdinfo_get_pxd_from_lid(const vcdinfo_obj_t *obj, PsdListDescriptor *pxd,
+                          uint16_t lid, bool ext) 
 {
   VcdListNode *node;
   unsigned mult = obj->info.offset_mult;
   const uint8_t *psd = ext ? obj->psd_x : obj->psd;
   VcdList *offset_list = ext ? obj->offset_x_list : obj->offset_list;
 
-  if (offset_list == NULL) return;
+  if (offset_list == NULL) return false;
   
   _VCD_LIST_FOREACH (node, offset_list)
     {
@@ -1090,7 +1101,7 @@ vcdinfo_get_pxd_from_lid(const vcdinfo_obj_t *obj, PsdListDescriptor *pxd,
           {
             pxd->pld = (PsdPlayListDescriptor *) (psd + _rofs);
             if (vcdinfo_get_lid_from_pld(pxd->pld) == lid) {
-              return;
+              return true;
             }
             break;
           }
@@ -1100,14 +1111,27 @@ vcdinfo_get_pxd_from_lid(const vcdinfo_obj_t *obj, PsdListDescriptor *pxd,
           {
             pxd->psd = (PsdSelectionListDescriptor *) (psd + _rofs);
             if (vcdinfo_get_lid_from_psd(pxd->psd) == lid) {
-              return;
+              return true;
             }
             break;
           }
         default: ;
         }
     }
-  return;
+  return false;
+}
+
+/*!
+  Get the PSD Selection List Descriptor for a given lid.
+  False is returned if not found.
+*/
+bool
+vcdinfo_get_pxd_from_lid(const vcdinfo_obj_t *obj, PsdListDescriptor *pxd,
+                         uint16_t lid)
+{
+  if (_vcdinfo_get_pxd_from_lid(obj, pxd, lid, true))
+    return true;
+  return _vcdinfo_get_pxd_from_lid(obj, pxd, lid, false);
 }
 
 /**
@@ -1123,8 +1147,7 @@ vcdinfo_get_return(const vcdinfo_obj_t *obj, unsigned int lid)
 
     PsdListDescriptor pxd;
 
-    /* FIXME: remove unconditional "false" */
-    vcdinfo_get_pxd_from_lid(obj, &pxd, lid, false);
+    vcdinfo_get_pxd_from_lid(obj, &pxd, lid);
     
     switch (pxd.descriptor_type) {
     case PSD_TYPE_PLAY_LIST:
@@ -1151,7 +1174,7 @@ vcdinfo_get_return(const vcdinfo_obj_t *obj, unsigned int lid)
  \return  VCDINFO_INVALID_OFFSET is returned on error or if pld has no 
  "return" entry or pld is NULL. Otherwise the LID offset is returned.
  */
-uint16_t
+lid_t
 vcdinfo_get_return_from_pld(const PsdPlayListDescriptor *pld)
 {
   return (pld != NULL) ? 
@@ -1676,7 +1699,7 @@ vcdinfo_ofs2str (const vcdinfo_obj_t *obj, unsigned int offset, bool ext)
   }
 
   buf = _getbuf ();
-  ofs = vcdinfo_get_offset_t(obj, offset, ext);
+  ofs = _vcdinfo_get_offset_t(obj, offset, ext);
   if (ofs != NULL) {
     if (ofs->lid)
       snprintf (buf, BUF_SIZE, "LID[%d] @0x%4.4x", 
