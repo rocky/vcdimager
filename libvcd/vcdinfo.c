@@ -61,6 +61,7 @@
 
 /* Eventually move above libvcd includes but having vcdinfo including. */
 #include "vcdinfo.h"
+#include "vcdinf.h"
 
 static const char _rcsid[] = "$Id$";
 
@@ -579,7 +580,7 @@ const char *
 vcdinfo_get_album_id(const vcdinfo_obj_t *obj)
 {
   if ( NULL == obj || NULL == &obj->info ) return (NULL);
-  return(obj->info.album_desc);
+  return vcdinf_get_album_id(&obj->info);
 }
 
 /*!
@@ -590,7 +591,7 @@ const char *
 vcdinfo_get_application_id(const vcdinfo_obj_t *obj)
 {
   if ( NULL == obj || NULL == &obj->pvd ) return (NULL);
-  return(vcdinfo_strip_trail(obj->pvd.application_id, MAX_APPLICATION_ID));
+  return(vcdinf_get_application_id(&obj->pvd));
 }
 
 /*!
@@ -723,7 +724,7 @@ vcdinfo_get_entry_sect_count (const vcdinfo_obj_t *obj, unsigned int entry_num)
   The first entry number is 0.
 */
 const msf_t *
-vcdinfo_get_entry_msf(const vcdinfo_obj_t *obj, const unsigned int entry_num)
+vcdinfo_get_entry_msf(const vcdinfo_obj_t *obj, unsigned int entry_num)
 {
   const EntriesVcd *entries = &obj->entries;
   const unsigned int entry_count = uint16_from_be (entries->entry_count);
@@ -736,7 +737,7 @@ vcdinfo_get_entry_msf(const vcdinfo_obj_t *obj, const unsigned int entry_num)
   entry_num in obj.  VCDINFO_NULL_LBA is returned if there is no entry.
 */
 lba_t
-vcdinfo_get_entry_lba(const vcdinfo_obj_t *obj, const unsigned int entry_num)
+vcdinfo_get_entry_lba(const vcdinfo_obj_t *obj, unsigned int entry_num)
 {
   const msf_t *msf = vcdinfo_get_entry_msf(obj, entry_num);
   return (msf != NULL) ? msf_to_lba(msf) : VCDINFO_NULL_LBA;
@@ -760,29 +761,7 @@ vcdinfo_get_format_version (vcdinfo_obj_t *obj)
 const char *
 vcdinfo_get_format_version_str (const vcdinfo_obj_t *obj) 
 {
-  switch (obj->vcd_type)
-    {
-    case VCD_TYPE_VCD:
-      return ("VCD 1.0");
-      break;
-    case VCD_TYPE_VCD11:
-      return ("VCD 1.1");
-      break;
-    case VCD_TYPE_VCD2:
-      return ("VCD 2.0");
-      break;
-    case VCD_TYPE_SVCD:
-      return ("SVCD");
-      break;
-    case VCD_TYPE_HQVCD:
-      return ("HQVCD");
-      break;
-    case VCD_TYPE_INVALID:
-      return ("INVALID");
-      break;
-    default:
-      return ( "????");
-    }
+  return vcdinf_get_format_version_str(obj->vcd_type);
 }
 
 /*!
@@ -1055,12 +1034,13 @@ vcdinfo_get_prev_from_psd(const PsdSelectionListDescriptor *psd)
 }
 
 /*!
-  Return number of bytes in PSD. 
+  Return number of bytes in PSD. Return 0 if there's an error.
 */
 uint32_t
 vcdinfo_get_psd_size (const vcdinfo_obj_t *obj)
 {
-  return uint32_from_be (obj->info.psd_size);
+  if ( NULL == obj || NULL == &obj->info ) return 0;
+  return vcdinf_get_psd_size(&obj->info);
 }
 
 /*!
@@ -1071,7 +1051,7 @@ const char *
 vcdinfo_get_publisher_id(const vcdinfo_obj_t *obj)
 {
   if ( NULL == obj || NULL == &obj->pvd ) return (NULL);
-  return(vcdinfo_strip_trail(obj->pvd.publisher_id, 128));
+  return(vcdinf_get_publisher_id(&obj->pvd));
 }
 
 /*!
@@ -1295,7 +1275,7 @@ const char *
 vcdinfo_get_system_id(const vcdinfo_obj_t *obj)
 {
   if ( NULL == obj || NULL == &obj->pvd ) return (NULL);
-  return(vcdinfo_strip_trail(obj->pvd.system_id, MAX_SYSTEM_ID));
+  return(vcdinf_get_system_id(&obj->pvd));
 }
 
 /*!
@@ -1501,7 +1481,7 @@ unsigned int
 vcdinfo_get_volume_count(const vcdinfo_obj_t *obj)
 {
   if ( NULL == obj || NULL == &obj->info ) return 0;
-  return(uint16_from_be( obj->info.vol_count));
+  return vcdinf_get_volume_count(&obj->info);
 }
 
 /*!
@@ -1512,7 +1492,7 @@ const char *
 vcdinfo_get_volume_id(const vcdinfo_obj_t *obj)
 {
   if ( NULL == obj || NULL == &obj->pvd ) return (NULL);
-  return(vcdinfo_strip_trail(obj->pvd.volume_id, 32));
+  return(vcdinf_get_volume_id(&obj->pvd));
 }
 
 /*!

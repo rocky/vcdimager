@@ -76,4 +76,4 @@ EXTRA_libvcd_a_SOURCES = \
 libvcd_a_LIBADD = @LIBVCD_SYSDEP@
 libvcd_a_DEPENDENCIES = @LIBVCD_SYSDEP@
 
-libvcdinfo_a_SOURCES = vcdinfo.h vcdinfo.c
+libvcdinfo_a_SOURCES = vcdinf.h vcdinf.c vcdinfo.h vcdinfo.c
