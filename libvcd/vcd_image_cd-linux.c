@@ -476,11 +476,11 @@ vcd_image_source_new_cd (void)
   _img_cd_src_t *_data = _vcd_malloc (sizeof *_data);
 
   vcd_image_source_funcs _funcs = {
-    eject_media       : _vcd_eject_media,
-    free              : _vcd_source_free,
-    read_mode2_sectors: _read_mode2_sectors,
-    set_arg           : _vcd_source_set_arg,
-    stat_size         : _vcd_stat_size
+    .eject_media       = _vcd_eject_media,
+    .free              = _vcd_source_free,
+    .read_mode2_sectors= _read_mode2_sectors,
+    .set_arg           = _vcd_source_set_arg,
+    .stat_size         = _vcd_stat_size
   };
 
   _data->device = _vcd_get_default_device();

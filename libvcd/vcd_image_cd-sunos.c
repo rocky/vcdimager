@@ -550,16 +550,16 @@ vcd_image_source_new_cd (void)
   _img_cd_src_t *_data;
 
   vcd_image_source_funcs _funcs = {
-    eject_media       : _vcd_eject_media,
-    free              : _vcd_source_free,
-    get_default_device: _vcd_get_default_device,
-    get_track_count   : _vcd_get_track_count,
-    get_track_msf     : _vcd_get_track_msf,
-    get_track_size    : _vcd_get_track_size,
-    read_mode2_sector : _read_mode2_sector,
-    read_mode2_sectors: _read_mode2_sectors,
-    stat_size         : _vcd_stat_size,
-    set_arg           : _vcd_source_set_arg
+    .eject_media       = _vcd_eject_media,
+    .free              = _vcd_source_free,
+    .get_default_device= _vcd_get_default_device,
+    .get_track_count   = _vcd_get_track_count,
+    .get_track_msf     = _vcd_get_track_msf,
+    .get_track_size    = _vcd_get_track_size,
+    .read_mode2_sector = _read_mode2_sector,
+    .read_mode2_sectors= _read_mode2_sectors,
+    .stat_size         = _vcd_stat_size,
+    .set_arg           = _vcd_source_set_arg
   };
 
   _data = _vcd_malloc (sizeof (_img_cd_src_t));
