@@ -1596,10 +1596,10 @@ _write_sequence (VcdObj *obj, int track_idx)
       norm_str = strdup ("FILM SIF (352x240/24fps)");
       break;
     case MPEG_NORM_PAL_S:
-      norm_str = strdup ("PAL 2/3 D-1 (480x576/25fps)");
+      norm_str = strdup ("PAL 2/3 D1 (480x576/25fps)");
       break;
     case MPEG_NORM_NTSC_S:
-      norm_str = strdup ("NTSC 2/3 D-1 (480x480/29.97fps)");
+      norm_str = strdup ("NTSC 2/3 D1 (480x480/29.97fps)");
       break;
 	
     case MPEG_NORM_OTHER:

@@ -323,6 +323,9 @@ Lead-out area.
 There are different Video CD flavors commonly used. The following
 sections tries to explain the differences amongst them.
 
+See also @uref{http://www.dvdrhelp.com/vcd} and
+@uref{http://www.dvdrhelp.com/svcd}.
+
 @menu
 * Video CD 1.1::                
 * Video CD 2.0::                
@@ -365,9 +368,9 @@ depending on the playing device}:
 
 @itemize @bullet
 @item
-352 x 240 @@ 29.97 Hz (@acronym{NTSC} @acronym{SIF}).
+352 x 240 @@ 29.97 fps (@acronym{NTSC} @acronym{SIF}).
 @item
-352 x 240 @@ 23.976 Hz (@acronym{FILM} @acronym{SIF}).
+352 x 240 @@ 23.976 fps (@acronym{FILM} @acronym{SIF}).
 @end itemize
 
 The @acronym{CBR} @acronym{MPEG}-1, layer II audio stream is fixed at
@@ -411,11 +414,11 @@ By adding PAL support to the Video CD 1.1 specification, the following
 resolutions became available:
 @itemize @bullet
 @item
-352 x 240 @@ 29.97 Hz (@acronym{NTSC} @acronym{SIF}).
+352 x 240 @@ 29.97 fps (@acronym{NTSC} @acronym{SIF}).
 @item
-352 x 240 @@ 23.976 Hz (@acronym{FILM} @acronym{SIF}).
+352 x 240 @@ 23.976 fps (@acronym{FILM} @acronym{SIF}).
 @item
-352 x 288 @@ 25 Hz (@acronym{PAL} @acronym{SIF}).
+352 x 288 @@ 25 fps (@acronym{PAL} @acronym{SIF}).
 @end itemize
 
 For segment play items the following audio encodings became available:
@@ -432,8 +435,8 @@ Mono audio streams at 64, 96 or 192 kbit/sec bit-rate.
 Also the possibility to have audio only streams and still
 pictures@footnote{in addition to the resolutions already defined for
 motion video, also high resolutions are available for still pictures,
-which are 704 x 480 (@acronym{NTSC} Full @acronym{D-2}) and 704 x 576
-(@acronym{PAL} Full @acronym{D-2})} was provided. The bit-rate of
+which are 704 x 480 (@acronym{NTSC} Full @acronym{D1}) and 704 x 576
+(@acronym{PAL} Full @acronym{D1})} was provided. The bit-rate of
 multiplex-ed streams should be kept under@footnote{Alas it seems, that
 for @emph{strict} Video CD 2.0 compliance, it's required to pad the
 stream exactly to 1x muxrate. The Super Video CD format does not have
@@ -448,6 +451,8 @@ actually just a name for VCD's which do not conform with the official
 standards in order to use the additional performance of the
 @acronym{DVD} decoders and thus achieve better image quality. Such an
 XVCD may be unsupported by many available stand-alone playing devices.
+
+See also @uref{http://www.dvdrhelp.com/xvcd.htm}
 
 @node Super Video CD 1.0, HQ Video CD 1.0, Extended Video CD, Known Video CD Flavors
 @subsection Super Video CD 1.0
@@ -483,9 +488,11 @@ Higher resolutions (see below) for video stream resolution.
 Up to 4 overlay graphics and text (@dfn{OGT}) sub-channels for user
 switchable subtitle displaying@footnote{There is also a non-compliant
 subtitle format widely used, having its origins in the forgotten
-@dfn{CVD} specification, which is said to have been a competitor for the
-Video CD 2.0 successor. Vcdimager recognizes both formats.} in addition
-to the already existing closed caption facility.
+@dfn{CVD} specification, which is said to have been a competitor for
+the Video CD 2.0 successor. See
+@uref{http://www.dvdrhelp.com/forum/userguides/98177.php}. Vcdimager
+recognizes both formats.} in addition to the already existing closed
+caption facility.
 
 @item
 Command lists for controlling the @acronym{SVCD} virtual machine.
@@ -499,10 +506,15 @@ high resolutions as defined for Video CD 2.0 apply for Super Video CD's}:
 
 @itemize @bullet
 @item
-480 x 480 @@ 29.97 Hz (@acronym{NTSC} 2/3 @acronym{D-2}).
+480 x 480 @@ 29.97 fps (@acronym{NTSC} 2/3 @acronym{D1}).
 @item
-480 x 576 @@ 25 Hz (@acronym{PAL} 2/3 @acronym{D-2}).
+480 x 576 @@ 25 fps (@acronym{PAL} 2/3 @acronym{D1}).
 @end itemize
+
+@noindent 
+See also @uref{http://www.dvdrhelp.com/svcd} for another description
+of SVCD and @uref{http://www.dvdrhelp.com/glossary} for a description
+of the acronyms used above.
 
 @node HQ Video CD 1.0, Extended Super Video CD, Super Video CD 1.0, Known Video CD Flavors
 @subsection HQ Video CD 1.0
@@ -678,12 +690,17 @@ stream is required to have one of the following resolutions:
 
 @itemize @bullet
 @item
-352 x 240 @@ 29.97 Hz (@acronym{NTSC}).
+352 x 240 @@ 29.97 fps (@acronym{NTSC}).
 @item
-352 x 240 @@ 23.976 Hz (@acronym{FILM}).
+352 x 240 @@ 23.976 fps (@acronym{FILM}).
 @item
-352 x 288 @@ 25 Hz (@acronym{PAL}) (not supported on VCD 1.x!).
+352 x 288 @@ 25 fps (@acronym{PAL}) (not supported on VCD 1.x!).
 @end itemize
+
+@noindent
+See also @uref{http://www.dvdrhelp.com/forum/userguides/94382.php}
+and @uref{http://www.dvdrhelp.com/glossary} for a description
+of the acronyms used above.
 
 The audio stream must be @acronym{MPEG}-1 layer II, fixed to a 224
 kbits/sec @acronym{CBR} with 1 joint stereo, stereo or dual channel
@@ -700,9 +717,9 @@ but then you are leaving the SVCD specification behind you@dots{}}:
 
 @itemize @bullet
 @item
-480 x 480 @@ 29.97 Hz (@acronym{NTSC}).
+480 x 480 @@ 29.97 fps (@acronym{NTSC}).
 @item
-480 x 576 @@ 25 Hz (@acronym{PAL}).
+480 x 576 @@ 25 fps (@acronym{PAL}).
 @end itemize
 
 The audio stream must be @acronym{MPEG}-1 layer II, with a bit-rate
