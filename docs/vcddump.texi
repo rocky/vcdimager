@@ -61,6 +61,11 @@ development.''
 @page
 
 @ifnottex
+@dircategory Video CD Tools
+@direntry
+* vcddump: (vcddump)Top.                  Video CD dump tool
+@end direntry
+
 @node Top, Introduction, (dir), (dir)
 
 @top The GNU Video CD Dump Program (@value{program})
@@ -69,13 +74,14 @@ This file documents GNU Video CD Dump Program.
 
 Copyright (C) 2003 Rocky Bernstein
 
-@dircategory Miscellaneous
 @menu
 * Introduction::        What is the program and why would I use it? 
 * Command Options::     How do I get this to do anything? 
 * Output Sections::     How do interpret the output? 
 * Some Examples::       Okay, enough talk. How about some simple examples?
 * History and Thanks::  History and Acknowledgments
+
+Indices
 * General Index::       Overall index
 * Option Index::        Index for options
 * Sub-Option Index::    Index for sub-options
@@ -415,7 +421,8 @@ An 8 characters name, probably ``ENTRYVCD''. See line 2 of the example
 in @ref{Entries,,Entries Section}.
 @item prof
 System profile tag. See line 4 of the example in @ref{Entries,,Entries
-Section}.
+Section}. If the format is HQSVCD the value will be 1. If the format
+is SVCD the value will be 0.
 @item vers
 A 2-hex digit version number. See line 3 of the example in
 @ref{Entries,,Entries Section}.
@@ -460,9 +467,9 @@ The number of disks in the volume, an integer. The XML tag for this is
 <volume-count>. See line 6 of the example in @ref{Info,,Info Section}.
 @item id
 A string representing the VCD format. ``VIDEO_CD'' for VCD 1.0, VCD
-1.1, or VCD 2.0, ``SUPERVCD'' for SVCD, XVCD, CVD, or HQVCD. A
-Maxiumum of 8 characters. See line 2 of the example in @ref{Info,,Info
-Section}.
+1.1, or VCD 2.0, ``SUPERVCD'' for SVCD, XVCD, CVD, and ``HQ-VCD'' for
+HQVCD. A Maxiumum of 8 characters. See line 2 of the example in
+@ref{Info,,Info Section}.
 @item ofm
 offset multiplier. Value is given is in hexadecimal. See line 20 of
 the example in @ref{Info,,Info Section}.
