@@ -34,26 +34,6 @@
 #include <libvcd/vcd_files_private.h>
 #include <libvcd/vcd_bytesex.h>
 
-/* fixme, also contained in vcd.c */
-static mpeg_sequence_t *
-_get_sequence_by_id (VcdObj *obj, const char id[])
-{
-  VcdListNode *node;
-
-  vcd_assert (id != NULL);
-  vcd_assert (obj != NULL);
-
-  _VCD_LIST_FOREACH (node, obj->mpeg_sequence_list)
-    {
-      mpeg_sequence_t *_sequence = _vcd_list_node_data (node);
-
-      if (_sequence->id && !strcmp (id, _sequence->id))
-        return _sequence;
-    }
-
-  return NULL;
-}
-
 static uint8_t
 _wtime (int seconds)
 {
@@ -231,24 +211,13 @@ _vcd_pbc_available (const VcdObj *obj)
   if (!_vcd_list_length (obj->pbc_list))
     return false;
 
-  switch (obj->type) 
+  if (!_vcd_obj_has_cap_p (obj, _CAP_PBC))
     {
-    case VCD_TYPE_VCD2:
-    case VCD_TYPE_SVCD:
-      return true;
-      break;
-
-    case VCD_TYPE_VCD11:
       vcd_warn ("PBC list not empty but VCD type not capable of PBC!");
       return false;
-      break;
-
-    default:
-      vcd_assert_not_reached ();
-      break;
     }
 
-  return false;
+  return true;
 }
 
 uint16_t
@@ -267,6 +236,9 @@ _vcd_pbc_node_length (const VcdObj *obj, const pbc_t *_pbc, bool extended)
 {
   size_t retval = 0;
 
+  if (extended)
+    vcd_assert (_vcd_obj_has_cap_p (obj, _CAP_PBC_X));
+
   switch (_pbc->type)
     {
       int n;
@@ -281,7 +253,7 @@ _vcd_pbc_node_length (const VcdObj *obj, const pbc_t *_pbc, bool extended)
 
       retval = offsetof (PsdSelectionListDescriptor, ofs[n]);
 
-      if (extended || obj->type == VCD_TYPE_SVCD)
+      if (extended || _vcd_obj_has_cap_p (obj, _CAP_4C_SVCD))
 	retval += offsetof (PsdSelectionListDescriptorExtended, area[n]);
       break;
       
@@ -301,6 +273,9 @@ static uint16_t
 _lookup_psd_offset (const VcdObj *obj, const char item_id[], bool extended)
 {
   VcdListNode *node;
+
+  if (extended)
+    vcd_assert (_vcd_obj_has_cap_p (obj, _CAP_PBC_X));
 
   /* disable it */
   if (!item_id)
@@ -328,7 +303,7 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 		     bool extended)
 {
   if (extended)
-    vcd_assert (obj->type == VCD_TYPE_VCD2);
+    vcd_assert (_vcd_obj_has_cap_p (obj, _CAP_PBC_X));
 
   switch (_pbc->type)
     {
@@ -406,7 +381,7 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 	vcd_assert (sizeof (PsdSelectionListFlags) == 1);
 
 	/* selection flags */
-	if (obj->type == VCD_TYPE_SVCD)
+	if (_vcd_obj_has_cap_p (obj, _CAP_4C_SVCD))
 	  _md->flags.SelectionAreaFlag = true;
 	else
 	  _md->flags.SelectionAreaFlag = false;
@@ -490,7 +465,7 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 	    {
 	      mpeg_sequence_t *_seq;
 
-	      if ((_seq = _get_sequence_by_id ((VcdObj *) obj, _pbc->item_id)))
+	      if ((_seq = _vcd_obj_get_sequence_by_id ((VcdObj *) obj, _pbc->item_id)))
 		{
 		  const unsigned _entries = _vcd_list_length (_seq->entry_list) + 1;
 
@@ -528,7 +503,7 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 	    }
 	}
 
-	if (extended || obj->type == VCD_TYPE_SVCD)
+	if (extended || _vcd_obj_has_cap_p (obj, _CAP_4C_SVCD))
 	  {
 	    PsdSelectionListDescriptorExtended *_md2;
 	    VcdListNode *node;
@@ -566,7 +541,7 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 
 	_md->type = PSD_TYPE_END_LIST;
 
-	if (obj->type == VCD_TYPE_SVCD)
+	if (_vcd_obj_has_cap_p (obj, _CAP_4C_SVCD))
 	  {
 	    _md->next_disc = _pbc->next_disc;
 
@@ -635,22 +610,26 @@ _vcd_pbc_finalize (VcdObj *obj)
   _VCD_LIST_FOREACH (node, obj->pbc_list)
     {
       pbc_t *_pbc = _vcd_list_node_data (node);
-      unsigned length, length_ext;
+      unsigned length, length_ext = 0;
 
       length = _vcd_pbc_node_length (obj, _pbc, false);
-      length_ext = _vcd_pbc_node_length (obj, _pbc, true);
+      if (_vcd_obj_has_cap_p (obj, _CAP_PBC_X))
+	length_ext = _vcd_pbc_node_length (obj, _pbc, true);
 
       /* round them up to... */
       length = _vcd_ceil2block (length, INFO_OFFSET_MULT);
-      length_ext = _vcd_ceil2block (length_ext, INFO_OFFSET_MULT);
+      if (_vcd_obj_has_cap_p (obj, _CAP_PBC_X))
+	length_ext = _vcd_ceil2block (length_ext, INFO_OFFSET_MULT);
 
       /* node may not cross sector boundary! */
       offset = _vcd_ofs_add (offset, length, ISO_BLOCKSIZE);
-      offset_ext = _vcd_ofs_add (offset_ext, length_ext, ISO_BLOCKSIZE);
+      if (_vcd_obj_has_cap_p (obj, _CAP_PBC_X))
+	offset_ext = _vcd_ofs_add (offset_ext, length_ext, ISO_BLOCKSIZE);
 
       /* save start offsets */
       _pbc->offset = offset - length;
-      _pbc->offset_ext = offset_ext - length_ext;
+      if (_vcd_obj_has_cap_p (obj, _CAP_PBC_X))
+	_pbc->offset_ext = offset_ext - length_ext;
 
       _pbc->lid = lid;
 
@@ -658,7 +637,8 @@ _vcd_pbc_finalize (VcdObj *obj)
     }
 
   obj->psd_size = offset;
-  obj->psdx_size = offset_ext;
+  if (_vcd_obj_has_cap_p (obj, _CAP_PBC_X))
+    obj->psdx_size = offset_ext;
 
   vcd_debug ("pbc: psd size %d (extended psd %d)", offset, offset_ext);
 

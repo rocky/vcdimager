@@ -88,6 +88,12 @@ set_entries_vcd (VcdObj *obj, void *buf)
 
   switch (obj->type)
     {
+    case VCD_TYPE_VCD:
+      strncpy(entries_vcd.ID, ENTRIES_ID_VCD, 8);
+      entries_vcd.version = ENTRIES_VERSION_VCD;
+      entries_vcd.sys_prof_tag = ENTRIES_SPTAG_VCD;
+      break;
+
     case VCD_TYPE_VCD11:
       strncpy(entries_vcd.ID, ENTRIES_ID_VCD, 8);
       entries_vcd.version = ENTRIES_VERSION_VCD11;
@@ -105,11 +111,17 @@ set_entries_vcd (VcdObj *obj, void *buf)
         strncpy(entries_vcd.ID, ENTRIES_ID_SVCD, 8);
       else
         {
-          vcd_warn ("setting ENTRYSVD signature for *DEPRECATED* VCD30 type SVCD");
-          strncpy(entries_vcd.ID, "ENTRYSVD", 8);
+          vcd_warn ("setting ENTRYSVD signature for *DEPRECATED* VCD 3.0 type SVCD");
+          strncpy(entries_vcd.ID, ENTRIES_ID_VCD3, 8);
         }
       entries_vcd.version = ENTRIES_VERSION_SVCD;
       entries_vcd.sys_prof_tag = ENTRIES_SPTAG_SVCD;
+      break;
+
+    case VCD_TYPE_HQVCD:
+      strncpy(entries_vcd.ID, ENTRIES_ID_SVCD, 8);
+      entries_vcd.version = ENTRIES_VERSION_HQVCD;
+      entries_vcd.sys_prof_tag = ENTRIES_SPTAG_HQVCD;
       break;
       
     default:
@@ -178,6 +190,9 @@ _set_bit (uint8_t bitset[], unsigned bitnum)
 uint32_t 
 get_psd_size (VcdObj *obj, bool extended)
 {
+  if (extended)
+    vcd_assert (_vcd_obj_has_cap_p (obj, _CAP_PBC_X));
+
   if (!_vcd_pbc_available (obj))
     return 0;
   
@@ -191,6 +206,9 @@ void
 set_psd_vcd (VcdObj *obj, void *buf, bool extended)
 {
   VcdListNode *node;
+
+  if (extended)
+    vcd_assert (_vcd_obj_has_cap_p (obj, _CAP_PBC_X));
 
   vcd_assert (_vcd_pbc_available (obj));
 
@@ -211,6 +229,9 @@ set_lot_vcd(VcdObj *obj, void *buf, bool extended)
 {
   LotVcd *lot_vcd = NULL;
   VcdListNode *node;
+
+  if (extended)
+    vcd_assert (_vcd_obj_has_cap_p (obj, _CAP_PBC_X));
 
   vcd_assert (_vcd_pbc_available (obj));
 
@@ -252,6 +273,12 @@ set_info_vcd(VcdObj *obj, void *buf)
 
   switch (obj->type)
     {
+    case VCD_TYPE_VCD:
+      strncpy (info_vcd.ID, INFO_ID_VCD, sizeof (info_vcd.ID));
+      info_vcd.version = INFO_VERSION_VCD;
+      info_vcd.sys_prof_tag = INFO_SPTAG_VCD;
+      break;
+
     case VCD_TYPE_VCD11:
       strncpy (info_vcd.ID, INFO_ID_VCD, sizeof (info_vcd.ID));
       info_vcd.version = INFO_VERSION_VCD11;
@@ -269,6 +296,12 @@ set_info_vcd(VcdObj *obj, void *buf)
       info_vcd.version = INFO_VERSION_SVCD;
       info_vcd.sys_prof_tag = INFO_SPTAG_SVCD;
       break;
+
+    case VCD_TYPE_HQVCD:
+      strncpy (info_vcd.ID, INFO_ID_HQVCD, sizeof (info_vcd.ID));
+      info_vcd.version = INFO_VERSION_HQVCD;
+      info_vcd.sys_prof_tag = INFO_SPTAG_HQVCD;
+      break;
       
     default:
       vcd_assert_not_reached ();
@@ -283,15 +316,9 @@ set_info_vcd(VcdObj *obj, void *buf)
   info_vcd.vol_count = UINT16_TO_BE (obj->info_volume_count);
   info_vcd.vol_id = UINT16_TO_BE (obj->info_volume_number);
 
-  switch (obj->type)
+  if (_vcd_obj_has_cap_p (obj, _CAP_PAL_BITS))
     {
-    case VCD_TYPE_VCD2:
-    case VCD_TYPE_SVCD:
       /* NTSC/PAL bitset */
-
-      info_vcd.flags.restriction = obj->info_restriction;
-      info_vcd.flags.use_lid2 = obj->info_use_lid2;
-      info_vcd.flags.use_track3 = obj->info_use_seq2;
 
       n = 0;
       _VCD_LIST_FOREACH (node, obj->mpeg_track_list)
@@ -310,11 +337,18 @@ set_info_vcd(VcdObj *obj, void *buf)
         
           n++;
         }
+    }
+
+  if (_vcd_obj_has_cap_p (obj, _CAP_PBC))
+    {
+      info_vcd.flags.restriction = obj->info_restriction;
+      info_vcd.flags.use_lid2 = obj->info_use_lid2;
+      info_vcd.flags.use_track3 = obj->info_use_seq2;
       
       info_vcd.psd_size = uint32_to_be (get_psd_size (obj, false));
       info_vcd.offset_mult = _vcd_pbc_available (obj) ? INFO_OFFSET_MULT : 0;
       info_vcd.lot_entries = uint16_to_be (_vcd_pbc_max_lid (obj));
-
+      
       if (_vcd_list_length (obj->mpeg_segment_list))
         {
           unsigned segments = 0;
@@ -349,16 +383,6 @@ set_info_vcd(VcdObj *obj, void *buf)
 
           lba_to_msf (obj->mpeg_segment_start_extent + 150, &info_vcd.first_seg_addr);
         }
-
-      break;
-
-    case VCD_TYPE_VCD11:
-      /* keep 0ed */
-      break;
-
-    default:
-      vcd_assert_not_reached ();
-      break;
     }
 
   memcpy(buf, &info_vcd, sizeof(info_vcd));
@@ -372,8 +396,9 @@ set_tracks_svd (VcdObj *obj, void *buf)
   TracksSVD2 *tracks_svd2;
   VcdListNode *node;
   int n;
-  
-  vcd_assert (obj->type == VCD_TYPE_SVCD);
+
+  vcd_assert (_vcd_obj_has_cap_p (obj, _CAP_4C_SVCD));
+
   vcd_assert (sizeof (SVDTrackContent) == 1);
 
   strncpy (tracks_svd1->file_id, TRACKS_SVD_FILE_ID, sizeof (TRACKS_SVD_FILE_ID));
@@ -576,7 +601,7 @@ set_search_dat (VcdObj *obj, void *buf)
   SearchDat search_dat;
   unsigned n;
 
-  vcd_assert (obj->type == VCD_TYPE_SVCD);
+  vcd_assert (_vcd_obj_has_cap_p (obj, _CAP_4C_SVCD));
   /* vcd_assert (sizeof (SearchDat) == ?) */
 
   memset (&search_dat, 0, sizeof (search_dat));
@@ -704,7 +729,7 @@ set_scandata_dat (VcdObj *obj, void *buf)
   unsigned n;
   uint16_t _tmp_offset;
 
-  vcd_assert (obj->type == VCD_TYPE_SVCD);
+  vcd_assert (_vcd_obj_has_cap_p (obj, _CAP_4C_SVCD));
 
   /* memset (buf, 0, get_scandata_dat_size (obj)); */
 
@@ -779,6 +804,77 @@ set_scandata_dat (VcdObj *obj, void *buf)
   /* struct 4 */
 
   
+}
+
+vcd_type_t
+vcd_files_info_detect_type (const void *info_buf)
+{
+  const InfoVcd *_info = info_buf;
+  vcd_type_t _type = VCD_TYPE_INVALID;
+
+  vcd_assert (info_buf != NULL);
+  
+  if (!strncmp (_info->ID, INFO_ID_VCD, sizeof (_info->ID)))
+    switch (_info->version)
+      {
+      case INFO_VERSION_VCD2:
+        if (_info->sys_prof_tag != INFO_SPTAG_VCD2)
+          vcd_warn ("INFO.VCD: unexpected system profile tag encountered");
+        _type = VCD_TYPE_VCD2;
+        break;
+
+      case INFO_VERSION_VCD:
+   /* case INFO_VERSION_VCD11: */
+        switch (_info->sys_prof_tag)
+          {
+          case INFO_SPTAG_VCD:
+            _type = VCD_TYPE_VCD;
+            break;
+          case INFO_SPTAG_VCD11:
+            _type = VCD_TYPE_VCD11;
+            break;
+          default:
+            vcd_warn ("INFO.VCD: unexpected system profile tag encountered, assuming VCD 1.1");
+            break;
+          }
+        break;
+
+      default:
+        vcd_warn ("unexpected vcd version encountered -- assuming vcd 2.0");
+        break;
+      }
+  else if (!strncmp (_info->ID, INFO_ID_SVCD, sizeof (_info->ID)))
+    switch (_info->version) 
+      {
+      case INFO_VERSION_SVCD:
+        if (_info->sys_prof_tag != INFO_SPTAG_SVCD)
+          vcd_warn ("INFO.SVD: unexpected system profile tag value -- assuming svcd");
+        _type = VCD_TYPE_SVCD;
+        break;
+        
+      default:
+        vcd_warn ("INFO.SVD: unexpected version value seen -- still assuming svcd");
+        _type = VCD_TYPE_SVCD;
+        break;
+      }
+  else if (!strncmp (_info->ID, INFO_ID_HQVCD, sizeof (_info->ID)))
+    switch (_info->version) 
+      {
+      case INFO_VERSION_HQVCD:
+  if (_info->sys_prof_tag != INFO_SPTAG_HQVCD)
+          vcd_warn ("INFO.SVD: unexpected system profile tag value -- assuming hqvcd");
+        _type = VCD_TYPE_HQVCD;
+        break;
+        
+      default:
+        vcd_warn ("INFO.SVD: unexpected version value seen -- still assuming hqvcd");
+        _type = VCD_TYPE_HQVCD;
+        break;
+      }
+  else
+    vcd_warn ("INFO.SVD: signature not found");
+  
+  return _type;
 }
 
 /* eof */

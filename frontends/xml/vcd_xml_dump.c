@@ -175,18 +175,31 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 
   switch (obj->vcd_type) 
     {
-    case VCD_TYPE_SVCD:
-      xmlSetProp (vcd_node, "class", "svcd");
+    case VCD_TYPE_VCD:
+      xmlSetProp (vcd_node, "class", "vcd");
       xmlSetProp (vcd_node, "version", "1.0");
       break;
-    case VCD_TYPE_VCD2:
-      xmlSetProp (vcd_node, "class", "vcd");
-      xmlSetProp (vcd_node, "version", "2.0");
-      break;
+
     case VCD_TYPE_VCD11:
       xmlSetProp (vcd_node, "class", "vcd");
       xmlSetProp (vcd_node, "version", "1.1");
       break;
+
+    case VCD_TYPE_VCD2:
+      xmlSetProp (vcd_node, "class", "vcd");
+      xmlSetProp (vcd_node, "version", "2.0");
+      break;
+
+    case VCD_TYPE_SVCD:
+      xmlSetProp (vcd_node, "class", "svcd");
+      xmlSetProp (vcd_node, "version", "1.0");
+      break;
+
+    case VCD_TYPE_HQVCD:
+      xmlSetProp (vcd_node, "class", "hqvcd");
+      xmlSetProp (vcd_node, "version", "1.0");
+      break;
+
     default:
       vcd_assert_not_reached ();
       break;

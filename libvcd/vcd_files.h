@@ -67,6 +67,10 @@ get_scandata_dat_size (const VcdObj *obj);
 void
 set_scandata_dat (VcdObj *obj, void *buf);
 
+
+vcd_type_t
+vcd_files_info_detect_type (const void *info_buf);
+
 #endif /* VCDFILES_H */
 
 

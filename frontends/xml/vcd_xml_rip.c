@@ -241,7 +241,7 @@ static int
 _parse_info (struct vcdxml_t *obj, VcdImageSource *img)
 {
   InfoVcd info;
-  vcd_type_t _vcd_type = VCD_TYPE_INVALID;
+  vcd_type_t _vcd_type;
 
   memset (&info, 0, sizeof (InfoVcd));
   vcd_assert (sizeof (InfoVcd) == ISO_BLOCKSIZE);
@@ -250,45 +250,13 @@ _parse_info (struct vcdxml_t *obj, VcdImageSource *img)
 
   /* analyze signature/type */
 
-  if (!strncmp (info.ID, INFO_ID_VCD, sizeof (info.ID)))
-    switch (info.version)
-      {
-      case INFO_VERSION_VCD2:
-        if (info.sys_prof_tag != INFO_SPTAG_VCD2)
-          vcd_warn ("unexpected system profile tag encountered");
-        _vcd_type = VCD_TYPE_VCD2;
-        break;
+  obj->vcd_type = _vcd_type = vcd_files_info_detect_type (&info);
 
-      case INFO_VERSION_VCD11:
-        if (info.sys_prof_tag != INFO_SPTAG_VCD11)
-          vcd_warn ("unexpected system profile tag encountered");
-        _vcd_type = VCD_TYPE_VCD11;
-        break;
-
-      default:
-        vcd_warn ("unexpected vcd version encountered -- assuming vcd 2.0");
-        break;
-      }
-  else if (!strncmp (info.ID, INFO_ID_SVCD, sizeof (info.ID)))
-    switch (info.version) 
-      {
-      case INFO_VERSION_SVCD:
-        if (info.sys_prof_tag != INFO_SPTAG_VCD2)
-          vcd_warn ("unexpected system profile tag value -- assuming svcd");
-        _vcd_type = VCD_TYPE_SVCD;
-        break;
-        
-      default:
-        vcd_warn ("unexpected svcd version...");
-        _vcd_type = VCD_TYPE_SVCD;
-        break;
-      }
-  else
-    vcd_error ("INFO signature not found");
-
-  obj->vcd_type = _vcd_type;
   switch (_vcd_type)
     {
+    case VCD_TYPE_VCD:
+      vcd_debug ("VCD 1.0 detected\n");
+      break;
     case VCD_TYPE_VCD11:
       vcd_debug ("VCD 1.1 detected");
       break;
@@ -297,6 +265,9 @@ _parse_info (struct vcdxml_t *obj, VcdImageSource *img)
       break;
     case VCD_TYPE_SVCD:
       vcd_debug ("SVCD detected");
+      break;
+    case VCD_TYPE_HQVCD:
+      vcd_debug ("HQVCD detected\n");
       break;
     case VCD_TYPE_INVALID:
       vcd_error ("unknown ID encountered -- maybe not a proper (S)VCD?");

@@ -704,9 +704,11 @@ _type_id_by_str (const char class[], const char version[])
     const char *version;
     vcd_type_t id;
   } type_str[] = {
+    { "vcd", "1.0", VCD_TYPE_VCD },
     { "vcd", "1.1", VCD_TYPE_VCD11 },
     { "vcd", "2.0", VCD_TYPE_VCD2 },
     { "svcd", "1.0", VCD_TYPE_SVCD },
+    { "hqvcd", "1.0", VCD_TYPE_HQVCD },
     { NULL, NULL, VCD_TYPE_INVALID }
   };
       

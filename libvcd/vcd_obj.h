@@ -61,6 +61,10 @@ typedef struct {
   VcdMpegSource *source;
   char *id;
   const struct vcd_mpeg_source_info *info;
+
+  VcdList *pause_list; /* pause_t */
+
+  /* computed through info */
   unsigned segment_count;
 
   /* computed on sector allocation */
@@ -86,6 +90,7 @@ struct _VcdObj {
 
   bool update_scan_offsets;
   bool relaxed_aps;
+  bool leadout_pause;
 
   unsigned pre_track_gap;
   unsigned pre_data_gap;
@@ -144,6 +149,28 @@ struct _VcdObj {
   progress_callback_t progress_callback;
   void *callback_user_data;
 };
+
+/* private functions */
+
+mpeg_sequence_t *
+_vcd_obj_get_sequence_by_id (VcdObj *obj, const char sequence_id[]);
+
+mpeg_segment_t *
+_vcd_obj_get_segment_by_id (VcdObj *obj, const char segment_id[]);
+
+enum vcd_capability_t {
+  _CAP_VALID,
+  _CAP_MPEG1,
+  _CAP_MPEG2,
+  _CAP_PBC,
+  _CAP_PBC_X,
+  _CAP_DATA_GAP,
+  _CAP_4C_SVCD,
+  _CAP_PAL_BITS
+};
+
+bool
+_vcd_obj_has_cap_p (const VcdObj *obj, enum vcd_capability_t capability);
 
 #endif /* __VCD_OBJ_H__ */
 

@@ -69,9 +69,12 @@ _parse_type_arg (const char arg[])
     vcd_type_t id;
   } type_str[] = 
     {
+      { "vcd10", VCD_TYPE_VCD },
       { "vcd11", VCD_TYPE_VCD11 },
       { "vcd2", VCD_TYPE_VCD2 },
+      { "vcd20", VCD_TYPE_VCD2 },
       { "svcd", VCD_TYPE_SVCD },
+      { "hqvcd", VCD_TYPE_HQVCD },
       { NULL, VCD_TYPE_INVALID }
     };
       
@@ -266,8 +269,8 @@ main (int argc, const char *argv[])
          "FILE"},
 
         {"type", 't', POPT_ARG_STRING, &type_str, 0,
-         "select VideoCD type ('vcd11', 'vcd2' or 'svcd') (default: '" DEFAULT_TYPE "')", 
-         "TYPE"},
+         "select VideoCD type ('vcd11', 'vcd2', 'svcd' or 'hqvcd')"
+         " (default: '" DEFAULT_TYPE "')", "TYPE"},
 
         {"iso-volume-label", 'l', POPT_ARG_STRING, &obj.pvd.volume_id, 0,
          "specify ISO volume label for video cd (default: '" DEFAULT_VOLUME_ID
@@ -423,6 +426,10 @@ main (int argc, const char *argv[])
 
   /* done with argument processing */
 
+  if (obj.vcd_type == VCD_TYPE_VCD11
+      || obj.vcd_type == VCD_TYPE_VCD)
+    nopbc_flag = true;
+
   if (!nopbc_flag) 
     {
       pbc_t *_pbc;
@@ -465,7 +472,8 @@ main (int argc, const char *argv[])
       _vcd_list_append (obj.pbc_list, _pbc);
     }
 
-  if (obj.vcd_type == VCD_TYPE_SVCD 
+  if ((obj.vcd_type == VCD_TYPE_SVCD 
+       || obj.vcd_type == VCD_TYPE_HQVCD)
       && update_scan_offsets_flag)
     {
       struct option_t *_opt = _vcd_malloc (sizeof (struct option_t));

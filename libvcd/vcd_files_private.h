@@ -29,16 +29,23 @@
 /* random note: most stuff is big endian here */
 
 #define ENTRIES_ID_VCD  "ENTRYVCD"
+#define ENTRIES_ID_VCD3 "ENTRYSVD"
 #define ENTRIES_ID_SVCD "ENTRYVCD" /* not ENTRYSVD! */
 
+#define ENTRIES_VERSION_VCD   0x01
+#define ENTRIES_SPTAG_VCD     0x00   
+
 #define ENTRIES_VERSION_VCD11 0x01
-#define ENTRIES_SPTAG_VCD11   0x01   
+#define ENTRIES_SPTAG_VCD11   0x00   
 
 #define ENTRIES_VERSION_VCD2  0x02
 #define ENTRIES_SPTAG_VCD2    0x00
 
 #define ENTRIES_VERSION_SVCD  0x01
 #define ENTRIES_SPTAG_SVCD    0x00
+
+#define ENTRIES_VERSION_HQVCD 0x01
+#define ENTRIES_SPTAG_HQVCD   0x00
 
 #ifdef __MWERKS__
 #pragma options align=packed
@@ -63,6 +70,9 @@ typedef struct {
 #define INFO_ID_VCD   "VIDEO_CD"
 #define INFO_ID_SVCD  "SUPERVCD"
 #define INFO_ID_HQVCD "HQ-VCD  "
+
+#define INFO_VERSION_VCD   0x01
+#define INFO_SPTAG_VCD     0x00   
 
 #define INFO_VERSION_VCD11 0x01
 #define INFO_SPTAG_VCD11   0x01   

@@ -1,3 +1,29 @@
+2001-07-31  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd.c (_vcd_obj_get_sequence_by_id): exported function
+	(_vcd_obj_get_segment_by_id): new function
+	(vcd_obj_add_segment_pause): new function
+
+2001-07-30  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd.c: added new option "leadout pause" for adding 
+		a 150 sector length track pause after the last track
+	
+	* frontends/xml/vcd_xml_gen.c: don't create PBC section for 
+		vcd types lacking that feature...
+
+	* libvcd/vcd_files.c (vcd_files_info_detect_type): 
+		moved function shared by vcd_debug.c and vcd_xml_rip.c
+		into libvcd
+
+	* implemented support for VCD 1.0 and HQVCD formats in libvcd,
+		added new options to frontends
+	
+	* libvcd/vcd.c (_vcd_obj_has_cap_p): new function for unifying 
+		capatibilities for different VCD types.
+
+	* frontends/cli/vcdimager.c: fixed unitialised add_files list
+
 2001-07-28  Herbert Valerio Riedel  <hvr@gnu.org>
 
  	* configure.in: bumped version up to 0.7.8

@@ -70,6 +70,7 @@ struct vcdxml_t {
 #define OPT_SVCD_VCD3_ENTRYSVD      "svcd vcd30 entrysvd"
 #define OPT_RELAXED_APS             "relaxed aps"
 #define OPT_UPDATE_SCAN_OFFSETS     "update scan offsets"
+#define OPT_LEADOUT_PAUSE           "leadout pause"
 
 struct option_t {
   char *name;

@@ -91,9 +91,6 @@ gl_add_file (char *fname, char *iso_fname, int raw_flag)
 {
   struct add_files_t *tmp = _vcd_malloc (sizeof (struct add_files_t));
 
-  if (!gl.add_files)
-    gl.add_files = _vcd_list_new ();
-
   _vcd_list_append (gl.add_files, tmp);
 
   tmp->fname = fname;
@@ -197,6 +194,8 @@ main (int argc, const char *argv[])
 
   gl.default_vcd_log_handler = vcd_log_set_handler (_vcd_log_handler);
 
+  gl.add_files = _vcd_list_new ();
+
   {
     const char **args = NULL;
     int opt = 0;
@@ -211,8 +210,8 @@ main (int argc, const char *argv[])
     struct poptOption optionsTable[] = 
       {
         {"type", 't', POPT_ARG_STRING, &gl.type, 0,
-         "select VideoCD type ('vcd11', 'vcd2' or 'svcd') (default: '" DEFAULT_TYPE "')", 
-         "TYPE"},
+         "select VideoCD type ('vcd11', 'vcd2', 'svcd' or 'hqvcd')"
+         " (default: '" DEFAULT_TYPE "')", "TYPE"},
 
         {"cue-file", 'c', POPT_ARG_STRING, &gl.cue_fname, 0,
          "specify cue file for output (default: '" DEFAULT_CUE_FILE "')",
@@ -342,9 +341,12 @@ main (int argc, const char *argv[])
         vcd_type_t id;
       } type_str[] = 
         {
+          { "vcd10", VCD_TYPE_VCD },
           { "vcd11", VCD_TYPE_VCD11 },
           { "vcd2", VCD_TYPE_VCD2 },
+          { "vcd20", VCD_TYPE_VCD2 },
           { "svcd", VCD_TYPE_SVCD },
+          { "hqvcd", VCD_TYPE_HQVCD },
           { NULL, }
         };
       
@@ -389,7 +391,7 @@ main (int argc, const char *argv[])
       vcd_obj_set_param_bool (gl_vcd_obj, VCD_PARM_SVCD_VCD3_ENTRYSVD,
                               gl.broken_svcd_mode_flag);
 
-      vcd_obj_set_param_bool (gl_vcd_obj, VCD_PARM_UPDATE_SCAN_OFSSETS, 
+      vcd_obj_set_param_bool (gl_vcd_obj, VCD_PARM_UPDATE_SCAN_OFFSETS, 
                               gl.update_scan_offsets);
     }
 

@@ -50,30 +50,157 @@ static const char _rcsid[] = "$Id$";
 
 static const char zero[CDDA_SIZE] = { 0, };
 
-/*
+/* exported private functions
  */
 
-static mpeg_sequence_t *
-_get_sequence_by_id (VcdObj *obj, const char id[])
+mpeg_sequence_t *
+_vcd_obj_get_sequence_by_id (VcdObj *obj, const char sequence_id[])
 {
   VcdListNode *node;
 
-  vcd_assert (id != NULL);
+  vcd_assert (sequence_id != NULL);
   vcd_assert (obj != NULL);
 
   _VCD_LIST_FOREACH (node, obj->mpeg_sequence_list)
     {
       mpeg_sequence_t *_sequence = _vcd_list_node_data (node);
 
-      if (_sequence->id && !strcmp (id, _sequence->id))
+      if (_sequence->id && !strcmp (sequence_id, _sequence->id))
         return _sequence;
     }
 
   return NULL;
 }
 
+mpeg_segment_t *
+_vcd_obj_get_segment_by_id (VcdObj *obj, const char segment_id[])
+{
+  VcdListNode *node;
+
+  vcd_assert (segment_id != NULL);
+  vcd_assert (obj != NULL);
+
+  _VCD_LIST_FOREACH (node, obj->mpeg_segment_list)
+    {
+      mpeg_segment_t *_segment = _vcd_list_node_data (node);
+
+      if (_segment->id && !strcmp (segment_id, _segment->id))
+        return _segment;
+    }
+
+  return NULL;
+}
+
+bool
+_vcd_obj_has_cap_p (const VcdObj *obj, enum vcd_capability_t capability)
+{
+  switch (capability)
+    {
+    case _CAP_VALID:
+      switch (obj->type)
+        {
+        case VCD_TYPE_VCD:
+        case VCD_TYPE_VCD11:
+        case VCD_TYPE_VCD2:
+        case VCD_TYPE_SVCD:
+        case VCD_TYPE_HQVCD:
+          return true;
+          break;
+
+        case VCD_TYPE_INVALID:
+          return false;
+          break;
+        }
+      break;
+
+    case _CAP_MPEG2:
+      switch (obj->type)
+        {
+        case VCD_TYPE_VCD:
+        case VCD_TYPE_VCD11:
+        case VCD_TYPE_VCD2:
+        case VCD_TYPE_INVALID:
+          return false;
+          break;
+
+        case VCD_TYPE_SVCD:
+        case VCD_TYPE_HQVCD:
+          return true;
+          break;
+        }
+      break;
+
+    case _CAP_PBC:
+      switch (obj->type)
+        {
+        case VCD_TYPE_VCD:
+        case VCD_TYPE_VCD11:
+        case VCD_TYPE_INVALID:
+          return false;
+          break;
+
+        case VCD_TYPE_VCD2:
+        case VCD_TYPE_SVCD:
+        case VCD_TYPE_HQVCD:
+          return true;
+          break;
+        }
+      break;
+
+    case _CAP_PBC_X:
+      switch (obj->type)
+        {
+        case VCD_TYPE_VCD:
+        case VCD_TYPE_VCD11:
+        case VCD_TYPE_INVALID:
+        case VCD_TYPE_SVCD:
+        case VCD_TYPE_HQVCD:
+          return false;
+          break;
+
+        case VCD_TYPE_VCD2:
+          return true;
+          break;
+        }
+      break;
+
+    case _CAP_4C_SVCD:
+      switch (obj->type)
+        {
+        case VCD_TYPE_VCD:
+        case VCD_TYPE_VCD11:
+        case VCD_TYPE_INVALID:
+        case VCD_TYPE_VCD2:
+          return false;
+          break;
+
+        case VCD_TYPE_SVCD:
+        case VCD_TYPE_HQVCD:
+          return true;
+          break;
+        }
+      break;
+
+    case _CAP_PAL_BITS:
+      return _vcd_obj_has_cap_p (obj, _CAP_PBC); /* for now */
+      break;
+
+    case _CAP_MPEG1:
+      return !_vcd_obj_has_cap_p (obj, _CAP_MPEG2); /* for now */
+      break;
+
+    case _CAP_DATA_GAP:
+      return !_vcd_obj_has_cap_p (obj, _CAP_MPEG2); /* for now */
+      break;
+    }
+
+  vcd_assert_not_reached ();
+  return false;
+}
+
 /*
- */
+ * public methods
+ */ 
 
 VcdObj *
 vcd_obj_new (vcd_type_t vcd_type)
@@ -96,21 +223,18 @@ vcd_obj_new (vcd_type_t vcd_type)
       _first = false;
     }
 
-  switch (vcd_type) 
+  new_obj = _vcd_malloc (sizeof (VcdObj));
+  new_obj->type = vcd_type;
+
+  if (!_vcd_obj_has_cap_p (new_obj, _CAP_VALID))
     {
-    case VCD_TYPE_VCD11:
-    case VCD_TYPE_VCD2:
-      break;
-      
-    case VCD_TYPE_SVCD:
-      break;
-    default:
       vcd_error ("VCD type not supported");
-      return new_obj; /* NULL */
-      break;
+      free (new_obj);
+      return NULL;
     }
 
-  new_obj = _vcd_malloc (sizeof (VcdObj));
+  if (vcd_type == VCD_TYPE_VCD)
+    vcd_warn ("VCD 1.0 support is experimental -- user feedback needed!");
 
   new_obj->iso_volume_label = strdup ("");
   new_obj->iso_application_id = strdup ("");
@@ -121,7 +245,6 @@ vcd_obj_new (vcd_type_t vcd_type)
   new_obj->custom_file_list = _vcd_list_new ();
   new_obj->custom_dir_list = _vcd_list_new ();
 
-  new_obj->type = vcd_type;
 
   new_obj->mpeg_sequence_list = _vcd_list_new ();
 
@@ -129,23 +252,17 @@ vcd_obj_new (vcd_type_t vcd_type)
 
   new_obj->pbc_list = _vcd_list_new ();
 
-  switch (vcd_type) 
+  if (_vcd_obj_has_cap_p (new_obj, _CAP_DATA_GAP))
     {
-    case VCD_TYPE_VCD11:
-    case VCD_TYPE_VCD2:
       new_obj->pre_track_gap = 150;
       new_obj->pre_data_gap = 30;
       new_obj->post_data_gap = 45;
-      break;
-      
-    case VCD_TYPE_SVCD:
+    }
+  else
+    {
       new_obj->pre_track_gap = 150;
       new_obj->pre_data_gap = 0;
       new_obj->post_data_gap = 0;
-      break;
-
-    default:
-      vcd_assert_not_reached ();
     }
 
   return new_obj;
@@ -201,10 +318,9 @@ vcd_obj_append_segment_play_item (VcdObj *obj, VcdMpegSource *mpeg_source,
   vcd_assert (obj != NULL);
   vcd_assert (mpeg_source != NULL);
 
-  if (obj->type != VCD_TYPE_SVCD
-      && obj->type != VCD_TYPE_VCD2)
+  if (!_vcd_obj_has_cap_p (obj, _CAP_PBC))
     {
-      vcd_error ("segment play items only supported for VCD2.0 and SVCD");
+      vcd_error ("segment play items not supported for this vcd type");
       return -1;
     }
 
@@ -241,6 +357,8 @@ vcd_obj_append_segment_play_item (VcdObj *obj, VcdMpegSource *mpeg_source,
   segment->info = vcd_mpeg_source_get_info (mpeg_source);
   segment->segment_count = _vcd_len2blocks (segment->info->packets, 150);
 
+  segment->pause_list = _vcd_list_new ();
+
   vcd_debug ("SPI length is %d sector(s), allocated %d segment(s)",
              segment->info->packets,
              segment->segment_count);
@@ -256,7 +374,7 @@ vcd_obj_append_sequence_play_item (VcdObj *obj, VcdMpegSource *mpeg_source,
                                    const char default_entry_id[])
 {
   unsigned length;
-  mpeg_sequence_t *track = NULL;
+  mpeg_sequence_t *sequence = NULL;
   int track_no = _vcd_list_length (obj->mpeg_sequence_list);
 
   vcd_assert (obj != NULL);
@@ -283,51 +401,51 @@ vcd_obj_append_sequence_play_item (VcdObj *obj, VcdMpegSource *mpeg_source,
   vcd_info ("scanning mpeg sequence item #%d for scanpoints...", track_no);
   vcd_mpeg_source_scan (mpeg_source, !obj->relaxed_aps, NULL, NULL);
 
-  track = _vcd_malloc (sizeof (mpeg_sequence_t));
+  sequence = _vcd_malloc (sizeof (mpeg_sequence_t));
 
-  track->source = mpeg_source;
+  sequence->source = mpeg_source;
 
   if (item_id)
-    track->id = strdup (item_id);
+    sequence->id = strdup (item_id);
 
   if (default_entry_id)
-    track->default_entry_id = strdup (default_entry_id);
+    sequence->default_entry_id = strdup (default_entry_id);
   
-  track->info = vcd_mpeg_source_get_info (mpeg_source);
-  length = track->info->packets;
+  sequence->info = vcd_mpeg_source_get_info (mpeg_source);
+  length = sequence->info->packets;
 
-  track->entry_list = _vcd_list_new ();
-  track->pause_list = _vcd_list_new ();
+  sequence->entry_list = _vcd_list_new ();
+  sequence->pause_list = _vcd_list_new ();
 
   obj->relative_end_extent += obj->pre_track_gap;
-  track->relative_start_extent = obj->relative_end_extent;
+  sequence->relative_start_extent = obj->relative_end_extent;
 
   obj->relative_end_extent += obj->pre_data_gap + length + obj->post_data_gap;
 
   if (length < 75)
     vcd_warn ("mpeg stream shorter than 75 sectors");
 
-  if (obj->type == VCD_TYPE_VCD11
-      && track->info->norm != MPEG_NORM_FILM
-      && track->info->norm != MPEG_NORM_NTSC)
-    vcd_warn ("VCD 1.x should contain only NTSC/FILM video");
+  if (!_vcd_obj_has_cap_p (obj, _CAP_PAL_BITS)
+      && sequence->info->norm != MPEG_NORM_FILM
+      && sequence->info->norm != MPEG_NORM_NTSC)
+    vcd_warn ("VCD 1.x should contain only NTSC/FILM video (may work with PAL nevertheless)");
 
-  if (obj->type == VCD_TYPE_SVCD
-      && track->info->version == MPEG_VERS_MPEG1)
-    vcd_warn ("SVCD should not contain MPEG1 tracks!");
-          
-  if ((obj->type == VCD_TYPE_VCD2 || obj->type == VCD_TYPE_VCD11)
-      && track->info->version == MPEG_VERS_MPEG2)
-    vcd_warn ("VCD should not contain MPEG2 tracks!");
-      
-  if (track->info->video_type != MPEG_VIDEO_PAL_MOTION
-      && track->info->video_type != MPEG_VIDEO_NTSC_MOTION)
+  if (!_vcd_obj_has_cap_p (obj, _CAP_MPEG1)
+      && sequence->info->version == MPEG_VERS_MPEG1)
+    vcd_warn ("this VCD type should not contain MPEG1 streams");
+
+  if (!_vcd_obj_has_cap_p (obj, _CAP_MPEG2)
+      && sequence->info->version == MPEG_VERS_MPEG2)
+    vcd_warn ("this VCD type should not contain MPEG2 streams");
+
+  if (sequence->info->video_type != MPEG_VIDEO_PAL_MOTION
+      && sequence->info->video_type != MPEG_VIDEO_NTSC_MOTION)
     vcd_warn ("sequence items should contain a motion video stream!");
     
   vcd_debug ("track# %d's detected playing time: %.2f seconds", 
-             track_no, track->info->playing_time);
+             track_no, sequence->info->playing_time);
 
-  _vcd_list_append (obj->mpeg_sequence_list, track);
+  _vcd_list_append (obj->mpeg_sequence_list, sequence);
 
   return track_no;
 }
@@ -353,7 +471,7 @@ vcd_obj_add_sequence_pause (VcdObj *obj, const char sequence_id[],
   vcd_assert (obj != NULL);
 
   if (sequence_id)
-    _sequence = _get_sequence_by_id (obj, sequence_id);
+    _sequence = _vcd_obj_get_sequence_by_id (obj, sequence_id);
   else
     _sequence = _vcd_list_node_data (_vcd_list_end (obj->mpeg_sequence_list));
 
@@ -384,6 +502,46 @@ vcd_obj_add_sequence_pause (VcdObj *obj, const char sequence_id[],
   return 0;
 }
 
+int 
+vcd_obj_add_segment_pause (VcdObj *obj, const char segment_id[], 
+                            double pause_time, const char pause_id[])
+{
+  mpeg_segment_t *_segment;
+
+  vcd_assert (obj != NULL);
+
+  if (segment_id)
+    _segment = _vcd_obj_get_segment_by_id (obj, segment_id);
+  else
+    _segment = _vcd_list_node_data (_vcd_list_end (obj->mpeg_segment_list));
+
+  if (!_segment)
+    {
+      vcd_error ("segment id `%s' not found", segment_id);
+      return -1;
+    }
+
+  if (pause_id)
+    vcd_warn ("pause id ignored...");
+
+  {
+    pause_t *_pause = _vcd_malloc (sizeof (pause_t));
+
+    if (pause_id)
+      _pause->id = strdup (pause_id);
+    _pause->time = pause_time;
+
+    _vcd_list_append (_segment->pause_list, _pause);
+  }
+
+  _vcd_list_sort (_segment->pause_list, 
+                  (_vcd_list_cmp_func) _pause_cmp);
+
+  vcd_debug ("added autopause point at %f", pause_time);
+
+  return 0;
+}
+
 static int
 _entry_cmp (entry_t *ent1, entry_t *ent2)
 {
@@ -405,7 +563,7 @@ vcd_obj_add_sequence_entry (VcdObj *obj, const char sequence_id[],
   vcd_assert (obj != NULL);
 
   if (sequence_id)
-    _sequence = _get_sequence_by_id (obj, sequence_id);
+    _sequence = _vcd_obj_get_sequence_by_id (obj, sequence_id);
   else
     _sequence = _vcd_list_node_data (_vcd_list_end (obj->mpeg_sequence_list));
 
@@ -610,14 +768,19 @@ vcd_obj_set_param_bool (VcdObj *obj, vcd_parm_t param, bool arg)
         vcd_error ("parameter not applicable for vcd type");
       break;
 
-    case VCD_PARM_UPDATE_SCAN_OFSSETS:
-      if (obj->type == VCD_TYPE_SVCD)
+    case VCD_PARM_UPDATE_SCAN_OFFSETS:
+      if (_vcd_obj_has_cap_p (obj, _CAP_4C_SVCD))
         {
           obj->update_scan_offsets = arg ? true : false;
           vcd_debug ("changing 'update scan offsets' to %d", obj->update_scan_offsets);
         }
       else
         vcd_error ("parameter not applicable for vcd type");
+      break;
+
+    case VCD_PARM_LEADOUT_PAUSE:
+      obj->leadout_pause = arg ? true : false;
+      vcd_debug ("changing 'leadout pause' to %d", obj->relaxed_aps);
       break;
 
     default:
@@ -759,7 +922,7 @@ _finalize_vcd_iso_track_allocation (VcdObj *obj)
                     _vcd_len2blocks (get_psd_size (obj, false), ISO_BLOCKSIZE), SM_EOF); /* PSD.VCD */ /* EOF */
     }
 
-  if (obj->type == VCD_TYPE_SVCD)
+  if (_vcd_obj_has_cap_p (obj, _CAP_4C_SVCD))
     {
       _dict_insert (obj, "tracks", SECTOR_NIL, 1, SM_EOF);      /* TRACKS.SVD */
       _dict_insert (obj, "search", SECTOR_NIL, 
@@ -800,34 +963,24 @@ _finalize_vcd_iso_track_allocation (VcdObj *obj)
 
   /* go on with EXT area */
 
-
-  switch (obj->type) 
+  if (_vcd_obj_has_cap_p (obj, _CAP_4C_SVCD))
     {
-    case VCD_TYPE_VCD11:
-      /* noop */
-      break;
-    case VCD_TYPE_VCD2:
-      if (_vcd_pbc_available (obj))
-        {
-          _dict_insert (obj, "lot_x", SECTOR_NIL, LOT_VCD_SIZE, SM_EOF);
-          
-          _dict_insert (obj, "psd_x", SECTOR_NIL,
-                        _vcd_len2blocks (get_psd_size (obj, true), ISO_BLOCKSIZE),
-                        SM_EOF);
-        }
-      /* scantable.dat */
-
-      break;
-    case VCD_TYPE_SVCD:
       _dict_insert (obj, "scandata", SECTOR_NIL, 
                     _vcd_len2blocks (get_scandata_dat_size (obj),
                                      ISO_BLOCKSIZE),
                     SM_EOF);
-      break;
-    default:
-      vcd_assert_not_reached ();
-      break;
     }
+
+  if (_vcd_obj_has_cap_p (obj, _CAP_PBC_X)
+      &&_vcd_pbc_available (obj))
+    {
+      _dict_insert (obj, "lot_x", SECTOR_NIL, LOT_VCD_SIZE, SM_EOF);
+      
+      _dict_insert (obj, "psd_x", SECTOR_NIL,
+                    _vcd_len2blocks (get_psd_size (obj, true), ISO_BLOCKSIZE),
+                    SM_EOF);
+    }
+
 
   obj->custom_file_start_extent =
     _vcd_salloc_get_highest (obj->iso_bitmap) + 1;
@@ -869,6 +1022,7 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
   /* create filesystem entries */
 
   switch (obj->type) {
+  case VCD_TYPE_VCD:
   case VCD_TYPE_VCD11:
   case VCD_TYPE_VCD2:
     /* add only necessary directories! */
@@ -903,6 +1057,7 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
     break;
 
   case VCD_TYPE_SVCD:
+  case VCD_TYPE_HQVCD:
     _vcd_directory_mkdir (obj->dir, "EXT");
 
     if (!obj->svcd_vcd3_mpegav)
@@ -966,6 +1121,7 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
           fnum = 1;
           break;
         case VCD_TYPE_SVCD:
+        case VCD_TYPE_HQVCD:
           fmt = "SEGMENT/ITEM%4.4d.MPG";
           fnum = 0;
           break;
@@ -987,37 +1143,29 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
 
   /* EXT files */
 
-  switch (obj->type) 
+  if (_vcd_obj_has_cap_p (obj, _CAP_PBC_X)
+      &&_vcd_pbc_available (obj))
     {
-    case VCD_TYPE_VCD2:
-      if (_vcd_pbc_available (obj))
-        {
-          /* psd_x -- extended PSD */
-          _vcd_directory_mkfile (obj->dir, "EXT/PSD_X.VCD",
-                                 _dict_get_bykey (obj, "psd_x")->sector, 
-                                 get_psd_size (obj, true), false, 1);
+      /* psd_x -- extended PSD */
+      _vcd_directory_mkfile (obj->dir, "EXT/PSD_X.VCD",
+                             _dict_get_bykey (obj, "psd_x")->sector, 
+                             get_psd_size (obj, true), false, 1);
 
-          /* lot_x -- extended LOT */
-          _vcd_directory_mkfile (obj->dir, "EXT/LOT_X.VCD",
-                                 _dict_get_bykey (obj, "lot_x")->sector, 
-                                 ISO_BLOCKSIZE*LOT_VCD_SIZE, false, 1);
-        }
-      break;
+      /* lot_x -- extended LOT */
+      _vcd_directory_mkfile (obj->dir, "EXT/LOT_X.VCD",
+                             _dict_get_bykey (obj, "lot_x")->sector, 
+                             ISO_BLOCKSIZE*LOT_VCD_SIZE, false, 1);
 
-    case VCD_TYPE_SVCD:
+      vcd_assert (obj->type == VCD_TYPE_VCD2);
+    }
+
+  if (_vcd_obj_has_cap_p (obj, _CAP_4C_SVCD))
+    {
       /* scandata.dat -- scanpoints */
       _vcd_directory_mkfile (obj->dir, "EXT/SCANDATA.DAT",
                              _dict_get_bykey (obj, "scandata")->sector, 
                              get_scandata_dat_size (obj), false, 0);
-      break;
-
-    case VCD_TYPE_VCD11:
-      break;
-
-    default:
-      vcd_assert_not_reached ();
     }
-
 
   /* custom files/dirs */
   _VCD_LIST_FOREACH (node, obj->custom_dir_list)
@@ -1051,12 +1199,14 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
 
       switch (obj->type) 
         {
+        case VCD_TYPE_VCD:
         case VCD_TYPE_VCD11:
         case VCD_TYPE_VCD2:
           fmt = "MPEGAV/AVSEQ%2.2d.DAT";
           file_num = n + 1;
           break;
         case VCD_TYPE_SVCD:
+        case VCD_TYPE_HQVCD:
           fmt = "MPEG2/AVSEQ%2.2d.MPG";
           file_num = 0;
 
@@ -1092,13 +1242,16 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
 
     switch (obj->type) 
       {
+      case VCD_TYPE_VCD:
       case VCD_TYPE_VCD11:
       case VCD_TYPE_VCD2:
         /* karaoke area starts at 03:00 */
         if (16 + 2 + dirs_size + 2 >= 75) 
           vcd_error ("directory section to big for a VCD");
         break;
+
       case VCD_TYPE_SVCD:
+      case VCD_TYPE_HQVCD:
         /* since no karaoke exists the next fixed area starts at 04:00 */
         if (16 + 2 + dirs_size + 2 >= 150) 
           vcd_error ("directory section to big for a SVCD");
@@ -1276,7 +1429,7 @@ _write_vcd_iso_track (VcdObj *obj)
 
   if (_vcd_pbc_available (obj))
     {
-      if (obj->type == VCD_TYPE_VCD2)
+      if (_vcd_obj_has_cap_p (obj, _CAP_PBC_X))
         {
           set_lot_vcd (obj, _dict_get_bykey (obj, "lot_x")->buf, true);
           set_psd_vcd (obj, _dict_get_bykey (obj, "psd_x")->buf, true);
@@ -1286,7 +1439,7 @@ _write_vcd_iso_track (VcdObj *obj)
       set_psd_vcd (obj, _dict_get_bykey (obj, "psd")->buf, false);
     }
 
-  if (obj->type == VCD_TYPE_SVCD) 
+  if (_vcd_obj_has_cap_p (obj, _CAP_4C_SVCD))
     {
       set_tracks_svd (obj, _dict_get_bykey (obj, "tracks")->buf);
       set_search_dat (obj, _dict_get_bykey (obj, "search")->buf);
@@ -1390,7 +1543,7 @@ _write_vcd_iso_track (VcdObj *obj)
                   break;
                 }
 
-              if (obj->type == VCD_TYPE_SVCD)
+              if (_vcd_obj_has_cap_p (obj, _CAP_4C_SVCD))
                 {
                   cn = 1;
                   sm = SM_FORM2 | SM_REALT | SM_VIDEO;
@@ -1399,8 +1552,6 @@ _write_vcd_iso_track (VcdObj *obj)
 
               if (packet_no + 1 == _segment->info->packets)
                 sm |= SM_EOF;
-
-
 
               if (_need_eor)
                 {
@@ -1433,7 +1584,7 @@ _write_vcd_iso_track (VcdObj *obj)
     {
       const void *content = NULL;
       uint8_t flags = SM_DATA;
-      uint8_t fileno = (obj->type == VCD_TYPE_SVCD) ? 0 : 1;
+      uint8_t fileno = _vcd_obj_has_cap_p (obj, _CAP_4C_SVCD) ? 0 : 1;
 
       content = _dict_get_sector (obj, n);
       flags |= _dict_get_sector_flags (obj, n);
@@ -1532,7 +1683,7 @@ _write_sectors (VcdObj *obj, int track_idx)
     free (norm_str);
   }
 
-  for (n = 0; n < obj->pre_track_gap;n++)
+  for (n = 0; n < obj->pre_track_gap; n++)
     _write_m2_image_sector (obj, zero, lastsect++, 0, 0, SM_FORM2, 0);
 
   for (n = 0; n < obj->pre_data_gap;n++)
@@ -1624,7 +1775,7 @@ _write_sectors (VcdObj *obj, int track_idx)
 
     fnum = track_idx + 1;
       
-    if (obj->type == VCD_TYPE_SVCD
+    if (_vcd_obj_has_cap_p (obj, _CAP_4C_SVCD)
         && !obj->svcd_vcd3_mpegav) /* IEC62107 SVCDs have a simplified subheader */
       {
         fnum = 1;
@@ -1689,6 +1840,9 @@ vcd_obj_begin_output (VcdObj *obj)
 
   image_size = obj->relative_end_extent + obj->iso_size;
 
+  if (obj->leadout_pause)
+    image_size += obj->pre_track_gap;
+
   if (image_size > CD_MAX_SECTORS)
     vcd_error ("image too big (%d sectors > %d sectors)", 
                (unsigned) image_size, (unsigned) CD_MAX_SECTORS);
@@ -1729,10 +1883,9 @@ vcd_obj_append_pbc_node (VcdObj *obj, struct _pbc_t *_pbc)
   vcd_assert (obj != NULL);
   vcd_assert (_pbc != NULL);
 
-  if (obj->type != VCD_TYPE_SVCD
-      && obj->type != VCD_TYPE_VCD2)
+  if (!_vcd_obj_has_cap_p (obj, _CAP_PBC))
     {
-      vcd_error ("PBC only supported for VCD2.0 and SVCD");
+      vcd_error ("PBC not supported for current VCD type");
       return -1;
     }
 
@@ -1793,6 +1946,10 @@ vcd_obj_write_image (VcdObj *obj, VcdImageSink *image_sink,
     _vcd_list_append (cue_list, (_cue = _vcd_malloc (sizeof (vcd_cue_t))));
 
     _cue->lsn = obj->relative_end_extent + obj->iso_size;
+
+    if (obj->leadout_pause)
+      _cue->lsn += obj->pre_track_gap;
+
     _cue->type = VCD_CUE_END;
 
     /* send it to image object */
@@ -1834,6 +1991,16 @@ vcd_obj_write_image (VcdObj *obj, VcdImageSink *image_sink,
 
         if (_write_sectors (obj, track))
           return 1;
+      }
+
+    if (obj->leadout_pause)
+      {
+        int n, lastsect = obj->sectors_written;
+
+        vcd_debug ("writting leadout pause...");
+        
+        for (n = 0; n < obj->pre_track_gap; n++)
+          _write_m2_image_sector (obj, zero, lastsect++, 0, 0, SM_FORM2, 0);
       }
 
     if (_callback_wrapper (obj, true))

@@ -399,7 +399,8 @@ dump_lot (const debug_obj_t *obj, bool ext)
   unsigned mult = obj->info.offset_mult;
 
   fprintf (stdout, 
-           obj->vcd_type == VCD_TYPE_SVCD 
+           (obj->vcd_type == VCD_TYPE_SVCD 
+            || obj->vcd_type == VCD_TYPE_HQVCD)
            ? "SVCD/LOT.SVD\n"
            : (ext ? "EXT/LOT_X.VCD\n": "VCD/LOT.VCD\n"));
 
@@ -433,7 +434,8 @@ dump_psd (const debug_obj_t *obj, bool ext)
   VcdList *offset_list = ext ? obj->offset_x_list : obj->offset_list;
 
   fprintf (stdout, 
-           obj->vcd_type == VCD_TYPE_SVCD 
+           (obj->vcd_type == VCD_TYPE_SVCD 
+            || obj->vcd_type == VCD_TYPE_HQVCD)
            ? "SVCD/PSD.SVD\n"
            : (ext ? "EXT/PSD_X.VCD\n": "VCD/PSD.VCD\n"));
 
@@ -562,44 +564,13 @@ dump_psd (const debug_obj_t *obj, bool ext)
 static vcd_type_t
 detect_type (debug_obj_t *obj)
 {
-  obj->vcd_type = VCD_TYPE_INVALID;
-
-  if (!strncmp (obj->info.ID, INFO_ID_VCD, sizeof (obj->info.ID)))
-    switch (obj->info.version)
-      {
-      case INFO_VERSION_VCD2:
-        if (obj->info.sys_prof_tag != INFO_SPTAG_VCD2)
-          vcd_warn ("INFO.VCD: unexpected system profile tag encountered");
-        obj->vcd_type = VCD_TYPE_VCD2;
-        break;
-
-      case INFO_VERSION_VCD11:
-        if (obj->info.sys_prof_tag != INFO_SPTAG_VCD11)
-          vcd_warn ("INFO.VCD: unexpected system profile tag encountered");
-        obj->vcd_type = VCD_TYPE_VCD11;
-        break;
-
-      default:
-        vcd_warn ("unexpected vcd version encountered -- assuming vcd 2.0");
-        break;
-      }
-  else if (!strncmp (obj->info.ID, INFO_ID_SVCD, sizeof (obj->info.ID)))
-    switch (obj->info.version) 
-      {
-      case INFO_VERSION_SVCD:
-        if (obj->info.sys_prof_tag != INFO_SPTAG_VCD2)
-          vcd_warn ("INFO.SVD: unexpected system profile tag value -- assuming svcd");
-        obj->vcd_type = VCD_TYPE_SVCD;
-        break;
-        
-      default:
-        vcd_warn ("INFO.SVD: unexpected version value seen -- still assuming svcd");
-        obj->vcd_type = VCD_TYPE_SVCD;
-        break;
-      }
+  obj->vcd_type = vcd_files_info_detect_type (&obj->info);
 
   switch (obj->vcd_type)
     {
+    case VCD_TYPE_VCD:
+      fprintf (stdout, "VCD 1.0 detected\n");
+      break;
     case VCD_TYPE_VCD11:
       fprintf (stdout, "VCD 1.1 detected\n");
       break;
@@ -608,6 +579,9 @@ detect_type (debug_obj_t *obj)
       break;
     case VCD_TYPE_SVCD:
       fprintf (stdout, "SVCD detected\n");
+      break;
+    case VCD_TYPE_HQVCD:
+      fprintf (stdout, "HQVCD detected\n");
       break;
     case VCD_TYPE_INVALID:
       fprintf (stderr, "unknown ID encountered -- maybe not a proper (S)VCD?\n");
@@ -625,7 +599,8 @@ dump_info (const debug_obj_t *obj)
   int n;
 
   fprintf (stdout, 
-           obj->vcd_type == VCD_TYPE_SVCD 
+           (obj->vcd_type == VCD_TYPE_SVCD 
+            || obj->vcd_type == VCD_TYPE_HQVCD)
            ? "SVCD/INFO.SVD\n" 
            : "VCD/INFO.VCD\n");
 
@@ -723,7 +698,8 @@ dump_entries (const debug_obj_t *obj)
   ntracks = uint16_from_be (entries->entry_count);
 
   fprintf (stdout, 
-           obj->vcd_type == VCD_TYPE_SVCD 
+           (obj->vcd_type == VCD_TYPE_SVCD 
+            || obj->vcd_type == VCD_TYPE_HQVCD)
            ? "SVCD/ENTRIES.SVD\n"
            : "VCD/ENTRIES.VCD\n");
 
@@ -1120,7 +1096,8 @@ dump (VcdImageSource *img, const char image_fname[])
 
       /* ISO9660 crosscheck */
       if (vcd_image_source_fs_stat (img, 
-                                    (obj.vcd_type == VCD_TYPE_SVCD 
+                                    ((obj.vcd_type == VCD_TYPE_SVCD 
+                                      || obj.vcd_type == VCD_TYPE_HQVCD)
                                      ? "/SVCD/PSD.SVD;1" 
                                      : "/VCD/PSD.VCD;1"),
                                     &statbuf))
@@ -1135,7 +1112,8 @@ dump (VcdImageSource *img, const char image_fname[])
           
     }
 
-  if (obj.vcd_type == VCD_TYPE_SVCD)
+  if (obj.vcd_type == VCD_TYPE_SVCD
+      || obj.vcd_type == VCD_TYPE_HQVCD)
     {
       if (!vcd_image_source_fs_stat (img, "MPEGAV", &statbuf))
         vcd_warn ("non compliant /MPEGAV folder detected!");
