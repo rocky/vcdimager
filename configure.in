@@ -172,6 +172,7 @@ AC_OUTPUT([ \
 	frontends/gnome/Makefile \
 	frontends/gnome/macros/Makefile \
 	frontends/gnome/src/Makefile \
+	debug/Makefile
 	vcdimager.spec \
 ])
 

@@ -124,6 +124,14 @@ _bitvec_read_bits (const uint8_t bitvec[], int *offset, int bits)
   return retval;
 }
 
+static inline int
+_align (int value, int boundary)
+{
+  if (value % boundary)
+    value += (boundary - (value % boundary));
+
+  return value;
+}
 
 static inline bool
 _start_code_p (uint32_t code)
@@ -190,14 +198,12 @@ struct _analyze_state
     bool system_header;
 
     bool aps;
-    double aps_timecode;
+    double aps_pts;
 
     bool gop;
-    double gop_timecode;
-
-    unsigned i_pict_rel_frame;
-    unsigned last_rel_frame;
-
+    struct {
+      uint8_t h, m, s, f;
+    } gop_timecode;
   } packet;
 
   struct {
@@ -219,10 +225,10 @@ struct _analyze_state
 
     mpeg_vers_t version;
 
-    bool gop_seen;
-    double min_gop_timecode;
-    double max_gop_timecode;
-    double max_pict_timecode;
+    bool seen_pts;
+    double min_pts;
+    double max_pts;
+    double last_aps_pts;
   } stream;
 };
 
@@ -285,16 +291,15 @@ _parse_gop_header (const void *buf,
 {
   const uint8_t *data = buf;
   int offset = 0;
+  
+  bool drop_flag; 
+  /* bool close_gop; */
+  /* bool broken_link; */
 
-  bool drop_flag;
-  bool close_gop;
-  bool broken_link;
-
-  unsigned hour = 0, minute = 0, second = 0, frame = 0;
-  double timecode = 0;
+  unsigned hour, minute, second, frame;
 
   drop_flag = _bitvec_read_bits(data, &offset, 1) != 0;
-
+  
   hour = _bitvec_read_bits(data, &offset, 5);
 
   minute = _bitvec_read_bits(data, &offset, 6);
@@ -305,37 +310,15 @@ _parse_gop_header (const void *buf,
 
   frame = _bitvec_read_bits(data, &offset, 6);
 
-  close_gop = _bitvec_read_bits(data, &offset, 1) != 0;
+  /* close_gop = _bitvec_read_bits(data, &offset, 1) != 0; */
 
-  broken_link = _bitvec_read_bits(data, &offset, 1) != 0;
-
-  timecode = hour;
-  timecode *= 60;
-  timecode += minute;
-  timecode *= 60;
-  timecode += second;
-
-  timecode += (double) frame / state->stream.frate;
+  /* broken_link = _bitvec_read_bits(data, &offset, 1) != 0; */
 
   state->packet.gop = true;
-  state->packet.gop_timecode = timecode;
-
-  if (timecode && state->stream.min_gop_timecode > timecode)
-    vcd_debug ("timecode seen smaller than min timecode (%f < %f)",
-               timecode, state->stream.min_gop_timecode);
-
-  if (!state->stream.gop_seen)
-    {
-      state->stream.min_gop_timecode = timecode;
-      state->stream.gop_seen = true;
-    }
-  
-  if (timecode && state->stream.max_gop_timecode > timecode)
-    vcd_debug ("timecode seen smaller than max timecode... (%f < %f)",
-               timecode, state->stream.max_gop_timecode);
-
-  state->stream.max_gop_timecode = 
-    MAX (timecode, state->stream.max_gop_timecode);
+  state->packet.gop_timecode.h = hour;
+  state->packet.gop_timecode.m = minute;
+  state->packet.gop_timecode.s = second;
+  state->packet.gop_timecode.f = frame;
 }
 
 static void
@@ -346,12 +329,153 @@ _analyze_video_pes (uint32_t code, const uint8_t *buf, int len,
   int sequence_header_pos = -1;
   int gop_header_pos = -1;
   int ipicture_header_pos = -1;
+  bool _has_pts = false;
+  bool _has_dts = false;
+  int64_t pts = 0;
+  int mpeg_ver = 0;
+  int _pts_pos = 0;
 
   assert (code == MPEG_VIDEO_E0_CODE 
           || code == MPEG_VIDEO_E1_CODE
           || code == MPEG_VIDEO_E2_CODE);
 
-  pos = 0;
+  switch (_bitvec_peek_bits (buf, 0, 2))
+    {
+    case 0:
+    case 1:
+    case 3: /* seems to be v1 as well... */
+      mpeg_ver = 1;
+      break;
+
+    case 2: /* %10 */
+      mpeg_ver = 2;
+      break;
+
+    default:
+      assert (0);
+      break;
+    }
+
+  if (mpeg_ver == 2)
+    {
+      int pos2 = 8;
+
+      switch (_bitvec_peek_bits (buf, pos2, 2))
+        {
+        case 2:
+          _has_pts = true;
+          _pts_pos = 24;
+          break;
+          
+        case 3:
+          _has_dts = _has_pts = true;
+          _pts_pos = 24;
+          break;
+
+        case 0:
+          break;
+
+        default:
+          vcd_debug ("?? v2");
+          break;
+        }
+
+      pos2 += 8;
+
+      pos = _bitvec_read_bits (buf, &pos2, 8);
+      
+      pos += pos2 >> 3;
+    }
+  else if (mpeg_ver == 1)
+    {
+      int pos2 = 0;
+
+      while (((pos2 + 8) < (len << 3)) && _bitvec_peek_bits (buf, pos2, 8) == 0xff)
+        pos2 += 8;
+
+      switch (_bitvec_peek_bits (buf, pos2, 2)) 
+        {
+        case 0: 
+          /* %00 */
+          break;
+
+        case 1:
+          /* %01 */
+          pos2 += 16;
+          break;
+
+        case 2:
+        case 3:
+          /* %1x */
+          vcd_warn ("heah??");
+          break;
+        }
+
+      switch (_bitvec_peek_bits (buf, pos2, 4))
+        {
+        case 2:
+          _has_pts = true;
+          _pts_pos = pos2;
+          break;
+          
+        case 3:
+          _has_dts = _has_pts = true;
+          _pts_pos = pos2;
+          break;
+
+        case 0:
+        case 0xf:
+          break;
+
+        default:
+          break;
+        }
+
+      pos = pos2 >> 3;
+    }
+  else
+    assert (0);
+
+  if (_has_pts)
+    {
+      int pos2 = _pts_pos;
+      int marker;
+      double pts2;
+      
+      marker = _bitvec_read_bits (buf, &pos2, 4);
+
+      //vcd_warn ("%d @%d", marker, _pts_pos);
+
+      assert (marker == 2 || marker == 3);
+
+      pts = _bitvec_read_bits (buf, &pos2, 3);
+
+      pos2++;
+
+      pts <<= 15;
+      pts |= _bitvec_read_bits (buf, &pos2, 15);
+      
+      pos2++;
+
+      pts <<= 15;
+      pts |= _bitvec_read_bits (buf, &pos2, 15);
+
+      pos2++;
+
+      pts2 = (double) pts / 90000.0;
+
+      if (!state->stream.seen_pts)
+        {
+          state->stream.max_pts = state->stream.min_pts = pts2;
+          state->stream.seen_pts = true;
+        }
+      else
+        {
+          state->stream.max_pts = MAX (state->stream.max_pts, pts2);
+          state->stream.min_pts = MIN (state->stream.min_pts, pts2);
+        }
+    }
+
   while (pos + 4 <= len)
     {
       uint32_t code = _bitvec_peek_bits32 (buf, pos << 3);
@@ -367,28 +491,8 @@ _analyze_video_pes (uint32_t code, const uint8_t *buf, int len,
 	case MPEG_PICTURE_CODE:
 	  pos += 4;
 	  
-	  {
-	    double timecode;
-	    int rel_frame = 
-	      _bitvec_peek_bits (buf, (pos << 3), 10);
-
-	    state->packet.last_rel_frame = 
-	      MAX (rel_frame, state->packet.last_rel_frame);
-
-	    timecode = rel_frame;
-	    timecode /= state->stream.frate;
-	    timecode += state->stream.max_gop_timecode;
-
-	    state->stream.max_pict_timecode = 
-	      MAX (state->stream.max_pict_timecode, timecode);
-
-	    if (_bitvec_peek_bits (buf, (pos << 3) + 10, 3) == 1)
-	      {
-		ipicture_header_pos = pos;
-		
-		state->packet.i_pict_rel_frame = rel_frame;
-	      }
-	  }
+          if (_bitvec_peek_bits (buf, (pos << 3) + 10, 3) == 1)
+            ipicture_header_pos = pos;
 	  break;
 	  
 	case MPEG_SEQUENCE_CODE:
@@ -420,20 +524,47 @@ _analyze_video_pes (uint32_t code, const uint8_t *buf, int len,
 	}
     }
 
-  if (sequence_header_pos != -1
-      && sequence_header_pos < gop_header_pos
-      && gop_header_pos < ipicture_header_pos)
+  /* decide whether this packet qualifies as access point */
+  state->packet.aps = false; /* paranoia */
+
+  if (ipicture_header_pos != -1)
     {
-      double timecode;
+      bool _is_aps = false;
 
-      state->packet.aps = true;
+      switch (mpeg_ver)
+        {
+        case 1:
+          /* for mpeg1 require just gop (before Iframe) */
+          _is_aps = (gop_header_pos != 1 
+                     && gop_header_pos < ipicture_header_pos);
+          break;
+        case 2:
+          /* for mpeg2 we need 3 headers in place... */
+          _is_aps = (sequence_header_pos != -1
+                     && sequence_header_pos < gop_header_pos
+                     && gop_header_pos < ipicture_header_pos);
+            break;
+        default:
+          _is_aps = false;
+          break;
+        }
 
-      timecode = state->packet.i_pict_rel_frame;
-      timecode /= state->stream.frate;
+      if (_is_aps && !_has_pts)
+        _is_aps = false; /* it's sad... */
 
-      timecode += state->packet.gop_timecode;
+      if (_is_aps) /* if still aps */
+        {
+          double pts2 = (double) pts / 90000.0;
 
-      state->packet.aps_timecode = timecode;
+          state->packet.aps = true;
+          state->packet.aps_pts = pts2;
+
+          if (state->stream.last_aps_pts > pts2)
+            vcd_warn ("aps pts seems out of order (actual pts %f, last seen pts %f)",
+                      pts2, state->stream.last_aps_pts);
+
+          state->stream.last_aps_pts = pts2;
+        }
     }
 }
 
@@ -491,6 +622,9 @@ _analyze (const uint8_t *buf, int len, bool analyze_pes,
 	  
 	  switch (_bitvec_peek_bits(buf, pos << 3, 2))
 	    {
+	    default:
+	      vcd_warn ("packet not recognized as either version 1 or 2 (%d) -- assuming v1", 
+			_bitvec_peek_bits(buf, pos << 3, 2));
 	    case 0x0: /* %00 mpeg1 */
 	      if (!state->stream.version)
 		state->stream.version = MPEG_VERS_MPEG1;
@@ -506,10 +640,6 @@ _analyze (const uint8_t *buf, int len, bool analyze_pes,
 	      if (state->stream.version != MPEG_VERS_MPEG2)
 		vcd_warn ("mixed mpeg versions?");
               pos += 10;
-	      break;
-	    default:
-	      vcd_warn ("packet not recognized as either version 1 or 2 (%d)", 
-			_bitvec_peek_bits(buf, pos << 3, 2));
 	      break;
 	    }
 	  
@@ -717,7 +847,7 @@ vcd_mpeg_source_scan (VcdMpegSource *obj)
 	  struct aps_data *_data = _vcd_malloc (sizeof (struct aps_data));
 
 	  _data->packet_no = pno;
-	  _data->timestamp = state.packet.aps_timecode;
+	  _data->timestamp = state.packet.aps_pts;
 
 	  _vcd_list_append (aps_list, _data);
 	}
@@ -763,12 +893,11 @@ vcd_mpeg_source_scan (VcdMpegSource *obj)
   obj->info.packets = state.stream.packets;
   obj->scanned = true;
 
-  obj->info.playing_time = (MAX (state.stream.max_pict_timecode,
-				 state.stream.max_gop_timecode) 
-			    - state.stream.min_gop_timecode);
+  obj->info.playing_time = state.stream.max_pts - state.stream.min_pts;
 
-  if (state.stream.min_gop_timecode > 1)
-    vcd_debug ("start offset %f", state.stream.min_gop_timecode);
+  if (state.stream.min_pts)
+    vcd_debug ("pts start offset %f (max pts = %f)", 
+               state.stream.min_pts, state.stream.max_pts);
 
   vcd_debug ("playing time %f", obj->info.playing_time);
 
@@ -777,7 +906,7 @@ vcd_mpeg_source_scan (VcdMpegSource *obj)
     {
       struct aps_data *_data = _vcd_list_node_data (n);
       
-      _data->timestamp -= state.stream.min_gop_timecode;
+      _data->timestamp -= state.stream.min_pts; /* pts offset */
     }
 
   obj->info.aps_list = aps_list;

@@ -6,6 +6,7 @@ version 0.7.0 (development)
 ===========================
 2001-....
 
+* use PTS times instead of inaccurate GOP timecodes
 * support for segment items added
 * support for additional entry points added
 * (full) PBC support added

@@ -1,3 +1,9 @@
+2001-05-19  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* debug/mpegscan.c: debug/testing tool for libvcd's vcd_mpeg* modules
+
+	* libvcd/vcd_mpeg_stream.c: rewrote to use PTS instead of GOP timecodes
+
 2001-05-17  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* frontends/xml/vcd_xml_build.c: added command line parsing

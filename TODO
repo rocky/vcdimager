@@ -7,14 +7,10 @@ TODO LIST:
  * check for VideoCD1.1/VideoCD2.0/SuperVideoCD1.0 conformance
  * optimize/improve MPEG detection/scanning/handling code
  * documentation
- * extended pbc/menu support (support is available as contrib patch on webpage)
- * XML frontend (DTD prototype already defined)
 
 - version 2.0+
  * C++ rewrite (OOD & OOA already on paper)
  * releasing libvcd
- * add support for interactive menus
- * add support for still images
  * add support for audio tracks
  * gtkmm frontend
 

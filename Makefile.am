@@ -1,4 +1,4 @@
-SUBDIRS = libvcd frontends 
+SUBDIRS = libvcd frontends debug
 
 EXTRA_DIST = BUGS FAQ cygwin-dist.sh debian
 
