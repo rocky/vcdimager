@@ -24,6 +24,8 @@ libvcd_a_SOURCES = \
 	vcd_files_private.h \
 	vcd_image.c \
 	vcd_image.h \
+	vcd_image_fs.c \
+	vcd_image_fs.h \
 	vcd_image_bincue.c \
 	vcd_image_bincue.h \
 	vcd_image_nrg.c \

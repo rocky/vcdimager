@@ -46,7 +46,8 @@ vcd_image_source_read_mode2_sector (VcdImageSource *obj, void *buf,
 
 int
 vcd_image_source_read_mode2_sectors (VcdImageSource *obj, void *buf, 
-				     uint32_t lsn, bool mode2raw, unsigned num_sectors);
+				     uint32_t lsn, bool mode2raw, 
+				     unsigned num_sectors);
 
 uint32_t
 vcd_image_source_stat_size (VcdImageSource *obj);

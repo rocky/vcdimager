@@ -23,6 +23,8 @@
 
 #include <libvcd/vcd_types.h>
 #include <libvcd/vcd_assert.h>
+#include <libvcd/vcd_util.h>
+#include <libvcd/vcd_bytesex.h>
 
 /* XA attribute definitions */
 #define XA_ATTR_U_READ         (1 << 0)

@@ -1,5 +1,7 @@
 2001-06-04  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* libvcd/vcd_image_fs.c: new module for iso9660 fs reading
+
 	* frontends/xml/vcd_xml_parse.c: implemented parsing of area
   		attributes for selection lists
 
