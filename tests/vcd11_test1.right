@@ -45,6 +45,7 @@ VCD/INFO.VCD
   start lid #2: no
   start track #2: no
   extended pbc: no
+ No PBC info.
  psd size: 0
  first segment addr: 00:00:00
  offset multiplier: 0x00

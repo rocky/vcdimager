@@ -92,10 +92,10 @@ SVCD/ENTRIES.SVD
  version: 0x01
  system profile tag: 0x00
  entries: 4
- ENTRY[00]: track# 1 (SEQUENCE[0]), LSN 826 (MSF 00:13:01)
- ENTRY[01]: track# 2 (SEQUENCE[1]), LSN 1051 (MSF 00:16:01)
- ENTRY[02]: track# 3 (SEQUENCE[2]), LSN 1276 (MSF 00:19:01)
- ENTRY[03]: track# 4 (SEQUENCE[3]), LSN 1501 (MSF 00:22:01)
+ ENTRY[00]: track#  1 (SEQUENCE[0]), LSN    826 (MSF 00:13:01)
+ ENTRY[01]: track#  2 (SEQUENCE[1]), LSN   1051 (MSF 00:16:01)
+ ENTRY[02]: track#  3 (SEQUENCE[2]), LSN   1276 (MSF 00:19:01)
+ ENTRY[03]: track#  4 (SEQUENCE[3]), LSN   1501 (MSF 00:22:01)
 -------------------------------------------------------------------------------
 SVCD/LOT.SVD
  LID[1]: offset = 0 (0x0000)
@@ -155,7 +155,7 @@ CVD interpretation (probably)
 (track[02]: 01:06:1d (cumulated), audio: 1d, ogt: 1d)
 (track[03]: 1d:00:00 (cumulated), audio: 00, ogt: 00)
 -------------------------------------------------------------------------------
-CDROM TRACKS
+CD-ROM TRACKS
  tracks:  0
 -------------------------------------------------------------------------------
 SVCD/SEARCH.DAT

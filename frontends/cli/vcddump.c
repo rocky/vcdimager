@@ -196,6 +196,39 @@ _hexdump (const void *data, unsigned len)
     }
 }
 
+typedef enum {
+  PBC_VCD2_NO_INFO,     /* NO PBC INFO info->psd_size == 0 */
+  PBC_VCD2_EXT,         /* Has extended PBC for VCD 2.0 */
+  PBC_VCD2_NOPE,        /* Is not VCD 2.0 */
+  PBC_VCD2_NO_LOT_X,    /* EXT/LOT_X.VCD doesn't exist */
+  PBC_VCD2_NO_PSD_X,    /* EXT/PSD_X.VCD doesn't exist */
+  PBC_VCD2_BAD_LOT_SIZE /* LOT_VCD_SIZE*BLOCKSIZE != size */
+} vcd2_ext_pbc_status_t;
+
+static vcd2_ext_pbc_status_t
+_has_vcd2_ext_pbc (const vcdinfo_obj_t *obj)
+{
+  vcd_image_stat_t statbuf;
+  const InfoVcd *info = &obj->info;
+
+  if (!info->psd_size)
+    return PBC_VCD2_NO_INFO;
+
+  if (obj->vcd_type != VCD_TYPE_VCD2)
+    return PBC_VCD2_NOPE;
+  
+  if (vcd_image_source_fs_stat (obj->img, "EXT/LOT_X.VCD;1", &statbuf))
+    return PBC_VCD2_NO_LOT_X;
+
+  if (statbuf.size != ISO_BLOCKSIZE * LOT_VCD_SIZE)
+    return PBC_VCD2_BAD_LOT_SIZE;
+
+  if (!vcd_image_source_fs_stat (obj->img, "EXT/PSD_X.VCD;1", &statbuf))
+    return PBC_VCD2_EXT;
+  else 
+    return PBC_VCD2_NO_PSD_X;
+}
+
 static void
 dump_lot (const vcdinfo_obj_t *obj, bool ext)
 {
@@ -433,12 +466,35 @@ dump_info (const vcdinfo_obj_t *obj)
     fprintf (stdout, "  start lid #2: %s\n", _vcd_bool_str (info->flags.use_lid2));
   if (gl.show.info.st2)
     fprintf (stdout, "  start track #2: %s\n", _vcd_bool_str (info->flags.use_track3));
-  if (gl.show.info.pbc)
+  if (gl.show.info.pbc) {
     fprintf (stdout, 
              ((obj->vcd_type == VCD_TYPE_SVCD || obj->vcd_type == VCD_TYPE_HQVCD) 
               ? "  reserved2: %s\n"
               : "  extended pbc: %s\n"),
              _vcd_bool_str (info->flags.pbc_x));
+    switch (_has_vcd2_ext_pbc(obj))
+      {
+      case PBC_VCD2_NO_INFO:
+        fprintf(stdout, " No PBC info.\n");
+        break;
+      case PBC_VCD2_NO_LOT_X:
+        fprintf(stdout, " Missing EXT/LOT_X.VCD for extended PBC info.\n");
+        break;
+      case PBC_VCD2_NO_PSD_X:
+        fprintf(stdout, " Missing EXT/PSD_X.VCD for extended PBC info.\n");
+        break;
+      case PBC_VCD2_BAD_LOT_SIZE:
+        fprintf(stdout, 
+                " Size of EXT/LOT_X.VCD != LOT_VCD_SIZE*ISO_BLOCKSIZE\n");
+        break;
+      case PBC_VCD2_EXT:
+        fprintf(stdout, " Detected extended VCD2.0 PBC files.\n");
+        break;
+      case PBC_VCD2_NOPE: 
+        break;
+      }
+  }
+  
 
   if (gl.show.info.psds)
     fprintf (stdout, " psd size: %d\n", uint32_from_be (info->psd_size));
@@ -517,7 +573,7 @@ dump_entries (const vcdinfo_obj_t *obj)
         const msf_t *msf = vcdinfo_get_entry_msf(obj, n);
         const uint32_t lsn = vcdinfo_lba2lsn(msf_to_lba(msf));
         
-        fprintf (stdout, " ENTRY[%2.2d]: track# %d (SEQUENCE[%d]), LSN %d "
+        fprintf (stdout, " ENTRY[%2.2d]: track# %2d (SEQUENCE[%d]), LSN %6d "
                  "(MSF %2.2x:%2.2x:%2.2x)\n",
                  n, vcdinfo_get_track(obj, n),
                  vcdinfo_get_track(obj, n) - 1,               
@@ -608,22 +664,32 @@ dump_tracks (const vcdinfo_obj_t *obj)
   unsigned int j;
   unsigned int num_tracks = vcdinfo_get_num_tracks(obj);
   uint8_t min, sec, frame;
+  lsn_t lsn;
+  lba_t lba;
 
   if (!gl.show.no.header)
-    fprintf (stdout, "CDROM TRACKS\n");
+    fprintf (stdout, "CD-ROM TRACKS\n");
 
   fprintf (stdout, " tracks: %2d\n", num_tracks);
   
   for (j = 1; j <= num_tracks; j++)
     {
-      vcdinfo_get_track_msf(obj, j, &min, &sec, &frame);
-      fprintf (stdout, " track # %2d: %2.2d:%2.2d:%2.2d, size: %10d\n",
-               j, min, sec, frame, vcdinfo_get_track_size(obj, j));
+      lba = vcdinfo_get_track_lba(obj, j);
+      vcdinfo_lba2msf(lba, &min, &sec, &frame);
+      lsn=vcdinfo_lba2lsn(lba);
+      fprintf (stdout, 
+               " track # %2.2d, LSN %6d, MSF: %2.2d:%2.2d:%2.2d,"
+               " size: %10d\n",
+               j, lsn, min, sec, frame, vcdinfo_get_track_size(obj, j));
     }
   if (num_tracks != 0) {
-      vcdinfo_get_track_msf(obj, num_tracks+1, &min, &sec, &frame);
-      fprintf (stdout, " leadout   : %2.2d:%2.2d:%2.2d\n",
-               min, sec, frame);
+      lba = vcdinfo_get_track_lba(obj, num_tracks+1);
+      vcdinfo_lba2msf(lba, &min, &sec, &frame);
+      lsn=vcdinfo_lba2lsn(lba);
+      fprintf (stdout, 
+               " leadout   : LSN %6d, MSF: %2.2d:%2.2d:%2.2d,"
+               " size: %10d\n",
+               lsn, min, sec, frame, vcdinfo_get_track_size(obj, j));
   }
 }
 
