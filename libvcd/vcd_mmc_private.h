@@ -128,30 +128,30 @@ struct disc_info
 {
   uint16_t length;
 #if defined(BITFIELD_MSBF)
-  uint8_t  reserved1		: 3;
-  uint8_t  erasable		: 1;
-  uint8_t  border		: 2;		/* state of last session */
-  uint8_t  status		: 2;		/* disc status */
+  bitfield_t  reserved1		: 3;
+  bitfield_t  erasable		: 1;
+  bitfield_t  border		: 2;		/* state of last session */
+  bitfield_t  status		: 2;		/* disc status */
 #else
-  uint8_t  status		: 2;
-  uint8_t  border		: 2;
-  uint8_t  erasable		: 1;
-  uint8_t  reserved1		: 3;
+  bitfield_t  status		: 2;
+  bitfield_t  border		: 2;
+  bitfield_t  erasable		: 1;
+  bitfield_t  reserved1		: 3;
 #endif
   uint8_t  n_first_track;	/* number of first track on d */
   uint8_t  n_sessions_l;	/* number of sessions */
   uint8_t  first_track_l;	/* first track in last session*/
   uint8_t  last_track_l;	/* last track in last session */
 #if defined(BITFIELD_MSBF)
-  uint8_t  did_v		: 1;
-  uint8_t  dbc_v		: 1;
-  uint8_t  uru			: 1;
-  uint8_t  reserved2		: 5;
+  bitfield_t  did_v		: 1;
+  bitfield_t  dbc_v		: 1;
+  bitfield_t  uru			: 1;
+  bitfield_t  reserved2		: 5;
 #else
-  uint8_t  reserved2		: 5;
-  uint8_t  uru 			: 1;
-  uint8_t  dbc_v 		: 1;
-  uint8_t  did_v 		: 1;
+  bitfield_t  reserved2		: 5;
+  bitfield_t  uru 			: 1;
+  bitfield_t  dbc_v 		: 1;
+  bitfield_t  did_v 		: 1;
 #endif
   enum session_format disc_type : 8;	/* disc type */
   uint8_t  n_sessions_m;
@@ -174,31 +174,31 @@ struct track_info
   uint8_t  session_number_l;
   uint8_t  reserved1;
 #if defined(BITFIELD_MSBF)
-  uint8_t  reserved2		: 2;
-  uint8_t  damage		: 1;
-  uint8_t  copy			: 1;
-  uint8_t  track_mode		: 4;
-  uint8_t  rt			: 1;
-  uint8_t  blank 		: 1;
-  uint8_t  packet		: 1;
-  uint8_t  fp			: 1;
-  uint8_t  data_mode		: 4;
-  uint8_t  reserved3		: 6;
-  uint8_t  lra_v		: 1;
-  uint8_t  nwa_v		: 1;
+  bitfield_t  reserved2		: 2;
+  bitfield_t  damage		: 1;
+  bitfield_t  copy			: 1;
+  bitfield_t  track_mode		: 4;
+  bitfield_t  rt			: 1;
+  bitfield_t  blank 		: 1;
+  bitfield_t  packet		: 1;
+  bitfield_t  fp			: 1;
+  bitfield_t  data_mode		: 4;
+  bitfield_t  reserved3		: 6;
+  bitfield_t  lra_v		: 1;
+  bitfield_t  nwa_v		: 1;
 #else
-  uint8_t  track_mode		: 4;
-  uint8_t  copy			: 1;
-  uint8_t  damage		: 1;
-  uint8_t  reserved2		: 2;
-  uint8_t  data_mode		: 4;
-  uint8_t  fp			: 1;
-  uint8_t  packet		: 1;
-  uint8_t  blank		: 1;
-  uint8_t  rt			: 1;
-  uint8_t  nwa_v		: 1;
-  uint8_t  lra_v		: 1;
-  uint8_t  reserved3		: 6;
+  bitfield_t  track_mode		: 4;
+  bitfield_t  copy			: 1;
+  bitfield_t  damage		: 1;
+  bitfield_t  reserved2		: 2;
+  bitfield_t  data_mode		: 4;
+  bitfield_t  fp			: 1;
+  bitfield_t  packet		: 1;
+  bitfield_t  blank		: 1;
+  bitfield_t  rt			: 1;
+  bitfield_t  nwa_v		: 1;
+  bitfield_t  lra_v		: 1;
+  bitfield_t  reserved3		: 6;
 #endif
   uint32_t track_start;
   uint32_t next_writable;
@@ -245,47 +245,47 @@ struct mode_page_header
 struct write_parameters_mode_page
 {
 #if defined(BITFIELD_MSBF)
-  uint8_t ps 			: 1;		/* page savable */
-  uint8_t reserved1		: 1;
-  uint8_t page_code		: 6;		/* always 0x05h */
+  bitfield_t ps 			: 1;		/* page savable */
+  bitfield_t reserved1		: 1;
+  bitfield_t page_code		: 6;		/* always 0x05h */
 #else
-  uint8_t page_code		: 6;
-  uint8_t reserved1		: 1;
-  uint8_t ps 			: 1;
+  bitfield_t page_code		: 6;
+  bitfield_t reserved1		: 1;
+  bitfield_t ps 			: 1;
 #endif
   uint8_t page_length;				/* 0x32 or 0x36 */
 #if defined(BITFIELD_MSBF)
-  uint8_t reserved2		: 3;
-  uint8_t test_write		: 1;		/* 1 => dummy write */
+  bitfield_t reserved2		: 3;
+  bitfield_t test_write		: 1;		/* 1 => dummy write */
   enum write_type write_type	: 4;		/* write types */
   enum multi_session_field multi_session
 	  			: 2;		/* multi-session */
-  uint8_t fixed_packet		: 1;		/* fixed or variable pkts */
-  uint8_t copy			: 1;		/* copy protected medium */
-  uint8_t track_mode		: 4;		/* control nibble in all 
+  bitfield_t fixed_packet		: 1;		/* fixed or variable pkts */
+  bitfield_t copy			: 1;		/* copy protected medium */
+  bitfield_t track_mode		: 4;		/* control nibble in all 
   						   1Q sub-channel, only for
 						   raw writing */
-  uint8_t reserved3		: 4;
+  bitfield_t reserved3		: 4;
   enum data_block_type data_block_type : 4;	/* see above */
 #else
   enum write_type write_type	: 4;
-  uint8_t test_write		: 1;
-  uint8_t reserved2		: 3;
-  uint8_t track_mode		: 4;
-  uint8_t copy			: 1;
-  uint8_t fixed_packet		: 1;
+  bitfield_t test_write		: 1;
+  bitfield_t reserved2		: 3;
+  bitfield_t track_mode		: 4;
+  bitfield_t copy			: 1;
+  bitfield_t fixed_packet		: 1;
   enum multi_session_field multi_session
 				: 2;
   enum data_block_type data_block_type : 4;
-  uint8_t reserved3		: 4;
+  bitfield_t reserved3		: 4;
 #endif
   uint16_t reserved4;
 #if defined(BITFIELD_MSBF)
-  uint8_t reserved5		: 2;
-  uint8_t host_appl_code	: 6;		/* host application code */
+  bitfield_t reserved5		: 2;
+  bitfield_t host_appl_code	: 6;		/* host application code */
 #else
-  uint8_t host_appl_code	: 6;
-  uint8_t reserved5		: 2;
+  bitfield_t host_appl_code	: 6;
+  bitfield_t reserved5		: 2;
 #endif
   enum session_format session_format : 8;	/* session format */
   uint8_t reserved6;
@@ -304,28 +304,28 @@ struct cd_capabilities_mode_page
 {
   uint8_t page_header[16];			/* XXX have to look this up */
 #if defined(BITFIELD_MSBF)
-  uint8_t ps 			: 1;		/* page savable */
-  uint8_t reserved1		: 1;
-  uint8_t page_code		: 6;		/* always 0x05h */
+  bitfield_t ps 			: 1;		/* page savable */
+  bitfield_t reserved1		: 1;
+  bitfield_t page_code		: 6;		/* always 0x05h */
 #else
-  uint8_t page_code		: 6;
-  uint8_t reserved1		: 1;
-  uint8_t ps 			: 1;
+  bitfield_t page_code		: 6;
+  bitfield_t reserved1		: 1;
+  bitfield_t ps 			: 1;
 #endif
   uint8_t page_length;				/* 0x32 or 0x36 */
 #if defined(BITFIELD_MSBF)
-  uint8_t reserved2		: 5;
+  bitfield_t reserved2		: 5;
   bool    method_2		: 1;	/* can read fixed packet
 					   addressing mode 2 disks*/
   bool    cdrw_read		: 1;
   bool    cdr_read		: 1;
   
-  uint8_t reserved3		: 5;
+  bitfield_t reserved3		: 5;
   bool    test_write		: 1;
   bool    cdrw_write		: 1;
   bool    cdr_write		: 1;
   
-  uint8_t reserved4		: 1;
+  bitfield_t reserved4		: 1;
   bool    multi_session		: 1;
   bool    mode2_form2		: 1;
   bool    mode2_form1		: 1;
@@ -343,15 +343,15 @@ struct cd_capabilities_mode_page
   bool    CDDA_stream_accurate	: 1; /* can continue after loss of stream*/
   bool    CDDA_commands_support	: 1; /* can extract digital audio */
 
-  uint8_t loading_mech_type	: 3; /* 0: caddy, 1: tray, 2: pop-up
+  bitfield_t loading_mech_type	: 3; /* 0: caddy, 1: tray, 2: pop-up
 					4: changer, 5: cardridge changer */
-  uint8_t reserved5		: 1;
+  bitfield_t reserved5		: 1;
   bool    eject			: 1; /* can eject through software */
   bool    prevent_jumper	: 1; /* disk is locked though jumper */
   bool    lock_state		: 1; /* drive is in prevent (lock) mode */
   bool    lock			: 1; /* prevent/allow command will lock */
 
-  uint8_t reserved6		: 4;
+  bitfield_t reserved6		: 4;
   bool    sss			: 1; /* software slot selection               */
   bool    db_report_support	: 1; /* changer supports disc present reporting*/
   bool    seperate_mute		: 1; /* seperate audio channel mute supported */
@@ -360,12 +360,12 @@ struct cd_capabilities_mode_page
   bool    cdr_read		: 1;
   bool    cdrw_read		: 1;
   bool    method_2		: 1;
-  uint8_t reserved2		: 5;
+  bitfield_t reserved2		: 5;
   
   bool    cdr_write		: 1;
   bool    cdrw_write		: 1;
   bool    test_write		: 1;
-  uint8_t reserved3		: 5;
+  bitfield_t reserved3		: 5;
   
   bool    audio_play		: 1;
   bool    composite		: 1;
@@ -374,7 +374,7 @@ struct cd_capabilities_mode_page
   bool    mode2_form1		: 1;
   bool    mode2_form2		: 1;
   bool    multi_session		: 1;
-  uint8_t reserved4		: 1;
+  bitfield_t reserved4		: 1;
 
   bool    CDDA_commands_support	: 1;
   bool    CDDA_stream_accurate	: 1;
@@ -389,14 +389,14 @@ struct cd_capabilities_mode_page
   bool    lock_state		: 1;
   bool    prevent_jumper	: 1;
   bool    eject			: 1;
-  uint8_t reserved5		: 1;
-  uint8_t loading_mech_type	: 3; /* tray or caddy */
+  bitfield_t reserved5		: 1;
+  bitfield_t loading_mech_type	: 3; /* tray or caddy */
 
   bool    seperate_vol		: 1; /* seperate audio volume settings        */
   bool    seperate_mute		: 1; /* seperate audio channel mute supported */
   bool    db_report_support	: 1; /* changer supports disc present reporting*/
   bool    sss			: 1; /* software slot selection               */
-  uint8_t reserved6		: 4;
+  bitfield_t reserved6		: 4;
 #endif
 
   uint16_t max_read_speed; /* maximum speed in kBps   */
@@ -408,19 +408,19 @@ struct cd_capabilities_mode_page
   
 #if defined(BITFIELD_MSBF)
  /* digital audio output */
-  uint8_t reserved8		: 2;
-  uint8_t length		: 2;
+  bitfield_t reserved8		: 2;
+  bitfield_t length		: 2;
   bool    lsbf			: 1;
   bool    rck			: 1;
   bool    bck			: 1;
-  uint8_t reserved9		: 1;
+  bitfield_t reserved9		: 1;
 #else
-  uint8_t reserved9		: 1;
+  bitfield_t reserved9		: 1;
   bool    bck			: 1;
   bool    rck			: 1;
   bool    lsbf			: 1;
-  uint8_t length		: 2;
-  uint8_t reserved8		: 2;
+  bitfield_t length		: 2;
+  bitfield_t reserved8		: 2;
 #endif
   
   uint16_t max_write_speed; /* maximum write speed in kBps */
@@ -481,21 +481,21 @@ enum data_form_transfer
 struct cue_sheet_data
 {
 #if defined(BITFIELD_MSBF)
-  uint8_t channels 	: 1;	/* number of audio channels: 
+  bitfield_t channels 	: 1;	/* number of audio channels: 
   				   0 => stereo / data
 				   1 => 4 channel audio (invalid)         */
-  uint8_t data 		: 1;	/* 0 => music; 1 => data                  */
-  uint8_t copy 		: 1;	/* 0 => copy prohibited; 1 => allowed     */
-  uint8_t preemph 	: 1;	/* 0 => no premphasis; 1 => 50/15µs emph. */
+  bitfield_t data 		: 1;	/* 0 => music; 1 => data                  */
+  bitfield_t copy 		: 1;	/* 0 => copy prohibited; 1 => allowed     */
+  bitfield_t preemph 	: 1;	/* 0 => no premphasis; 1 => 50/15µs emph. */
   enum cue_sheet_adr cue_sheet_adr
 	  		: 4;	/* adr field; XXX endian correct?         */
 #else
   enum cue_sheet_adr cue_sheet_adr
 	  		: 4;
-  uint8_t preemph 	: 1;
-  uint8_t copy 		: 1;
-  uint8_t data 		: 1;
-  uint8_t channels 	: 1;
+  bitfield_t preemph 	: 1;
+  bitfield_t copy 		: 1;
+  bitfield_t data 		: 1;
+  bitfield_t channels 	: 1;
 #endif
   uint8_t tno;		/* track number */
   uint8_t index;	/* index; 0 to 0x63 */
@@ -506,8 +506,8 @@ struct cue_sheet_data
 	  		: 2;	/* data form of main data   */
   enum data_form_transfer data_form_transfer
 	  		: 4;	/* where to get the data    */
-  uint8_t alt_copy	: 1;	/* Alternate copy bit       */
-  uint8_t reserved	: 7;
+  bitfield_t alt_copy	: 1;	/* Alternate copy bit       */
+  bitfield_t reserved	: 7;
 #else
   enum data_form_transfer data_form_transfer
 	  		: 4;
@@ -515,8 +515,8 @@ struct cue_sheet_data
 	  		: 2;
   enum data_form_sub data_form_sub 
 	  		: 2;
-  uint8_t reserved	: 7;
-  uint8_t alt_copy	: 1;
+  bitfield_t reserved	: 7;
+  bitfield_t alt_copy	: 1;
 #endif 
   uint8_t min;	/* absolute time: minute  */
   uint8_t sec;	/* absolute time: second  */
