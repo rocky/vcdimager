@@ -21,45 +21,66 @@
 #ifndef __VCD_TYPES_H__
 #define __VCD_TYPES_H__
 
+/* provide some C99 definitions */
+
 #if defined(HAVE_STDINT_H)
 # include <stdint.h>
 #elif defined(HAVE_INTTYPES_H)
 # include <inttypes.h>
-# if defined(__FreeBSD__)
-#  define UINT32_C(c)   c ## U
-#  define UINT64_C(c)   c ## ULL
-# endif
 #elif defined(__CYGWIN__)
 # include <sys/types.h>
 typedef u_int8_t uint8_t;
 typedef u_int16_t uint16_t;
 typedef u_int32_t uint32_t;
 typedef u_int64_t uint64_t;
-# define INT8_C(c)     c
-# define INT16_C(c)    c
-# define INT32_C(c)    c
-# define INT64_C(c)    c ## LL
-# define UINT8_C(c)    c ## U
-# define UINT16_C(c)   c ## U
-# define UINT32_C(c)   c ## U
-# define UINT64_C(c)   c ## ULL
 #else
 /* warning ISO/IEC 9899:1999 <stdint.h> was missing and even <inttypes.h> */
 /* fixme */
 #endif /* HAVE_STDINT_H */
 
+/* default HP/UX macros are broken */
+#if defined(__hpux__)
+# undef UINT16_C
+# undef UINT32_C
+# undef UINT64_C
+# undef INT64_C
+#endif
+
 /* if it's still not defined, take a good guess... should work for
-   32bit archs */
+   most 32bit and 64bit archs */
+
 #ifndef UINT16_C
 # define UINT16_C(c) c ## U
 #endif
 
 #ifndef UINT32_C
-# define UINT32_C(c) c ## U
+# if defined (SIZEOF_INT) && SIZEOF_INT == 4
+#  define UINT32_C(c) c ## U
+# elif defined (SIZEOF_LONG) && SIZEOF_LONG == 4
+#  define UINT32_C(c) c ## UL
+# else
+#  define UINT32_C(c) c ## U
+# endif
 #endif
 
 #ifndef UINT64_C
-# define UINT64_C(c) c ## ULL
+# if defined (SIZEOF_LONG) && SIZEOF_LONG == 8
+#  define UINT64_C(c) c ## UL
+# elif defined (SIZEOF_INT) && SIZEOF_INT == 8
+#  define UINT64_C(c) c ## U
+# else
+#  define UINT64_C(c) c ## ULL
+# endif
+#endif
+
+#ifndef INT64_C
+# if defined (SIZEOF_LONG) && SIZEOF_LONG == 8
+#  define INT64_C(c) c ## L
+# elif defined (SIZEOF_INT) && SIZEOF_INT == 8
+#  define INT64_C(c) c 
+# else
+#  define INT64_C(c) c ## LL
+# endif
 #endif
 
 #if defined(HAVE_STDBOOL_H)
@@ -79,6 +100,8 @@ typedef enum
 #  define bool _Bool
 # endif
 #endif
+
+/* some GCC optimizations */
 
 #if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)
 #define GNUC_PRINTF( format_idx, arg_idx )    \

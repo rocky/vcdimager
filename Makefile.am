@@ -11,5 +11,7 @@ dist-hook: vcdimager.spec
 snapshot:
 	$(MAKE) dist distdir=$(PACKAGE)-$(VERSION)-`date +"%Y%m%d"`
 
+if CYGWIN
 cygwin-dist:
 	./cygwin-dist.sh $(VERSION)
+endif

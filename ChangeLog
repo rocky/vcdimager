@@ -1,3 +1,7 @@
+2001-05-29  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_types.h: try to make it more flexible
+
 2001-05-28  Keith White <Keith.White@site.uottawa.ca>
 
 	* libvcd/vcd_mpeg.c (_parse_sequence_header): hires in stills takes

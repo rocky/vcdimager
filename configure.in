@@ -29,6 +29,13 @@ AC_ARG_WITH(xml-frontend,
 dnl programs
 
 AC_PROG_CC
+if test "x$GCC" != "xyes" 
+then
+  echo "*** non GNU CC compiler detected."
+  echo "*** This package has not been tested very well with non GNU compilers"
+  echo "*** you should try to use 'gcc' for compiling this package."
+fi
+
 AC_PROG_CPP
 if test "x$enable_gnome_fe" = "xyes"; then
  AC_PROG_CXX
@@ -71,12 +78,8 @@ AC_DEFINE(_GNU_SOURCE, [], enable GNU libc extension)
 AC_STDC_HEADERS
 AC_CHECK_HEADERS(stdint.h inttypes.h stdbool.h alloca.h)
 
-if test "x$ac_cv_header_stdint_h" != "xyes" \
- 	-a "x$ac_cv_header_inttypes_h" != "xyes"
+if test "x$ac_cv_header_stdint_h" != "xyes" 
  then
-dnl ...we check for sizes but we dont actually use this information yet
-   AC_CHECK_SIZEOF(char, 1)
-   AC_CHECK_SIZEOF(short int, 2)
    AC_CHECK_SIZEOF(int, 4)
    AC_CHECK_SIZEOF(long, 4)
    AC_CHECK_SIZEOF(long long, 8)
@@ -145,6 +148,8 @@ fi
 dnl
 
 dnl system
+AC_CYGWIN
+
 if test "x$GCC" = "xyes"
 then
  WARN_CFLAGS="-Wall -Wmissing-prototypes -Wunused -Wpointer-arith -Wwrite-strings"
@@ -152,6 +157,7 @@ fi
 LIBS="$LIBS -lm"
 CFLAGS="$CFLAGS $WARN_CFLAGS"
 
+AM_CONDITIONAL(CYGWIN, test "x$CYGWIN" = "xyes")
 AM_CONDITIONAL(BUILD_CLI_FE_POPT, test "x$enable_cli_fe_popt" = "xyes")
 AM_CONDITIONAL(BUILD_CLI_FE, test "x$enable_cli_fe" = "xyes")
 AM_CONDITIONAL(BUILD_GNOME_FE, test "x$enable_gnome_fe" = "xyes")
