@@ -25,7 +25,10 @@ endif
 MAINTAINERCLEANFILES = ChangeLog
 
 if MAINTAINER_MODE
+
 ChangeLog:
 	$(srcdir)/cvs2cl.pl -W 450 --header $(srcdir)/cvs2cl_header --utc -w -I ChangeLog --usermap $(srcdir)/cvs2cl_usermap
-endif
 
+ACLOCAL_AMFLAGS=-I .
+
+endif
