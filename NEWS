@@ -2,14 +2,17 @@ $Id$
 
 see ChangeLog for more information
 
-version 0.7.0 (development)
-===========================
-2001-....
+version 0.7.0 (unstable/development)
+====================================
+2001-05-24
 
+* dummy PBC generation disabled for classic vcdimager frontend (use vcdxgen instead)
+* warn if labels are non-conforming
 * use PTS times instead of inaccurate GOP timecodes
 * support for segment items added
 * support for additional entry points added
-* (full) PBC support added
+* support for (auto)pause points added
+* (full) PBC support (including playlists, menus/selections) added
 * new XML based frontend(s) added (vcdxgen, vcdxbuild, vcdxrip)
 
 version 0.6.2 (stable)

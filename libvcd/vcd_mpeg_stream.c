@@ -41,6 +41,7 @@ struct _VcdMpegSource
   VcdDataSource *data_source;
 
   bool scanned;
+  double pts_offset;
   
   /* _get_packet cache */
   unsigned _read_pkt_pos;
@@ -197,6 +198,7 @@ vcd_mpeg_source_scan (VcdMpegSource *obj)
   obj->scanned = true;
 
   obj->info.playing_time = state.stream.max_pts - state.stream.min_pts;
+  obj->pts_offset = state.stream.min_pts;
 
   if (state.stream.min_pts)
     vcd_debug ("pts start offset %f (max pts = %f)", 
@@ -283,6 +285,8 @@ vcd_mpeg_source_get_packet (VcdMpegSource *obj, unsigned long packet_no,
     }
 
   memset (&state, 0, sizeof (state));
+  state.stream.seen_pts = true;
+  state.stream.min_pts = obj->pts_offset;
 
   pos = obj->_read_pkt_pos;
   pno = obj->_read_pkt_no;
@@ -339,6 +343,9 @@ vcd_mpeg_source_get_packet (VcdMpegSource *obj, unsigned long packet_no,
 
               if (state.packet.pem)
                 flags->pem = true;
+
+              if ((flags->has_pts = state.packet.has_pts))
+                flags->pts = state.packet.pts - state.stream.min_pts;
             }
 
 	  return 0;

@@ -22,11 +22,15 @@ if [ ! -f configure.in ]
    exit 1
  fi
 
-if [ ! -f frontends/cli/vcdimager.exe -o ! -f frontends/cli/vcdrip.exe ]
+EXECUTABLES="frontends/cli/vcdimager.exe frontends/cli/vcdrip.exe frontends/xml/vcdxgen.exe frontends/xml/vcdxbuild.exe frontends/xml/vcdxrip.exe"
+
+for E in $EXECUTABLES
+do if [ ! -f "$E" ]
  then
-   echo "executable(s) not found"
+   echo "executable not found"
    exit 2
  fi
+done
 
 VERSION="$1"
 TMPDIR="cygwin-$VERSION-tmp"
@@ -44,7 +48,7 @@ for DOCFILE in BUGS TODO README NEWS ChangeLog THANKS AUTHORS COPYING FAQ
 
 unix2dos $TMPDIR/*.txt
 
-cp -v frontends/cli/vcdimager.exe frontends/cli/vcdrip.exe /bin/cygwin1.dll $TMPDIR/
+cp -v $EXECUTABLES frontends/xml/videocd.dtd /bin/cygwin1.dll $TMPDIR/
 strip -v $TMPDIR/*.exe
 
 rm -fv "$DISTZIP"

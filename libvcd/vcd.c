@@ -235,7 +235,7 @@ vcd_obj_append_segment_play_item (VcdObj *obj, VcdMpegSource *mpeg_source,
   segment->info = vcd_mpeg_source_get_info (mpeg_source);
   segment->segment_count = _vcd_len2blocks (segment->info->packets, 150);
 
-  vcd_debug ("SPI length is %d, rounded up to %d",
+  vcd_debug ("SPI length is %d sector(s), allocated %d segment(s)",
              segment->info->packets,
              segment->segment_count);
 
@@ -275,6 +275,7 @@ vcd_obj_append_sequence_play_item (VcdObj *obj, VcdMpegSource *mpeg_source,
   length = track->info->packets;
 
   track->entry_list = _vcd_list_new ();
+  track->pause_list = _vcd_list_new ();
 
   obj->relative_end_extent += obj->pre_track_gap;
   track->relative_start_extent = obj->relative_end_extent;
@@ -309,13 +310,68 @@ vcd_obj_append_sequence_play_item (VcdObj *obj, VcdMpegSource *mpeg_source,
   return track_no;
 }
 
+static int
+_pause_cmp (pause_t *ent1, pause_t *ent2)
+{
+  if (ent1->time < ent2->time)
+    return -1;
+
+  if (ent1->time > ent2->time)
+    return 1;
+
+  return 0;
+}
+
 int 
 vcd_obj_add_sequence_pause (VcdObj *obj, const char sequence_id[], 
-                            double pause_timestamp, const char pause_id[])
+                            double pause_time, const char pause_id[])
 {
-  vcd_warn ("%s not implemented yet", __FUNCTION__);
+  mpeg_sequence_t *_sequence;
 
-  return -1;
+  vcd_assert (obj != NULL);
+
+  if (sequence_id)
+    _sequence = _get_sequence_by_id (obj, sequence_id);
+  else
+    _sequence = _vcd_list_node_data (_vcd_list_end (obj->mpeg_sequence_list));
+
+  if (!_sequence)
+    {
+      vcd_error ("sequence id `%s' not found", sequence_id);
+      return -1;
+    }
+
+  if (pause_id)
+    vcd_warn ("pause id ignored...");
+
+  {
+    pause_t *_pause = _vcd_malloc (sizeof (pause_t));
+
+    if (pause_id)
+      _pause->id = strdup (pause_id);
+    _pause->time = pause_time;
+
+    _vcd_list_append (_sequence->pause_list, _pause);
+  }
+
+  _vcd_list_sort (_sequence->pause_list, 
+                  (_vcd_list_cmp_func) _pause_cmp);
+
+  vcd_debug ("added autopause point at %f", pause_time);
+
+  return 0;
+}
+
+static int
+_entry_cmp (entry_t *ent1, entry_t *ent2)
+{
+  if (ent1->time < ent2->time)
+    return -1;
+
+  if (ent1->time > ent2->time)
+    return 1;
+
+  return 0;
 }
 
 int 
@@ -346,11 +402,15 @@ vcd_obj_add_sequence_entry (VcdObj *obj, const char sequence_id[],
   {
     entry_t *_entry = _vcd_malloc (sizeof (entry_t));
 
-    _entry->id = strdup (entry_id);
+    if (entry_id)
+      _entry->id = strdup (entry_id);
     _entry->time = entry_time;
 
     _vcd_list_append (_sequence->entry_list, _entry);
   }
+
+  _vcd_list_sort (_sequence->entry_list, 
+                  (_vcd_list_cmp_func) _entry_cmp);
 
   return 0;
 }
@@ -1273,6 +1333,7 @@ _write_sectors (VcdObj *obj, int track_idx)
 {
   mpeg_sequence_t *track = 
     _vcd_list_node_data (_vcd_list_at (obj->mpeg_sequence_list, track_idx));
+  VcdListNode *pause_node;
   int n, lastsect = obj->sectors_written;
   char buf[2324];
   struct {
@@ -1310,7 +1371,6 @@ _write_sectors (VcdObj *obj, int track_idx)
     case MPEG_NORM_NTSC_S:
       norm_str = strdup ("NTSC S (480x480/30fps)");
       break;
-
 	
     case MPEG_NORM_OTHER:
       {
@@ -1336,11 +1396,33 @@ _write_sectors (VcdObj *obj, int track_idx)
     _write_m2_image_sector (obj, zero, lastsect++, track_idx + 1,
                             0, SM_FORM2|SM_REALT, 0);
 
+  pause_node = _vcd_list_begin (track->pause_list);
+
   for (n = 0; n < track->info->packets; n++) {
     int ci = 0, sm = 0, cnum = 0, fnum = 0;
     struct vcd_mpeg_packet_flags pkt_flags;
+    bool set_trigger = false;
 
     vcd_mpeg_source_get_packet (track->source, n, buf, &pkt_flags);
+
+    while (pause_node)
+      {
+        pause_t *_pause = _vcd_list_node_data (pause_node);
+
+        if (!pkt_flags.has_pts)
+          break; /* no pts */
+
+        if (pkt_flags.pts < _pause->time)
+          break; /* our time has not come yet */
+
+        /* seems it's time to trigger! */
+        set_trigger = true;
+
+        vcd_debug ("setting auto pause trigger for time %f (pts %f) @%d", 
+                   _pause->time, pkt_flags.pts, n);
+
+        pause_node = _vcd_list_node_next (pause_node);
+      }
 
     switch (pkt_flags.type) {
     case PKT_TYPE_VIDEO:
@@ -1391,7 +1473,10 @@ _write_sectors (VcdObj *obj, int track_idx)
     }
 
     if (n == track->info->packets - 1)
-      sm |= SM_EOR;
+      sm |= SM_EOR | SM_EOF;
+
+    if (set_trigger)
+      sm |= SM_TRIG;
 
     fnum = track_idx + 1;
       

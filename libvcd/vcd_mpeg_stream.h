@@ -124,6 +124,9 @@ struct vcd_mpeg_packet_flags
   bool video_e2;
 
   bool pem;
+
+  bool has_pts;
+  double pts;
 };
 
 /* access functions */

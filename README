@@ -1,11 +1,31 @@
 -*- text -*-
 
+*WARNING* this is NOT a stable version *WARNING* 
+*WARNING* this is NOT a stable version *WARNING* 
+*WARNING* this is NOT a stable version *WARNING* 
+
 This is GNU VCDImager, the GNU (Super)VideoCD authoring solution.
 
 This package contains 'vcdimager', an image authoring tool, and
 'vcdrip', a VideoCD ripping tool. 'vcdrip' can be used to rip mpeg
 streams from VideoCD images and to show VideoCD information about the
-image.
+image. Furthermore, 3 XML based tools have been added recently:
+ 
+1) vcdxgen - a xml description generator, with an interface similiar
+   to the classic vcdimager frontend.
+
+2) vcdxbuild - the image builder, which takes a xml description (and
+   the files referenced within) for the to be built image.
+
+3) vcdxrip - the vcd extraction tool. this tool completes the cycle by
+   giving the possibility to extract the (s)vcd structure of an cd image,
+   and give back a xml description + mpeg items of it.
+
+For simple PBC-less VCDs the classic 'vcdimager' tool will be enough,
+but if advanced VCD features are needed, like menues, playlists,
+additional entry points, auto pause points and so on, the XML based
+tools are required to make use of. Examples and more information about
+the XML structure will be added on http://www.hvrlab.org/~hvr/vcdimager/
 
 See the file NEWS for a list of major changes in the current release.
 
@@ -19,8 +39,9 @@ The user manual is kept as texinfo documentation.
 See http://www.gnu.org/software/vcdimager/ for latest official news
 about GNU VCDImager.
 
-(until GNU VCDImager becomes ready for production, that is, officially 
-released, see http://www.hvrlab.org/~hvr/vcdimager/ for bleeding edge news)
+(until GNU VCDImager becomes ready for production, that is, officially
+released, see http://www.hvrlab.org/~hvr/vcdimager/ for bleeding edge
+news, especially for the unstable series)
 
 Mail suggestions and bug reports to bug-vcdimager@gnu.org.
 

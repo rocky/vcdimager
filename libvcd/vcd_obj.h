@@ -35,9 +35,15 @@ typedef struct {
 } entry_t;
 
 typedef struct {
+  double time;
+  char *id;
+} pause_t;
+
+typedef struct {
   VcdMpegSource *source;
   char *id;
   const struct vcd_mpeg_source_info *info;
+  VcdList *pause_list; /* pause_t */
   VcdList *entry_list; /* entry_t */
 
   /* computed on sector allocation */
