@@ -68,7 +68,11 @@ _get_node (xmlDocPtr doc, xmlNodePtr cur, xmlNsPtr ns,
       if (!folder || !cur->xmlChildrenNode) /* file or first folder */
 	xmlAddChild (cur, n);
       else /* folder */
-	xmlAddPrevSibling (cur->xmlChildrenNode, n);
+	{
+	  vcd_assert (!xmlStrcmp (n->children->name, "name"));
+
+	  xmlAddNextSibling (cur->xmlChildrenNode, n);
+	}
     }
 
   return n;
