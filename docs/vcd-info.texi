@@ -174,22 +174,19 @@ To get the album information you might run:
 @end smallexample 
 
 After doing this for a while and seeing this was useful, I then wrote
-a Video CD ``info'' library. A library is much faster and furthermore much
-of the information is saved away in memory reducing the amount of disk
-I/O. Later it turned out that I could shift the I/O completely from my
-program and use the I/O from that or another library, but that's a
-different story. What's relevant is that after creating this library,
-I then modified @value{program} to use this library @kbd{libvcdinfo}. The
-@value{program} code then got shorter (as some of it getting moved
-inside the library), and this program served as a test bed for
-the library. (It also happens that the input plugin was much harder
-and slower to debug than @value{program} since it is a ``shared
-object'' and part of a larger program with many other such shared
-objects.)
+a Video CD ``info'' library. A library is much faster and furthermore
+much of the information is saved away in memory reducing the amount of
+disk I/O. Later it turned out that I could completely remove the
+CD-reading routines from the VCD module and get this from another
+library, but that's a different story. What's relevant is that after
+creating this library, I then modified @value{program} to use this
+library @kbd{libvcdinfo}. The @value{program} code then got shorter as
+some of it getting moved inside the library. And this program served
+as a test bed for the @kbd{libvcdinfo}.
 
 So the last thing that @value{program} may be of useful for is if you
-want to see how to use the vcd-info library; you can consult the source
-program and see how @value{program} gets its information via vcd-info.
+want to see how to use the @kbd{libvcdinfo} library; you can consult the
+source program and see how @value{program} gets its information.
 
 @node Command Options, Output Sections, Introduction, Top
 @chapter Command Options
@@ -217,13 +214,13 @@ that contains an image that could be burned into a Compact Disc.  The
 option for the former category, reading a physical CD, is
 @kbd{--cdrom-device} (@kbd{-C}); options for the latter category,
 reading a file containing a CD disk image, are @kbd{--bin-file}
-(@kbd{-b}), @kbd{--cue-file} (@kbd{-c}), and @kbd{--nrg-file}
-(@kbd{-N}. There is one other option @kbd{--input} (@kbd{-i}) which
-blurs the distinction---it tries to figure out based on the name
-whether you are reading from a device containing a CD or not and do
-the appropriate thing.  Of course, since it only makes sense to read
-from one place, these options are mutually exclusive; use only one
-option from this set.
+(@kbd{-b}), @kbd{--cue-file} (@kbd{-c}), @kbd{--toc-file}, and
+@kbd{--nrg-file} (@kbd{-N}). There is one other option @kbd{--input}
+(@kbd{-i}) which blurs the distinction---it tries to figure out based
+on the name whether you are reading from a device containing a CD or
+not and do the appropriate thing.  Of course, since it only makes
+sense to read from one place, these options are mutually exclusive;
+use only one option from this set.
 
 @menu
 * CD Images::                   Reading from a file containing a CD disk image
