@@ -317,6 +317,13 @@ set_tracks_svd (VcdObj *obj, void *buf)
 
         f = modf(playtime, &i);
 
+        if (i > 99*60)
+          {
+            vcd_warn ("SVCD/TRACKS.SVD: playing time value (%d seconds) to great,"
+                      " clipping to 99 minutes", (int) i);
+            i = 99*60;
+          }
+
         lba_to_msf (i * 75, &(tracks_svd.tracks_info[n].playing_time));
         tracks_svd.tracks_info[n].playing_time.f = 
           to_bcd8 (rint (f * track->mpeg_info.frate));

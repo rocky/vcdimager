@@ -1,3 +1,8 @@
+2001-03-16  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_files.c (set_tracks_svd): clip play time value to
+	99minutes...
+
 2001-03-15  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd.c (vcd_obj_add_file): 
