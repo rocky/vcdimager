@@ -219,15 +219,9 @@ main (int argc, const char *argv[])
   int broken_svcd_mode_flag = 0;
   int nopbc_flag = 0;
 
-  memset (&obj, 0, sizeof (struct vcdxml_t));
+  vcd_xml_init (&obj);
 
   obj.comment = vcd_xml_dump_cl_comment (argc, argv);
-
-  obj.segment_list = _vcd_list_new ();
-  obj.sequence_list = _vcd_list_new ();
-  obj.pbc_list = _vcd_list_new ();
-  obj.filesystem = _vcd_list_new ();
-  obj.option_list = _vcd_list_new ();
 
   obj.pvd.system_id = strdup (DEFAULT_SYSTEM_ID);
   obj.pvd.volume_id = strdup (DEFAULT_VOLUME_ID);

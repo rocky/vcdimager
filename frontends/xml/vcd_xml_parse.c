@@ -404,6 +404,7 @@ _parse_mpeg_sequence (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlN
   GET_PROP_STR (sequence->src, "src", doc, node, ns);
 
   sequence->entry_point_list = _vcd_list_new ();
+  sequence->autopause_list = _vcd_list_new ();
 
   FOR_EACH (cur, node)
     {
@@ -646,11 +647,7 @@ _parse_videocd (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr n
   if ((obj->vcd_type = _type_id_by_str (_class, _version)) == VCD_TYPE_INVALID)
     return true;
 
-  obj->segment_list = _vcd_list_new ();
-  obj->pbc_list = _vcd_list_new ();
-  obj->sequence_list = _vcd_list_new ();
-  obj->filesystem = _vcd_list_new ();
-  obj->option_list = _vcd_list_new ();
+  vcd_xml_init (obj);
 
   FOR_EACH (cur, node)
     {

@@ -224,7 +224,8 @@ main (int argc, const char *argv[])
   if (!(vcd_doc = _xmlParseFile (gl.xml_fname)))
     {
       if (errno)
-	vcd_error ("error while parsing file `%s': %s", gl.xml_fname, strerror (errno));
+	vcd_error ("error while parsing file `%s': %s",
+		   gl.xml_fname, strerror (errno));
       else
 	vcd_error ("parsing file `%s' failed", gl.xml_fname);
       return EXIT_FAILURE;
