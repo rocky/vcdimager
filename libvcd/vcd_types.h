@@ -132,9 +132,17 @@ typedef enum
 #define GNUC_PACKED
 #endif  /* !__GNUC__ */
 
+#if defined(__sgi) && !defined(__GNUC__)
+# define PRAGMA_BEGIN_PACKED _Pragma("pack (1)")
+# define PRAGMA_END_PACKED   _Pragma("pack (0)")
+#else
+# define PRAGMA_BEGIN_PACKED
+# define PRAGMA_END_PACKED
+#endif
+
 /* user directed static branch prediction
  */
-#if __GNUC__ == 2 && __GNUC_MINOR__ < 96
+#if !defined(__GNUC__) || (__GNUC__ == 2 && __GNUC_MINOR__ < 96)
 # define GNUC_LIKELY(x)   (x) 
 # define GNUC_UNLIKELY(x) (x)
 #else /* supported with gcc 2.96+ */
@@ -146,11 +154,15 @@ typedef enum
 # define NULL ((void*) 0)
 #endif
 
+#define __vcd_offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
+
 /* In many structures on the disk a sector address is stored as a
    BCD-encoded mmssff in three bytes. */
+PRAGMA_BEGIN_PACKED
 typedef struct {
   uint8_t m, s, f;
 } GNUC_PACKED msf_t;
+PRAGMA_END_PACKED
 
 #define msf_t_SIZEOF 3
 

@@ -43,6 +43,7 @@ static const char _rcsid[] = "$Id$";
    least structure were set big endian, so at reverse
    engineering wasn't such a big headache... */
 
+PRAGMA_BEGIN_PACKED
 typedef struct {
   uint32_t start      GNUC_PACKED;
   uint32_t length     GNUC_PACKED;
@@ -74,6 +75,8 @@ typedef struct {
   uint32_t len                   GNUC_PACKED;
   char data[EMPTY_ARRAY_SIZE]    GNUC_PACKED;
 } _chunk_t;
+
+PRAGMA_END_PACKED
 
 /* to be converted into BE */
 #define CUEX_ID  0x43554558
@@ -143,6 +146,7 @@ _parse_footer (_img_nrg_src_t *_obj)
   size = vcd_data_source_stat (_obj->nrg_src);
 
   {
+PRAGMA_BEGIN_PACKED
     union {
       struct {
 	uint32_t __x          GNUC_PACKED;
@@ -154,6 +158,7 @@ _parse_footer (_img_nrg_src_t *_obj)
 	uint64_t footer_ofs   GNUC_PACKED;
       } v55;
     } buf;
+PRAGMA_END_PACKED
 
     vcd_assert (sizeof (buf) == 12);
 

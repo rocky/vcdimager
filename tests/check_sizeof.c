@@ -108,6 +108,7 @@ int main (int argc, const char *argv[])
 
   /* vcd_cd_sector_private.h */
   CHECK_SIZEOF(raw_cd_sector_t);
+  CHECK_SIZEOF(sector_header_t);
   CHECK_SIZEOF(mode0_sector_t);
   CHECK_SIZEOF(mode2_form1_sector_t);
   CHECK_SIZEOF(mode2_form2_sector_t);

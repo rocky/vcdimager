@@ -34,6 +34,7 @@ typedef enum {
   MPEG_VERS_MPEG2 = 2
 } mpeg_vers_t;
 
+PRAGMA_BEGIN_PACKED
 struct vcd_mpeg_scan_data_t {
   uint8_t tag;
   uint8_t len;
@@ -42,6 +43,7 @@ struct vcd_mpeg_scan_data_t {
   msf_t back_ofs;
   msf_t forw_ofs;
 } GNUC_PACKED;
+PRAGMA_END_PACKED
 
 #define struct_vcd_mpeg_scan_data_t_SIZEOF 14
 

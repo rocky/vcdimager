@@ -32,6 +32,8 @@
 #define ISO_XA_MARKER_STRING    "CD-XA001"
 #define ISO_XA_MARKER_OFFSET    1024
 
+PRAGMA_BEGIN_PACKED
+
 struct iso_volume_descriptor {
   uint8_t  type; /* 711 */
   char     id[5];
@@ -104,6 +106,8 @@ struct iso_directory_record {
 } GNUC_PACKED;
 
 #define struct_iso_directory_record_SIZEOF 33
+
+PRAGMA_END_PACKED
 
 #endif /* __VCD_ISO9660_PRIVATE_H__ */
 

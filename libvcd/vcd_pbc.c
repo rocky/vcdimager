@@ -264,16 +264,16 @@ _vcd_pbc_node_length (const VcdObj *obj, const pbc_t *_pbc, bool extended)
 
     case PBC_PLAYLIST:
       n = _vcd_list_length (_pbc->item_id_list);
-      retval = offsetof (PsdPlayListDescriptor, itemid[n]);
+      retval = __vcd_offsetof (PsdPlayListDescriptor, itemid[n]);
       break;
 
     case PBC_SELECTION:
       n = _vcd_list_length (_pbc->select_id_list);
 
-      retval = offsetof (PsdSelectionListDescriptor, ofs[n]);
+      retval = __vcd_offsetof (PsdSelectionListDescriptor, ofs[n]);
 
       if (extended || _vcd_obj_has_cap_p (obj, _CAP_4C_SVCD))
-	retval += offsetof (PsdSelectionListDescriptorExtended, area[n]);
+	retval += __vcd_offsetof (PsdSelectionListDescriptorExtended, area[n]);
       break;
       
     case PBC_END:

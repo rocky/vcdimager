@@ -10,7 +10,6 @@ testing or whatsoever to ensure anything.
 Most of the code is ISO C compliant, with the exception of the
 following features not contained in ISO C99:
 
- *) zero sized arrays used in otherwise empty structs
  *) uint8_t used as bit-field type 
  *) use of braced-groups within expressions
 

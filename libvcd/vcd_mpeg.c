@@ -320,11 +320,13 @@ _parse_user_data (uint8_t streamid, const void *buf, unsigned len,
                   VcdMpegStreamCtx *state)
 {
   unsigned pos = 0;
+  PRAGMA_BEGIN_PACKED
   struct {
     uint8_t tag;
     uint8_t len;
     uint8_t data[EMPTY_ARRAY_SIZE];
   } GNUC_PACKED const *udg = buf;
+  PRAGMA_END_PACKED
 
   if (udg->tag == 0x00) /* if first tag's already 0x00 */
     {

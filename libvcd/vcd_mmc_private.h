@@ -121,6 +121,9 @@ static int data_block_size[16] = {
 };
 */
 
+
+PRAGMA_BEGIN_PACKED
+
 struct disc_info 
 {
   uint16_t length;
@@ -228,14 +231,14 @@ enum multi_session_field
 
 struct mode_page_header
 {
-  uint16_t mode_data_length	GNUC_PACKED;
-  uint8_t  medium_typer		GNUC_PACKED;
-  uint8_t  device_specific	GNUC_PACKED;
-  uint8_t  long_lba		GNUC_PACKED;
-  uint8_t  reserved1		GNUC_PACKED;
-  uint16_t block_desc_len	GNUC_PACKED;
-  uint8_t  reserved2[8]		GNUC_PACKED;
-};
+  uint16_t mode_data_length;
+  uint8_t  medium_typer;
+  uint8_t  device_specific;
+  uint8_t  long_lba;
+  uint8_t  reserved1;
+  uint16_t block_desc_len;
+  uint8_t  reserved2[8];
+} GNUC_PACKED;
 
 #define struct_mode_page_header_SIZEOF 16
 
@@ -521,6 +524,8 @@ struct cue_sheet_data
 } GNUC_PACKED;
 
 #define struct_cue_sheet_data_SIZEOF 8
+
+PRAGMA_END_PACKED
 
 typedef struct
 {

@@ -300,12 +300,12 @@ main (int argc, const char *argv[])
       const union {
 	InfoSpiContents bf;
 	uint8_t byte;
-      } u = { .bf = InfoSpiContents_table[i].bitfield };
+      } *u = (void *) &InfoSpiContents_table[i].bitfield;
 
-      if (u.byte != InfoSpiContents_table[i].intval)
+      if (u->byte != InfoSpiContents_table[i].intval)
 	{
 	  printf ("failed at index %d (%.2x != %.2x)\n", 
-		  i, u.byte, InfoSpiContents_table[i].intval);
+		  i, u->byte, InfoSpiContents_table[i].intval);
 	  return 1;
 	}
     }

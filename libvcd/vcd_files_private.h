@@ -47,6 +47,8 @@
 #define ENTRIES_VERSION_HQVCD 0x01
 #define ENTRIES_SPTAG_HQVCD   0x00
 
+PRAGMA_BEGIN_PACKED
+
 typedef struct {
   char ID[8];                             /* "ENTRYVCD" */
   uint8_t version;                        /* 0x02 --- VCD2.0
@@ -415,10 +417,11 @@ typedef struct {
 
 typedef struct {
   /* TracksSVD tracks_svd; */
-  SVDTrackContent contents[EMPTY_ARRAY_SIZE]; /* indicates track contents */
+  SVDTrackContent contents[1]; /* should be [], but C99 doesn't allow it
+                                  indicates track contents */
 } GNUC_PACKED TracksSVD2;
 
-#define TracksSVD2_SIZEOF 0
+#define TracksSVD2_SIZEOF SVDTrackContent_SIZEOF
 
 /* VCD30 tracks svd */
 
@@ -523,12 +526,12 @@ typedef struct {
 
 typedef struct {
   /* ScandataDat head; */
-  uint16_t spi_indexes[EMPTY_ARRAY_SIZE]; /* Indexes into
-                                             the following scandata
-                                             table */
+  uint16_t spi_indexes[1]; /* should be [], but C doesn't allow that;
+                              Indexes into the following scandata
+                              table */
 } GNUC_PACKED ScandataDat2;
 
-#define ScandataDat2_SIZEOF 0
+#define ScandataDat2_SIZEOF sizeof(uint16_t)
 
 typedef struct {
   /* ScandataDat2 head; */
@@ -548,10 +551,12 @@ typedef struct {
 
 typedef struct {
   /* ScandataDat3 head; */
-  msf_t scandata_table[EMPTY_ARRAY_SIZE];
+  msf_t scandata_table[1]; /* should be [] but C99 doesn't allow that */
 } GNUC_PACKED ScandataDat4;
 
-#define ScandataDat4_SIZEOF 0
+#define ScandataDat4_SIZEOF msf_t_SIZEOF
+
+PRAGMA_END_PACKED
 
 #endif /* __VCD_FILES_PRIVATE_H__ */
 

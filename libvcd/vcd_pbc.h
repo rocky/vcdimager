@@ -39,6 +39,7 @@ enum pbc_type_t {
 
 /* (0,0) == upper left , (255,255) == lower right 
    setting all to zero disables area */
+PRAGMA_BEGIN_PACKED
 struct psd_area_t
 {
   uint8_t x1; /* upper left */
@@ -46,6 +47,7 @@ struct psd_area_t
   uint8_t x2; /* lower right */
   uint8_t y2; /* lower right */
 } GNUC_PACKED;
+PRAGMA_END_PACKED
 
 #define struct_psd_area_t_SIZEOF 4
 

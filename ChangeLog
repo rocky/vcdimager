@@ -1,3 +1,15 @@
+2003-02-19  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_types.h (PRAGMA_BEGIN/END_PACKED): added pragmas for
+	mipspro compiler
+
+	* libvcd/vcd_files_private.h: fixed 3 occurences of variable length
+	arrays in otherwise empty structures
+
+	* libvcd/vcd_types.h (__vcd_offsetof): add own non-const offsetof() 
+	macro, since C99 requires offsetof() to be a constant expression;
+	define GNUC_(UN)LIKELY() properly for non-gcc's
+
 2003-02-16  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* released version 0.7.13

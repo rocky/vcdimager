@@ -49,7 +49,15 @@ typedef struct {
 #define raw_cd_sector_t_SIZEOF (SYNC_LEN+HEADER_LEN)
 
 typedef struct {
-  raw_cd_sector_t sector_header;
+  uint8_t sync[SYNC_LEN];
+  msf_t msf;
+  uint8_t mode;
+} sector_header_t;
+
+#define sector_header_t_SIZEOF (SYNC_LEN+HEADER_LEN)
+
+typedef struct {
+  sector_header_t sector_header;
   uint8_t data[2336];
 } mode0_sector_t;
 
@@ -58,7 +66,7 @@ typedef struct {
 #define SUBHDR_LEN 8
 
 typedef struct {
-  raw_cd_sector_t sector_header;
+  sector_header_t sector_header;
   uint8_t subheader[SUBHDR_LEN];
   uint8_t data[M2F1_SECTOR_SIZE];
   uint32_t edc;
@@ -69,7 +77,7 @@ typedef struct {
 #define mode2_form1_sector_t_SIZEOF CDDA_SECTOR_SIZE
 
 typedef struct {
-  raw_cd_sector_t sector_header;
+  sector_header_t sector_header;
   uint8_t subheader[SUBHDR_LEN];
   uint8_t data[M2F2_SECTOR_SIZE];
   uint32_t edc;

@@ -876,8 +876,8 @@ dump_scandata_dat (const debug_obj_t *obj)
         (const void *) &_sd3->mpeg_track_offsets[track_count];
 
       const int scandata_ofs0 = 
-        offsetof (ScandataDat3, mpeg_track_offsets[track_count])
-        - offsetof (ScandataDat3, mpeg_track_offsets);
+        __vcd_offsetof (ScandataDat3, mpeg_track_offsets[track_count])
+        - __vcd_offsetof (ScandataDat3, mpeg_track_offsets);
 
       int n;
 

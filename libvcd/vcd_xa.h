@@ -52,6 +52,7 @@
 
 /* the struct */
 
+PRAGMA_BEGIN_PACKED
 typedef struct /* big endian!! */
 {
   uint16_t user_id;       /* 0 */
@@ -61,6 +62,7 @@ typedef struct /* big endian!! */
   uint8_t  filenum;       /* file number, see also XA subheader */
   uint8_t  reserved[5];   /* zero */
 } GNUC_PACKED vcd_xa_t;
+PRAGMA_END_PACKED
 
 #define vcd_xa_t_SIZEOF 14
 

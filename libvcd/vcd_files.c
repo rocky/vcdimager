@@ -793,8 +793,8 @@ get_scandata_dat_size (const VcdObj *obj)
   retval += sizeof (msf_t) * _vcd_list_length (obj->mpeg_track_list);
 
   /* struct 2 */
-  vcd_assert (sizeof (ScandataDat2) == 0);
-  retval += sizeof (ScandataDat2);
+  /* vcd_assert (sizeof (ScandataDat2) == 0);
+     retval += sizeof (ScandataDat2); */
   retval += sizeof (uint16_t) * 0;
 
   /* struct 3 */
@@ -802,8 +802,8 @@ get_scandata_dat_size (const VcdObj *obj)
   retval += (sizeof (uint8_t) + sizeof (uint16_t)) * _vcd_list_length (obj->mpeg_track_list);
 
   /* struct 4 */
-  vcd_assert (sizeof (ScandataDat4) == 0);
-  retval += sizeof (ScandataDat4);
+  /* vcd_assert (sizeof (ScandataDat4) == 0);
+     retval += sizeof (ScandataDat4); */
   {
     VcdListNode *node;
     _VCD_LIST_FOREACH (node, obj->mpeg_track_list)
@@ -812,7 +812,6 @@ get_scandata_dat_size (const VcdObj *obj)
         
         retval += sizeof (msf_t) * _get_scandata_count (track->info);
       }
-    
   }
 
   return retval;
@@ -832,8 +831,8 @@ set_scandata_dat (VcdObj *obj, void *buf)
     (ScandataDat4 *) &(scandata_dat3->mpeg_track_offsets[tracks]);
 
   const uint16_t _begin_offset =
-    offsetof (ScandataDat3, mpeg_track_offsets[tracks])
-    - offsetof (ScandataDat3, mpeg_track_offsets);
+    __vcd_offsetof (ScandataDat3, mpeg_track_offsets[tracks])
+    - __vcd_offsetof (ScandataDat3, mpeg_track_offsets);
 
   VcdListNode *node;
   unsigned n;
