@@ -30,6 +30,8 @@
 #include "vcd_bytesex.h"
 #include "vcd_salloc.h"
 
+static const char _rcsid[] = "$Id$";
+
 const static uint8_t sync_pattern[] = {
   0x00, 0xff, 0xff, 0xff,
   0xff, 0xff, 0xff, 0xff,

@@ -25,6 +25,8 @@
 
 #include "vcd_logging.h"
 
+static const char _rcsid[] = "$Id$";
+
 static void
 default_vcd_log_handler(log_level_t level, const char message[])
 {

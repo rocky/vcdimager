@@ -26,6 +26,8 @@
 #include "vcd_logging.h"
 #include "vcd_util.h"
 
+static const char _rcsid[] = "$Id$";
+
 #define VCD_SALLOC_CHUNK_SIZE 16
 
 struct _VcdSalloc

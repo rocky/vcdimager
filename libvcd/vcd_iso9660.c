@@ -28,6 +28,8 @@
 
 #include "vcd_bytesex.h"
 
+static const char _rcsid[] = "$Id$";
+
 /* some parameters... */
 #define SYSTEM_ID         "CD-RTOS CD-BRIDGE"
 

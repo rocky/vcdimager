@@ -29,6 +29,8 @@
 #include <sys/stat.h>
 #include <errno.h>
 
+static const char _rcsid[] = "$Id$";
+
 typedef struct {
   char *pathname;
   FILE *fd;

@@ -25,6 +25,8 @@
 #include <string.h>
 #include <assert.h>
 
+static const char _rcsid[] = "$Id$";
+
 struct _VcdList
 {
   unsigned length;

@@ -27,6 +27,8 @@
 #include "vcd_logging.h"
 #include "vcd_util.h"
 
+static const char _rcsid[] = "$Id$";
+
 /* CD-ROM XA */
 
 #define XA_FORM1_DIR    0x8d

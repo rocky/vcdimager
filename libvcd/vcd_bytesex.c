@@ -24,6 +24,8 @@
 
 #include "vcd_bytesex.h"
 
+static const char _rcsid[] = "$Id$";
+
 uint16_t 
 to_721(uint16_t i)
 {

@@ -1,3 +1,9 @@
+2000-12-25  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd.c (_finalize_vcd_iso_track): added 2 links to /EXT
+
+	* libvcd/: added static _rcsid symbols to all modules
+
 2000-12-23  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_mpeg.c (vcd_mpeg_get_type): added hack to detect

@@ -39,6 +39,8 @@
 #include "vcd_logging.h"
 #include "vcd_util.h"
 
+static const char _rcsid[] = "$Id$";
+
 /* some parameters */
 #define PRE_TRACK_GAP (2*75)
 #define PRE_DATA_GAP  30
@@ -124,7 +126,7 @@ _dict_get_bykey (VcdObj *obj, const char key[])
   node = _vcd_list_find (obj->buffer_dict_list,
                          (_vcd_list_iterfunc) _dict_key_cmp,
                          (char *) key);
-
+  
   if (node)
     return _vcd_list_node_data (node);
 
@@ -646,6 +648,15 @@ _finalize_vcd_iso_track (VcdObj *obj)
         _vcd_directory_mkfile (obj->dir, "VCD/PSD.VCD;1", 
                                _dict_get_bykey (obj, "psd")->sector, 
                                get_psd_size (obj), false, 0);
+
+        /* just link() those 2 files with filenum 1 in /EXT/ */
+
+        _vcd_directory_mkfile (obj->dir, "EXT/LOT_X.VCD;1", 
+                               _dict_get_bykey (obj, "lot")->sector, 
+                               ISO_BLOCKSIZE*LOT_VCD_SIZE, false, 1);
+        _vcd_directory_mkfile (obj->dir, "EXT/PSD_X.VCD;1", 
+                               _dict_get_bykey (obj, "psd")->sector, 
+                               get_psd_size (obj), false, 1);
       }
     break;
 

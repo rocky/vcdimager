@@ -27,6 +27,8 @@
 #include "vcd_mpeg.h"
 #include "vcd_logging.h"
 
+static const char _rcsid[] = "$Id$";
+
 #define MPEG_START_CODE_PATTERN  ((uint32_t) 0x00000100)
 #define MPEG_START_CODE_MASK     ((uint32_t) 0xffffff00)
 

@@ -27,6 +27,8 @@
 #include "vcd_logging.h"
 #include "vcd_util.h"
 
+static const char _rcsid[] = "$Id$";
+
 /* 
  * DataSource implementations
  */

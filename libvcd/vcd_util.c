@@ -24,6 +24,8 @@
 
 #include "vcd_util.h"
 
+static const char _rcsid[] = "$Id$";
+
 size_t
 _strlenv(char **str_array)
 {

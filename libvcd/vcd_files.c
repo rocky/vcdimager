@@ -29,6 +29,8 @@
 #include "vcd_logging.h"
 #include "vcd_util.h"
 
+static const char _rcsid[] = "$Id$";
+
 void
 set_entries_vcd (VcdObj *obj, void *buf)
 {

@@ -30,6 +30,8 @@
 #include "vcd_logging.h"
 #include "vcd_salloc.h"
 
+static const char _rcsid[] = "$Id$";
+
 void
 write_mode2_sector(VcdDataSink *sink, int sect2336, const void *data,
                    uint32_t extent, uint8_t fnum, uint8_t cnum, 
