@@ -65,8 +65,8 @@ _type_id_by_str (const char class[], const char version[])
   return type_str[i].id;
 }
 
-bool
-vcd_xml_master (const struct vcdxml_t *obj)
+bool vcd_xml_master (const struct vcdxml_t *obj, const char cue_fname[],
+		     const char bin_fname[], bool sector_2336_flag)
 {
   VcdObj *_vcd;
   VcdListNode *node;
@@ -173,9 +173,9 @@ vcd_xml_master (const struct vcdxml_t *obj)
     VcdImageSink *image_sink;
 
     image_sink = 
-      vcd_image_sink_new_bincue (vcd_data_sink_new_stdio ("videocd.bin"),
-                                 vcd_data_sink_new_stdio ("videocd.cue"),
-                                 "videocd.bin", false);
+      vcd_image_sink_new_bincue (vcd_data_sink_new_stdio (bin_fname),
+                                 vcd_data_sink_new_stdio (cue_fname),
+                                 bin_fname, sector_2336_flag);
 
     if (!image_sink)
       {

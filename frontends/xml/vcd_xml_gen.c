@@ -41,7 +41,7 @@
 #include <libvcd/vcd_data_structures.h>
 #include <libvcd/vcd_cd_sector.h>
 
-#include "videocd_dtd.h"
+#include "vcd_xml_dtd.h"
 
 static const char _rcsid[] = "$Id$";
 

@@ -22,7 +22,10 @@
 #define __VCD_XML_MASTER_H__
 #include "vcdxml.h"
 
-bool vcd_xml_master (const struct vcdxml_t *obj);
+bool vcd_xml_master (const struct vcdxml_t *obj, 
+		     const char cue_fname[],
+		     const char bin_fname[],
+		     bool sector_2336_flag);
 
 #endif /* __VCD_XML_MASTER_H__ */
 

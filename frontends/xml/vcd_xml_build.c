@@ -26,6 +26,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
+
+#include <popt.h>
 
 #include <libxml/parserInternals.h>
 #include <libxml/parser.h>
@@ -34,7 +37,8 @@
 #include <libxml/xmlerror.h>
 
 
-#include "vcd_types.h"
+#include <libvcd/vcd_types.h>
+#include <libvcd/vcd_logging.h>
 
 #include "vcdxml.h"
 #include "vcd_xml_parse.h"
@@ -95,69 +99,160 @@ _xmlParseFile(const char *filename)
   return(ret);
 }
 
+#define DEFAULT_CUE_FILE       "videocd.cue"
+#define DEFAULT_BIN_FILE       "videocd.bin"
+
+static struct {
+  char *xml_fname;
+  char *bin_fname;
+  char *cue_fname;
+  int sector_2336_flag;
+  int verbose_flag;
+  int quiet_flag;
+  int progress_flag;
+
+  vcd_log_handler_t default_vcd_log_handler;
+} gl;
+
+static void 
+_vcd_log_handler (log_level_t level, const char message[])
+{
+  if (level == LOG_DEBUG && !gl.verbose_flag)
+    return;
+
+  if (level == LOG_INFO && gl.quiet_flag)
+    return;
+  
+  gl.default_vcd_log_handler (level, message);
+}
+
+static int
+_do_cl (int argc, const char *argv[])
+{
+  const char **args = NULL;
+  int n, opt = 0;
+  enum { CL_VERSION = 1 };
+  poptContext optCon = NULL;
+  struct poptOption optionsTable[] = 
+    {
+      {"cue-file", 'c', POPT_ARG_STRING, &gl.cue_fname, 0,
+       "specify cue file for output (default: '" DEFAULT_CUE_FILE "')",
+       "FILE"},
+      
+      {"bin-file", 'b', POPT_ARG_STRING, &gl.bin_fname, 0,
+       "specify bin file for output (default: '" DEFAULT_BIN_FILE "')",
+       "FILE"},
+
+      { "sector-2336", '\0', POPT_ARG_NONE, &gl.sector_2336_flag, 0,
+	"use 2336 byte sectors for output"},
+
+/*       {"progress", 'p', POPT_ARG_NONE, &gl.progress_flag, 0,  */
+/*        "show progress"},  */
+
+      {"verbose", 'v', POPT_ARG_NONE, &gl.verbose_flag, 0, 
+       "be verbose"},
+	
+      {"quiet", 'q', POPT_ARG_NONE, &gl.quiet_flag, 0, 
+       "show only critical messages"},
+
+      {"version", 'V', POPT_ARG_NONE, NULL, CL_VERSION,
+       "display version and copyright information and exit"},
+
+      POPT_AUTOHELP 
+
+      {NULL, 0, 0, NULL, 0}
+    };
+
+  gl.cue_fname = strdup (DEFAULT_CUE_FILE);
+  gl.bin_fname = strdup (DEFAULT_BIN_FILE);
+  
+  optCon = poptGetContext ("vcdimager", argc, argv, optionsTable, 0);
+  
+  if (poptReadDefaultConfig (optCon, 0)) 
+    fprintf (stderr, "warning, reading popt configuration failed\n"); 
+
+  while ((opt = poptGetNextOpt (optCon)) != -1)
+    switch (opt)
+      {
+      case CL_VERSION:
+	fprintf (stdout, "GNU VCDImager " VERSION " [" HOST_ARCH "]\n\n"
+		 "Copyright (c) 2001 Herbert Valerio Riedel <hvr@gnu.org>\n\n"         
+		 "GNU VCDImager may be distributed under the terms of the GNU General Public\n"
+		 "Licence; For details, see the file `COPYING', which is included in the GNU\n"
+		 "VCDImager distribution. There is no warranty, to the extent permitted by law.\n");
+	exit (EXIT_SUCCESS);
+	break;
+
+      default:
+	vcd_error ("error while parsing command line - try --help");
+	break;
+      }
+
+  if (gl.verbose_flag && gl.quiet_flag)
+    vcd_error ("I can't be both, quiet and verbose... either one or another ;-)");
+    
+  if ((args = poptGetArgs (optCon)) == NULL)
+    vcd_error ("xml input file argument missing -- try --help");
+
+  for (n = 0; args[n]; n++);
+
+  if (n != 1)
+    vcd_error ("only one xml input file argument allowed -- try --help");
+
+  gl.xml_fname = strdup (args[0]);
+
+  poptFreeContext (optCon);
+
+  return 0;
+}
+
 int 
 main (int argc, const char *argv[])
 {
-  int rc = EXIT_FAILURE;
   xmlDocPtr vcd_doc;
 
   _init_xml ();
-  
-  if (argc != 2)
-    {
-      printf ("argc != 2\n");
-      return EXIT_FAILURE;
-    }
 
-  if (!(vcd_doc = _xmlParseFile (argv[1])))
+  gl.default_vcd_log_handler = vcd_log_set_handler (_vcd_log_handler);
+
+  if (_do_cl (argc, argv))
+    return EXIT_FAILURE;
+
+  errno = 0;
+  if (!(vcd_doc = _xmlParseFile (gl.xml_fname)))
     {
-      printf ("parsing file failed\n");
+      if (errno)
+	vcd_error ("error while parsing file `%s': %s", gl.xml_fname, strerror (errno));
+      else
+	vcd_error ("parsing file `%s' failed", gl.xml_fname);
       return EXIT_FAILURE;
     }
 
   if (vcd_xml_dtd_loaded < 1)
     {
-      printf ("doctype declaration missing\n");
+      vcd_error ("doctype declaration missing in `%s'", gl.xml_fname);
       return EXIT_FAILURE;
     }
 
-  do {
+  {
     xmlNodePtr root;
     xmlNsPtr ns;
     struct vcdxml_t obj;
     
     if (!(root = xmlDocGetRootElement (vcd_doc)))
-      {
-	printf ("sorry, doc is empty\n");
-	break;
-      }
+      vcd_error ("XML document seems to be empy (no root node found)");
 
     if (!(ns = xmlSearchNsByHref (vcd_doc, root, VIDEOCD_DTD_XMLNS)))
-      {
-	printf ("sorry, namespace not found in doc\n");
-	break;
-      }
-
+      vcd_error ("Namespace not found in document");
+    
     if (vcd_xml_parse (&obj, vcd_doc, root, ns))
-      {
-	printf ("sorry, parsing failed\n");
-	break;
-      }
+      vcd_error ("parsing tree failed");
 
-    if (vcd_xml_master (&obj))
-      {
-	printf ("sorry, mastering vcd failed\n");
-	break;
-      }
-
-    printf ("everything worked!\n");
-
-    rc = EXIT_SUCCESS;
-  } while (false);
-
-  /* xmlDocDump (stdout, vcd_doc); */
+    if (vcd_xml_master (&obj, gl.cue_fname, gl.bin_fname, gl.sector_2336_flag))
+      vcd_error ("building videocd failed");
+  } 
 
   xmlFreeDoc (vcd_doc);
 
-  return rc;
+  return EXIT_SUCCESS;
 }
