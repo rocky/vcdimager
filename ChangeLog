@@ -1,3 +1,8 @@
+2001-10-21  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* frontends/xml/vcd_xml_rip.c (main): added three new options for
+		disabling extraction of data
+
 2001-10-19  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_image_bsdicd.c: merged fixes from Steven M. Schultz

@@ -1294,6 +1294,9 @@ main (int argc, const char *argv[])
   char *xml_fname = NULL;
   char *img_fname = NULL;
   int norip_flag = 0;
+  int nofile_flag = 0;
+  int noseq_flag = 0;
+  int noseg_flag = 0;
   int no_ext_psd_flag = 0;
   int sector_2336_flag = 0;
   int _progress_flag = 0;
@@ -1341,7 +1344,16 @@ main (int argc, const char *argv[])
        "ignore /EXT/PSD_X.VCD"},
 
       {"norip", '\0', POPT_ARG_NONE, &norip_flag, 0,
-       "dont rip mpeg streams"},
+       "only extract XML structure"},
+
+      {"nofiles", '\0', POPT_ARG_NONE, &nofile_flag, 0,
+       "don't extract files"},
+
+      {"nosequences", '\0', POPT_ARG_NONE, &noseq_flag, 0,
+       "don't extract sequences"},
+
+      {"nosegments", '\0', POPT_ARG_NONE, &noseg_flag, 0,
+       "don't extract segment play items"},
 
       {"progress", 'p', POPT_ARG_NONE, &_progress_flag, 0,  
        "show progress"}, 
@@ -1469,9 +1481,14 @@ main (int argc, const char *argv[])
 	      "determined without mpeg extraction -- hope that's ok");
   else
     {
-      _rip_isofs (&obj, img_src);
-      _rip_segments (&obj, img_src);
-      _rip_sequences (&obj, img_src);
+      if (!nofile_flag)
+	_rip_isofs (&obj, img_src);
+
+      if (!noseg_flag)
+	_rip_segments (&obj, img_src);
+
+      if (!noseq_flag)
+	_rip_sequences (&obj, img_src);
     }
 
   vcd_info ("writing xml description to `%s'...", xml_fname);

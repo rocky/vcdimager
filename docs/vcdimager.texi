@@ -16,26 +16,14 @@ This file documents GNU VCDImager, The GNU Video CD Authoring Tools.
 Copyright (C) Herbert Valerio Riedel @email{<hvr@@gnu.org>}
 
 @sp 2
-Permission is granted to make and distributed verbatim copies of this
-manual, provided the copyright notice and this permission notice are
-preserved on all copies. 
-
-@ignore
-Permission is granted to process this file through TeX and print the 
-results, provided the printed document carries copying permission notice 
-identical to this one except for the removal of this paragraph (this 
-paragraph not being relevant to the printed manual).
-
-@end ignore
-Permission is granted to copy and distribute modified versions of this
-manual under the conditions for verbatim copying, provided that the
-entire resulting derived work is distributed under the terms of a
-permission notice identical to this one.
-
-Permission is granted to copy and distribute translations of this manual
-into another language, under the above conditions for modified versions,
-except that this permission notice may be stated in a translation
-approved by Herbert Valerio Riedel.
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.1 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, one Front-Cover Text: "GNU VCDImager by Herbert
+Valerio Riedel et al." and one Back-Cover Text: "GNU VCDImager can be
+obtained at @url{http://www.gnu.org/software/vcdimager/}. The author is
+reachable at @email{hvr@@gnu.org}".  A copy of the license is included
+in the section entitled "GNU Free Documentation License".
 @end ifinfo
 
 @titlepage
@@ -46,25 +34,24 @@ approved by Herbert Valerio Riedel.
 @author Herbert Valerio Riedel et al.
 
 @page
+@smallexample
+pub  1024D/883F4142 2001-03-19 Herbert Valerio Riedel <hvr@@kernel.org>
+     Key fingerprint = 7BB9 2D6C D485 CE64 4748  5F65 4981 E064 883F 4142
+uid                            Herbert Valerio Riedel <hvr@@gnu.org>
+@end smallexample
+
 @vskip 0pt plus 1filll
+
 Copyright @copyright{} 2001 Herbert Valerio Riedel @email{<hvr@@gnu.org>}
 @sp 1
-Permission is granted to make and distribute verbatim copies of this
-manual provided the copyright notice and this permission notice are
-preserved on all copies.
-
-Permission is granted to copy and distribute modified versions of this
-manual under the conditions for verbatim copying, provided also that the
-section entitled ``GNU General Public License'' are included exactly as
-in the original, and provided that the entire resulting derived work is
-distributed under the terms of a permission notice identical to this
-one.
-
-Permission is granted to copy and distribute translations of this manual
-into another language, under the above conditions for modified versions,
-except that the sections entitled ``GNU General Public License'' may be
-included in a translation approved by the Free Software Foundation
-instead of in the original English.
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.1 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, one Front-Cover Text: ``GNU VCDImager by Herbert
+Valerio Riedel et al.'' and one Back-Cover Text: ``GNU VCDImager can be
+obtained at @url{http://www.gnu.org/software/vcdimager/}. The author is
+reachable at @email{hvr@@gnu.org}.''.  A copy of the license is included
+in the section entitled ``GNU Free Documentation License''.
 @end titlepage
 
 @c @summarycontents
@@ -76,7 +63,7 @@ instead of in the original English.
 * vcddebug: (vcdimager).                        Video CD debugging tool
 * vcdxgen: (vcdimager).                         Video CD XML template generator
 * vcdxbuild: (vcdimager).                       Video CD XML formatter
-* vcdxrip: (vcdimager).                         Video CD XML disassembler
+* vcdxrip: (vcdimager).                         Video CD XML dis-assembler
 @end direntry
 
 @node Top, Introduction, (dir), (dir)
@@ -85,12 +72,13 @@ instead of in the original English.
 * Introduction::                
 * Video CD Concepts::           
 * Reference::                   
-* Video CD XML Description::     
+* Video CD XML Description::    
 * Examples::                    
 * Tips and Hints::              
 * Character Sets::              
 * Acronym Expansions::          
 * GNU General Public License::  
+* GNU Free Documentation License::  
 * XML Tag Index::               
 * Concept Index::               
 @end menu
@@ -99,7 +87,7 @@ instead of in the original English.
 @unnumbered Introduction
 
 This manual describes the @dfn{GNU VCDImager}@footnote{see
-@uref{http://www.gnu.org/software/vcdimager/}} package, a toolset for
+@uref{http://www.gnu.org/software/vcdimager/}} package, a tool-set for
 authoring, disassembling and analyzing Video CD's and Super Video CD's.
 
 @menu
@@ -110,21 +98,21 @@ authoring, disassembling and analyzing Video CD's and Super Video CD's.
 @node Supplied Tools, Features, Introduction, Introduction
 @section Supplied Tools
 
-The following commandline tools are provided with this package:
+The following command-line tools are provided with this package:
 
 @table @command
 @item vcdimager
-Simple frontend, allowing for easy commandline controlled generation of
+Simple front-end, allowing for easy command-line controlled generation of
 basic @acronym{VCD} and @acronym{SVCD} disc images without an
 intermediate @acronym{XML} description.
 
 @item vcddebug
-Analysation tool and report generator for @acronym{VCD} and
+Analyzing tool and report generator for @acronym{VCD} and
 @acronym{SVCD} discs.
 
 @item vcdxgen
-@acronym{XML} @acronym{VCD}-description generator, with a commandline
-interface similiar to the classic @command{vcdimager} frontend.
+@acronym{XML} @acronym{VCD}-description generator, with a command-line
+interface similar to the classic @command{vcdimager} front-end.
 
 @item vcdxbuild
 Builds a @acronym{VCD}/@acronym{SVCD} according to a supplied
@@ -149,9 +137,9 @@ recognizes the @acronym{BIN/CUE}-format, such as cdrdao@footnote{see
 @node Features,  , Supplied Tools, Introduction
 @section Features
 
-Features of the backend library@footnote{the core of the GNU VCDImager
-package consists of a library named @code{libvcd}, the frontends are
-just user interfaces to the exported C-API}, on which all frontends
+Features of the back-end library@footnote{the core of the GNU VCDImager
+package consists of a library named @code{libvcd}, the front-ends are
+just user interfaces to the exported C-API}, on which all front-ends
 rely, include:
 
 @itemize @bullet
@@ -239,7 +227,7 @@ In general, the layout of a Video CD is as follows:
 
 @itemize @bullet
 @item 
-lead-in area containg the TOC (@code{00:00:00} -- @code{00:01:74}).
+lead-in area containing the TOC (@code{00:00:00} -- @code{00:01:74}).
 
 @item
 ISO-9660 data track. @xref{The ISO-9660 Track}.
@@ -274,11 +262,11 @@ margin empty sectors, preceded by track pre-gaps.
 
 @item
 Up to 97@footnote{the maximum number of tracks on a Video CD must not
-excede 99 tracks} @acronym{CD-DA} tracks. (not supported yet by
+exceed 99 tracks} @acronym{CD-DA} tracks. (not supported yet by
 vcdimager)
 
 @item
-Optional lead-out pregap.
+Optional lead-out pre-gap.
 
 @item
 lead-out area.
@@ -392,10 +380,10 @@ For segment play items the following audio encodings became available:
 @itemize @bullet
 @item
 Joint stereo, stereo or dual channel audio streams at 128, 192, 224 or
-384 kbit/sec bitrate.
+384 kbit/sec bit-rate.
 
 @item
-Mono audio streams at 64, 96 or 192 kbit/sec bitrate.
+Mono audio streams at 64, 96 or 192 kbit/sec bit-rate.
 @end itemize
 
 Also the possibility to have audio only streams and still
@@ -507,12 +495,12 @@ SVCD's.
 @subsection Primary Volume Descriptor
 
 This ISO-9660 sector located at sector @acronym{LSN} 16 contains general
-information about the ISO-9660 filesystem, such as volume label, various
-IDs, filesystem size, pointer to the root directory and so on@dots{}
+information about the ISO-9660 file-system, such as volume label, various
+IDs, file-system size, pointer to the root directory and so on@dots{}
 
 @node Directory Structure,  , Primary Volume Descriptor, The ISO-9660 Track
 @subsection Directory Structure
-@cindex Video CD filesystem
+@cindex Video CD file-system
 
 @menu
 * /VCD & /SVCD Directory::      
@@ -702,8 +690,8 @@ should happen not be aligned on 2324 byte boundaries, GNU VCDImager will
 try@footnote{aligning only works, if @acronym{MPEG} packets are
 @emph{not} bigger than 2324 bytes.} to align them on the fly while
 issuing a warning that padding was needed. @strong{Warning:} Padding the
-@acronym{MPEG} streams causes the bitrate at which the data is read to
-be increased, this may lead to undesiderable effects.
+@acronym{MPEG} streams causes the bit-rate at which the data is read to
+be increased, this may lead to undesirable effects.
 
 If the image generation process should abort with an @acronym{MPEG}
 related error message, it maybe either due to a bug or due to a
@@ -719,7 +707,7 @@ sector on the @acronym{VCD}/@acronym{SVCD} which is suitable to be
 jumped to directly. @acronym{APS} are required for entry points and
 scantables.
 
-@acronym{APS} have to fullfill the requirement to precede every I-frame
+@acronym{APS} have to fulfill the requirement to precede every I-frame
 by a GOP header which shall be preceded by a sequence header in its
 turn. The start codes of these 3 items are required to be contained all
 in the same mpeg pack/sector, thus forming a so-called @dfn{access
@@ -727,7 +715,7 @@ point sector}.
 
 This requirement can be relaxed by enabling the @code{relaxed aps}
 option. @strong{Warning:} The sequence header is needed for a playing
-device to figure out display parameters, such as display resoulution and
+device to figure out display parameters, such as display resolution and
 frame rate, relaxing the aps requirement may lead to non-working entry
 points.
 
@@ -782,8 +770,8 @@ Must contain motion video (and audio for Video CD 2.0).
 Segment items are stored in the so-called @acronym{SPI} area, which
 consists of up to 1980 allocation units which are called
 @dfn{segments}. Each segment consists of 150 @acronym{XA} form 2
-sectors.  Thus the @acronym{SPI} area can contain up to 658 mb of
-realtime data@footnote{@math{1980 * 150 * 2324 = 690228000} bytes}. 
+sectors.  Thus the @acronym{SPI} area can contain up to 658 MB of
+real-time data@footnote{@math{1980 * 150 * 2324 = 690228000} bytes}. 
 
 A segment (play) item is a @acronym{MPEG} stream stored in one or more
 consecutive segments. A segment item can be
@@ -878,11 +866,11 @@ interpreted. In this mode, the @key{NUMERIC} key causes to start
 playback at the entry in @file{ENTRY.VCD}/@file{ENTRY.SVD} with the
 index number pressed. The @key{NEXT} and @key{PREVIOUS} keys play the
 next or previous entry in that the entry file. This mode allows for
-compliant playing devices to honour the entry points defined as chapter
+compliant playing devices to honor the entry points defined as chapter
 division markers@footnote{in fact even when the play item is contained
-in a playlist it should allow to jump between the entry points with the
+in a play-list it should allow to jump between the entry points with the
 @key{NEXT}/@key{PREVIOUS} keys.}. Alas, only a few playing devices are
-capable of honouring Video CD chapters.
+capable of honoring Video CD chapters.
 
 @node PBC Lists, Applications, Linear Playback, Playback Control
 @subsection PBC Lists
@@ -916,11 +904,11 @@ selection, while showing a play item.
 Also features such as random selection, default target (@key{DEFAULT}),
 timeout target and looping are supported.
 
-@subsubheading Hotspots
+@subsubheading Hot-spots
 @cindex Menu selection areas
 @cindex Menu highlighting
 
-The Video CD format allows for so-called hotspots in selection lists,
+The Video CD format allows for so-called hot-spots in selection lists,
 which are used to define areas on the screen for selection targets,
 which can be used for pointer device based selection in addition to the
 @key{NUMERIC} input, and/or for highlighting of areas on the screen on
@@ -977,11 +965,11 @@ interactivity.
 @node vcdimager, vcddebug, Tools, Tools
 @subsection @command{vcdimager}
 
-This is the classic frontend, which is maintained only for ease of use
+This is the classic front-end, which is maintained only for ease of use
 and because it does not relay on @command{libxml2} and thus may be the
-only built frontend. @command{vcdimager} does not create a dummy
-@acronym{PBC} anymore as in the past. It is recommended to familarize
-with the @acronym{XML} frontends, in order to be able to use the
+only built front-end. @command{vcdimager} does not create a dummy
+@acronym{PBC} anymore as in the past. It is recommended to familiarize
+with the @acronym{XML} front-ends, in order to be able to use the
 extended features offered by GNU VCDImager.
 
 There are a few command-line options for @command{vcdimager} at the
@@ -1026,7 +1014,7 @@ track of the Video CD, by making use of the command-line options
 @option{--add-file=@var{FILE},@var{ISO_FILENAME}} and
 @option{--add-file-2336=@var{FILE},@var{ISO_FILENAME}}.  The latter
 option allows you to include files containing the complete user data of
-mode 2 CD-ROM sectors @footnote{8 bytes for subheader, 2324 bytes
+mode 2 CD-ROM sectors @footnote{8 bytes for sub-header, 2324 bytes
 payload (which contains 276 bytes @acronym{ECC} for form 1) and finally
 4 bytes for @acronym{EDC}}.
 
@@ -1051,7 +1039,7 @@ extension is supposed to exist the dot must be placed as a trailing
 dot.}
 
 @item
-ISO-9660 conformance level 1 restrictions apply, i.e. filenames are
+ISO-9660 conformance level 1 restrictions apply, i.e. file names are
 restricted to 8.3 characters.
 
 @item
@@ -1121,7 +1109,7 @@ actually extracting any files or mpeg streams contained.
 @subsection @command{vcdxminfo}
 
 This tool allows to show basic properties of @acronym{MPEG} streams as
-seen by the backend library. Dumping of all @acronym{APS} contained in
+seen by the back-end library. Dumping of all @acronym{APS} contained in
 the stream is supported as well.
 
 @emph{FIXME: write more}
@@ -1233,7 +1221,7 @@ ranging from @samp{1} to @samp{60} in steps of 1, representing the time
 to wait in whole seconds.
 
 @item 60
-rangin from @samp{60} to @samp{2000} in steps of 10, representing the
+ranging from @samp{60} to @samp{2000} in steps of 10, representing the
 time to wait in whole seconds.
 
 @item 2000
@@ -1252,7 +1240,7 @@ For @code{<loop>} and @code{<playtime>} the value @samp{0} means
 Items and their associated IDs fall into two categories, @emph{play
 items} and @emph{PSD items}. Every reference to an ID has to be of the
 right class, otherwise the reference can't be resolved, due to a failing
-lookup. A @emph{play item} can be any of the following:
+look up. A @emph{play item} can be any of the following:
 
 @itemize @bullet
 @item
@@ -1334,7 +1322,7 @@ Supported combinations of @var{class} and @var{version} are listed below:
 @end multitable
 
 @item xmlns
-The @code{xmlns} attribute defines the @acronym{XML} namespace.
+The @code{xmlns} attribute defines the @acronym{XML} name-space.
 @end table
 
 @smallexample
@@ -1388,8 +1376,8 @@ Allowed @code{value} content: @samp{true}, @samp{false}. Default: @samp{false}.
 
 @item track pregap
 
-Used to set the track pregap for all tracks at once in sectors. The
-specification requires the pregap to be at least 150 sectors long.
+Used to set the track pre-gap for all tracks at once in sectors. The
+specification requires the pre-gap to be at least 150 sectors long.
 
 Allowed @code{value} content: [@samp{1}..@samp{300}]. Default: @samp{150}.
 
@@ -1421,7 +1409,7 @@ Allowed @code{value} content: [@samp{0}..@samp{300}]. Default: @samp{0}.
 @item leadout pause
 
 @emph{DEPRECATED}. Use @samp{leadout pregap} instead. This option is
-aequivalent to setting the @samp{leadout pregap} option to the value 
+equivalent to setting the @samp{leadout pregap} option to the value 
 @samp{150}.
 
 Allowed @code{value} content: @samp{true}, @samp{false}. Default: @samp{false}.
@@ -1581,7 +1569,7 @@ d-characters, @xref{ISO646 d-Characters}. This is label usually shows up
 on computer systems as volume label.
 
 @item <system-id>
-System id of the @acronym{CD-ROM}. Content restricted to upto 32
+System id of the @acronym{CD-ROM}. Content restricted to up to 32
 a-characters. Should be set to @samp{CD-RTOS CD-BRIDGE} for Video CD's
 for @acronym{CD-i} compatibility.  This fields content is ignored by
 vcdimager and always set to @samp{CD-RTOS CD-BRIDGE}.
@@ -1595,7 +1583,7 @@ regardless of the content given in the XML description which is ignored.
 
 @item <publisher-id>
 Data Preparer Identifier for the @acronym{CD-ROM}. Content restricted to
-upto 128 a-characters@xref{ISO646 a-Characters}.
+up to 128 a-characters@xref{ISO646 a-Characters}.
 @end table
 
 @smallexample
@@ -1691,7 +1679,7 @@ Source location of the file.
 @item format
 @tgindex @var{format}
 Whether file is an ordinary @code{form1} file, or a @code{mixed} form
-realtime file containing the sector information in 2336 byte blocks.
+real-time file containing the sector information in 2336 byte blocks.
 
 @end table
 
@@ -1845,7 +1833,7 @@ in seconds from the beginning of the sequence.
 @item <default-entry>
 Represents the mandatory default entry point pointing to the start of
 the sequence@footnote{Referencing the default entry point id should
-be aequivalent to referencing the sequence id. Depending on the firmware
+be equivalent to referencing the sequence id. Depending on the firmware
 of the playing device, the sequence id may reflect the start of the
 sequence as defined by the TOC, while the default entry id gets defined
 by the address defined in the @file{ENTRY.VCD} or @file{ENTRY.SVD}}.
@@ -1854,7 +1842,7 @@ by the address defined in the @file{ENTRY.VCD} or @file{ENTRY.SVD}}.
 Defines an additional entry point into the sequence item. Up to 99 entry
 points (including the default entry point) can be defined per sequence,
 while only a maximum of 500 entry points@footnote{every sequence point
-has automatically an entry point defined, which must be substracted from
+has automatically an entry point defined, which must be subtracted from
 the maximum of 500 entry points} can be present in the whole disc. The
 entry point time is given in seconds from the beginning of the sequence.
 If referenced from @acronym{PBC} the sequence which contains the entry
@@ -1942,14 +1930,14 @@ ID value referenced in @code{ref} attributes.
 @tgindex @var{rejected}
 Attribute controlling, whether item is not listed, i.e. @emph{rejected},
 in the @acronym{LOT}. Lists which are not rejected may be---if supported
-by the playing device---selectable by user input of the automatically
+by the playing device---select-able by user input of the automatically
 assigned @emph{List ID Number}. It is recommended to enable the rejected
 property for but the very first PBC list, in order to make the
 @emph{unreferenced item check} work better.  The first PBC Item must not
 be rejected.
 
 @item x1 y1 x2 y2
-@cindex Hotspot area coordinates
+@cindex Hot spot area coordinates
 @tgindex @var{x1}
 @tgindex @var{x2}
 @tgindex @var{y1}
@@ -2047,7 +2035,7 @@ at the same time with the following element.
 
 If a @code{<default>} target is defined, @code{<loop>} should not be set
 to loop forever (@samp{0}) nor shall @code{<wait>} indicate an infinite
-timeout wait time, otherwise the target will be unreachable.
+time-out wait time, otherwise the target will be unreachable.
 
 @item <multi-default>
 @tgindex @var{numeric}
@@ -2060,7 +2048,7 @@ number of selection must match the number of all entry points of the
 sequence referenced by @code{<play-item>}.
 
 @item <timeout>
-Target list id to be jumped on timeout of @code{<wait>}. If ommitted
+Target list id to be jumped on time-out of @code{<wait>}. If omitted
 (and @code{<wait>} is not set to an infinite time) one of the
 @code{<select>} targets is selected at random!
 
@@ -2074,7 +2062,7 @@ action before time ran up). Default: @samp{0}.
 Times to repeat the playback of @code{<play-item>}. the
 @code{jump-timing} attribute controls whether the playback of
 @code{<play-item>} is finished, thus @emph{delayed}, before executing
-user triggered action or an @emph{immediate} jump is perfomed. After the
+user triggered action or an @emph{immediate} jump is performed. After the
 specified amount of repetitions are completed, the @code{<wait>} time
 begins to count down, unless set to an infinite wait time by setting it
 to the value @samp{0}. If this element is omitted, a default of @samp{1}
@@ -2397,7 +2385,7 @@ Take warnings serious! If there were warnings issued during the image
 building process, chances are the problems are related to them.
 
 @item 
-Make sure the @acronym{SVCD} is physically ok (e.g., analyze the disc
+Make sure the @acronym{SVCD} is physically OK (e.g., analyze the disc
 with @command{vcddebug} or try it on some other playing device).
 
 @item
@@ -2405,7 +2393,7 @@ Try creating the @acronym{SVCD} by enabling the @samp{svcd vcd30 mpegav}
 and @samp{svcd vcd30 entrysvd} options.
 
 @item
-Add an empty @file{/SEGMENT} dir, if it isn't created due to inclusion
+Add an empty @file{/SEGMENT} directory, if it isn't created due to inclusion
 of @acronym{SPI}s.
 
 @item
@@ -2508,12 +2496,19 @@ f |     / ? O _
 
 @include glossary.texi
 
-@node GNU General Public License, XML Tag Index, Acronym Expansions, Top
+@node GNU General Public License, GNU Free Documentation License, Acronym Expansions, Top
 @appendix GNU General Public License
+@cindex GPL, GNU General Public License
 @center Version 2, June 1991
 @include gpl.texi
 
-@node XML Tag Index, Concept Index, GNU General Public License, Top
+@node GNU Free Documentation License, XML Tag Index, GNU General Public License, Top
+@appendix GNU Free Documentation License
+@cindex FDL, GNU Free Documentation License
+@center Version 1.1, March 2000
+@include fdl.texi
+
+@node XML Tag Index, Concept Index, GNU Free Documentation License, Top
 @unnumbered XML Tag Index
 
 @printindex tg
