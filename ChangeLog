@@ -1,3 +1,7 @@
+2003-01-30  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd.c (_write_sequence): s/30fps/29.97fps/
+
 2003-01-28  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_image_cd-bsdi.c: fixes from Steven M. Schultz
