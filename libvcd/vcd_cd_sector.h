@@ -23,12 +23,29 @@
 
 #include "vcd_types.h"
 
+/* subheader */
+
+/* coding information */
 #define CI_VIDEO   0x0f
 #define CI_STILL   0x1f
 #define CI_STILL2  0x3f
 #define CI_AUDIO   0x7f
+#define CI_AUDIO2  0x7f
+#define CI_OGT     0x0f
+#define CI_PAD     0x1f
 #define CI_OTHER   0x00
 
+/* channel numbers */
+#define CN_VIDEO   0x01
+#define CN_STILL   0x02
+#define CN_STILL2  0x03
+#define CN_AUDIO   0x01
+#define CN_AUDIO2  0x02
+#define CN_OGT     0x02 /* fixme -- is it 0x04 ?? */
+#define CN_PAD     0x00
+#define CN_OTHER   0x00
+
+/* submode byte */
 #define SM_EOR    (1<<0)
 #define SM_VIDEO  (1<<1)
 #define SM_AUDIO  (1<<2)
@@ -37,6 +54,7 @@
 #define SM_FORM2  (1<<5)
 #define SM_REALT  (1<<6)
 #define SM_EOF    (1<<7)
+
 
 #define CDDA_SIZE  2352
 #define M2F1_SIZE  2048

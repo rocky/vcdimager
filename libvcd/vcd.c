@@ -314,7 +314,7 @@ _make_scantable (mpeg_track_t *track)
       switch (vcd_mpeg_get_type (buf, &ti))
         {
         case MPEG_TYPE_INVALID:
-          vcd_debug ("mk_st: invalid type @%d", sect);
+          vcd_debug ("mpeg scan: invalid mpeg block @%d", sect);
           break;
           
         case MPEG_TYPE_VIDEO:
@@ -385,17 +385,18 @@ _make_scantable (mpeg_track_t *track)
                   last_i_timecode = timecode;
                       
                   /* vcd_debug ("replace I-Frame: @%.4d +%6f", sect, timecode); */
-
                 }
             }
           break;
 
         case MPEG_TYPE_AUDIO:
+        case MPEG_TYPE_AUDIO_1:
+        case MPEG_TYPE_OGT: 
         case MPEG_TYPE_NULL:
           break;
 
         default:
-          vcd_debug ("mk_st: type %d @%d", ti.type, sect);
+          vcd_debug ("mpeg scan: type %d @%d", ti.type, sect);
           break;
         }
     }
@@ -861,6 +862,8 @@ _finalize_vcd_iso_track (VcdObj *obj)
         mpeg_track_t *track = _vcd_list_node_data (node);
         uint32_t extent = track->relative_start_extent;
       
+        extent += obj->iso_size;
+
         switch (obj->type) 
           {
           case VCD_TYPE_VCD11:
@@ -1210,7 +1213,19 @@ _write_sectors (VcdObj *obj, int track_idx)
       mpeg_packets.audio++;
       sm = SM_FORM2|SM_REALT|SM_AUDIO;
       ci = CI_AUDIO;
-      cnum = 1;
+      cnum = CN_AUDIO;
+      break;
+    case MPEG_TYPE_AUDIO_1:
+      mpeg_packets.audio++;
+      sm = SM_FORM2|SM_REALT|SM_AUDIO;
+      ci = CI_AUDIO2;
+      cnum = CN_AUDIO2;
+      break;
+    case MPEG_TYPE_OGT:
+      mpeg_packets.video++; /* fixme */
+      sm = SM_FORM2|SM_REALT|SM_VIDEO;
+      ci = CI_OGT;
+      cnum = CN_OGT;
       break;
     case MPEG_TYPE_NULL:
       mpeg_packets.null++;

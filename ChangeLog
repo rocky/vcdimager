@@ -1,4 +1,27 @@
+2001-01-16  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd.c (_write_sectors): OGT support and secondary 
+		audio channel support added
+
+	* libvcd/vcd_mpeg.c: added detection of OGT packets
+
+2001-01-15  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* configure.in: bumped version up to 0.5.9beta1
+
+	* libvcd/vcd_mpeg.c: some more bound checking...
+
+2001-01-14  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* frontends/cli/vcdrip.c (rip): fixed detecting false stream
+		leadouts
+
+	* libvcd/vcd.c (_finalize_vcd_iso_track): fixed relative offset bug
+		in ISO mpegav-entries introduced in 0.5.9alpha4 :-/
+
 2001-01-13  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_mpeg.c (vcd_mpeg_get_type): more skips
 
 	* configure.in: bumped version up to 0.5.9alpha4
 	

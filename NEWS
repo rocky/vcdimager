@@ -2,6 +2,14 @@ $Id$
 
 see ChangeLog for more information
 
+version 0.5.9beta1
+==================
+2001-01-15
+
+* fixed padding packet losing bug in vcdrip
+* fixed misplaced MPEGAV-isofs offset bug introduced in alpha4
+* minor improvements in mpeg scanning code
+
 version 0.5.9alpha4
 ===================
 2001-01-13

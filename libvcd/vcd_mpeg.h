@@ -27,10 +27,14 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#define MPEG_PACKET_SIZE 2324
+
 typedef enum {
   MPEG_TYPE_INVALID = 0,
   MPEG_TYPE_VIDEO,
   MPEG_TYPE_AUDIO,
+  MPEG_TYPE_AUDIO_1,
+  MPEG_TYPE_OGT,
   MPEG_TYPE_NULL,
   MPEG_TYPE_END,
   MPEG_TYPE_UNKNOWN

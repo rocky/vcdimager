@@ -35,6 +35,8 @@ static const char _rcsid[] = "$Id$";
 #define _MPEG_START_CODE_P(code) (((code) & MPEG_START_CODE_MASK) == MPEG_START_CODE_PATTERN)
 
 #define MPEG_PICTURE_START_CODE  ((uint32_t) 0x00000100)
+
+#define MPEG_USER_DATA_CODE      ((uint32_t) 0x000001b2)
 #define MPEG_SEQUENCE_CODE       ((uint32_t) 0x000001b3)
 #define MPEG_EXT_START_CODE      ((uint32_t) 0x000001b5)
 #define MPEG_SEQ_END_CODE        ((uint32_t) 0x000001b7)
@@ -42,9 +44,15 @@ static const char _rcsid[] = "$Id$";
 #define MPEG_PROGRAM_END_CODE    ((uint32_t) 0x000001b9)
 #define MPEG_PACK_HEADER_CODE    ((uint32_t) 0x000001ba)
 #define MPEG_SYSTEM_HEADER_CODE  ((uint32_t) 0x000001bb)
+#define MPEG_OGT_CODE            ((uint32_t) 0x000001bd)
 #define MPEG_NULL_CODE           ((uint32_t) 0x000001be)
-#define MPEG_AUDIO_CODE          ((uint32_t) 0x000001c0)
-#define MPEG_VIDEO_CODE          ((uint32_t) 0x000001e0)
+
+#define MPEG_AUDIO_CODE          ((uint32_t) 0x000001c0) 
+#define MPEG_AUDIO_CODE_1        ((uint32_t) 0x000001c1) /* 2nd audio channel */
+
+#define MPEG_VIDEO_CODE          ((uint32_t) 0x000001e0) /* motion */
+#define MPEG_VIDEO_CODE_1        ((uint32_t) 0x000001e1) /* lowres still */
+#define MPEG_VIDEO_CODE_2        ((uint32_t) 0x000001e2) /* hires still */
 
 #define PICT_TYPE_I             1
 #define PICT_TYPE_P             2
@@ -79,6 +87,7 @@ const static double aspect_ratios[16] =
   };
 
 
+
 static mpeg_norm_t 
 _get_norm (unsigned hsize, unsigned vsize, double frate)
 {
@@ -109,6 +118,8 @@ _get_norm (unsigned hsize, unsigned vsize, double frate)
   return norm_table[i].norm;
 }
 
+#define MPEG_PACKET_SIZE_BITS (MPEG_PACKET_SIZE << 3)
+
 #define _BIT_SET_P(n, bit)  (((n) >> (bit)) & 0x1)
 
 static uint32_t 
@@ -136,6 +147,21 @@ _bitvec_get_bits32 (const uint8_t bitvec[], int offset, int bits)
     }
   
   return result;
+}
+
+static void 
+_mpeg_generic_packet_skip (const void *packet, int *offsetp)
+{
+  int size;
+
+  assert (*offsetp + 2 <= MPEG_PACKET_SIZE_BITS);
+
+  size = _bitvec_get_bits32 (packet, *offsetp, 16); 
+  *offsetp += 16;
+  
+  *offsetp += size << 3;
+
+  assert (*offsetp <= MPEG_PACKET_SIZE_BITS);
 }
 
 static void
@@ -286,10 +312,10 @@ _vcd_mpeg_parse_video (const void *packet, int *offsetp, mpeg_type_info_t *info)
   size = _bitvec_get_bits32 (data, offset, 16);
   offset += 16;
   
-  size *= 8;
+  size <<= 3;
   offset_end = offset + size;
 
-  assert (offset_end <= 2324 * 8);
+  assert (offset_end <= MPEG_PACKET_SIZE_BITS);
   assert (offset % 8 == 0);
 
   while (offset < offset_end - 32)
@@ -327,6 +353,7 @@ _vcd_mpeg_parse_video (const void *packet, int *offsetp, mpeg_type_info_t *info)
 
               default:
                 vcd_warn ("mpeg_video: unknown ext start type %x", ext_type);
+                offset -= 4; /* restore offset */
                 break;
               }
             break;
@@ -387,13 +414,15 @@ vcd_mpeg_get_type (const void *packet, mpeg_type_info_t *extended_type_info)
           case 0x0: /* mpeg1 */
             if (extended_type_info)
               extended_type_info->version = MPEG_VERS_MPEG1;
+            offset += 8 << 3;
             break;
           case 0x1: /* mpeg2 */
             if (extended_type_info)
               extended_type_info->version = MPEG_VERS_MPEG2;
+            offset += 10 << 3;
             break;
           default:
-            vcd_warn ("packet not recognized as mpeg1 or mpeg2 stream (%d)", 
+            vcd_warn ("packet not recognized as either mpeg1 or mpeg2 stream (%d)", 
                       _bitvec_get_bits32(data, offset, 2));
             if (extended_type_info)
               {
@@ -405,9 +434,16 @@ vcd_mpeg_get_type (const void *packet, mpeg_type_info_t *extended_type_info)
             break;
           }
 
-        while ((offset + 32) < (2324 * 8))
+        while ((offset + 32) < MPEG_PACKET_SIZE_BITS)
           {
             code = _bitvec_get_bits32 (data, offset, 32);
+
+            if (!_MPEG_START_CODE_P (code))
+              {
+                offset += 8;
+                continue;
+              }
+
             offset += 32;
 
             switch (code)
@@ -418,12 +454,27 @@ vcd_mpeg_get_type (const void *packet, mpeg_type_info_t *extended_type_info)
                 return MPEG_TYPE_NULL;
                 break;
 
+              case MPEG_AUDIO_CODE_1:
+                if (extended_type_info)
+                  extended_type_info->type = MPEG_TYPE_AUDIO_1;
+
+                _mpeg_generic_packet_skip (packet, &offset);
+                
+                return MPEG_TYPE_AUDIO_1;
+                break;
+
               case MPEG_AUDIO_CODE:
                 if (extended_type_info)
                   extended_type_info->type = MPEG_TYPE_AUDIO;
+                
+                _mpeg_generic_packet_skip (packet, &offset);
+                
                 return MPEG_TYPE_AUDIO;
                 break;
        
+              case MPEG_VIDEO_CODE_1:
+              case MPEG_VIDEO_CODE_2:
+                vcd_warn ("(unsupported) still images video header detected");
               case MPEG_VIDEO_CODE:
                 if (extended_type_info) 
                   {
@@ -432,43 +483,47 @@ vcd_mpeg_get_type (const void *packet, mpeg_type_info_t *extended_type_info)
                     _vcd_mpeg_parse_video (packet, &offset, extended_type_info);
                   }
                 else
-                  {
-                    int size = _bitvec_get_bits32 (data, offset, 16); 
-                    offset += 16;
-                    
-                    offset += size * 8;
-                  }
+                  _mpeg_generic_packet_skip (packet, &offset);
+
                 return MPEG_TYPE_VIDEO;
                 break;
                 
               case MPEG_SYSTEM_HEADER_CODE:
-                {
-                  int size = _bitvec_get_bits32 (data, offset, 16); 
-                  /* fixme -- boundary check assert (offset + 16 < 2324 * 8) */
-                  offset += 16;
-                  
-                  /* just a hack, since I don't know exactly what the
-                     format of the system header is */
-                  if (!extended_type_info && size > 6)
-                    switch (_bitvec_get_bits32 (data, offset + (6 * 8), 8))
-                      {
-                      case 0xe0:
-                        return MPEG_TYPE_VIDEO;
-                        break;
-                      case 0xc0:
-                        return MPEG_TYPE_AUDIO;
-                        break;
-                      default:
-                        /* noop */
-                        break;
-                      }
+                /* just a hack, since I don't know exactly what the
+                   format of the system header is */
+                if (!extended_type_info)
+                  switch (_bitvec_get_bits32 (data, offset + ((6 + 2) * 8), 8))
+                    {
+                    case 0xe0:
+                      return MPEG_TYPE_VIDEO;
+                      break;
+                    case 0xc0:
+                      return MPEG_TYPE_AUDIO;
+                      break;
+                    default:
+                      /* noop */
+                      break;
+                    }
 
-                  offset += size * 8;
-                }
+                _mpeg_generic_packet_skip (packet, &offset);
+                break;
+
+              case MPEG_OGT_CODE:
+                if (extended_type_info)
+                  extended_type_info->type = MPEG_TYPE_OGT;
+
+                _mpeg_generic_packet_skip (packet, &offset);
+
+                return MPEG_TYPE_OGT;
+                break;
+
+              case MPEG_PICTURE_START_CODE:
+                vcd_warn ("unexpected picture start code encountered");
+                offset -= 8; /* paranoia */
                 break;
 
               default:
-                offset -= 24; /* jump back 24 of 32 bits... */
+                /* noop -- just let the next 32 bit be analyzed */
                 break;
               }
           }
@@ -480,7 +535,7 @@ vcd_mpeg_get_type (const void *packet, mpeg_type_info_t *extended_type_info)
       if (extended_type_info)
         extended_type_info->type = MPEG_TYPE_INVALID;
       
-      for (n = 0;n < 2324; n++)
+      for (n = 0;n < MPEG_PACKET_SIZE; n++)
         if (data[n])
           return MPEG_TYPE_INVALID;
 

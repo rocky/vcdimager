@@ -1019,16 +1019,24 @@ rip (const char device_fname[])
                   in_data = true;
                 }
             }
-          else
+          else if (buf.data[0] == 0x00 
+                   && buf.data[1] == 0x00
+                   && buf.data[2] == 0x01)
             {
-              if (in_data)
-                {
-                  vcd_debug (" stream leadout at %d", pos);
-                  in_data = false;
-                }
-              
-              continue;
+              if (buf.data[3] != 0xba)
+                vcd_debug (" found non-packet-header at extent %d", pos);
+
+              if (!in_data) 
+                vcd_warn (" strange... found some mpeg header outside of data area (@extent %d)", pos);
             }
+          else if (in_data)
+            {
+              vcd_debug (" stream leadout at %d", pos);
+              in_data = false;
+            }
+
+          if (!in_data)
+            continue;
 
           assert (in_data);
 
