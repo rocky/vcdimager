@@ -1330,7 +1330,7 @@ vcdinfo_get_track_msf(const vcdinfo_obj_t *obj, unsigned int track_num,
   Return the size in sectors for track n. The first track is 1.
 */
 unsigned int
-vcdinfo_get_track_sec_count(const vcdinfo_obj_t *obj, 
+vcdinfo_get_track_sect_count(const vcdinfo_obj_t *obj, 
                             const unsigned int track_num)
 {
   if (NULL == obj || VCDINFO_INVALID_TRACK == track_num) 
