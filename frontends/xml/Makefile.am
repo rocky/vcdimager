@@ -10,6 +10,8 @@ EXTRA_DIST = videocd.dtd
 BUILT_SOURCES = videocd_dtd.inc
 MOSTLYCLEANFILES = videocd_dtd.inc
 
+Makefile: $(BUILT_SOURCES)
+
 vcdxbuild_LDADD = $(XML_LIBS) $(VCD_LIBS) $(POPT_LIBS)
 vcdxbuild_SOURCES = \
 	vcdxml.h \
@@ -34,6 +36,8 @@ vcdxgen_SOURCES = \
 	vcd_xml_dump.h \
 	vcd_xml_dump.c \
 	vcd_xml_dtd.h 
+
+#vcd_xml_dtd.c: videocd_dtd.inc
 
 videocd_dtd.inc: $(srcdir)/videocd.dtd
 	(sed 's/\"/\\"/g' | $(AWK) 'BEGIN { print "char videocd_dtd[] = \\" } { print " \"" $$0 "\\n\" \\" } END { print ";" }') < $< > $@

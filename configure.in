@@ -6,15 +6,17 @@ AM_MAINTAINER_MODE
 
 AM_SANITY_CHECK
 AC_CANONICAL_HOST
-AM_ACLOCAL_INCLUDE(frontends/gnome/macros)
+dnl A M _ACLOCAL_INCLUDE(frontends/gnome/macros)
 
 AC_DEFINE_UNQUOTED(HOST_ARCH, "$host_os/$host_cpu", [host os/cpu identifier])
 
 dnl conditionally built frontends
 
-AC_ARG_WITH(gnome-frontend,
-	[  --with-gnome-frontend   enable gnome frontend (not enabled by default)], 
-	enable_gnome_fe="${withval}", enable_gnome_fe=no)
+enable_gnome_fe=no
+
+dnl AC_ARG_WITH(gnome-frontend,
+dnl	[  --with-gnome-frontend   enable gnome frontend (not enabled by default)], 
+dnl	enable_gnome_fe="${withval}", enable_gnome_fe=no)
 
 AC_ARG_WITH(cli-frontend,
 	[  --without-cli-frontend  enable cli frontend (enabled by default)], 
@@ -48,19 +50,19 @@ if test "x$enable_xml_fe" = "xyes"; then
   AM_PATH_XML2(2.3.8, , enable_xml_fe=no)
 fi
 
-if test "x$enable_gnome_fe" = "xyes"; then
- gnome_avail=no
- GNOME_INIT_HOOK(gnome_avail=yes,,)
- enable_gnome_fe="${gnome_avail}" 
-fi
+dnl if test "x$enable_gnome_fe" = "xyes"; then
+dnl gnome_avail=no
+dnl GNOME_INIT_HOOK(gnome_avail=yes,,)
+dnl enable_gnome_fe="${gnome_avail}" 
+dnl fi
 
-if test "x$enable_gnome_fe" = "xyes"; then
- AM_PATH_LIBGLADE(, enable_gnome_fe=no, gnome)
-fi
+dnl if test "x$enable_gnome_fe" = "xyes"; then
+dnl AM_PATH_LIBGLADE(, enable_gnome_fe=no, gnome)
+dnl fi
 
-if test "x$enable_gnome_fe" = "xyes"; then
- AM_PATH_GNOMEMM(,, enable_gnome_fe=no)
-fi
+dnl if test "x$enable_gnome_fe" = "xyes"; then
+dnl AM_PATH_GNOMEMM(,, enable_gnome_fe=no)
+dnl fi
 
 dnl headers
 
@@ -86,7 +88,7 @@ then
  AC_CHECK_HEADER(popt.h, , enable_cli_fe_popt=yes)
 fi
 
-GNOME_COMPILE_WARNINGS
+dnl GNOME_COMPILE_WARNINGS
 
 if test "x$enable_gnome_fe" = "xyes"; then
  GNOME_X_CHECKS
@@ -169,12 +171,13 @@ AC_OUTPUT([ \
 	frontends/xml/Makefile \
 	frontends/cli/Makefile \
 	frontends/cli/popt/Makefile \
-	frontends/gnome/Makefile \
-	frontends/gnome/macros/Makefile \
-	frontends/gnome/src/Makefile \
 	debug/Makefile
 	vcdimager.spec \
 ])
+
+dnl	frontends/gnome/Makefile \
+dnl	frontends/gnome/macros/Makefile \
+dnl	frontends/gnome/src/Makefile \
 
 echo "
 Setup:
