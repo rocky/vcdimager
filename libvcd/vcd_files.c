@@ -31,13 +31,14 @@
 void
 set_entries_vcd(VcdObj *obj, void *buf)
 {
-  int n;
+  VcdListNode *node = NULL;
+  int n = 0;
   EntriesVcd entries_vcd;
 
   assert(sizeof(EntriesVcd) == 2048);
 
-  assert(obj->mpeg_tracks_num <= 509);
-  assert(obj->mpeg_tracks_num > 0);
+  assert(_vcd_list_length (obj->mpeg_track_list) <= 509);
+  assert(_vcd_list_length (obj->mpeg_track_list) > 0);
 
   memset(&entries_vcd, 0, sizeof(entries_vcd)); /* paranoia / fixme */
 
@@ -58,17 +59,21 @@ set_entries_vcd(VcdObj *obj, void *buf)
       break;
     }
 
-  entries_vcd.tracks = UINT16_TO_BE(obj->mpeg_tracks_num);
+  entries_vcd.tracks = UINT16_TO_BE(_vcd_list_length (obj->mpeg_track_list));
 
-  for(n = 0;n < obj->mpeg_tracks_num;n++) {
-    uint32_t lsect = obj->mpeg_tracks[n].relative_start_extent;
+  for (n = 0, node = _vcd_list_begin (obj->mpeg_track_list);
+       node != NULL;
+       n++, node = _vcd_list_node_next (node))
+    {
+      mpeg_track_t *track = _vcd_list_node_data (node);
+      uint32_t lsect = track->relative_start_extent;
 
-    lsect += obj->iso_size;
+      lsect += obj->iso_size;
 
-    entries_vcd.entry[n].n = to_bcd8(n+2);
+      entries_vcd.entry[n].n = to_bcd8(n+2);
 
-    lba_to_msf(lsect + 150, &(entries_vcd.entry[n].msf));
-  }
+      lba_to_msf(lsect + 150, &(entries_vcd.entry[n].msf));
+    }
 
   memcpy(buf, &entries_vcd, sizeof(entries_vcd));
 }
@@ -88,7 +93,7 @@ get_psd_size(VcdObj *obj)
 {
   uint32_t psd_size;
   
-  psd_size = obj->mpeg_tracks_num*16; /* 2<<3 */
+  psd_size = _vcd_list_length (obj->mpeg_track_list)*16; /* 2<<3 */
   psd_size += 8; /* stop descriptor */
 
   return psd_size;
@@ -102,7 +107,7 @@ set_psd_vcd (VcdObj *obj, void *buf)
 
   /* memset (psd_buf, 0, sizeof (obj->psd_vcd_buf)); */
 
-  for (n = 0; n < obj->mpeg_tracks_num; n++)
+  for (n = 0; n < _vcd_list_length (obj->mpeg_track_list); n++)
     {
       const int noi = 1;
       int descriptor_size = sizeof (PsdPlayListDescriptor) + (noi * sizeof (uint16_t));
@@ -147,7 +152,7 @@ set_lot_vcd(VcdObj *obj, void *buf)
 
   lot_vcd->reserved = 0x0000;
 
-  for(n = 0;n < obj->mpeg_tracks_num+1;n++)
+  for(n = 0;n < _vcd_list_length (obj->mpeg_track_list)+1;n++)
     lot_vcd->offset[n] = UINT16_TO_BE(n << 1); /* quick'n'dirty */
 
   memcpy(buf, lot_vcd, sizeof(LotVcd));
@@ -158,10 +163,11 @@ void
 set_info_vcd(VcdObj *obj, void *buf)
 {
   InfoVcd info_vcd;
-  int n;
+  VcdListNode *node = NULL;
+  int n = 0;
   
   assert(sizeof(InfoVcd) == 2048);
-  assert(obj->mpeg_tracks_num <= 98);
+  assert(_vcd_list_length (obj->mpeg_track_list) <= 98);
   
   memset(&info_vcd, 0, sizeof(info_vcd));
 
@@ -191,16 +197,22 @@ set_info_vcd(VcdObj *obj, void *buf)
   info_vcd.vol_count = UINT16_TO_BE(0x0001);
   info_vcd.vol_id = UINT16_TO_BE(0x0001);
 
-  for(n = 0; n < obj->mpeg_tracks_num;n++)
-    if(obj->mpeg_tracks[n].mpeg_info.norm == MPEG_NORM_PAL 
-       || obj->mpeg_tracks[n].mpeg_info.norm == MPEG_NORM_PAL_S)
-      _set_bit(info_vcd.pal_flags, n);
+  for (n = 0, node = _vcd_list_begin (obj->mpeg_track_list);
+       node != NULL;
+       n++, node = _vcd_list_node_next (node))
+    {
+      mpeg_track_t *track = _vcd_list_node_data (node);
+
+      if(track->mpeg_info.norm == MPEG_NORM_PAL 
+         || track->mpeg_info.norm == MPEG_NORM_PAL_S)
+        _set_bit(info_vcd.pal_flags, n);
+    }
 
   info_vcd.psd_size = UINT32_TO_BE(get_psd_size (obj));
 
   info_vcd.offset_mult = INFO_OFFSET_MULT;
 
-  info_vcd.last_psd_ofs = UINT16_TO_BE((obj->mpeg_tracks_num)<<1);
+  info_vcd.last_psd_ofs = UINT16_TO_BE((_vcd_list_length (obj->mpeg_track_list))<<1);
 
   info_vcd.item_count = UINT16_TO_BE(0x0000); /* no items in /SEGMENT supported yet */
 
@@ -211,6 +223,7 @@ void
 set_tracks_svd (VcdObj *obj, void *buf)
 {
   TracksSVD tracks_svd;
+  VcdListNode *node;
   int n;
   
   assert (obj->type == VCD_TYPE_SVCD);
@@ -223,13 +236,16 @@ set_tracks_svd (VcdObj *obj, void *buf)
   tracks_svd.version = TRACKS_SVD_VERSION;
 
 
-  tracks_svd.tracks = obj->mpeg_tracks_num;
+  tracks_svd.tracks = _vcd_list_length (obj->mpeg_track_list);
 
-  for (n = 0; n < obj->mpeg_tracks_num; n++) 
+  for (n = 0, node = _vcd_list_begin (obj->mpeg_track_list);
+       node != NULL;
+       n++, node = _vcd_list_node_next (node))
     {
-      unsigned playtime = obj->mpeg_tracks[n].playtime;
+      mpeg_track_t *track = _vcd_list_node_data (node);
+      unsigned playtime = track->playtime;
        
-      switch (obj->mpeg_tracks[n].mpeg_info.norm)
+      switch (track->mpeg_info.norm)
         {
         case MPEG_NORM_PAL:
         case MPEG_NORM_PAL_S:

@@ -519,7 +519,7 @@ vcd_mpeg_get_info (const void *packet, mpeg_info_t *info)
     {
       assert (_info.type == MPEG_TYPE_VIDEO);
 
-      memset (info, 0, sizeof (mpeg_type_info_t));
+      memset (info, 0, sizeof (mpeg_info_t));
 
       info->hsize = _info.video.hsize;
       info->vsize = _info.video.vsize;

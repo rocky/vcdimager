@@ -21,7 +21,36 @@
 #ifndef __VCD_DATA_STRUCTURES_H__
 #define __VCD_DATA_STRUCTURES_H__
 
+/* opaque... */
+typedef struct _VcdList VcdList;
+typedef struct _VcdListNode VcdListNode;
 
+typedef int (*_vcd_list_iterfunc) (void *data, void *user_data);
+
+/* methods */
+VcdList *_vcd_list_new (void);
+
+void _vcd_list_free (VcdList *list, int free_data);
+
+unsigned _vcd_list_length (VcdList *list);
+
+void _vcd_list_prepend (VcdList *list, void *data);
+
+void _vcd_list_append (VcdList *list, void *data);
+
+void _vcd_list_foreach (VcdList *list, _vcd_list_iterfunc *func, void *user_data);
+
+/* node ops */
+
+VcdListNode *_vcd_list_at (VcdList *list, int idx);
+
+VcdListNode *_vcd_list_begin (VcdList *list);
+
+VcdListNode *_vcd_list_node_next (VcdListNode *node);
+
+void _vcd_list_node_free (VcdListNode *node, int free_data);
+
+void *_vcd_list_node_data (VcdListNode *node);
 
 #endif /* __VCD_DATA_STRUCTURES_H__ */
 

@@ -21,11 +21,20 @@
 #ifndef __VCD_OBJ_H__
 #define __VCD_OBJ_H__
 
+#include "vcd_data_structures.h"
 #include "vcd_mpeg.h"
 #include "vcd_iso9660.h"
 #include "vcd_files.h"
 #include "vcd_salloc.h"
 #include "vcd_directory.h"
+
+typedef struct {
+  VcdDataSource *source;
+  unsigned relative_start_extent; /* relative to iso data end */
+  unsigned length_sectors;
+  unsigned playtime; /* estimated playtime in secs based on timecode */
+  mpeg_info_t mpeg_info;
+} mpeg_track_t;
 
 struct _VcdObj {
   vcd_type_t type;
@@ -39,18 +48,12 @@ struct _VcdObj {
   char *iso_volume_label;
 
   /* input */
+  VcdList *mpeg_track_list; /* mpeg_track_t */
+
   unsigned relative_end_extent; /* last mpeg end extent */
-  struct mpeg_track_t {
-    VcdDataSource *source;
-    unsigned relative_start_extent; /* relative to iso data end */
-    unsigned length_sectors;
-    unsigned playtime; /* estimated playtime in secs based on timecode */
-    mpeg_info_t mpeg_info;
-  } mpeg_tracks[100]; /* fixme */
-  int mpeg_tracks_num;
 
   /* custom files */
-  struct _cust_file_t *custom_files;
+  VcdList *custom_file_list;
 
   /* dictionary */
   struct _dict_t *buf_dict;

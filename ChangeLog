@@ -1,6 +1,15 @@
 2000-12-18  Herbert Valerio Riedel  <hvr@gnu.org>
 
-	* libvcd/vcd_data_structures.[ch]: new module
+	* libvcd/vcd.c: made cust_file_t list into VcdList
+
+	* libvcd/vcd_data_structures.c: new VcdList object and methods
+	
+	* libvcd/vcd_files.c, libvcd/vcd.c, libvcd/vcd_obj.h:
+		switched from array to VcdList for track list
+	
+	* libvcd/vcd_mpeg.c (vcd_mpeg_get_info): fixed subtile buffer overun
+
+	* libvcd/vcd_data_structures.[ch]: new module 
 
 2000-12-17  Herbert Valerio Riedel  <hvr@gnu.org>
 

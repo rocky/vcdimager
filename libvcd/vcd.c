@@ -57,8 +57,6 @@ struct _cust_file_t {
   uint32_t size;
   uint32_t start_extent;
   uint32_t sectors;
-    
-  struct _cust_file_t *next;
 };
 
 /*
@@ -207,9 +205,12 @@ vcd_obj_new (vcd_type_t vcd_type)
 
   new_obj = malloc (sizeof (VcdObj));
   memset (new_obj, 0, sizeof (VcdObj));
-  new_obj->custom_files = NULL; /* paranoid */
+
+  new_obj->custom_file_list = _vcd_list_new ();
 
   new_obj->type = vcd_type;
+
+  new_obj->mpeg_track_list = _vcd_list_new ();
 
   return new_obj;
 }
@@ -217,36 +218,51 @@ vcd_obj_new (vcd_type_t vcd_type)
 const mpeg_info_t *
 vcd_obj_get_mpeg_info (VcdObj *obj, int track_id)
 {
-  assert (track_id >= 0);
-  assert (track_id < obj->mpeg_tracks_num);
+  VcdListNode *node = NULL;
+  mpeg_track_t *track = NULL;
 
-  return &(obj->mpeg_tracks[track_id].mpeg_info); 
+  assert (track_id >= 0);
+
+  node = _vcd_list_at (obj->mpeg_track_list, track_id);
+
+  assert (node != NULL);
+
+  track = (mpeg_track_t *)_vcd_list_node_data (node);
+
+  return &(track->mpeg_info);
 }
 
 void
 vcd_obj_remove_mpeg_track (VcdObj *obj, int track_id)
 {
-  int n, length;
+  int length;
+  mpeg_track_t *track = NULL;
+  VcdListNode *node = NULL;
 
   assert (track_id >= 0);
-  assert (track_id < obj->mpeg_tracks_num);
+
+  node = _vcd_list_at (obj->mpeg_track_list, track_id);
   
-  vcd_data_source_destroy (obj->mpeg_tracks[track_id].source);
+  assert (node != NULL);
+
+  track = (mpeg_track_t *) _vcd_list_node_data (node);
+
+  vcd_data_source_destroy (track->source);
   
-  length = obj->mpeg_tracks[track_id].length_sectors;
+  length = track->length_sectors;
   length += PRE_TRACK_GAP + PRE_DATA_GAP + 0 + POST_DATA_GAP;
 
   /* fixup offsets */
-  for (n = track_id+1;n < obj->mpeg_tracks_num;n++)
-    obj->mpeg_tracks[n].relative_start_extent -= length;
+  {
+    VcdListNode *node2 = node;
+    while ((node2 = _vcd_list_node_next (node2)) != NULL)
+      ((mpeg_track_t *) _vcd_list_node_data (node))->relative_start_extent -= length;
+  }
 
   obj->relative_end_extent -= length;
 
   /* shift up */
-  for (n = track_id+1;n < obj->mpeg_tracks_num;n++)
-    memcpy (&(obj->mpeg_tracks[n-1]), &(obj->mpeg_tracks[n]), sizeof (obj->mpeg_tracks[n]));
-
-  obj->mpeg_tracks_num--;
+  _vcd_list_node_free (node, TRUE);
 }
 
 int
@@ -254,7 +270,7 @@ vcd_obj_append_mpeg_track (VcdObj *obj, VcdDataSource *mpeg_file)
 {
   unsigned length;
   int j;
-  struct mpeg_track_t *track;
+  mpeg_track_t *track = NULL;
   double begin = -1, end = -1;
   int got_info = 0;
 
@@ -264,9 +280,12 @@ vcd_obj_append_mpeg_track (VcdObj *obj, VcdDataSource *mpeg_file)
   length = vcd_data_source_stat (mpeg_file);
 
   if (length % 2324)
-    vcd_warn ("track# %d not a multiple of 2324 bytes", obj->mpeg_tracks_num);
+    vcd_warn ("track# %d not a multiple of 2324 bytes", 
+              _vcd_list_length (obj->mpeg_track_list));
 
-  track = &(obj->mpeg_tracks[obj->mpeg_tracks_num]);
+  track = malloc (sizeof (mpeg_track_t));
+  assert (track != NULL);
+  memset (track, 0, sizeof (mpeg_track_t));
 
   track->source = mpeg_file;
   track->length_sectors = length / 2324;
@@ -346,38 +365,39 @@ vcd_obj_append_mpeg_track (VcdObj *obj, VcdDataSource *mpeg_file)
     {
       vcd_warn ("track# %d: timecode begin with %f / end at %f " 
                 "-- setting playtime to 0", 
-                obj->mpeg_tracks_num, begin, end);
+                _vcd_list_length (obj->mpeg_track_list), begin, end);
       track->playtime = 0;
     }
 
   track->playtime = (double) (0.5 + end - begin);
 
   vcd_debug ("track# %d's estimated playtime: %d seconds", 
-             obj->mpeg_tracks_num, track->playtime);
+             _vcd_list_length (obj->mpeg_track_list), track->playtime);
   
-  return obj->mpeg_tracks_num++;
+  _vcd_list_append (obj->mpeg_track_list, track);
+
+  return _vcd_list_length (obj->mpeg_track_list)-1;
 }
 
 void 
 vcd_obj_destroy (VcdObj *obj)
 {
+  VcdListNode *node;
+
   assert (obj != NULL);
 
-  /* destroy cust_file linked list */
-  {
-    struct _cust_file_t *p = obj->custom_files;
+  for(node = _vcd_list_begin (obj->custom_file_list);
+      node;
+      node = _vcd_list_node_next (node))
+    {
+      struct _cust_file_t *p = _vcd_list_node_data (node);
     
-    while (p)
-      {
-        struct _cust_file_t *tmp = p->next;
+      free (p->iso_pathname);
+    }
 
-        free (p->iso_pathname);
-        free (p);
-        p = tmp;
-      }
+  _vcd_list_free (obj->custom_file_list, TRUE);
 
-    obj->custom_files = NULL;
-  }
+  _vcd_list_free (obj->mpeg_track_list, TRUE);
 
   free (obj);
 }
@@ -414,15 +434,22 @@ vcd_obj_write_cuefile (VcdObj *obj, VcdDataSink *cue_file,
                        const char bin_fname[])
 {
   int n;
+  VcdListNode *node;
 
   assert (obj != NULL);
 
   cue_start (cue_file, bin_fname);
   cue_track (cue_file, obj->bin_file_2336_flag, 1, 0); /* ISO9660 track */
 
-  for (n = 0;n < obj->mpeg_tracks_num;n++)
-    cue_track (cue_file, obj->bin_file_2336_flag, n+2, 
-               obj->mpeg_tracks[n].relative_start_extent+obj->iso_size);
+  for (n = 0, node = _vcd_list_begin (obj->mpeg_track_list);
+         node != NULL;
+         n++, node = _vcd_list_node_next (node))
+    {
+      mpeg_track_t *track = _vcd_list_node_data (node);
+
+      cue_track (cue_file, obj->bin_file_2336_flag, n+2, 
+                 track->relative_start_extent + obj->iso_size);
+    }
 
   vcd_data_sink_destroy (cue_file);
 
@@ -482,7 +509,7 @@ vcd_obj_add_file (VcdObj *obj, const char iso_pathname[],
     sectors++;
 
   {
-    struct _cust_file_t **p = &(obj->custom_files);
+    struct _cust_file_t *p;
     char *_iso_pathname = _vcd_iso_pathname_isofy (iso_pathname);
 
     if (!_vcd_iso_pathname_valid_p (_iso_pathname))
@@ -492,20 +519,18 @@ vcd_obj_add_file (VcdObj *obj, const char iso_pathname[],
         return 1;
       }
 
-
-    while (*p)
-      p = &(*p)->next;
-
-    *p = malloc (sizeof (struct _cust_file_t));
-    memset (*p, 0, sizeof (struct _cust_file_t));
+    p = malloc (sizeof (struct _cust_file_t));
+    memset (p, 0, sizeof (struct _cust_file_t));
     
-    (*p)->file = file;
-    (*p)->iso_pathname = _iso_pathname;
-    (*p)->raw_flag = raw_flag;
+    p->file = file;
+    p->iso_pathname = _iso_pathname;
+    p->raw_flag = raw_flag;
   
-    (*p)->size = size;
-    (*p)->start_extent = 0;
-    (*p)->sectors = sectors;
+    p->size = size;
+    p->start_extent = 0;
+    p->sectors = sectors;
+
+    _vcd_list_append (obj->custom_file_list, p);
   }
 
   return 0;
@@ -630,18 +655,20 @@ _finalize_vcd_iso_track (VcdObj *obj)
   /* custom files */
 
   {
-    struct _cust_file_t *p = obj->custom_files;
-    
-    while (p) 
+    VcdListNode *node;
+
+    for (node = _vcd_list_begin (obj->custom_file_list);
+           node != NULL;
+           node = _vcd_list_node_next (node))
       {
+        struct _cust_file_t *p = _vcd_list_node_data (node);
+
         p->start_extent = _vcd_salloc(obj->iso_bitmap, SECTOR_NIL, p->sectors);
         
         assert(p->start_extent != SECTOR_NIL);
 
         _vcd_directory_mkfile(obj->dir, p->iso_pathname, p->start_extent,
                               p->size, p->raw_flag, 1);
-        
-        p = p->next;
       }
   }
 
@@ -656,30 +683,41 @@ _finalize_vcd_iso_track (VcdObj *obj)
 
   /* after this point the ISO9660's size is frozen */
 
-  for (n = 0; n < obj->mpeg_tracks_num; n++) {
-    char avseq_pathname[128] = { 0, };
-    const char *fmt = NULL;
-    uint32_t extent = obj->mpeg_tracks[n].relative_start_extent;
-      
-    switch (obj->type) {
-    case VCD_TYPE_VCD11:
-    case VCD_TYPE_VCD2:
-      fmt = "MPEGAV/AVSEQ%2.2d.DAT;1";
-      break;
-    case VCD_TYPE_SVCD:
-      fmt = "MPEG2/AVSEQ%2.2d.MPG;1";
-      break;
-    default:
-      assert(1);
-    }
-      
-    snprintf (avseq_pathname, sizeof (avseq_pathname), fmt, n+1);
+  {
+    VcdListNode *node = NULL;
+    n = 0;
 
-    extent += obj->iso_size;
+    for (n = 0, node = _vcd_list_begin (obj->mpeg_track_list);
+         node != NULL;
+         n++, node = _vcd_list_node_next (node))
+      {
+        char avseq_pathname[128] = { 0, };
+        const char *fmt = NULL;
+        mpeg_track_t *track = _vcd_list_node_data (node);
+        uint32_t extent = track->relative_start_extent;
+      
+        switch (obj->type) 
+          {
+          case VCD_TYPE_VCD11:
+          case VCD_TYPE_VCD2:
+            fmt = "MPEGAV/AVSEQ%2.2d.DAT;1";
+            break;
+          case VCD_TYPE_SVCD:
+            fmt = "MPEG2/AVSEQ%2.2d.MPG;1";
+            break;
+          default:
+            assert(1);
+          }
+      
+        snprintf (avseq_pathname, sizeof (avseq_pathname), fmt, n+1);
+        
+        extent += obj->iso_size;
 
-    _vcd_directory_mkfile (obj->dir, avseq_pathname, extent+PRE_DATA_GAP,
-                           obj->mpeg_tracks[n].length_sectors*ISO_BLOCKSIZE,
-                           TRUE, n+1);
+        _vcd_directory_mkfile (obj->dir, avseq_pathname, extent+PRE_DATA_GAP,
+                               track->length_sectors*ISO_BLOCKSIZE,
+                               TRUE, n+1);
+      }
+
   }
 
   /* register isofs dir structures */
@@ -713,7 +751,7 @@ _callback_wrapper (VcdObj *obj, int force)
     _pi.sectors_written = obj->sectors_written;
     _pi.total_sectors = obj->relative_end_extent + obj->iso_size; 
     _pi.in_track = obj->in_track;
-    _pi.total_tracks = obj->mpeg_tracks_num + 1;
+    _pi.total_tracks = _vcd_list_length (obj->mpeg_track_list) + 1;
 
     return obj->progress_callback (&_pi, obj->callback_user_data);
   }
@@ -861,18 +899,20 @@ _write_vcd_iso_track (VcdObj *obj)
 
   /* write custom files */
   {
-    struct _cust_file_t *p = obj->custom_files;
+    VcdListNode *node;
     
-    while (p) 
+    for (node = _vcd_list_begin (obj->custom_file_list);
+           node != NULL;
+           node = _vcd_list_node_next (node))
       {
+        struct _cust_file_t *p = _vcd_list_node_data (node);
+        
         vcd_debug ("Writing custom file as `%s' (size=%d)", 
                    p->iso_pathname, p->size);
         if (p->raw_flag)
           _write_source_mode2_raw (obj, p->file, p->start_extent);
         else
           _write_source_mode2_form1 (obj, p->file, p->start_extent);
-
-        p = p->next;
       }
   }
   
@@ -884,8 +924,10 @@ _write_vcd_iso_track (VcdObj *obj)
 }
 
 static int
-_write_sectors (VcdObj *obj, int track)
+_write_sectors (VcdObj *obj, int track_idx)
 {
+  mpeg_track_t *track = 
+    _vcd_list_node_data (_vcd_list_at (obj->mpeg_track_list, track_idx));
   int n, lastsect = obj->sectors_written;
   const char zero[2352] = { 0, };
   char buf[2324];
@@ -898,7 +940,7 @@ _write_sectors (VcdObj *obj, int track)
 
   {
     char *norm_str = NULL;
-    mpeg_info_t *info = &(obj->mpeg_tracks[track].mpeg_info);
+    mpeg_info_t *info = &(track->mpeg_info);
 
     switch (info->norm) {
     case MPEG_NORM_PAL:
@@ -928,7 +970,7 @@ _write_sectors (VcdObj *obj, int track)
       break;
     }
 
-    vcd_debug ("writing track %d, %s, %s...", track+2,
+    vcd_debug ("writing track %d, %s, %s...", track_idx + 2,
                (info->version == MPEG_VERS_MPEG1 ? "MPEG1" : "MPEG2"),
                norm_str);
 
@@ -939,15 +981,15 @@ _write_sectors (VcdObj *obj, int track)
     _write_m2_image_sector (obj, zero, lastsect++, 0, 0, SM_FORM2, 0);
 
   for (n = 0; n < PRE_DATA_GAP;n++)
-    _write_m2_image_sector (obj, zero, lastsect++, track+1,
+    _write_m2_image_sector (obj, zero, lastsect++, track_idx + 1,
                             0, SM_FORM2|SM_REALT, 0);
 
-  vcd_data_source_seek (obj->mpeg_tracks[track].source, 0);
+  vcd_data_source_seek (track->source, 0);
 
-  for (n = 0; n < obj->mpeg_tracks[track].length_sectors;n++) {
+  for (n = 0; n < track->length_sectors;n++) {
     int ci = 0, sm = 0;
 
-    vcd_data_source_read (obj->mpeg_tracks[track].source, buf, 2324, 1);
+    vcd_data_source_read (track->source, buf, 2324, 1);
 
     switch (vcd_mpeg_get_type (buf, NULL)) {
     case MPEG_TYPE_VIDEO:
@@ -971,7 +1013,7 @@ _write_sectors (VcdObj *obj, int track)
       ci = 0;
       break;
     case MPEG_TYPE_END:
-      if (n < obj->mpeg_tracks[track].length_sectors)
+      if (n < track->length_sectors)
         vcd_warn ("Program end marker seen at packet %d"
                   " -- before actual end of stream", n);
       sm = SM_FORM2|SM_REALT;
@@ -980,24 +1022,24 @@ _write_sectors (VcdObj *obj, int track)
     case MPEG_TYPE_INVALID:
       vcd_error ("invalid mpeg packet found at packet# %d"
                  " -- please fix this mpeg file!", n);
-      vcd_data_source_close (obj->mpeg_tracks[track].source);
+      vcd_data_source_close (track->source);
       return 1;
       break;
     default:
       assert (0);
     }
 
-    if (n == obj->mpeg_tracks[track].length_sectors-1)
+    if (n == track->length_sectors-1)
       sm |= SM_EOR;
 
-    if (_write_m2_image_sector (obj, buf, lastsect++, track+1, 1, sm, ci))
+    if (_write_m2_image_sector (obj, buf, lastsect++, track_idx + 1, 1, sm, ci))
       break;
   }
 
-  vcd_data_source_close (obj->mpeg_tracks[track].source);
+  vcd_data_source_close (track->source);
 
   for (n = 0; n < POST_DATA_GAP;n++)
-    _write_m2_image_sector (obj, zero, lastsect++, track+1,
+    _write_m2_image_sector (obj, zero, lastsect++, track_idx + 1,
                             0, SM_FORM2|SM_REALT, 0);
 
   vcd_debug ("MPEG packet statistics: %d video, %d audio, %d null, %d unknown",
@@ -1013,7 +1055,7 @@ vcd_obj_get_image_size (VcdObj *obj)
 {
   long size_sectors = -1;
 
-  if (obj->mpeg_tracks_num > 0) {
+  if (_vcd_list_length (obj->mpeg_track_list) > 0) {
     /* fixme -- make this efficient */
     size_sectors = vcd_obj_begin_output (obj);
     vcd_obj_end_output (obj);
@@ -1026,7 +1068,7 @@ long
 vcd_obj_begin_output (VcdObj *obj)
 {
   assert (obj != NULL);
-  assert (obj->mpeg_tracks_num > 0);
+  assert (_vcd_list_length (obj->mpeg_track_list) > 0);
 
   obj->in_track = 1;
   obj->sectors_written = 0;
@@ -1060,7 +1102,7 @@ vcd_obj_write_image (VcdObj *obj, VcdDataSink *bin_file,
   if (_write_vcd_iso_track (obj))
     return 1;
 
-  for (track = 0;track < obj->mpeg_tracks_num;track++) {
+  for (track = 0;track < _vcd_list_length (obj->mpeg_track_list);track++) {
     obj->in_track++;
 
     if (_callback_wrapper (obj, TRUE))
