@@ -2,12 +2,12 @@ noinst_PROGRAMS = mpegscan mpegscan2 testimage testassert
 
 INCLUDES = -I$(top_srcdir) $(POPT_CFLAGS) $(LIBVCD_CFLAGS) $(LIBCDIO_CFLAGS)
 
-mpegscan_LDADD = $(LIBVCD_LIBS)
-mpegscan2_LDADD = $(LIBVCD_LIBS)
-testimage_LDADD = $(LIBVCD_LIBS)
-check_sizeof_LDADD = $(LIBVCD_LIBS)
+mpegscan_LDADD = $(LIBVCD_LIBS) $(LIBISO9660_LIBS)
+mpegscan2_LDADD = $(LIBVCD_LIBS) $(LIBISO9660_LIBS)
+testimage_LDADD = $(LIBVCD_LIBS) $(LIBISO9660_LIBS)
+check_sizeof_LDADD = $(LIBVCD_LIBS) 
 check_bitfield_LDADD = $(LIBVCD_LIBS)
-testassert_LDADD = $(LIBVCD_LIBS)
+testassert_LDADD = $(LIBVCD_LIBS) $(LIBISO9660_LIBS)
 
 # make check targets
 
