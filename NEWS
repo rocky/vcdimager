@@ -2,7 +2,7 @@ $Id$
 
 see ChangeLog for more information
 
-version 0.7.21 (unstable/development)
+version 0.7.21 (development)
 =====================================
 
 * LSN's match MMC-3 specs better.
