@@ -15,7 +15,7 @@ Source:         http://www.gnu.org/pub/gnu/%{name}/%{name}-%{version}.tar.gz
 URL:            http://www.gnu.org/software/vcdimager/
 BuildRoot:      %{_tmppath}/%{name}-root
 Requires:	libxml2 >= 2.3.8
-BuildPrereq:	libxml2-devel >= 2.3.8
+BuildPrereq:	libxml2-devel >= 2.3.8, popt >= 1.6
 
 %description 
 GNU VCDImager is a full-featured mastering suite for authoring,

@@ -1,13 +1,17 @@
 Source: vcdimager
 Section: otherosfs
 Priority: optional
-Maintainer: Viral Shah <viral@debian.org>
+Maintainer: Nicolas Boullis <nboullis@debian.org>
 Build-Depends: debhelper (>> 3.0.0), libxml2-dev, libpopt-dev, help2man
-Standards-Version: 3.5.2
+Standards-Version: 3.5.7
 
 Package: vcdimager
 Architecture: any
 Depends: ${shlibs:Depends}
 Description: A VideoCD (VCD) image mastering and ripping tool.
- This package contains a videoCD ripping tool to rip mpeg streams 
- from VCD images.
+ This package contains a collection of tools to master (Super)VideoCD,
+ either directly from compliant MPEG streams with no PlayBack Control
+ (PBC), or out of an XML description for a full-featured (S)VCD.
+ .
+ This package also contains a videoCD ripping tool to rip mpeg streams
+ from VCD images, and some debugging tools.

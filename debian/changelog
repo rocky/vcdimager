@@ -1,8 +1,22 @@
+vcdimager (0.7.12-2) unstable; urgency=low
+
+  * Hijack with permission.
+  * Add "-mstructure-size-boundary=8" to CFLAGS on arm. (Closes: #97733)
+  * Add support for DEB_HOST_GNU_TYPE .
+  * Test for noopt in DEB_BUILD_OPTIONS .
+  * Cleaned up debian/rules .
+  * Bumped up Standards-Version to 3.5.7 .
+  * Rewrote description. (Closes: #118882)
+  * vcdxrip now replaces vcdrip. (Closes: #131607)
+  * Removed obsolete "local variables:" from changelog.
+
+ -- Nicolas Boullis <nboullis@debian.org>  Thu, 31 Oct 2002 20:38:24 +0100
+
 vcdimager (0.7.12-1) unstable; urgency=low
 
   * New upstream release
 
- -- Herbert Valerio Riedel <hvr@gnu.org>  Tue, 23 Jul 2002 19:29:21 +0200
+ -- Kyle McMartin <kyle@debian.org>  Thu, 22 Aug 2002 13:12:10 -0500
 
 vcdimager (0.7.11-2) unstable; urgency=low
 
@@ -38,6 +52,4 @@ vcdimager (0.6.0-1) unstable; urgency=low
 
  -- Viral Shah <viral@debian.org>  Fri, 27 Apr 2001 10:13:45 +0530
 
-Local variables:
-mode: debian-changelog
-End:
+

@@ -8,17 +8,10 @@ AM_MAINTAINER_MODE
 
 AM_SANITY_CHECK
 AC_CANONICAL_HOST
-dnl A M _ACLOCAL_INCLUDE(frontends/gnome/macros)
 
 AC_DEFINE_UNQUOTED(HOST_ARCH, "$host_os/$host_cpu", [host os/cpu identifier])
 
 dnl conditionally built frontends
-
-enable_gnome_fe=no
-
-dnl AC_ARG_WITH(gnome-frontend,
-dnl	[  --with-gnome-frontend   enable gnome frontend (not enabled by default)], 
-dnl	enable_gnome_fe="${withval}", enable_gnome_fe=no)
 
 AC_ARG_WITH(cli-frontend,
 	[  --without-cli-frontend  enable cli frontend (enabled by default)], 
@@ -140,7 +133,6 @@ CFLAGS="$CFLAGS $WARN_CFLAGS"
 
 AM_CONDITIONAL(CYGWIN, test "x$CYGWIN" = "xyes")
 AM_CONDITIONAL(BUILD_CLI_FE, test "x$enable_cli_fe" = "xyes")
-AM_CONDITIONAL(BUILD_GNOME_FE, test "x$enable_gnome_fe" = "xyes")
 AM_CONDITIONAL(BUILD_XML_FE, test "x$enable_xml_fe" = "xyes")
 
 LIBVCD_CFLAGS='-I$(top_srcdir)/libvcd/'
