@@ -53,7 +53,7 @@ if MAINTAINER_MODE
 
 .PHONY: ChangeLog
 ChangeLog:
-	$(srcdir)/cvs2cl.pl -W 450 --header $(srcdir)/cvs2cl_header --utc -w -I ChangeLog --usermap $(srcdir)/cvs2cl_usermap -P 
+	$(CVS2CL) -W 450 --header $(srcdir)/cvs2cl_header --utc -w -I ChangeLog --usermap $(srcdir)/cvs2cl_usermap -P 
 
 ACLOCAL_AMFLAGS=-I .
 

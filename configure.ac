@@ -31,6 +31,7 @@ dnl AM_CONFIG_HEADER(include/libvcd/acconfig.h)
 AM_CONFIG_HEADER(config.h)
 
 AM_MISSING_PROG(HELP2MAN, help2man, $missing_dir)
+AM_MISSING_PROG(CVS2CL, cvs2cl, $missing_dir)
 AM_MAINTAINER_MODE
 
 AM_SANITY_CHECK

@@ -77,9 +77,11 @@ Required Tools
 When working directly from CVS the following additional requirements
 exists for building vcdimager 0.7.x:
 
-* GNU Automake 1.6.3 or better
-* GNU Autoconf 2.53 or better
-* GNU help2man 1.25 or better
+* GNU Automake 1.6.3 or later
+* GNU Autoconf 2.53 or later
+* GNU help2man 1.25 or later
+* GNU libtool 1.5 or later
+* cvs2cl (http://www.red-bean.com/cvs2cl/)
 
 hvr@gnu.org
 --
