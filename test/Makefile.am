@@ -5,8 +5,8 @@ INCLUDES = -I$(top_srcdir) $(POPT_CFLAGS) $(LIBVCD_CFLAGS) $(LIBCDIO_CFLAGS)
 mpegscan_LDADD = $(LIBVCD_LIBS) $(LIBISO9660_LIBS)
 mpegscan2_LDADD = $(LIBVCD_LIBS) $(LIBISO9660_LIBS)
 testimage_LDADD = $(LIBVCD_LIBS) $(LIBISO9660_LIBS)
-check_sizeof_LDADD = $(LIBVCD_LIBS) 
-check_bitfield_LDADD = $(LIBVCD_LIBS)
+check_sizeof_LDADD = $(LIBVCD_LIBS) $(LIBISO9660_LIBS)
+check_bitfield_LDADD = $(LIBVCD_LIBS) $(LIBISO9660_LIBS)
 testassert_LDADD = $(LIBVCD_LIBS) $(LIBISO9660_LIBS)
 
 # make check targets
