@@ -136,7 +136,7 @@ vcd_mpeg_source_new (VcdDataSource *mpeg_file);
 
 /* scan the mpeg file... needed to be called only once */
 void
-vcd_mpeg_source_scan (VcdMpegSource *obj);
+vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps);
 
 /* gets the packet at given position */
 int

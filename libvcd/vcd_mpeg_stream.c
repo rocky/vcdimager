@@ -104,7 +104,7 @@ vcd_mpeg_source_stat (VcdMpegSource *obj)
 }
 
 void
-vcd_mpeg_source_scan (VcdMpegSource *obj)
+vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps)
 {
   unsigned length = 0;
   unsigned pos = 0;
@@ -152,15 +152,31 @@ vcd_mpeg_source_scan (VcdMpegSource *obj)
           break;
         }
 
-      if (state.packet.aps)
-	{
-	  struct aps_data *_data = _vcd_malloc (sizeof (struct aps_data));
+      switch (state.packet.aps)
+        {
+        case APS_NONE:
+          break;
 
-	  _data->packet_no = pno;
-	  _data->timestamp = state.packet.aps_pts;
+        case APS_I:
+        case APS_GI:
+          if (strict_aps)
+            break; /* allow only if now strict aps */
 
-	  _vcd_list_append (aps_list, _data);
-	}
+        case APS_SGI:
+          {
+            struct aps_data *_data = _vcd_malloc (sizeof (struct aps_data));
+            
+            _data->packet_no = pno;
+            _data->timestamp = state.packet.aps_pts;
+
+            _vcd_list_append (aps_list, _data);
+          }
+          break;
+
+        default:
+          vcd_assert_not_reached ();
+          break;
+        }
 
       pos += pkt_len;
       pno++;

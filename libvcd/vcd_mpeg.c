@@ -445,39 +445,38 @@ _analyze_video_pes (uint8_t streamid, const uint8_t *buf, int len, bool only_pts
     }
 
   /* decide whether this packet qualifies as access point */
-  state->packet.aps = false; /* paranoia */
+  state->packet.aps = APS_NONE; /* paranoia */
 
-  if (ipicture_header_pos != -1)
+  if (_has_pts && ipicture_header_pos != -1)
     {
-      bool _is_aps = false;
+      enum aps_t _aps_type = APS_NONE;
 
       switch (mpeg_ver)
         {
         case 1:
-          /* for mpeg1 require just gop (before Iframe) */
-          _is_aps = (gop_header_pos != 1 
-                     && gop_header_pos < ipicture_header_pos);
-          break;
         case 2:
-          /* for mpeg2 we need 3 headers in place... */
-          _is_aps = (sequence_header_pos != -1
-                     && sequence_header_pos < gop_header_pos
-                     && gop_header_pos < ipicture_header_pos);
+          if (sequence_header_pos != -1
+              && sequence_header_pos < gop_header_pos
+              && gop_header_pos < ipicture_header_pos)
+            _aps_type = APS_SGI;
+          else if (gop_header_pos != 1 
+                   && gop_header_pos < ipicture_header_pos)
+            _aps_type = APS_GI;
+          else
+            _aps_type = APS_I;
+
           break;
+
         default:
-          _is_aps = false;
           break;
         }
 
-      if (_is_aps && !_has_pts)
-        _is_aps = false; /* it's sad... */
-
-      if (_is_aps) /* if still aps */
+      if (_aps_type) 
         {
           double pts2 = (double) pts / 90000.0;
           int vid_idx = _vid_streamid_idx (streamid);
 
-          state->packet.aps = true;
+          state->packet.aps = _aps_type;
           state->packet.aps_pts = pts2;
 
           if (state->stream.last_aps_pts[vid_idx] > pts2)

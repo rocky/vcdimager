@@ -439,14 +439,14 @@ main (int argc, const char *argv[])
     {
       struct option_t *_opt = _vcd_malloc (sizeof (struct option_t));
       
-      _opt->name = strdup ("svcd vcd30 mpegav");
+      _opt->name = strdup (OPT_SVCD_VCD3_MPEGAV);
       _opt->value = strdup ("true");
 
       _vcd_list_append (obj.option_list, _opt);
 
       _opt = _vcd_malloc (sizeof (struct option_t));
       
-      _opt->name = strdup ("svcd vcd30 entrysvd");
+      _opt->name = strdup (OPT_SVCD_VCD3_ENTRYSVD);
       _opt->value = strdup ("true");
 
       _vcd_list_append (obj.option_list, _opt);

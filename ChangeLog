@@ -1,3 +1,17 @@
+2001-05-30  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* frontends/xml/vcd_xml_master.c (vcd_xml_master): option handling
+
+	* frontends/xml/vcd_xml_parse.c (_parse_option): implemented parsing of options
+
+	* libvcd/vcd.c (vcd_obj_set_param_bool): new paramater
+		VCD_PARM_RELAXED_APS
+	
+	* libvcd/vcd_mpeg.c (_analyze_video_pes): allow for relaxed aps constraints
+
+	* libvcd/vcd.c (_write_vcd_iso_track): added hack for detecting
+		where to set EOR for still segments
+
 2001-05-29  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_mpeg.c (vcd_mpeg_parse_packet): warn instead of 

@@ -64,7 +64,8 @@ typedef enum
   VCD_PARM_APPLICATION_ID,      /* char *          max length 128 */
   VCD_PARM_SEC_TYPE,            /* unsigned        [2336, 2352]   */
   VCD_PARM_SVCD_VCD3_MPEGAV,    /* bool */
-  VCD_PARM_SVCD_VCD3_ENTRYSVD   /* bool */
+  VCD_PARM_SVCD_VCD3_ENTRYSVD,  /* bool */
+  VCD_PARM_RELAXED_APS          /* bool */
 }
 vcd_parm_t;
 

@@ -38,7 +38,12 @@ typedef struct {
     bool zero;
     bool system_header;
 
-    bool aps;
+    enum aps_t {
+      APS_NONE = 0,
+      APS_I,    /* iframe */
+      APS_GI,   /* gop + iframe */
+      APS_SGI   /* sequence + gop + iframe */
+    } aps;
     double aps_pts;
 
     bool has_pts;

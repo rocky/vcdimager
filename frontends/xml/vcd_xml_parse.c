@@ -119,7 +119,18 @@ _get_elem_double (const char id[], xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 static bool
 _parse_option (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
-  printf ("sorry, option element not supported yet\n");
+  if (!xmlStrcmp (node->name, "option")) 
+    {
+      struct option_t *_option = _vcd_malloc (sizeof (struct option_t));
+	  
+      GET_PROP_STR (_option->name, "name", doc, node, ns);
+      GET_PROP_STR (_option->value, "value", doc, node, ns);
+
+      _vcd_list_append (obj->option_list, _option);
+    }
+  else
+    vcd_assert_not_reached ();
+
   return false;
 }
 

@@ -215,7 +215,7 @@ vcd_obj_append_segment_play_item (VcdObj *obj, VcdMpegSource *mpeg_source,
 
   vcd_info ("scanning mpeg segment item #%d for scanpoints...", 
             _vcd_list_length (obj->mpeg_segment_list));
-  vcd_mpeg_source_scan (mpeg_source);
+  vcd_mpeg_source_scan (mpeg_source, !obj->relaxed_aps);
 
   if (vcd_mpeg_source_get_info (mpeg_source)->packets == 0)
     {
@@ -262,7 +262,7 @@ vcd_obj_append_sequence_play_item (VcdObj *obj, VcdMpegSource *mpeg_source,
     }
 
   vcd_info ("scanning mpeg sequence item #%d for scanpoints...", track_no);
-  vcd_mpeg_source_scan (mpeg_source);
+  vcd_mpeg_source_scan (mpeg_source, !obj->relaxed_aps);
 
   track = _vcd_malloc (sizeof (mpeg_sequence_t));
 
@@ -543,6 +543,11 @@ vcd_obj_set_param_bool (VcdObj *obj, vcd_parm_t param, bool arg)
 
   switch (param) 
     {
+    case VCD_PARM_RELAXED_APS:
+      obj->relaxed_aps = arg ? true : false;
+      vcd_debug ("changing 'relaxed aps' to %d", obj->relaxed_aps);
+      break;
+
     case VCD_PARM_NEXT_VOL_LID2:
       obj->info_use_lid2 = arg ? true : false;
       vcd_debug ("changing 'next volume use lid 2' to %d", obj->info_use_lid2);
@@ -1247,12 +1252,13 @@ _write_vcd_iso_track (VcdObj *obj)
 
       for (packet_no = 0;packet_no < (_segment->segment_count * 150);packet_no++)
         {
-          char buf[M2F2_SIZE] = { 0, };
+          uint8_t buf[M2F2_SIZE] = { 0, };
           uint8_t fn, cn, sm, ci;
 
           if (packet_no < _segment->info->packets)
             {
               struct vcd_mpeg_packet_flags pkt_flags;
+              bool _need_eor = false;
 
               vcd_mpeg_source_get_packet (_segment->source, packet_no,
                                           buf, &pkt_flags);
@@ -1275,6 +1281,23 @@ _write_vcd_iso_track (VcdObj *obj)
 
                   if (pkt_flags.video_e2)
                     ci = CI_STILL2, cn = CN_STILL2;
+
+                  if (pkt_flags.video_e1 || pkt_flags.video_e2)
+                    { /* search for endcode -- hack */
+                      int idx;
+                
+                      for (idx = 0; idx <= 2320; idx++)
+                        if (buf[idx] == 0x00
+                            && buf[idx + 1] == 0x00
+                            && buf[idx + 2] == 0x01
+                            && buf[idx + 3] == 0xb7)
+                          {
+                            _need_eor = true;
+                            break;
+                          }
+                    }
+
+
                   break;
 
                 case PKT_TYPE_AUDIO:
@@ -1304,6 +1327,14 @@ _write_vcd_iso_track (VcdObj *obj)
               if (packet_no + 1 == _segment->info->packets)
                 sm |= SM_EOF;
 
+
+
+              if (_need_eor)
+                {
+                  vcd_debug ("setting EOR for SeqEnd at packet# %d ('%s')", 
+                             packet_no, _segment->id);
+                  sm |= SM_EOR;
+                }
             }
           else
             {

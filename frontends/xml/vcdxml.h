@@ -66,6 +66,10 @@ struct vcdxml_t {
   VcdList *filesystem;
 };
 
+#define OPT_SVCD_VCD3_MPEGAV        "svcd vcd30 mpegav"
+#define OPT_SVCD_VCD3_ENTRYSVD      "svcd vcd30 entrysvd"
+#define OPT_RELAXED_APS             "relaxed aps"
+
 struct option_t {
   char *name;
   char *value;

@@ -61,6 +61,43 @@ bool vcd_xml_master (const struct vcdxml_t *obj, const char cue_fname[],
   if (obj->pvd.application_id)
     vcd_obj_set_param_str (_vcd, VCD_PARM_APPLICATION_ID, obj->pvd.application_id);
 
+  _VCD_LIST_FOREACH (node, obj->option_list)
+    {
+      struct option_t *_option = _vcd_list_node_data (node);
+      bool _value = false;
+
+      if (!_option->name)
+	{
+	  vcd_error ("no option name given!");
+	  continue;
+	}
+
+      if (!_option->value)
+	{
+	  vcd_error ("no value given for option name '%s'", _option->name);
+	  continue;
+	}
+
+      if (!strcmp (_option->value, "true"))
+	_value = true;
+      else if (!strcmp (_option->value, "false"))
+	_value = false;
+      else
+	{
+	  vcd_error ("option value '%s' invalid (use 'true' or 'false')", _option->value);
+	  continue;
+	}
+
+      if (!strcmp (_option->name, OPT_SVCD_VCD3_MPEGAV))
+	vcd_obj_set_param_bool (_vcd, VCD_PARM_SVCD_VCD3_MPEGAV, _value);
+      else if (!strcmp (_option->name, OPT_SVCD_VCD3_ENTRYSVD))
+	vcd_obj_set_param_bool (_vcd, VCD_PARM_SVCD_VCD3_MPEGAV, _value);
+      else if (!strcmp (_option->name, OPT_RELAXED_APS))
+	vcd_obj_set_param_bool (_vcd, VCD_PARM_RELAXED_APS, _value);
+      else
+	vcd_error ("unknown option name '%s'", _option->name);
+    }  
+
   _VCD_LIST_FOREACH (node, obj->pbc_list)
     {
       pbc_t *_pbc = _vcd_list_node_data (node);

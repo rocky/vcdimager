@@ -77,8 +77,11 @@ typedef struct {
 
 struct _VcdObj {
   vcd_type_t type;
+
   bool svcd_vcd3_mpegav;
   bool svcd_vcd3_entrysvd;
+
+  bool relaxed_aps;
 
   unsigned pre_track_gap;
   unsigned pre_data_gap;
