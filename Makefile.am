@@ -26,7 +26,7 @@ pkgconfig_DATA = libvcdinfo.pc
 
 EXTRA_DIST = BUGS FAQ cygwin-dist.sh HACKING libpopt.m4 \
 	ChangeLog_pre0_5 ChangeLog_pre0_7_14 \
-	debian/changelog debian/control debian/copyright debian/docs debian/info debian/rules debian/watch
+	debian/changelog debian/control debian/copyright debian/docs debian/info debian/rules debian/watch $(wildcard debian/*.install)
 
 dist-hook: vcdimager.spec
 	cp vcdimager.spec $(distdir)

@@ -1,8 +1,10 @@
-vcdimager (0.7.19+cvs-1) UNRELEASED; urgency=low
+vcdimager (0.7.20-1) unstable; urgency=low
 
-  * CVS snapshot of 0.7.20.
+  * New upstream release.
+  * New packages: libvcdinfo0 and libvcdinfo-dev; the libvcdinfo library
+    shall be used in the future at least by xine-lib and vlc.
 
- -- Nicolas Boullis <nboullis@debian.org>  Wed, 18 Feb 2004 02:17:55 +0100
+ -- Nicolas Boullis <nboullis@debian.org>  Fri, 20 Feb 2004 01:35:29 +0100
 
 vcdimager (0.7.14.debian.2-1) unstable; urgency=medium
 
