@@ -63,53 +63,53 @@ development.''
 @ifnottex
 @dircategory Video CD Tools
 @direntry
-* vcd-info: (vcd-info).                           Video CD dump tool
+* vcd-info: (vcd-info).                           Video CD Information tool
 @end direntry
 
 @node Top, Introduction, (dir), (dir)
 
-@top The GNU Video CD Info Program (@value{program})
+@top The GNU Video CD Information Tool (@value{program})
 
-This file documents GNU Video CD Info Program.
+This file documents GNU Video CD Information Tool.
 
 Copyright (C) 2003, 2004, 2005 Rocky Bernstein
 
 @menu
-* Introduction::        What is the program and why would I use it? 
-* Command Options::     How do I get this to do anything? 
-* Output Sections::     How do interpret the output? 
-* Some Examples::       Okay, enough talk. How about some simple examples?
-* History and Thanks::  History and Acknowledgments
+* Introduction::                What is the program and why would I use it? 
+* Command Options::             How do I get this to do anything? 
+* Output Sections::             How do interpret the output? 
+* Some Examples::               Okay, enough talk. How about some simple examples?
+* History and Thanks::          History and Acknowledgments
 
-Indices
-* General Index::       Overall index
-* Option Index::        Index for options
-* Sub-Option Index::    Index for sub-options
+Indexes
+* General Index::               Overall index
+* Option Index::                Index for options
+* Sub-Option Index::            Index for sub-options
 
 @detailmenu
  --- The Detailed Node Listing ---
 
 Command Options
 
-* Where Options::     Options controlling where to read from 
-* What Options::      Options controlling what do you want shown
-* All Options::       A complete list of options
+* Where Options::               Options controlling where to read from 
+* What Options::                Options controlling what do you want shown
+* All Options::                 A complete list of options
 
 Options controlling where to read from 
 
-* CD Images::             Reading from a file containing a CD disk image
-* CD-ROM Device::         Reading from a CD-ROM device
-* Intelligent Input::     Reading from wherever
+* CD Images::                   Reading from a file containing a CD disk image
+* CD-ROM Device::               Reading from a CD-ROM device
+* Intelligent Input::           Reading from wherever
 
 Output Sections
 
-* PVD::                 Primary Volume Descriptor (PVD) Section
-* Filesystem::          ISO 9660 Information
-* Entries::             Entries Section
-* Info::                Disc Information
-* LOT::                 LID Offset Table (LOT) Section
-* PSD::                 Program Segment Descriptors (PSD) Section
-* Tracks::              Tracks 
+* PVD::                         Primary Volume Descriptor (PVD) Section
+* Filesystem::                  ISO 9660 Information
+* Entries::                     Entries Section
+* Info::                        Disc Information
+* LOT::                         LID Offset Table (LOT) Section
+* PSD::                         Program Segment Descriptors (PSD) Section
+* Tracks::                      Tracks 
 
 @end detailmenu
 @end menu
@@ -200,9 +200,9 @@ to dump, these all start @kbd{--show-} and another set of options
 which specify where the CD-ROM or CD-ROM disk-image is.
 
 @menu
-* Where Options::     Options controlling where to read from 
-* What Options::      Options controlling what do you want shown
-* All Options::       A complete list of options
+* Where Options::               Options controlling where to read from 
+* What Options::                Options controlling what do you want shown
+* All Options::                 A complete list of options
 @end menu
 
 @node Where Options, What Options, Command Options, Command Options
@@ -226,9 +226,9 @@ from one place, these options are mutually exclusive; use only one
 option from this set.
 
 @menu
-* CD Images::             Reading from a file containing a CD disk image
-* CD-ROM Device::         Reading from a CD-ROM device
-* Intelligent Input::     Reading from wherever
+* CD Images::                   Reading from a file containing a CD disk image
+* CD-ROM Device::               Reading from a CD-ROM device
+* Intelligent Input::           Reading from wherever
 @end menu
 
 @node CD Images, CD-ROM Device, Where Options, Where Options
@@ -239,8 +239,7 @@ The option @kbd{--bin-file}, @kbd{--cue-file} or @kbd{--toc-file} (the
 short forms for the first two are these are @kbd{-b} and @kbd{-c}
 respectively) indicate to read from a file containing an image what
 might be burned onto Compact Disc. The format is expected to be in the
-BIN/CUE format that cdrdao uses and is used by a popular DOS/Windows
-CD mastering tool.
+BIN/CUE format is is accepted by many CD mastering tools.
 
 If you use the @kbd{--bin-file} option, the file read is expected to
 be the ``.BIN'' part---this is the bulk of the data.  If you use
@@ -256,15 +255,15 @@ specify a filename after --cue-file a default name is used, probably
 ``videocd.cue.'' These names I believe are the default output file
 names used when you use @command{vcdimager} or @command{vcdxbuild}.
 
+If you use the @kbd{--toc-file} option, the file read is expected to
+be a CD-ROM disk image using for the format @kbd{cdrdao} uses.  
+
 If you use the @kbd{--nrg-file} option (short form @kbd{-N}), the file
 read is expected to be a CD-ROM disk image using a proprietary and
 unpublished format used by the Nero burning software. Because this is
 proprietary and not published, this code has been reverse engineered
 and we really can't do as good a job as we can with a cue-sheet file.
 It's better not to work with such things when possible.
-
-If you use the @kbd{--toc-file} option, the file read is expected to
-be a CD-ROM disk image using for the format @kbd{cdrdao} uses.  
 
 @node CD-ROM Device, Intelligent Input, CD Images, Where Options
 @subsection Reading from CD-ROM Device
@@ -286,19 +285,20 @@ The option @kbd{--input} or the short form of this @kbd{-i} tries to
 be intelligent by trying to figure out whether the thing you are
 referring to is a device or a bin/cue disk image of a CD.
 
-Currently the algorithm it uses is pretty simple. If the thing
+Currently the algorithm it uses the one that the provided by from the
+underlying library: @kbd{libcdio}.  It is pretty simple: if the thing
 referred to is what in Unix is called a ``block'' or ``character''
-device, then it assumes a device name. When you do ``long listing''
-(``ls -l'') of the name and track down possible symbolic links
-you will see a ``b'' or ``c'' in the first colum if the file is a
-block or character devcies.
+device (and there is such a notion in your OS), then it assumes a
+device name. When you do ``long listing'' (``ls -l'') of the name and
+track down possible symbolic links you will see a ``b'' or ``c'' in
+the first column if the file is a block or character devices.
 
 If the thing referred to in an @kbd{--input} option is a ``regular''
 file then it is assumed you have a file image of a CD. If the filename
 ends (i.e. the extension is) ``.bin'' or ``.BIN'' then we assume a
-``BIN file''. If the filename ends ``.cue'' or ``.CUE'' then we
-assume a CUE file, and if the filename ends ``.nrg'' or ``.NRG'' we
-assume a Nero NRG disk image.
+``BIN file'' if the filename ends ``.nrg or ``.NRG we assume a Nero
+NRG disk image, and if the filename ends ``.toc'' or ``.TOC'' then we
+assume a @kbd{cdrdao} CD image.
 
 Although this algorithm is subject to change and there may be more
 sophisticated or alternative methods, in practice I think this does
@@ -465,7 +465,7 @@ If the Video CD is in format VCD 2.0, there can be an optional
 ``extended'' PSD which contains information in the PSD and area
 highlighting and selection information. To suppress reading and
 printing this information use this option. The option is only
-meaningfull if the VCD format is 2.0.
+meaningful if the VCD format is 2.0.
 
 @item --show-entries-all
 @itemx -E
@@ -486,7 +486,7 @@ A complete list of the entries. See lines 6--9. of the example in
 @ref{Entries, ,Entries Section}.
 @item id
 An 8 characters name, probably ``ENTRYVCD''. The name may also be
-``ENTRYSVD'' but this is depricated. Some DVD players may require one
+``ENTRYSVD'' but this is deprecated. Some DVD players may require one
 or the other to play SVCDs. See line 2 of the example in @ref{Entries,
 ,Entries Section}. The XML tag for this is <option name="svcd vcd30
 entrysvd" value="true"/> or <option name="svcd vcd30 mpegav"
@@ -540,7 +540,7 @@ The number of disks in the volume, an integer. The XML tag for this is
 @item id
 A string representing the Video CD format. ``VIDEO_CD'' for VCD 1.0, VCD
 1.1, or VCD 2.0, ``SUPERVCD'' for SVCD, XVCD, CVD, and ``HQ-VCD'' for
-HQVCD. A Maxiumum of 8 characters. See line 2 of the example in
+HQVCD. A Maximum of 8 characters. See line 2 of the example in
 @ref{Info, ,Disc Information}.
 @item ofm
 offset multiplier. Value is given is in hexadecimal. See line 20 of
@@ -553,11 +553,11 @@ Section}.
 Maximum LID number. See line 21 of the example in @ref{Info, ,Info
 Section}.
 @item pal
-bitset of 98 PAL(=set)/NTSC flags. See lines 8--9 of the example in
+bit set of 98 PAL(=set)/NTSC flags. See lines 8--9 of the example in
 @ref{Info, ,Disc Information}.
 @item pbc
 Show the field called ``extended pbc'' or ``reserved2'' A boolean
-value. If the image format is SVCD or HQVCD, this will be labled
+value. If the image format is SVCD or HQVCD, this will be labeled
 ``reserved2'' rather than ``extended pbc.'' Furthermore if the format
 is VCD 2.0, checks for for extended playback control files
 (EXT/LOT_X.VCD and EXT_PSD_X.VCD) will be made. If both files exist
@@ -566,12 +566,12 @@ then VCD2.0 extended playback is probably used.  See line 17 of
 @item prof
 System profile tag.  Used to define the set of mandatory parts to be
 applied for compatibility. Tag, 0x00 for "SUPERVCD", 0x01 for
-"HQ-VCD", 0x0@emph{n} for VCD@emph{x}.@emph{n}. A hexidecimal number.
+"HQ-VCD", 0x0@emph{n} for VCD@emph{x}.@emph{n}. A hexadecimal number.
 See line 4 of the example in @ref{Info, ,Disc Information}.
 @item psds
 PSD size. See line 18 of the example in @ref{Info, ,Disc Information}.
 @item res 
-Restriction number, e.g. ``unsuitiable for kids''; 0 is unrestricted,
+Restriction number, e.g. ``unsuitable for kids''; 0 is unrestricted,
 1 is restricted category 1, 2 is restricted category 2, 3 is
 restricted category 3. The XML tag for this is <restriction>.
 @item seg
@@ -657,7 +657,7 @@ The version ID. A decimal number. See line 3 of the example in
 The volume ID. The XML tag for this is <volume-id>. See line 5 of the
 example in @ref{PVD, ,Primary Volume Descriptor (PVD) Section}.
 @item volset
-Volumeset id. See line 5 of the example in @ref{PVD, ,Primary Volume
+Volume set id. See line 5 of the example in @ref{PVD, ,Primary Volume
 Descriptor (PVD) Section}.
 @item xa
 A boolean indicating whether the XA marker is present or not. See line
@@ -713,13 +713,13 @@ sections of output separated by a string of dashes like this:
 These separate the major logical sections of a Video CD
 
 @menu
-* PVD::                 Primary Volume Descriptor (PVD) Section
-* Filesystem::          ISO 9660 Information
-* Entries::             Entries Section
-* Info::                Disc Information
-* LOT::                 LID Offset Table (LOT) Section
-* PSD::                 Program Segment Descriptors (PSD) Section
-* Tracks::              Tracks 
+* PVD::                         Primary Volume Descriptor (PVD) Section
+* Filesystem::                  ISO 9660 Information
+* Entries::                     Entries Section
+* Info::                        Disc Information
+* LOT::                         LID Offset Table (LOT) Section
+* PSD::                         Program Segment Descriptors (PSD) Section
+* Tracks::                      Tracks 
 @end menu
 
 Note that in example given in these sections, numbers at the beginning
@@ -759,7 +759,7 @@ found from:
 @section ISO-9660 section
 
 This section contains something that looks pretty much like a
-directory listing obtained by interpretting the ISO-9660 filesystem
+directory listing obtained by interpreting the ISO-9660 filesystem
 information. Here's a sample:
 
 @smallexample
@@ -799,14 +799,14 @@ lowercase letters.
 The ``attribute'' characters at the beginning of left-hand side of the
 listing, for the most part, looks like what you would get in a Unix
 listing. Except there are these 1's and 2's before what in Unix would
-be the user/group/other mode attribibutes.  Those numbers indicate
+be the user/group/other mode attributes.  Those numbers indicate
 whether the track is ``mode2 form1'' or ``mode2 form2.'' So the
 example above, AVSEQ01.DAT is in a mode2 form2 track while every other
 entry listed is in a mode2 form1 track.  The movie part is is this
 mode2 form2 track while the remaining meta-data part is in a mode2
 form1 track.
 
-Another unusal thing about that single mode2 form2 track containing
+Another unusual thing about that single mode2 form2 track containing
 AVSEQ01.DAT, is that there seem to be two numbers listed before the
 AVSEQ01.DAT entry. All the other mode2 form1 entries have a single
 number listed beforehand. The first number (63954208) is the number of
@@ -1098,7 +1098,7 @@ doesn't do a rigorous job in determining if they have been
 violated. So it doesn't really know if the CD image is a CVD or
 not. Worse, we really don't have a firm grasp of what the CVD
 specifications are.  Having written all this though, a guess is that
-if the subtitle's a private stream id in the MPEG file has hexidecimal
+if the subtitle's a private stream id in the MPEG file has hexadecimal
 number 0xde. This may be completely bogus though.
 
 The bottom part of the display shows track info obtained in a
@@ -1106,7 +1106,7 @@ lower-level way. The information above CDROM TRACKS comes from
 meta-data read in that IS09660 filesystem. 
 
 If you are reading from a CD-ROM device, this information comes from
-comes requsts from the device to give track information. If what you
+comes requests from the device to give track information. If what you
 are reading is a disk image, the only way to get this information has
 to come from a ``cue sheet'' which is why it is better to specify a
 CUE file than a BIN file.
@@ -1168,7 +1168,7 @@ the ``intelligent'' input option again as we did before:
   vcd-info -i nausicaa.cue
 @end smallexample 
 
-To list all of the suboptions to choose from in the Primary Volume
+To list all of the sub-options to choose from in the Primary Volume
 Descriptor section (PVD) try this:
 @smallexample
   vcd-info --show-pvd help
@@ -1254,7 +1254,7 @@ started by splitting off code from the @kbd{vcdimager} package.
 In writing a utility programs to show off @kbd{libcdio}, I came across
 Gerd Knorr's @kbd{cdinfo} and with his permission I modified it
 calling @kbd{cd-info} (so both programs could be available
-simultaenously). I then reliezed that if @kbd{vcddump} were renamed
+simultaneously). I then realized that if @kbd{vcddump} were renamed
 @kbd{vcd-info} it might make a stronger uniform connection between
 these two similar programs.
 

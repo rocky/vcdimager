@@ -19,7 +19,7 @@
 @ifinfo
 This file documents GNU Video CD Ripping Program (@value{program})
 
-Copyright (C) Herbert Valerio Riedel @email{<hvr@@gnu.org>} and Rocky
+Copyright (C) 2005 Herbert Valerio Riedel @email{<hvr@@gnu.org>} and Rocky
 Bernstein @email{<rocky@@panix.com>}
 
 Permission is granted to copy, distribute and/or modify this document
@@ -45,7 +45,7 @@ development.''
 
 @vskip 0pt plus 1filll
 
-Copyright @copyright{} 2003 Herbert Valerio Riedel
+Copyright @copyright{} 2003, 2005 Herbert Valerio Riedel
 @email{<hvr@@gnu.org>} and Rocky Bernstein @email{<rocky@@panix.com>}
 @sp 1
 Permission is granted to copy, distribute and/or modify this document
@@ -74,23 +74,48 @@ development.''
 
 This file documents GNU Video CD Ripping Program.
 
-Copyright (C) 2003 Herbert Valerio Riedel and Rocky Bernstein
+Copyright (C) 2003, 2005 Herbert Valerio Riedel and Rocky Bernstein
 
 @menu
-* Introduction::        What is the program and why would I use it? 
-* Command Options::     How do I get this to do anything? 
-* Some Examples::       Okay, enough talk. How about some simple examples?
-* History::             History
+* Introduction::                What is the program and why would I use it? 
+* Command Options::             How do I get this to do anything? 
+* Some Examples::               Okay, enough talk. How about some simple examples?
+* History::                     History
 
-Indices
-* General Index::       Overall index
-* Option Index::        Index for options
+Indexes
+* General Index::               Overall index
+* Option Index::                Index for options
+
+@detailmenu
+ --- The Detailed Node Listing ---
+
+Command Options
+
+* General Options::             Generic options
+* Where Options::               Options controlling where to read from 
+* What Options::                Options controlling what do you want done
+* Miscellaneous Options::       Miscellaneous options
+
+Options controlling where to read from 
+
+* BIN/CUE TOC or NRG file::     
+* CD-ROM Device::               Reading from a CD-ROM device
+* Intelligent Input::           Reading from wherever
+* Input options::               A list of just the input options
+
+Some simple command invocations.
+
+* Input Examples::              Examples specifying input
+* Extraction Examples::         Examples specifying what to rip
+
+@end detailmenu
 @end menu
+
 @end ifnottex
 
 @contents
 
-@node Introduction
+@node Introduction, Command Options, Top, Top
 @chapter Introduction
 
 Note in the guide, we use the term Video CD to mean some sort of Video
@@ -101,7 +126,7 @@ whether we are referring to a class of Video Compact Disks or the
 specific older format called VCD @emph{version-number}.
 
 @value{program} can be used to extract or disassemble the contents of
-a CD or a CD disk image (commonly referred to as ``ripping'').
+a CD or a on-disk CD (commonly referred to as ``ripping'').
 @cindex ripping
 So in a sense @value{program} is the inverse of @kbd{vcdxbuild}---if
 you use @value{program} followed by @kbd{vcdxbuild} on the result and
@@ -114,33 +139,33 @@ image and can create an XML Video CD description file without
 extracting a single file located on the CD.
 
 You might use @value{program} as a step in re-mastering or re-authoring
-and existing CD, or it could be used to extract MPEGs from a CD or CD
-disk image file. 
+and existing CD, or it could be used to extract MPEGs from a CD or
+on-disk CD image file. 
 
 Since Video CD's use the ISO-9660 format, another way to ``extract''
 an MPEG or piece of a Video CD is simply to mount the CD and use file
 copy commands. However this program will interpret the Video-CD
 specific files and output a corresponding XML description file.  So
-@value{program} is something similar to the program @kbd{vcddump};
-however the latter gives lower-level Video-CD specific information and
-does not output its results in XML.
+@value{program} is something similar to the program @kbd{vcd-info};
+however the latter gives more detailed, lower-level Video-CD specific
+information and does not output its results in XML.
 
-@node Command Options
+@node Command Options, Some Examples, Introduction, Top
 @chapter Command Options
 
 There are a number of miscellaneous options, but there some broad
 categories of options. There is a set of options for specifying what
 not to dump, these all start @kbd{--no} and another set of options
-which specify where the CD-ROM or CD-ROM disk-image is.
+which specify where the CD-ROM or on-disk CD-ROM image is.
 
 @menu
-* General Options::         Generic options
-* Where Options::           Options controlling where to read from 
-* What Options::            Options controlling what do you want done
-* Miscellaneous Options::   Miscellaneous options
+* General Options::             Generic options
+* Where Options::               Options controlling where to read from 
+* What Options::                Options controlling what do you want done
+* Miscellaneous Options::       Miscellaneous options
 @end menu
 
-@node General Options
+@node General Options, Where Options, Command Options, Command Options
 @section General Options
 
 Here are some general-purpose options. These you might find on other
@@ -175,41 +200,44 @@ Display version and copyright information and exit after displaying
 this information. Sometimes, you just wanna know what version you got.
 @end table
 
-@node Where Options
+@node Where Options, What Options, General Options, Command Options
 @section Options controlling where to read from 
 
 If you don't specify any place to read from @value{program} will try
 to read from the default device that may be appropriate for your OS.
 
 There are two broad categories of input, reading from a device that
-contains a Compact Disk, and reading from a file on the filesystem
+contains a Compact Disc, and reading from a file on the filesystem
 that contains an image that could be burned into a Compact Disk.  The
 option for the former category, reading a physical CD, is
 @kbd{--cdrom-device} (@kbd{-C}); options for the latter category,
-reading a file containing a CD disk image, are @kbd{--bin-file}
-(@kbd{-b}), @kbd{--nrg-file} (@kbd{-N}). There is one other option
-@kbd{--input} (@kbd{-i}) which blurs the distinction---it tries to
-figure out based on the name whether you are reading from a device
-containing a CD or not and do the appropriate thing.  Of course, since
-it only makes sense to read from one place, these options are mutually
-exclusive; use only one option from this set.
+reading a file containing a CD image, are @kbd{--bin-file} (@kbd{-b}),
+@kbd{--nrg-file} (@kbd{-N}). There is one other option @kbd{--input}
+(@kbd{-i}) which blurs the distinction---it tries to figure out based
+on the name whether you are reading from a device containing a CD or
+not and do the appropriate thing.  Of course, since it only makes
+sense to read from one place, these options are mutually exclusive;
+use only one option from this set.
 
 @menu
-* BIN/CUE or NRG file::   Reading from a file containing a CD disk image
-* CD-ROM Device::         Reading from a CD-ROM device
-* Intelligent Input::     Reading from wherever
-* Input options::         A list of just the input options
+* BIN/CUE TOC or NRG file::     
+* CD-ROM Device::               Reading from a CD-ROM device
+* Intelligent Input::           Reading from wherever
+* Input options::               A list of just the input options
 @end menu
 
-@node BIN/CUE or NRG file
-@subsection Reading from a file containing a CD disk image
-@cindex Reading, BIN, or NRG CD-ROM disk image
+@node BIN/CUE TOC or NRG file, CD-ROM Device, Where Options, Where Options
+@subsection Reading from a file containing an on-disk CD image
+@cindex Reading, BIN, TOC, or NRG on-disk CD-ROM image
 
 The option @kbd{--bin-file} (the short forms for this is @kbd{-b})
 indicate to read from a file containing an image what might be burned
 onto Compact Disk. The format is expected to be in the BIN/CUE format
-that cdrdao uses and is used by a popular DOS/Windows CD mastering
+that @kbd{cdrdao} uses and is used by a popular DOS/Windows CD mastering
 tool.
+
+If you use the @kbd{--toc-file}, the file read is expected to be a
+@kbd{cdrdao} image.
 
 If you use the @kbd{--bin-file} option, the file read is expected to
 be the ``.BIN'' part---this is the bulk of the data.
@@ -224,7 +252,7 @@ It's better not to work with such things when possible.
 If you do not specify a file name after @kbd{--bin-file}, a default
 name is used ``videocd.bin'' is probably used
 
-@node CD-ROM Device
+@node CD-ROM Device, Intelligent Input, BIN/CUE TOC or NRG file, Where Options
 @subsection Reading from CD-ROM Device
 @cindex Reading, CD-ROM Device
 
@@ -236,26 +264,28 @@ the OS. For example on GNU/Linux, the default device may be
 @kbd{/dev/cdrom}, while on Solaris it might be
 @kbd{/vol/dev/aliases/cdrom0}.
 
-@node Intelligent Input
+@node Intelligent Input, Input options, CD-ROM Device, Where Options
 @subsection Reading from wherever
 @cindex Reading, wherever
 
 The option @kbd{--input} or the short form of this @kbd{-i} tries to
 be intelligent by trying to figure out whether the thing you are
-referring to is a device or a bin/cue disk image of a CD.
+referring to is a device or a CD disc image.
 
-Currently the algorithm it uses is pretty simple. If the thing
+Currently the algorithm it uses the one that the provided by from the
+underlying library: @kbd{libcdio}.  It is pretty simple: if the thing
 referred to is what in Unix is called a ``block'' or ``character''
-device, then it assumes a device name. When you do ``long listing''
-(``ls -l'') of the name and track down possible symbolic links
-you will see a ``b'' or ``c'' in the first column if the file is a
-block or character devices.
+device (and there is such a notion in your OS), then it assumes a
+device name. When you do ``long listing'' (``ls -l'') of the name and
+track down possible symbolic links you will see a ``b'' or ``c'' in
+the first column if the file is a block or character devices.
 
 If the thing referred to in an @kbd{--input} option is a ``regular''
 file then it is assumed you have a file image of a CD. If the filename
 ends (i.e. the extension is) ``.bin'' or ``.BIN'' then we assume a
-``BIN file'' and if the filename ends ``.nrg or ``.NRG then we assume
-a Nero NRG disk image.
+``BIN file'' if the filename ends ``.nrg or ``.NRG we assume a Nero
+NRG disk image, and if the filename ends ``.toc'' or ``.TOC'' then we
+assume a @kbd{cdrdao} CD image.
 
 Although this algorithm is subject to change and there may be more
 sophisticated or alternative methods, in practice I think this does
@@ -265,15 +295,15 @@ Use at most one option in an invocation from the following list. These
 options are described in general in @ref{Where Options, ,Options
 controlling where to read from}.
 
-@node Input options
+@node Input options,  , Intelligent Input, Where Options
 @subsection A list of just input options
 
 @table @code
 @item --bin-file @ovar{filename}
 @itemx -b @ovar{filename}
 @kindex @code{--bin-file}
-Specifies a BIN CD-ROM disk image to read from. See @ref{BIN/CUE or NRG
-file, ,Reading from a file containing a CD disk image}.
+Specifies a BIN CD-ROM disk image to read from. See @ref{BIN/CUE TOC or NRG
+file, ,Reading from a file containing an on-disk CD image}.
 
 
 @item --cdrom-device @ovar{device-name}
@@ -285,8 +315,8 @@ Device, ,Reading from CD-ROM Device}.
 @item --nrg-file @ovar{filename}
 @itemx -N @ovar{filename}
 @kindex @code{--nrg-file}
-Specifies a Nero NRG-format CD-ROM disk image to read from. See
-@ref{BIN/CUE or NRG file, ,Reading from a file containing a CD disk
+Specifies a Nero NRG-format CD-ROM disc image to read from. See
+@ref{BIN/CUE TOC or NRG file, ,Reading from a file containing a CD disk
 image}.
 
 @item --input @ovar{file or device name}
@@ -302,9 +332,16 @@ This option only makes sense if you are reading from a BIN CD disk
 image This indicates to @value{program} to assume a 2336-byte sector
 mode for image file. @emph{Note: This option is slated to disappear.}
 
+@item --toc-file @ovar{filename}
+@itemx -b @ovar{filename}
+@kindex @code{--toc-file}
+Specifies a cdrdao CD-ROM disc image to read from. See @ref{BIN/CUE
+TOC or NRG file, ,Reading from a file containing a CD disc image}.
+
+
 @end table
 
-@node What Options
+@node What Options, Miscellaneous Options, Where Options, Command Options
 @section Options controlling what do you want done
 
 By default @value{program} will extract everything it can about a Video CD
@@ -397,7 +434,7 @@ has no effect if you have also given the option @code{--nosegments}.
 
 @end table
 
-@node Miscellaneous Options
+@node Miscellaneous Options,  , What Options, Command Options
 @section Miscellaneous Options
 
 @table @code
@@ -420,15 +457,15 @@ default is @kbd{videocd.xml}.
 @end table
 
 
-@node Some Examples
+@node Some Examples, History, Command Options, Top
 @chapter Some simple command invocations.
 
 @menu
-* Input Examples::       Examples specifying input
-* Extraction Examples::  Examples specifying what to rip
+* Input Examples::              Examples specifying input
+* Extraction Examples::         Examples specifying what to rip
 @end menu
 
-@node Input Examples
+@node Input Examples, Extraction Examples, Some Examples, Some Examples
 @section Examples specifying input
 
 Perhaps all you want to do is rip a CD onto your disk to modify it.
@@ -508,7 +545,7 @@ than ``videocd.xml'' then use this:
 vcdxrip -i nausicaa.bin -o nausicaa.xml
 @end smallexample 
 
-@node Extraction Examples
+@node Extraction Examples,  , Input Examples, Some Examples
 @section Examples specifying what to rip
 
 If I just want the XML description only for the last example in
@@ -543,16 +580,16 @@ If you only want to extract track 1 from your CD this might work:
 vcdxrip --track 1
 @end smallexample 
 
-@node History
+@node History, General Index, Some Examples, Top
 @chapter History
 
 This program was written by Herbert Valerio Riedel.
 
-@node General Index
+@node General Index, Option Index, History, Top
 @unnumbered General Index
 @printindex cp
 
-@node Option Index
+@node Option Index,  , General Index, Top
 @unnumbered Option Index
 @printindex ky
 
