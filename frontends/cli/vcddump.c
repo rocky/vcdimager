@@ -396,7 +396,7 @@ dump_info (const vcdinfo_obj_t *obj)
   if (gl.show.info.prof)
     fprintf (stdout, " system profile tag: 0x%2.2x\n", info->sys_prof_tag);
   if (gl.show.info.album)
-    fprintf (stdout, " album desc: `%.16s'\n", info->album_desc);
+    fprintf (stdout, " album id: `%.16s'\n", vcdinfo_get_album_id(obj));
   if (gl.show.info.count)
     fprintf (stdout, " volume count: %d\n", vcdinfo_get_volume_count(obj));
   if (gl.show.info.vol)

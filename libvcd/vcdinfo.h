@@ -29,7 +29,7 @@ extern "C" {
 
 /*========== Move somewhere else? ================*/
 
-/*! \def Max # characters in an album description. */
+/*! \def Max # characters in an album id. */
 #define MAX_ALBUM_LEN 16   
 #define MAX_APPLICATION_ID 128
 #define MAX_PREPARER_ID 128
@@ -250,11 +250,11 @@ const char *
 vcdinfo_pin2str (uint16_t itemid);
 
 /*!
-  Return a string containing the VCD album description, or NULL if there is 
+  Return a string containing the VCD album id, or NULL if there is 
   some problem in getting this. 
 */
 const char *
-vcdinfo_get_album_description(vcdinfo_obj_t *obj);
+vcdinfo_get_album_id(const vcdinfo_obj_t *obj);
 
 /*!
   Return the VCD application ID.

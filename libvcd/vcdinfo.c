@@ -493,16 +493,14 @@ vcdinfo_pin2str (uint16_t itemid_num)
 }
 
 /*!
-   Return a string containing the VCD album description, or NULL if there is 
+   Return a string containing the VCD album id, or NULL if there is 
    some problem in getting this. 
 */
 const char *
-vcdinfo_get_album_description(vcdinfo_obj_t *obj)
+vcdinfo_get_album_id(const vcdinfo_obj_t *obj)
 {
-  InfoVcd *info;
   if ( NULL == obj || NULL == &obj->info ) return (NULL);
-  info = &obj->info;
-  return(info->album_desc);
+  return(obj->info.album_desc);
 }
 
 /*!
