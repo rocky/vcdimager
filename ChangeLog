@@ -1,3 +1,7 @@
+2001-01-02  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_types.h: fixes for cygwin environment
+
 2001-01-01  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* configure.in: added -lm to link flags

@@ -23,9 +23,27 @@
 
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
-#else
-#warning ISO/IEC 9899:1999 <stdint.h> missing
-#endif
+#else /* HAVE_STDINT_H */
+# ifndef __CYGWIN__
+# warning ISO/IEC 9899:1999 <stdint.h> missing
+# else  /* __CYGWIN__ */
+
+# include <sys/types.h>
+typedef u_int8_t uint8_t;
+typedef u_int16_t uint16_t;
+typedef u_int32_t uint32_t;
+typedef u_int64_t uint64_t;
+# define INT8_C(c)     c
+# define INT16_C(c)    c
+# define INT32_C(c)    c
+# define INT64_C(c)    c ## LL
+# define UINT8_C(c)    c ## U
+# define UINT16_C(c)   c ## U
+# define UINT32_C(c)   c ## U
+# define UINT64_C(c)   c ## ULL
+
+# endif /* __CYGWIN__ */
+#endif /* HAVE_STDINT_H */
 
 #ifdef HAVE_STDBOOL_H
 #include <stdbool.h>
