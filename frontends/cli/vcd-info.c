@@ -1,8 +1,8 @@
 /*
     $Id$
 
-    Copyright (C) 2001,2002 Herbert Valerio Riedel <hvr@gnu.org>
-    Copyright (C) 2002,2003,2004 Rocky Bernstein <rocky@panix.com>
+    Copyright (C) 2001, 2002 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2002 ,2003, 2004 Rocky Bernstein <rocky@panix.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1096,7 +1096,7 @@ dump_all (vcdinfo_obj_t *obj)
 }
 
 static void
-dump (char image_fname[])
+dump (char *image_fname[])
 {
   unsigned size, psd_size;
   vcdinfo_obj_t *obj;
@@ -1113,15 +1113,16 @@ dump (char image_fname[])
                "%s\n\n", _rcsid);
     }
 
-  open_rc = vcdinfo_open(&obj, &image_fname, gl.source_type, gl.access_mode);
+  open_rc = vcdinfo_open(&obj, image_fname, gl.source_type, gl.access_mode);
 
   if (NULL == obj) {
-    if (image_fname == NULL) {
+    if (*image_fname == NULL) {
       fprintf (stdout, "Couldn't automatically find a Video CD.\n");
     } else {
       fprintf (stdout, "Error opening requested Video CD object %s\n",
-               image_fname);
+               *image_fname);
       fprintf (stdout, "Perhaps this is not a Video CD.n");
+      free(*image_fname);
     }
     exit (EXIT_FAILURE);
   }
@@ -1129,6 +1130,7 @@ dump (char image_fname[])
   img = vcdinfo_get_cd_image(obj);
   if (open_rc==VCDINFO_OPEN_ERROR || img == NULL) {
     vcd_error ("Error determining place to read from");
+    free(*image_fname);
     exit (EXIT_FAILURE);
   }
 
@@ -1136,12 +1138,11 @@ dump (char image_fname[])
 
   if (gl.show.source) 
     {
-      if (NULL == image_fname) {
-        image_fname = vcdinfo_get_default_device(obj);
-        fprintf (stdout, "Source: default image file `%s'\n", image_fname);
-        free(image_fname);
+      if (NULL == *image_fname) {
+        *image_fname = vcdinfo_get_default_device(obj);
+        fprintf (stdout, "Source: default image file `%s'\n", *image_fname);
       } else {
-        fprintf (stdout, "Source: image file `%s'\n", image_fname);
+        fprintf (stdout, "Source: image file `%s'\n", *image_fname);
       }
       fprintf (stdout, "Image size: %d sectors\n", size);
     }
@@ -1597,8 +1598,9 @@ main (int argc, const char *argv[])
   gl_default_vcd_log_handler  = vcd_log_set_handler (_vcd_log_handler);
   gl_default_cdio_log_handler = cdio_log_set_handler (_vcd_log_handler);
 
-  dump (source_name);
+  dump (&source_name);
 
+  free(source_name);
   poptFreeContext(optCon);
   return EXIT_SUCCESS;
 }
