@@ -1,5 +1,7 @@
 2001-05-12  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* started to evolve PBC support
+
 	* libvcd/vcd.c (_finalize_vcd_iso_track): split up function in allocation and 
 		entry generation parts
 		(_finalize_vcd_iso_track_filesystem): allow for bigger directory section for SVCDs

@@ -91,6 +91,12 @@ int
 vcd_obj_append_segment_play_item (VcdObj *obj, VcdMpegSource *mpeg_source, 
                                   const char item_id[]);
 
+/* warning -- api will change for pbc */
+typedef struct _pbc_t pbc_t;
+
+int
+vcd_obj_append_pbc_node (VcdObj *obj, struct _pbc_t *_pbc);
+
 /* removes item (sequence, entry, segment, ...) by id, returns
    negative value on error */
 int 

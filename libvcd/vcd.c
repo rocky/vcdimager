@@ -956,6 +956,7 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
 static void
 _finalize_vcd_iso_track (VcdObj *obj)
 {
+  _vcd_pbc_finalize (obj);
   _finalize_vcd_iso_track_allocation (obj);
   _finalize_vcd_iso_track_filesystem (obj);
 }
@@ -1508,6 +1509,30 @@ vcd_obj_end_output (VcdObj *obj)
     vcd_data_sink_destroy (obj->bin_file); /* fixme -- try moving it to
                                               write_image */
   obj->bin_file = NULL;
+}
+
+int
+vcd_obj_append_pbc_node (VcdObj *obj, struct _pbc_t *_pbc)
+{
+  assert (obj != NULL);
+  assert (_pbc != NULL);
+
+  if (obj->type != VCD_TYPE_SVCD
+      && obj->type != VCD_TYPE_VCD2)
+    {
+      vcd_error ("PBC only supported for VCD2.0 and SVCD");
+      return -1;
+    }
+
+  if (_pbc->item_id && _vcd_pbc_lookup (obj, _pbc->item_id))
+    {
+      vcd_error ("item id (%s) exists already", _pbc->item_id);
+      return -1;
+    }
+  
+  _vcd_list_append (obj->pbc_list, _pbc);
+
+  return 0;
 }
 
 

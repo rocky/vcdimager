@@ -173,74 +173,58 @@ _set_bit (uint8_t bitset[], unsigned bitnum)
 uint32_t 
 get_psd_size (VcdObj *obj, bool extended)
 {
-  uint32_t psd_size;
-
   if (!_vcd_pbc_available (obj))
     return 0;
   
-  psd_size = _vcd_list_length (obj->mpeg_track_list)*16; /* 2<<3 */
-  psd_size += 8; /* stop descriptor */
+  if (extended)
+    return obj->psdx_size;
 
-  return psd_size;
+  return obj->psd_size;
 }
 
 void
 set_psd_vcd (VcdObj *obj, void *buf, bool extended)
 {
-  int n;
-  char psd_buf[ISO_BLOCKSIZE] = { 0, };
+  VcdListNode *node;
 
-  assert (obj->type == VCD_TYPE_SVCD
-          || obj->type == VCD_TYPE_VCD2);
+  assert (_vcd_pbc_available (obj));
 
-  for (n = 0; n < _vcd_list_length (obj->mpeg_track_list); n++)
+  _VCD_LIST_FOREACH (node, obj->pbc_list)
     {
-      const int noi = 1;
-      int descriptor_size = sizeof (PsdPlayListDescriptor) + (noi * sizeof (uint16_t));
-      PsdPlayListDescriptor *_md = _vcd_malloc (descriptor_size);
+      pbc_t *_pbc = _vcd_list_node_data (node);
+      char *_buf = buf;
+      unsigned offset = (extended ? _pbc->offset_ext : _pbc->offset);
+      
+      assert (offset % INFO_OFFSET_MULT == 0);
 
-      _md->type = PSD_TYPE_PLAY_LIST;
-      _md->noi = noi;
-      _md->lid = UINT16_TO_BE (n+1);
-      _md->prev_ofs = UINT16_TO_BE (n ? (n - 1) << 1 : 0xffff);
-      _md->next_ofs = UINT16_TO_BE ((n + 1) << 1);
-      _md->return_ofs = UINT16_TO_BE ((get_psd_size (obj, false) - 8) >> 3);
-      _md->ptime = UINT16_TO_BE (0x0000);
-      _md->wtime = 0x05;
-      _md->atime = 0x00;
-      _md->itemid[0] = UINT16_TO_BE (n+2);
-
-      memcpy (psd_buf+(n << 4), _md, descriptor_size);
-      free (_md);
+      _vcd_pbc_node_write (_pbc, _buf + offset, extended);
     }
-
-  {
-    PsdEndOfListDescriptor _sd;
-    
-    memset (&_sd, 0, sizeof (_sd));
-    _sd.type = PSD_TYPE_END_OF_LIST;
-    memcpy (psd_buf + (n << 4), &_sd, sizeof (_sd));
-  }
-
-  memcpy (buf, psd_buf, sizeof (psd_buf));
 }
 
 void
 set_lot_vcd(VcdObj *obj, void *buf, bool extended)
 {
   LotVcd *lot_vcd = NULL;
-  int n;
+  VcdListNode *node;
 
-  assert (obj->type == VCD_TYPE_SVCD
-          || obj->type == VCD_TYPE_VCD2);
+  assert (_vcd_pbc_available (obj));
 
   lot_vcd = _vcd_malloc (sizeof (LotVcd));
   memset(lot_vcd, 0xff, sizeof(LotVcd));
 
   lot_vcd->reserved = 0x0000;
 
-  for(n = 0; n < _vcd_list_length (obj->mpeg_track_list) + 1; n++)
-    lot_vcd->offset[n] = UINT16_TO_BE(n << 1); /* quick'n'dirty */
+  _VCD_LIST_FOREACH (node, obj->pbc_list)
+    {
+      pbc_t *_pbc = _vcd_list_node_data (node);
+      unsigned offset = extended ? _pbc->offset_ext : _pbc->offset;
+      
+      assert (offset % INFO_OFFSET_MULT == 0);
+
+      offset /= INFO_OFFSET_MULT;
+
+      lot_vcd->offset[_pbc->lid - 1] = UINT16_TO_BE (offset);
+    }
 
   memcpy(buf, lot_vcd, sizeof(LotVcd));
   free(lot_vcd);

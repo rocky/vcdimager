@@ -21,16 +21,21 @@
 #ifndef __VCD_PBC_H__
 #define __VCD_PBC_H__
 
+#include <libvcd/vcd.h>
 #include <libvcd/vcd_types.h>
-#include <libvcd/vcd_obj.h>
+#include <libvcd/vcd_data_structures.h>
 
-typedef struct {
-  enum {
-    PBC_INVALID = 0,
-    PBC_PLAY,
-    PBC_SELECTION,
-    PBC_END
-  } type;
+enum pbc_type_t {
+  PBC_INVALID = 0,
+  PBC_PLAYLIST,
+  PBC_SELECTION,
+  PBC_END
+};
+
+/* typedef struct _pbc_t pbc_t; */
+
+struct _pbc_t {
+  enum pbc_type_t type;
 
   char *id;
 
@@ -59,11 +64,11 @@ typedef struct {
   char *image_id;
   unsigned next_disc_no;
 
-  /* computed... */
+  /* computed values */
   unsigned lid;
   unsigned offset;
   unsigned offset_ext;
-} pbc_t;
+};
 
 enum item_type_t {
   ITEM_TYPE_NOTFOUND = 0,
@@ -74,6 +79,12 @@ enum item_type_t {
 };
 
 /* functions */
+
+pbc_t *
+vcd_pbc_new (enum pbc_type_t type);
+
+void
+_vcd_pbc_destroy (pbc_t *obj);
 
 unsigned
 _vcd_pbc_lid_lookup (const VcdObj *obj, const char item_id[]);
@@ -88,12 +99,15 @@ unsigned
 _vcd_pbc_list_calc_size (const pbc_t *_pbc, bool extended);
 
 bool
-_vcd_pbc_link (VcdObj *obj);
+_vcd_pbc_finalize (VcdObj *obj);
 
 bool
 _vcd_pbc_available (const VcdObj *obj);
 
 uint32_t
 _vcd_pbc_max_lid (const VcdObj *obj);
+
+void
+_vcd_pbc_node_write (const pbc_t *_pbc, void *buf, bool extended);
 
 #endif /* __VCD_PBC_H__ */

@@ -23,6 +23,7 @@
 
 #include <libvcd/vcd_types.h>
 #include <libvcd/vcd_data_structures.h>
+#include <libvcd/vcd_pbc.h>
 
 #include <libxml/tree.h>
 
@@ -44,6 +45,8 @@ struct vcdxml_t {
     xmlChar *preparer_id;
     xmlChar *publisher_id;
   } pvd;
+
+  VcdList *pbc_list;
 
   VcdList *mpeg_track_list;
 

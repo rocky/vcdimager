@@ -99,6 +99,8 @@ struct _VcdObj {
 
   /* PBC */
   VcdList *pbc_list; /* pbc_t */
+  unsigned psd_size;
+  unsigned psdx_size;
 
   /* custom files */
   unsigned ext_file_start_extent; 

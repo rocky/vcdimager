@@ -147,9 +147,149 @@ _parse_items (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
  */
 
 static bool
+_parse_pbc_selection (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+{
+  xmlNodePtr cur;
+  pbc_t *_pbc;
+
+  printf ("%s\n", __PRETTY_FUNCTION__);
+
+  _pbc = vcd_pbc_new (PBC_SELECTION);
+
+  GET_PROP_STR (_pbc->id, "id", doc, node, ns);
+
+  FOR_EACH (cur, node)
+    {
+      if (cur->ns != ns) 
+	continue; 
+      
+      if (!xmlStrcmp (cur->name, "prev"))
+	{ GET_PROP_STR (_pbc->prev_id, "ref", doc, cur, ns); }
+      else if (!xmlStrcmp (cur->name, "next"))
+	{ GET_PROP_STR (_pbc->next_id, "ref", doc, cur, ns); }
+      else if (!xmlStrcmp (cur->name, "return"))
+	{ GET_PROP_STR (_pbc->retn_id, "ref", doc, cur, ns); }
+      else if (!xmlStrcmp (cur->name, "play-item"))
+	{ GET_PROP_STR (_pbc->item_id, "ref", doc, cur, ns); }
+      else if (!xmlStrcmp (cur->name, "default"))
+	{
+	  xmlChar *_default_ref = NULL;
+
+	  GET_PROP_STR (_default_ref, "ref", doc, cur, ns); 
+	  assert (_default_ref != NULL);
+	  _vcd_list_append (_pbc->default_id_list, _default_ref);
+	}
+      else if (!xmlStrcmp (cur->name, "select"))
+	{
+	  xmlChar *_select_ref = NULL;
+
+	  GET_PROP_STR (_select_ref, "ref", doc, cur, ns); 
+	  assert (_select_ref != NULL);
+	  _vcd_list_append (_pbc->select_id_list, _select_ref);
+	}
+      else
+	printf ("%s %s -- sorry, not fully implemented yet\n", __PRETTY_FUNCTION__, cur->name);
+    }
+
+  _vcd_list_append (obj->pbc_list, _pbc);
+
+  return false;
+}
+
+static bool
+_parse_pbc_playlist (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+{
+  xmlNodePtr cur;
+  pbc_t *_pbc;
+
+  printf ("%s\n", __PRETTY_FUNCTION__);
+
+  _pbc = vcd_pbc_new (PBC_PLAYLIST);
+
+  GET_PROP_STR (_pbc->id, "id", doc, node, ns);
+
+  FOR_EACH (cur, node)
+    {
+      if (cur->ns != ns) 
+	continue; 
+      
+      if (!xmlStrcmp (cur->name, "prev"))
+	{ GET_PROP_STR (_pbc->prev_id, "ref", doc, cur, ns); }
+      else if (!xmlStrcmp (cur->name, "next"))
+	{ GET_PROP_STR (_pbc->next_id, "ref", doc, cur, ns); }
+      else if (!xmlStrcmp (cur->name, "return"))
+	{ GET_PROP_STR (_pbc->retn_id, "ref", doc, cur, ns); }
+      else if (!xmlStrcmp (cur->name, "play-item"))
+	{
+	  xmlChar *_item_ref = NULL;
+
+	  GET_PROP_STR (_item_ref, "ref", doc, cur, ns); 
+	  assert (_item_ref != NULL);
+	  _vcd_list_append (_pbc->item_id_list, _item_ref);
+	}
+      else
+	printf ("%s %s -- sorry, not fully implemented yet\n", __PRETTY_FUNCTION__, cur->name);
+    }
+
+  _vcd_list_append (obj->pbc_list, _pbc);
+
+  return false;
+}
+
+static bool
+_parse_pbc_endlist (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+{
+  xmlNodePtr cur;
+  pbc_t *_pbc;
+
+  printf ("%s\n", __PRETTY_FUNCTION__);
+
+  _pbc = vcd_pbc_new (PBC_END);
+
+  GET_PROP_STR (_pbc->id, "id", doc, node, ns);
+
+  FOR_EACH (cur, node)
+    {
+      if (cur->ns != ns) 
+	continue; 
+      
+      printf ("%s %s -- sorry, not fully implemented yet\n", __PRETTY_FUNCTION__, cur->name);
+    }
+
+  _vcd_list_append (obj->pbc_list, _pbc);
+
+  return false;
+}
+
+static bool
 _parse_pbc (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
-  printf ("sorry, PBC not supported yet\n");
+  xmlNodePtr cur;
+
+  assert (obj->pbc_list == NULL);
+
+  obj->pbc_list = _vcd_list_new ();
+
+  FOR_EACH (cur, node)
+    {
+      bool rc = true;
+
+      if (cur->ns != ns) 
+	continue; 
+
+      if (!xmlStrcmp (cur->name, "selection")) 
+	rc = _parse_pbc_selection (obj, doc, cur, ns);
+      else if (!xmlStrcmp (cur->name, "playlist")) 
+	rc = _parse_pbc_playlist (obj, doc, cur, ns);
+      else if (!xmlStrcmp (cur->name, "endlist")) 
+	rc = _parse_pbc_endlist (obj, doc, cur, ns);
+      else 
+	printf ("????? %s\n", cur->name);
+
+      if (rc)
+	return rc;
+    }
+
   return false;
 }
 

@@ -110,6 +110,16 @@ vcd_xml_master (const struct vcdxml_t *obj)
   if (obj->pvd.application_id)
     vcd_obj_set_param (_vcd, VCD_PARM_APPLICATION_ID, obj->pvd.application_id);
 
+  if (obj->pbc_list)
+    _VCD_LIST_FOREACH (node, obj->pbc_list)
+    {
+      pbc_t *_pbc = _vcd_list_node_data (node);
+
+      printf ("adding pbc (%s/%d)\n", _pbc->id, _pbc->type);
+
+      vcd_obj_append_pbc_node (_vcd, _pbc);
+    }
+
   if (obj->filesystem)
     _VCD_LIST_FOREACH (node, obj->filesystem)
     {
