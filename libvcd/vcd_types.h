@@ -132,6 +132,16 @@ typedef enum
 #define GNUC_PACKED
 #endif  /* !__GNUC__ */
 
+/* user directed static branch prediction
+ */
+#if __GNUC__ == 2 && __GNUC_MINOR__ < 96
+# define GNUC_LIKELY(x)   (x) 
+# define GNUC_UNLIKELY(x) (x)
+#else /* supported with gcc 2.96+ */
+# define GNUC_LIKELY(x)   __builtin_expect((x),true)
+# define GNUC_UNLIKELY(x) __builtin_expect((x),false)
+#endif
+
 #ifndef NULL
 # define NULL ((void*) 0)
 #endif

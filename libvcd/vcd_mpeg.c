@@ -85,7 +85,7 @@ static const double frame_rates[16] =  {
  vcd_assert (vcd_bitvec_read_bit (buf, offset) == 1)
 #else
 # define MARKER(buf, offset) \
- { if (vcd_bitvec_read_bit (buf, offset) != 1) vcd_debug ("mpeg: some marker is not set..."); }
+ { if (GNUC_UNLIKELY (vcd_bitvec_read_bit (buf, offset) != 1)) vcd_debug ("mpeg: some marker is not set..."); }
 #endif
 
 static inline bool
@@ -352,7 +352,7 @@ _parse_user_data (uint8_t streamid, const void *buf, unsigned len,
             struct vcd_mpeg_scan_data_t *usdi = (void *) udg;
             vcd_assert (sizeof (struct vcd_mpeg_scan_data_t) == 14);
             
-            if (usdi->len != 14)
+            if (GNUC_UNLIKELY (usdi->len != 14))
               {
                 vcd_warn ("invalid user scan data length (%d != 14)", usdi->len);
                 break;
@@ -572,7 +572,7 @@ _analyze_audio_pes (uint8_t streamid, const uint8_t *buf, int len, bool only_pts
 
       bitpos += 12;
 
-      if (!vcd_bitvec_read_bits (buf, &bitpos, 1))
+      if (GNUC_UNLIKELY (!vcd_bitvec_read_bits (buf, &bitpos, 1)))
         {
           vcd_debug ("non-MPEG1 audio stream header seen");
           break;

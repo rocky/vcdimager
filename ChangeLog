@@ -1,3 +1,8 @@
+2003-01-19  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_assert.h, libvcd/vcd_types.h: added branch prediction
+	annotation macros
+
 2003-01-08  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_image_nrg.c, libvcd/vcd_image_cdrdao.c: use C99

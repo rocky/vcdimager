@@ -23,11 +23,12 @@
 
 #if defined(__GNUC__)
 
+#include <libvcd/vcd_types.h>
 #include <libvcd/vcd_logging.h>
 
 #define vcd_assert(expr) \
  (void) ({ \
-   if (!(expr)) vcd_log (LOG_ASSERT, \
+   if (GNUC_UNLIKELY (!(expr))) vcd_log (LOG_ASSERT, \
      "file %s: line %d (%s): assertion failed: (%s)", \
      __FILE__, __LINE__, __PRETTY_FUNCTION__, #expr); \
  }) 
