@@ -50,6 +50,6 @@ libvcdinfo_la_SOURCES = \
 	vcd_read.c \
 	vcd_read.h 
 
-libvcdinfo_la_LDFLAGS = $(LIBCDIO_LIBS) $(LIBISO9660_LIBS) -no-undefined -version-info 0:1:0
+libvcdinfo_la_LDFLAGS = $(LIBCDIO_LIBS) $(LIBISO9660_LIBS) $(LIBVCD_LIBS) -no-undefined -version-info 0:1:0
 
 # EOF
