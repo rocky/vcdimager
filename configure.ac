@@ -19,7 +19,7 @@ dnl 02111-1307, USA.
 AC_PREREQ(2.52)
 AC_REVISION([$Id$])dnl
 
-AC_INIT([GNU VCDimager],0.7.20-cvs, [bugs-vcdimager@gnu.org], [vcdimager])
+AC_INIT([GNU VCDimager],0.7.20, [bugs-vcdimager@gnu.org], [vcdimager])
 AC_CONFIG_SRCDIR([lib/vcd.c])
 AM_INIT_AUTOMAKE(1.6.0)
 
