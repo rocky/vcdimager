@@ -53,7 +53,6 @@ AC_DEFINE(_DEVELOPMENT_, [], enable warnings about being development release)
 AC_DEFINE(_GNU_SOURCE, [], enable GNU libc extension)
 AC_STDC_HEADERS
 AC_CHECK_HEADERS(sys/stat.h stdint.h inttypes.h stdbool.h)
-AC_CHECK_HEADERS(linux/version.h)
 
 if test "x$ac_cv_header_stdint_h" != "xyes" 
  then
@@ -126,8 +125,9 @@ AC_CYGWIN
 
 if test "x$GCC" = "xyes"
 then
- WARN_CFLAGS="-Wall -Wmissing-prototypes -Wunused -Wpointer-arith -Wwrite-strings"
+  WARN_CFLAGS="-Wall -Wchar-subscripts -Wmissing-prototypes -Wmissing-declarations -Wunused -Wpointer-arith -Wwrite-strings -Wnested-externs"
 fi
+
 LIBS="$LIBS -lm"
 CFLAGS="$CFLAGS $WARN_CFLAGS"
 
@@ -144,6 +144,7 @@ AC_SUBST(LIBVCDINFO_LIBS)
 
 case $host in
      *-linux*)
+        AC_CHECK_HEADERS(linux/version.h)
 	LIBVCD_SYSDEP='vcd_image_cd-linux.$(OBJEXT)' 
 	;;
      *-bsdi*)
@@ -176,6 +177,7 @@ Setup:
   Install path:     ${prefix}
   Build CLI FE:	    $enable_cli_fe
   Build XML FE:	    $enable_xml_fe
+  Maintainer mode:  $enable_maintainer_mode
 "
 
 if test "x$enable_cli_fe" != "xyes" -a "x$enable_xml_fe" != "xyes"
