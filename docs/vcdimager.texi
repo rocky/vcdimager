@@ -141,8 +141,6 @@ A program to strip the @acronym{RIFF} header on CD-XA format tracks.
 See @xref{cdxa2mpeg}.
 @end table
 
-@end table
-
 The generated @acronym{CD-ROM} images created are suitable for being
 burnt on to @acronym{CD-R}, by the use of a CD-recording program which
 recognizes the @acronym{BIN/CUE}-format, such as cdrdao@footnote{see
