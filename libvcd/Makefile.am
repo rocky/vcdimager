@@ -34,20 +34,11 @@ libvcd_a_SOURCES = \
 	vcd_image_nrg.c \
 	vcd_image_nrg.h \
 	vcd_image_cd.h \
-	vcd_image_bsdicd.c \
-	vcd_image_bsdicd.h \
-	vcd_image_linuxcd.c \
-	vcd_image_linuxcd.h \
-	vcd_image_vpkt.c \
-	vcd_image_vpkt.h \
 	vcd_iso9660.c \
 	vcd_iso9660.h \
 	vcd_iso9660_private.h \
 	vcd_logging.c \
 	vcd_logging.h \
-	vcd_mmc_linux.c \
-	vcd_mmc_linux.h \
-	vcd_mmc_private.h \
 	vcd_mpeg.c \
 	vcd_mpeg.h \
 	vcd_mpeg_stream.c \
@@ -55,10 +46,6 @@ libvcd_a_SOURCES = \
 	vcd_obj.h \
 	vcd_pbc.h \
 	vcd_pbc.c \
-	vcd_recorder.c \
-	vcd_recorder.h \
-	vcd_recorder_mmc.c \
-	vcd_recorder_mmc.h \
 	vcd_salloc.c \
 	vcd_salloc.h \
 	vcd_stream.c \
@@ -69,5 +56,24 @@ libvcd_a_SOURCES = \
 	vcd_util.h \
 	vcd_types.h \
 	vcd_xa.h
+
+# vcd_recorder related stuff below isn't used yet
+EXTRA_libvcd_a_SOURCES = \
+	vcd_image_cd-bsdi.c \
+	vcd_image_cd-generic.c \
+	vcd_image_cd-linux.c \
+	vcd_image_cd-sunos.c \
+	vcd_image_vpkt.c \
+	vcd_image_vpkt.h \
+	vcd_mmc_linux.c \
+	vcd_mmc_linux.h \
+	vcd_mmc_private.h \
+	vcd_recorder.c \
+	vcd_recorder.h \
+	vcd_recorder_mmc.c \
+	vcd_recorder_mmc.h
+
+libvcd_a_LIBADD = @LIBVCD_SYSDEP@
+libvcd_a_DEPENDENCIES = @LIBVCD_SYSDEP@
 
 libvcdinfo_a_SOURCES = vcdinfo.h vcdinfo.c

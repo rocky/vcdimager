@@ -30,7 +30,7 @@
 #include <libvcd/vcd_assert.h>
 
 #include <libvcd/vcd_image_nrg.h>
-#include <libvcd/vcd_image_linuxcd.h>
+#include <libvcd/vcd_image_cd.h>
 #include <libvcd/vcd_image_bincue.h>
 #include <libvcd/vcd_stream_stdio.h>
 
@@ -56,8 +56,8 @@ main (int argc, const char *argv[])
 
       img = vcd_image_source_new_bincue () /* src, NULL, false) */; 
     }
-  else if (!strcmp ("linuxcd", argv[1]))
-    img = vcd_image_source_new_linuxcd () /* argv[2]) */;
+  else if (!strcmp ("cd", argv[1]))
+    img = vcd_image_source_new_cd () /* argv[2]) */;
   else 
     vcd_error ("unrecognized img type");
 

@@ -22,21 +22,15 @@
 #define __VCD_IMAGE_CD_H__
 
 #include <libvcd/vcd_image.h>
-#include <libvcd/vcd_image_linuxcd.h>
-#include <libvcd/vcd_image_bsdicd.h>
 
-static VcdImageSource *
-vcd_image_source_new_cd (void)
-{
-#if defined(__linux__)
-  return vcd_image_source_new_linuxcd ();
-#elif defined(__bsdi__)
-  return vcd_image_source_new_bsdicd ();
-#else
-  vcd_error ("no CD-ROM image driver available for this architecture (%s)",
-	     HOST_ARCH);
-  return NULL;
-#endif
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+VcdImageSource *vcd_image_source_new_cd (void);
+
+#ifdef __cplusplus
 }
+#endif /* __cplusplus */
 
 #endif /* __VCD_IMAGE_CD_H__ */

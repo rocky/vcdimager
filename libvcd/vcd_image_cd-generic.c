@@ -18,12 +18,19 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef __VCD_IMAGE_LINUXCD_H__
-#define __VCD_IMAGE_LINUXCD_H__
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
 
-#include <libvcd/vcd_image.h>
+#include <libvcd/vcd_image_cd.h>
+#include <libvcd/vcd_logging.h>
+
+static const char _rcsid[] = "$Id$";
 
 VcdImageSource *
-vcd_image_source_new_linuxcd (void);
-
-#endif /* __VCD_IMAGE_LINUXCD_H__ */
+vcd_image_source_new_cd (void)
+{
+  vcd_error ("no CD-ROM image driver available for this architecture (%s)",
+	     HOST_ARCH);
+  return NULL;
+}

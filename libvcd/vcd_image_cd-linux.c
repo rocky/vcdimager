@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2003 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 #include <libvcd/vcd_assert.h>
 #include <libvcd/vcd_bytesex.h>
 #include <libvcd/vcd_cd_sector.h>
-#include <libvcd/vcd_image_linuxcd.h>
+#include <libvcd/vcd_image_cd.h>
 #include <libvcd/vcd_iso9660.h>
 #include <libvcd/vcd_logging.h>
 #include <libvcd/vcd_util.h>
@@ -374,10 +374,10 @@ _source_set_arg (void *user_data, const char key[], const char value[])
 #endif /* defined(__VCD_IMAGE_LINUXCD_BUILD) */
 
 VcdImageSource *
-vcd_image_source_new_linuxcd (void)
+vcd_image_source_new_cd (void)
 {
 #if defined(__VCD_IMAGE_LINUXCD_BUILD)
-  _img_linuxcd_src_t *_data;
+  _img_linuxcd_src_t *_data = _vcd_malloc (sizeof *_data);
 
   vcd_image_source_funcs _funcs = {
     .read_mode2_sectors = _read_mode2_sectors,
@@ -386,16 +386,17 @@ vcd_image_source_new_linuxcd (void)
     .set_arg            = _source_set_arg
   };
 
-  _data = _vcd_malloc (sizeof (_img_linuxcd_src_t));
   _data->device = strdup ("/dev/cdrom");
   _data->fd = -1;
 
   return vcd_image_source_new (_data, &_funcs);
+
 #elif defined(__linux__)
-  vcd_error ("linux cd image source driver was not enabled in build due to old or missing linux kernel headers.");
+  vcd_error ("linux cd image source driver was not enabled in build due to old or missing linux kernel headers at compile time.");
   return NULL;
 #else
-  vcd_error ("linux cd image source only supported under linux");
+# error linux cd image source only supported under linux
+  vcd_assert_not_reached ();
   return NULL;
 #endif
 }

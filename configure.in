@@ -142,6 +142,22 @@ AC_SUBST(LIBVCD_CFLAGS)
 AC_SUBST(LIBVCD_LIBS)
 AC_SUBST(LIBVCDINFO_LIBS)
 
+case $host in
+     *-linux*)
+	LIBVCD_SYSDEP='vcd_image_cd-linux.$(OBJEXT)' 
+	;;
+     *-bsdi*)
+	LIBVCD_SYSDEP='vcd_image_cd-bsdi.$(OBJEXT)' 
+	;;
+     *-sunos*)
+	LIBVCD_SYSDEP='vcd_image_cd-sunos.$(OBJEXT)' 
+	;;
+     *)
+	LIBVCD_SYSDEP='vcd_image_cd-generic.$(OBJEXT)' 
+	;;
+esac
+AC_SUBST(LIBVCD_SYSDEP)
+
 AC_OUTPUT([ \
 	Makefile \
 	amiga/Makefile \

@@ -1,5 +1,14 @@
 2003-01-19  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* libvcd/vcd_image_cd.h: replaced #if-based selection of cdrom
+	driver selection by configure/link-based scheme
+
+	* libvcd/vcd_image_cd-generic.c, libvcd/vcd_image_cd-linux.c,
+	libvcd/vcd_image_cd-bsdi.c, libvcd/vcd_image_cd-sunos.c: added
+
+	* libvcd/vcd_image_linuxcd.[ch], libvcd/vcd_image_bsdicd.[ch]:
+	removed
+
 	* libvcd/vcd_mmc_private.h: fixed packed attributes (note2myself;
 	disc_info got smaller by 2 bytes...)
 
