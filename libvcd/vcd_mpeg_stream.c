@@ -465,7 +465,8 @@ _analyze (const uint8_t *buf, int len, bool analyze_pes,
     }
 
   if (_bitvec_peek_bits32 (buf, 0) != MPEG_PACK_HEADER_CODE)
-    vcd_error ("scanning error 0x%8.8x %d", _bitvec_peek_bits32 (buf, 0), len);
+    vcd_error ("mpeg scan: pack header code expected, but 0x%8.8x found (buflen = %d)",
+               _bitvec_peek_bits32 (buf, 0), len);
 
   pos = 0;
   while (pos + 4 <= len)

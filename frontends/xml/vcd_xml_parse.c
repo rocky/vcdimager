@@ -199,8 +199,6 @@ _parse_pbc_selection (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlN
   xmlNodePtr cur;
   pbc_t *_pbc;
 
-  printf ("%s\n", __PRETTY_FUNCTION__);
-
   _pbc = vcd_pbc_new (PBC_SELECTION);
 
   GET_PROP_STR (_pbc->id, "id", doc, node, ns);
@@ -449,7 +447,6 @@ _parse_file (struct vcdxml_t *obj, const char path[], xmlDocPtr doc, xmlNodePtr 
   xmlChar *_src = NULL;
   xmlChar *_format = NULL;
 
-  printf ("%s\n", __PRETTY_FUNCTION__);
   assert (path != NULL);
 
   GET_PROP_STR (_src, "src", doc, node, ns);
@@ -495,8 +492,6 @@ _parse_folder (struct vcdxml_t *obj, const char path[], xmlDocPtr doc, xmlNodePt
   char *new_path = NULL;
 
   assert (path != NULL);
-
-  printf ("%s\n", __PRETTY_FUNCTION__);
 
   FOR_EACH (cur, node)
     {
@@ -558,8 +553,6 @@ _parse_filesystem (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPt
 {
   xmlNodePtr cur;
 
-  printf ("%s\n", __PRETTY_FUNCTION__);
-
   assert (obj->filesystem == NULL);
 
   obj->filesystem = _vcd_list_new ();
@@ -595,8 +588,6 @@ _parse_videocd (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr n
   xmlNodePtr cur;
 
   assert (obj != NULL);
-
-  printf ("%s\n", __PRETTY_FUNCTION__);
 
   GET_PROP_STR (obj->class, "class", doc, node, ns);
   GET_PROP_STR (obj->version, "version", doc, node, ns);

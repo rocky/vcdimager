@@ -46,15 +46,15 @@ struct _pbc_t {
 
   /* used for play lists */
   double playing_time;
-  unsigned wait_time;
-  unsigned auto_pause_time;
+  int wait_time;
+  int auto_pause_time;
   VcdList *item_id_list; /* char */
 
   /* used for selection lists */
   unsigned bsn;
   VcdList *default_id_list; /* char */
   char *timeout_id;
-  unsigned timeout_time;
+  int timeout_time;
   unsigned loop_count;
   bool jump_delayed;
   char *item_id;
@@ -83,8 +83,11 @@ enum item_type_t {
 pbc_t *
 vcd_pbc_new (enum pbc_type_t type);
 
+pbc_t *
+_vcd_pbc_init (pbc_t *_pbc);
+
 void
-_vcd_pbc_destroy (pbc_t *obj);
+vcd_pbc_destroy (pbc_t *obj);
 
 unsigned
 _vcd_pbc_lid_lookup (const VcdObj *obj, const char item_id[]);
