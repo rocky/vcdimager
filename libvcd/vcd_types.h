@@ -170,6 +170,18 @@ PRAGMA_END_PACKED
 
 #define msf_t_SIZEOF 3
 
+/* type used for bit-fields in structs (1 <= bits <= 8) */
+#if defined(__GNUC__)
+/* this is strict ISO C99 which allows only 'unsigned int', 'signed
+   int' and '_Bool' explicitly as bit-field type */
+typedef unsigned int bitfield_t;
+#else
+/* other compilers might increase alignment requirements to match the
+   'unsigned int' type -- fixme: find out how unalignment accesses can
+   be pragma'ed on non-gcc compilers */
+typedef uint8_t bitfield_t;
+#endif
+
 /* The type of a Logical Block Address. */
 typedef uint32_t lba_t;
  

@@ -92,38 +92,38 @@ typedef struct {
 /* This one-byte field describes certain characteristics of the disc */
 typedef struct {
 #if defined(BITFIELD_LSBF)
-  unsigned reserved1 : 1;                   /* Reserved, must be zero */
-  unsigned restriction : 2;                 /* restriction, eg. "unsuitable
+  bitfield_t reserved1 : 1;                   /* Reserved, must be zero */
+  bitfield_t restriction : 2;                 /* restriction, eg. "unsuitable
                                               for kids":
                                               0x0 ==> unrestricted,
                                               0x1 ==> restricted category 1,
                                               0x2 ==> restricted category 2,
                                               0x3 ==> restricted category 3 */
-  unsigned special_info : 1;                /* Special Information is encoded 
+  bitfield_t special_info : 1;                /* Special Information is encoded 
                                               in the pictures */
-  unsigned user_data_cc : 1;                /* MPEG User Data is used
+  bitfield_t user_data_cc : 1;                /* MPEG User Data is used
                                               for Closed Caption */
-  unsigned use_lid2 : 1;                    /* If == 1 and the PSD is
+  bitfield_t use_lid2 : 1;                    /* If == 1 and the PSD is
                                               interpreted and the next
                                               disc has the same album
                                               id then start the next
                                               disc at List ID #2,
                                               otherwise List ID #1 */ 
-  unsigned use_track3 : 1;                  /* If == 1 and the PSD is
+  bitfield_t use_track3 : 1;                  /* If == 1 and the PSD is
                                               not interpreted  and
                                               next disc has same album
                                               id, then start next disc
                                               with track 3, otherwise
                                               start with track 2 */ 
-  unsigned pbc_x : 1;                       /* extended PBC available */
+  bitfield_t pbc_x : 1;                       /* extended PBC available */
 #else
-  unsigned pbc_x : 1;
-  unsigned use_track3 : 1;
-  unsigned use_lid2 : 1;
-  unsigned user_data_cc : 1;
-  unsigned special_info : 1;
-  unsigned restriction : 2;
-  unsigned reserved1 : 1;
+  bitfield_t pbc_x : 1;
+  bitfield_t use_track3 : 1;
+  bitfield_t use_lid2 : 1;
+  bitfield_t user_data_cc : 1;
+  bitfield_t special_info : 1;
+  bitfield_t restriction : 2;
+  bitfield_t reserved1 : 1;
 #endif
 } GNUC_PACKED InfoStatusFlags;
 
@@ -142,7 +142,7 @@ enum {
 typedef struct 
 {
 #if defined(BITFIELD_LSBF)
-  unsigned audio_type : 2;                /* Audio characteristics:
+  bitfield_t audio_type : 2;                /* Audio characteristics:
                                             0x0 - No MPEG audio stream
                                             0x1 - One MPEG1 or MPEG2 audio
                                                   stream without extension
@@ -150,7 +150,7 @@ typedef struct
                                                   streams without extension
                                             0x3 - One MPEG2 multi-channel 
                                                     audio stream w/ extension*/
-  unsigned video_type : 3;                /* Video characteristics:
+  bitfield_t video_type : 3;                /* Video characteristics:
                                             0x0 - No MPEG video data
                                             0x1 - NTSC still picture
                                             0x2 - Reserved (NTSC hires?)
@@ -159,20 +159,20 @@ typedef struct
                                             0x5 - PAL still picture
                                             0x6 - Reserved (PAL hires?)
                                             0x7 - PAL motion picture */
-  unsigned item_cont : 1;                 /* Indicates segment is continuation
+  bitfield_t item_cont : 1;                 /* Indicates segment is continuation
                                             0x0 - 1st or only segment of item
                                             0x1 - 2nd or later
                                                   segment of item */
-  unsigned ogt : 2;                       /* 0x0 - no OGT substream 
+  bitfield_t ogt : 2;                       /* 0x0 - no OGT substream 
                                             0x1 - sub-stream 0 available
                                             0x2 - sub-stream 0 & 1 available
                                             0x3 - all OGT sub-substreams 
                                                   available */
 #else
-  unsigned ogt : 2;
-  unsigned item_cont : 1;
-  unsigned video_type : 3;
-  unsigned audio_type : 2;
+  bitfield_t ogt : 2;
+  bitfield_t item_cont : 1;
+  bitfield_t video_type : 3;
+  bitfield_t audio_type : 2;
 #endif
 } GNUC_PACKED InfoSpiContents;
 
@@ -281,13 +281,13 @@ typedef struct {
 
 typedef struct {
 #if defined(BITFIELD_LSBF)
-  unsigned SelectionAreaFlag : 1;
-  unsigned CommandListFlag : 1;
-  unsigned reserved : 6;
+  bitfield_t SelectionAreaFlag : 1;
+  bitfield_t CommandListFlag : 1;
+  bitfield_t reserved : 6;
 #else
-  unsigned reserved : 6;
-  unsigned CommandListFlag : 1;
-  unsigned SelectionAreaFlag : 1;
+  bitfield_t reserved : 6;
+  bitfield_t CommandListFlag : 1;
+  bitfield_t SelectionAreaFlag : 1;
 #endif  
 } GNUC_PACKED PsdSelectionListFlags;
 
@@ -370,28 +370,28 @@ typedef struct {
 
 typedef struct {
 #if defined(BITFIELD_LSBF)
-  unsigned audio : 2;                      /* Audio Content
+  bitfield_t audio : 2;                      /* Audio Content
                                              0x00 : No MPEG audio stream
                                              0x01 : One MPEG{1|2} audio stream
                                              0x02 : Two MPEG{1|2} streams
                                              0x03 : One MPEG2 multi-channel
                                                     audio stream with
                                                     extension */
-  unsigned video : 3;                      /* Video Content
+  bitfield_t video : 3;                      /* Video Content
                                              0x00 : No MPEG video
                                              0x03 : NTSC video
                                              0x07 : PAL video */
-  unsigned reserved1 : 1;                  /* Reserved, must be zero */
-  unsigned ogt : 2;                        /* 0x0 - no OGT substream 
+  bitfield_t reserved1 : 1;                  /* Reserved, must be zero */
+  bitfield_t ogt : 2;                        /* 0x0 - no OGT substream 
                                              0x1 - sub-stream 0 available
                                              0x2 - sub-stream 0 & 1 available
                                              0x3 - all OGT sub-substreams 
                                                    available */
 #else
-  unsigned ogt : 2;
-  unsigned reserved1 : 1;
-  unsigned video : 3;
-  unsigned audio : 2;
+  bitfield_t ogt : 2;
+  bitfield_t reserved1 : 1;
+  bitfield_t video : 3;
+  bitfield_t audio : 2;
 #endif
 } GNUC_PACKED SVDTrackContent;
 
