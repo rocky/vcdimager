@@ -867,12 +867,14 @@ dump_search_dat (vcdinfo_obj_t *obj)
       unsigned hh, mm, ss, ss2;
       const msf_t *msf = &(searchdat->points[m]);
       const uint32_t lsn = cdio_msf_to_lsn(msf);
+      char *psz_msf;
 
       if (!gl.debug_level >= 1 
           && m > PRINTED_POINTS 
           && m < (scan_points - PRINTED_POINTS))
         continue;
       
+      psz_msf = cdio_msf_to_str(msf);
       ss2 = m * searchdat->time_interval;
 
       hh = ss2 / (2 * 60 * 60);
@@ -881,8 +883,9 @@ dump_search_dat (vcdinfo_obj_t *obj)
       ss2 = (ss2 % 2) * 5;
 
       fprintf (stdout, " scanpoint[%.4d]: (real time: %.2d:%.2d:%.2d.%.1d) "
-               " sector: LSN %lu (MSF %.2x:%.2x:%.2x)\n", m, hh, mm, ss, ss2,
-               (unsigned long int) lsn, msf->m, msf->s, msf->f);
+               " sector: LSN %lu (MSF %s)\n", m, hh, mm, ss, ss2,
+               (unsigned long int) lsn, psz_msf);
+      free(psz_msf);
       
       if (!gl.debug_level >= 1
           && m == PRINTED_POINTS && scan_points > (PRINTED_POINTS * 2))
