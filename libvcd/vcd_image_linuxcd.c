@@ -49,6 +49,13 @@ typedef struct {
   FILE *fd;
   int ioctls_debugged; /* for debugging */
 
+  enum {
+    _AM_NONE,
+    _AM_IOCTL,
+    _AM_READ_CD,
+    _AM_READ_10
+  } access_mode;
+
   char *device;
   
   bool init;
@@ -61,6 +68,7 @@ _source_init (_img_linuxcd_src_t *_obj)
     return;
 
   _obj->fd = fopen (_obj->device, "rb");
+  _obj->access_mode = _AM_READ_CD;
 
   if (!_obj->fd)
     {
@@ -85,8 +93,104 @@ _source_free (void *user_data)
   free (_obj);
 }
 
+static int 
+_set_bsize (int fd, unsigned bsize)
+{
+  struct cdrom_generic_command cgc;
+
+  struct
+  {
+    uint8_t reserved1;
+    uint8_t medium;
+    uint8_t reserved2;
+    uint8_t block_desc_length;
+    uint8_t density;
+    uint8_t number_of_blocks_hi;
+    uint8_t number_of_blocks_med;
+    uint8_t number_of_blocks_lo;
+    uint8_t reserved3;
+    uint8_t block_length_hi;
+    uint8_t block_length_med;
+    uint8_t block_length_lo;
+  } mh;
+
+  memset (&mh, 0, sizeof (mh));
+  memset (&cgc, 0, sizeof (struct cdrom_generic_command));
+  
+  cgc.cmd[0] = 0x15;
+  cgc.cmd[1] = 1 << 4;
+  cgc.cmd[4] = 12;
+  
+  cgc.buflen = sizeof (mh);
+  cgc.buffer = (void *) &mh;
+
+  cgc.data_direction = CGC_DATA_WRITE;
+
+  mh.block_desc_length = 0x08;
+  mh.block_length_hi = (bsize >> 16) & 0xff;
+  mh.block_length_med = (bsize >> 8) & 0xff;
+  mh.block_length_lo = (bsize >> 0) & 0xff;
+
+  return ioctl (fd, CDROM_SEND_PACKET, &cgc);
+}
+
 static int
-_read_mode2_sector (void *user_data, void *data, uint32_t lsn, bool form2)
+_read_mode2 (int fd, void *buf, uint32_t lba, unsigned nblocks, 
+	     bool _workaround)
+{
+  struct cdrom_generic_command cgc;
+
+  memset (&cgc, 0, sizeof (struct cdrom_generic_command));
+
+  cgc.cmd[0] = _workaround ? GPCMD_READ_10 : GPCMD_READ_CD;
+  
+  cgc.cmd[2] = (lba >> 24) & 0xff;
+  cgc.cmd[3] = (lba >> 16) & 0xff;
+  cgc.cmd[4] = (lba >> 8) & 0xff;
+  cgc.cmd[5] = (lba >> 0) & 0xff;
+
+  cgc.cmd[6] = (nblocks >> 16) & 0xff;
+  cgc.cmd[7] = (nblocks >> 8) & 0xff;
+  cgc.cmd[8] = (nblocks >> 0) & 0xff;
+
+  if (!_workaround)
+    {
+      cgc.cmd[1] = 0; /* sector size mode2 */
+
+      cgc.cmd[9] = 0x58; /* 2336 mode2 */
+    }
+
+  cgc.buflen = 2336 * nblocks;
+  cgc.buffer = buf;
+
+  cgc.timeout = 500;
+  cgc.data_direction = CGC_DATA_READ;
+
+  if (_workaround)
+    {
+      int retval;
+
+      if ((retval = _set_bsize (fd, 2336)))
+	return retval;
+
+      if ((retval = ioctl (fd, CDROM_SEND_PACKET, &cgc)))
+	{
+	  _set_bsize (fd, 2048);
+	  return retval;
+	}
+
+      if ((retval = _set_bsize (fd, 2048)))
+	return retval;
+    }
+  else
+    return ioctl (fd, CDROM_SEND_PACKET, &cgc);
+
+  return 0;
+}
+
+static int
+_read_mode2_sectors (void *user_data, void *data, uint32_t lsn, bool form2,
+		     unsigned nblocks)
 {
   _img_linuxcd_src_t *_obj = user_data;
 
@@ -110,26 +214,83 @@ _read_mode2_sector (void *user_data, void *data, uint32_t lsn, bool form2)
 	vcd_debug ("only displaying every 30*75th ioctl from now on");
 
       if (_obj->ioctls_debugged < 75 
-	  || (_obj->ioctls_debugged < (30 * 75)  && _obj->ioctls_debugged % 75 == 0)
+	  || (_obj->ioctls_debugged < (30 * 75)  
+	      && _obj->ioctls_debugged % 75 == 0)
 	  || _obj->ioctls_debugged % (30 * 75) == 0)
 	vcd_debug ("reading %2.2d:%2.2d:%2.2d",
 		   msf->cdmsf_min0, msf->cdmsf_sec0, msf->cdmsf_frame0);
      
       _obj->ioctls_debugged++;
  
-      if (ioctl (fileno (_obj->fd), CDROMREADMODE2, &buf) == -1)
-        {
-          perror ("ioctl()");
-          return 1;
-          /* exit (EXIT_FAILURE); */
-        }
+    retry:
+	switch (_obj->access_mode)
+	  {
+	  case _AM_NONE:
+	    vcd_error ("no way to read mode2");
+	    return 1;
+	    break;
 
-      memcpy (data, buf, M2RAW_SIZE);
+	  case _AM_IOCTL:
+	    if (nblocks != 1)
+	      {
+		int i;
+		
+		for (i = 0; i < nblocks; i++)
+		  if (_read_mode2_sectors (_obj, 
+					   ((char *)data) + (M2RAW_SIZE * i),
+					   lsn + i, form2, 1))
+		    return 1;
+	      }
+	    else if (ioctl (fileno (_obj->fd), CDROMREADMODE2, &buf) == -1)
+	      {
+		perror ("ioctl()");
+		return 1;
+		/* exit (EXIT_FAILURE); */
+	      }
+	    else
+	      memcpy (data, buf, M2RAW_SIZE);
+	    break;
+
+	  case _AM_READ_CD:
+	  case _AM_READ_10:
+	    if (_read_mode2 (fileno (_obj->fd), data, lsn, nblocks, 
+			     (_obj->access_mode == _AM_READ_10)))
+	      {
+		perror ("ioctl()");
+		if (_obj->access_mode == _AM_READ_CD)
+		  {
+		    vcd_info ("READ_CD failed; switching to READ_10 mode...");
+		    _obj->access_mode = _AM_READ_10;
+		    goto retry;
+		  }
+		else
+		  {
+		    vcd_info ("READ_10 failed; switching to ioctl(CDROMREADMODE2) mode...");
+		    _obj->access_mode = _AM_IOCTL;
+		    goto retry;
+		  }
+		return 1;
+	      }
+	    break;
+	  }
     }
   else
     {
-      char buf[ISO_BLOCKSIZE] = { 0, };
+      int i;
 
+      for (i = 0; i < nblocks; i++)
+	{
+	  char buf[M2RAW_SIZE] = { 0, };
+	  int retval;
+
+	  if ((retval = _read_mode2_sectors (_obj, buf, lsn + i, true, 1)))
+	    return retval;
+
+	  memcpy (((char *)data) + (ISO_BLOCKSIZE * i), 
+		  buf + 8, ISO_BLOCKSIZE);
+	}
+
+#if 0
       if (fseek (_obj->fd, lsn * ISO_BLOCKSIZE, SEEK_SET))
         {
           perror ("fseek()");
@@ -137,14 +298,14 @@ _read_mode2_sector (void *user_data, void *data, uint32_t lsn, bool form2)
           return 1;
         }
 
-      if (fread (buf, ISO_BLOCKSIZE, 1, _obj->fd) != 1 && ferror (_obj->fd))
+      if (fread (data, ISO_BLOCKSIZE, nblocks, _obj->fd) != 1 
+	  && ferror (_obj->fd))
         {
           perror ("fread()");
           clearerr (_obj->fd);
           return 1;
         }
-
-      memcpy (data, buf, ISO_BLOCKSIZE);
+#endif
     }
 
   return 0;
@@ -201,7 +362,7 @@ vcd_image_source_new_linuxcd (void)
   _img_linuxcd_src_t *_data;
 
   vcd_image_source_funcs _funcs = {
-    read_mode2_sector: _read_mode2_sector,
+    read_mode2_sectors: _read_mode2_sectors,
     stat_size: _stat_size,
     free: _source_free,
     setarg: _source_set_arg

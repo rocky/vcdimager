@@ -30,6 +30,7 @@ typedef struct _VcdImageSource VcdImageSource;
 
 typedef struct {
   int (*read_mode2_sector) (void *user_data, void *buf, uint32_t lsn, bool mode2raw);
+  int (*read_mode2_sectors) (void *user_data, void *buf, uint32_t lsn, bool mode2raw, unsigned nblocks);
   uint32_t (*stat_size) (void *user_data);
   void (*free) (void *user_data);
   int (*setarg) (void *user_data, const char key[], const char value[]);

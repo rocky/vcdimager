@@ -1,3 +1,13 @@
+2001-08-30  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* frontends/xml/vcd_xml_rip.c (_rip_sequences): read up to 15
+		sectors at once...
+
+	* libvcd/vcd_image_linuxcd.c (_read_mode2_sectors): make use of
+	 	linux' generic packet command interface
+
+	* libvcd/vcd_image.c: added primitive for multiple sector reads..
+
 2001-08-29  Herbert Valerio Riedel  <hvr@gnu.org>
 
  	* configure.in: released version 0.7.10

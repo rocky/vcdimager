@@ -72,9 +72,17 @@ vcd_image_source_read_mode2_sectors (VcdImageSource *obj, void *buf,
 
   vcd_assert (obj != NULL);
   vcd_assert (buf != NULL);
+  vcd_assert (obj->op.read_mode2_sector != NULL 
+	      || obj->op.read_mode2_sectors != NULL);
   
+  if (obj->op.read_mode2_sectors)
+    return obj->op.read_mode2_sectors (obj->user_data, buf, lsn,
+				      mode2raw, num_sectors);
+
+  /* fallback */
   for (n = 0; n < num_sectors; n++)
-    if ((rc = vcd_image_source_read_mode2_sector (obj, &_buf[n * blocksize], lsn + n, mode2raw)))
+    if ((rc = vcd_image_source_read_mode2_sector (obj, &_buf[n * blocksize],
+						  lsn + n, mode2raw)))
       return rc;
 
   return 0;
@@ -84,8 +92,15 @@ int
 vcd_image_source_read_mode2_sector (VcdImageSource *obj, void *buf, uint32_t lsn, bool mode2raw)
 {
   vcd_assert (obj != NULL);
+  vcd_assert (buf != NULL);
+  vcd_assert (obj->op.read_mode2_sector != NULL 
+	      || obj->op.read_mode2_sectors != NULL);
 
-  return obj->op.read_mode2_sector (obj->user_data, buf, lsn, mode2raw);
+  if (obj->op.read_mode2_sector)
+    return obj->op.read_mode2_sector (obj->user_data, buf, lsn, mode2raw);
+
+  /* fallback */
+  return vcd_image_source_read_mode2_sectors (obj, buf, lsn, mode2raw, 1);
 }
 
 uint32_t

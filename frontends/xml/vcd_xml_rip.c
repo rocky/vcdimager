@@ -1022,8 +1022,10 @@ _rip_segments (struct vcdxml_t *obj, VcdImageSource *img)
             uint8_t spare[4];
           }
           buf;
+
 	  memset (&buf, 0, sizeof (buf));
-	  vcd_image_source_read_mode2_sector (img, &buf, start_extent + n, true);
+	  vcd_image_source_read_mode2_sector (img, &buf, start_extent + n,
+					       true);
 	  
 	  if (!buf.subheader[0] 
               && !buf.subheader[1]
@@ -1092,6 +1094,14 @@ _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img)
       uint32_t start_lsn, end_lsn, n, last_nonzero, first_data;
       double last_pts = 0;
 
+      struct m2f2sector
+      {
+	uint8_t subheader[8];
+	uint8_t data[2324];
+	uint8_t spare[4];
+      }
+      buf[15];
+
       memset (&mpeg_ctx, 0, sizeof (VcdMpegStreamCtx));
 
       start_lsn = _seq->start_extent;
@@ -1108,23 +1118,25 @@ _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img)
 
       last_nonzero = start_lsn - 1;
       first_data = 0;
+
       for (n = start_lsn; n < end_lsn; n++)
 	{
-	  struct m2f2sector
-          {
-            uint8_t subheader[8];
-            uint8_t data[2324];
-            uint8_t spare[4];
-          }
-          buf;
+	  const int buf_idx = (n - start_lsn) % 15;
 
-	  memset (&buf, 0, sizeof (buf));
-	  vcd_image_source_read_mode2_sector (img, &buf, n, true);
+	  if (!buf_idx)
+	    {
+	      const int secs_left = end_lsn - n;
+
+	      memset (buf, 0, sizeof (buf));
+	      vcd_image_source_read_mode2_sectors (img, buf, n, true, 
+						   (secs_left > 15 
+						    ? 15 : secs_left));
+	    }
 
 	  if (_nseq && n + 150 == end_lsn + 1)
 	    vcd_warn ("reading into gap @%d... :-(", n);
 
-	  if (!(buf.subheader[2] & SM_FORM2))
+	  if (!(buf[buf_idx].subheader[2] & SM_FORM2))
 	    {
 	      vcd_warn ("encountered non-form2 sector -- leaving loop");
 	      break;
@@ -1132,20 +1144,20 @@ _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img)
 	  
 	  if (in_data)
 	    { /* end conditions... */
-	      if (!buf.subheader[0])
+	      if (!buf[buf_idx].subheader[0])
 		{
 		  vcd_debug ("fn -edge @%d", n);
 		  break;
 		}
 
-	      if (!(buf.subheader[2] & SM_REALT))
+	      if (!(buf[buf_idx].subheader[2] & SM_REALT))
 		{
 		  vcd_debug ("subheader: no realtime data anymore @%d", n);
 		  break;
 		}
 	    }
 
-	  if (buf.subheader[1] && !in_data)
+	  if (buf[buf_idx].subheader[1] && !in_data)
 	    {
 	      vcd_debug ("cn +edge @%d", n);
 	      in_data = true;
@@ -1155,17 +1167,17 @@ _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img)
 #if defined(DEBUG)
 	  if (!in_data)
 	    vcd_debug ("%2.2x %2.2x %2.2x %2.2x",
-		       buf.subheader[0],
-		       buf.subheader[1],
-		       buf.subheader[2],
-		       buf.subheader[3]);
+		       buf[buf_idx].subheader[0],
+		       buf[buf_idx].subheader[1],
+		       buf[buf_idx].subheader[2],
+		       buf[buf_idx].subheader[3]);
 #endif
 
 	  if (in_data)
 	    {
 	      VcdListNode *_node;
 
-	      vcd_mpeg_parse_packet (buf.data, 2324, false, &mpeg_ctx);
+	      vcd_mpeg_parse_packet (buf[buf_idx].data, 2324, false, &mpeg_ctx);
 
 	      if (!mpeg_ctx.packet.zero)
 		last_nonzero = n;
@@ -1183,7 +1195,7 @@ _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img)
 		  /* vcd_debug ("pts %f @%d", mpeg_ctx.packet.pts, n); */
 		}
 
-	      if (buf.subheader[2] & SM_TRIG)
+	      if (buf[buf_idx].subheader[2] & SM_TRIG)
 		{
 		  double *_ap_ts = _vcd_malloc (sizeof (double));
 
@@ -1206,7 +1218,7 @@ _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img)
 	      
 	      if (first_data)
 		{
-		  fwrite (buf.data, 2324, 1, outfd);
+		  fwrite (buf[buf_idx].data, 2324, 1, outfd);
 
 		  if (ferror (outfd))
 		    {
@@ -1217,7 +1229,7 @@ _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img)
 
 	    }
 	  
-	  if (buf.subheader[2] & SM_EOF)
+	  if (buf[buf_idx].subheader[2] & SM_EOF)
 	    {
 	      vcd_debug ("encountered subheader EOF @%d", n);
 	      break;
