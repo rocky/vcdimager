@@ -1,3 +1,9 @@
+vcdimager (0.7.19+cvs-1) unstable; urgency=low
+
+  * CVS snapshot of 0.7.20.
+
+ -- Nicolas Boullis <nboullis@debian.org>  Sun,  8 Feb 2004 23:50:23 +0100
+
 vcdimager (0.7.14.debian.1-1) unstable; urgency=medium
 
   * New "orig" tarball:
