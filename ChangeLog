@@ -1,3 +1,13 @@
+2003-02-20 20:21  rocky
+
+	* frontends/xml/vcd_xml_rip.c, libvcd/vcdinf.c, libvcd/vcdinf.h,
+	libvcd/vcdinfo.c, libvcd/vcdinfo.h: More stuff added to vcdinf and
+	more code in vcd_xml_rip now uses it.
+
+2003-02-20 20:15  rocky
+
+	* libvcd/vcd_types.h: Add type for track numbers.
+
 2003-02-20 09:21  rocky
 
 	* tests/: svcd1_test0.right, svcd1_test1.right, svcd1_test2.right,
@@ -14,7 +24,7 @@
 	* libvcd/: Makefile.am, vcdinf.c, vcdinf.h, vcdinfo.c, vcdinfo.h:
 	Sort of a lower-level vcdinfo for routines that can't use
 	libvcdinfo yet (vcd_xml_rip). This has more of the internal
-	structures, e.g.  info, pvd, segment, exposed.
+	structures, e.g.  info, pvd, segemnt, exposed.
 
 2003-02-20 09:16  rocky
 
@@ -27,6 +37,10 @@
 	include.  Add get_default_device, _vcd_eject_media. Some names made
 	more generic to facilitate cut and past for other OSs, some names
 	made more specific: _vcd_.
+
+2003-02-19 18:50  rocky
+
+	* ChangeLog: [no log message]
 
 2003-02-19 18:47  hvr
 
