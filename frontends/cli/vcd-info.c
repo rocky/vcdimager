@@ -540,7 +540,7 @@ dump_info (vcdinfo_obj_t *obj)
                  vcdinfo_video_type2str(obj, n),
                  _vcd_bool_str (info->spi_contents[n].item_cont),
                  (vcdinfo_get_VCD_type(obj) == VCD_TYPE_VCD2) 
-                   ? "" : ", OGT substream:",
+                   ? "" : ",\n   SVCD subtitle (OGT) substream:",
                  (vcdinfo_get_VCD_type(obj) == VCD_TYPE_VCD2) 
                    ? "" : vcdinfo_ogt2str(obj, n));
       }
@@ -644,8 +644,10 @@ dump_tracks_svd (vcdinfo_obj_t *obj)
           "all available"
         };
 
-      fprintf (stdout, " track[%.2d]: %2.2x:%2.2x:%2.2x,"
-               " audio: %s, video: %s, OGT stream: %s\n",
+      fprintf (stdout, 
+               " track[%.2d]: %2.2x:%2.2x:%2.2x,"
+               " audio: %s, video: %s,\n"
+               "            SVCD subtitle (OGT) stream: %s\n",
                j,
                tracks->playing_time[j].m,
                tracks->playing_time[j].s,

@@ -22,11 +22,14 @@ SVCD/INFO.SVD
  maximum lid: 4
  number of segments: 3
  SEGMENT[0000]: track# 0, LSN    225 (MSF 00:05:00), 28 sectors
-   audio: no stream, video: PAL still (lo+hires), continuation no, OGT substream: None
+   audio: no stream, video: PAL still (lo+hires), continuation no,
+   SVCD subtitle (OGT) substream: None
  SEGMENT[0001]: track# 0, LSN    375 (MSF 00:07:00), 28 sectors
-   audio: no stream, video: PAL still (lo+hires), continuation no, OGT substream: None
+   audio: no stream, video: PAL still (lo+hires), continuation no,
+   SVCD subtitle (OGT) substream: None
  SEGMENT[0002]: track# 0, LSN    525 (MSF 00:09:00), 28 sectors
-   audio: no stream, video: PAL still (lo+hires), continuation no, OGT substream: None
+   audio: no stream, video: PAL still (lo+hires), continuation no,
+   SVCD subtitle (OGT) substream: None
  volume start time[0]: 0 secs
  volume start time[1]: 0 secs
  volume start time[2]: 0 secs

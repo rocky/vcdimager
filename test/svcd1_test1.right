@@ -79,11 +79,14 @@ SVCD/INFO.SVD
  maximum lid: 4
  number of segments: 3
  SEGMENT[0000]: track# 0, LSN    225 (MSF 00:05:00), 28 sectors
-   audio: no stream, video: PAL still (lo+hires), continuation no, OGT substream: None
+   audio: no stream, video: PAL still (lo+hires), continuation no,
+   SVCD subtitle (OGT) substream: None
  SEGMENT[0001]: track# 0, LSN    375 (MSF 00:07:00), 28 sectors
-   audio: no stream, video: PAL still (lo+hires), continuation no, OGT substream: None
+   audio: no stream, video: PAL still (lo+hires), continuation no,
+   SVCD subtitle (OGT) substream: None
  SEGMENT[0002]: track# 0, LSN    525 (MSF 00:09:00), 28 sectors
-   audio: no stream, video: PAL still (lo+hires), continuation no, OGT substream: None
+   audio: no stream, video: PAL still (lo+hires), continuation no,
+   SVCD subtitle (OGT) substream: None
  volume start time[0]: 0 secs
  volume start time[1]: 0 secs
  volume start time[2]: 0 secs
@@ -147,10 +150,14 @@ SVCD/TRACKS.SVD
  ID: `TRACKSVD'
  version: 0x01
  tracks: 4
- track[00]: 00:01:06, audio: 1 stream, video: PAL stream, OGT stream: None
- track[01]: 00:01:06, audio: 1 stream, video: PAL stream, OGT stream: None
- track[02]: 00:01:06, audio: 1 stream, video: PAL stream, OGT stream: None
- track[03]: 00:01:06, audio: 1 stream, video: PAL stream, OGT stream: None
+ track[00]: 00:01:06, audio: 1 stream, video: PAL stream,
+            SVCD subtitle (OGT) stream: None
+ track[01]: 00:01:06, audio: 1 stream, video: PAL stream,
+            SVCD subtitle (OGT) stream: None
+ track[02]: 00:01:06, audio: 1 stream, video: PAL stream,
+            SVCD subtitle (OGT) stream: None
+ track[03]: 00:01:06, audio: 1 stream, video: PAL stream,
+            SVCD subtitle (OGT) stream: None
 
 CVD interpretation (probably)
 (track[00]: 00:01:06 (cumulated), audio: 01, ogt: 00)
