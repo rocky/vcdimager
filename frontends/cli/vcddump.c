@@ -66,6 +66,7 @@ static struct gl_t
   */
   int verbose_flag;
   int quiet_flag;
+  int suppress_warnings;
 
   struct show_t
   {
@@ -569,7 +570,7 @@ dump_entries (const vcdinfo_obj_t *obj)
     for (n = 0; n < num_entries; n++)
       {
         const msf_t *msf = vcdinfo_get_entry_msf(obj, n);
-        const uint32_t lsn = vcdinfo_lba2lsn(msf_to_lba(msf));
+        const lsn_t lsn = vcdinfo_lba2lsn(msf_to_lba(msf));
         
         fprintf (stdout, " ENTRY[%2.2d]: track# %2d (SEQUENCE[%d]), LSN %6d "
                  "(MSF %2.2x:%2.2x:%2.2x)\n",
@@ -635,7 +636,6 @@ dump_tracks_svd (const vcdinfo_obj_t *obj)
                video_types[tracks2->contents[j].video],
                ogt_str[tracks2->contents[j].ogt]);
     }
-
 
   fprintf (stdout, "\nCVD interpretation (probably)\n");
   for (j = 0;j < tracks->tracks; j++)
@@ -1114,6 +1114,19 @@ dump (char image_fname[])
     
   if (open_rc == VCDINFO_OPEN_OTHER) {
     vcd_warn ("Medium is not VCD image");
+    if (gl.show.fs) 
+      {
+        if (vcdinfo_has_xa(&obj))
+        {
+          /* Suppress XA warnings */
+          int old_suppress_warnings = gl.suppress_warnings;
+          if (!gl.show.no.delimiter) fprintf (stdout, DELIM);
+          gl.suppress_warnings=1;
+          dump_fs (&obj);
+          gl.suppress_warnings=old_suppress_warnings;
+        }
+      }
+
     if (gl.show.tracks) {
       if (!gl.show.no.delimiter) fprintf (stdout, DELIM);
       dump_tracks (&obj);
@@ -1251,6 +1264,9 @@ _vcd_log_handler (log_level_t level, const char message[])
     return;
 
   if (level == LOG_INFO && gl.quiet_flag)
+    return;
+  
+  if (level == LOG_WARN && gl.suppress_warnings)
     return;
   
   gl_default_vcd_log_handler (level, message);
