@@ -151,7 +151,7 @@ struct _VcdObj {
   /* aggregates */
   VcdSalloc *iso_bitmap;
 
-  VcdDirectory *dir;
+  VcdDirectory_t *dir;
 
   /* state info */
   bool in_output;

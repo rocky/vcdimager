@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2000, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,30 +27,31 @@
 #include "data_structures.h"
 
 /* opaque data structure representing the ISO directory tree */
-typedef VcdTree VcdDirectory;
+typedef VcdTree_t VcdDirectory_t;
 
-VcdDirectory *
+VcdDirectory_t *
 _vcd_directory_new (void);
 
 void
-_vcd_directory_destroy (VcdDirectory *dir);
+_vcd_directory_destroy (VcdDirectory_t *p_dir);
 
 int
-_vcd_directory_mkdir (VcdDirectory *dir, const char pathname[]);
+_vcd_directory_mkdir (VcdDirectory_t *p_dir, const char pathname[]);
 
 int
-_vcd_directory_mkfile (VcdDirectory *dir, const char pathname[], 
+_vcd_directory_mkfile (VcdDirectory_t *dir, const char pathname[], 
                        uint32_t start, uint32_t size,
                        bool form2_flag, uint8_t filenum);
 
 uint32_t
-_vcd_directory_get_size (VcdDirectory *dir);
+_vcd_directory_get_size (VcdDirectory_t *p_dir);
 
 void 
-_vcd_directory_dump_entries (VcdDirectory *dir, void *buf, uint32_t extent);
+_vcd_directory_dump_entries (VcdDirectory_t *p_dir, void *p_buf, 
+                             uint32_t extent);
 
 void
-_vcd_directory_dump_pathtables (VcdDirectory *dir, void *ptl, void *ptm);
+_vcd_directory_dump_pathtables (VcdDirectory_t *p_dir, void *ptl, void *ptm);
 
 #endif /* _DIRECTORY_H_ */
 

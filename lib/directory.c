@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2000, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ typedef struct
   unsigned pt_id;
 } data_t;
 
-typedef VcdTreeNode VcdDirNode;
+typedef VcdTreeNode_t VcdDirNode_t;
 
 #define EXTENT(anode) (DATAP(anode)->extent)
 #define SIZE(anode)   (DATAP(anode)->size)
@@ -68,7 +68,7 @@ static const time_t _vcd_time = 269222400L;
 /* implementation */
 
 static void
-traverse_get_dirsizes(VcdDirNode *node, void *data)
+traverse_get_dirsizes(VcdDirNode_t *node, void *data)
 {
   data_t *d = DATAP(node);
   unsigned *sum = data;
@@ -82,7 +82,7 @@ traverse_get_dirsizes(VcdDirNode *node, void *data)
 }
 
 static unsigned
-get_dirsizes (VcdDirNode* dirnode)
+get_dirsizes (VcdDirNode_t * dirnode)
 {
   unsigned result = 0;
 
@@ -92,13 +92,13 @@ get_dirsizes (VcdDirNode* dirnode)
 }
 
 static void
-traverse_update_dirextents (VcdDirNode *dirnode, void *data)
+traverse_update_dirextents (VcdDirNode_t *dirnode, void *data)
 {
   data_t *d = DATAP(dirnode);
 
   if (d->is_dir) 
     {
-      VcdDirNode* child;
+      VcdDirNode_t *child;
       unsigned dirextent = d->extent;
       
       vcd_assert (d->size % ISO_BLOCKSIZE == 0);
@@ -121,7 +121,7 @@ traverse_update_dirextents (VcdDirNode *dirnode, void *data)
 }
 
 static void 
-update_dirextents (VcdDirectory *dir, uint32_t extent)
+update_dirextents (VcdDirectory_t *dir, uint32_t extent)
 {
   data_t *dirdata = DATAP(_vcd_tree_root (dir));
   
@@ -131,13 +131,13 @@ update_dirextents (VcdDirectory *dir, uint32_t extent)
 }
 
 static void
-traverse_update_sizes(VcdDirNode *node, void *data)
+traverse_update_sizes(VcdDirNode_t *node, void *data)
 {
   data_t *dirdata = DATAP(node);
 
   if (dirdata->is_dir)
     {
-      VcdDirNode* child;
+      VcdDirNode_t *child;
       unsigned offset = 0;
       
       offset += iso9660_dir_calc_record_size (1, sizeof(iso9660_xa_t)); /* '.' */
@@ -168,7 +168,7 @@ traverse_update_sizes(VcdDirNode *node, void *data)
 }
 
 static void 
-update_sizes (VcdDirectory *dir)
+update_sizes (VcdDirectory_t *dir)
 {
   _vcd_tree_node_traverse (_vcd_tree_root(dir), traverse_update_sizes, NULL);
 }
@@ -176,11 +176,11 @@ update_sizes (VcdDirectory *dir)
 
 /* exported stuff: */
 
-VcdDirectory *
+VcdDirectory_t *
 _vcd_directory_new (void)
 {
   data_t *data;
-  VcdDirectory *dir = NULL;
+  VcdDirectory_t *dir = NULL;
 
   vcd_assert (sizeof(iso9660_xa_t) == 14);
 
@@ -196,7 +196,7 @@ _vcd_directory_new (void)
 }
 
 static void
-traverse_vcd_directory_done (VcdDirNode *node, void *data)
+traverse_vcd_directory_done (VcdDirNode_t *node, void *data)
 {
   data_t *dirdata = DATAP (node);
 
@@ -204,7 +204,7 @@ traverse_vcd_directory_done (VcdDirNode *node, void *data)
 }
 
 void
-_vcd_directory_destroy (VcdDirectory *dir)
+_vcd_directory_destroy (VcdDirectory_t *dir)
 {
   vcd_assert (dir != NULL);
 
@@ -214,10 +214,10 @@ _vcd_directory_destroy (VcdDirectory *dir)
   _vcd_tree_destroy (dir, true);
 }
 
-static VcdDirNode* 
-lookup_child (VcdDirNode* node, const char name[])
+static VcdDirNode_t * 
+lookup_child (VcdDirNode_t *node, const char name[])
 {
-  VcdDirNode* child;
+  VcdDirNode_t *child;
 
   _VCD_CHILD_FOREACH (child, node)
     {
@@ -231,7 +231,7 @@ lookup_child (VcdDirNode* node, const char name[])
 }
 
 static int
-_iso_dir_cmp (VcdDirNode *node1, VcdDirNode *node2)
+_iso_dir_cmp (VcdDirNode_t *node1, VcdDirNode_t *node2)
 {
   data_t *d1 = DATAP(node1);
   data_t *d2 = DATAP(node2);
@@ -243,11 +243,11 @@ _iso_dir_cmp (VcdDirNode *node1, VcdDirNode *node2)
 }
 
 int
-_vcd_directory_mkdir (VcdDirectory *dir, const char pathname[])
+_vcd_directory_mkdir (VcdDirectory_t *dir, const char pathname[])
 {
   char **splitpath;
   unsigned level, n;
-  VcdDirNode* pdir = _vcd_tree_root (dir);
+  VcdDirNode_t *pdir = _vcd_tree_root (dir);
 
   vcd_assert (dir != NULL);
   vcd_assert (pathname != NULL);
@@ -290,7 +290,7 @@ _vcd_directory_mkdir (VcdDirectory *dir, const char pathname[])
 }
 
 int
-_vcd_directory_mkfile (VcdDirectory *dir, const char pathname[], 
+_vcd_directory_mkfile (VcdDirectory_t *dir, const char pathname[], 
                        uint32_t start, uint32_t size,
                        bool form2_flag, uint8_t filenum)
 {
@@ -298,7 +298,7 @@ _vcd_directory_mkfile (VcdDirectory *dir, const char pathname[],
   unsigned level, n;
   const int file_version = 1;
 
-  VcdDirNode* pdir = NULL;
+  VcdDirNode_t *pdir = NULL;
 
   vcd_assert (dir != NULL);
   vcd_assert (pathname != NULL);
@@ -369,7 +369,7 @@ _vcd_directory_mkfile (VcdDirectory *dir, const char pathname[],
 }
 
 uint32_t
-_vcd_directory_get_size (VcdDirectory *dir)
+_vcd_directory_get_size (VcdDirectory_t *dir)
 {
   vcd_assert (dir != NULL);
 
@@ -378,7 +378,7 @@ _vcd_directory_get_size (VcdDirectory *dir)
 }
 
 static void
-traverse_vcd_directory_dump_entries (VcdDirNode *node, void *data)
+traverse_vcd_directory_dump_entries (VcdDirNode_t *node, void *data)
 {
   data_t *d = DATAP(node);
   iso9660_xa_t xa_su;
@@ -426,7 +426,7 @@ traverse_vcd_directory_dump_entries (VcdDirNode *node, void *data)
 }
 
 void
-_vcd_directory_dump_entries (VcdDirectory *dir, void *buf, uint32_t extent)
+_vcd_directory_dump_entries (VcdDirectory_t *dir, void *buf, uint32_t extent)
 {
   vcd_assert (dir != NULL);
 
@@ -466,13 +466,13 @@ _dump_pathtables_helper (_vcd_directory_dump_pathtables_t *args,
 }
 
 static void
-traverse_vcd_directory_dump_pathtables (VcdDirNode *node, void *data)
+traverse_vcd_directory_dump_pathtables (VcdDirNode_t *node, void *data)
 {
   _vcd_directory_dump_pathtables_t *args = data;
 
   if (DATAP (node)->is_dir)
     {
-      VcdDirNode* parent = _vcd_tree_node_parent (node);
+      VcdDirNode_t *parent = _vcd_tree_node_parent (node);
       uint16_t parent_id = parent ? PT_ID (parent) : 1;
 
       _dump_pathtables_helper (args, DATAP (node), parent_id);
@@ -480,7 +480,7 @@ traverse_vcd_directory_dump_pathtables (VcdDirNode *node, void *data)
 }
 
 void
-_vcd_directory_dump_pathtables (VcdDirectory *dir, void *ptl, void *ptm)
+_vcd_directory_dump_pathtables (VcdDirectory_t *dir, void *ptl, void *ptm)
 {
   _vcd_directory_dump_pathtables_t args;
 

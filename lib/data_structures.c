@@ -2,7 +2,7 @@
     $Id$
 
     Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
-    Copyright (C) 2004 Rocky Bernstein <rocky@panix.com>
+    Copyright (C) 2004, 2005 Rocky Bernstein <rocky@panix.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -58,35 +58,35 @@ struct _CdioListNode
 /* impl */
 
 static bool
-_bubble_sort_iteration (CdioList *list, _cdio_list_cmp_func cmp_func)
+_bubble_sort_iteration (CdioList_t *p_list, _cdio_list_cmp_func cmp_func)
 {
-  CdioListNode_t **pnode;
+  CdioListNode_t **pp_node;
   bool changed = false;
   
-  for (pnode = &(list->begin);
-       (*pnode) != NULL && (*pnode)->next != NULL;
-       pnode = &((*pnode)->next))
+  for (pp_node = &(p_list->begin);
+       (*pp_node) != NULL && (*pp_node)->next != NULL;
+       pp_node = &((*pp_node)->next))
     {
-      CdioListNode_t *node = *pnode;
+      CdioListNode_t *p_node = *pp_node;
       
-      if (cmp_func (node->data, node->next->data) <= 0)
+      if (cmp_func (p_node->data, p_node->next->data) <= 0)
         continue; /* n <= n->next */
       
       /* exch n n->next */
-      *pnode = node->next;
-      node->next = node->next->next;
-      (*pnode)->next = node;
+      *pp_node = p_node->next;
+      p_node->next = p_node->next->next;
+      (*pp_node)->next = p_node;
       
       changed = true;
 
-      if (node->next == NULL)
-        list->end = node;
+      if (p_node->next == NULL)
+        p_list->end = p_node;
     }
 
   return changed;
 }
 
-void _vcd_list_sort (CdioList *list, _cdio_list_cmp_func cmp_func)
+void _vcd_list_sort (CdioList_t *list, _cdio_list_cmp_func cmp_func)
 {
   /* fixme -- this is bubble sort -- worst sorting algo... */
 
@@ -99,7 +99,7 @@ void _vcd_list_sort (CdioList *list, _cdio_list_cmp_func cmp_func)
 /* node ops */
 
 CdioListNode_t *
-_vcd_list_at (CdioList *list, int idx)
+_vcd_list_at (CdioList_t *list, int idx)
 {
   CdioListNode_t *node = _cdio_list_begin (list);
 
@@ -123,7 +123,7 @@ _vcd_list_at (CdioList *list, int idx)
 
 struct _VcdTree
 {
-  VcdTreeNode *root;
+  VcdTreeNode_t *root;
 };
 
 struct _VcdTreeNode
@@ -131,19 +131,19 @@ struct _VcdTreeNode
   void *data;
 
   CdioListNode_t *listnode;
-  VcdTree *tree;
-  VcdTreeNode *parent;
-  CdioList *children;
+  VcdTree_t *tree;
+  VcdTreeNode_t *parent;
+  CdioList_t *children;
 };
 
-VcdTree *
+VcdTree_t *
 _vcd_tree_new (void *root_data)
 {
-  VcdTree *new_tree;
+  VcdTree_t *new_tree;
 
-  new_tree = calloc(1, sizeof (VcdTree));
+  new_tree = calloc(1, sizeof (VcdTree_t));
 
-  new_tree->root = calloc(1, sizeof (VcdTreeNode));
+  new_tree->root = calloc(1, sizeof (VcdTreeNode_t));
 
   new_tree->root->data = root_data;
   new_tree->root->tree = new_tree;
@@ -155,7 +155,7 @@ _vcd_tree_new (void *root_data)
 }
 
 void
-_vcd_tree_destroy (VcdTree *tree, bool free_data)
+_vcd_tree_destroy (VcdTree_t *tree, bool free_data)
 {
   _vcd_tree_node_destroy (tree->root, free_data);
   
@@ -164,146 +164,147 @@ _vcd_tree_destroy (VcdTree *tree, bool free_data)
 }
 
 void
-_vcd_tree_node_destroy (VcdTreeNode *node, bool free_data)
+_vcd_tree_node_destroy (VcdTreeNode_t *p_node, bool free_data)
 {
-  VcdTreeNode *child, *nxt_child;
+  VcdTreeNode_t *p_child, *nxt_child;
   
-  vcd_assert (node != NULL);
+  vcd_assert (p_node != NULL);
 
-  child = _vcd_tree_node_first_child (node);
-  while(child) {
-    nxt_child = _vcd_tree_node_next_sibling (child);
-    _vcd_tree_node_destroy (child, free_data);
-    child = nxt_child;
+  p_child = _vcd_tree_node_first_child (p_node);
+  while(p_child) {
+    nxt_child = _vcd_tree_node_next_sibling (p_child);
+    _vcd_tree_node_destroy (p_child, free_data);
+    p_child = nxt_child;
   }
 
-  if (node->children)
+  if (p_node->children)
     {
-      vcd_assert (_cdio_list_length (node->children) == 0);
-      _cdio_list_free (node->children, true);
-      node->children = NULL;
+      vcd_assert (_cdio_list_length (p_node->children) == 0);
+      _cdio_list_free (p_node->children, true);
+      p_node->children = NULL;
     }
 
   if (free_data)
-    free (_vcd_tree_node_set_data (node, NULL));
+    free (_vcd_tree_node_set_data (p_node, NULL));
 
-  if (node->parent)
-    _cdio_list_node_free (node->listnode, true);
+  if (p_node->parent)
+    _cdio_list_node_free (p_node->listnode, true);
   else
-    _vcd_tree_node_set_data (node, NULL);
+    _vcd_tree_node_set_data (p_node, NULL);
 }
 
-VcdTreeNode *
-_vcd_tree_root (VcdTree *tree)
+VcdTreeNode_t *
+_vcd_tree_root (VcdTree_t *p_tree)
 {
-  return tree->root;
-}
-
-void *
-_vcd_tree_node_data (VcdTreeNode *node)
-{
-  return node->data;
+  return p_tree->root;
 }
 
 void *
-_vcd_tree_node_set_data (VcdTreeNode *node, void *new_data)
+_vcd_tree_node_data (VcdTreeNode_t *p_node)
 {
-  void *old_data = node->data;
-
-  node->data = new_data;
-
-  return old_data;
+  return p_node->data;
 }
 
-VcdTreeNode *
-_vcd_tree_node_append_child (VcdTreeNode *pnode, void *cdata)
+void *
+_vcd_tree_node_set_data (VcdTreeNode_t *p_node, void *p_new_data)
 {
-  VcdTreeNode *nnode;
+  void *p_old_data = p_node->data;
 
-  vcd_assert (pnode != NULL);
+  p_node->data = p_new_data;
 
-  if (!pnode->children)
-    pnode->children = _cdio_list_new ();
-
-  nnode = calloc(1, sizeof (VcdTreeNode));
-
-  _cdio_list_append (pnode->children, nnode);
-
-  nnode->data = cdata;
-  nnode->parent = pnode;
-  nnode->tree = pnode->tree;
-  nnode->listnode = _cdio_list_end (pnode->children);
-
-  return nnode;
+  return p_old_data;
 }
 
-VcdTreeNode *
-_vcd_tree_node_first_child (VcdTreeNode *node)
+VcdTreeNode_t *
+_vcd_tree_node_append_child (VcdTreeNode_t *p_node, void *cdata)
 {
-  vcd_assert (node != NULL);
+  VcdTreeNode_t *p_nnode;
 
-  if (!node->children)
+  vcd_assert (p_node != NULL);
+
+  if (!p_node->children)
+    p_node->children = _cdio_list_new ();
+
+  p_nnode = calloc(1, sizeof (VcdTreeNode_t));
+
+  _cdio_list_append (p_node->children, p_nnode);
+
+  p_nnode->data = cdata;
+  p_nnode->parent = p_node;
+  p_nnode->tree = p_node->tree;
+  p_nnode->listnode = _cdio_list_end (p_node->children);
+
+  return p_nnode;
+}
+
+VcdTreeNode_t *
+_vcd_tree_node_first_child (VcdTreeNode_t *p_node)
+{
+  vcd_assert (p_node != NULL);
+
+  if (!p_node->children)
     return NULL;
 
-  return _cdio_list_node_data (_cdio_list_begin (node->children));
+  return _cdio_list_node_data (_cdio_list_begin (p_node->children));
 }
 
-VcdTreeNode *
-_vcd_tree_node_next_sibling (VcdTreeNode *node)
+VcdTreeNode_t *
+_vcd_tree_node_next_sibling (VcdTreeNode_t *p_node)
 {
-  vcd_assert (node != NULL);
+  vcd_assert (p_node != NULL);
 
-  return _cdio_list_node_data (_cdio_list_node_next (node->listnode));
+  return _cdio_list_node_data (_cdio_list_node_next (p_node->listnode));
 }
 
 void
-_vcd_tree_node_sort_children (VcdTreeNode *node, _vcd_tree_node_cmp_func cmp_func)
+_vcd_tree_node_sort_children (VcdTreeNode_t *p_node, 
+                              _vcd_tree_node_cmp_func cmp_func)
 {
-  vcd_assert (node != NULL);
+  vcd_assert (p_node != NULL);
 
-  if (node->children)
-    _vcd_list_sort (node->children, (_cdio_list_cmp_func) cmp_func);
+  if (p_node->children)
+    _vcd_list_sort (p_node->children, (_cdio_list_cmp_func) cmp_func);
 }
 
 void
-_vcd_tree_node_traverse (VcdTreeNode *node, 
+_vcd_tree_node_traverse (VcdTreeNode_t *p_node, 
                          _vcd_tree_node_traversal_func trav_func,
-                         void *user_data) /* pre-order */
+                         void *p_user_data) /* pre-order */
 {
-  VcdTreeNode *child;
+  VcdTreeNode_t *p_child;
 
-  vcd_assert (node != NULL);
+  vcd_assert (p_node != NULL);
 
-  trav_func (node, user_data);
+  trav_func (p_node, p_user_data);
 
-  _VCD_CHILD_FOREACH (child, node)
+  _VCD_CHILD_FOREACH (p_child, p_node)
     {
-      _vcd_tree_node_traverse (child, trav_func, user_data);
+      _vcd_tree_node_traverse (p_child, trav_func, p_user_data);
     }
 }
 
 void
-_vcd_tree_node_traverse_bf (VcdTreeNode *node, 
+_vcd_tree_node_traverse_bf (VcdTreeNode_t *p_node, 
                             _vcd_tree_node_traversal_func trav_func,
-                            void *user_data) /* breath-first */
+                            void *p_user_data) /* breath-first */
 {
-  CdioList *queue;
+  CdioList_t *queue;
 
-  vcd_assert (node != NULL);
+  vcd_assert (p_node != NULL);
 
   queue = _cdio_list_new ();
 
-  _cdio_list_prepend (queue, node);
+  _cdio_list_prepend (queue, p_node);
 
   while (_cdio_list_length (queue))
     {
       CdioListNode_t *lastnode = _cdio_list_end (queue);
-      VcdTreeNode  *treenode = _cdio_list_node_data (lastnode);
-      VcdTreeNode  *childnode;
+      VcdTreeNode_t  *treenode = _cdio_list_node_data (lastnode);
+      VcdTreeNode_t  *childnode;
 
       _cdio_list_node_free (lastnode, false);
 
-      trav_func (treenode, user_data);
+      trav_func (treenode, p_user_data);
       
       _VCD_CHILD_FOREACH (childnode, treenode)
         {
@@ -314,19 +315,19 @@ _vcd_tree_node_traverse_bf (VcdTreeNode *node,
   _cdio_list_free (queue, false);
 }
 
-VcdTreeNode *_vcd_tree_node_parent (VcdTreeNode *node)
+VcdTreeNode_t *_vcd_tree_node_parent (VcdTreeNode_t *p_node)
 {
-  return node->parent;
+  return p_node->parent;
 }
 
-VcdTreeNode *_vcd_tree_node_root (VcdTreeNode *node)
+VcdTreeNode_t *_vcd_tree_node_root (VcdTreeNode_t *p_node)
 {
-  return node->tree->root;
+  return p_node->tree->root;
 }
 
-bool _vcd_tree_node_is_root (VcdTreeNode *node)
+bool _vcd_tree_node_is_root (VcdTreeNode_t *p_node)
 {
-  return (node->parent == NULL);
+  return (p_node->parent == NULL);
 }
 
 /* eof */
