@@ -26,7 +26,7 @@ vcdxml_SOURCES = \
 #	vcdxml.h 
 
 videocd_dtd.h: $(srcdir)/videocd.dtd
-	(sed 's/\"/\\"/g' | gawk 'BEGIN { print "static char videocd_dtd[] = \\" } { print " \"" $$0 "\\n\" \\" } END { print ";" }') < $< > $@
+	(sed 's/\"/\\"/g' | $(AWK) 'BEGIN { print "static char videocd_dtd[] = \\" } { print " \"" $$0 "\\n\" \\" } END { print ";" }') < $< > $@
 
 clean-local:
 	-rm -f *.ps
