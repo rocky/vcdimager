@@ -16,3 +16,5 @@ stamp-h
 stamp-h.in
 vcdimager.spec
 *.tar.gz
+autom4te.cache
+stamp-h1
