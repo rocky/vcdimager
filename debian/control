@@ -2,8 +2,8 @@ Source: vcdimager
 Section: otherosfs
 Priority: optional
 Maintainer: Nicolas Boullis <nboullis@debian.org>
-Build-Depends: debhelper (>> 3.0.0), libxml2-dev, libpopt-dev
-Standards-Version: 3.5.8
+Build-Depends: debhelper (>> 3.0.0), libxml2-dev, libpopt-dev, texinfo
+Standards-Version: 3.6.1
 
 Package: vcdimager
 Architecture: any

@@ -1,3 +1,22 @@
+vcdimager (0.7.14-3) unstable; urgency=low
+
+  * Re-run the autotools to prevent the installation of
+    /usr/share/info/dir and friends in the generated package. Many thanks
+    to Santiago Vila for noticing this problem. (Closes: #215354)
+
+ -- Nicolas Boullis <nboullis@debian.org>  Sun, 12 Oct 2003 16:06:20 +0200
+
+vcdimager (0.7.14-2) unstable; urgency=low
+
+  * Ensure that cdxa2mpeg fails with a consistent error message in case of
+    read failure or unexpected EOF. (Closes: #211374)
+  * Get the enhanced description written by Rocky Bernstein from
+    CVS. (Closes: #214273)
+  * Add missing build-dependency on texinfo.
+  * Bump Standards-Version to 3.6.1 (no change required).
+
+ -- Nicolas Boullis <nboullis@debian.org>  Thu,  9 Oct 2003 01:27:54 +0200
+
 vcdimager (0.7.14-1) unstable; urgency=low
 
   * New upstream release.
