@@ -17,11 +17,13 @@ test_vcdimager -t svcd ${srcdir}/avseq00.m1p
 RC=$?
 
 if test $RC -ne 0 ; then
-  echo vcdimager failed 
   if test $RC -ne 77 ; then 
+    echo vcdimager failed 
+    exit $RC
+  else
+    echo vcdimager skipped
     test_vcdimager_cleanup
   fi
-  exit $RC
 fi
 
 if do_cksum <<EOF
@@ -40,14 +42,10 @@ fi
 
 echo "$0: vcdimager cksum(1) checksums matched :-)"
 
-if test_vcddump '--no-banner -i videocd.bin' \
-    svcd1_test0.dump ${srcdir}/svcd1_test0.right ; then 
-    :
-else
-    echo "$0: vcddump test 0 failed "
-    test_vcdxbuild_cleanup
-    exit 1
-fi
+test_vcddump '--no-banner -i videocd.bin' \
+    svcd1_test0.dump ${srcdir}/svcd1_test0.right
+RC=$?
+check_result $RC 'vcddump test 0'
 
 test_vcdxbuild ${srcdir}/$BASE.xml
 RC=$?

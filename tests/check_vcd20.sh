@@ -39,14 +39,10 @@ fi
 
 echo "$0: vcdimager cksum(1) checksums matched :-)"
 
-if test_vcddump '-B -i videocd.bin ' \
-    vcd20_test0.dump ${srcdir}/vcd20_test0.right ; then 
-    :
-else
-    echo "$0: vcddump test 0 failed "
-    test_vcdxbuild_cleanup
-    exit 1
-fi
+test_vcddump '-B -i videocd.bin ' \
+    vcd20_test0.dump ${srcdir}/vcd20_test0.right
+RC=$?
+check_result $RC 'vcddump test 0'
 
 if test_vcdxbuild ${srcdir}/${BASE}.xml; then
  :
