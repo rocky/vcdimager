@@ -25,18 +25,22 @@
   </segment-items>
 
   <sequence-items>
-    <sequence-item src="avseq00.m1p" id="sequence-00"/>
+    <sequence-item src="avseq00.m1p" id="sequence-00">
+      <default-entry id="entry-001"/>
+    </sequence-item>
     <sequence-item src="avseq00.m1p" id="sequence-01"/>
     <sequence-item src="avseq00.m1p" id="sequence-02"/>
-    <sequence-item src="avseq00.m1p" id="sequence-03"/>
+    <sequence-item src="avseq00.m1p" id="sequence-03">
+      <entry id="entry-002">0.000000</entry>
+    </sequence-item>
   </sequence-items>
 
   <pbc>
     <selection id="menu">
       <bsn>1</bsn>
       <next ref="lid-end"/>
-      <return ref="lid-end"/>
-      <wait>5</wait>
+      <return ref="lid-end" x1="0" y1="0" x2="0" y2="0"/>
+      <wait>-1</wait>
       <loop jump-timing="immediate">1</loop>
       <play-item ref="segment-0000"/>
       <select ref="lid-000" />
@@ -52,6 +56,7 @@
       <play-item ref="sequence-00"/>
       <play-item ref="sequence-01"/>
       <play-item ref="segment-0001"/>
+      <play-item ref="entry-001"/>
     </playlist>
 
     <playlist id="lid-001">
@@ -62,6 +67,7 @@
       <play-item ref="sequence-02"/>
       <play-item ref="sequence-03"/>
       <play-item ref="segment-0002"/>
+      <play-item ref="entry-002"/>
     </playlist>
 
     <endlist id="lid-end" rejected="true"/>

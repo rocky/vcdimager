@@ -56,8 +56,8 @@ else
 fi
 
 if do_cksum <<EOF
-3848449134 4840416 videocd.bin
-1276056839 424 videocd.cue
+105909689 4840416 videocd.bin
+2350689551 447 videocd.cue
 EOF
     then
     :

@@ -86,11 +86,12 @@ VCD/ENTRIES.VCD
  ID: `ENTRYVCD'
  version: 0x02
  system profile tag: 0x00
- entries: 4
+ entries: 5
  ENTRY[00]: track#  1 (SEQUENCE[0]), LSN    858 (MSF 00:13:33)
  ENTRY[01]: track#  2 (SEQUENCE[1]), LSN   1158 (MSF 00:17:33)
  ENTRY[02]: track#  3 (SEQUENCE[2]), LSN   1458 (MSF 00:21:33)
  ENTRY[03]: track#  4 (SEQUENCE[3]), LSN   1758 (MSF 00:25:33)
+ ENTRY[04]: track#  4 (SEQUENCE[3]), LSN   1790 (MSF 00:25:65)
 -------------------------------------------------------------------------------
 VCD/LOT.VCD
  LID[1]: offset = 0 (0x0000)
@@ -103,27 +104,29 @@ VCD/PSD.VCD
   Flags: 0x00 | NOS: 3 | BSN: 1 | LID: 1 (rejected: no)
   prev: disabled | next: LID[4] @0x000a | return: LID[4] @0x000a
   default: disabled | timeout: disabled
-  wait: 5 secs | loop: 1 (delayed: no)
+  wait: -1 secs | loop: 1 (delayed: no)
   play-item: SEGMENT[1] (0x03e8)
   ofs[0]: LID[2] @0x0004
   ofs[1]: LID[3] @0x0007
   ofs[2]: LID[4] @0x000a
 
  PSD[01] (LID[2] @0x0004): play list descriptor
-  NOI: 3 | LID#: 2 (rejected: no)
+  NOI: 4 | LID#: 2 (rejected: no)
   prev: disabled | next: LID[3] @0x0007 | return: LID[4] @0x000a
   playtime: 0/15s | wait: 5s | autowait: 0s
   play-item[0]: SEQUENCE[1] (0x0002)
   play-item[1]: SEQUENCE[2] (0x0003)
   play-item[2]: SEGMENT[2] (0x03e9)
+  play-item[3]: ENTRY[0] (0x0064)
 
  PSD[02] (LID[3] @0x0007): play list descriptor
-  NOI: 3 | LID#: 3 (rejected: no)
+  NOI: 4 | LID#: 3 (rejected: no)
   prev: disabled | next: LID[4] @0x000a | return: LID[4] @0x000a
   playtime: 0/15s | wait: 5s | autowait: 0s
   play-item[0]: SEQUENCE[3] (0x0004)
   play-item[1]: SEQUENCE[4] (0x0005)
   play-item[2]: SEGMENT[3] (0x03ea)
+  play-item[3]: ENTRY[4] (0x0068)
 
  PSD[03] (LID[4] @0x000a): end list descriptor
 
@@ -139,7 +142,7 @@ EXT/PSD_X.VCD
   Flags: 0x00 | NOS: 3 | BSN: 1 | LID: 1 (rejected: no)
   prev: disabled | next: LID[4] @0x000d | return: LID[4] @0x000d
   default: disabled | timeout: disabled
-  wait: 5 secs | loop: 1 (delayed: no)
+  wait: -1 secs | loop: 1 (delayed: no)
   play-item: SEGMENT[1] (0x03e8)
   ofs[0]: LID[2] @0x0007
   ofs[1]: LID[3] @0x000a
@@ -151,20 +154,22 @@ EXT/PSD_X.VCD
   area[2]: disabled
 
  PSD[01] (LID[2] @0x0007): play list descriptor
-  NOI: 3 | LID#: 2 (rejected: no)
+  NOI: 4 | LID#: 2 (rejected: no)
   prev: disabled | next: LID[3] @0x000a | return: LID[4] @0x000d
   playtime: 0/15s | wait: 5s | autowait: 0s
   play-item[0]: SEQUENCE[1] (0x0002)
   play-item[1]: SEQUENCE[2] (0x0003)
   play-item[2]: SEGMENT[2] (0x03e9)
+  play-item[3]: ENTRY[0] (0x0064)
 
  PSD[02] (LID[3] @0x000a): play list descriptor
-  NOI: 3 | LID#: 3 (rejected: no)
+  NOI: 4 | LID#: 3 (rejected: no)
   prev: disabled | next: LID[4] @0x000d | return: LID[4] @0x000d
   playtime: 0/15s | wait: 5s | autowait: 0s
   play-item[0]: SEQUENCE[3] (0x0004)
   play-item[1]: SEQUENCE[4] (0x0005)
   play-item[2]: SEGMENT[3] (0x03ea)
+  play-item[3]: ENTRY[4] (0x0068)
 
  PSD[03] (LID[4] @0x000d): end list descriptor
 
