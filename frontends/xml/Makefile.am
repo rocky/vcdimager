@@ -42,7 +42,7 @@ vcdxgen_SOURCES = \
 	vcd_xml_dump.c \
 	vcd_xml_dtd.h 
 
-vcdxminfo_LDADD = $(XML_LIBS) $(LIBPOPT_LIBS) $(LIBVCD_LIBS)
+vcdxminfo_LDADD = $(LIBPOPT_LIBS) $(LIBVCD_LIBS)
 vcdxminfo_SOURCES = \
 	vcd_xml_common.c \
 	vcd_xml_common.h \
@@ -51,7 +51,7 @@ vcdxminfo_SOURCES = \
 #vcd_xml_dtd.c: videocd_dtd.inc
 
 videocd_dtd.inc: $(srcdir)/videocd.dtd
-	(sed 's/\"/\\"/g' | $(AWK) 'BEGIN { print "char videocd_dtd[] = \\" } { print " \"" $$0 "\\n\" \\" } END { print ";" }') < $(srcdir)/videocd.dtd > $@
+	(sed 's/\"/\\"/g' | $(AWK) 'BEGIN { print "char videocd_dtd[] = \\" } { print " \"" $$0 "\\n\" \\" } END { print ";" }') < $(srcdir)/videocd.dtd > videocd_dtd.inc
 
 if MAINTAINER_MODE
 $(man_MANS): %.1: %
