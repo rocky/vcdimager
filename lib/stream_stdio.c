@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2000, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ _stdio_open_source (void *user_data)
   
   if ((ud->fd = fopen (ud->pathname, "rb")))
     {
-      ud->fd_buf = _vcd_malloc (VCD_STREAM_STDIO_BUFSIZE);
+      ud->fd_buf = calloc(1, VCD_STREAM_STDIO_BUFSIZE);
       setvbuf (ud->fd, ud->fd_buf, _IOFBF, VCD_STREAM_STDIO_BUFSIZE);
     }
 
@@ -69,7 +69,7 @@ _stdio_open_sink (void *user_data)
 
   if ((ud->fd = fopen (ud->pathname, "wb")))
     {
-      ud->fd_buf = _vcd_malloc (VCD_STREAM_STDIO_BUFSIZE);
+      ud->fd_buf = calloc(1, VCD_STREAM_STDIO_BUFSIZE);
       setvbuf (ud->fd, ud->fd_buf, _IOFBF, VCD_STREAM_STDIO_BUFSIZE);
     }
   
@@ -180,7 +180,7 @@ vcd_data_source_new_stdio(const char pathname[])
       return NULL;
     }
 
-  ud = _vcd_malloc (sizeof (_UserData));
+  ud = calloc(1, sizeof (_UserData));
 
   ud->pathname = strdup(pathname);
   ud->st_size = statbuf.st_size; /* let's hope it doesn't change... */
@@ -209,7 +209,7 @@ vcd_data_sink_new_stdio(const char pathname[])
   if (stat (pathname, &statbuf) != -1) 
     vcd_warn ("file `%s' exist already, will get overwritten!", pathname);
 
-  ud = _vcd_malloc (sizeof (_UserData));
+  ud = calloc(1, sizeof (_UserData));
 
   memset (&funcs, 0, sizeof (funcs));
 

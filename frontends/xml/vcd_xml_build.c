@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2001,2003 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2001, 2003, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -132,7 +132,7 @@ static struct {
     IMG_TYPE_NRG
   } img_type;
 
-  CdioList *img_options;
+  CdioList_t *img_options;
 
   char *xml_fname;
   char *file_prefix;
@@ -158,7 +158,7 @@ _set_img_opt (const char key[], const char val[])
   if (!key || !val)
     vcd_error ("invalid image option");
 
-  _cons = _vcd_malloc (sizeof (struct key_val_t));
+  _cons = calloc(1, sizeof (struct key_val_t));
   _cons->key = strdup (key);
   _cons->val = strdup (val);
 
@@ -357,7 +357,7 @@ static VcdImageSink *
 _create_sink (void)
 {
   VcdImageSink *image_sink = NULL;
-  CdioListNode *node;
+  CdioListNode_t *node;
 
   switch (gl.img_type)
     {

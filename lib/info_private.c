@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2003 Rocky Bernstein <rocky@panix.com>
+    Copyright (C) 2003, 2005 Rocky Bernstein <rocky@panix.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -75,12 +75,12 @@ vcdinf_update_offset_list(struct _vcdinf_pbc_ctx *obj, bool extended)
 {
   if (NULL==obj) return;
   {
-    CdioListNode *node;
-    CdioList *unused_lids = _cdio_list_new();
-    CdioListNode *next_unused_node = _cdio_list_begin(unused_lids);
+    CdioListNode_t *node;
+    CdioList_t *unused_lids = _cdio_list_new();
+    CdioListNode_t *next_unused_node = _cdio_list_begin(unused_lids);
     
     unsigned int last_lid=0;
-    CdioList *offset_list = extended ? obj->offset_x_list : obj->offset_list;
+    CdioList_t *offset_list = extended ? obj->offset_x_list : obj->offset_list;
     
     lid_t max_seen_lid=0;
 
@@ -91,7 +91,7 @@ vcdinf_update_offset_list(struct _vcdinf_pbc_ctx *obj, bool extended)
           /* We have a customer! Assign a LID from the free pool
              or take one from the end if no skipped LIDs.
           */
-          CdioListNode *node=_cdio_list_node_next(next_unused_node);
+          CdioListNode_t *node=_cdio_list_node_next(next_unused_node);
           if (node != NULL) {
             lid_t *next_unused_lid=_cdio_list_node_data(node);
             ofs->lid = *next_unused_lid;
@@ -104,7 +104,7 @@ vcdinf_update_offset_list(struct _vcdinf_pbc_ctx *obj, bool extended)
           /* See if we've skipped any LID numbers. */
           last_lid++;
           while (last_lid != ofs->lid ) {
-            lid_t * lid=_vcd_malloc (sizeof(lid_t));
+            lid_t * lid=calloc(1, sizeof(lid_t));
             *lid = last_lid;
             _cdio_list_append(unused_lids, lid);
           }
@@ -156,12 +156,12 @@ bool
 vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, unsigned int offset, 
                   bool in_lot)
 {
-  CdioListNode *node;
+  CdioListNode_t *node;
   vcdinfo_offset_t *ofs;
   unsigned int psd_size  = obj->extended ? obj->psd_x_size : obj->psd_size;
   const uint8_t *psd = obj->extended ? obj->psd_x : obj->psd;
   unsigned int _rofs = offset * obj->offset_mult;
-  CdioList *offset_list;
+  CdioList_t *offset_list;
   bool ret=true;
 
   vcd_assert (psd_size % 8 == 0);
@@ -221,7 +221,7 @@ vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, unsigned int offset,
         }
     }
 
-  ofs = _vcd_malloc (sizeof (vcdinfo_offset_t));
+  ofs = calloc(1, sizeof (vcdinfo_offset_t));
 
   ofs->ext    = obj->extended;
   ofs->in_lot = in_lot;

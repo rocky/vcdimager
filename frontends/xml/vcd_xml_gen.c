@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2001, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -139,7 +139,7 @@ _add_dir (struct vcdxml_t *obj, const char pathname[])
   vcd_assert (pathname != NULL);
 
   {
-    struct filesystem_t *_file = _vcd_malloc (sizeof (struct filesystem_t));
+    struct filesystem_t *_file = calloc(1, sizeof (struct filesystem_t));
     
     _file->name = strdup (pathname);
     _file->file_src = NULL;
@@ -195,7 +195,7 @@ _add_dirtree (struct vcdxml_t *obj, const char pathname[],
         }
       else if (S_ISREG(st.st_mode))
         {
-          struct filesystem_t *_file = _vcd_malloc (sizeof (struct filesystem_t));
+          struct filesystem_t *_file = calloc(1, sizeof (struct filesystem_t));
 
           _file->name = strdup (iso_name);
           _file->file_src = strdup (buf);
@@ -377,7 +377,7 @@ main (int argc, const char *argv[])
 
             if(!_parse_file_arg (arg, &fname1, &fname2)) 
               {
-                struct filesystem_t *_file = _vcd_malloc (sizeof (struct filesystem_t));
+                struct filesystem_t *_file = calloc(1, sizeof (struct filesystem_t));
 
                 _file->name = strdup (fname2);
                 _file->file_src = strdup (fname1);
@@ -411,7 +411,7 @@ main (int argc, const char *argv[])
 
     for (n = 0; args[n]; n++)
       {
-        struct sequence_t *_seq = _vcd_malloc (sizeof (struct sequence_t));
+        struct sequence_t *_seq = calloc(1, sizeof (struct sequence_t));
 
         _seq->entry_point_list = _cdio_list_new ();
         _seq->autopause_list = _cdio_list_new ();
@@ -450,7 +450,7 @@ main (int argc, const char *argv[])
   if (!nopbc_flag) 
     {
       pbc_t *_pbc;
-      CdioListNode *node;
+      CdioListNode_t *node;
 
       int n = 0;
       _CDIO_LIST_FOREACH (node, obj.sequence_list)
@@ -493,7 +493,7 @@ main (int argc, const char *argv[])
        || obj.vcd_type == VCD_TYPE_HQVCD)
       && update_scan_offsets_flag)
     {
-      struct option_t *_opt = _vcd_malloc (sizeof (struct option_t));
+      struct option_t *_opt = calloc(1, sizeof (struct option_t));
       
       _opt->name = strdup (OPT_UPDATE_SCAN_OFFSETS);
       _opt->value = strdup ("true");
@@ -504,14 +504,14 @@ main (int argc, const char *argv[])
   if (obj.vcd_type == VCD_TYPE_SVCD 
       && broken_svcd_mode_flag)
     {
-      struct option_t *_opt = _vcd_malloc (sizeof (struct option_t));
+      struct option_t *_opt = calloc(1, sizeof (struct option_t));
       
       _opt->name = strdup (OPT_SVCD_VCD3_MPEGAV);
       _opt->value = strdup ("true");
 
       _cdio_list_append (obj.option_list, _opt);
 
-      _opt = _vcd_malloc (sizeof (struct option_t));
+      _opt = calloc(1, sizeof (struct option_t));
       
       _opt->name = strdup (OPT_SVCD_VCD3_ENTRYSVD);
       _opt->value = strdup ("true");

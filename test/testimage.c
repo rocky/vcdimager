@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2001, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -39,8 +39,8 @@
 int
 main (int argc, const char *argv[])
 {
-  CdIo *img = NULL;
-  uint32_t lsn = 0;
+  CdIo_t *img = NULL;
+  lsn_t lsn = 0;
 
   vcd_assert (argc == 4);
 

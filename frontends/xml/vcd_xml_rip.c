@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2001, 2003, 2004 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2001, 2003, 2004, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -81,7 +81,7 @@ _register_file (struct vcdxml_t *obj, const char *pathname,
     case _STAT_DIR:
 	{
 	  struct filesystem_t *_fs 
-	    = _vcd_malloc (sizeof (struct filesystem_t));
+	    = calloc(1, sizeof (struct filesystem_t));
 	  _cdio_list_append (obj->filesystem, _fs);
 	  
 	  _fs->name = strdup (pathname);
@@ -91,7 +91,7 @@ _register_file (struct vcdxml_t *obj, const char *pathname,
     case _STAT_FILE:
       {
 	char *namebuf = strdup (pathname);
-	struct filesystem_t *_fs = _vcd_malloc (sizeof (struct filesystem_t));
+	struct filesystem_t *_fs = calloc(1, sizeof (struct filesystem_t));
 	_cdio_list_append (obj->filesystem, _fs);
 
 	if (strrchr (namebuf, ';'))
@@ -143,8 +143,8 @@ _register_file (struct vcdxml_t *obj, const char *pathname,
 static int
 _parse_isofs_r (struct vcdxml_t *obj, CdIo *img, const char pathname[])
 { 
-  CdioList *entlist = iso9660_fs_readdir (img, pathname, true);
-  CdioListNode *entnode;
+  CdioList_t *entlist = iso9660_fs_readdir (img, pathname, true);
+  CdioListNode_t *entnode;
 
   if (entlist == NULL)
     return -1;
@@ -267,7 +267,7 @@ _parse_info (struct vcdxml_t *obj, CdIo *img)
 	if (!info.spi_contents[idx].item_cont)
 	  { /* new segment */
 	    char buf[80];
-	    _segment = _vcd_malloc (sizeof (struct segment_t));
+	    _segment = calloc(1, sizeof (struct segment_t));
 
 	    snprintf (buf, sizeof (buf), "segment-%4.4d", idx);
 	    _segment->id = strdup (buf);
@@ -323,7 +323,7 @@ _parse_entries (struct vcdxml_t *obj, CdIo *img)
 	  char buf[80];
 	  struct sequence_t *_new_sequence;
 
-	  _new_sequence = _vcd_malloc (sizeof (struct sequence_t));
+	  _new_sequence = calloc(1, sizeof (struct sequence_t));
 
 	  snprintf (buf, sizeof (buf), "sequence-%2.2d", track);
 	  _new_sequence->id = strdup (buf);
@@ -346,7 +346,7 @@ _parse_entries (struct vcdxml_t *obj, CdIo *img)
 	  struct sequence_t *_seq =
 	    _cdio_list_node_data (_cdio_list_end (obj->sequence_list));
 
-	  struct entry_point_t *_entry = _vcd_malloc (sizeof (struct entry_point_t));
+	  struct entry_point_t *_entry = calloc(1, sizeof (struct entry_point_t));
 
 	  snprintf (buf, sizeof (buf), "entry-%3.3d", idx);
 	  _entry->id = strdup (buf);
@@ -375,7 +375,7 @@ struct _pbc_ctx {
   unsigned psd_size;
   unsigned maximum_lid;
   unsigned offset_mult;
-  CdioList *offset_list;
+  CdioList_t *offset_list;
 
   uint8_t *psd;
   LotVcd_t *lot;
@@ -412,7 +412,7 @@ _pin2id (unsigned pin)
 static const char *
 _ofs2id (unsigned offset, const struct _pbc_ctx *_ctx)
 {
-  CdioListNode *node;
+  CdioListNode_t *node;
   static char buf[80];
   unsigned sl_num = 0, el_num = 0, pl_num = 0;
   vcdinfo_offset_t *ofs = NULL;
@@ -484,7 +484,7 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
   vcdinfo_offset_t *ofs = NULL;
 
   {
-    CdioListNode *node;
+    CdioListNode_t *node;
     _CDIO_LIST_FOREACH (node, _ctx->offset_list)
       {
 	ofs = _cdio_list_node_data (node);
@@ -578,10 +578,10 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
 	  {
 	    PsdSelectionListDescriptorExtended *d2 = (void *) &d->ofs[d->nos];
 
-	    _pbc->prev_area = _vcd_malloc (sizeof (pbc_area_t));
-	    _pbc->next_area = _vcd_malloc (sizeof (pbc_area_t));
-	    _pbc->return_area = _vcd_malloc (sizeof (pbc_area_t));
-	    _pbc->default_area = _vcd_malloc (sizeof (pbc_area_t));
+	    _pbc->prev_area = calloc(1, sizeof (pbc_area_t));
+	    _pbc->next_area = calloc(1, sizeof (pbc_area_t));
+	    _pbc->return_area = calloc(1, sizeof (pbc_area_t));
+	    _pbc->default_area = calloc(1, sizeof (pbc_area_t));
 
 	    *_pbc->prev_area = d2->prev_area;
 	    *_pbc->next_area = d2->next_area;
@@ -590,7 +590,7 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
 
 	    for (n = 0; n < vcdinf_get_num_selections(d); n++)
 	      {
-		pbc_area_t *_area = _vcd_malloc (sizeof (pbc_area_t));
+		pbc_area_t *_area = calloc(1, sizeof (pbc_area_t));
 
 		*_area = d2->area[n];
 
@@ -630,7 +630,7 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
 static void
 _visit_pbc (struct _pbc_ctx *obj, lid_t lid, unsigned int offset, bool in_lot)
 {
-  CdioListNode *node;
+  CdioListNode_t *node;
   vcdinfo_offset_t *ofs;
   unsigned _rofs = offset * obj->offset_mult;
 
@@ -683,7 +683,7 @@ _visit_pbc (struct _pbc_ctx *obj, lid_t lid, unsigned int offset, bool in_lot)
         }
     }
 
-  ofs = _vcd_malloc (sizeof (vcdinfo_offset_t));
+  ofs = calloc(1, sizeof (vcdinfo_offset_t));
 
   ofs->offset = offset;
   ofs->lid    = lid;
@@ -770,7 +770,7 @@ _parse_pbc (struct vcdxml_t *obj, CdIo *img, bool no_ext_psd)
 {
   int n;
   struct _pbc_ctx _pctx;
-  CdioListNode *node;
+  CdioListNode_t *node;
   bool extended = false;
   uint32_t _lot_vcd_sector = -1;
   uint32_t _psd_vcd_sector = -1;
@@ -825,7 +825,7 @@ _parse_pbc (struct vcdxml_t *obj, CdIo *img, bool no_ext_psd)
 
   /* read in LOT */
   
-  _pctx.lot = _vcd_malloc (ISO_BLOCKSIZE * LOT_VCD_SIZE);
+  _pctx.lot = calloc(1, ISO_BLOCKSIZE * LOT_VCD_SIZE);
   
   if (cdio_read_mode2_sectors (img, _pctx.lot, _lot_vcd_sector, false, 
 			       LOT_VCD_SIZE))
@@ -835,7 +835,7 @@ _parse_pbc (struct vcdxml_t *obj, CdIo *img, bool no_ext_psd)
 
   n = _vcd_len2blocks (_psd_size, ISO_BLOCKSIZE);
 
-  _pctx.psd = _vcd_malloc (ISO_BLOCKSIZE * n);
+  _pctx.psd = calloc(1, ISO_BLOCKSIZE * n);
 
   if (cdio_read_mode2_sectors (img, _pctx.psd,_psd_vcd_sector, false, n))
     return -1;
@@ -861,7 +861,7 @@ _parse_pbc (struct vcdxml_t *obj, CdIo *img, bool no_ext_psd)
 static int
 _rip_isofs (struct vcdxml_t *obj, CdIo *img)
 {
-  CdioListNode *node;
+  CdioListNode_t *node;
   
   _CDIO_LIST_FOREACH (node, obj->filesystem)
     {
@@ -917,7 +917,7 @@ _rip_isofs (struct vcdxml_t *obj, CdIo *img)
 static int
 _rip_segments (struct vcdxml_t *obj, CdIo *img)
 {
-  CdioListNode *node;
+  CdioListNode_t *node;
   lsn_t start_extent;
 
   start_extent = obj->info.segments_start;
@@ -981,7 +981,7 @@ _rip_segments (struct vcdxml_t *obj, CdIo *img)
 
 	  if (buf.subheader[2] & SM_TRIG)
 	    {
-	      double *_ap_ts = _vcd_malloc (sizeof (double));
+	      double *_ap_ts = calloc(1, sizeof (double));
 	      
 	      vcd_debug ("autopause @%u (%f)", (unsigned int) n, last_pts);
 	      *_ap_ts = last_pts;
@@ -1012,13 +1012,13 @@ _rip_segments (struct vcdxml_t *obj, CdIo *img)
 static int
 _rip_sequences (struct vcdxml_t *obj, CdIo *img, int tracknum)
 {
-  CdioListNode *node;
+  CdioListNode_t *node;
   int counter=1;
 
   _CDIO_LIST_FOREACH (node, obj->sequence_list)
     {
       struct sequence_t *_seq = _cdio_list_node_data (node);
-      CdioListNode *nnode = _cdio_list_node_next (node);
+      CdioListNode_t *nnode = _cdio_list_node_next (node);
       struct sequence_t *_nseq = nnode ? _cdio_list_node_data (nnode) : NULL;
       FILE *outfd = NULL;
       bool in_data = false;
@@ -1123,7 +1123,7 @@ _rip_sequences (struct vcdxml_t *obj, CdIo *img, int tracknum)
 
 	  if (in_data)
 	    {
-	      CdioListNode *_node;
+	      CdioListNode_t *_node;
 
 	      vcd_mpeg_parse_packet (buf[buf_idx].data, M2F2_SECTOR_SIZE, 
 				     false, &mpeg_ctx);
@@ -1146,7 +1146,7 @@ _rip_sequences (struct vcdxml_t *obj, CdIo *img, int tracknum)
 
 	      if (buf[buf_idx].subheader[2] & SM_TRIG)
 		{
-		  double *_ap_ts = _vcd_malloc (sizeof (double));
+		  double *_ap_ts = calloc(1, sizeof (double));
 
 		  vcd_debug ("autopause @%u (%f)", (unsigned int) n, 
 			     last_pts);

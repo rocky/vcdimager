@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2001, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ mk_dsource (const char prefix[], const char pathname[])
   if (prefix) 
     {
       VcdDataSource *retval = 0;
-      char *tmp = _vcd_malloc (strlen (prefix) + strlen (pathname) + 1);
+      char *tmp = calloc(1, strlen (prefix) + strlen (pathname) + 1);
       strcpy (tmp, prefix);
       strcat (tmp, pathname);
       retval = vcd_data_source_new_stdio (tmp);
@@ -67,7 +67,7 @@ bool vcd_xml_master (const struct vcdxml_t *obj, VcdImageSink *image_sink,
 		     time_t *create_time)
 {
   VcdObj *_vcd;
-  CdioListNode *node;
+  CdioListNode_t *node;
   int idx;
   bool _relaxed_aps = false;
   bool _update_scan_offsets = false;
@@ -225,7 +225,7 @@ bool vcd_xml_master (const struct vcdxml_t *obj, VcdImageSink *image_sink,
     {
       struct segment_t *segment = _cdio_list_node_data (node);
       VcdDataSource *_source = mk_dsource (obj->file_prefix, segment->src);
-      CdioListNode *node2;
+      CdioListNode_t *node2;
       VcdMpegSource *_mpeg_src;
 
       vcd_debug ("adding segment #%d, %s", idx, segment->src);
@@ -257,7 +257,7 @@ bool vcd_xml_master (const struct vcdxml_t *obj, VcdImageSink *image_sink,
     {
       struct sequence_t *sequence = _cdio_list_node_data (node);
       VcdDataSource *data_source;
-      CdioListNode *node2;
+      CdioListNode_t *node2;
       VcdMpegSource *_mpeg_src;
 
       vcd_debug ("adding sequence #%d, %s", idx, sequence->src);

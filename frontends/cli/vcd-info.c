@@ -265,12 +265,12 @@ dump_lot (const vcdinfo_obj_t *obj, bool ext)
 static void
 dump_psd (const vcdinfo_obj_t *obj, bool ext)
 {
-  CdioListNode *node;
+  CdioListNode_t *node;
   unsigned n = 0;
   unsigned int mult = vcdinfo_get_offset_mult(obj);
   const uint8_t *psd = ext 
     ? vcdinfo_get_psd_x(obj) : vcdinfo_get_psd(obj);
-  CdioList *offset_list = ext 
+  CdioList_t *offset_list = ext 
     ? vcdinfo_get_offset_x_list(obj) : vcdinfo_get_offset_list(obj);
 
   fprintf (stdout, 
@@ -896,9 +896,9 @@ dump_search_dat (vcdinfo_obj_t *obj)
 static void
 _dump_fs_recurse (const vcdinfo_obj_t *obj, const char pathname[])
 {
-  CdioList *entlist;
-  CdioList *dirlist =  _cdio_list_new ();
-  CdioListNode *entnode;
+  CdioList_t *entlist;
+  CdioList_t *dirlist =  _cdio_list_new ();
+  CdioListNode_t *entnode;
   CdIo *cdio = vcdinfo_get_cd_image(obj);
 
   entlist = iso9660_fs_readdir (cdio, pathname, true);

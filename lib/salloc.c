@@ -170,7 +170,7 @@ _vcd_salloc_free (VcdSalloc *bitmap, uint32_t sec, uint32_t size)
 VcdSalloc *
 _vcd_salloc_new (void)
 {
-  VcdSalloc *newobj = _vcd_malloc (sizeof (VcdSalloc));
+  VcdSalloc *newobj = calloc(1, sizeof (VcdSalloc));
   return newobj;
 }
 

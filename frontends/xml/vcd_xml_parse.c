@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2001, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -129,7 +129,7 @@ _parse_option (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns
 {
   if (!xmlStrcmp (node->name, (const xmlChar *) "option")) 
     {
-      struct option_t *_option = _vcd_malloc (sizeof (struct option_t));
+      struct option_t *_option = calloc(1, sizeof (struct option_t));
 	  
       GET_PROP_STR (_option->name, "name", doc, node, ns);
       GET_PROP_STR (_option->value, "value", doc, node, ns);
@@ -206,7 +206,7 @@ _parse_mpeg_segment (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNs
   struct segment_t *segment;
   xmlNodePtr cur;
 
-  segment = _vcd_malloc (sizeof (struct segment_t));
+  segment = calloc(1, sizeof (struct segment_t));
 
   _cdio_list_append (obj->segment_list, segment);
 
@@ -224,7 +224,7 @@ _parse_mpeg_segment (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNs
 
       if (!xmlStrcmp (cur->name, (const xmlChar *) "auto-pause"))
 	{
-	  double *_ap_ts = _vcd_malloc (sizeof (double));
+	  double *_ap_ts = calloc(1, sizeof (double));
 	  *_ap_ts = 0;
 	  
 	  GET_ELEM_DOUBLE (*_ap_ts, "auto-pause", doc, cur, ns);
@@ -519,7 +519,7 @@ _parse_mpeg_sequence (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlN
   struct sequence_t *sequence;
   xmlNodePtr cur;
 
-  sequence = _vcd_malloc (sizeof (struct sequence_t));
+  sequence = calloc(1, sizeof (struct sequence_t));
 
   _cdio_list_append (obj->sequence_list, sequence);
 
@@ -542,7 +542,7 @@ _parse_mpeg_sequence (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlN
 	}
       else if (!xmlStrcmp (cur->name, (const xmlChar *) "entry"))
 	{
-	  struct entry_point_t *entry = _vcd_malloc (sizeof (struct entry_point_t));
+	  struct entry_point_t *entry = calloc(1, sizeof (struct entry_point_t));
 	  
 	  GET_PROP_STR (entry->id, "id", doc, cur, ns);
 	  GET_ELEM_DOUBLE (entry->timestamp, "entry", doc, cur, ns);
@@ -551,7 +551,7 @@ _parse_mpeg_sequence (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlN
 	}
       else if (!xmlStrcmp (cur->name, (const xmlChar *) "auto-pause"))
 	{
-	  double *_ap_ts = _vcd_malloc (sizeof (double));
+	  double *_ap_ts = calloc(1, sizeof (double));
 	  *_ap_ts = 0;
 	  
 	  GET_ELEM_DOUBLE (*_ap_ts, "auto-pause", doc, cur, ns);

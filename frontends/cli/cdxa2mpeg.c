@@ -1,7 +1,7 @@
 /* -*- c -*- 
    $Id$
 
-   Copyright (C) 2001, 2004 Herbert Valerio Riedel <hvr@gnu.org>
+   Copyright (C) 2001, 2004, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -225,7 +225,7 @@ handler_fmt (riff_context *ctxt)
     }
 
   {
-    char *strbuf = _vcd_malloc (1 + size * 6);
+    char *strbuf = calloc(1, 1 + size * 6);
     strbuf[0] = '\0';
 
     for (i = 0; i < size; i++)

@@ -50,7 +50,7 @@ vcd_image_sink_new (void *user_data, const vcd_image_sink_funcs *funcs)
 {
   VcdImageSink *new_obj;
 
-  new_obj = _vcd_malloc (sizeof (VcdImageSink));
+  new_obj = calloc(1, sizeof (VcdImageSink));
 
   new_obj->user_data = user_data;
   new_obj->op = *funcs;
@@ -68,7 +68,7 @@ vcd_image_sink_destroy (VcdImageSink *obj)
 }
 
 int
-vcd_image_sink_set_cuesheet (VcdImageSink *obj, const CdioList *vcd_cue_list)
+vcd_image_sink_set_cuesheet (VcdImageSink *obj, const CdioList_t *vcd_cue_list)
 {
   vcd_assert (obj != NULL);
 

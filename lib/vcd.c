@@ -29,6 +29,7 @@
 #include <math.h>
 
 #include <cdio/cdio.h>
+#include <cdio/util.h>
 #include <cdio/iso9660.h>
 
 /* public headers */
@@ -61,7 +62,7 @@ static const char zero[CDIO_CD_FRAMESIZE_RAW] = { 0, };
 mpeg_sequence_t *
 _vcd_obj_get_sequence_by_id (VcdObj *obj, const char sequence_id[])
 {
-  CdioListNode *node;
+  CdioListNode_t *node;
 
   vcd_assert (sequence_id != NULL);
   vcd_assert (obj != NULL);
@@ -80,7 +81,7 @@ _vcd_obj_get_sequence_by_id (VcdObj *obj, const char sequence_id[])
 mpeg_sequence_t *
 _vcd_obj_get_sequence_by_entry_id (VcdObj *obj, const char entry_id[])
 {
-  CdioListNode *node;
+  CdioListNode_t *node;
 
   vcd_assert (entry_id != NULL);
   vcd_assert (obj != NULL);
@@ -88,7 +89,7 @@ _vcd_obj_get_sequence_by_entry_id (VcdObj *obj, const char entry_id[])
   _CDIO_LIST_FOREACH (node, obj->mpeg_sequence_list)
     {
       mpeg_sequence_t *_sequence = _cdio_list_node_data (node);
-      CdioListNode *node2;
+      CdioListNode_t *node2;
 
       /* default entry point */
       if (_sequence->default_entry_id 
@@ -114,7 +115,7 @@ _vcd_obj_get_sequence_by_entry_id (VcdObj *obj, const char entry_id[])
 mpeg_segment_t *
 _vcd_obj_get_segment_by_id (VcdObj *obj, const char segment_id[])
 {
-  CdioListNode *node;
+  CdioListNode_t *node;
 
   vcd_assert (segment_id != NULL);
   vcd_assert (obj != NULL);
@@ -262,7 +263,7 @@ vcd_obj_new (vcd_type_t vcd_type)
       _first = false;
     }
 
-  new_obj = _vcd_malloc (sizeof (VcdObj));
+  new_obj = calloc(1, sizeof (VcdObj));
   new_obj->type = vcd_type;
 
   if (!_vcd_obj_has_cap_p (new_obj, _CAP_VALID))
@@ -327,7 +328,7 @@ _vcd_obj_remove_mpeg_track (VcdObj *obj, int track_id)
 {
   int length;
   mpeg_sequence_t *track = NULL;
-  CdioListNode *node = NULL;
+  CdioListNode_t *node = NULL;
 
   vcd_assert (track_id >= 0);
 
@@ -344,7 +345,7 @@ _vcd_obj_remove_mpeg_track (VcdObj *obj, int track_id)
 
   /* fixup offsets */
   {
-    CdioListNode *node2 = node;
+    CdioListNode_t *node2 = node;
     while ((node2 = _cdio_list_node_next (node2)) != NULL)
       ((mpeg_sequence_t *) _cdio_list_node_data (node))->relative_start_extent -= length;
   }
@@ -396,7 +397,7 @@ vcd_obj_append_segment_play_item (VcdObj *obj, VcdMpegSource *mpeg_source,
 
   /* create list node */
 
-  segment = _vcd_malloc (sizeof (mpeg_sequence_t));
+  segment = calloc(1, sizeof (mpeg_sequence_t));
 
   segment->source = mpeg_source;
 
@@ -450,7 +451,7 @@ vcd_obj_append_sequence_play_item (VcdObj *obj, VcdMpegSource *mpeg_source,
   vcd_mpeg_source_scan (mpeg_source, !obj->relaxed_aps,
                         obj->update_scan_offsets, NULL, NULL);
 
-  sequence = _vcd_malloc (sizeof (mpeg_sequence_t));
+  sequence = calloc(1, sizeof (mpeg_sequence_t));
 
   sequence->source = mpeg_source;
 
@@ -567,7 +568,7 @@ vcd_obj_add_sequence_pause (VcdObj *obj, const char sequence_id[],
     vcd_warn ("pause id ignored...");
 
   {
-    pause_t *_pause = _vcd_malloc (sizeof (pause_t));
+    pause_t *_pause = calloc(1, sizeof (pause_t));
 
     if (pause_id)
       _pause->id = strdup (pause_id);
@@ -607,7 +608,7 @@ vcd_obj_add_segment_pause (VcdObj *obj, const char segment_id[],
     vcd_warn ("pause id ignored...");
 
   {
-    pause_t *_pause = _vcd_malloc (sizeof (pause_t));
+    pause_t *_pause = calloc(1, sizeof (pause_t));
 
     if (pause_id)
       _pause->id = strdup (pause_id);
@@ -669,7 +670,7 @@ vcd_obj_add_sequence_entry (VcdObj *obj, const char sequence_id[],
     }
 
   {
-    entry_t *_entry = _vcd_malloc (sizeof (entry_t));
+    entry_t *_entry = calloc(1, sizeof (entry_t));
 
     if (entry_id)
       _entry->id = strdup (entry_id);
@@ -687,7 +688,7 @@ vcd_obj_add_sequence_entry (VcdObj *obj, const char sequence_id[],
 void 
 vcd_obj_destroy (VcdObj *obj)
 {
-  CdioListNode *node;
+  CdioListNode_t *node;
 
   vcd_assert (obj != NULL);
   vcd_assert (!obj->in_output);
@@ -1042,7 +1043,7 @@ vcd_obj_add_file (VcdObj *obj, const char iso_pathname[],
         return 1;
       }
 
-    p = _vcd_malloc (sizeof (custom_file_t));
+    p = calloc(1, sizeof (custom_file_t));
     
     p->file = file;
     p->iso_pathname = _iso_pathname;
@@ -1062,7 +1063,7 @@ static void
 _finalize_vcd_iso_track_allocation (VcdObj *obj)
 {
   int n;
-  CdioListNode *node;
+  CdioListNode_t *node;
 
   uint32_t dir_secs = SECTOR_NIL;
 
@@ -1196,7 +1197,7 @@ static void
 _finalize_vcd_iso_track_filesystem (VcdObj *obj)
 {
   int n;
-  CdioListNode *node;
+  CdioListNode_t *node;
 
   /* create filesystem entries */
 
@@ -1583,7 +1584,7 @@ _write_sequence (VcdObj *obj, int track_idx)
 {
   mpeg_sequence_t *track = 
     _cdio_list_node_data (_vcd_list_at (obj->mpeg_sequence_list, track_idx));
-  CdioListNode *pause_node;
+  CdioListNode_t *pause_node;
   int n, lastsect = obj->sectors_written;
   char buf[2324];
   struct {
@@ -1809,7 +1810,7 @@ _write_sequence (VcdObj *obj, int track_idx)
 static int
 _write_segment (VcdObj *obj, mpeg_segment_t *_segment)
 {
-  CdioListNode *pause_node;
+  CdioListNode_t *pause_node;
   unsigned packet_no;
   int n = obj->sectors_written;
 
@@ -1952,7 +1953,7 @@ static uint32_t
 _get_closest_aps (const struct vcd_mpeg_stream_info *_mpeg_info, double t,
                   struct aps_data *_best_aps)
 {
-  CdioListNode *node;
+  CdioListNode_t *node;
   struct aps_data best_aps;
   bool first = true;
 
@@ -1983,12 +1984,12 @@ _get_closest_aps (const struct vcd_mpeg_stream_info *_mpeg_info, double t,
 static void
 _update_entry_points (VcdObj *obj)
 {
-  CdioListNode *sequence_node;
+  CdioListNode_t *sequence_node;
 
   _CDIO_LIST_FOREACH (sequence_node, obj->mpeg_sequence_list)
     {
       mpeg_sequence_t *_sequence = _cdio_list_node_data (sequence_node);
-      CdioListNode *entry_node;
+      CdioListNode_t *entry_node;
       unsigned last_packet_no = 0;
 
       _CDIO_LIST_FOREACH (entry_node, _sequence->entry_list)
@@ -2016,7 +2017,7 @@ _update_entry_points (VcdObj *obj)
 static int
 _write_vcd_iso_track (VcdObj *obj, const time_t *create_time)
 {
-  CdioListNode *node;
+  CdioListNode_t *node;
   int n;
 
   /* generate dir sectors */
@@ -2257,7 +2258,7 @@ vcd_obj_write_image (VcdObj *obj, VcdImageSink *image_sink,
                      progress_callback_t callback, void *user_data,
                      const time_t *create_time)
 {
-  CdioListNode *node;
+  CdioListNode_t *node;
 
   vcd_assert (obj != NULL);
   vcd_assert (obj->in_output);
@@ -2273,7 +2274,7 @@ vcd_obj_write_image (VcdObj *obj, VcdImageSink *image_sink,
 
     cue_list = _cdio_list_new ();
 
-    _cdio_list_append (cue_list, (_cue = _vcd_malloc (sizeof (vcd_cue_t))));
+    _cdio_list_append (cue_list, (_cue = calloc(1, sizeof (vcd_cue_t))));
 
     _cue->lsn = 0;
     _cue->type = VCD_CUE_TRACK_START;
@@ -2281,17 +2282,17 @@ vcd_obj_write_image (VcdObj *obj, VcdImageSink *image_sink,
     _CDIO_LIST_FOREACH (node, obj->mpeg_sequence_list)
       {
         mpeg_sequence_t *track = _cdio_list_node_data (node);
-        CdioListNode *entry_node;
+        CdioListNode_t *entry_node;
 
         _cdio_list_append (cue_list, 
-                           (_cue = _vcd_malloc (sizeof (vcd_cue_t))));
+                           (_cue = calloc(1, sizeof (vcd_cue_t))));
         
         _cue->lsn = track->relative_start_extent + obj->iso_size;
         _cue->lsn -= obj->track_pregap;
         _cue->type = VCD_CUE_PREGAP_START;
 
         _cdio_list_append (cue_list, 
-                           (_cue = _vcd_malloc (sizeof (vcd_cue_t))));
+                           (_cue = calloc(1, sizeof (vcd_cue_t))));
 
         _cue->lsn = track->relative_start_extent + obj->iso_size;
         _cue->type = VCD_CUE_TRACK_START;
@@ -2301,7 +2302,7 @@ vcd_obj_write_image (VcdObj *obj, VcdImageSink *image_sink,
             entry_t *_entry = _cdio_list_node_data (entry_node);
 
             _cdio_list_append (cue_list, 
-                               (_cue = _vcd_malloc (sizeof (vcd_cue_t))));
+                               (_cue = calloc(1, sizeof (vcd_cue_t))));
             
             _cue->lsn = obj->iso_size;
             _cue->lsn += track->relative_start_extent;
@@ -2314,7 +2315,7 @@ vcd_obj_write_image (VcdObj *obj, VcdImageSink *image_sink,
 
     /* add last one... */
 
-    _cdio_list_append (cue_list, (_cue = _vcd_malloc (sizeof (vcd_cue_t))));
+    _cdio_list_append (cue_list, (_cue = calloc(1, sizeof (vcd_cue_t))));
 
     _cue->lsn = obj->relative_end_extent + obj->iso_size;
 

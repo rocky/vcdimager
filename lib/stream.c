@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2000, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -73,7 +73,7 @@ vcd_data_sink_new(void *user_data, const vcd_data_sink_io_functions *funcs)
 {
   VcdDataSink *new_obj;
 
-  new_obj = _vcd_malloc(sizeof(VcdDataSink));
+  new_obj = calloc(1, sizeof(VcdDataSink));
 
   new_obj->user_data = user_data;
   memcpy(&(new_obj->op), funcs, sizeof(vcd_data_sink_io_functions));
@@ -208,7 +208,7 @@ vcd_data_source_new(void *user_data, const vcd_data_source_io_functions *funcs)
 {
   VcdDataSource *new_obj;
 
-  new_obj = _vcd_malloc (sizeof (VcdDataSource));
+  new_obj = calloc(1, sizeof (VcdDataSource));
 
   new_obj->user_data = user_data;
   memcpy(&(new_obj->op), funcs, sizeof(vcd_data_source_io_functions));

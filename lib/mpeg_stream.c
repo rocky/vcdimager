@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2000, 2004 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2000, 2004, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@
 
 #include <cdio/cdio.h>
 #include <cdio/bytesex.h>
+#include <cdio/util.h>
 
 #include <libvcd/logging.h>
 
@@ -64,7 +65,7 @@ vcd_mpeg_source_new (VcdDataSource *mpeg_file)
   
   vcd_assert (mpeg_file != NULL);
 
-  new_obj = _vcd_malloc (sizeof (VcdMpegSource));
+  new_obj = calloc(1, sizeof (VcdMpegSource));
 
   new_obj->data_source = mpeg_file;
   new_obj->scanned = false;
@@ -117,7 +118,7 @@ vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps, bool fix_scan_info,
   unsigned padbytes = 0;
   unsigned padpackets = 0;
   VcdMpegStreamCtx state;
-  CdioListNode *n;
+  CdioListNode_t *n;
   vcd_mpeg_prog_info_t _progress = { 0, };
 
   vcd_assert (obj != NULL);
@@ -188,7 +189,7 @@ vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps, bool fix_scan_info,
         case APS_SGI:
         case APS_ASGI:
           {
-            struct aps_data *_data = _vcd_malloc (sizeof (struct aps_data));
+            struct aps_data *_data = calloc(1, sizeof (struct aps_data));
             
             _data->packet_no = pno;
             _data->timestamp = state.packet.aps_pts;
@@ -271,7 +272,7 @@ static double
 _approx_pts (CdioList *aps_list, uint32_t packet_no)
 {
   double retval = 0;
-  CdioListNode *node;
+  CdioListNode_t *node;
 
   struct aps_data *_laps = NULL;
 
@@ -324,7 +325,7 @@ static void
 _fix_scan_info (struct vcd_mpeg_scan_data_t *scan_data_ptr,
                 unsigned packet_no, double pts, CdioList *aps_list)
 {
-  CdioListNode *node;
+  CdioListNode_t *node;
   long _next = -1, _prev = -1, _forw = -1, _back = -1;
 
   _CDIO_LIST_FOREACH (node, aps_list)
@@ -464,7 +465,7 @@ vcd_mpeg_source_get_packet (VcdMpegSource *obj, unsigned long packet_no,
 
   vcd_assert (pos == length);
 
-  vcd_error ("shouldnt be reached...");
+  vcd_error ("shouldn't be reached...");
 
   return -1;
 }

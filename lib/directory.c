@@ -184,7 +184,7 @@ _vcd_directory_new (void)
 
   vcd_assert (sizeof(iso9660_xa_t) == 14);
 
-  data = _vcd_malloc (sizeof (data_t));
+  data = calloc(1, sizeof (data_t));
   dir = _vcd_tree_new (data);
 
   data->is_dir = true;
@@ -271,7 +271,7 @@ _vcd_directory_mkdir (VcdDirectory *dir, const char pathname[])
     }
 
   {
-    data_t *data = _vcd_malloc (sizeof (data_t));
+    data_t *data = calloc(1, sizeof (data_t));
 
     _vcd_tree_node_append_child (pdir, data);
 
@@ -347,7 +347,7 @@ _vcd_directory_mkfile (VcdDirectory *dir, const char pathname[],
     }
   
   {
-    data_t *data = _vcd_malloc (sizeof (data_t));
+    data_t *data = calloc(1, sizeof (data_t));
 
     _vcd_tree_node_append_child (pdir, data);
 

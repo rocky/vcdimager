@@ -50,12 +50,12 @@ _dict_insert (VcdObj *obj, const char key[], uint32_t sector, uint32_t length,
   if ((sector =_vcd_salloc (obj->iso_bitmap, sector, length)) == SECTOR_NIL)
     vcd_assert_not_reached ();
 
-  _new_node = _vcd_malloc (sizeof (struct _dict_t));
+  _new_node = calloc(1, sizeof (struct _dict_t));
 
   _new_node->key = strdup (key);
   _new_node->sector = sector;
   _new_node->length = length;
-  _new_node->buf = _vcd_malloc (length * ISO_BLOCKSIZE);
+  _new_node->buf = calloc(1, length * ISO_BLOCKSIZE);
   _new_node->flags = end_flags;
 
   _cdio_list_prepend (obj->buffer_dict_list, _new_node);
@@ -82,7 +82,7 @@ int _dict_sector_cmp (struct _dict_t *a, uint32_t *b)
 static const struct _dict_t *
 _dict_get_bykey (VcdObj *obj, const char key[])
 {
-  CdioListNode *node;
+  CdioListNode_t *node;
 
   vcd_assert (obj != NULL);
   vcd_assert (key != NULL);
@@ -100,7 +100,7 @@ _dict_get_bykey (VcdObj *obj, const char key[])
 static const struct _dict_t *
 _dict_get_bysector (VcdObj *obj, uint32_t sector)
 {
-  CdioListNode *node;
+  CdioListNode_t *node;
 
   vcd_assert (obj != NULL);
   vcd_assert (sector != SECTOR_NIL);
@@ -149,7 +149,7 @@ _dict_get_sector (VcdObj *obj, uint32_t sector)
 static void
 _dict_clean (VcdObj *obj)
 {
-  CdioListNode *node;
+  CdioListNode_t *node;
 
   while ((node = _cdio_list_begin (obj->buffer_dict_list)))
     {

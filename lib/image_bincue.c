@@ -91,7 +91,7 @@ static int
 _set_cuesheet (void *user_data, const CdioList *vcd_cue_list)
 {
   _img_bincue_snk_t *_obj = user_data;
-  CdioListNode *node;
+  CdioListNode_t *node;
   int track_no, index_no;
   const vcd_cue_t *_last_cue = 0;
   
@@ -249,7 +249,7 @@ vcd_image_sink_new_bincue (void)
     .set_arg      = _sink_set_arg
   };
 
-  _data = _vcd_malloc (sizeof (_img_bincue_snk_t));
+  _data = calloc(1, sizeof (_img_bincue_snk_t));
 
   _data->bin_fname = strdup ("videocd.bin");
   _data->cue_fname = strdup ("videocd.cue");

@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2000, 2004 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2000, 2004, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@
 
 #include <cdio/cdio.h>
 #include <cdio/bytesex.h>
+#include <cdio/util.h>
 
 /* Public headers */
 #include <libvcd/logging.h>
@@ -75,7 +76,7 @@ _wtime (int seconds)
 static pbc_t *
 _vcd_pbc_byid(const VcdObj *obj, const char item_id[])
 {
-  CdioListNode *node;
+  CdioListNode_t *node;
 
   _CDIO_LIST_FOREACH (node, obj->pbc_list)
     {
@@ -92,7 +93,7 @@ _vcd_pbc_byid(const VcdObj *obj, const char item_id[])
 unsigned
 _vcd_pbc_lid_lookup (const VcdObj *obj, const char item_id[])
 {
-  CdioListNode *node;
+  CdioListNode_t *node;
   unsigned n = 1;
 
   _CDIO_LIST_FOREACH (node, obj->pbc_list)
@@ -163,7 +164,7 @@ uint16_t
 _vcd_pbc_pin_lookup (const VcdObj *obj, const char item_id[])
 {
   int n;
-  CdioListNode *node;
+  CdioListNode_t *node;
 
   if (!item_id)
     return 0;
@@ -189,7 +190,7 @@ _vcd_pbc_pin_lookup (const VcdObj *obj, const char item_id[])
   _CDIO_LIST_FOREACH (node, obj->mpeg_sequence_list)
     {
       mpeg_sequence_t *_sequence = _cdio_list_node_data (node);
-      CdioListNode *node2;
+      CdioListNode_t *node2;
 
       /* default entry point */
 
@@ -301,7 +302,7 @@ _vcd_pbc_node_length (const VcdObj *obj, const pbc_t *_pbc, bool extended)
 static uint16_t 
 _lookup_psd_offset (const VcdObj *obj, const char item_id[], bool extended)
 {
-  CdioListNode *node;
+  CdioListNode_t *node;
 
   if (extended)
     vcd_assert (_vcd_obj_has_cap_p (obj, _CAP_PBC_X));
@@ -368,7 +369,7 @@ _vcd_pbc_mark_id (const VcdObj *obj, const char _id[])
     {
     case PBC_PLAYLIST:
       {
-	CdioListNode *node;
+	CdioListNode_t *node;
 	
 	_vcd_pbc_mark_id (obj, _pbc->prev_id);
 	_vcd_pbc_mark_id (obj, _pbc->next_id);
@@ -385,7 +386,7 @@ _vcd_pbc_mark_id (const VcdObj *obj, const char _id[])
 
     case PBC_SELECTION:
       {
-	CdioListNode *node;
+	CdioListNode_t *node;
 
 	_vcd_pbc_mark_id (obj, _pbc->prev_id);
 	_vcd_pbc_mark_id (obj, _pbc->next_id);
@@ -420,7 +421,7 @@ _vcd_pbc_mark_id (const VcdObj *obj, const char _id[])
 void
 _vcd_pbc_check_unreferenced (const VcdObj *obj)
 {
-  CdioListNode *node;
+  CdioListNode_t *node;
 
   /* clear all flags */
 
@@ -503,7 +504,7 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
     case PBC_PLAYLIST:
       {
 	_PsdPlayListDescriptor *_md = buf;
-	CdioListNode *node;
+	CdioListNode_t *node;
 	int n;
 	
 	_md->type = PSD_TYPE_PLAY_LIST;
@@ -701,7 +702,7 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 
 	/* fill selection array */
 	{
-	  CdioListNode *node = NULL;
+	  CdioListNode_t *node = NULL;
 	  int idx = 0;
 
 	  idx = 0;
@@ -719,7 +720,7 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 	if (extended || _vcd_obj_has_cap_p (obj, _CAP_4C_SVCD))
 	  {
 	    PsdSelectionListDescriptorExtended *_md2;
-	    CdioListNode *node;
+	    CdioListNode_t *node;
 	    int n;
 	    
 	    /* append extended selection areas */
@@ -805,7 +806,7 @@ vcd_pbc_new (enum pbc_type_t type)
 {
   pbc_t *_pbc;
 
-  _pbc = _vcd_malloc (sizeof (pbc_t));
+  _pbc = calloc(1, sizeof (pbc_t));
   _pbc->type = type;
 
   switch (type)
@@ -836,7 +837,7 @@ vcd_pbc_new (enum pbc_type_t type)
 bool
 _vcd_pbc_finalize (VcdObj *obj)
 {
-  CdioListNode *node;
+  CdioListNode_t *node;
   unsigned offset = 0, offset_ext = 0;
   unsigned lid;
 

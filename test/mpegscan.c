@@ -41,7 +41,7 @@ int
 main (int argc, const char *argv[])
 {
   VcdMpegSource *src;
-  CdioListNode *n;
+  CdioListNode_t *n;
   double t = 0;
 
   if (argc != 2)
@@ -61,7 +61,7 @@ main (int argc, const char *argv[])
     }
 
   {
-    CdioListNode *aps_node = 
+    CdioListNode_t *aps_node = 
       _cdio_list_begin (vcd_mpeg_source_get_info (src)->shdr[0].aps_list);
     struct aps_data *_data;
     double aps_time;

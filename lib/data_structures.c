@@ -42,15 +42,15 @@ struct _CdioList
 {
   unsigned length;
 
-  CdioListNode *begin;
-  CdioListNode *end;
+  CdioListNode_t *begin;
+  CdioListNode_t *end;
 };
 
 struct _CdioListNode
 {
-  CdioList *list;
+  CdioList_t *list;
 
-  CdioListNode *next;
+  CdioListNode_t *next;
 
   void *data;
 };
@@ -60,14 +60,14 @@ struct _CdioListNode
 static bool
 _bubble_sort_iteration (CdioList *list, _cdio_list_cmp_func cmp_func)
 {
-  CdioListNode **pnode;
+  CdioListNode_t **pnode;
   bool changed = false;
   
   for (pnode = &(list->begin);
        (*pnode) != NULL && (*pnode)->next != NULL;
        pnode = &((*pnode)->next))
     {
-      CdioListNode *node = *pnode;
+      CdioListNode_t *node = *pnode;
       
       if (cmp_func (node->data, node->next->data) <= 0)
         continue; /* n <= n->next */
@@ -98,10 +98,10 @@ void _vcd_list_sort (CdioList *list, _cdio_list_cmp_func cmp_func)
 
 /* node ops */
 
-CdioListNode *
+CdioListNode_t *
 _vcd_list_at (CdioList *list, int idx)
 {
-  CdioListNode *node = _cdio_list_begin (list);
+  CdioListNode_t *node = _cdio_list_begin (list);
 
   if (idx < 0)
     return _vcd_list_at (list, _cdio_list_length (list) + idx);
@@ -130,7 +130,7 @@ struct _VcdTreeNode
 {
   void *data;
 
-  CdioListNode *listnode;
+  CdioListNode_t *listnode;
   VcdTree *tree;
   VcdTreeNode *parent;
   CdioList *children;
@@ -141,9 +141,9 @@ _vcd_tree_new (void *root_data)
 {
   VcdTree *new_tree;
 
-  new_tree = _vcd_malloc (sizeof (VcdTree));
+  new_tree = calloc(1, sizeof (VcdTree));
 
-  new_tree->root = _vcd_malloc (sizeof (VcdTreeNode));
+  new_tree->root = calloc(1, sizeof (VcdTreeNode));
 
   new_tree->root->data = root_data;
   new_tree->root->tree = new_tree;
@@ -225,7 +225,7 @@ _vcd_tree_node_append_child (VcdTreeNode *pnode, void *cdata)
   if (!pnode->children)
     pnode->children = _cdio_list_new ();
 
-  nnode = _vcd_malloc (sizeof (VcdTreeNode));
+  nnode = calloc(1, sizeof (VcdTreeNode));
 
   _cdio_list_append (pnode->children, nnode);
 
@@ -297,7 +297,7 @@ _vcd_tree_node_traverse_bf (VcdTreeNode *node,
 
   while (_cdio_list_length (queue))
     {
-      CdioListNode *lastnode = _cdio_list_end (queue);
+      CdioListNode_t *lastnode = _cdio_list_end (queue);
       VcdTreeNode  *treenode = _cdio_list_node_data (lastnode);
       VcdTreeNode  *childnode;
 

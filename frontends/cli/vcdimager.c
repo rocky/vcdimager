@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2001, 2003, 2004 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2001, 2003, 2004, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -67,7 +67,7 @@ static struct {
   const char *create_timestr;
   char **track_fnames;
 
-  CdioList *add_files;
+  CdioList_t *add_files;
 
   const char *volume_label;
   const char *application_id;
@@ -91,7 +91,7 @@ static struct {
 static void
 gl_add_file (char *fname, char *iso_fname, int raw_flag)
 {
-  struct add_files_t *tmp = _vcd_malloc (sizeof (struct add_files_t));
+  struct add_files_t *tmp = calloc(1, sizeof (struct add_files_t));
 
   _cdio_list_append (gl.add_files, tmp);
 
@@ -165,7 +165,7 @@ main (int argc, const char *argv[])
 {
   int n = 0;
   vcd_type_t type_id;
-  CdioListNode *node;
+  CdioListNode_t *node;
   time_t create_time;
 
   /* g_set_prgname (argv[0]); */
@@ -334,7 +334,7 @@ main (int argc, const char *argv[])
       vcd_error ("error: maximal number of supported mpeg tracks (%d) reached",
                  CDIO_CD_MAX_TRACKS - 1);
 
-    gl.track_fnames = _vcd_malloc (sizeof (char *) * (n + 1));
+    gl.track_fnames = calloc(1, sizeof (char *) * (n + 1));
 
     for (n = 0; args[n]; n++)
       gl.track_fnames[n] = strdup (args[n]);

@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2000, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -77,7 +77,7 @@ _vcd_strjoin (char *strv[], unsigned count, const char delim[])
 
   len++;
 
-  new_str = _vcd_malloc (len);
+  new_str = calloc(1, len);
   new_str[0] = '\0';
 
   for (n = 0;n < count;n++)
@@ -111,7 +111,7 @@ _vcd_strsplit(const char str[], char delim) /* fixme -- non-reentrant */
     if (*(p++) == delim)
       n++;
 
-  strv = _vcd_malloc (sizeof (char *) * (n+1));
+  strv = calloc(1, sizeof (char *) * (n+1));
   
   n = 0;
   while((p = strtok(n ? NULL : _str, _delim)) != NULL) 
@@ -123,25 +123,13 @@ _vcd_strsplit(const char str[], char delim) /* fixme -- non-reentrant */
 }
 
 void *
-_vcd_malloc (size_t size)
-{
-  void *new_mem = malloc (size);
-
-  vcd_assert (new_mem != NULL);
-
-  memset (new_mem, 0, size);
-
-  return new_mem;
-}
-
-void *
 _vcd_memdup (const void *mem, size_t count)
 {
   void *new_mem = NULL;
 
   if (mem)
     {
-      new_mem = _vcd_malloc (count);
+      new_mem = malloc(count);
       memcpy (new_mem, mem, count);
     }
   

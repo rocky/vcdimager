@@ -156,7 +156,7 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
   xmlNodePtr vcd_node, section;
   xmlNsPtr ns = NULL;
   char buf[1024];
-  CdioListNode *node;
+  CdioListNode_t *node;
 
   xmlKeepBlanksDefault(0);
 
@@ -284,7 +284,7 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 	{
 	  struct segment_t *_segment =  _cdio_list_node_data (node);
 	  xmlNodePtr seg_node;
-	  CdioListNode *node2;
+	  CdioListNode_t *node2;
 	  
 	  seg_node = xmlNewChild (section, ns, (const xmlChar *) "segment-item", NULL);
 	  xmlSetProp (seg_node, (const xmlChar *) "src", vcd_xml_filename_to_utf8 (_segment->src));
@@ -309,7 +309,7 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
     {
       struct sequence_t *_sequence =  _cdio_list_node_data (node);
       xmlNodePtr seq_node;
-      CdioListNode *node2;
+      CdioListNode_t *node2;
 
       seq_node = xmlNewChild (section, ns, (const xmlChar *) "sequence-item", NULL);
       xmlSetProp (seq_node, (const xmlChar *) "src", vcd_xml_filename_to_utf8 (_sequence->src));
@@ -358,7 +358,7 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 	  switch (_pbc->type)
 	    {
 	      char buf[80];
-	      CdioListNode *node2;
+	      CdioListNode_t *node2;
 
 	    case PBC_PLAYLIST:
 	      pl = xmlNewChild (section, ns, (const xmlChar *) "playlist", NULL);
@@ -438,7 +438,7 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 			    (const xmlChar *) _pbc->item_id);
 
 	      {
-		CdioListNode *node3 = 
+		CdioListNode_t *node3 = 
 		  _cdio_list_begin (_pbc->select_area_list);
 
 		_CDIO_LIST_FOREACH (node2, _pbc->select_id_list)

@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
+  Copyright (C) 2000, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 #include <stdio.h>
 
 #include <cdio/cdio.h>
+#include <cdio/util.h>
 
 /* Private headers */
 #include "bitvec.h"

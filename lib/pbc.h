@@ -41,7 +41,7 @@ typedef struct psd_area_t pbc_area_t; /* fixme */
 static inline pbc_area_t *
 vcd_pbc_area_new (uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2)
 {
-  pbc_area_t *_new_area = _vcd_malloc (sizeof (pbc_area_t));
+  pbc_area_t *_new_area = calloc(1, sizeof (pbc_area_t));
 
   _new_area->x1 = x1;
   _new_area->y1 = y1;
@@ -72,7 +72,7 @@ struct _pbc_t {
   double playing_time;
   int wait_time;
   int auto_pause_time;
-  CdioList *item_id_list; /* char */
+  CdioList_t *item_id_list; /* char */
 
   /* used for selection lists */
   enum selection_type_t {
@@ -85,7 +85,7 @@ struct _pbc_t {
   pbc_area_t *next_area;
   pbc_area_t *return_area;
   pbc_area_t *default_area; /* depends on selection_type */
-  CdioList *select_area_list; /* pbc_area_t */
+  CdioList_t *select_area_list; /* pbc_area_t */
 
   unsigned bsn;
   char *default_id;
@@ -94,7 +94,7 @@ struct _pbc_t {
   unsigned loop_count;
   bool jump_delayed;
   char *item_id;
-  CdioList *select_id_list; /* char */
+  CdioList_t *select_id_list; /* char */
 
   /* used for end lists */
   char *image_id;

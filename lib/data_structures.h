@@ -26,9 +26,9 @@
 
 /* node ops */
 
-CdioListNode *_vcd_list_at (CdioList *list, int idx);
+CdioListNode_t *_vcd_list_at (CdioList *list, int idx);
 
-void _vcd_list_sort (CdioList *list, _cdio_list_cmp_func cmp_func);
+void _vcd_list_sort (CdioList_t *list, _cdio_list_cmp_func cmp_func);
 
 /* n-way tree */
 

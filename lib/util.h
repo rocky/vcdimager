@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2000, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,21 +23,6 @@
 
 #include <stdlib.h>
 #include <libvcd/types.h>
-
-#ifndef __CDIO_UTIL_H__
-#undef  MAX
-#define MAX(a, b)  (((a) > (b)) ? (a) : (b))
-
-#undef  MIN
-#define MIN(a, b)  (((a) < (b)) ? (a) : (b))
-
-#undef  IN
-#define IN(x, low, high) ((x) >= (low) && (x) <= (high))
-
-#undef  CLAMP
-#define CLAMP(x, low, high)  (((x) > (high)) ? (high) : (((x) < (low)) ? (low) : (x)))
-
-#endif
 
 static inline unsigned
 _vcd_len2blocks (unsigned len, int blocksize)
@@ -80,9 +65,6 @@ _vcd_strsplit(const char str[], char delim);
 
 void
 _vcd_strfreev(char **strv);
-
-void *
-_vcd_malloc (size_t size);
 
 void *
 _vcd_memdup (const void *mem, size_t count);

@@ -136,7 +136,7 @@ _derive_aud_type (const struct vcd_mpeg_stream_info *_info, bool svcd)
 void
 set_entries_vcd (VcdObj *obj, void *buf)
 {
-  CdioListNode *node = NULL;
+  CdioListNode_t *node = NULL;
   int idx = 0;
   int track_idx = 0;
   EntriesVcd_t entries_vcd;
@@ -197,7 +197,7 @@ set_entries_vcd (VcdObj *obj, void *buf)
     {
       mpeg_sequence_t *track = _cdio_list_node_data (node);
       uint32_t lsect = track->relative_start_extent;
-      CdioListNode *node2;
+      CdioListNode_t *node2;
 
       lsect += obj->iso_size;
 
@@ -257,7 +257,7 @@ get_psd_size (VcdObj *obj, bool extended)
 void
 set_psd_vcd (VcdObj *obj, void *buf, bool extended)
 {
-  CdioListNode *node;
+  CdioListNode_t *node;
 
   if (extended)
     vcd_assert (_vcd_obj_has_cap_p (obj, _CAP_PBC_X));
@@ -280,14 +280,14 @@ void
 set_lot_vcd(VcdObj *obj, void *buf, bool extended)
 {
   LotVcd_t *lot_vcd = NULL;
-  CdioListNode *node;
+  CdioListNode_t *node;
 
   if (extended)
     vcd_assert (_vcd_obj_has_cap_p (obj, _CAP_PBC_X));
 
   vcd_assert (_vcd_pbc_available (obj));
 
-  lot_vcd = _vcd_malloc (sizeof (LotVcd_t));
+  lot_vcd = calloc(1, sizeof (LotVcd_t));
   memset(lot_vcd, 0xff, sizeof(LotVcd_t));
 
   lot_vcd->reserved = 0x0000;
@@ -315,7 +315,7 @@ void
 set_info_vcd(VcdObj *obj, void *buf)
 {
   InfoVcd_t info_vcd;
-  CdioListNode *node = NULL;
+  CdioListNode_t *node = NULL;
   int n = 0;
 
   vcd_assert (sizeof (InfoVcd_t) == 2048);
@@ -465,7 +465,7 @@ set_tracks_svd_v30 (VcdObj *obj, void *buf)
 {
   char tracks_svd_buf[ISO_BLOCKSIZE] = { 0, };
   TracksSVD_v30 *tracks_svd = (void *) tracks_svd_buf;
-  CdioListNode *node;
+  CdioListNode_t *node;
   double playtime;
   int n;
 
@@ -518,7 +518,7 @@ set_tracks_svd (VcdObj *obj, void *buf)
   char tracks_svd[ISO_BLOCKSIZE] = { 0, };
   TracksSVD *tracks_svd1 = (void *) tracks_svd;
   TracksSVD2 *tracks_svd2;
-  CdioListNode *node;
+  CdioListNode_t *node;
   int n;
 
   vcd_assert (_vcd_obj_has_cap_p (obj, _CAP_4C_SVCD));
@@ -588,7 +588,7 @@ static double
 _get_cumulative_playing_time (const VcdObj *obj, unsigned up_to_track_no)
 {
   double result = 0;
-  CdioListNode *node;
+  CdioListNode_t *node;
 
   _CDIO_LIST_FOREACH (node, obj->mpeg_track_list)
     {
@@ -627,21 +627,21 @@ get_search_dat_size (const VcdObj *obj)
 static CdioList *
 _make_track_scantable (const VcdObj *obj)
 {
-  CdioList *all_aps = _cdio_list_new ();
-  CdioList *scantable = _cdio_list_new ();
+  CdioList_t *all_aps = _cdio_list_new ();
+  CdioList_t *scantable = _cdio_list_new ();
   unsigned scanpoints = _get_scanpoint_count (obj);
   unsigned track_no;
-  CdioListNode *node;
+  CdioListNode_t *node;
 
   track_no = 0;
   _CDIO_LIST_FOREACH (node, obj->mpeg_track_list)
     {
       mpeg_track_t *track = _cdio_list_node_data (node);
-      CdioListNode *node2;
+      CdioListNode_t *node2;
       
       _CDIO_LIST_FOREACH (node2, track->info->shdr[0].aps_list)
         {
-          struct aps_data *_data = _vcd_malloc (sizeof (struct aps_data));
+          struct aps_data *_data = calloc(1, sizeof (struct aps_data));
           
           *_data = *(struct aps_data *)_cdio_list_node_data (node2);
 
@@ -655,8 +655,8 @@ _make_track_scantable (const VcdObj *obj)
     }
   
   {
-    CdioListNode *aps_node = _cdio_list_begin (all_aps);
-    CdioListNode *n;
+    CdioListNode_t *aps_node = _cdio_list_begin (all_aps);
+    CdioListNode_t *n;
     struct aps_data *_data;
     double aps_time;
     double playing_time;
@@ -690,7 +690,7 @@ _make_track_scantable (const VcdObj *obj)
 	  }
 
         {
-          uint32_t *lsect = _vcd_malloc (sizeof (uint32_t));
+          uint32_t *lsect = calloc(1, sizeof (uint32_t));
           
           *lsect = aps_packet;
           _cdio_list_append (scantable, lsect);
@@ -710,8 +710,8 @@ _make_track_scantable (const VcdObj *obj)
 void
 set_search_dat (VcdObj *obj, void *buf)
 {
-  CdioList *scantable;
-  CdioListNode *node;
+  CdioList_t *scantable;
+  CdioListNode_t *node;
   SearchDat search_dat;
   unsigned n;
 
@@ -754,14 +754,14 @@ _get_scandata_count (const struct vcd_mpeg_stream_info *info)
 static uint32_t *
 _get_scandata_table (const struct vcd_mpeg_stream_info *info)
 {
-  CdioListNode *n, *aps_node = _cdio_list_begin (info->shdr[0].aps_list);
+  CdioListNode_t *n, *aps_node = _cdio_list_begin (info->shdr[0].aps_list);
   struct aps_data *_data;
   double aps_time, t;
   int aps_packet;
   uint32_t *retval;
   unsigned i;
   
-  retval = _vcd_malloc (_get_scandata_count (info) * sizeof (uint32_t));
+  retval = calloc(1, _get_scandata_count (info) * sizeof (uint32_t));
 
   _data = _cdio_list_node_data (aps_node);
   aps_time = _data->timestamp;
@@ -817,7 +817,7 @@ get_scandata_dat_size (const VcdObj *obj)
   /* vcd_assert (sizeof (ScandataDat4) == 0);
      retval += sizeof (ScandataDat4); */
   {
-    CdioListNode *node;
+    CdioListNode_t *node;
     _CDIO_LIST_FOREACH (node, obj->mpeg_track_list)
       {
         const mpeg_track_t *track = _cdio_list_node_data (node);
@@ -846,7 +846,7 @@ set_scandata_dat (VcdObj *obj, void *buf)
     __cd_offsetof (ScandataDat3, mpeg_track_offsets[tracks])
     - __cd_offsetof (ScandataDat3, mpeg_track_offsets);
 
-  CdioListNode *node;
+  CdioListNode_t *node;
   unsigned n;
   uint16_t _tmp_offset;
 

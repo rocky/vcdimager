@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2002, 2003, 2004 Rocky Bernstein <rocky@panix.com>
+    Copyright (C) 2002, 2003, 2004, 2005 Rocky Bernstein <rocky@panix.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -96,13 +96,13 @@ _init_segments (vcdinfo_obj_t *obj)
 {
   InfoVcd_t *info = vcdinfo_get_infoVcd(obj);
   segnum_t num_segments = vcdinfo_get_num_segments(obj);
-  CdioListNode *entnode;
-  CdioList *entlist;
+  CdioListNode_t *entnode;
+  CdioList_t *entlist;
   int i;
   lsn_t last_lsn=0;
   
   obj->first_segment_lsn = cdio_msf_to_lsn(&info->first_seg_addr);
-  obj->seg_sizes         = _vcd_malloc( num_segments * sizeof(uint32_t *));
+  obj->seg_sizes         = calloc(1, num_segments * sizeof(uint32_t *));
 
   if (NULL == obj->seg_sizes || 0 == num_segments) return;
 
@@ -613,7 +613,7 @@ vcdinfo_get_default_device (const vcdinfo_obj_t *vcd_obj)
      let CdIo select a driver, get the default for that and then
      close/destroy the temporary we created.
    */
-  CdIo *cdio=NULL;
+  CdIo_t *cdio=NULL;
   if (vcd_obj != NULL && vcd_obj->img != NULL)
     cdio = vcd_obj->img;
 
@@ -922,8 +922,8 @@ vcdinfo_lid_get_offset(const vcdinfo_obj_t *obj, lid_t lid,
 static vcdinfo_offset_t *
 _vcdinfo_get_offset_t (const vcdinfo_obj_t *obj, unsigned int offset, bool ext)
 {
-  CdioListNode *node;
-  CdioList *offset_list = ext ? obj->offset_x_list : obj->offset_list;
+  CdioListNode_t *node;
+  CdioList_t *offset_list = ext ? obj->offset_x_list : obj->offset_list;
 
   switch (offset) {
   case PSD_OFS_DISABLED:
@@ -945,7 +945,7 @@ _vcdinfo_get_offset_t (const vcdinfo_obj_t *obj, unsigned int offset, bool ext)
 /*!
   Get the VCD info list.
 */
-CdioList *
+CdioList_t *
 vcdinfo_get_offset_list(const vcdinfo_obj_t *obj)
 {
   if (NULL == obj) return NULL;
@@ -956,7 +956,7 @@ vcdinfo_get_offset_list(const vcdinfo_obj_t *obj)
 /*!
   Get the VCD info extended offset list.
 */
-CdioList *
+CdioList_t *
 vcdinfo_get_offset_x_list(const vcdinfo_obj_t *obj)
 {
   if (NULL == obj) return NULL;
@@ -1055,10 +1055,10 @@ static bool
 _vcdinfo_lid_get_pxd(const vcdinfo_obj_t *obj, PsdListDescriptor_t *pxd,
                      uint16_t lid, bool ext) 
 {
-  CdioListNode *node;
+  CdioListNode_t *node;
   unsigned mult = obj->info.offset_mult;
   const uint8_t *psd = ext ? obj->psd_x : obj->psd;
-  CdioList *offset_list = ext ? obj->offset_x_list : obj->offset_list;
+  CdioList_t *offset_list = ext ? obj->offset_x_list : obj->offset_list;
 
   if (offset_list == NULL) return false;
   
@@ -1642,8 +1642,8 @@ vcdinfo_read_psd (vcdinfo_obj_t *obj)
           return false;
         }
 
-      obj->lot = _vcd_malloc (ISO_BLOCKSIZE * LOT_VCD_SIZE);
-      obj->psd = _vcd_malloc (ISO_BLOCKSIZE * _vcd_len2blocks (psd_size, 
+      obj->lot = calloc(1, ISO_BLOCKSIZE * LOT_VCD_SIZE);
+      obj->psd = calloc(1, ISO_BLOCKSIZE * _vcd_len2blocks (psd_size, 
                                                                ISO_BLOCKSIZE));
       
       if (cdio_read_mode2_sectors (obj->img, (void *) obj->lot, LOT_VCD_SECTOR,
@@ -1794,8 +1794,8 @@ vcdinfo_open_return_t
 vcdinfo_open(vcdinfo_obj_t **obj_p, char *source_name[], 
              driver_id_t source_type, const char access_mode[])
 {
-  CdIo *img;
-  vcdinfo_obj_t *obj = _vcd_malloc(sizeof(vcdinfo_obj_t));
+  CdIo_t *img;
+  vcdinfo_obj_t *obj = calloc(1, sizeof(vcdinfo_obj_t));
   iso9660_stat_t *statbuf;
 
 
@@ -1877,7 +1877,7 @@ vcdinfo_open(vcdinfo_obj_t **obj_p, char *source_name[],
       if (statbuf->size != ISO_BLOCKSIZE)
         vcd_warn ("TRACKS.SVD filesize != %d!", ISO_BLOCKSIZE);
       
-      obj->tracks_buf = _vcd_malloc (ISO_BLOCKSIZE);
+      obj->tracks_buf = calloc(1, ISO_BLOCKSIZE);
 
       free(statbuf);
       if (cdio_read_mode2_sector (obj->img, obj->tracks_buf, lsn, false))
@@ -1898,7 +1898,7 @@ vcdinfo_open(vcdinfo_obj_t **obj_p, char *source_name[],
       lsn_t lsn        = statbuf->lsn;
       uint32_t secsize = statbuf->secsize;
 
-      obj->psd_x       = _vcd_malloc (ISO_BLOCKSIZE * secsize);
+      obj->psd_x       = calloc(1, ISO_BLOCKSIZE * secsize);
       obj->psd_x_size  = statbuf->size;
       
       vcd_debug ("found /EXT/PSD_X.VCD at sector %lu", 
@@ -1913,7 +1913,7 @@ vcdinfo_open(vcdinfo_obj_t **obj_p, char *source_name[],
     if (NULL != statbuf) {
       lsn_t lsn        = statbuf->lsn;
       uint32_t secsize = statbuf->secsize;
-      obj->lot_x       = _vcd_malloc (ISO_BLOCKSIZE * secsize);
+      obj->lot_x       = calloc(1, ISO_BLOCKSIZE * secsize);
       
       vcd_debug ("found /EXT/LOT_X.VCD at sector %lu", 
                  (unsigned long int) lsn);
@@ -1960,7 +1960,7 @@ vcdinfo_open(vcdinfo_obj_t **obj_p, char *source_name[],
 
       vcd_debug ("found SEARCH.DAT at sector %lu", (unsigned long int) lsn);
       
-      obj->search_buf = _vcd_malloc (ISO_BLOCKSIZE * secsize);
+      obj->search_buf = calloc(1, ISO_BLOCKSIZE * secsize);
       
       if (cdio_read_mode2_sectors (img, obj->search_buf, lsn, false, secsize))
         return VCDINFO_OPEN_ERROR;
@@ -1974,7 +1974,7 @@ vcdinfo_open(vcdinfo_obj_t **obj_p, char *source_name[],
                   "file size of SEARCH.DAT! -- rereading");
         
         free (obj->search_buf);
-        obj->search_buf = _vcd_malloc (ISO_BLOCKSIZE 
+        obj->search_buf = calloc(1, ISO_BLOCKSIZE 
                                        * _vcd_len2blocks(size, ISO_BLOCKSIZE));
         
         if (cdio_read_mode2_sectors (img, obj->search_buf, lsn, false, 
@@ -1995,7 +1995,7 @@ vcdinfo_open(vcdinfo_obj_t **obj_p, char *source_name[],
 
     vcd_debug ("found /EXT/SCANDATA.DAT at sector %u", (unsigned int) lsn);
     
-    obj->scandata_buf = _vcd_malloc (ISO_BLOCKSIZE * secsize);
+    obj->scandata_buf = calloc(1, ISO_BLOCKSIZE * secsize);
 
     free(statbuf);
     if (cdio_read_mode2_sectors (img, obj->scandata_buf, lsn, false, secsize))

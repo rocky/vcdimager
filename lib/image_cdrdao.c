@@ -28,6 +28,7 @@
 
 /* Public headers */
 #include <cdio/iso9660.h>
+#include <cdio/util.h>
 #include <cdio/bytesex.h>
 #include <libvcd/sector.h>
 #include <libvcd/logging.h>
@@ -56,7 +57,7 @@ typedef struct {
   int last_snk_idx;
   bool last_pause;
 
-  CdioList *vcd_cue_list;
+  CdioList_t *vcd_cue_list;
 } _img_cdrdao_snk_t;
 
 static void
@@ -73,12 +74,12 @@ _sink_free (void *user_data)
 }
 
 static int
-_set_cuesheet (void *user_data, const CdioList *vcd_cue_list)
+_set_cuesheet (void *user_data, const CdioList_t *vcd_cue_list)
 {
   _img_cdrdao_snk_t *_obj = user_data;
   VcdDataSink *toc_snk = vcd_data_sink_new_stdio (_obj->toc_fname);
 
-  CdioListNode *node;
+  CdioListNode_t *node;
 
   int track_no, index_no;
   const vcd_cue_t *_last_cue = 0;
@@ -92,13 +93,13 @@ _set_cuesheet (void *user_data, const CdioList *vcd_cue_list)
   _obj->vcd_cue_list = _cdio_list_new ();
 
   index_no = track_no = 0;
-  _CDIO_LIST_FOREACH (node, (CdioList *) vcd_cue_list)
+  _CDIO_LIST_FOREACH (node, (CdioList_t *) vcd_cue_list)
     {
       const vcd_cue_t *_cue = _cdio_list_node_data (node);
 
       /* copy cue list while traversing */
       {
-	vcd_cue_t *_cue2 = _vcd_malloc (sizeof (vcd_cue_t));
+	vcd_cue_t *_cue2 = calloc(1, sizeof (vcd_cue_t));
 	*_cue2 = *_cue;
 	_cdio_list_append (_obj->vcd_cue_list, _cue2);
       }
@@ -178,7 +179,7 @@ _vcd_image_cdrdao_write (void *user_data, const void *data, lsn_t lsn)
   long offset;
 
   {
-    CdioListNode *node;
+    CdioListNode_t *node;
     uint32_t _last = 0;
     uint32_t _ofs = 0;
     bool _lpregap = false;
@@ -303,7 +304,7 @@ vcd_image_sink_new_cdrdao (void)
     .set_arg      = _sink_set_arg
   };
 
-  _data = _vcd_malloc (sizeof (_img_cdrdao_snk_t));
+  _data = calloc(1, sizeof (_img_cdrdao_snk_t));
 
   _data->toc_fname = strdup ("videocd.toc");
   _data->img_base = strdup ("videocd");
