@@ -20,6 +20,8 @@ version 0.7.20 (unstable/development)
 
 * some bug fixes.
 
+* library symbol versioning (from Nicolas Boullis)
+
 version 0.7.19 (unstable/development)
 =====================================
 * Use VCD CD-drive auto scanning in vcdxrip and vcd-info that is 
