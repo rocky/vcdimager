@@ -507,10 +507,12 @@ dump_info (vcdinfo_obj_t *obj)
     fprintf (stdout, " psd size: %u\n", 
              (unsigned int) uint32_from_be (info->psd_size));
 
-  if (gl.show.info.seg)
-    fprintf (stdout, " first segment addr: %2.2x:%2.2x:%2.2x\n",
-             info->first_seg_addr.m, info->first_seg_addr.s, info->first_seg_addr.f);
-  
+  if (gl.show.info.seg) {
+    char *psz_msf = cdio_msf_to_str(&info->first_seg_addr);
+    fprintf (stdout, " first segment addr: %s\n", psz_msf);
+    free(psz_msf);
+  }
+    
   if (gl.show.info.ofm)
     fprintf (stdout, " offset multiplier: 0x%2.2x\n", 
              vcdinfo_get_offset_mult(obj));
@@ -527,12 +529,15 @@ dump_info (vcdinfo_obj_t *obj)
       {
         const lsn_t  lsn = vcdinfo_get_seg_lsn(obj, n);
         msf_t  msf;
+        char *psz_msf;
 
         cdio_lsn_to_msf(lsn, &msf);
+        psz_msf = cdio_msf_to_str(&msf);
         fprintf (stdout, " SEGMENT[%4.4d]: track# 0, LSN %6u "
-                 "(MSF %2.2x:%2.2x:%2.2x), %2u sectors\n",
-                 n, (unsigned int) lsn, msf.m, msf.s, msf.f, 
+                 "(MSF %s), %2u sectors\n",
+                 n, (unsigned int) lsn, psz_msf, 
                  (unsigned int) vcdinfo_get_seg_sector_count(obj, n));
+        free(psz_msf);
 
         fprintf (stdout, "   audio: %s, video: %s, continuation %s%s %s\n",
                  vcdinfo_audio_type2str(obj,
@@ -590,13 +595,16 @@ dump_entries (vcdinfo_obj_t *obj)
       {
         const lsn_t  lsn = vcdinfo_get_entry_lsn(obj, n);
         msf_t  msf;
+        char *psz_msf;
 
         cdio_lsn_to_msf(lsn, &msf);
+        psz_msf = cdio_msf_to_str(&msf);
         fprintf (stdout, " ENTRY[%2.2d]: track# %2d (SEQUENCE[%d]), LSN %6u "
-                 "(MSF %2.2x:%2.2x:%2.2x)\n",
+                 "(MSF %s)\n",
                  n, vcdinfo_get_track(obj, n),
                  vcdinfo_get_track(obj, n) - 1,
-                 (unsigned int) lsn, msf.m, msf.s, msf.f);
+                 (unsigned int) lsn, psz_msf);
+        free(psz_msf);
       }
 }
 
@@ -643,32 +651,32 @@ dump_tracks_svd (vcdinfo_obj_t *obj)
           "0 & 1 available",
           "all available"
         };
+      char *psz_msf = cdio_msf_to_str(&(tracks->playing_time[j]));
 
       fprintf (stdout, 
-               " track[%.2d]: %2.2x:%2.2x:%2.2x,"
+               " track[%.2d]: %s,"
                " audio: %s, video: %s,\n"
                "            SVCD subtitle (OGT) stream: %s\n",
-               j,
-               tracks->playing_time[j].m,
-               tracks->playing_time[j].s,
-               tracks->playing_time[j].f,
+               j, psz_msf,
                vcdinfo_audio_type2str(obj, 
                                       vcdinfo_get_track_audio_type(obj, j+1)),
                video_types[tracks2->contents[j].video],
                ogt_str[tracks2->contents[j].ogt]);
+      free(psz_msf);
     }
 
   fprintf (stdout, "\nCVD interpretation (probably)\n");
   for (j = 0;j < tracks->tracks; j++)
     {
-      fprintf (stdout, "(track[%.2d]: %2.2x:%2.2x:%2.2x (cumulated),"
+
+      char *psz_msf = cdio_msf_to_str(&(tracks_v30->track[j].cum_playing_time));
+      fprintf (stdout, "(track[%.2d]: %s (cumulated),"
                " audio: %.2x, ogt: %.2x)\n",
-               j,
-               tracks_v30->track[j].cum_playing_time.m,
-               tracks_v30->track[j].cum_playing_time.s,
-               tracks_v30->track[j].cum_playing_time.f,
+               j, psz_msf,
                tracks_v30->track[j].audio_info,
                tracks_v30->track[j].ogt_info);
+      free(psz_msf);
+      
     }
 }
 
@@ -692,26 +700,27 @@ dump_tracks (const CdIo *cdio)
   /* Read and possibly print track information. */
   for (i = first_track_num; i <= CDIO_CDROM_LEADOUT_TRACK; i++) {
     msf_t msf;
+    char *psz_msf;
     
     if (!cdio_get_track_msf(cdio, i, &msf)) {
       vcd_error("Error getting information for track %i.\n", i);
       continue;
     }
     
+    psz_msf = cdio_msf_to_str(&msf);
     if (i == CDIO_CDROM_LEADOUT_TRACK) {
-      printf("%3d: %2.2x:%2.2x:%2.2x  %06u  leadout\n",
-             (int) i, 
-             msf.m, msf.s, msf.f, 
+      printf("%3d: %s  %06u  leadout\n",
+             (int) i, psz_msf,
              (unsigned int) cdio_msf_to_lsn(&msf));
       break;
       } else {
-      printf("%3d: %2.2x:%2.2x:%2.2x  %06u  %s\n",
-             (int) i, 
-             msf.m, msf.s, msf.f, 
+      printf("%3d: %s  %06u  %s\n",
+             (int) i, psz_msf,
              (unsigned int) cdio_msf_to_lsn(&msf),
              track_format2str[cdio_get_track_format(cdio, i)]);
       
     }
+    free(psz_msf);
     /* skip to leadout? */
     if (i == num_tracks) i = CDIO_CDROM_LEADOUT_TRACK-1;
   }
@@ -742,14 +751,18 @@ dump_scandata_dat (vcdinfo_obj_t *obj)
         {
           const msf_t *msf = &_sd_v2->points[n];
           const uint32_t lsn = cdio_msf_to_lsn(msf);
+          char *psz_msf;
 
           if (!gl.debug_level >= 1
               && n > PRINTED_POINTS
               && n < scandata_count - PRINTED_POINTS)
             continue;
 
-          fprintf (stdout, "  scanpoint[%.4d]: LSN %lu (msf %2.2x:%2.2x:%2.2x)\n",
-                   n, (long unsigned int) lsn, msf->m, msf->s, msf->f);
+          psz_msf = cdio_msf_to_str(msf);
+          fprintf (stdout, "  scanpoint[%.4d]: LSN %lu (msf %s)\n",
+                   n, (long unsigned int) lsn, psz_msf);
+
+          free(psz_msf);
 
           if (!gl.debug_level >= 1
               && n == PRINTED_POINTS
@@ -780,9 +793,10 @@ dump_scandata_dat (vcdinfo_obj_t *obj)
       for (n = 0; n < track_count; n++)
         {
           const msf_t *msf = &_sd1->cum_playtimes[n];
+          char *psz_msf = cdio_msf_to_str(msf);
 
-          fprintf (stdout, "  cumulative_playingtime[%d]: %2.2x:%2.2x:%2.2x\n",
-                   n, msf->m, msf->s, msf->f);
+          fprintf (stdout, "  cumulative_playingtime[%d]: %s\n", n, psz_msf);
+          free(psz_msf);
         }
  
       for (n = 0; n < spi_count; n++)
@@ -811,6 +825,7 @@ dump_scandata_dat (vcdinfo_obj_t *obj)
         {
           const msf_t *msf = &_sd4->scandata_table[n];
           const uint32_t lsn = cdio_msf_to_lsn(msf);
+          char *psz_msf = cdio_msf_to_str(msf);
 
           if (!gl.debug_level >= 1
               && n > PRINTED_POINTS
@@ -818,9 +833,10 @@ dump_scandata_dat (vcdinfo_obj_t *obj)
             continue;
 
           fprintf (stdout, 
-                   "  scanpoint[%.4d] (ofs:%5d): LSN %lu (MSF %2.2x:%2.2x:%2.2x)\n",
+                   "  scanpoint[%.4d] (ofs:%5d): LSN %lu (MSF %s)\n",
                    n, scandata_ofs0 + (n * 3), (unsigned long int) lsn, 
-                   msf->m, msf->s, msf->f);
+                   psz_msf);
+          free(psz_msf);
 
           if (!gl.debug_level >= 1
               && n == PRINTED_POINTS

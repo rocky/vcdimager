@@ -139,12 +139,13 @@ _set_cuesheet (void *user_data, const VcdList *vcd_cue_list)
 
 	  {
 	    msf_t _msf = { 0, 0, 0 };
+	    char *psz_msf;
 
 	    cdio_lba_to_msf (_cue->lsn - last_track_lsn, &_msf);
+	    psz_msf = cdio_msf_to_str(&_msf);
 
-	    vcd_data_sink_printf (toc_snk, 
-				  " INDEX %2.2x:%2.2x:%2.2x\n",
-				  _msf.m, _msf.s, _msf.f);
+	    vcd_data_sink_printf (toc_snk, " INDEX %s\n", psz_msf);
+	    free(psz_msf);
 	  }
 	  break;
 

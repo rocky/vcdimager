@@ -105,6 +105,7 @@ _set_cuesheet (void *user_data, const VcdList *vcd_cue_list)
   _VCD_LIST_FOREACH (node, (VcdList *) vcd_cue_list)
     {
       const vcd_cue_t *_cue = _vcd_list_node_data (node);
+      char *psz_msf;
       
       msf_t _msf = { 0, 0, 0 };
       
@@ -122,19 +123,23 @@ _set_cuesheet (void *user_data, const VcdList *vcd_cue_list)
 	  if (_last_cue && _last_cue->type == VCD_CUE_PREGAP_START)
 	    {
 	      cdio_lba_to_msf (_last_cue->lsn, &_msf);
+	      psz_msf = cdio_msf_to_str(&_msf);
 
 	      vcd_data_sink_printf (_obj->cue_snk, 
-				    "    INDEX %2.2d %2.2x:%2.2x:%2.2x\r\n",
-				    index_no, _msf.m, _msf.s, _msf.f);
+				    "    INDEX %2.2d %s\r\n", 
+				    index_no, psz_msf);
+	      free(psz_msf);
 	    }
 
 	  index_no++;
 
 	  cdio_lba_to_msf (_cue->lsn, &_msf);
+	  psz_msf = cdio_msf_to_str(&_msf);
 
 	  vcd_data_sink_printf (_obj->cue_snk, 
-				"    INDEX %2.2d %2.2x:%2.2x:%2.2x\r\n",
-				index_no, _msf.m, _msf.s, _msf.f);
+				"    INDEX %2.2d %s\r\n",
+				index_no, psz_msf);
+	  free(psz_msf);
 	  break;
 
 	case VCD_CUE_PREGAP_START:
@@ -145,13 +150,15 @@ _set_cuesheet (void *user_data, const VcdList *vcd_cue_list)
 	  vcd_assert (_last_cue != 0);
 
 	  index_no++;
-	  vcd_assert (index_no < 100);
+	  vcd_assert (index_no <= CDIO_CD_MAX_TRACKS);
 
 	  cdio_lba_to_msf (_cue->lsn, &_msf);
+	  psz_msf = cdio_msf_to_str(&_msf);
 
 	  vcd_data_sink_printf (_obj->cue_snk, 
-				"    INDEX %2.2d %2.2x:%2.2x:%2.2x\r\n",
-				index_no, _msf.m, _msf.s, _msf.f);
+				"    INDEX %2.2d %s\r\n",
+				index_no, psz_msf);
+	  free(psz_msf);
 	  break;
 	  
 	case VCD_CUE_END:
