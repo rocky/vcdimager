@@ -81,6 +81,9 @@ _init_xml (void)
   assert (!_init_done);
   _init_done = true;
 
+  xmlKeepBlanksDefaultValue = false;
+  xmlIndentTreeOutput = true; 
+
   /* _xmlExternalEntityLoaderDefault = xmlGetExternalEntityLoader (); */
   xmlSetExternalEntityLoader (_xmlExternalEntityLoader);
 }
@@ -99,7 +102,7 @@ _xmlParseFile(const char *filename)
   if (!ctxt)
     return NULL;
 
-  ctxt->keepBlanks = false;
+  /* ctxt->keepBlanks = false; */
   ctxt->pedantic = true; 
   ctxt->validate = true;
   ctxt->vctxt.nodeMax = 0;
@@ -186,7 +189,7 @@ main (int argc, const char *argv[])
     rc = EXIT_SUCCESS;
   } while (false);
 
-  /* xmlDocDump (stdout, vcd_doc); */
+  xmlDocDump (stdout, vcd_doc);
 
   xmlFreeDoc (vcd_doc);
 

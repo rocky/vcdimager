@@ -160,12 +160,6 @@ LIBVCD_LIBS='$(top_builddir)/libvcd/libvcd.a'
 AC_SUBST(LIBVCD_CFLAGS)
 AC_SUBST(LIBVCD_LIBS)
 
-
-dnl LIBXML2_CFLAGS=`xml2-config --cflags`
-dnl LIBXML2_LIBS=`xml2-config --libs`
-dnl AC_SUBST(LIBXML2_CFLAGS)
-dnl AC_SUBST(LIBXML2_LIBS)
-
 AC_OUTPUT([ \
 	Makefile \
 	libvcd/Makefile \

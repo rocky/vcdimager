@@ -138,6 +138,9 @@ _parse_info (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 
   FOR_EACH (cur, node)
     {
+      if (cur->ns != ns)
+	continue;
+
       GET_ELEM_STR (obj->info.album_id, "album-id", doc, cur, ns);
       GET_ELSE GET_ELEM_LONG (obj->info.volume_count, "volume-count", doc, cur, ns);
       GET_ELSE GET_ELEM_LONG (obj->info.volume_number, "volume-number", doc, cur, ns);
@@ -164,6 +167,9 @@ _parse_pvd (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 
   FOR_EACH (cur, node)
     {
+      if (cur->ns != ns)
+	continue;
+
       GET_ELEM_STR (obj->pvd.volume_id, "volume-id", doc, cur, ns);
       GET_ELSE GET_ELEM_STR (obj->pvd.system_id, "system-id", doc, cur, ns);
       GET_ELSE GET_ELEM_STR (obj->pvd.application_id, "application-id", doc, cur, ns);
@@ -187,6 +193,9 @@ _parse_segments (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr 
   FOR_EACH (cur, node)
     {
       bool rc = false;
+
+      if (cur->ns != ns)
+	continue;
 
       if (!xmlStrcmp (cur->name, "segment-item")) 
 	{
@@ -395,18 +404,23 @@ _parse_mpeg_sequence (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlN
   sequence->entry_point_list = _vcd_list_new ();
 
   FOR_EACH (cur, node)
-    if (!xmlStrcmp (cur->name, "entry"))
-      {
-	struct entry_point_t *entry = malloc (sizeof (struct entry_point_t));
-	memset (entry, 0, sizeof (struct entry_point_t));
+    {
+      if (cur->ns != ns)
+	continue;
 
-	GET_PROP_STR (entry->id, "id", doc, cur, ns);
-	GET_ELEM_DOUBLE (entry->timestamp, "entry", doc, cur, ns);
+      if (!xmlStrcmp (cur->name, "entry"))
+	{
+	  struct entry_point_t *entry = malloc (sizeof (struct entry_point_t));
+	  memset (entry, 0, sizeof (struct entry_point_t));
+	  
+	  GET_PROP_STR (entry->id, "id", doc, cur, ns);
+	  GET_ELEM_DOUBLE (entry->timestamp, "entry", doc, cur, ns);
 
-	_vcd_list_append (sequence->entry_point_list, entry);
-      }
-    else
-      assert (0);
+	  _vcd_list_append (sequence->entry_point_list, entry);
+	}
+      else
+	assert (0);
+    }
 
   return false;
 }
@@ -419,6 +433,10 @@ _parse_sequences (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr
   FOR_EACH (cur, node)
     {
       bool rc = false;
+
+      if (cur->ns != ns)
+	continue;
+
 
       if (!xmlStrcmp (cur->name, "sequence-item")) 
 	rc = _parse_mpeg_sequence (obj, doc, cur, ns);
@@ -453,6 +471,10 @@ _parse_file (struct vcdxml_t *obj, const char path[], xmlDocPtr doc, xmlNodePtr 
 
   FOR_EACH (cur, node)
     {
+      if (cur->ns != ns)
+	continue;
+
+
       GET_ELEM_STR (_name, "name", doc, cur, ns);
       GET_ELSE assert (0);
     }
@@ -594,10 +616,7 @@ _parse_videocd (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr n
       bool rc = false;
 
       if (cur->ns != ns)
-	{
-	  printf ("foreign namespace ignored (%s)\n", cur->name);
-	  continue;
-	}
+	continue;
 
       if (!xmlStrcmp (cur->name, "option")) 
 	rc = _parse_option (obj, doc, cur, ns);

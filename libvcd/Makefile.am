@@ -20,6 +20,8 @@ libvcd_a_SOURCES = \
 	vcd_files.c \
 	vcd_files.h \
 	vcd_files_private.h \
+	vcd_image.c \
+	vcd_image.h \
 	vcd_iso9660.c \
 	vcd_iso9660.h \
 	vcd_iso9660_private.h \
