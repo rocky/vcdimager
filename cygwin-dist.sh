@@ -28,7 +28,7 @@ if [ ! -f configure.in ]
    exit 1
  fi
 
-EXECUTABLES="frontends/cli/vcdimager.exe frontends/cli/vcddebug.exe frontends/xml/vcdxgen.exe frontends/xml/vcdxbuild.exe frontends/xml/vcdxrip.exe"
+EXECUTABLES="frontends/cli/vcdimager.exe frontends/cli/vcddebug.exe frontends/xml/vcdxgen.exe frontends/xml/vcdxbuild.exe frontends/xml/vcdxrip.exe frontends/xml/vcdxminfo.exe"
 
 for E in $EXECUTABLES
 do if [ ! -f "$E" ]

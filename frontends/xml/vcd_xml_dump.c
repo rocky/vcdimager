@@ -348,9 +348,12 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 
 	      _VCD_LIST_FOREACH (node2, _pbc->item_id_list)
 		{
-		  char *_id = _vcd_list_node_data (node2);
+		  const char *_id = _vcd_list_node_data (node2);
 		  
-		  xmlSetProp (xmlNewChild (pl, ns, "play-item", NULL), "ref", _id);
+		  if (_id)
+		    xmlSetProp (xmlNewChild (pl, ns, "play-item", NULL), "ref", _id);
+		  else
+		    xmlNewChild (pl, ns, "play-item", NULL);
 		}
 
 	      break;
@@ -364,15 +367,21 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 	      _ref_area_helper (pl, ns, "prev", _pbc->prev_id, _pbc->prev_area);
 	      _ref_area_helper (pl, ns, "next", _pbc->next_id, _pbc->next_area);
 	      _ref_area_helper (pl, ns, "return", _pbc->retn_id, _pbc->return_area);
-
-	      _VCD_LIST_FOREACH (node2, _pbc->default_id_list)
+	      switch (_pbc->selection_type)
 		{
-		  char *_id = _vcd_list_node_data (node2);
+		case _SEL_NORMAL:
+		  _ref_area_helper (pl, ns, "default", _pbc->retn_id, _pbc->return_area);
+		  break;
 
-		  _ref_area_helper (pl, ns, "default", _id, 
-				    ((node2 == _vcd_list_begin (_pbc->default_id_list)) 
-				     ? _pbc->default_area 
-				     : NULL));
+		case _SEL_MULTI_DEF:
+		  xmlSetProp (xmlNewChild (pl, ns, "multi-default", NULL), 
+			      "numeric", "enabled");
+		  break;
+
+		case _SEL_MULTI_DEF_NO_NUM:
+		  xmlSetProp (xmlNewChild (pl, ns, "multi-default", NULL), 
+			      "numeric", "disabled");
+		  break;
 		}
 
 	      if (_pbc->timeout_id)
@@ -396,9 +405,12 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 		    char *_id = _vcd_list_node_data (node2);
 		    pbc_area_t *_area = node3 ? _vcd_list_node_data (node3) : NULL;
 
-		    _ref_area_helper (pl, ns, "select", _id, _area);
+		    if (_id)
+		      _ref_area_helper (pl, ns, "select", _id, _area);
+		    else
+		      xmlNewChild (pl, ns, "select", NULL);
 
-		    if (node3)
+		    if (_vcd_list_length (_pbc->select_area_list))
 		      node3 = _vcd_list_node_next (node3);
 		  }
 	      }

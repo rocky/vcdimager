@@ -98,7 +98,7 @@
    y2        %XY;        #IMPLIED"
 >
 
-<!ELEMENT selection (bsn?,prev?,next?,return?,default*,timeout?,wait?,loop?,play-item?,select*)>
+<!ELEMENT selection (bsn?,prev?,next?,return?,(multi-default|default)?,timeout?,wait?,loop?,play-item?,select*)>
 <!ATTLIST selection
   %pbcattrs;
 >
@@ -122,12 +122,17 @@
 <!ELEMENT prev EMPTY>
 <!ELEMENT next EMPTY>
 <!ELEMENT return EMPTY>
+<!ELEMENT multi-default EMPTY>
 <!ELEMENT default EMPTY>
 <!ELEMENT timeout EMPTY>
 <!ELEMENT play-item EMPTY>
 <!ELEMENT select EMPTY>
 
 <!ELEMENT next-volume (#PCDATA)>
+
+<!ATTLIST multi-default
+  numeric      (enabled|disabled)    'enabled'
+>
 
 <!ATTLIST loop
   jump-timing  (immediate|delayed)   'immediate'

@@ -29,24 +29,12 @@
 #include <popt.h>
 
 #include <libvcd/vcd_assert.h>
-#include <libvcd/vcd_bitvec.h>
-#include <libvcd/vcd_types.h>
-#include <libvcd/vcd_bytesex.h>
-#include <libvcd/vcd_cd_sector.h>
-#include <libvcd/vcd_files.h>
-#include <libvcd/vcd_files_private.h>
-#include <libvcd/vcd_iso9660.h>
-#include <libvcd/vcd_iso9660_private.h>
-#include <libvcd/vcd_logging.h>
-#include <libvcd/vcd_util.h>
-#include <libvcd/vcd_salloc.h>
-#include <libvcd/vcd_stream_stdio.h>
-#include <libvcd/vcd_image.h>
-#include <libvcd/vcd_image_fs.h>
-#include <libvcd/vcd_image_bincue.h>
-#include <libvcd/vcd_image_linuxcd.h>
 #include <libvcd/vcd_data_structures.h>
-#include <libvcd/vcd_xa.h>
+#include <libvcd/vcd_types.h>
+#include <libvcd/vcd_logging.h>
+#include <libvcd/vcd_mpeg_stream.h>
+#include <libvcd/vcd_util.h>
+#include <libvcd/vcd_stream_stdio.h>
 
 static const char _rcsid[] = "$Id$";
 
@@ -184,7 +172,21 @@ main (int argc, const char *argv[])
         _TAG_PRINT (stdout, "playing-time", "%f", _info->playing_time);
         _TAG_PRINT (stdout, "packets", "%d", _info->packets);
 
-        _TAG_PRINT (stdout, "bitrate", "%d", _info->bitrate);
+        _TAG_PRINT (stdout, "video-bitrate", "%d", _info->bitrate);
+
+        if (_info->video_e0)
+          fprintf (stdout, "  <video-e0 /> <!-- motion -->\n");
+        if (_info->video_e1)
+          fprintf (stdout, "  <video-e1 /> <!-- still -->\n");
+        if (_info->video_e2)
+          fprintf (stdout, "  <video-e2 /> <!-- hi-res still -->\n");
+
+        if (_info->audio_c0)
+          fprintf (stdout, "  <audio-c0 /> <!-- standard audio -->\n");
+        if (_info->audio_c1)
+          fprintf (stdout, "  <audio-c1 /> <!-- 2nd audio -->\n");
+        if (_info->audio_c2)
+          fprintf (stdout, "  <audio-c2 /> <!-- MC5.1 surround -->\n");
 
         /* fprintf (stdout, " v: %d a: %d\n", _info->video_type, _info->audio_type); */
 

@@ -314,6 +314,21 @@ _parse_pbc_selection (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlN
 	{ 
 	  GET_PROP_STR (_pbc->timeout_id, "ref", doc, cur, ns); 
 	}
+      else if (!xmlStrcmp (cur->name, "multi-default"))
+	{
+	  xmlChar *_numeric = NULL;
+
+	  _pbc->selection_type = _SEL_MULTI_DEF;
+
+	  GET_PROP_STR (_numeric, "numeric", doc, cur, ns); 
+	  if (_numeric && !xmlStrcmp (_numeric, "disabled"))
+	    _pbc->selection_type = _SEL_MULTI_DEF_NO_NUM;
+	}
+      else if (!xmlStrcmp (cur->name, "default"))
+	{ 
+	  _pbc->selection_type = _SEL_NORMAL;
+	  GET_PROP_STR (_pbc->default_id, "ref", doc, cur, ns); 
+	}
       else if (!xmlStrcmp (cur->name, "bsn"))
 	{ _pbc->bsn = _get_elem_long ("bsn", doc, cur, ns); }
       else if (!xmlStrcmp (cur->name, "loop"))
@@ -331,31 +346,21 @@ _parse_pbc_selection (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlN
 	{ _pbc->timeout_time = _get_elem_long ("wait", doc, cur, ns); }
       else if (!xmlStrcmp (cur->name, "play-item"))
 	{ GET_PROP_STR (_pbc->item_id, "ref", doc, cur, ns); }
-      else if (!xmlStrcmp (cur->name, "default"))
-	{
-	  xmlChar *_default_ref = NULL;
-
-	  GET_PROP_STR (_default_ref, "ref", doc, cur, ns); 
-	  vcd_assert (_default_ref != NULL);
-	  _vcd_list_append (_pbc->default_id_list, _default_ref);
-
-	  if (!_pbc->default_area)
-	    _get_area_props (&_pbc->default_area, doc, cur, ns);
-	}
       else if (!xmlStrcmp (cur->name, "select"))
 	{
 	  xmlChar *_select_ref = NULL;
 
 	  GET_PROP_STR (_select_ref, "ref", doc, cur, ns); 
-	  vcd_assert (_select_ref != NULL);
+
 	  _vcd_list_append (_pbc->select_id_list, _select_ref);
 
 	  {
-	    pbc_area_t *_area;
+	    pbc_area_t *_area = NULL;
 
 	    _get_area_props (&_area, doc, cur, ns);
 	    _vcd_list_append (_pbc->select_area_list, _area);
 	  }
+	  
 	}
       else
 	vcd_assert_not_reached ();
@@ -398,7 +403,7 @@ _parse_pbc_playlist (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNs
 	  xmlChar *_item_ref = NULL;
 
 	  GET_PROP_STR (_item_ref, "ref", doc, cur, ns); 
-	  vcd_assert (_item_ref != NULL);
+
 	  _vcd_list_append (_pbc->item_id_list, _item_ref);
 	}
       else

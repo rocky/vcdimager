@@ -93,7 +93,7 @@ _pin2str (uint16_t itemid)
   strcpy (buf, "??");
 
   if (itemid < 2) 
-    snprintf (buf, BUF_SIZE, "no item (0x%4.4x)", itemid);
+    snprintf (buf, BUF_SIZE, "play nothing (0x%4.4x)", itemid);
   else if (itemid < 100)
     snprintf (buf, BUF_SIZE, "SEQUENCE[%d] (0x%4.4x)", itemid - 1, itemid);
   else if (itemid < 600)
@@ -223,8 +223,14 @@ _ofs2str (const debug_obj_t *obj, unsigned offset, bool ext)
   VcdList *offset_list = ext ? obj->offset_x_list : obj->offset_list;
   char *buf;
 
-  if (offset == 0xffff)
+  if (offset == PSD_OFS_DISABLED)
     return "disabled";
+
+  if (offset == PSD_OFS_MULTI_DEF)
+    return "multi_def";
+
+  if (offset == PSD_OFS_MULTI_DEF_NO_NUM)
+    return "multi_def_no_num";
 
   buf = _getbuf ();
 
@@ -260,7 +266,9 @@ _visit_pbc (debug_obj_t *obj, unsigned lid, unsigned offset, bool in_lot, bool e
 
   vcd_assert (psd_size % 8 == 0);
 
-  if (offset == 0xffff)
+  if (offset == PSD_OFS_DISABLED
+      || offset == PSD_OFS_MULTI_DEF 
+      || offset == PSD_OFS_MULTI_DEF_NO_NUM)
     return;
 
   vcd_assert (_rofs < psd_size);
@@ -369,7 +377,7 @@ static void
 _visit_lot (debug_obj_t *obj, bool ext)
 {
   const LotVcd *lot = ext ? obj->lot_x : obj->lot;
-  unsigned n, tmp;
+  unsigned n;
 
   if (!ext && !_get_psd_size (obj))
     return;
@@ -378,8 +386,7 @@ _visit_lot (debug_obj_t *obj, bool ext)
     return;
 
   for (n = 0; n < LOT_VCD_OFFSETS; n++)
-    if ((tmp = uint16_from_be (lot->offset[n])) != 0xFFFF)
-      _visit_pbc (obj, n + 1, tmp, true, ext);
+    _visit_pbc (obj, n + 1, uint16_from_be (lot->offset[n]), true, ext);
 
   _vcd_list_sort (ext ? obj->offset_x_list : obj->offset_list, 
                   (_vcd_list_cmp_func) _offset_t_cmp);
@@ -404,7 +411,7 @@ dump_lot (const debug_obj_t *obj, bool ext)
 
   for (n = 0; n < LOT_VCD_OFFSETS; n++)
     {
-      if ((tmp = uint16_from_be (lot->offset[n])) != 0xFFFF)
+      if ((tmp = uint16_from_be (lot->offset[n])) != PSD_OFS_DISABLED)
         {
           if (!n && tmp)
             fprintf (stdout, "warning, LID[1] should have offset = 0!\n");

@@ -1,3 +1,12 @@
+2001-07-27  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* reflected changes from vcd_pbc.c to frontends
+	
+	* libvcd/vcd_pbc.c: multi default list support rewritten from 
+		scratch, added some checks, added support for disabled
+		items in select_id_list	and play_item_list, added extended
+		end list features.
+
 2001-07-26  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* frontends/xml/vcd_xml_minfo.c:

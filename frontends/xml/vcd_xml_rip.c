@@ -308,15 +308,15 @@ _parse_info (struct vcdxml_t *obj, VcdImageSource *img)
     }
 
   obj->info.album_id = strdup (_strip_trail (info.album_desc, 16));
-  obj->info.volume_count = UINT16_FROM_BE (info.vol_count);
-  obj->info.volume_number = UINT16_FROM_BE (info.vol_id);
+  obj->info.volume_count = uint16_from_be (info.vol_count);
+  obj->info.volume_number = uint16_from_be (info.vol_id);
 
   obj->info.restriction = info.flags.restriction;
   obj->info.use_lid2 = info.flags.use_lid2;
   obj->info.use_sequence2 = info.flags.use_track3;
 
-  obj->info.psd_size = UINT32_FROM_BE (info.psd_size);
-  obj->info.max_lid = UINT16_FROM_BE (info.lot_entries);
+  obj->info.psd_size = uint32_from_be (info.psd_size);
+  obj->info.max_lid = uint16_from_be (info.lot_entries);
 
   {
     unsigned segment_start;
@@ -326,7 +326,7 @@ _parse_info (struct vcdxml_t *obj, VcdImageSource *img)
 
     segment_start = msf_to_lba (&info.first_seg_addr);
 
-    max_seg_num = UINT16_FROM_BE (info.item_count);
+    max_seg_num = uint16_from_be (info.item_count);
 
     if (segment_start < 150)
       return 0;
@@ -392,7 +392,7 @@ _parse_entries (struct vcdxml_t *obj, VcdImageSource *img)
     }
 
   ltrack = 0;
-  for (idx = 0; idx < UINT16_FROM_BE (entries.entry_count); idx++)
+  for (idx = 0; idx < uint16_from_be (entries.entry_count); idx++)
     {
       uint32_t extent = msf_to_lba(&(entries.entry[idx].msf));
       uint8_t track = from_bcd8 (entries.entry[idx].n);
@@ -500,7 +500,7 @@ _ofs2id (unsigned offset, const struct _pbc_ctx *_ctx)
   unsigned sl_num = 0, el_num = 0, pl_num = 0;
   offset_t *ofs = NULL;
   
-  if (offset == 0xffff)
+  if (offset == PSD_OFS_DISABLED)
     return NULL;
 
   _VCD_LIST_FOREACH (node, _ctx->offset_list)
@@ -599,18 +599,18 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
       _pbc = vcd_pbc_new (PBC_PLAYLIST);
       {
 	const PsdPlayListDescriptor *d = (const void *) _buf;
-	_pbc->prev_id = _xstrdup (_ofs2id (UINT16_FROM_BE (d->prev_ofs), _ctx));
-	_pbc->next_id = _xstrdup (_ofs2id (UINT16_FROM_BE (d->next_ofs), _ctx));
-	_pbc->retn_id = _xstrdup (_ofs2id (UINT16_FROM_BE (d->return_ofs), _ctx));
+	_pbc->prev_id = _xstrdup (_ofs2id (uint16_from_be (d->prev_ofs), _ctx));
+	_pbc->next_id = _xstrdup (_ofs2id (uint16_from_be (d->next_ofs), _ctx));
+	_pbc->retn_id = _xstrdup (_ofs2id (uint16_from_be (d->return_ofs), _ctx));
 	
-	_pbc->playing_time = (double) (UINT16_FROM_BE (d->ptime)) / 15.0;
+	_pbc->playing_time = (double) (uint16_from_be (d->ptime)) / 15.0;
 	_pbc->wait_time = _calc_time (d->wtime);
 	_pbc->auto_pause_time =  _calc_time(d->atime);
 
 	for (n = 0; n < d->noi; n++)
 	  {
 	    _vcd_list_append (_pbc->item_id_list, 
-			      _xstrdup (_pin2id (UINT16_FROM_BE (d->itemid[n]), _ctx)));
+			      _xstrdup (_pin2id (uint16_from_be (d->itemid[n]), _ctx)));
 	  }
       }
       break;
@@ -621,28 +621,44 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
       {
 	const PsdSelectionListDescriptor *d = (const void *) _buf;
 	_pbc->bsn = d->bsn;
-	_pbc->prev_id = _xstrdup (_ofs2id (UINT16_FROM_BE (d->prev_ofs), _ctx));
-	_pbc->next_id = _xstrdup (_ofs2id (UINT16_FROM_BE (d->next_ofs), _ctx));
-	_pbc->retn_id = _xstrdup (_ofs2id (UINT16_FROM_BE (d->return_ofs), _ctx));
+	_pbc->prev_id = _xstrdup (_ofs2id (uint16_from_be (d->prev_ofs), _ctx));
+	_pbc->next_id = _xstrdup (_ofs2id (uint16_from_be (d->next_ofs), _ctx));
+	_pbc->retn_id = _xstrdup (_ofs2id (uint16_from_be (d->return_ofs), _ctx));
 
-	vcd_assert (UINT16_FROM_BE (d->default_ofs) != 0xfffe);
-	vcd_assert (UINT16_FROM_BE (d->default_ofs) != 0xfffd); /* fixme -- multidef lists
-							       not supported yet */
-	if (_ofs2id (UINT16_FROM_BE (d->default_ofs), _ctx))
-	  _vcd_list_append (_pbc->default_id_list,
-			    _xstrdup (_ofs2id (UINT16_FROM_BE (d->default_ofs), _ctx)));
+	switch (uint16_from_be (d->default_ofs))
+	  {
+	  case PSD_OFS_DISABLED:
+	    _pbc->default_id = NULL;
+	    _pbc->selection_type = _SEL_NORMAL;
+	    break;
+
+	  case PSD_OFS_MULTI_DEF:
+	    _pbc->default_id = NULL;
+	    _pbc->selection_type = _SEL_MULTI_DEF;
+	    break;
+
+	  case PSD_OFS_MULTI_DEF_NO_NUM:
+	    _pbc->default_id = NULL;
+	    _pbc->selection_type = _SEL_MULTI_DEF_NO_NUM;
+	    break;
+
+	  default:
+	    _pbc->default_id = _xstrdup (_ofs2id (uint16_from_be (d->default_ofs), _ctx));
+	    _pbc->selection_type = _SEL_NORMAL;
+	    break;
+	  }
 
 	_pbc->timeout_id = 
-	  _xstrdup (_ofs2id (UINT16_FROM_BE (d->timeout_ofs), _ctx));
+	  _xstrdup (_ofs2id (uint16_from_be (d->timeout_ofs), _ctx));
 	_pbc->timeout_time = _calc_time (d->totime);
 	_pbc->jump_delayed = (0x80 & d->loop) != 0;
 	_pbc->loop_count = (0x7f & d->loop);
-	_pbc->item_id = _xstrdup (_pin2id (UINT16_FROM_BE (d->itemid), _ctx));
+	_pbc->item_id = _xstrdup (_pin2id (uint16_from_be (d->itemid), _ctx));
 
 	for (n = 0; n < d->nos; n++)
 	  {
 	    _vcd_list_append (_pbc->select_id_list, 
-			      _xstrdup (_ofs2id (UINT16_FROM_BE (d->ofs[n]), _ctx)));
+			      _xstrdup (_ofs2id (uint16_from_be (d->ofs[n]), _ctx)));
 	  }
 
 	if (d->type == PSD_TYPE_EXT_SELECTION_LIST
@@ -702,8 +718,16 @@ _visit_pbc (struct _pbc_ctx *obj, unsigned lid, unsigned offset, bool in_lot)
 
   vcd_assert (obj->psd_size % 8 == 0);
 
-  if (offset == 0xffff)
-    return;
+  switch (offset)
+    {
+    case PSD_OFS_DISABLED:
+    case PSD_OFS_MULTI_DEF:
+    case PSD_OFS_MULTI_DEF_NO_NUM:
+      return;
+
+    default:
+      break;
+    }
 
   vcd_assert (_rofs < obj->psd_size);
 
@@ -739,15 +763,15 @@ _visit_pbc (struct _pbc_ctx *obj, unsigned lid, unsigned offset, bool in_lot)
           (const void *) (obj->psd + _rofs);
 
         if (!ofs->lid)
-          ofs->lid = UINT16_FROM_BE (d->lid) & 0x7fff;
+          ofs->lid = uint16_from_be (d->lid) & 0x7fff;
         else 
-          if (ofs->lid != (UINT16_FROM_BE (d->lid) & 0x7fff))
+          if (ofs->lid != (uint16_from_be (d->lid) & 0x7fff))
             vcd_warn ("LOT entry assigned LID %d, but descriptor has LID %d",
-                      ofs->lid, UINT16_FROM_BE (d->lid) & 0x7fff);
+                      ofs->lid, uint16_from_be (d->lid) & 0x7fff);
 
-        _visit_pbc (obj, 0, UINT16_FROM_BE (d->prev_ofs), false);
-        _visit_pbc (obj, 0, UINT16_FROM_BE (d->next_ofs), false);
-        _visit_pbc (obj, 0, UINT16_FROM_BE (d->return_ofs), false);
+        _visit_pbc (obj, 0, uint16_from_be (d->prev_ofs), false);
+        _visit_pbc (obj, 0, uint16_from_be (d->next_ofs), false);
+        _visit_pbc (obj, 0, uint16_from_be (d->return_ofs), false);
       }
       break;
 
@@ -762,20 +786,20 @@ _visit_pbc (struct _pbc_ctx *obj, unsigned lid, unsigned offset, bool in_lot)
         int idx;
 
         if (!ofs->lid)
-          ofs->lid = UINT16_FROM_BE (d->lid) & 0x7fff;
+          ofs->lid = uint16_from_be (d->lid) & 0x7fff;
         else 
-          if (ofs->lid != (UINT16_FROM_BE (d->lid) & 0x7fff))
+          if (ofs->lid != (uint16_from_be (d->lid) & 0x7fff))
             vcd_warn ("LOT entry assigned LID %d, but descriptor has LID %d",
-                      ofs->lid, UINT16_FROM_BE (d->lid) & 0x7fff);
+                      ofs->lid, uint16_from_be (d->lid) & 0x7fff);
 
-        _visit_pbc (obj, 0, UINT16_FROM_BE (d->prev_ofs), false);
-        _visit_pbc (obj, 0, UINT16_FROM_BE (d->next_ofs), false);
-        _visit_pbc (obj, 0, UINT16_FROM_BE (d->return_ofs), false);
-        _visit_pbc (obj, 0, UINT16_FROM_BE (d->default_ofs), false);
-        _visit_pbc (obj, 0, UINT16_FROM_BE (d->timeout_ofs), false);
+        _visit_pbc (obj, 0, uint16_from_be (d->prev_ofs), false);
+        _visit_pbc (obj, 0, uint16_from_be (d->next_ofs), false);
+        _visit_pbc (obj, 0, uint16_from_be (d->return_ofs), false);
+        _visit_pbc (obj, 0, uint16_from_be (d->default_ofs), false);
+        _visit_pbc (obj, 0, uint16_from_be (d->timeout_ofs), false);
 
         for (idx = 0; idx < d->nos; idx++)
-          _visit_pbc (obj, 0, UINT16_FROM_BE (d->ofs[idx]), false);
+          _visit_pbc (obj, 0, uint16_from_be (d->ofs[idx]), false);
         
       }
       break;
@@ -818,7 +842,7 @@ _visit_lot (struct _pbc_ctx *obj)
   unsigned n, tmp;
 
   for (n = 0; n < LOT_VCD_OFFSETS; n++)
-    if ((tmp = UINT16_FROM_BE (lot->offset[n])) != 0xFFFF)
+    if ((tmp = uint16_from_be (lot->offset[n])) != PSD_OFS_DISABLED)
       _visit_pbc (obj, n + 1, tmp, true);
 
   _vcd_list_sort (obj->offset_list, (_vcd_list_cmp_func) _offset_t_cmp);
@@ -902,7 +926,7 @@ _parse_pbc (struct vcdxml_t *obj, VcdImageSource *img)
       offset_t *ofs = _vcd_list_node_data (node);
       pbc_t *_pbc;
 
-      vcd_assert (ofs->offset != 0xffff);
+      vcd_assert (ofs->offset != PSD_OFS_DISABLED);
 
       if ((_pbc = _pbc_node_read (&_pctx, ofs->offset)))
 	_vcd_list_append (obj->pbc_list, _pbc);

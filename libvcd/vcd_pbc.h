@@ -26,6 +26,10 @@
 #include <libvcd/vcd_types.h>
 #include <libvcd/vcd_util.h>
 
+#define PSD_OFS_DISABLED         0xffff
+#define PSD_OFS_MULTI_DEF        0xfffe
+#define PSD_OFS_MULTI_DEF_NO_NUM 0xfffd
+
 enum pbc_type_t {
   PBC_INVALID = 0,
   PBC_PLAYLIST,
@@ -33,7 +37,8 @@ enum pbc_type_t {
   PBC_END
 };
 
-/* (0,0) == upper left , (255,255) == lower right */
+/* (0,0) == upper left , (255,255) == lower right 
+   setting all to zero disables area */
 struct psd_area_t
 {
   uint8_t x1                 GNUC_PACKED; /* upper left */
@@ -78,14 +83,20 @@ struct _pbc_t {
   VcdList *item_id_list; /* char */
 
   /* used for selection lists */
+  enum selection_type_t {
+    _SEL_NORMAL = 0,
+    _SEL_MULTI_DEF,
+    _SEL_MULTI_DEF_NO_NUM
+  } selection_type;
+
   pbc_area_t *prev_area;
   pbc_area_t *next_area;
   pbc_area_t *return_area;
-  pbc_area_t *default_area;
+  pbc_area_t *default_area; /* depends on selection_type */
   VcdList *select_area_list; /* pbc_area_t */
 
   unsigned bsn;
-  VcdList *default_id_list; /* char */
+  char *default_id;
   char *timeout_id;
   int timeout_time;
   unsigned loop_count;
@@ -95,7 +106,7 @@ struct _pbc_t {
 
   /* used for end lists */
   char *image_id;
-  unsigned next_disc_no;
+  unsigned next_disc;
 
   /* computed values */
   unsigned lid;
@@ -105,6 +116,7 @@ struct _pbc_t {
 
 enum item_type_t {
   ITEM_TYPE_NOTFOUND = 0,
+  ITEM_TYPE_NOOP,
   ITEM_TYPE_TRACK,
   ITEM_TYPE_ENTRY,
   ITEM_TYPE_SEGMENT,
