@@ -21,6 +21,8 @@
 #ifndef __VCD_DATA_STRUCTURES_H__
 #define __VCD_DATA_STRUCTURES_H__
 
+#include "vcd_types.h"
+
 /* opaque... */
 typedef struct _VcdList VcdList;
 typedef struct _VcdListNode VcdListNode;
@@ -48,12 +50,52 @@ VcdListNode *_vcd_list_at (VcdList *list, int idx);
 
 VcdListNode *_vcd_list_begin (VcdList *list);
 
+VcdListNode *_vcd_list_end (VcdList *list);
+
 VcdListNode *_vcd_list_node_next (VcdListNode *node);
 
 void _vcd_list_node_free (VcdListNode *node, int free_data);
 
 void *_vcd_list_node_data (VcdListNode *node);
 
+
+/* n-way tree */
+
+typedef struct _VcdTree VcdTree;
+typedef struct _VcdTreeNode VcdTreeNode;
+
+typedef void (*_vcd_tree_node_traversal_func) (VcdTreeNode *node, 
+                                               void *user_data);
+
+VcdTree *_vcd_tree_new (void *root_data);
+
+void _vcd_tree_destroy (VcdTree *tree, bool free_data);
+
+VcdTreeNode *_vcd_tree_root (VcdTree *tree);
+
+
+void *_vcd_tree_node_data (VcdTreeNode *node);
+
+void _vcd_tree_node_destroy (VcdTreeNode *node, bool free_data);
+
+void *_vcd_tree_node_set_data (VcdTreeNode *node, void *new_data);
+
+VcdTreeNode *_vcd_tree_node_append_child (VcdTreeNode *pnode, void *cdata);
+
+VcdTreeNode *_vcd_tree_node_first_child (VcdTreeNode *node);
+
+VcdTreeNode *_vcd_tree_node_next_sibling (VcdTreeNode *node);
+
+VcdTreeNode *_vcd_tree_node_parent (VcdTreeNode *node);
+
+VcdTreeNode *_vcd_tree_node_root (VcdTreeNode *node);
+
+bool _vcd_tree_node_is_root (VcdTreeNode *node);
+
+void _vcd_tree_node_traverse (VcdTreeNode *node, 
+                              _vcd_tree_node_traversal_func trav_func,
+                              void *user_data);
+     
 #endif /* __VCD_DATA_STRUCTURES_H__ */
 
 /* 

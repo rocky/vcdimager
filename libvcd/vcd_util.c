@@ -108,6 +108,19 @@ _vcd_malloc (size_t size)
   return new_mem;
 }
 
+void *
+_vcd_memdup (const void *mem, size_t count)
+{
+  void *new_mem = NULL;
+
+  if (mem) {
+    new_mem = _vcd_malloc (count);
+    memcpy (new_mem, mem, count);
+  }
+  
+  return new_mem;
+}
+
 
 /* 
  * Local variables:

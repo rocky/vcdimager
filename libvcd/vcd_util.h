@@ -44,6 +44,9 @@ _vcd_strfreev(char **strv);
 void *
 _vcd_malloc (size_t size);
 
+void *
+_vcd_memdup (const void *mem, size_t count);
+
 #endif /* __VCD_UTIL_H__ */
 
 

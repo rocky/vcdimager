@@ -1,3 +1,11 @@
+2001-01-05  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_directory.c: make use of new tree implementation
+
+	* libvcd/vcd_data_structures.c: added n-way tree implementation
+
+	* libvcd/vcd_util.c (_vcd_memdup): moved/new function
+
 2001-01-04  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_cd_sector.c: enforced _vcd prefix

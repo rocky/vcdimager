@@ -22,9 +22,10 @@
 #define _DIRECTORY_H_
 
 #include "vcd_types.h"
+#include "vcd_data_structures.h"
 
 /* opaque data structure representing the ISO directory tree */
-typedef struct _VcdDirectory VcdDirectory;
+typedef VcdTree VcdDirectory;
 
 VcdDirectory *
 _vcd_directory_new (void);

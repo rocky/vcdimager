@@ -20,6 +20,7 @@
 
 #include "vcd_data_structures.h"
 #include "vcd_util.h"
+#include "vcd_types.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -176,6 +177,14 @@ _vcd_list_begin (VcdList *list)
 }
 
 VcdListNode *
+_vcd_list_end (VcdList *list)
+{
+  assert (list != NULL);
+
+  return list->end;
+}
+
+VcdListNode *
 _vcd_list_node_next (VcdListNode *node)
 {
   if (node)
@@ -242,6 +251,180 @@ _vcd_list_node_data (VcdListNode *node)
     return node->data;
 
   return NULL;
+}
+
+/*
+ * n-way tree based on list -- somewhat inefficent 
+ */
+
+struct _VcdTree
+{
+  VcdTreeNode *root;
+};
+
+struct _VcdTreeNode
+{
+  void *data;
+
+  VcdListNode *listnode;
+  VcdTree *tree;
+  VcdTreeNode *parent;
+  VcdList *children;
+};
+
+VcdTree *
+_vcd_tree_new (void *root_data)
+{
+  VcdTree *new_tree;
+
+  new_tree = _vcd_malloc (sizeof (VcdTree));
+
+  new_tree->root = _vcd_malloc (sizeof (VcdTreeNode));
+
+  new_tree->root->data = root_data;
+  new_tree->root->tree = new_tree;
+  new_tree->root->parent = NULL;
+  new_tree->root->children = NULL;
+  new_tree->root->listnode = NULL;
+  
+  return new_tree;
+}
+
+void
+_vcd_tree_destroy (VcdTree *tree, bool free_data)
+{
+  _vcd_tree_node_destroy (tree->root, free_data);
+  
+  free (tree->root);
+  free (tree);
+}
+
+void
+_vcd_tree_node_destroy (VcdTreeNode *node, bool free_data)
+{
+  VcdTreeNode *child, *nxt_child;
+  
+  assert(node != NULL);
+
+  child = _vcd_tree_node_first_child (node);
+  while(child) {
+    nxt_child = _vcd_tree_node_next_sibling (child);
+    _vcd_tree_node_destroy (child, free_data);
+    child = nxt_child;
+  }
+
+  if (node->children)
+    {
+      assert (_vcd_list_length (node->children) == 0);
+      _vcd_list_free (node->children, true);
+      node->children = NULL;
+    }
+
+  if (free_data)
+    free (_vcd_tree_node_set_data (node, NULL));
+
+  if (node->parent)
+    _vcd_list_node_free (node->listnode, true);
+  else
+    _vcd_tree_node_set_data (node, NULL);
+}
+
+VcdTreeNode *
+_vcd_tree_root (VcdTree *tree)
+{
+  return tree->root;
+}
+
+void *
+_vcd_tree_node_data (VcdTreeNode *node)
+{
+  return node->data;
+}
+
+void *
+_vcd_tree_node_set_data (VcdTreeNode *node, void *new_data)
+{
+  void *old_data = node->data;
+
+  node->data = new_data;
+
+  return old_data;
+}
+
+VcdTreeNode *
+_vcd_tree_node_append_child (VcdTreeNode *pnode, void *cdata)
+{
+  VcdTreeNode *nnode;
+
+  assert(pnode != NULL);
+
+  if (!pnode->children)
+    pnode->children = _vcd_list_new ();
+
+  nnode = _vcd_malloc (sizeof (VcdTreeNode));
+
+  _vcd_list_append (pnode->children, nnode);
+
+  nnode->data = cdata;
+  nnode->parent = pnode;
+  nnode->tree = pnode->tree;
+  nnode->listnode = _vcd_list_end (pnode->children);
+
+  return nnode;
+}
+
+VcdTreeNode *
+_vcd_tree_node_first_child (VcdTreeNode *node)
+{
+  assert (node != NULL);
+
+  if (!node->children)
+    return NULL;
+
+  return _vcd_list_node_data (_vcd_list_begin (node->children));
+}
+
+VcdTreeNode *
+_vcd_tree_node_next_sibling (VcdTreeNode *node)
+{
+  assert (node != NULL);
+
+  return _vcd_list_node_data (_vcd_list_node_next (node->listnode));
+}
+
+/* pre-order */
+
+void
+_vcd_tree_node_traverse (VcdTreeNode *node, 
+                         _vcd_tree_node_traversal_func trav_func,
+                         void *user_data)
+{
+  VcdTreeNode *child;
+
+  assert(node != NULL);
+
+  trav_func(node, user_data);
+
+  child = _vcd_tree_node_first_child (node);
+  while(child) {
+    _vcd_tree_node_traverse (child, trav_func, user_data);
+    child = _vcd_tree_node_next_sibling (child);
+  }
+}
+
+VcdTreeNode *_vcd_tree_node_parent (VcdTreeNode *node)
+{
+  return node->parent;
+}
+
+VcdTreeNode *_vcd_tree_node_root (VcdTreeNode *node)
+{
+  return node->tree->root;
+}
+
+bool _vcd_tree_node_is_root (VcdTreeNode *node)
+{
+  return (node->parent == NULL);
 }
 
 /* eof */
