@@ -1,5 +1,7 @@
 2001-06-30  Herbert Valerio Riedel  <hvr@gnu.org>
 
+ 	* configure.in: bumped version up to 0.7.7
+
 	* frontends/xml/videocd.dtd: added <autoplay> tag
 
 	* frontends/cli/vcd_debug.c (dump_info): added autoplay and reserved1
