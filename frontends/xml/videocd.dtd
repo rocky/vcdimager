@@ -37,16 +37,15 @@
 
 <!--======================================================================-->
 
-<!ELEMENT info (album-id?,volume-count?,volume-number?,next-volume-use-sequence2?,next-volume-use-lid2?,autoplay?,restriction?,time-offset?)>
+<!ELEMENT info (album-id?,volume-count?,volume-number?,next-volume-use-sequence2?,next-volume-use-lid2?,restriction?,start-time-offset*)>
 
 <!ELEMENT album-id (#PCDATA)>
 <!ELEMENT volume-count (#PCDATA)>
 <!ELEMENT volume-number (#PCDATA)>
 <!ELEMENT next-volume-use-sequence2 EMPTY>
 <!ELEMENT next-volume-use-lid2 EMPTY>
-<!ELEMENT autoplay EMPTY>
 <!ELEMENT restriction (#PCDATA)>
-<!ELEMENT time-offset (#PCDATA)>
+<!ELEMENT start-time-offset (#PCDATA)>
 
 <!--======================================================================-->
 
@@ -125,7 +124,7 @@
   %pbcattrs;
 >
 
-<!ELEMENT playlist (prev?,next?,return?,playtime?,wait?,autowait?,play-item*)>
+<!ELEMENT playlist (prev?,next?,return?,playtime?,wait?,autowait?,play-item+)>
 <!ATTLIST playlist
   %pbcattrs;
 >

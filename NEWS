@@ -12,10 +12,12 @@ version 0.7.8 (unstable/development)
 * implemented end list extension for SVCDs
 * reverted autoplay experiment
 * minor compatibility change for SVCD compatibility
-* fixed non working 
+* fixed non working "svcd vcd30 entrysvd" option
 * added new tool for dumping mpeg infos/aps addresses
 * added support for empty (ref-less) <select> and <play-item>'s
 * fixed/added support for multi default selections
+* implement <default-entry> for allowing to reference the default 
+  entry point of sequence items
 
 version 0.7.7 (unstable/development)
 ====================================

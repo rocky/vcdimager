@@ -43,7 +43,7 @@ approved by Herbert Valerio Riedel.
 @subtitle $Id$
 @subtitle The GNU Video CD Authoring Tools.
 @subtitle for version @value{VERSION}, @value{UPDATED}
-@author Herbert Valerio Riedel
+@author Herbert Valerio Riedel et al.
 
 @page
 @vskip 0pt plus 1filll
@@ -611,7 +611,8 @@ These are the corresponding file names on Super Video CD's, and fulfill
 the same purpose as those defined for the Video CD 2.0 format.
 
 @item /SVCD/SEARCH.DAT
-This mandatory file contains access point sector addresses.
+This file, mandatory for Super Video CD's, contains access point sector
+addresses.
 
 @item /SVCD/TRACKS.SVD
 In this file additional information (e.g. playing time and stream
@@ -1156,7 +1157,58 @@ with me at @email{<hvr@@gnu.org>}.}
 @end menu
 
 @node Common Rules, @code{<videocd>} Root, VideoCD XML Description, VideoCD XML Description
-@section Common Rules
+
+@section XML Simplified Rules
+
+@itemize @bullet
+@item
+All attribute values must be quoted.
+
+@item
+White space within content, including line breaks, is significant.
+
+@item
+All start tags (@samp{<pbc>}) must have corresponding end tags (@samp{</pbc>}).
+
+@item
+Tags without content and those which are empty elements must use the
+@samp{/>}-notation, e.g.: @samp{<next-volume-use-lid2 />}.
+
+@item
+Elements must not overlap; they may be nested, however.
+
+@item
+Element names are case sensitive: @samp{<videocd>} and @samp{<VideoCD>}
+are two different entities.
+@end itemize
+
+@section DTD Notation
+
+@table @code
+@item ()
+grouping expressions
+
+@item A?
+A or nothing (A is optional, but at most one A)
+
+@item A+
+one or more A?s (at least one)
+
+@item A*
+zero or more A's (A optional, but could be several A's)
+
+@item (A | B | C)
+either A or B or C (but only one)
+
+@item (A, B, C)
+first A, followed by B, then C (all, and in this order)
+
+@item (A & B)
+both A and B, in any order
+
+@end table
+
+@section Common VideoCD XML Rules
 
 All time related entries@footnote{@code{<wait>}, @code{<autowait>},
 @code{<playtime>}, @code{<time-offset>}} are given in seconds.
@@ -1167,10 +1219,12 @@ means @emph{repeat forever} and @emph{play until end} accordingly.
 
 Items and their associated IDs fall into two categories, @emph{play
 items} and @emph{PSD items}. Every reference to an ID has to be of the
-right class, otherwise the reference can't be resolved, due to a missing
+right class, otherwise the reference can't be resolved, due to a failing
 lookup. A @emph{play item} can be any of the following:
 
 @itemize @bullet
+@item
+play nothing item, (omitted @code{ref} attribute).
 @item
 sequence item, @code{<sequence-item>}.
 @item
@@ -1182,6 +1236,8 @@ segment play item, @code{<segment-item>}.
 Whereas a @emph{PSD item} is required to be one of:
 
 @itemize @bullet
+@item
+disabled, (omitted @code{ref} attribute).
 @item
 selection list, @code{<selection>}.
 @item
@@ -1232,6 +1288,8 @@ Supported combinations of @var{class} and @var{version} are listed below:
 @tab SuperVideoCD 1.0 (IEC-62107)
 @end multitable
 
+The @code{xmlns} attribute defines the @acronym{XML} namespace.
+
 @node @code{<option>} Element, @code{<info>} Container, @code{<videocd>} Root, @code{<videocd>} Root
 @subsection @code{<option>} Element
 
@@ -1279,7 +1337,7 @@ Data}.
                                          next-volume-use-sequence2?,
                                          next-volume-use-lid2?,
                                          restriction?,
-                                         time-offset?)>
+                                         start-time-offset*)>
 
 <!ELEMENT album-id                      (#PCDATA)>
 <!ELEMENT volume-count                  (#PCDATA)>
@@ -1287,8 +1345,46 @@ Data}.
 <!ELEMENT next-volume-use-sequence2     EMPTY>
 <!ELEMENT next-volume-use-lid2          EMPTY>
 <!ELEMENT restriction                   (#PCDATA)>
-<!ELEMENT time-offset                   (#PCDATA)>
+<!ELEMENT start-time-offset             (#PCDATA)>
 @end example
+
+The @code{<info>} section allows to customize the information contained
+in the @file{VCD/INFO.VCD} or @file{VCD/INFO.SVD}.
+
+@table @code
+@item <album-id>
+Name of the album@footnote{An @emph{album} is defined as a series of
+discs which contain related content} which the discs belongs to.
+
+@item <volume-count>
+Total number of volumes (discs) in the album identified by @code{<album-id>}.
+
+@item <volume-number>
+Ordinal number of the volume (disc) in the album.
+
+@item <next-volume-use-sequence2/>
+If @acronym{PBC} interpretation is disabled, start the next disc if it
+has the same @code{<album-id>} at the second sequence instead of the
+first.
+
+@item <next-volume-use-lid2/>
+If @acronym{PBC} is present and interpretation enabled, start the next
+disc if it has the same @code{<album-id>} at the second @acronym{PBC}
+list instead of the first one.
+
+@item <restriction>
+Restriction category. This element allows to set viewing restrictions
+which may be interpreted by the playing device. The allowed range goes
+from @samp{0}, i.e. unrestricted, to @samp{3}, i.e. restriction category
+3.@footnote{The exact meaning of the restriction categories is depending
+on the interpreting playing device.}
+
+@item <start-time-offset>
+Only for Super Video CD's. Up to 5 @code{<start-time-offset>} may be
+defined, which represent the start time offsets for the first 5 discs of
+an album. @emph{not implemented yet}
+
+@end table
 
 @node @code{<pvd>} Container, @code{<filesystem>} Container, @code{<info>} Container, @code{<videocd>} Root
 @subsection @code{<pvd>} Container
@@ -1307,6 +1403,31 @@ Data}.
 <!ELEMENT publisher-id                  (#PCDATA)>
 @end example
 
+This part of the XML structure describes the primary volume descriptor
+of the disc.
+
+@table @code
+@item <volume-id>
+Volume label of the @acronym{CD-ROM}. Content restricted to upto 32
+d-characters.
+
+@item <system-id>
+System id of the @acronym{CD-ROM}. Content restricted to upto 32
+a-characters. Should be set to @samp{CD-RTOS CD-BRIDGE} for Video CD's
+for @acronym{CD-i} compatibility.  This field is overriden by vcdimager and set to
+@samp{CD-RTOS CD-BRIDGE}.
+
+@item <application-id>
+Defines the application pathname for @acronym{CD-i} playing devices.
+
+@item <preparer-id>
+This field is used by vcdimager to put a version string on the Video CD,
+regardless of the content given in the XML description.
+
+@item <publisher-id>
+@emph{not implemented yet}.
+@end table
+
 @node @code{<filesystem>} Container, @code{<segment-items>} Container, @code{<pvd>} Container, @code{<videocd>} Root
 @subsection @code{<filesystem>} Container
 
@@ -1319,6 +1440,10 @@ Data}.
 <!ELEMENT filesystem                    (folder*,
                                          file*)>
 @end example
+
+This section of the @acronym{XML} description allows for the creation of
+additional folders and files into the ISO9660 filesystem on the Video
+CD.
 
 @node @code{<folder>} Element/Containter, @code{<file>} Element/Containter, @code{<filesystem>} Container, @code{<filesystem>} Container
 @subsubsection @code{<folder>} Element/Containter
@@ -1395,18 +1520,24 @@ i.e. @acronym{MPEG} stream, to be included.
 @subsubsection @code{<sequence-item>} Element
 
 @example
-<!ELEMENT sequence-item                 (entry*,
+<!ELEMENT sequence-item                 (default-entry?,
+                                         entry*,
                                          auto-pause*)>
 <!ATTLIST sequence-item
-  id           ID     #REQUIRED
+  id           ID     #IMPLIED
   src          %URI;  #REQUIRED
 >
 
 <!ELEMENT auto-pause                    (#PCDATA)>
 
+<!ELEMENT default-entry EMPTY>
+<!ATTLIST default-entry
+  id           ID     #REQUIRED
+>
+
 <!ELEMENT entry                         (#PCDATA)>
 <!ATTLIST entry
-  id           ID     #REQUIRED
+  id           ID     #IMPLIED
 >
 @end example
 
@@ -1427,16 +1558,24 @@ This element specifies where to insert auto pause points, whose wait
 time is controlled by play lists. The time is given in seconds from the
 beginning of the sequence.
 
+@item <default-entry>
+Represents the mandatory default entry point pointing to the start of
+the sequence@footnote{Referencing the default entry point id should
+be aequivalent to referencing the sequence id. Depending on the firmware
+of the playing device, the sequence id may reflect the start of the
+sequence as defined by the TOC, while the default entry id gets defined
+by the address defined in the @file{ENTRY.VCD} or @file{ENTRY.SVD}}.
+
 @item <entry>
 Defines an additional entry point into the sequence item. Up to 99 entry
-can be defined per sequence, while only a maximum of 500 entry
-points@footnote{every sequence point has automatically an entry point
-defined, which must be substracted from the maximum of 500 entry points}
-can be present in the whole disc. The entry point time is given in
-seconds from the beginning of the sequence.
+points (including the default entry point) can be defined per sequence,
+while only a maximum of 500 entry points@footnote{every sequence point
+has automatically an entry point defined, which must be substracted from
+the maximum of 500 entry points} can be present in the whole disc. The
+entry point time is given in seconds from the beginning of the sequence.
 
 @item id
-ID value referenced in @code{ref} attributes. 
+Play item ID value referenced in @code{ref} attributes. 
 
 @end table
 
@@ -1468,6 +1607,11 @@ ID value referenced in @code{ref} attributes.
   x2           %XY;   #IMPLIED
   y2           %XY;   #IMPLIED"
 >
+
+<!ELEMENT play-item                      EMPTY>
+<!ATTLIST play-item
+  ref          IDREF  #IMPLIED
+>
 @end example
 
 @table @code
@@ -1483,7 +1627,14 @@ in the @acronym{LOT}.
 @itemx x2
 @itemx y2
 Screen Co-ordinates for selection hotspot areas, with @samp{0,0} being
-the upper left and @samp{255,255} being the lower right screen point.
+the upper left and @samp{255,255} being the lower right screen
+point. @code{x1} and @code{y1} are required to be less than @code{x2}
+and @code{y2} respectively.
+
+@item play-item
+This empty element is used to reference play item ids. If the @code{ref}
+attribute is ommited, the @samp{play nothing item} is implicitly
+referenced.
 
 @end table
 
@@ -1495,7 +1646,7 @@ the upper left and @samp{255,255} being the lower right screen point.
                                          prev?,
                                          next?,
                                          return?,
-                                         default*,
+                                         (multi-default|default)?,
                                          timeout?,
                                          wait?,
                                          loop?,
@@ -1509,7 +1660,13 @@ the upper left and @samp{255,255} being the lower right screen point.
 <!ELEMENT      prev                     EMPTY>
 <!ELEMENT      next                     EMPTY>
 <!ELEMENT      return                   EMPTY>
+
 <!ELEMENT      default                  EMPTY>
+<!ELEMENT      multi-default            EMPTY>
+<!ATTLIST multi-default
+  numeric      (enabled|disabled)  'enabled'
+>
+
 <!ELEMENT      timeout                  EMPTY>
 <!ELEMENT      wait                     (#PCDATA)>
 
@@ -1525,7 +1682,8 @@ the upper left and @samp{255,255} being the lower right screen point.
 @table @code
 @item <bsn>
 Base selection number, the numeric value which is taken as the first
-selection number.
+selection number. The default is @emph{1} and the allowed range goes
+from 1 upto 99.
 
 @item <prev>
 Target list id jumped to on @key{PREVIOUS} key press.
@@ -1537,30 +1695,50 @@ Target list id jumped to on @key{NEXT} key press.
 Target list id jumped to on @key{RETURN} key press.
 
 @item <default>
-Target list id jumped to on @key{DEFAULT} key press.
+Target list id jumped to on @key{DEFAULT} key press. May not be present
+at the same time with the following element.
+
+@item <multi-default>
+When present, causes the selection list to be a multi default selection
+list, i.e. that the target list id of the @key{DEFAULT} depends on which
+part of the sequence item is playing. The @code{numeric} attributes, if
+@emph{disabled}, allows to disable the @key{NUMERIC} keys. When using
+multi default selections, the @code{<bsn>} must be set to 1 and the
+number of selection must match the number of all entry points of the
+sequence referenced by @code{<play-item>}.
 
 @item <timeout>
-Target list id to be jumped on timeout of @code{<wait>}. If ommitted, a
-@code{<select>} is selected at random!
+Target list id to be jumped on timeout of @code{<wait>}. If ommitted
+(and @code{<wait>} is not set to an infinite time) one of the
+@code{<select>} targets is selected at random!
 
 @item <wait>
 Time in seconds to wait after playback of @code{<play-item>} before
-triggering timeout action (unless the user triggers some action before
-time ran up).
+triggering the @code{<timeout>} action (unless the user triggers some
+action before time ran up).
 
 @item <loop>
 Times to repeat the playback of @code{<play-item>}. the
 @code{jump-timing} attribute controls whether the playback of
 @code{<play-item>} is finished, thus @emph{delayed}, before executing
 user triggered action or an @emph{immediate} jump is perfomed. After the
-specified amount of repetions are completed, the @code{<wait>} time
-begins to count down.
+specified amount of repetitions are completed, the @code{<wait>} time
+begins to count down, unless set to an infinite wait time.
+
+When the @code{jump-timing} is set to @emph{delayed}, it is recommended
+that the length of the referenced @code{<play-item>} is not more than 5
+seconds. The recommended setting for a play item consisting of one still
+picture and no audio is to loop once and have a @emph{delayed}.
+@code{jump-timing}.
 
 @item <play-item>
 The @emph{play item} to be played while waiting for user intervention.
 
 @item <select>
-Target list id(s) jumped to on @key{NUMERIC} key presses.
+Target list id(s) jumped to on @key{NUMERIC} key presses. There may be
+up to 99 select choices. The sum of @code{<bsn>} and the number of
+@code{<select>} elements per @code{<selection>} must not be greater than
+100.
 
 @end table
 
@@ -1574,7 +1752,7 @@ Target list id(s) jumped to on @key{NUMERIC} key presses.
                                          playtime?,
                                          wait?,
                                          autowait?,
-                                         play-item*)>
+                                         play-item+)>
 <!ATTLIST playlist
   %pbcattrs;
 >
@@ -1611,7 +1789,8 @@ Time in seconds to wait at each defined @code{<auto-pause>} point for
 sequence items referenced in this play list.
 
 @item <play-item>
-The @emph{play item(s)} to play in order.
+The @emph{play item(s)} to play in order. Up to 255 @code{<play-item>}
+elements may be defined per @code{<playlist>}.
 
 @end table
 
@@ -1624,7 +1803,21 @@ The @emph{play item(s)} to play in order.
 <!ATTLIST endlist
   %pbcattrs;
 >
+
+<!ELEMENT next-volume                   (#PCDATA)>
 @end example
+
+@table @code
+@item <next-volume>
+Only supported for Super Video CD's. If set to @emph{0} stop
+@acronym{PBC} intepretation, otherwise switch to the selected volume
+number.
+
+@item <play-item>
+Only supported for Super Video CD's. Displays the referenced image while
+waiting for a volume change. Referenced play item must be a still
+picture.
+@end table
 
 @node Examples, Tips and Hints, VideoCD XML Description, Top
 @chapter Examples
