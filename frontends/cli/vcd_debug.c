@@ -751,7 +751,8 @@ dump_tracks_svd (const debug_obj_t *obj)
 {
   const TracksSVD *tracks = obj->tracks_buf;
   const TracksSVD2 *tracks2 = (const void *) &(tracks->playing_time[tracks->tracks]);
- 
+  const TracksSVD_v30 *tracks_v30 = obj->tracks_buf;
+
   unsigned j;
 
   fprintf (stdout, "SVCD/TRACKS.SVD\n");
@@ -800,6 +801,21 @@ dump_tracks_svd (const debug_obj_t *obj)
                video_types[tracks2->contents[j].video],
                ogt_str[tracks2->contents[j].ogt]);
     }
+
+
+  fprintf (stdout, "\n(VCD3.0 interpretation)\n");
+  for (j = 0;j < tracks->tracks; j++)
+    {
+      fprintf (stdout, "(track[%.2d]: %2.2x:%2.2x:%2.2x (cumulated),"
+               " audio: %.2x, ogt: %.2x)\n",
+               j,
+               tracks_v30->track[j].cum_playing_time.m,
+               tracks_v30->track[j].cum_playing_time.s,
+               tracks_v30->track[j].cum_playing_time.f,
+               tracks_v30->track[j].audio_info,
+               tracks_v30->track[j].ogt_info);
+    }
+
 }
 
 static void

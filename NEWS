@@ -11,6 +11,11 @@ version 0.7.10 (unstable/development)
 * allow multi default selections to have entry points as play-item
 * gui mode added to vcdxbuild, vcdxminfo and vcdxrip
 * progress display added to vcdxbuild and vcdxminfo
+* rewrite/improvement of MPEG scanning code (detect audio parameters)
+* detect OGT channels and set flags accordingly
+* new option "svcd vcd30 tracksvd"
+* set pregap and subindexes explicitly in cue sheet
+* vcdxminfo output format changed and enhanced
 
 version 0.7.9 (unstable/development)
 ====================================

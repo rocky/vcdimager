@@ -155,7 +155,7 @@ rely, include:
 Support for Video CD 1.1 and 2.0 disc format.
 
 @item
-Support for Super Video CD 1.0@footnote{based on the @acronym{IEC}62107
+Support for Super Video CD 1.0@footnote{based on the IEC-62107
 specification with some extensions defined in the so-called `4C SVCD
 System Specification 1.0'. Some support for the @emph{deprecated}
 Chinese SVCD format is available through switches.} disc format.
@@ -1208,15 +1208,15 @@ Supported combinations of @var{class} and @var{version} are listed below:
 @multitable @columnfractions .10 .10 .80
 @item @var{class} @tab @var{version} @tab Description
 @item @samp{vcd}  @tab @samp{1.0}
-@tab VideoCD 1.0 @emph{experimental}
+@tab Video CD 1.0/Karaoke CD @emph{experimental}
 @item @samp{vcd}  @tab @samp{1.1}
-@tab VideoCD 1.1
+@tab Video CD 1.1
 @item @samp{vcd}  @tab @samp{2.0}
-@tab VideoCD 2.0
+@tab Video CD 2.0
 @item @samp{svcd}  @tab @samp{1.0}
-@tab SuperVideoCD 1.0 (IEC-62107)
+@tab Super Video CD 1.0 (IEC-62107)
 @item @samp{hqvcd}  @tab @samp{1.0}
-@tab HQ VideoCD 1.0 (IEC-62107)
+@tab HQ Video CD 1.0 (IEC-62107)
 @end multitable
 
 @item xmlns
@@ -1260,7 +1260,11 @@ Rename @file{/MPEG2} folder on @acronym{SVCD}s to (non-compliant)
 @item svcd vcd30 entrysvd
 Enables the use of the (deprecated) signature @samp{ENTRYSVD} instead of
 @samp{ENTRYVCD} for the file @file{/SVCD/ENTRY.SVD}. Default:
-@samp{false}.
+
+@item svcd vcd30 tracksvd
+Enables the use of the (deprecated) chinese @file{/SVCD/TRACKS.SVD}
+format which differs from the format defined in the IEC-62107
+specification.  Default: @samp{false}.
 
 @item relaxed aps
 @cindex Relaxed @acronym{APS} constraints
@@ -1328,14 +1332,22 @@ in the @file{VCD/INFO.VCD} or @file{VCD/INFO.SVD}.
 @table @code
 @item <album-id>
 Name of the album@footnote{An @emph{album} is defined as a series of
-discs which contain related content} which the discs belongs to.
+discs which contain related content} which the discs belongs to. This id
+is used in conjunction with the following elements to decide whether a
+disc is the next volume of the currently played one.
 
 @item <volume-count>
 Total number of volumes (discs) in the album identified by @code{<album-id>}.
 
 @item <volume-number>
 Ordinal number of the volume (disc) in the album.
+@end table
 
+@noindent
+The following elements are only supported for Video CD 2.0, Super Video
+CD 1.0 and HQ Video CD 1.0.
+
+@table @code
 @item <next-volume-use-sequence2/>
 If @acronym{PBC} interpretation is disabled, start the next disc if it
 has the same @code{<album-id>} at the second sequence instead of the
@@ -1354,11 +1366,25 @@ from @samp{0}, i.e. unrestricted, to @samp{3}, i.e. restriction category
 on the interpreting playing device.}
 
 @item <start-time-offset>
-Only for Super Video CD's. Up to 5 @code{<start-time-offset>} may be
-defined, which represent the start time offsets for the first 5 discs of
-an album. @emph{not implemented yet}
+Only supported for Super Video CD 1.0 and HQ Video CD 1.0. Up to 5
+@code{<start-time-offset>} may be defined, which represent the start
+time offsets for the first 5 discs of an album. @emph{not implemented
+yet}
 
 @end table
+
+@smallexample
+@cartouche
+@dots{}
+  <info>
+    <album-id>GNU_WARS_EP9</album-id>
+    <volume-count>2</volume-count>
+    <volume-number>1</volume-number>
+    <next-volume-use-sequence2/>
+  </info>
+@dots{}
+@end cartouche
+@end smallexample
 
 @node <pvd> Container, <filesystem> Container, <info> Container, <videocd> Root
 @subsection @code{<pvd>} Container
@@ -1391,24 +1417,38 @@ of the disc.
 @table @code
 @item <volume-id>
 Volume label of the @acronym{CD-ROM}. Content restricted to upto 32
-d-characters.
+d-characters@xref{ISO646 d-Characters}. This is label usually shows up
+on computer systems as volume label.
 
 @item <system-id>
 System id of the @acronym{CD-ROM}. Content restricted to upto 32
 a-characters. Should be set to @samp{CD-RTOS CD-BRIDGE} for Video CD's
-for @acronym{CD-i} compatibility.  This field is overriden by vcdimager and set to
-@samp{CD-RTOS CD-BRIDGE}.
+for @acronym{CD-i} compatibility.  This fields content is ignored by
+vcdimager and always set to @samp{CD-RTOS CD-BRIDGE}.
 
 @item <application-id>
 Defines the application pathname for @acronym{CD-i} playing devices.
 
 @item <preparer-id>
 This field is used by vcdimager to put a version string on the Video CD,
-regardless of the content given in the XML description.
+regardless of the content given in the XML description which is ignored.
 
 @item <publisher-id>
-@emph{not implemented yet}.
+Data Preparer Identifier for the @acronym{CD-ROM}. Content restricted to
+upto 128 a-characters@xref{ISO646 a-Characters}.
 @end table
+
+@smallexample
+@cartouche
+@dots{}
+  <pvd>
+    <volume-id>GNU_WARS_EP9_1_OF_2</volume-id>
+    <system-id>CD-RTOS CD-BRIDGE</system-id>
+    <publisher-id>John Doe</publisher-id>
+  </pvd>
+@dots{}
+@end cartouche
+@end smallexample
 
 @node <filesystem> Container, <segment-items> Container, <pvd> Container, <videocd> Root
 @subsection @code{<filesystem>} Container
@@ -1472,6 +1512,8 @@ CD.
 <!ELEMENT segment-items                 (segment-item)+>
 @end cartouche
 @end example
+
+Only supported for Video CD 2.0, Super Video CD 1.0 and HQ Video CD 1.0.
 
 @node <segment-item> Element,  , <segment-items> Container, <segment-items> Container
 @subsubsection @code{<segment-item>} Element
@@ -1568,8 +1610,8 @@ i.e. @acronym{MPEG} stream, to be included.
 
 @item <auto-pause>
 This element specifies where to insert auto pause points, whose wait
-time is controlled by play lists. The time is given in seconds from the
-beginning of the sequence.
+time is controlled by play lists' @code{<autowait>}. The time is given
+in seconds from the beginning of the sequence.
 
 @item <default-entry>
 Represents the mandatory default entry point pointing to the start of
@@ -1632,12 +1674,16 @@ Play item ID value referenced in @code{ref} attributes.
 @end cartouche
 @end example
 
+@code{<pbc>} container and sub-elements only supported for Video CD 2.0,
+Super Video CD 1.0 and HQ Video CD 1.0.
+
 @table @code
 @item id
 ID value referenced in @code{ref} attributes.
 
 @item rejected
 @cindex Rejected list
+@tgindex @var{rejected}
 Attribute controlling, whether item is not listed, i.e. @emph{rejected},
 in the @acronym{LOT}. Lists which are not rejected may be---if supported
 by the playing device---selectable by user input of the automatically
@@ -1647,13 +1693,19 @@ property for but the very first PBC list, in order to make the
 be rejected.
 
 @item x1 y1 x2 y2
-Screen Co-ordinates for selection hotspot areas, with @samp{0,0} being
-the upper left and @samp{255,255} being the lower right screen
-point. @code{x1} and @code{y1} are required to be less than @code{x2}
-and @code{y2} respectively.
+@tgindex @var{x1}
+@tgindex @var{x2}
+@tgindex @var{y1}
+@tgindex @var{y2}
+Screen Co-ordinates for selection hotspot areas (only supported for
+@code{<selection>} members), with @samp{0,0} being the upper left and
+@samp{255,255} being the lower right screen point. @code{x1} and
+@code{y1} are required to be less than @code{x2} and @code{y2}
+respectively.
 
 @item play-item
 @cindex Play nothing item
+@tgindex @code{play-item}
 This empty element is used to reference play item ids. If the @code{ref}
 attribute is ommitted (e.g. @code{<play-item />}, the @emph{play nothing
 item} is implicitly referenced.
@@ -1741,6 +1793,7 @@ to loop forever (@samp{0}) nor shall @code{<wait>} indicate an infinite
 timeout wait time, otherwise the target will be unreachable.
 
 @item <multi-default>
+@tgindex @var{numeric}
 When present, causes the selection list to be a multi default selection
 list, i.e. that the target list id of the @key{DEFAULT} depends on which
 part of the sequence item is playing. The @code{numeric} attributes, if
@@ -1760,6 +1813,7 @@ triggering the @code{<timeout>} action (unless the user triggers some
 action before time ran up). Default: @samp{0}.
 
 @item <loop>
+@tgindex @var{jump-timing}
 Times to repeat the playback of @code{<play-item>}. the
 @code{jump-timing} attribute controls whether the playback of
 @code{<play-item>} is finished, thus @emph{delayed}, before executing
@@ -1850,6 +1904,33 @@ elements may be defined per @code{<playlist>}.
 
 @end table
 
+@smallexample
+@cartouche
+@dots{}
+  <pbc>
+@dots{}
+    <playlist id="play-trailers">
+      <prev ref="select-specialfeaturemenu"/>
+      <next ref="select-specialfeaturemenu"/>
+      <return ref="select-specialfeaturemenu"/>
+      <wait>0</wait>
+      <autowait>0</autowait>
+      <play-item ref="seq-animation-intro"/>
+      <play-item ref="seq-trailer-1"/>
+      <play-item ref="seq-animation-intra"/>
+      <play-item ref="seq-trailer-2"/>
+      <play-item ref="seq-animation-intra"/>
+      <play-item ref="seq-trailer-3"/>
+      <play-item ref="seq-animation-extro"/>
+    </playlist>
+@dots{}
+  </pbc>
+</videocd>
+@dots{}
+@end cartouche
+@end smallexample
+
+
 @node <endlist> Element,  , <playlist> Element, <pbc> Container
 @subsubsection @code{<endlist>} Element
 @tgindex @code{endlist}
@@ -1868,6 +1949,10 @@ elements may be defined per @code{<playlist>}.
 @end cartouche
 @end example
 
+@noindent
+The following elements are only supported for Super Video CD 1.0 and HQ
+Video CD 1.0.
+
 @table @code
 @item <next-volume>
 Only supported for Super Video CD's. If set to @emph{0} stop
@@ -1876,9 +1961,23 @@ number.
 
 @item <play-item>
 Only supported for Super Video CD's. Displays the referenced image while
-waiting for a volume change. Referenced play item must be a still
+waiting for a volume change. Referenced play item shall be a still
 picture.
 @end table
+
+@smallexample
+@cartouche
+@dots{}
+    <endlist id="end-lid">
+      <next-volume>2</next-volume>
+      <play-item ref="change-disc-segitem"/>
+    </endlist>
+@dots{}
+  </pbc>
+</videocd>
+@dots{}
+@end cartouche
+@end smallexample
 
 @node Examples, Tips and Hints, VideoCD XML Description, Top
 @chapter Examples
@@ -2064,6 +2163,13 @@ be caused by:
 The playing device does not support @acronym{FF}/@acronym{RW} with
 @acronym{SVCD}s.@footnote{Sometimes upgrading the player firmware may
 help.}
+
+@item
+The @acronym{MPEG}-2 streams playing time longer that can be handled by
+the playing device.@footnote{Some devices don't support programs with a
+playing time of over about 40 minutes. This is to be seen as bug or
+limitation of the firmware, as @acronym{SVCD}'s can have programs with
+up to 100 minute playing times.}
 
 @item
 The @acronym{MPEG}-2 stream does not include the mandatory scan
