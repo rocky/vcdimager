@@ -1,5 +1,5 @@
-bin_PROGRAMS = vcdimager vcddebug cdxa2mpeg
-man_MANS = vcdimager.1 vcddebug.1 cdxa2mpeg.1
+bin_PROGRAMS = vcdimager vcddebug cdxa2mpeg vcddump
+man_MANS = vcdimager.1 vcddebug.1 cdxa2mpeg.1 vcddump.1
 #man_MANS = $(patsubst %,%.1,$(bin_PROGRAMS))
 DISTCLEANFILES = $(man_MANS)
 
@@ -13,6 +13,9 @@ vcddebug_LDADD = $(LIBVCD_LIBS) $(LIBPOPT_LIBS)
 
 cdxa2mpeg_SOURCES = cdxa2mpeg.c
 cdxa2mpeg_LDADD = $(LIBVCD_LIBS) $(LIBPOPT_LIBS)
+
+vcddump_SOURCES = vcddump.c
+vcddump_LDADD = $(LIBVCDINFO_LIBS) $(LIBVCD_LIBS) $(LIBPOPT_LIBS)
 
 $(man_MANS): %.1: %
 	-$(HELP2MAN) --output=$@ ./$<

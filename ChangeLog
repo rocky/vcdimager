@@ -1,5 +1,7 @@
 2003-01-19  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* frontends/cli/vcddump.c: added Bernstein's vcddump tool
+
 	* libvcd/vcd_assert.h, libvcd/vcd_types.h: added branch prediction
 	annotation macros
 

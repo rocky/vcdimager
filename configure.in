@@ -137,8 +137,10 @@ AM_CONDITIONAL(BUILD_XML_FE, test "x$enable_xml_fe" = "xyes")
 
 LIBVCD_CFLAGS='-I$(top_srcdir)/libvcd/'
 LIBVCD_LIBS='$(top_builddir)/libvcd/libvcd.a'
+LIBVCDINFO_LIBS='$(top_builddir)/libvcd/libvcdinfo.a'
 AC_SUBST(LIBVCD_CFLAGS)
 AC_SUBST(LIBVCD_LIBS)
+AC_SUBST(LIBVCDINFO_LIBS)
 
 AC_OUTPUT([ \
 	Makefile \

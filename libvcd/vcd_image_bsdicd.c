@@ -314,6 +314,9 @@ _stat_size (void *user_data)
   return retval;
 }
 
+/*!
+  Set the key "arg" to "value" in source device.
+*/
 static int
 _source_set_arg (void *user_data, const char key[], const char value[])
 {
@@ -343,10 +346,10 @@ vcd_image_source_new_bsdicd (void)
   _img_bsdicd_src_t *_data;
 
   vcd_image_source_funcs _funcs = {
-    read_mode2_sector: _read_mode2_sector,
-    stat_size: _stat_size,
-    free: _source_free,
-    setarg: _source_set_arg
+    .read_mode2_sector = _read_mode2_sector,
+    .stat_size         = _stat_size,
+    .free              = _source_free,
+    .set_arg           = _source_set_device
   };
 
   _data = _vcd_malloc (sizeof (_img_bsdicd_src_t));
