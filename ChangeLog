@@ -1,3 +1,8 @@
+2001-06-22  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_image_fs.c (_idr2statbuf): don't assert, just warn and
+		ignore attributes when missing a XA signature
+
 2001-06-16  Herbert Valerio Riedel  <hvr@gnu.org>
 
  	* configure.in: bumped version up to 0.7.6

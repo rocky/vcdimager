@@ -65,9 +65,13 @@ _idr2statbuf (const struct iso_directory_record *idr, vcd_image_stat_t *buf)
   if (xa_data->signature[0] != 'X' 
       || xa_data->signature[1] != 'A')
     {
-      vcd_debug ("%d %d %d,  %c %c", idr->length, idr->name_len, su_length,
+      vcd_warn ("XA signature not found in ISO9660's system use area;"
+		" ignoring XA attributes for this file entry.");
+      vcd_debug ("%d %d %d, '%c%c' (%d, %d)", idr->length, idr->name_len,
+		 su_length,
+		 xa_data->signature[0], xa_data->signature[1],
 		 xa_data->signature[0], xa_data->signature[1]);
-      vcd_assert_not_reached ();
+      return;
     }
 
   buf->xa = *xa_data;
