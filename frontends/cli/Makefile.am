@@ -10,7 +10,7 @@ bin_PROGRAMS = vcdimager vcdrip
 
 SUBDIRS = $(POPT_SUBDIR)
 
-INCLUDES = $(POPT_INCLUDES) -I $(top_srcdir)/libvcd/ 
+INCLUDES = $(POPT_INCLUDES) -I$(top_srcdir) -I$(top_srcdir)/libvcd/ 
 
 VCD_LIBS = $(top_builddir)/libvcd/libvcd.a
 

@@ -2,7 +2,7 @@ POPT_LIBS = -lpopt
 
 bin_PROGRAMS = vcdxml
 
-INCLUDES = $(POPT_INCLUDES) $(LIBVCD_CFLAGS) $(XML_CFLAGS)
+INCLUDES = -I$(top_srcdir) $(POPT_INCLUDES) $(LIBVCD_CFLAGS) $(XML_CFLAGS)
 
 VCD_LIBS = $(top_builddir)/libvcd/libvcd.a
 
@@ -20,8 +20,8 @@ vcdxml_SOURCES = \
 
 vcdxml_LDADD = $(XML_LIBS) $(VCD_LIBS) $(POPT_LIBS)
 
-videocd_dtd.h: videocd.dtd
-	(sed 's/\"/\\"/g' | gawk 'BEGIN { print "static char videocd_dtd[] = \\" } { print " \"" $$0 "\\n\" \\" } END { print ";" }') < videocd.dtd > videocd_dtd.h
+videocd_dtd.h: $(srcdir)/videocd.dtd
+	(sed 's/\"/\\"/g' | gawk 'BEGIN { print "static char videocd_dtd[] = \\" } { print " \"" $$0 "\\n\" \\" } END { print ";" }') < $< > $@
 
 clean-local:
 	-rm -f *.ps

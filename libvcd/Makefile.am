@@ -2,7 +2,7 @@
 
 noinst_LIBRARIES = libvcd.a
 
-#INCLUDES = 
+INCLUDES = -I$(top_srcdir)
 
 libvcd_a_SOURCES = \
 	vcd.c \

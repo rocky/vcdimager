@@ -2,7 +2,9 @@ if BUILD_CLI_FE
 CLI_DIRS = cli
 endif
 
+if BUILD_XML_FE
 XML_DIRS = xml
+endif
 
 if BUILD_GNOME_FE
 GNOME_DIRS = gnome

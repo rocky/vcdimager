@@ -20,6 +20,10 @@ AC_ARG_WITH(cli-frontend,
 	[  --without-cli-frontend  enable cli frontend (enabled by default)], 
 	enable_cli_fe="${withval}", enable_cli_fe=yes)
 
+AC_ARG_WITH(xml-frontend,
+	[  --without-xml-frontend  enable XML frontend (enabled by default)], 
+	enable_xml_fe="${withval}", enable_xml_fe=yes)
+
 dnl programs
 
 AC_PROG_CC
@@ -37,6 +41,10 @@ enable_cli_fe_popt=no
 
 if test "x$enable_cli_fe" = "xyes"; then
  AC_CHECK_LIB(popt, poptGetContext, POPT_LIBS="-lpopt", enable_cli_fe_popt=yes)
+fi
+
+if test "x$enable_xml_fe" = "xyes"; then
+  AM_PATH_XML2(2.3.0, , enable_xml_fe=no)
 fi
 
 if test "x$enable_gnome_fe" = "xyes"; then
@@ -143,6 +151,7 @@ CFLAGS="$CFLAGS $WARN_CFLAGS"
 AM_CONDITIONAL(BUILD_CLI_FE_POPT, test "x$enable_cli_fe_popt" = "xyes")
 AM_CONDITIONAL(BUILD_CLI_FE, test "x$enable_cli_fe" = "xyes")
 AM_CONDITIONAL(BUILD_GNOME_FE, test "x$enable_gnome_fe" = "xyes")
+AM_CONDITIONAL(BUILD_XML_FE, test "x$enable_xml_fe" = "xyes")
 
 AC_SUBST(POPT_LIBS)
 
@@ -151,7 +160,6 @@ LIBVCD_LIBS='$(top_builddir)/libvcd/libvcd.a'
 AC_SUBST(LIBVCD_CFLAGS)
 AC_SUBST(LIBVCD_LIBS)
 
-AM_PATH_XML2(2.3.0, , AC_MSG_ERROR([libxml2 required but not found]))
 
 dnl LIBXML2_CFLAGS=`xml2-config --cflags`
 dnl LIBXML2_LIBS=`xml2-config --libs`
@@ -176,6 +184,7 @@ Setup:
   Install path:     ${prefix}
   Build CLI FE:	    $enable_cli_fe
   Use own popt lib: $enable_cli_fe_popt
+  Build XML FE:	    $enable_xml_fe
   Build Gnome FE:   $enable_gnome_fe
 "
 
@@ -193,6 +202,7 @@ EOM
 fi
 
 if test "x$enable_cli_fe" != "xyes" \
+ 	-a "x$enable_xml_fe" != "xyes" \
  	-a "x$enable_gnome_fe" != "xyes"
 then
   cat <<EOF
