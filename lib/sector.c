@@ -37,7 +37,6 @@
 #include "bytesex.h"
 #include "salloc.h"
 #include "sector_private.h"
-#include "l2sq_table.h"
 
 static const char _rcsid[] = "$Id$";
 
@@ -126,50 +125,33 @@ encode_L2_Q(uint8_t inout[4 + L2_RAW + 4 + 8 + L2_P + L2_Q])
 static void
 encode_L2_P (uint8_t inout[4 + L2_RAW + 4 + 8 + L2_P])
 {
-  uint8_t *P;
-  int i,j;
-
+  uint8_t *dp;
+  unsigned char *P;
+  int i, j;
+  
   P = inout + 4 + L2_RAW + 4 + 8;
-  memset(P, 0, L2_P);
+  
   for (j = 0; j < 43; j++) {
-    for (i = 0; i < 24; i++) {
-      uint8_t data;
-
+    uint16_t a;
+    uint16_t b;
+    
+    a = b = 0;
+    dp = inout;
+    for (i = 19; i < 43; i++) {
+      
       /* LSB */
-      data = inout[i*2*43];
-      if (data != 0) {
-        uint32_t base = rs_l12_log[data];
-                
-        uint32_t sum = base + DP[0][i];
-        if (sum >= ((1 << RS_L12_BITS)-1))
-          sum -= (1 << RS_L12_BITS)-1;
-
-        P[0] ^= rs_l12_alog[sum];
-
-        sum = base + DP[1][i];
-        if (sum >= ((1 << RS_L12_BITS)-1))
-          sum -= (1 << RS_L12_BITS)-1;
-                
-        P[43*2] ^= rs_l12_alog[sum];
-      }
+      a ^= L2sq[i][*dp++];
+      
       /* MSB */
-      data = inout[i*2*43+1];
-      if (data != 0) {
-        uint32_t base = rs_l12_log[data];
-
-        uint32_t sum = base + DP[0][i];
-        if (sum >= ((1 << RS_L12_BITS)-1))
-          sum -= (1 << RS_L12_BITS)-1;
-                
-        P[1] ^= rs_l12_alog[sum];
-
-        sum = base + DP[1][i];
-        if (sum >= ((1 << RS_L12_BITS)-1))
-          sum -= (1 << RS_L12_BITS)-1;
-                
-        P[43*2+1] ^= rs_l12_alog[sum];
-      }
+      b ^= L2sq[i][*dp];
+      
+      dp += 2*43 -1;
     }
+    P[0]      = a >> 8;
+    P[43*2]   = a;
+    P[1]      = b >> 8;
+    P[43*2+1] = b;
+    
     P += 2;
     inout += 2;
   }

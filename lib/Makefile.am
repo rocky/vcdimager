@@ -14,7 +14,6 @@ libvcd_la_SOURCES = \
 	dict.h \
 	directory.h \
 	image_sink.h \
-	l2sq_table.h \
 	mpeg.h \
 	mpeg_stream.h \
 	obj.h \
