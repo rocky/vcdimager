@@ -11,7 +11,7 @@
 @include version.texi
 
 @ifinfo
-This file documents GNU VCDImager, The GNU Video CD image creating tool.
+This file documents GNU VCDImager, The GNU Video CD Authoring Tools.
 
 Copyright (C) Herbert Valerio Riedel @email{hvr@@gnu.org}
 
@@ -41,7 +41,7 @@ approved by Herbert Valerio Riedel.
 @titlepage
 @title GNU VCDImager
 @subtitle $Id$
-@subtitle The GNU Video CD image authoring tool.
+@subtitle The GNU Video CD Authoring Tools.
 @subtitle for version @value{VERSION}, @value{UPDATED}
 @author Herbert Valerio Riedel
 
@@ -72,24 +72,168 @@ instead of in the original English.
 
 @dircategory Miscellaneous
 @direntry
-* VCDImager: (vcdimager).      The GNU Video CD Image Maker
-* VCDRip: (vcdimager).         The GNU Video CD Image Ripper
+* GNU VCDImager: (vcdimager).  The GNU Video CD Authoring Tools
 @end direntry
 
-@node Top, , (dir), (dir)
+@node Top, Introduction, (dir), (dir)
 
-@unnumbered Introduction
+@menu
+* Introduction::                
+* Video CD Concepts::           
+* Reference::                   
+* VideoCD @acronym{XML} Description::  
+* Examples::                    
+* Tips and Hints::              
+* Acronym Expansions::          
+* GNU GENERAL PUBLIC LICENSE::  
+
+@detailmenu
+ --- The Detailed Node Listing ---
+
+Introduction
+
+* Supplied Tools::              
+* Features::                    
+
+Video CD Concepts
+
+* Overview::                    
+* Anatomy of Video CDs::        
+* Known Video CD Flavors::      
+* Constraints on @acronym{MPEG} streams::  
+
+Known Video CD Flavors
+
+* Video CD 1.1::                
+* Video CD 2.0::                
+* Extended Video CD::           
+* Super Video CD 1.0::          
+* Extended Super Video CD::     
+
+Constraints on @acronym{MPEG} streams
+
+* Video CD::                    
+* Super Video CD::              
+* Common Constraints::          
+
+Common Constraints
+
+* Alignment::                   
+* Access Point Sectors::        
+
+Reference
+
+* Tools::                       
+
+Tools
+
+* @file{vcdimager}::            
+* @file{vcddebug}::             
+* @file{vcdxgen}::              
+* @file{vcdxbuild}::            
+* @file{vcdxrip}::              
+
+@file{vcdimager}
+
+* Adding Files to the Video CD ::  
+* CD-i Support::                
+
+VideoCD @acronym{XML} Description
+
+* @code{<videocd>} Root::       
+
+@code{<videocd>} Root
+
+* @code{<option>} Element::     
+* @code{<info>} Container::     
+* @code{<pvd>} Container::      
+* @code{<filesystem>} Container::  
+* @code{<segment-items>} Container::  
+* @code{<sequence-items>} Container::  
+* @code{<pbc>} Container::      
+
+@code{<filesystem>} Container
+
+* @code{<folder>} Element/Containter::  
+* @code{<file>} Element/Containter::  
+
+@code{<segment-items>} Container
+
+* @code{<segment-item>} Element::  
+
+@code{<sequence-items>} Container
+
+* @code{<sequence-item>} Element::  
+
+@code{<pbc>} Container
+
+* @code{<selection>} Element::  
+* @code{<playlist>} Element::   
+* @code{<endlist>} Element::    
+
+Examples
+
+* Simple Multitrack Example::   
+* @acronym{MPEG} Extraction::   
+
+Tips and Hints
+
+* SVCD Player Compatibility::   
+
+@end detailmenu
+@end menu
+
+@node Introduction, Video CD Concepts, Top, Top
+@chapter Introduction
 
 This manual describes the @dfn{GNU VCDImager}@footnote{see
-@url{http://www.gnu.org/software/vcdimager/}} package. It provides a
-front end, @file{vcdimager}, to generate @acronym{CD-ROM} images
-suitable for being burnt on to CD recordables. It takes @acronym{MPEG}
-movie files as its input and generates an image file and a cue-sheet file.
-These can then be fed to a CD-recording program which recognizes the
-@acronym{BIN/CUE}-format, such as cdrdao@footnote{see
+@url{http://www.gnu.org/software/vcdimager/}} package, a toolset for
+operating on (Super) Video CD disc images.
+
+@menu
+* Supplied Tools::              
+* Features::                    
+@end menu
+
+@node Supplied Tools, Features, Introduction, Introduction
+@section Supplied Tools
+
+The following commandline tools are provided with this package:
+
+@table @code
+@item vcdimager
+Simple frontend, allowing for easy commandline controlled generation of
+basic @acronym{VCD} and @acronym{SVCD} disc images without an
+intermediate @acronym{XML} description.
+
+@item vcddebug
+Analysation tool and report generator for @acronym{VCD} and
+@acronym{SVCD} discs.
+
+@item vcdxgen
+@acronym{XML} @acronym{VCD}-description generator, with commandline
+interface similiar to the classic @code{vcdimager} frontend.
+
+@item vcdxbuild
+Builds a @acronym{VCD}/@acronym{SVCD} according to a supplied
+@acronym{XML} description and files containing the @acronym{MPEG}
+program streams referred to in the @acronym{XML} description.
+
+@item vcdxrip
+Disassembles a given @acronym{VCD} or @acronym{SVCD} disc into a
+@acronym{XML} description and the contained @acronym{MPEG} program
+streams.
+
+@end table
+
+The generated @acronym{CD-ROM} images created are suitable for being
+burnt on to @acronym{CD-R}, by the use of a CD-recording program which
+recognizes the @acronym{BIN/CUE}-format, such as cdrdao@footnote{see
 @url{http://www.ping.de/sites/daneb/cdrdao.html}}, for instance.
 
-@noindent
+@node Features,  , Supplied Tools, Introduction
+@section Features
+
 Features of the backend library@footnote{the core of the GNU VCDImager
 package consists of a library named @code{libvcd}, the frontends are
 just user interfaces to the exported C-API}, on which all frontends
@@ -103,32 +247,46 @@ Video CD 1.1 image output support.
 Video CD 2.0 image output support.
 
 @item
-Super Video CD 1.0 image output support.
+Super Video CD 1.0@footnote{based on the @acronym{IEC}62107
+specification with some extensions defined in the socalled `4C SVCD
+System Specification 1.0'. Some support for the @emph{deprecated}
+Chinese SVCD format is available through switches.} image output
+support.
+
+@item 
+Full @acronym{PBC} support, including customizable play lists, selection
+lists and end lists.
 
 @item
-General facility for adding files as mode 2 form 1 and 2 sectors to
-the @acronym{ISO9660} filesystem and setting the @acronym{ISO9660}
-volume label and application id fields.
+Support for segment (play) items (@acronym{SPI}).
 
 @item
-Support for up to 98 @acronym{MPEG} tracks per (Super) Video CD.
+Support for up to 98 sequence items (@acronym{MPEG} tracks) per (Super) Video CD.
+
+@item
+Support for additonal entry points into sequence items.
+
+@item
+Support for defining auto pause points in sequence items.
+
+@item
+General facility for adding files as mode 2 form 1 and 2 sectors to the
+@acronym{ISO9660} filesystem and setting some labels in the
+@acronym{ISO9660} @acronym{PVD}
 
 @item
 Supports 99 minute @acronym{CD-R} media@footnote{...though most devices
-will have problems with such out of specification media. You may want
+will have problems with such an out-of-specification media. You may want
 use the @option{--sector-2336} option for images longer than 80
 minutes}.
 
+@item 
+Image input support for GNU/Linux ioctl()-based cdrom devices,
+@acronym{BIN/CUE} images and @acronym{NRG} images.
+
 @end itemize
 
-This package also includes @file{vcdrip}, a tool for dumping
-information about (Super) Video CD image files@footnote{on Linux it is
-supported to operate directly on @acronym{CD-ROM} devices} and
-extracting the @acronym{MPEG} streams from them.
-
-@c well well well
-@include gpl.texi
-
+@node Video CD Concepts, Reference, Introduction, Top
 @chapter Video CD Concepts
 
 This chapter gives some background information regarding the underlying
@@ -139,7 +297,15 @@ any warranty of accuracy or correctness. You are encouraged to send
 corrections and improvements for this manual to
 @email{bug-vcdimager@@gnu.org}.
 
-@section General Information
+@menu
+* Overview::                    
+* Anatomy of Video CDs::        
+* Known Video CD Flavors::      
+* Constraints on @acronym{MPEG} streams::  
+@end menu
+
+@node Overview, Anatomy of Video CDs, Video CD Concepts, Video CD Concepts
+@section Overview
 
 The Video Compact Disc (@dfn{Video CD} or @dfn{VCD}) is a standardized
 digital video storage format. It is based on the commonly available
@@ -148,6 +314,7 @@ Video CDs can be played in most @acronym{DVD} standalone player,
 dedicated VCD players and finally, modern Personal Computers with
 multimedia support.
 
+@node Anatomy of Video CDs, Known Video CD Flavors, Overview, Video CD Concepts
 @section Anatomy of Video CDs
 
 In general, the layout of a Video CD is as follows:
@@ -186,11 +353,21 @@ embedded in lead-in and lead-out empty sectors.
 
 @end itemize
 
+@node Known Video CD Flavors, Constraints on @acronym{MPEG} streams, Anatomy of Video CDs, Video CD Concepts
 @section Known Video CD Flavors
 
 There are different Video CD flavours commonly used. The following
 sections tries to explain the differences amongst them.
 
+@menu
+* Video CD 1.1::                
+* Video CD 2.0::                
+* Extended Video CD::           
+* Super Video CD 1.0::          
+* Extended Super Video CD::     
+@end menu
+
+@node Video CD 1.1, Video CD 2.0, Known Video CD Flavors, Known Video CD Flavors
 @subsection Video CD 1.1
 
 This is the most basic Video CD specification dating back to
@@ -229,6 +406,7 @@ resolutions:
 The @acronym{CBR} @acronym{MPEG}-1, layer II audio stream is fixed at
 224kbps with 1 stereo or 2 mono channels.
 
+@node Video CD 2.0, Extended Video CD, Video CD 1.1, Known Video CD Flavors
 @subsection Video CD 2.0
 
 About two years after the Video CD 1.1 specification came out, an
@@ -264,6 +442,7 @@ resolutions became available:
 352 x 288 @@ 25 Hz (@acronym{PAL}).
 @end itemize
 
+@node Extended Video CD, Super Video CD 1.0, Video CD 2.0, Known Video CD Flavors
 @subsection Extended Video CD
 
 Also known as @dfn{XVCD}, this is not an official standard. It's
@@ -272,6 +451,7 @@ standards in order to use the additional performance of the
 @acronym{DVD} decoders and thus achieve better image quality. Such an
 XVCD may be unsupported by many available standalone playing devices.
 
+@node Super Video CD 1.0, Extended Super Video CD, Extended Video CD, Known Video CD Flavors
 @subsection Super Video CD 1.0
 
 With the upcoming of the @acronym{DVD} media, a new VCD standard had to
@@ -308,65 +488,29 @@ for motion pictures:
 480 x 576 @@ 25 Hz (@acronym{PAL}).
 @end itemize
 
+@node Extended Super Video CD,  , Super Video CD 1.0, Known Video CD Flavors
 @subsection Extended Super Video CD
 
 Just like the XVCD, and thus also known as @dfn{XSVCD}, this is not an
 official standard and may not work with all playing devices supporting
 SVCDs.
 
-@chapter Reference
-
-@section @file{vcdimager} Tool
-
-There are a few command-line options for @file{vcdimager} at the moment:
-@example
-@cartouche
-$ vcdimager --help
-Usage: vcdimager [OPTION...]
-  -t, --type=TYPE                       select VideoCD type ('vcd11', 
-                                        'vcd2' or 'svcd') (default: 'vcd2')
-  -c, --cue-file=FILE                   specify cue file for output
-                                        (default: 'videocd.cue')
-  -b, --bin-file=FILE                   specify bin file for output 
-                                        (default: 'videocd.bin')
-  -l, --iso-volume-label=LABEL          specify ISO volume label for video
-                                        cd (default: 'VideoCD')
-  --iso-application-id=LABEL            specify ISO application id for 
-                                        video cd (default: '')
-  --info-album-id=LABEL                 specify album id for video cd set
-                                        (default: '')
-  --volume-count=NUMBER                 specify number of volumes in 
-                                        album set
-  --volume-number=NUMBER                specify album set sequence number
-                                        (< volume-count)
-  --broken-svcd-mode                    enable non-compliant compatibility
-                                        mode for broken devices
-  --sector-2336                         use 2336 byte sectors for output
-  --add-dir=DIR                         add directory contents recursively 
-                                        to ISO fs root
-  --add-file=FILE,ISO_FILENAME          add single file to ISO fs
-  --add-file-2336=FILE,ISO_FILENAME     add file containing full 2336 byte
-                                        sectors to ISO fs
-  -p, --progress                        show progress
-  -v, --verbose                         be verbose
-  -q, --quiet                           show only critical messages
-  -V, --version                         display version and copyright
-                                        information and exit
-
-Help options:
-  -?, --help                            Show this help message
-  --usage                               Display brief usage message
-
-$
-@end cartouche
-@end example
-
-@subsection Requirements For input @acronym{MPEG} streams
+@node Constraints on @acronym{MPEG} streams,  , Known Video CD Flavors, Video CD Concepts
+@section Constraints on @acronym{MPEG} streams
 
 GNU VCDImager expects @acronym{MPEG} streams in a format suitable for
-(Super) Video CD production.
+(Super) Video CD production. Only a few cases where the @acronym{MPEG}
+streams fail to adhere to this requirement are detected, thus it's up to
+the user to ensure that the constraints are fullfilled.
 
-@subsubsection Video CD
+@menu
+* Video CD::                    
+* Super Video CD::              
+* Common Constraints::          
+@end menu
+
+@node Video CD, Super Video CD, Constraints on @acronym{MPEG} streams, Constraints on @acronym{MPEG} streams
+@subsection Video CD
 
 The Video CD specification requires the multiplexed @acronym{MPEG}-1
 stream to have a bit rate of about 174300 bytes per second. The video
@@ -384,7 +528,8 @@ stream is required to have one of the following resolutions:
 The audio stream must be @acronym{MPEG}-1 layer II, fixed to a 224
 kbits/sec @acronym{CBR} with 1 stereo or 2 mono audio channels.
 
-@subsubsection Super Video CD
+@node Super Video CD, Common Constraints, Video CD, Constraints on @acronym{MPEG} streams
+@subsection Super Video CD
 
 When creating Super Video CD images @acronym{MPEG}-2 @acronym{VBR}
 streams are expected with a maximum allowed bit-rate of approximately
@@ -401,27 +546,93 @@ but then you are leaving the SVCD specification behind you...}:
 
 There are a few other requirements imposed by the specification, like the
 need to encode scan information as user data in the picture layer of all
-intra pictures, and the requirement to precede every I picture by a GOP
-header which shall be preceded by a sequence header in its turn and
-possibly begin all in the same packet, thus forming a so called access
-point sector.
+intra coded pictures.
 
 The audio stream must be @acronym{MPEG}-1 layer II, with a bit-rate
 ranging from 32 to 384 kbps kbits/sec bit-rate with up to 2 stereo or 4
 mono channels, or 1 extended @acronym{MPEG}-1/2 multichannel (5+1)
 surround sound stream.
 
-@subsubsection Common Constraints
+@node Common Constraints,  , Super Video CD, Constraints on @acronym{MPEG} streams
+@subsection Common Constraints
 
-Furthermore the @acronym{MPEG} files should be aligned to 2324 byte
-@acronym{MPEG} packet boundaries. If they aren't GNU VCDImager will 
-try to align them on the fly while issuing a warning that padding was needed.
+@menu
+* Alignment::                   
+* Access Point Sectors::        
+@end menu
 
-%If on-the-fly padding should fail, you can try fixing those files with VCDpad
-%@footnote{see @url{http://www.nocrew.org/?part=vcdpad}} or any other
-%program capable of aligning or fixing @acronym{MPEG} packets.
+@node Alignment, Access Point Sectors, Common Constraints, Common Constraints
+@subsubsection Alignment
 
-@subsection Adding Files to the Video CD 
+The @acronym{MPEG} program streams should be aligned to 2324
+byte @acronym{MPEG} packet boundaries@footnote{i.e. pack headers must be
+repeated every 2324 bytes, starting on byte 0}. If they pack headers
+should happen not be aligned on 2324 byte boundaries, GNU VCDImager will
+try@footnote{aligning only works, if @acronym{MPEG} packets are
+@emph{not} bigger than 2324 bytes.} to align them on the fly while
+issuing a warning that padding was needed. @strong{Warning:} Padding the
+@acronym{MPEG} streams causes the bitrate at which the data is read to
+be increased, this may lead to undesiderable effects.
+
+If the image generation process should abort with an @acronym{MPEG}
+related error message, it maybe either due to a bug or due to a
+corrupted or non-compliant @acronym{MPEG} stream coding. In this case
+re-encoding or re-multiplexing may help.
+
+@node Access Point Sectors,  , Alignment, Common Constraints
+@subsubsection Access Point Sectors
+
+An @dfn{Access Point Sector}, @acronym{APS}, is an @acronym{MPEG} video
+sector on the @acronym{VCD}/@acronym{SVCD} which is suitable to be
+jumped to directly. @acronym{APS} are required for entry points and
+scantables.
+
+@acronym{APS} have to fullfill the requirement to precede every I
+picture by a GOP header which shall be preceded by a sequence header in
+its turn and begin all in the same packet, thus forming a so called
+access point sector. 
+
+This requirement can be relaxed by enabling the @code{relaxed aps}
+option. @strong{Warning:} The sequence header is needed for a playing
+device to figure out display parameters, such as display resoulution and
+frame rate, relaxing the aps requirement may lead to non-working entry
+points.
+
+@node Reference, VideoCD @acronym{XML} Description, Video CD Concepts, Top
+@chapter Reference
+
+@menu
+* Tools::                       
+@end menu
+
+@node Tools,  , Reference, Reference
+@section Tools
+
+@menu
+* @file{vcdimager}::            
+* @file{vcddebug}::             
+* @file{vcdxgen}::              
+* @file{vcdxbuild}::            
+* @file{vcdxrip}::              
+@end menu
+
+@node @file{vcdimager}, @file{vcddebug}, Tools, Tools
+@subsection @file{vcdimager}
+
+There are a few command-line options for @file{vcdimager} at the moment:
+@example
+@cartouche
+$ vcdimager --help
+@end cartouche
+@end example
+
+@menu
+* Adding Files to the Video CD ::  
+* CD-i Support::                
+@end menu
+
+@node Adding Files to the Video CD , CD-i Support, @file{vcdimager}, @file{vcdimager}
+@subsubsection Adding Files to the Video CD 
 
 Files can be added to the @acronym{ISO} file-system, that is the first
 track of the Video CD, by making use of the command-line options
@@ -458,7 +669,8 @@ slashes following directly each other.
 If the parent directory for a file entry does not exist it will be
 created automatically on demand.
 
-@subsection CD-i Support
+@node CD-i Support,  , Adding Files to the Video CD , @file{vcdimager}
+@subsubsection CD-i Support
 There is no specific CD-i support in GNU VCDImager. But you
 can use the general facilities for adding a custom CD-i player
 application. 
@@ -480,34 +692,121 @@ vcdimager alias --cdi \
 	--add-file      /usr/share/cdi/cdi_vcd.cfg,CDI/CDI_VCD.CFG 
 @end example
 
-@section @file{vcdrip} Tool
+@node @file{vcddebug}, @file{vcdxgen}, @file{vcdimager}, Tools
+@subsection @file{vcddebug}
 
-The @file{vcdrip} utility offers just a few command line options:
-@example
-@cartouche
-$ vcdrip --help
-Usage: vcdrip [OPTION...]
-  -b, --bin-file=FILE       set image file as source
-  --sector-2336             use 2336 byte sector mode for image file
-  --cdrom-device=DEVICE     set CDROM device as source (Linux only)
-  -d, --dump                dump information about VideoCD
-  --rip                     rip mpeg tracks
-  --rip-spi                 rip segment play items
-  -v, --verbose             be verbose
-  -q, --quiet               show only critical messages
-  -V, --version             display version and copyright information
-                            and exit
+@emph{...not written yet...}
 
-Help options:
-  -?, --help                Show this help message
-  --usage                   Display brief usage message
+@node @file{vcdxgen}, @file{vcdxbuild}, @file{vcddebug}, Tools
+@subsection @file{vcdxgen}
 
-$
-@end cartouche
-@end example
+@emph{...not written yet...}
 
+@node @file{vcdxbuild}, @file{vcdxrip}, @file{vcdxgen}, Tools
+@subsection @file{vcdxbuild}
+
+@emph{...not written yet...}
+
+@node @file{vcdxrip},  , @file{vcdxbuild}, Tools
+@subsection @file{vcdxrip}
+
+@emph{...not written yet...}
+
+@node VideoCD @acronym{XML} Description, Examples, Reference, Top
+@chapter VideoCD @acronym{XML} Description
+
+The @acronym{DTD} the @acronym{XML} description conforms to,, can be
+downloaded from @url{http://www.gnu.org/software/vcdimager/videocd.dtd}.
+
+@menu
+* @code{<videocd>} Root::       
+@end menu
+
+@node @code{<videocd>} Root,  , VideoCD @acronym{XML} Description, VideoCD @acronym{XML} Description
+@section @code{<videocd>} Root
+
+@menu
+* @code{<option>} Element::     
+* @code{<info>} Container::     
+* @code{<pvd>} Container::      
+* @code{<filesystem>} Container::  
+* @code{<segment-items>} Container::  
+* @code{<sequence-items>} Container::  
+* @code{<pbc>} Container::      
+@end menu
+
+@node @code{<option>} Element, @code{<info>} Container, @code{<videocd>} Root, @code{<videocd>} Root
+@subsection @code{<option>} Element
+
+@node @code{<info>} Container, @code{<pvd>} Container, @code{<option>} Element, @code{<videocd>} Root
+@subsection @code{<info>} Container
+
+@node @code{<pvd>} Container, @code{<filesystem>} Container, @code{<info>} Container, @code{<videocd>} Root
+@subsection @code{<pvd>} Container
+
+@node @code{<filesystem>} Container, @code{<segment-items>} Container, @code{<pvd>} Container, @code{<videocd>} Root
+@subsection @code{<filesystem>} Container
+
+@menu
+* @code{<folder>} Element/Containter::  
+* @code{<file>} Element/Containter::  
+@end menu
+
+@node @code{<folder>} Element/Containter, @code{<file>} Element/Containter, @code{<filesystem>} Container, @code{<filesystem>} Container
+@subsubsection @code{<folder>} Element/Containter
+
+@node @code{<file>} Element/Containter,  , @code{<folder>} Element/Containter, @code{<filesystem>} Container
+@subsubsection @code{<file>} Element/Containter
+
+@node @code{<segment-items>} Container, @code{<sequence-items>} Container, @code{<filesystem>} Container, @code{<videocd>} Root
+@subsection @code{<segment-items>} Container
+
+@menu
+* @code{<segment-item>} Element::  
+@end menu
+
+@node @code{<segment-item>} Element,  , @code{<segment-items>} Container, @code{<segment-items>} Container
+@subsubsection @code{<segment-item>} Element
+
+@node @code{<sequence-items>} Container, @code{<pbc>} Container, @code{<segment-items>} Container, @code{<videocd>} Root
+@subsection @code{<sequence-items>} Container
+
+@menu
+* @code{<sequence-item>} Element::  
+@end menu
+
+@node @code{<sequence-item>} Element,  , @code{<sequence-items>} Container, @code{<sequence-items>} Container
+@subsubsection @code{<sequence-item>} Element
+
+@node @code{<pbc>} Container,  , @code{<sequence-items>} Container, @code{<videocd>} Root
+@subsection @code{<pbc>} Container
+
+@menu
+* @code{<selection>} Element::  
+* @code{<playlist>} Element::   
+* @code{<endlist>} Element::    
+@end menu
+
+@node @code{<selection>} Element, @code{<playlist>} Element, @code{<pbc>} Container, @code{<pbc>} Container
+@subsubsection @code{<selection>} Element
+
+@node @code{<playlist>} Element, @code{<endlist>} Element, @code{<selection>} Element, @code{<pbc>} Container
+@subsubsection @code{<playlist>} Element
+
+@node @code{<endlist>} Element,  , @code{<playlist>} Element, @code{<pbc>} Container
+@subsubsection @code{<endlist>} Element
+
+@node Examples, Tips and Hints, VideoCD @acronym{XML} Description, Top
 @chapter Examples
 
+@menu
+* Simple Multitrack Example::   
+* @acronym{MPEG} Extraction::   
+@end menu
+
+@strong{outdated!!!}
+
+@node Simple Multitrack Example, @acronym{MPEG} Extraction, Examples, Examples
 @section Simple Multitrack Example
 
 In the following example session, the files @file{track1.mpg},
@@ -523,6 +822,7 @@ $
 @end cartouche
 @end example
 
+@node @acronym{MPEG} Extraction,  , Simple Multitrack Example, Examples
 @section @acronym{MPEG} Extraction
 
 The next example show how to extract the @acronym{MPEG} streams
@@ -550,59 +850,55 @@ $
 @end cartouche
 @end example
 
-@appendix Acronym Expansions
+@node Tips and Hints, Acronym Expansions, Examples, Top
+@appendix Tips and Hints
 
-@table @acronym
+@menu
+* SVCD Player Compatibility::   
+@end menu
 
-@item CBR
-constant bit rate
+@node SVCD Player Compatibility,  , Tips and Hints, Tips and Hints
+@section SVCD Player Compatibility
 
-@item CD
-compact disc
+If you have problems with your playing device failing to @emph{detect} a
+created @acronym{SVCD}, you can may the following things (some of the
+advices below apply to @acronym{VCD}s as well):
 
-@item CD-DA
-@acronym{CD} digital audio
+@enumerate
+@item
+Take warnings serious! If there were warnings issued during the image
+building process, chances are the problems are related to them.
 
-@item CD-ROM
-@acronym{CD} read only memory
+@item 
+Make sure the @acronym{SVCD} is physically ok (e.g., analyze the disc
+with @file{vcddebug} or try it on some other playing device).
 
-@item DVD
-digital versatile/video disc
+@item
+Try creating the @acronym{SVCD} by enabling the @code{svcd vcd30 mpegav}
+and @code{svcd vcd30 entrysvd} options.
 
-@item FSF
-free software foundation, @url{http://www.fsf.org/}
+@item
+Add an empty @file{/SEGMENT} dir, if it isn't created due to inclusion
+of @acronym{SPI}s.
 
-@item GNU
-@acronym{GNU} is not @acronym{UNIX}, @url{http://www.gnu.org/}
+@end enumerate
 
-@item MPEG
-movie picture experts group
+@node Acronym Expansions, GNU GENERAL PUBLIC LICENSE, Tips and Hints, Top
+@appendix Glossary
 
-@item OGT
-overlay graphics & text
+@include glossary.texi
 
-@item PBC
-playback control
+@iftex
+@appendix GNU General Public License
+@end iftex
+@ifinfo
+@node GNU GENERAL PUBLIC LICENSE,  , Acronym Expansions, Top
+@appendix GNU GENERAL PUBLIC LICENSE
+@end ifinfo
 
-@item PVD
-primary volume descriptor
+@center Version 2, June 1991
 
-@item SVCD
-Super @acronym{VCD}
-
-@item VBR
-variable bit rate
-
-@item VCD
-Video @acronym{CD}
-
-@item XSVCD
-eXtended @acronym{SVCD}
-
-@item XVCD
-eXtended @acronym{VCD}
-
-@end table
+@include gpl.texi
 
 @bye
 

@@ -1,0 +1,60 @@
+@table @acronym
+
+@item APS
+access point sector
+
+@item CBR
+constant bit rate
+
+@item CD
+compact disc
+
+@item CD-DA
+@acronym{CD} digital audio
+
+@item CD-ROM
+@acronym{CD} read only memory
+
+@item DVD
+digital versatile/video disc
+
+@item FSF
+free software foundation, @url{http://www.fsf.org/}
+
+@item GNU
+@acronym{GNU} is not @acronym{UNIX}, @url{http://www.gnu.org/}
+
+@item MPEG
+movie picture experts group
+
+@item OGT
+overlay graphics & text
+
+@item PEM
+program end marker
+
+@item PBC
+playback control
+
+@item PVD
+primary volume descriptor
+
+@item SVCD
+Super @acronym{VCD}
+
+@item VBR
+variable bit rate
+
+@item VCD
+Video @acronym{CD}
+
+@item XML
+extensible markup language, @url{http://www.w3.org/XML/}
+
+@item XSVCD
+eXtended @acronym{SVCD}
+
+@item XVCD
+eXtended @acronym{VCD}
+
+@end table
