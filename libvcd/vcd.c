@@ -460,6 +460,8 @@ vcd_obj_append_sequence_play_item (VcdObj *obj, VcdMpegSource *mpeg_source,
 
   obj->relative_end_extent += obj->track_front_margin + length + obj->track_rear_margin;
 
+  /* sanity checks */
+
   if (length < 75)
     vcd_warn ("mpeg stream shorter than 75 sectors");
 
@@ -480,6 +482,35 @@ vcd_obj_append_sequence_play_item (VcdObj *obj, VcdMpegSource *mpeg_source,
       || sequence->info->shdr[1].seen
       || sequence->info->shdr[2].seen)
     vcd_warn ("sequence items should contain a motion video stream!");
+
+  {
+    int i;
+
+    for (i = 0; i < 3; i++)
+      {
+        if (sequence->info->ahdr[i].seen)
+          {
+            if (i && !_vcd_obj_has_cap_p (obj, _CAP_MPEG2))
+              vcd_warn ("audio stream #%d not supported by this VCD type", i);
+
+            if (sequence->info->ahdr[i].sampfreq != 44100)
+              vcd_warn ("audio stream #%d has sampling frequency %d Hz (should be 44100 Hz)", 
+                        i, sequence->info->ahdr[i].sampfreq);
+
+            if (sequence->info->ahdr[i].layer != 2)
+              vcd_warn ("audio stream #%d is not layer II", i);
+
+            if (_vcd_obj_has_cap_p (obj, _CAP_MPEG1) 
+                && sequence->info->ahdr[i].bitrate != 224*1024)
+              vcd_warn ("audio stream #%d has bitrate %d kbps (should be 224 kbps for this vcd type)",
+                        i, sequence->info->ahdr[i].bitrate);
+          }
+        else if (!i && !_vcd_obj_has_cap_p (obj, _CAP_MPEG2))
+          {
+            vcd_warn ("this VCD type requires an audio stream to be present");
+          }
+      }
+  }
     
   /* vcd_debug ("track# %d's detected playing time: %.2f seconds",  */
   /*            track_no, sequence->info->playing_time); */

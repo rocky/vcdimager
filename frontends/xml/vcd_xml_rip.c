@@ -217,7 +217,7 @@ _parse_pvd (struct vcdxml_t *obj, VcdImageSource *img)
 
   if (pvd.type != ISO_VD_PRIMARY)
     {
-      vcd_error ("unexcected descriptor type");
+      vcd_error ("unexpected descriptor type");
       return -1;
     }
   

@@ -33,7 +33,6 @@
 static const char _rcsid[] = "$Id$";
 
 #if defined(__bsdi__)
-/* && defined(SCSIRAWCDB) */
 
 #include </sys/dev/scsi/scsi.h>
 #include </sys/dev/scsi/scsi_ioctl.h>
@@ -64,6 +63,28 @@ typedef struct {
   
   bool init;
 } _img_bsdicd_src_t;
+
+static int
+_scsi_cmd (int fd, struct scsi_user_cdb *sucp, const char *tag)
+{
+  u_char *cp;
+
+  if  (ioctl (fd, SCSIRAWCDB, sucp))
+    {
+      vcd_error ("%s: ioctl (SCSIRAWCDB): %s", tag, strerror (errno));
+      return 1;
+    }
+  if  (sucp->suc_sus.sus_status)
+    {
+      cp = sucp->suc_sus.sus_sense;
+      vcd_info("%s: cmd: %x sus_status %d ", tag, sucp->suc_cdb[0],
+	       sucp->suc_sus.sus_status);
+      vcd_info(" sense: %x %x %x %x %x %x %x %x", cp[0], cp[1], cp[2],
+	       cp[3], cp[4], cp[5], cp[6], cp[7]);
+      return 1;
+    }
+  return 0;
+}
 
 static void
 _source_init (_img_bsdicd_src_t *_obj)
@@ -137,7 +158,7 @@ _set_bsize (int fd, unsigned bsize)
   mh.block_length_med = (bsize >> 8) & 0xff;
   mh.block_length_lo = (bsize >> 0) & 0xff;
 
-  return ioctl (fd, SCSIRAWCDB, &suc);
+  return _scsi_cmd (fd, &suc, "_set_bsize");
 }
 
 static int
@@ -145,6 +166,7 @@ _read_mode2 (int fd, void *buf, uint32_t lba, unsigned nblocks,
 	     bool _workaround)
 {
   struct scsi_user_cdb suc; 
+  int retval = 0;
 
   memset (&suc, 0, sizeof (struct scsi_user_cdb));
 
@@ -175,32 +197,23 @@ _read_mode2 (int fd, void *buf, uint32_t lba, unsigned nblocks,
   suc.suc_timeout = 500;
   suc.suc_flags = SUC_READ;
 
-  if (ioctl (fd, SCSIRAWCDB, &suc))
-    {
-      vcd_error ("ioctl (SCSIRAWCDB): %s", strerror (errno));
-      return 0;
-    }
-
   if (_workaround)
     {
-      int retval;
-
       if ((retval = _set_bsize (fd, 2336)))
-	return retval;
+	goto out;
 
-      if ((retval = ioctl (fd, SCSIRAWCDB, &suc)))
+      if ((retval = _scsi_cmd(fd, &suc, "_read_mode2_workaround")))
 	{
 	  _set_bsize (fd, 2048);
-	  return retval;
+	  goto out;
 	}
-
-      if ((retval = _set_bsize (fd, 2048)))
-	return retval;
+      retval = _set_bsize (fd, 2048);
     }
   else
-    return ioctl (fd, SCSIRAWCDB, &suc);
+    retval = _scsi_cmd(fd, &suc, "_read_mode2");
 
-  return 0;
+ out:
+  return retval;
 }
 
 static int
@@ -213,35 +226,34 @@ _read_mode2_sector (void *user_data, void *data, uint32_t lsn, bool form2)
   if (form2)
     {
     retry:
-	switch (_obj->access_mode)
-	  {
-	  case _AM_NONE:
-	    vcd_error ("no way to read mode2");
-	    return 1;
-	    break;
+      switch (_obj->access_mode)
+	{
+	case _AM_NONE:
+	  vcd_error ("no way to read mode2");
+	  return 1;
+	  break;
 
-	  case _AM_READ_CD:
-	  case _AM_READ_10:
-	    if (_read_mode2 (_obj->fd, data, lsn, 1, 
-			     (_obj->access_mode == _AM_READ_10)))
-	      {
-		perror ("ioctl()");
-		if (_obj->access_mode == _AM_READ_CD)
-		  {
-		    vcd_info ("READ_CD failed; switching to READ_10 mode...");
-		    _obj->access_mode = _AM_READ_10;
-		    goto retry;
-		  }
-		else
-		  {
-		    vcd_info ("READ_10 failed; no way to read mode2 left.");
-		    _obj->access_mode = _AM_NONE;
-		    goto retry;
-		  }
-		return 1;
-	      }
-	    break;
-	  }
+	case _AM_READ_CD:
+	case _AM_READ_10:
+	  if (_read_mode2 (_obj->fd, data, lsn, 1, 
+			   (_obj->access_mode == _AM_READ_10)))
+	    {
+	      if (_obj->access_mode == _AM_READ_CD)
+		{
+		  vcd_info ("READ_CD failed; switching to READ_10 mode...");
+		  _obj->access_mode = _AM_READ_10;
+		  goto retry;
+		}
+	      else
+		{
+		  vcd_info ("READ_10 failed; no way to read mode2 left.");
+		  _obj->access_mode = _AM_NONE;
+		  goto retry;
+		}
+	      return 1;
+	    }
+	  break;
+	}
     }
   else
     {
@@ -285,17 +297,8 @@ _stat_size (void *user_data)
   suc.suc_timeout = 500;
   suc.suc_flags = SUC_READ;
 
-  if (ioctl (_obj->fd, SCSIRAWCDB, &suc))
-    {
-      vcd_error ("ioctl (SCSIRAWCDB): %s", strerror (errno));
-      return 0;
-    }
-
-  if (suc.suc_sus.sus_status)
-    {
-      vcd_error ("scsistatus = %d", suc.suc_sus.sus_status);
-      return 0;
-    }
+  if (_scsi_cmd(_obj->fd, &suc, "_stat_size"))
+    return 0;
 
   {
     int i;

@@ -1,3 +1,11 @@
+2001-10-19  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_image_bsdicd.c: merged fixes from Steven M. Schultz
+
+2001-10-16  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd.c: added a few constraint checks for sequence items
+
 2001-10-10  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd.c (_write_sequence): place EOF bit at end of track...
