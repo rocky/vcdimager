@@ -1,3 +1,9 @@
+2000-11-09  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd.c (_write_sectors): s/vcd_warning/vcd_warn/
+
+	* libvcd/vcd_files.c (set_info_vcd): removed obsolete comment
+
 2000-11-08  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* applied fix for program end markers in mpeg streams from

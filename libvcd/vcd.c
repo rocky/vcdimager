@@ -66,8 +66,8 @@ vcd_obj_new(vcd_type_t vcd_type)
 
 
 void
-vcd_obj_set_cdi_input(VcdObj* obj, VcdDataSource* image_file,
-                      VcdDataSource* text_file, VcdDataSource* vcd_file)
+vcd_obj_set_cdi_input(VcdObj *obj, VcdDataSource *image_file,
+                      VcdDataSource *text_file, VcdDataSource *vcd_file)
 {
   assert(obj != NULL);
   
@@ -77,7 +77,7 @@ vcd_obj_set_cdi_input(VcdObj* obj, VcdDataSource* image_file,
 }
 
 const mpeg_info_t*
-vcd_obj_get_mpeg_info(VcdObj* obj, int track_id)
+vcd_obj_get_mpeg_info(VcdObj *obj, int track_id)
 {
   assert(track_id >= 0);
   assert(track_id < obj->mpeg_tracks_num);
@@ -86,7 +86,7 @@ vcd_obj_get_mpeg_info(VcdObj* obj, int track_id)
 }
 
 void
-vcd_obj_remove_mpeg_track(VcdObj* obj, int track_id)
+vcd_obj_remove_mpeg_track(VcdObj *obj, int track_id)
 {
   int n, length;
 
@@ -112,7 +112,7 @@ vcd_obj_remove_mpeg_track(VcdObj* obj, int track_id)
 }
 
 int
-vcd_obj_append_mpeg_track(VcdObj *obj, VcdDataSource* mpeg_file)
+vcd_obj_append_mpeg_track(VcdObj *obj, VcdDataSource *mpeg_file)
 {
   unsigned length;
   int j;
@@ -190,7 +190,7 @@ cue_track(VcdDataSink *sink, bool sect2336, uint8_t num, uint32_t extent)
 }
 
 void
-vcd_obj_write_cuefile(VcdObj *obj, VcdDataSink* cue_file,
+vcd_obj_write_cuefile(VcdObj *obj, VcdDataSink *cue_file,
                       const char bin_fname[])
 {
   int n;
@@ -208,7 +208,7 @@ vcd_obj_write_cuefile(VcdObj *obj, VcdDataSink* cue_file,
 }
 
 void
-vcd_obj_set_param(VcdObj* obj, vcd_parm_t param, const void* arg)
+vcd_obj_set_param(VcdObj *obj, vcd_parm_t param, const void *arg)
 {
   assert(arg != NULL);
 
@@ -341,7 +341,7 @@ _finalize_vcd_iso_track(VcdObj *obj)
 }
 
 static int
-_callback_wrapper(VcdObj* obj, bool force)
+_callback_wrapper(VcdObj *obj, bool force)
 {
   const int cb_frequency = 75*4;
 
@@ -612,8 +612,8 @@ _write_sectors(VcdObj *obj, int track)
       break;
     case MPEG_END:
       if(n < obj->mpeg_tracks[track].length_sectors)
-        vcd_warning("Program end marker seen at packet %d"
-                    " -- before actual end of stream", n);
+        vcd_warn("Program end marker seen at packet %d"
+                 " -- before actual end of stream", n);
       sm = SM_FORM2|SM_REALT;
       ci = 0;
       break;
@@ -680,7 +680,7 @@ vcd_obj_begin_output(VcdObj *obj)
 }
 
 int
-vcd_obj_write_image(VcdObj* obj, VcdDataSink* bin_file,
+vcd_obj_write_image(VcdObj *obj, VcdDataSink *bin_file,
                     progress_callback_t callback, void *user_data)
 {
   unsigned sectors, track;

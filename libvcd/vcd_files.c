@@ -153,10 +153,6 @@ set_info_vcd(VcdObj *obj)
 
   info_vcd.psd_size = UINT32_TO_BE(obj->psd_size);
 
-/*   info_vcd.unknown2[0] = 0x00; /* ??????  */
-/*   info_vcd.unknown2[1] = 0x02; /* ?????? BCD offset of something perhaps ???? */
-/*   info_vcd.unknown2[2] = 0x00; /* ??????  */
-
   info_vcd.offset_mult = INFO_OFFSET_MULT;
 
   info_vcd.last_psd_ofs = UINT16_TO_BE((obj->mpeg_tracks_num+1)<<1); /* maybe this is the autoplay offset? */
