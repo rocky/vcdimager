@@ -6,14 +6,13 @@ TODO LIST:
 - version 1.0
  * check for VideoCD1.1/VideoCD2.0/SuperVideoCD1.0 conformance
  * optimize/improve MPEG detection/scanning/handling code
- * documentation
+ * documentation/examples (XML!!)
 
 - version 2.0+
  * C++ rewrite (OOD & OOA already on paper)
  * releasing libvcd
  * add support for audio tracks
- * gtkmm frontend
-
+ * PyGnome+libglade frontend
 
 BUGS:
 ~~~~~
@@ -31,7 +30,7 @@ MISSING INFORMATION (read `INFO WISHLIST'):
  * is pre/post zero sector padding in mpeg tracks really required for
    VCD 1.1/2.0?
 
- * is the extended sel list structure correct?
+ * is the extended sel list structure correct? (for VCD2.0)
 
  * how are access point sectors defined for VCD 1.1/2.0?
 
@@ -39,7 +38,7 @@ MISSING INFORMATION (read `INFO WISHLIST'):
 
  * where is INFO.SVD's playing time offset field?
  
- * what about command lists?
+ * what about command lists? (how are the opcodes defined)
 
  * SCANDATA.DAT for VCD2.0?
 

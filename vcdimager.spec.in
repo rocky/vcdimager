@@ -14,6 +14,8 @@ Packager:       Herbert Valerio Riedel <hvr@gnu.org>
 Source:         http://www.gnu.org/pub/gnu/%{name}/%{name}-%{version}.tar.gz
 URL:            http://www.gnu.org/software/vcdimager/
 BuildRoot:      %{_tmppath}/%{name}-root
+Requires:	libxml2 >= 2.3.8
+BuildPrereq:	libxml2-devel >= 2.3.8
 
 %description 
 VCDImager allows you to create VideoCD BIN/CUE CD images from mpeg

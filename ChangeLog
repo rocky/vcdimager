@@ -1,5 +1,6 @@
 2001-05-27  Herbert Valerio Riedel  <hvr@gnu.org>
 
+ 	* configure.in: bumped version up to 0.7.1
 
 	* libvcd/vcd_pbc.c (_vcd_pbc_pin_lookup): typo preventing entry ids to be resolved fixed
 
