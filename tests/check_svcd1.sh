@@ -49,9 +49,11 @@ fi
 test_vcdxbuild ${srcdir}/$BASE.xml
 RC=$?
 if test $RC -ne 0 ; then
-  echo vcdxbuild failed 
   if test $RC -eq 77 ; then
+    echo vcdxbuild skipped
     test_vcdxbuild_cleanup
+  else
+    echo vcdxbuild failed 
   fi
   exit $RC
 fi
