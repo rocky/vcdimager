@@ -17,18 +17,11 @@ the following gcc versions seem to create good code:
 gcc version 2.96 20000731 (Red Hat Linux 7.1 2.96-81)
 gcc version egcs-2.91.66 19990314/Linux (egcs-1.1.2 release)
 
-vcdimager
-~~~~~~~~~
+vcdimager/vcdxbuild
+~~~~~~~~~~~~~~~~~~~
 
 *) scantable creation/playing time detection still not accurate enough
 *) mpeg analyzation doesn't detect all non-conforming parameters
-*) no checking is performed whether charset used for labels and id's is ok
-*) segment play items are always assumed to be STILL images 
-
-vcdrip
-~~~~~~
-
-*) SPI spanning multiple segments untested
 
 --
 $Id$

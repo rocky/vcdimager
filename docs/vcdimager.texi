@@ -1070,8 +1070,8 @@ valid ISO9660 file name with the following restrictions:
 @itemize @bullet
 @item
 The Character set is restricted to upper case letters, numbers, 
-underscore @samp{_}, dot @samp{.} and slash @samp{/}. 
-@xref{ISO646 d-Characters}
+underscore @samp{_}, dot @samp{.} and slash @samp{/}, 
+@xref{ISO646 d-Characters}.
 
 @item
 The maximum file name length is restricted to 31 characters, the

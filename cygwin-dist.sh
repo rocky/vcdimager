@@ -54,6 +54,10 @@ for DOCFILE in BUGS TODO README NEWS ChangeLog THANKS AUTHORS COPYING FAQ
 
 unix2dos $TMPDIR/*.txt
 
+if [ -f vcdimager.pdf ]; then
+  cp -v vcdimager.pdf $TMPDIR/
+fi
+
 cp -v $EXECUTABLES frontends/xml/videocd.dtd /bin/cygwin1.dll /bin/cygz.dll $TMPDIR/
 strip -v $TMPDIR/*.exe
 
