@@ -2597,7 +2597,7 @@ e |     . > N
 f |     / ? O _                    
 @end example
 
-@node CD Image Formats, Acronym Expansions, Character Sets, Top
+@node CD Image Formats, Glossary, Character Sets, Top
 @appendix CD Image Formats 
 
 @menu
