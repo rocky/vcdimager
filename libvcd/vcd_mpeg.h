@@ -62,6 +62,9 @@ typedef struct {
     bool has_pts;
     double pts;
 
+    uint64_t scr;
+    uint32_t muxrate;
+
     bool gop;
     struct {
       uint8_t h, m, s, f;

@@ -1,7 +1,7 @@
 AC_REVISION([$Id$])dnl
 AC_INIT(libvcd/vcd.h)
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(vcdimager, 0.7.9)
+AM_INIT_AUTOMAKE(vcdimager, 0.7.10pre1)
 AM_MAINTAINER_MODE
 
 AM_SANITY_CHECK
@@ -123,10 +123,10 @@ dnl empty_array_size
 AC_MSG_CHECKING([how to create empty arrays])
 
 empty_array_size="xxx"
-AC_TRY_COMPILE(,[struct { int foo; int bar[]; } doo;], empty_array_size="")
+AC_TRY_COMPILE(,[struct { int foo; int bar[0]; } doo;], empty_array_size="0")
 
 if test "x$empty_array_size" = "xxxx";then
- AC_TRY_COMPILE(,[struct { int foo; int bar[0]; } doo;], empty_array_size="0")
+ AC_TRY_COMPILE(,[struct { int foo; int bar[]; } doo;], empty_array_size="")
 fi
 
 if test "x$empty_array_size" = "xxxx"

@@ -1,3 +1,7 @@
+2001-08-19  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_mpeg.c: major cleanups
+
 2001-08-16  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_mpeg.c (_parse_user_data): just warn and break out if invalid scan data len

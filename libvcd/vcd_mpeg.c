@@ -80,6 +80,9 @@ const static double frame_rates[16] =  {
     60.00, 00.0, 
   };
 
+#define MARKER(buf, offset) \
+ vcd_assert (vcd_bitvec_read_bits (buf, offset, 1) == 1)
+
 static inline bool
 _start_code_p (uint32_t code)
 {
@@ -136,6 +139,28 @@ _aud_streamid_idx (uint8_t streamid)
   return -1;
 }
 
+/* used for SCR, PTS and DTS */
+static inline uint64_t
+_parse_timecode (const void *buf, int *offset)
+{
+  uint64_t _retval;
+
+  _retval = vcd_bitvec_read_bits (buf, offset, 3);
+
+  MARKER (buf, offset);
+
+  _retval <<= 15;
+  _retval |= vcd_bitvec_read_bits (buf, offset, 15);
+      
+  MARKER (buf, offset);
+
+  _retval <<= 15;
+  _retval |= vcd_bitvec_read_bits (buf, offset, 15);
+
+  MARKER (buf, offset);
+
+  return _retval;
+}
 
 static void
 _parse_sequence_header (uint8_t streamid, const void *buf, 
@@ -360,145 +385,135 @@ _parse_user_data (uint8_t streamid, const void *buf, unsigned len,
   vcd_assert (pos <= len);
 }
 
-static void
-_analyze_video_pes (uint8_t streamid, const uint8_t *buf, int len, bool only_pts,
-		    VcdMpegStreamCtx *state)
+static int
+_analyze_pes_header (const uint8_t *buf, int len,
+                     VcdMpegStreamCtx *state)
 {
-  int pos = 0;
-  int sequence_header_pos = -1;
-  int gop_header_pos = -1;
-  int ipicture_header_pos = -1;
   bool _has_pts = false;
   bool _has_dts = false;
   int64_t pts = 0;
-  int mpeg_ver = 0;
-  int _pts_pos = 0;
+  mpeg_vers_t pes_mpeg_ver = 0;
 
-  vcd_assert (_vid_streamid_idx (streamid) != -1);
+  int pos;
 
-  switch (vcd_bitvec_peek_bits (buf, 0, 2))
-    {
-    case 0:
-    case 1:
-    case 3: /* seems to be v1 as well... */
-      mpeg_ver = 1;
-      break;
-
-    case 2: /* %10 */
-      mpeg_ver = 2;
-      break;
-
-    default:
-      vcd_assert_not_reached ();
-      break;
-    }
-
-  if (mpeg_ver == 2)
-    {
-      int pos2 = 8;
-
-      switch (vcd_bitvec_peek_bits (buf, pos2, 2))
-        {
-        case 2:
-          _has_pts = true;
-          _pts_pos = 24;
-          break;
-          
-        case 3:
-          _has_dts = _has_pts = true;
-          _pts_pos = 24;
-          break;
-
-        case 0:
-          break;
-
-        default:
-          vcd_debug ("?? v2");
-          break;
-        }
-
-      pos2 += 8;
-
-      pos = vcd_bitvec_read_bits (buf, &pos2, 8);
-      
-      pos += pos2 >> 3;
-    }
-  else if (mpeg_ver == 1)
+  if (vcd_bitvec_peek_bits (buf, 0, 2) == 2) /* %10 - ISO13818-1 */
     {
       int pos2 = 0;
 
-      while (((pos2 + 8) < (len << 3)) && vcd_bitvec_peek_bits (buf, pos2, 8) == 0xff)
-        pos2 += 8;
+      pes_mpeg_ver = MPEG_VERS_MPEG2;
 
-      switch (vcd_bitvec_peek_bits (buf, pos2, 2)) 
+      pos2 += 2;
+
+      pos2 += 2; /* PES_scrambling_control */
+      pos2++; /* PES_priority */
+      pos2++; /* data_alignment_indicator */
+      pos2++; /* copyright */
+      pos2++; /* original_or_copy */
+
+      switch (vcd_bitvec_read_bits (buf, &pos2, 2)) /* PTS_DTS_flags */
         {
-        case 0: 
-          /* %00 */
-          break;
-
-        case 1:
-          /* %01 */
-          pos2 += 16;
-          break;
-
-        case 2:
-        case 3:
-          /* %1x */
-          vcd_warn ("heah??");
-          break;
-        }
-
-      switch (vcd_bitvec_peek_bits (buf, pos2, 4))
-        {
-        case 2:
+        case 2: /* %10 */
           _has_pts = true;
-          _pts_pos = pos2;
           break;
           
-        case 3:
+        case 3: /* %11 */
           _has_dts = _has_pts = true;
-          _pts_pos = pos2;
-          break;
-
-        case 0:
-        case 0xf:
           break;
 
         default:
+          /* NOOP */
+          break;
+        }
+
+      pos2++; /* ESCR_flag */
+      
+      pos2++; /* */
+      pos2++; /* */
+      pos2++; /* */
+      pos2++; /* */
+
+      pos2++; /* PES_extension_flag */
+
+      pos = vcd_bitvec_read_bits (buf, &pos2, 8); /* PES_header_data_length */
+      pos += pos2 >> 3;
+
+      if (_has_pts && _has_dts)
+        {
+          vcd_assert (vcd_bitvec_peek_bits (buf, pos2, 4) == 3); /* %0011 */
+          pos2 += 4;
+
+          pts = _parse_timecode (buf, &pos2);
+
+          vcd_assert (vcd_bitvec_peek_bits (buf, pos2, 4) == 1); /* %0001 */
+          pos2 += 4;
+
+          /* dts = */ _parse_timecode (buf, &pos2);
+        }
+      else if (_has_pts)
+        {
+          vcd_assert (vcd_bitvec_peek_bits (buf, pos2, 4) == 2); /* %0010 */
+          pos2 += 4;
+
+          pts = _parse_timecode (buf, &pos2);
+        }
+    }
+  else /* ISO11172-1 */
+    {
+      int pos2 = 0;
+
+      pes_mpeg_ver = MPEG_VERS_MPEG1;
+
+      /* get rid of stuffing bytes */
+      while (((pos2 + 8) < (len << 3)) 
+             && vcd_bitvec_peek_bits (buf, pos2, 8) == 0xff)
+        pos2 += 8;
+
+      if (vcd_bitvec_peek_bits (buf, pos2, 2) == 1) /* %01 */
+        {
+          pos2 += 2;
+
+          pos2++;     /* STD_buffer_scale */
+          pos2 += 13; /* STD_buffer_size */
+        }
+
+      switch (vcd_bitvec_peek_bits (buf, pos2, 4)) 
+        {
+        case 0x2: /* %0010 */
+          pos2 += 4;
+          _has_pts = true;
+
+          pts = _parse_timecode (buf, &pos2);
+          break;
+
+        case 0x3: /* %0011 */
+          pos2 += 4;
+
+          _has_dts = _has_pts = true;
+          pts = _parse_timecode (buf, &pos2);
+
+          vcd_assert (vcd_bitvec_peek_bits (buf, pos2, 4) == 1); /* %0001 */
+          pos2 += 4;
+
+          /* dts = */ _parse_timecode (buf, &pos2);
+          break;
+
+        case 0x0: /* %0000 */
+          vcd_assert (vcd_bitvec_peek_bits (buf, pos2, 8) == 0x0f);
+          pos2 += 8;
+          break;
+
+        default:
+          vcd_error ("error in mpeg1 stream");
           break;
         }
 
       pos = pos2 >> 3;
     }
-  else
-    vcd_assert_not_reached ();
 
   if (_has_pts)
     {
-      int pos2 = _pts_pos;
-      int marker;
       double pts2;
       
-      marker = vcd_bitvec_read_bits (buf, &pos2, 4);
-
-      /* vcd_warn ("%d @%d", marker, _pts_pos); */
-
-      vcd_assert (marker == 2 || marker == 3);
-
-      pts = vcd_bitvec_read_bits (buf, &pos2, 3);
-
-      pos2++;
-
-      pts <<= 15;
-      pts |= vcd_bitvec_read_bits (buf, &pos2, 15);
-      
-      pos2++;
-
-      pts <<= 15;
-      pts |= vcd_bitvec_read_bits (buf, &pos2, 15);
-
-      pos2++;
-
       pts2 = (double) pts / 90000.0;
 
       if (!state->stream.seen_pts)
@@ -515,6 +530,41 @@ _analyze_video_pes (uint8_t streamid, const uint8_t *buf, int len, bool only_pts
       state->packet.has_pts = true;
       state->packet.pts = pts2;
     }
+
+  if (state->stream.version != pes_mpeg_ver)
+    vcd_warn ("pack header mpeg version does not match pes header mpeg version");
+
+  return pos;
+}
+
+static void
+_analyze_audio_pes (uint8_t streamid, const uint8_t *buf, int len, bool only_pts,
+		    VcdMpegStreamCtx *state)
+{
+  vcd_assert (_aud_streamid_idx (streamid) != -1);
+
+  _analyze_pes_header (buf, len, state);
+
+  /* if only pts extraction was needed, we are done here... */
+  if (only_pts)
+    return;
+  
+}
+
+static void
+_analyze_video_pes (uint8_t streamid, const uint8_t *buf, int len, bool only_pts,
+		    VcdMpegStreamCtx *state)
+{
+  int pos = 0;
+  int sequence_header_pos = -1;
+  int gop_header_pos = -1;
+  int ipicture_header_pos = -1;
+  
+  int bits;
+
+  vcd_assert (_vid_streamid_idx (streamid) != -1);
+
+  _analyze_pes_header (buf, len, state);
 
   /* if only pts extraction was needed, we are done here... */
   if (only_pts)
@@ -571,14 +621,15 @@ _analyze_video_pes (uint8_t streamid, const uint8_t *buf, int len, bool only_pts
   /* decide whether this packet qualifies as access point */
   state->packet.aps = APS_NONE; /* paranoia */
 
-  if (_has_pts && ipicture_header_pos != -1)
+  if (state->packet.has_pts 
+      && ipicture_header_pos != -1)
     {
       enum aps_t _aps_type = APS_NONE;
 
-      switch (mpeg_ver)
+      switch (state->stream.version)
         {
-        case 1:
-        case 2:
+        case MPEG_VERS_MPEG1:
+        case MPEG_VERS_MPEG2:
           if (sequence_header_pos != -1
               && sequence_header_pos < gop_header_pos
               && gop_header_pos < ipicture_header_pos)
@@ -597,8 +648,8 @@ _analyze_video_pes (uint8_t streamid, const uint8_t *buf, int len, bool only_pts
 
       if (_aps_type) 
         {
-          double pts2 = (double) pts / 90000.0;
-          int vid_idx = _vid_streamid_idx (streamid);
+          const double pts2 = state->packet.pts;
+          const int vid_idx = _vid_streamid_idx (streamid);
 
           if (state->stream.last_aps_pts[vid_idx] > pts2)
             vcd_warn ("aps pts seems out of order (actual pts %f, last seen pts %f) -- ignoring this aps",
@@ -644,6 +695,48 @@ _register_streamid (uint8_t streamid, VcdMpegStreamCtx *state)
       state->packet.system_header = true;
       break;
     }
+}
+
+static void
+_analyze_system_header (const uint8_t *buf, int len, 
+                        VcdMpegStreamCtx *state)
+{
+  int bitpos = 0;
+
+  MARKER (buf, &bitpos);
+
+  bitpos += 22; /* rate_bound */
+
+  MARKER (buf, &bitpos);
+
+  bitpos += 6; /* audio_bound */ 
+
+  bitpos++; /* fixed_flag */
+  bitpos++; /* CSPS_flag */
+  bitpos++; /* system_audio_lock_flag */
+  bitpos++; /* system_video_lock_flag */
+
+  MARKER (buf, &bitpos);
+
+  bitpos += 5; /* video_bound */ 
+
+  bitpos += 1; /* packet_rate_restriction_flag -- only ISO 13818-1 */
+  bitpos += 7; /* reserved */
+
+  while (vcd_bitvec_peek_bits (buf, bitpos, 1) == 1 
+         && bitpos <= (len << 3))
+    {
+      const uint8_t stream_id = vcd_bitvec_read_bits (buf, &bitpos, 8);
+
+      bitpos += 2; /* %11 */
+
+      bitpos++; /* P-STD_buffer_bound_scale */
+      bitpos += 13; /* P-STD_buffer_size_bound */
+
+      _register_streamid (stream_id, state);
+    }
+
+  vcd_assert (bitpos <= (len << 3));
 }
 
 int
@@ -694,6 +787,9 @@ vcd_mpeg_parse_packet (const void *_buf, unsigned buflen, bool parse_pes,
             vcd_warn ("...this looks like a RIFF header"
                       " but a plain multiplexed program stream was required.");
         }
+      else if (_code == MPEG_PROGRAM_END_CODE)
+        vcd_warn ("...PEM (program end marker) found instead of pack header;"
+                  " should be in last 4 bytes of pack");
 
       return 0;
     }
@@ -701,18 +797,18 @@ vcd_mpeg_parse_packet (const void *_buf, unsigned buflen, bool parse_pes,
   /* take a look at the pack header */
   pos = 0;
 
-  
-
   while (pos + 4 <= buflen)
     {
       uint32_t code = vcd_bitvec_peek_bits32 (buf, pos << 3);
 
+      /* skip zero bytes... */
       if (!code)
 	{
 	  pos += (pos + 4 == buflen) ? 4 : 2;
 	  continue;
 	}
 
+      /* continue until start code seen */
       if (!_start_code_p (code))
 	{
 	  pos++;
@@ -722,37 +818,89 @@ vcd_mpeg_parse_packet (const void *_buf, unsigned buflen, bool parse_pes,
       switch (code)
 	{
 	  uint16_t size;
-
+          int bits;
+          int bitpos;
+          
 	case MPEG_PACK_HEADER_CODE:
 	  if (pos)
 	    return pos;
 
 	  pos += 4;
-	  
-	  switch (vcd_bitvec_peek_bits(buf, pos << 3, 2))
-	    {
-	    default:
-	      vcd_warn ("packet not recognized as either version 1 or 2 (%d)" 
-                        " -- assuming v1", 
-			vcd_bitvec_peek_bits(buf, pos << 3, 2));
-	    case 0x0: /* %00 mpeg1 */
-	      if (!ctx->stream.version)
-		ctx->stream.version = MPEG_VERS_MPEG1;
 
-	      if (ctx->stream.version != MPEG_VERS_MPEG1)
-		vcd_warn ("mixed mpeg versions?");
-              pos += 8;
-	      break;
-	    case 0x1: /* %11 mpeg2 */
-	      if (!ctx->stream.version)
-		ctx->stream.version = MPEG_VERS_MPEG2;
+          bitpos = pos << 3;
+          bits = vcd_bitvec_peek_bits (buf, bitpos, 4);
 
-	      if (ctx->stream.version != MPEG_VERS_MPEG2)
-		vcd_warn ("mixed mpeg versions?");
-              pos += 10;
-	      break;
-	    }
-	  
+          if (bits == 0x2) /* %0010 ISO11172-1 */
+            {
+              uint64_t _scr;
+              uint32_t _muxrate;
+
+              bitpos += 4;
+
+              if (!ctx->stream.version)
+                ctx->stream.version = MPEG_VERS_MPEG1;
+
+              if (ctx->stream.version != MPEG_VERS_MPEG1)
+                vcd_warn ("mixed mpeg versions?");
+
+              _scr = _parse_timecode (buf, &bitpos);
+
+              bitpos++; /* marker */
+
+              _muxrate = vcd_bitvec_read_bits (buf, &bitpos, 22);
+
+              bitpos++; /* marker */
+
+              vcd_assert (bitpos % 8 == 0);
+              pos = bitpos >> 3;
+
+              ctx->packet.scr = _scr;
+              ctx->packet.muxrate = _muxrate * 50;
+            }
+          else if (bits >> 2 == 0x1) /* %01xx ISO13818-1 */
+            {
+              uint64_t _scr;
+              uint32_t _muxrate;
+              int tmp;
+
+              bitpos += 2;
+
+              if (!ctx->stream.version)
+                ctx->stream.version = MPEG_VERS_MPEG2;
+
+              if (ctx->stream.version != MPEG_VERS_MPEG2)
+                vcd_warn ("mixed mpeg versions?");
+
+              _scr = _parse_timecode (buf, &bitpos);
+
+              _scr *= 300;
+              _scr += vcd_bitvec_read_bits (buf, &bitpos, 9); /* SCR ext */
+
+              bitpos++; /* marker */
+              
+              _muxrate = vcd_bitvec_read_bits (buf, &bitpos, 22);
+              
+              bitpos++; /* marker */
+              bitpos++; /* marker */
+
+              bitpos += 5; /* reserved */
+
+              tmp = vcd_bitvec_read_bits (buf, &bitpos, 3) << 3;
+
+              bitpos += tmp;
+
+              vcd_assert (bitpos % 8 == 0);
+              pos = bitpos >> 3;
+
+              ctx->packet.scr = _scr;
+              ctx->packet.muxrate = _muxrate * 50;
+            }
+          else
+            {
+              vcd_warn ("packet not recognized as either version 1 or 2 (%d)" 
+                        " -- assuming v1", bits);
+            }
+
 	  break;
 
 	case MPEG_SYSTEM_HEADER_CODE:
@@ -783,13 +931,19 @@ vcd_mpeg_parse_packet (const void *_buf, unsigned buflen, bool parse_pes,
 	  switch (code)
 	    {
 	    case MPEG_SYSTEM_HEADER_CODE: 
-              _register_streamid (buf[pos + 6], ctx);
+              _analyze_system_header (buf + pos, size, ctx);
               break;
 
 	    case MPEG_VIDEO_E0_CODE:
 	    case MPEG_VIDEO_E1_CODE: 
 	    case MPEG_VIDEO_E2_CODE: 
               _analyze_video_pes (code & 0xff, buf + pos, size, !parse_pes, ctx);
+              break;
+
+            case MPEG_AUDIO_C0_CODE:
+            case MPEG_AUDIO_C1_CODE:
+            case MPEG_AUDIO_C2_CODE:
+              _analyze_audio_pes (code & 0xff, buf + pos, size, !parse_pes, ctx);
               break;
 	    }
 

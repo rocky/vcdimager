@@ -1668,8 +1668,7 @@ _write_segment (VcdObj *obj, mpeg_segment_t *_segment)
 
               if (pkt_flags.video_e1)
                 ci = CI_STILL, cn = CN_STILL;
-
-              if (pkt_flags.video_e2)
+              else if (pkt_flags.video_e2)
                 ci = CI_STILL2, cn = CN_STILL2;
 
               if (pkt_flags.video_e1 || pkt_flags.video_e2)
