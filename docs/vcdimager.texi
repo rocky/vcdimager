@@ -735,14 +735,88 @@ downloaded from @url{http://www.gnu.org/software/vcdimager/videocd.dtd}.
 * @code{<pbc>} Container::      
 @end menu
 
+@example
+<!ELEMENT videocd (option*,info,pvd,filesystem?,
+                   segment-items?,sequence-items,pbc?)>
+<!ATTLIST videocd
+  class        CDATA  #REQUIRED
+  version      CDATA  #REQUIRED
+  xmlns        %URI;  #FIXED 'http://www.gnu.org/software/vcdimager/1.0/'
+>
+@end example
+
+Supported combinations of @var{class} and @var{version} are listed below:
+
+@multitable @columnfractions .10 .10 .80
+@item @var{class} @tab @var{version} @tab Description
+@item @samp{vcd}  @tab @samp{1.1}
+@tab VideoCD 1.1
+@item @samp{vcd}  @tab @samp{2.0}
+@tab VideoCD 2.0
+@item @samp{svcd}  @tab @samp{1.0}
+@tab SuperVideoCD 1.0 (IEC-62107)
+@end multitable
+
 @node @code{<option>} Element, @code{<info>} Container, @code{<videocd>} Root, @code{<videocd>} Root
 @subsection @code{<option>} Element
+
+@example
+<!ELEMENT option EMPTY>
+<!ATTLIST option 
+  name         CDATA  #REQUIRED
+  value        CDATA  #IMPLIED
+>
+@end example
+
+The following option @var{name} are recognized.  At the moment only
+@samp{true} or @samp{false} is recognized as @var{value}.
+
+@table @samp
+@item svcd vcd30 mpegav
+Rename @file{/MPEG2/} folder on @acronym{SVCD}s to (non-compliant)
+@file{/MPEGAV/}.  Default: @samp{false}.
+
+@item svcd vcd30 entrysvd
+Enables the use of the (deprecated) signature @samp{ENTRYSVD} instead of
+@samp{ENTRYVCD} for the file @file{/SVCD/ENTRY.SVD}. Default:
+@samp{false}.
+
+@item relaxed aps
+This controls whether @acronym{APS} constraints are strict or
+relaxed. Default: @samp{false}.
+
+@end table
 
 @node @code{<info>} Container, @code{<pvd>} Container, @code{<option>} Element, @code{<videocd>} Root
 @subsection @code{<info>} Container
 
+@example
+<!ELEMENT info (album-id?,volume-count?,volume-number?,
+                next-volume-use-sequence2?,next-volume-use-lid2?,
+                restriction?,time-offset?)>
+
+<!ELEMENT album-id                      (#PCDATA)>
+<!ELEMENT volume-count                  (#PCDATA)>
+<!ELEMENT volume-number                 (#PCDATA)>
+<!ELEMENT restriction                   (#PCDATA)>
+<!ELEMENT time-offset                   (#PCDATA)>
+<!ELEMENT next-volume-use-sequence2     EMPTY>
+<!ELEMENT next-volume-use-lid2          EMPTY>
+@end example
+
 @node @code{<pvd>} Container, @code{<filesystem>} Container, @code{<info>} Container, @code{<videocd>} Root
 @subsection @code{<pvd>} Container
+
+@example
+<!ELEMENT pvd (volume-id?,system-id?,application-id?,
+               preparer-id?,publisher-id?)>
+
+<!ELEMENT volume-id                     (#PCDATA)>
+<!ELEMENT system-id                     (#PCDATA)>
+<!ELEMENT application-id                (#PCDATA)>
+<!ELEMENT preparer-id                   (#PCDATA)>
+<!ELEMENT publisher-id                  (#PCDATA)>
+@end example
 
 @node @code{<filesystem>} Container, @code{<segment-items>} Container, @code{<pvd>} Container, @code{<videocd>} Root
 @subsection @code{<filesystem>} Container
@@ -752,11 +826,29 @@ downloaded from @url{http://www.gnu.org/software/vcdimager/videocd.dtd}.
 * @code{<file>} Element/Containter::  
 @end menu
 
+@example
+<!ELEMENT filesystem (folder*,file*)>
+@end example
+
 @node @code{<folder>} Element/Containter, @code{<file>} Element/Containter, @code{<filesystem>} Container, @code{<filesystem>} Container
 @subsubsection @code{<folder>} Element/Containter
 
+@example
+<!ELEMENT folder (name,folder*,file*)>
+<!ELEMENT name                          (#PCDATA)>
+@end example
+
 @node @code{<file>} Element/Containter,  , @code{<folder>} Element/Containter, @code{<filesystem>} Container
 @subsubsection @code{<file>} Element/Containter
+
+@example
+<!ELEMENT file (name)>
+<!ATTLIST file 
+  src          %URI;  #REQUIRED
+  format       (form1|mixed) "form1"
+>
+<!ELEMENT name                          (#PCDATA)>
+@end example
 
 @node @code{<segment-items>} Container, @code{<sequence-items>} Container, @code{<filesystem>} Container, @code{<videocd>} Root
 @subsection @code{<segment-items>} Container
@@ -775,8 +867,27 @@ downloaded from @url{http://www.gnu.org/software/vcdimager/videocd.dtd}.
 * @code{<sequence-item>} Element::  
 @end menu
 
+@example
+<!ELEMENT sequence-items (sequence-item)+>
+@end example
+
 @node @code{<sequence-item>} Element,  , @code{<sequence-items>} Container, @code{<sequence-items>} Container
 @subsubsection @code{<sequence-item>} Element
+
+@example
+<!ELEMENT sequence-item (entry*,auto-pause*)>
+<!ATTLIST sequence-item
+  id           ID     #REQUIRED
+  src          %URI;  #REQUIRED
+>
+
+<!ELEMENT auto-pause                    (#PCDATA)>
+
+<!ELEMENT entry                         (#PCDATA)>
+<!ATTLIST entry
+  id           ID     #REQUIRED
+>
+@end example
 
 @node @code{<pbc>} Container,  , @code{<sequence-items>} Container, @code{<videocd>} Root
 @subsection @code{<pbc>} Container

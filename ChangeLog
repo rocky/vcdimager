@@ -1,3 +1,9 @@
+2001-06-02  Herbert Valerio Riedel  <hvr@gnu.org>
+
+ 	* configure.in: bumped version up to 0.7.3
+
+	* frontends/xml/vcd_xml_dump.c: fixed some XML element ordering issues
+
 2001-06-01  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_mpeg.c (_analyze_video_pes): ignore aps with pts out of order for now...

@@ -1,7 +1,7 @@
 AC_REVISION([$Id$])dnl
 AC_INIT(libvcd/vcd.h)
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(vcdimager, 0.7.2)
+AM_INIT_AUTOMAKE(vcdimager, 0.7.3)
 AM_MAINTAINER_MODE
 
 AM_SANITY_CHECK

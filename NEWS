@@ -2,6 +2,18 @@ $Id$
 
 see ChangeLog for more information
 
+version 0.7.3 (unstable/development)
+====================================
+2001-05-02
+
+* implemented ISO9660 fs extraction
+* enhanced vcddebug to display extended PBC files and dump fs
+  structure with XA flags
+* fixed some XA flags related misunderstandings
+* fixed handling of unordered aps presentation timestamps (which fixes
+  entry point calculation)
+* fixed XML output of filesystem dump
+
 version 0.7.2 (unstable/development)
 ====================================
 2001-05-31

@@ -252,7 +252,7 @@ _visit_pbc (debug_obj_t *obj, unsigned lid, unsigned offset, bool in_lot, bool e
 {
   VcdListNode *node;
   offset_t *ofs;
-  unsigned psd_size = _get_psd_size (obj);
+  unsigned psd_size = ext ? obj->psd_x_size : _get_psd_size (obj);
   const uint8_t *psd = ext ? obj->psd_x : obj->psd;
   unsigned _rofs = offset * obj->info.offset_mult;
   VcdList *offset_list;

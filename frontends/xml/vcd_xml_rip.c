@@ -147,6 +147,7 @@ _parse_idr (struct vcdxml_t *obj, VcdImageSource *img,
 		  && strcmp (namebuf, "VCD")
 		  && strcmp (namebuf, "SVCD")
 		  && strcmp (namebuf, "SEGMENT")
+		  && strcmp (namebuf, "EXT") /* fixme */
 		  && strcmp (namebuf, "CDDA"))
 		{
 		  _fs = _vcd_malloc (sizeof (struct filesystem_t));

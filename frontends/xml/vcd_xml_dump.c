@@ -39,56 +39,43 @@
 static const char _rcsid[] = "$Id$";
 
 static xmlNodePtr 
-_get_folder_node (xmlDocPtr doc, xmlNodePtr cur, xmlNsPtr ns, const char pathname[])
+_get_node (xmlDocPtr doc, xmlNodePtr cur, xmlNsPtr ns, 
+	   const char nodename[], bool folder)
 {
-  char *_dir, *c;
-  xmlNodePtr retval = NULL;
+  xmlNodePtr n = NULL;
+  const xmlChar *_node_id = folder ? "folder" : "file";
 
-  _dir = strdup (pathname);
-  c = strchr (_dir, '/');
+  FOR_EACH (n, cur)
+    {
+      char *tmp;
 
-  if (c)
-    { /* subdir... */
-      xmlNodePtr n;
+      if (xmlStrcmp (n->name, _node_id))
+	continue;
 
-      *c++ = '\0';
-
-      FOR_EACH (n, cur)
-        {
-          char *tmp;
-
-          if (xmlStrcmp (n->name, (const xmlChar *) "folder"))
-            continue;
-
-          vcd_assert (!xmlStrcmp (n->children->name, "name"));
-
-          tmp = xmlNodeListGetString (doc, n->children->children, 1);
-
-          if (!xmlStrcmp (tmp, _dir))
-            break;
-        }
-
-      if (!n)
-        {
-          n = xmlNewChild (cur, ns, "folder", NULL);
-          xmlNewChild (n, ns, "name", _dir);
-        }
-
-      retval = _get_folder_node (doc, n, ns, c);
+      vcd_assert (!xmlStrcmp (n->children->name, "name"));
+      
+      tmp = xmlNodeListGetString (doc, n->children->children, 1);
+      
+      if (!xmlStrcmp (tmp, nodename))
+	break;
     }
-  else
-    { /* finally there! */
-      retval = xmlNewChild (cur, ns, "folder", NULL);
-      xmlNewChild (retval, ns, "name", pathname);
+  
+  if (!n)
+    {
+      n = xmlNewNode (ns, _node_id);
+      xmlNewChild (n, ns, "name", nodename);
+
+      if (!folder || !cur->xmlChildrenNode) /* file or first folder */
+	xmlAddChild (cur, n);
+      else /* folder */
+	xmlAddPrevSibling (cur->xmlChildrenNode, n);
     }
 
-  free (_dir);
-
-  return retval;
+  return n;
 }
 
 static xmlNodePtr 
-_get_file_node (xmlDocPtr doc, xmlNodePtr cur, xmlNsPtr ns, const char pathname[])
+_get_node_pathname (xmlDocPtr doc, xmlNodePtr cur, xmlNsPtr ns, const char pathname[], bool folder)
 {
   char *_dir, *c;
   xmlNodePtr retval = NULL;
@@ -102,34 +89,12 @@ _get_file_node (xmlDocPtr doc, xmlNodePtr cur, xmlNsPtr ns, const char pathname[
 
       *c++ = '\0';
 
-      FOR_EACH (n, cur)
-        {
-          char *tmp;
+      n = _get_node (doc, cur, ns, _dir, true);
 
-          if (xmlStrcmp (n->name, (const xmlChar *) "folder"))
-            continue;
-
-          vcd_assert (!xmlStrcmp (n->children->name, "name"));
-
-          tmp = xmlNodeListGetString (doc, n->children->children, 1);
-
-          if (!xmlStrcmp (tmp, _dir))
-            break;
-        }
-
-      if (!n)
-        {
-          n = xmlNewChild (cur, ns, "folder", NULL);
-          xmlNewChild (n, ns, "name", _dir);
-        }
-
-      retval = _get_file_node (doc, n, ns, c);
+      retval = _get_node_pathname (doc, n, ns, c, folder);
     }
-  else
-    { /* finally there! */
-      retval = xmlNewChild (cur, ns, "file", NULL);
-      xmlNewChild (retval, ns, "name", pathname);
-    }
+  else /* leaf */
+    retval = _get_node (doc, cur, ns, pathname, folder);
 
   free (_dir);
 
@@ -223,6 +188,30 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
   xmlNewChild (section, ns, "preparer-id", obj->pvd.preparer_id);
   xmlNewChild (section, ns, "publisher-id", obj->pvd.publisher_id);
 
+  /* filesystem */
+
+  if (_vcd_list_length (obj->filesystem))
+    {
+      section = xmlNewChild (vcd_node, ns, "filesystem", NULL);
+
+      _VCD_LIST_FOREACH (node, obj->filesystem)
+	{
+	  struct filesystem_t *p = _vcd_list_node_data (node);
+	  
+	  if (p->file_src)
+	    { /* file */
+	      xmlNodePtr filenode = _get_node_pathname (doc, section, ns, p->name, false);
+
+	      xmlSetProp (filenode, "src", p->file_src);
+
+	      if (p->file_raw)
+		xmlSetProp (filenode, "format", "mixed");
+	    }
+	  else /* folder */
+	    _get_node_pathname (doc, section, ns, p->name, true);
+	}
+    }
+
   /* segments */
 
   if (_vcd_list_length (obj->segment_list))
@@ -240,29 +229,6 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 	}
     }
 
-  /* filesystem */
-
-  if (_vcd_list_length (obj->filesystem))
-    {
-      section = xmlNewChild (vcd_node, ns, "filesystem", NULL);
-
-      _VCD_LIST_FOREACH (node, obj->filesystem)
-	{
-	  struct filesystem_t *p = _vcd_list_node_data (node);
-	  
-	  if (p->file_src)
-	    {
-	      xmlNodePtr filenode = _get_file_node (doc, section, ns, p->name);
-
-	      xmlSetProp (filenode, "src", p->file_src);
-
-	      if (p->file_raw)
-		xmlSetProp (filenode, "format", "mixed");
-	    }
-	  else
-	    _get_folder_node (doc, section, ns, p->name);
-	}
-    }
 
   /* sequences */
     
