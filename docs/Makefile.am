@@ -23,4 +23,4 @@ html: vcdimager.html vcddump.html
 
 all-formats: pdf dvi txt ps html
 
-MOSTLYCLEANFILES = vcdimager.tgs vcdimager.ps.gz vcdimager.pdf vcdimager.html vcdimager_toc.html vcdimager_foot.html vcddump.cps vcddump.kys vcddump.html vcddump.fns
+MOSTLYCLEANFILES = vcdimager.tgs vcdimager.ps.gz vcdimager.pdf vcdimager.html vcdimager_toc.html vcdimager_foot.html vcddump.cps vcddump.kys vcddump.html vcddump.fns vcddump.ps.gz vcddump.pdf
