@@ -41,7 +41,8 @@ void
 vcd_image_source_destroy (VcdImageSource *obj);
 
 int
-vcd_image_source_read_mode2_sector (VcdImageSource *obj, void *buf, uint32_t lsn, bool mode2raw);
+vcd_image_source_read_mode2_sector (VcdImageSource *obj, void *buf, 
+				    uint32_t lsn, bool mode2raw);
 
 uint32_t
 vcd_image_source_stat_size (VcdImageSource *obj);

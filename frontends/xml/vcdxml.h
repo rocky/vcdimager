@@ -107,6 +107,10 @@ struct filesystem_t
   char *name;
   char *file_src; /* if NULL then dir */
   bool file_raw;
+
+  /* for ripping */
+  uint32_t size;
+  uint32_t lsn;
 };
 
 static inline void

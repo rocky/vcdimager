@@ -1,3 +1,7 @@
+2001-06-01  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* frontends/xml/vcd_xml_rip.c: implemented file extraction
+
 2001-05-31  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* frontends/cli/vcd_debug.c: dump XA attributes as well

@@ -101,7 +101,6 @@ struct iso_directory_record {
   char     name[EMPTY_ARRAY_SIZE]      GNUC_PACKED;
 };
 
-
 #ifdef __MWERKS__
 #pragma options align=reset
 #endif

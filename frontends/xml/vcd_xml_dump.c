@@ -39,6 +39,55 @@
 static const char _rcsid[] = "$Id$";
 
 static xmlNodePtr 
+_get_folder_node (xmlDocPtr doc, xmlNodePtr cur, xmlNsPtr ns, const char pathname[])
+{
+  char *_dir, *c;
+  xmlNodePtr retval = NULL;
+
+  _dir = strdup (pathname);
+  c = strchr (_dir, '/');
+
+  if (c)
+    { /* subdir... */
+      xmlNodePtr n;
+
+      *c++ = '\0';
+
+      FOR_EACH (n, cur)
+        {
+          char *tmp;
+
+          if (xmlStrcmp (n->name, (const xmlChar *) "folder"))
+            continue;
+
+          vcd_assert (!xmlStrcmp (n->children->name, "name"));
+
+          tmp = xmlNodeListGetString (doc, n->children->children, 1);
+
+          if (!xmlStrcmp (tmp, _dir))
+            break;
+        }
+
+      if (!n)
+        {
+          n = xmlNewChild (cur, ns, "folder", NULL);
+          xmlNewChild (n, ns, "name", _dir);
+        }
+
+      retval = _get_folder_node (doc, n, ns, c);
+    }
+  else
+    { /* finally there! */
+      retval = xmlNewChild (cur, ns, "folder", NULL);
+      xmlNewChild (retval, ns, "name", pathname);
+    }
+
+  free (_dir);
+
+  return retval;
+}
+
+static xmlNodePtr 
 _get_file_node (xmlDocPtr doc, xmlNodePtr cur, xmlNsPtr ns, const char pathname[])
 {
   char *_dir, *c;
@@ -200,13 +249,18 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
       _VCD_LIST_FOREACH (node, obj->filesystem)
 	{
 	  struct filesystem_t *p = _vcd_list_node_data (node);
-	  xmlNodePtr filenode;
+	  
+	  if (p->file_src)
+	    {
+	      xmlNodePtr filenode = _get_file_node (doc, section, ns, p->name);
 
-	  filenode = _get_file_node (doc, section, ns, p->name);
+	      xmlSetProp (filenode, "src", p->file_src);
 
-	  xmlSetProp (filenode, "src", p->file_src);
-	  if (p->file_raw)
-	    xmlSetProp (filenode, "format", "mixed");
+	      if (p->file_raw)
+		xmlSetProp (filenode, "format", "mixed");
+	    }
+	  else
+	    _get_folder_node (doc, section, ns, p->name);
 	}
     }
 

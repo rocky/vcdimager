@@ -241,13 +241,14 @@ typedef struct {
 
 /* ...difficult to represent as monolithic C struct... */
 
-typedef enum {
-  PSD_TYPE_PLAY_LIST = 0x10,        /* Play List */
-  PSD_TYPE_SELECTION_LIST = 0x18,   /* Selection List -- (jbj1: more
-                                       on list later) */
-  PSD_TYPE_END_LIST = 0x1f,         /* End List */
-  PSD_TYPE_COMMAND_LIST = 0x20      /* Command List */
-} psd_descriptor_types;
+typedef enum 
+  {
+    PSD_TYPE_PLAY_LIST = 0x10,        /* Play List */
+    PSD_TYPE_SELECTION_LIST = 0x18,   /* Selection List (+Ext. for SVCD) */
+    PSD_TYPE_EXT_SELECTION_LIST = 0x1a,   /* Extended Selection List (VCD2.0) */
+    PSD_TYPE_END_LIST = 0x1f,         /* End List */
+    PSD_TYPE_COMMAND_LIST = 0x20      /* Command List */
+  } psd_descriptor_types;
 
 typedef struct {
   uint8_t type               GNUC_PACKED;

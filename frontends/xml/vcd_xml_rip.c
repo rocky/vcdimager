@@ -22,6 +22,7 @@
 # include "config.h"
 #endif
 
+#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -43,6 +44,7 @@
 #include <libvcd/vcd_stream_stdio.h>
 #include <libvcd/vcd_types.h>
 #include <libvcd/vcd_util.h>
+#include <libvcd/vcd_xa.h>
 
 #include "vcdxml.h"
 #include "vcd_xml_dtd.h"
@@ -73,6 +75,157 @@ _strip_trail (const char str[], size_t n)
     }
 
   return buf;
+}
+
+static int
+_parse_idr (struct vcdxml_t *obj, VcdImageSource *img, 
+	    uint32_t lsn, uint32_t size, const char pathname[])
+{
+  char *buf = NULL;
+  struct iso_directory_record *idr;
+  int pos = 0;
+
+  vcd_assert (size % ISO_BLOCKSIZE == 0);
+
+  idr = (void *) buf = realloc (buf, size);
+
+  for (pos = 0; pos < size; pos += ISO_BLOCKSIZE)
+    if (vcd_image_source_read_mode2_sector (img, &buf[pos], lsn, false)) 
+      vcd_assert_not_reached ();
+
+  vcd_assert (idr->name[0] == '\0');
+  vcd_assert (from_733 (idr->size) == size);
+
+  /* register dir */
+  vcd_debug ("traversing pathname '%s'", pathname);
+
+  pos = 0;
+  while (pos < size)
+    {
+      char namebuf[1024] = { 0, };
+      idr = (void *) &buf[pos];
+
+      if (!buf[pos])
+	{
+	  pos++;
+	  continue;
+	}
+      
+      if (idr->name[0] != '\0' 
+	  && idr->name[0] != '\1')
+	{        
+	  vcd_xa_t *xa_data;
+          uint16_t xa_attr = 0;
+          int su_len;
+
+          su_len = idr->length;
+          su_len -= sizeof (struct iso_directory_record);
+          su_len -= idr->name_len;
+
+	  strcat (namebuf, pathname);
+	  strncat (namebuf, idr->name, idr->name_len);
+          
+          if (su_len % 2)
+            su_len--;
+
+          vcd_assert (su_len >= sizeof (vcd_xa_t));
+
+          xa_data = (void *) &buf[pos + (idr->length - su_len)];
+
+          if (xa_data->signature[0] != 'X' 
+              || xa_data->signature[1] != 'A')
+            vcd_assert_not_reached ();
+
+          xa_attr = UINT16_FROM_BE (xa_data->attributes);
+
+	  if (idr->flags & ISO_DIRECTORY)
+	    {
+	      struct filesystem_t *_fs = NULL;
+	      
+	      if (strcmp (namebuf, "MPEGAV")
+		  && strcmp (namebuf, "MPEG2")
+		  && strcmp (namebuf, "VCD")
+		  && strcmp (namebuf, "SVCD")
+		  && strcmp (namebuf, "SEGMENT")
+		  && strcmp (namebuf, "CDDA"))
+		{
+		  _fs = _vcd_malloc (sizeof (struct filesystem_t));
+		  _vcd_list_append (obj->filesystem, _fs);
+		  
+		  _fs->name = strdup (namebuf);
+		  _fs->lsn = from_733 (idr->extent);
+		  _fs->size = from_733 (idr->size);
+
+		  strcat (namebuf, "/");
+		  _parse_idr (obj, img, _fs->lsn, _fs->size, namebuf);
+		}
+	    }
+	  else
+	    {
+	      struct filesystem_t *_fs = _vcd_malloc (sizeof (struct filesystem_t));
+
+	      /* fixme -- handle eXtended PBCs for VCD2.0 */
+
+	      _vcd_list_append (obj->filesystem, _fs);
+
+	      if (strrchr (namebuf, ';'))
+		*strrchr (namebuf, ';') = '\0';
+
+	      _fs->name = strdup (namebuf);
+
+	      {
+		char namebuf2[strlen (namebuf) + 2];
+		int i;
+		
+		namebuf2[0] = '_';
+
+		for (i = 0; namebuf[i]; i++)
+		  namebuf2[i + 1] = (namebuf[i] == '/') ? '_' : tolower (namebuf[i]);
+
+		namebuf2[i + 1] = '\0';
+
+		_fs->file_src = strdup (namebuf2);
+	      }
+
+	      _fs->lsn = from_733 (idr->extent);
+	      _fs->size = from_733 (idr->size);
+	      _fs->file_raw = (xa_attr & XA_ATTR_MODE2FORM2) != 0;
+
+	      vcd_debug ("file %s", namebuf);
+
+	      if (_fs->file_raw)
+		{
+		  if (_fs->size % ISO_BLOCKSIZE == 0)
+		    { 
+		      _fs->size /= ISO_BLOCKSIZE;
+		      _fs->size *= M2RAW_SIZE;
+		    }
+		  else if (_fs->size % M2RAW_SIZE == 0)
+		    vcd_warn ("detected wrong size calculation for form2 file `%s'; fixing up", namebuf);
+		  else 
+		    vcd_error ("form2 file has invalid file size");
+		}
+	    }
+	}
+
+      pos += idr->length;
+    }
+  
+  return 0;
+}
+
+static int
+_parse_isofs (struct vcdxml_t *obj, VcdImageSource *img)
+{
+  struct iso_primary_descriptor pvd;
+  struct iso_directory_record *idr = (void *) pvd.root_directory_record;
+
+  memset (&pvd, 0, sizeof (struct iso_primary_descriptor));
+  vcd_assert (sizeof (struct iso_primary_descriptor) == ISO_BLOCKSIZE);
+
+  vcd_image_source_read_mode2_sector (img, &pvd, ISO_PVD_SECTOR, false);
+
+  return _parse_idr (obj, img, from_733 (idr->extent), from_733 (idr->size), "");
 }
 
 static int
@@ -496,7 +649,8 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
 	  _vcd_list_append (_pbc->default_id_list,
 			    _xstrdup (_ofs2id (UINT16_FROM_BE (d->default_ofs), _ctx)));
 
-	_pbc->timeout_id = _xstrdup (_ofs2id (UINT16_FROM_BE (d->timeout_ofs), _ctx));
+	_pbc->timeout_id = 
+	  _xstrdup (_ofs2id (UINT16_FROM_BE (d->timeout_ofs), _ctx));
 	_pbc->timeout_time = _calc_time (d->totime);
 	_pbc->jump_delayed = (0x80 & d->loop) != 0;
 	_pbc->loop_count = (0x7f & d->loop);
@@ -702,6 +856,60 @@ _parse_pbc (struct vcdxml_t *obj, VcdImageSource *img)
     }
 
   /* fixme -- what about 'rejected' PBC lists... */
+
+  return 0;
+}
+
+static int
+_rip_isofs (struct vcdxml_t *obj, VcdImageSource *img)
+{
+  VcdListNode *node;
+  
+  _VCD_LIST_FOREACH (node, obj->filesystem)
+    {
+      struct filesystem_t *_fs = _vcd_list_node_data (node);
+      int idx;
+      FILE *outfd;
+      const int blocksize = _fs->file_raw ? M2RAW_SIZE : ISO_BLOCKSIZE;
+
+      if (!_fs->file_src)
+	continue;
+
+      vcd_info ("extracting %s to %s (lsn %d, size %d, raw %d)", 
+		_fs->name, _fs->file_src,
+		_fs->lsn, _fs->size, _fs->file_raw);
+
+      if (!(outfd = fopen (_fs->file_src, "wb")))
+        {
+          perror ("fopen()");
+          exit (EXIT_FAILURE);
+        }
+
+      for (idx = 0; idx < _fs->size; idx += blocksize)
+	{
+	  char buf[blocksize];
+	  memset (&buf, 0, sizeof (buf));
+
+	  vcd_image_source_read_mode2_sector (img, &buf, 
+					      _fs->lsn + (idx / blocksize),
+					      _fs->file_raw);
+
+	  fwrite (buf, blocksize, 1, outfd);
+
+	  if (ferror (outfd))
+	    {
+	      perror ("fwrite()");
+	      exit (EXIT_FAILURE);
+	    }
+	}
+
+      fflush (outfd);
+      if (ftruncate (fileno (outfd), _fs->size))
+	perror ("ftruncate()");
+
+      fclose (outfd);
+      
+    }
 
   return 0;
 }
@@ -1094,7 +1302,7 @@ main (int argc, const char *argv[])
   /* start with ISO9660 PVD */
   _parse_pvd (&obj, img_src);
 
-  /* _parse_iso_fs (&obj, img_src); */
+  _parse_isofs (&obj, img_src); 
   
   /* needs to be parsed in order */
   _parse_info (&obj, img_src);
@@ -1108,7 +1316,7 @@ main (int argc, const char *argv[])
 	      "determined without mpeg extraction -- hope that's ok");
   else
     {
-      /* _rip_files (&obj, img_src); */
+      _rip_isofs (&obj, img_src);
       _rip_segments (&obj, img_src);
       _rip_sequences (&obj, img_src);
     }
