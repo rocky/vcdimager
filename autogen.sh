@@ -109,6 +109,13 @@ do
 	echo "Running autoheader..."
 	autoheader
       fi
+
+      if test -f ChangeLog 
+      then 
+        :
+      else 
+	echo "Run cvs2cl.pl for a real ChangeLog!" > ChangeLog
+      fi
       echo "Running automake --add-missing --gnu $am_opt ..."
       automake --add-missing --gnu $am_opt
       echo "Running autoconf ..."
