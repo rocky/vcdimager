@@ -305,7 +305,7 @@ vcdinfo_get_entry_msf(const vcdinfo_obj_t *obj, const unsigned int entry_num);
   The type is also set inside obj.
   The first entry number is 0.
  */
-const vcd_type_t 
+vcd_type_t 
 vcdinfo_get_format_version (vcdinfo_obj_t *obj);
 
 /*!

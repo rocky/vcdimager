@@ -218,7 +218,7 @@ vcdinfo_audio_type2str(const vcdinfo_obj_t *obj, unsigned int audio_type)
         "1 multi-channel stream (surround sound)", "error"}, 
     };
 
-  unsigned int first_index; 
+  unsigned int first_index = 0; 
 
   /* Get first index entry into above audio_type array from vcd_type */
   switch (obj->vcd_type) {
@@ -624,7 +624,7 @@ vcdinfo_get_entry_lba(const vcdinfo_obj_t *obj, const unsigned int entry_num)
    Get the VCD format (VCD 1.0 VCD 1.1, SVCD, ... for this object.
    The type is also set inside obj.
 */
-const vcd_type_t
+vcd_type_t
 vcdinfo_get_format_version (vcdinfo_obj_t *obj)
 {
   obj->vcd_type = vcd_files_info_detect_type (&obj->info);
