@@ -110,10 +110,11 @@ vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps)
   unsigned length = 0;
   unsigned pos = 0;
   unsigned pno = 0;
+  unsigned padbytes = 0;
+  unsigned padpackets = 0;
   VcdMpegStreamCtx state;
   VcdList *aps_list = 0;
   VcdListNode *n;
-  bool _warned_padding = false;
   bool _pal = false;
 
   vcd_assert (obj != NULL);
@@ -184,11 +185,12 @@ vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps)
 
       if (pkt_len != read_len)
         {
-          if (!_warned_padding)
-            {
-              vcd_warn ("mpeg stream will be padded on the fly -- hope that's ok for you!");
-              _warned_padding = true;
-            }
+          padbytes += (2324 - pkt_len);
+
+          if (!padpackets)
+            vcd_warn ("mpeg stream will be padded on the fly -- hope that's ok for you!");
+
+          padpackets++;
 
           vcd_data_source_seek (obj->data_source, pos);
         }
@@ -244,6 +246,10 @@ vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps)
     }
 
   obj->info.aps_list = aps_list;
+
+  if (padpackets)
+    vcd_warn ("autopadding requires to insert additional %d zero bytes into MPEG stream (due to %d unaligned packets)",
+              padbytes, padpackets);
 
   {
     int vid_idx = state.stream.first_shdr;

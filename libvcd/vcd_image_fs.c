@@ -117,7 +117,7 @@ _fs_stat_traverse (VcdImageSource *obj,
 		   vcd_image_stat_t *buf)
 {
   unsigned offset = 0;
-  uint8_t _dirbuf[_root->size];
+  uint8_t *_dirbuf = NULL;
 
   if (!splitpath[0])
     {
@@ -130,6 +130,8 @@ _fs_stat_traverse (VcdImageSource *obj,
 
   vcd_assert (_root->type == _STAT_DIR);
   vcd_assert (_root->size == ISO_BLOCKSIZE * _root->secsize);
+
+  _dirbuf = _vcd_malloc (_root->size);
 
   if (vcd_image_source_read_mode2_sectors (obj, _dirbuf, _root->lsn, 
 					   false, _root->secsize))
@@ -156,6 +158,7 @@ _fs_stat_traverse (VcdImageSource *obj,
 	{
 	  int retval = _fs_stat_traverse (obj, &_stat, &splitpath[1], buf);
 	  free (_name);
+	  free (_dirbuf);
 	  return retval;
 	}
 
@@ -167,6 +170,7 @@ _fs_stat_traverse (VcdImageSource *obj,
   vcd_assert (offset == _root->size);
   
   /* not found */
+  free (_dirbuf);
   return -1;
 }
 
@@ -208,10 +212,12 @@ vcd_image_source_fs_readdir (VcdImageSource *obj,
 
   {
     unsigned offset = 0;
-    uint8_t _dirbuf[_stat.size];
+    uint8_t *_dirbuf = NULL;
     VcdList *retval = _vcd_list_new ();
 
     vcd_assert (_stat.size == ISO_BLOCKSIZE * _stat.secsize);
+
+    _dirbuf = _vcd_malloc (_stat.size);
 
     if (vcd_image_source_read_mode2_sectors (obj, _dirbuf, _stat.lsn, 
 					     false, _stat.secsize))
@@ -235,6 +241,7 @@ vcd_image_source_fs_readdir (VcdImageSource *obj,
 
     vcd_assert (offset == _stat.size);
 
+    free (_dirbuf);
     return retval;
   }
 }
