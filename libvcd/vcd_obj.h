@@ -50,41 +50,12 @@ struct _VcdObj {
   int mpeg_tracks_num;
 
   /* custom files */
-  struct cust_file {
-    char *iso_pathname;
-    VcdDataSource *file;
-    int raw_flag;
-
-    uint32_t size;
-    uint32_t start_extent;
-    uint32_t sectors;
-    
-    struct cust_file *next;
-  } *custom_files;
+  struct _cust_file_t *custom_files;
 
   /* dictionary */
   struct _dict_t *buf_dict;
 
-  /* fixme -- vcd files */
-  char info_vcd_buf[ISO_BLOCKSIZE];
-  char entries_vcd_buf[ISO_BLOCKSIZE];
-  char lot_vcd_buf[ISO_BLOCKSIZE*LOT_VCD_SIZE];
-  char psd_vcd_buf[ISO_BLOCKSIZE]; /* fixme */
-
-  char tracks_svd_buf[ISO_BLOCKSIZE];
-  char search_dat_buf[ISO_BLOCKSIZE]; /* fixme */
-
-  uint32_t info_sec;
-  uint32_t entries_sec;
-  uint32_t lot_secs;
-  uint32_t psd_sec;
-  uint32_t psd_size;
-  
-  uint32_t tracks_sec;
-  uint32_t search_secs;
-
-  unsigned dirs_size;
-
+  /* aggregates */
   VcdSalloc *iso_bitmap;
 
   VcdDirectory *dir;

@@ -1,5 +1,15 @@
 2000-12-17  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* libvcd/vcd_obj.h: moved cust_file struct declaration out of VcdObj
+
+  	* libvcd/vcd.c: finished rewriting of buffer allocation
+
+	* libvcd/vcd_files.c: added buf argument to all set_ calls,
+		renamed set_psd_size to get_psd_size
+	
+	* libvcd/vcd_files.c (set_lot_vcd): fixed LOT bug, not 
+		having 0x0000 in reserved field
+
 	* libvcd/vcd_obj.h: moved some buffers/sector ptr's to new 
 		dictionary
 

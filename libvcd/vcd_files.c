@@ -29,7 +29,7 @@
 #include "vcd_logging.h"
 
 void
-set_entries_vcd(VcdObj *obj)
+set_entries_vcd(VcdObj *obj, void *buf)
 {
   int n;
   EntriesVcd entries_vcd;
@@ -70,7 +70,7 @@ set_entries_vcd(VcdObj *obj)
     lba_to_msf(lsect + 150, &(entries_vcd.entry[n].msf));
   }
 
-  memcpy(obj->entries_vcd_buf, &entries_vcd, sizeof(entries_vcd));
+  memcpy(buf, &entries_vcd, sizeof(entries_vcd));
 }
 
 
@@ -83,19 +83,24 @@ _set_bit(uint8_t bitset[], unsigned bitnum)
   bitset[_byte] |= (1 << _bit);
 }
 
-void
-set_psd_size(VcdObj *obj)
+uint32_t 
+get_psd_size(VcdObj *obj)
 {
-  obj->psd_size = obj->mpeg_tracks_num*16; /* 2<<3 */
-  obj->psd_size += 8; /* stop descriptor */
+  uint32_t psd_size;
+  
+  psd_size = obj->mpeg_tracks_num*16; /* 2<<3 */
+  psd_size += 8; /* stop descriptor */
+
+  return psd_size;
 }
 
 void
-set_psd_vcd (VcdObj *obj)
+set_psd_vcd (VcdObj *obj, void *buf)
 {
   int n;
+  char psd_buf[ISO_BLOCKSIZE] = { 0, };
 
-  memset (obj->psd_vcd_buf, 0, sizeof (obj->psd_vcd_buf));
+  /* memset (psd_buf, 0, sizeof (obj->psd_vcd_buf)); */
 
   for (n = 0; n < obj->mpeg_tracks_num; n++)
     {
@@ -110,13 +115,13 @@ set_psd_vcd (VcdObj *obj)
       _md->lid = UINT16_TO_BE (n+1);
       _md->prev_ofs = UINT16_TO_BE (n ? (n - 1) << 1 : 0xffff);
       _md->next_ofs = UINT16_TO_BE ((n + 1) << 1);
-      _md->retn_ofs = UINT16_TO_BE ((obj->psd_size - 8) >> 3);
+      _md->retn_ofs = UINT16_TO_BE ((get_psd_size (obj) - 8) >> 3);
       _md->ptime = UINT16_TO_BE (0x0000);
       _md->wtime = 0x05;
       _md->atime = 0x00;
       _md->itemid[0] = UINT16_TO_BE (n+2);
 
-      memcpy (obj->psd_vcd_buf+(n << 4), _md, descriptor_size);
+      memcpy (psd_buf+(n << 4), _md, descriptor_size);
       free (_md);
     }
 
@@ -125,30 +130,32 @@ set_psd_vcd (VcdObj *obj)
     
     memset (&_sd, 0, sizeof (_sd));
     _sd.type = PSD_TYPE_END_OF_LIST;
-    memcpy (obj->psd_vcd_buf + (n << 4), &_sd, sizeof (_sd));
+    memcpy (psd_buf + (n << 4), &_sd, sizeof (_sd));
   }
+
+  memcpy (buf, psd_buf, sizeof (psd_buf));
 }
 
 void
-set_lot_vcd(VcdObj *obj)
+set_lot_vcd(VcdObj *obj, void *buf)
 {
   LotVcd *lot_vcd = NULL;
   int n;
 
   lot_vcd = malloc(sizeof(LotVcd));
   memset(lot_vcd, 0xff, sizeof(LotVcd));
-  
-  /* lot_vcd->unknown = UINT16_TO_BE(0x0000); -- fixme */
-  
+
+  lot_vcd->reserved = 0x0000;
+
   for(n = 0;n < obj->mpeg_tracks_num+1;n++)
     lot_vcd->offset[n] = UINT16_TO_BE(n << 1); /* quick'n'dirty */
 
-  memcpy(obj->lot_vcd_buf, lot_vcd, sizeof(LotVcd));
+  memcpy(buf, lot_vcd, sizeof(LotVcd));
   free(lot_vcd);
 }
 
 void
-set_info_vcd(VcdObj *obj)
+set_info_vcd(VcdObj *obj, void *buf)
 {
   InfoVcd info_vcd;
   int n;
@@ -189,7 +196,7 @@ set_info_vcd(VcdObj *obj)
        || obj->mpeg_tracks[n].mpeg_info.norm == MPEG_NORM_PAL_S)
       _set_bit(info_vcd.pal_flags, n);
 
-  info_vcd.psd_size = UINT32_TO_BE(obj->psd_size);
+  info_vcd.psd_size = UINT32_TO_BE(get_psd_size (obj));
 
   info_vcd.offset_mult = INFO_OFFSET_MULT;
 
@@ -197,11 +204,11 @@ set_info_vcd(VcdObj *obj)
 
   info_vcd.item_count = UINT16_TO_BE(0x0000); /* no items in /SEGMENT supported yet */
 
-  memcpy(obj->info_vcd_buf, &info_vcd, sizeof(info_vcd));
+  memcpy(buf, &info_vcd, sizeof(info_vcd));
 }
 
 void
-set_tracks_svd (VcdObj *obj)
+set_tracks_svd (VcdObj *obj, void *buf)
 {
   TracksSVD tracks_svd;
   int n;
@@ -248,11 +255,11 @@ set_tracks_svd (VcdObj *obj)
       tracks_svd.tracks_info[n].playing_time.f = 0; /* fixme */
     }
   
-  memcpy (obj->tracks_svd_buf, &tracks_svd, sizeof(tracks_svd));
+  memcpy (buf, &tracks_svd, sizeof(tracks_svd));
 }
 
 void
-set_search_dat (VcdObj *obj)
+set_search_dat (VcdObj *obj, void *buf)
 {
   SearchDat search_dat;
 
@@ -266,7 +273,7 @@ set_search_dat (VcdObj *obj)
   search_dat.scan_points = UINT16_TO_BE (0x0000); /* fixme */
   search_dat.time_interval = SEARCH_TIME_INTERVAL;
 
-  memcpy (obj->search_dat_buf, &search_dat, sizeof (search_dat));
+  memcpy (buf, &search_dat, sizeof (search_dat));
 }
 
 /* eof */

@@ -34,27 +34,26 @@
 #define TRACKS_SVD_SECTOR  (PSD_VCD_SECTOR+1)
 #define SEARCH_DAT_SECTOR  (TRACKS_SVD_SECTOR+1)
 
-
 void
-set_entries_vcd (VcdObj *obj);
+set_entries_vcd(VcdObj *obj, void *buf);
 
 void 
-set_info_vcd (VcdObj *obj);
+set_info_vcd (VcdObj *obj, void *buf);
+
+uint32_t
+get_psd_size (VcdObj *obj);
 
 void
-set_psd_size (VcdObj *obj);
+set_lot_vcd (VcdObj *obj, void *buf);
 
 void
-set_lot_vcd (VcdObj *obj);
+set_psd_vcd (VcdObj *obj, void *buf);
 
 void
-set_psd_vcd (VcdObj *obj);
+set_tracks_svd (VcdObj *obj, void *buf);
 
 void
-set_tracks_svd (VcdObj *obj);
-
-void
-set_search_dat (VcdObj *obj);
+set_search_dat (VcdObj *obj, void *buf);
 
 #endif /* VCDFILES_H */
 

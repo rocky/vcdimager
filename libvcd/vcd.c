@@ -49,6 +49,21 @@ static const char zero[ISO_BLOCKSIZE] = { 0, };
 /*
  */
 
+struct _cust_file_t {
+  char *iso_pathname;
+  VcdDataSource *file;
+  int raw_flag;
+  
+  uint32_t size;
+  uint32_t start_extent;
+  uint32_t sectors;
+    
+  struct _cust_file_t *next;
+};
+
+/*
+ */
+
 struct _dict_t
 {
   char *key;
@@ -178,13 +193,17 @@ vcd_obj_new (vcd_type_t vcd_type)
 {
   VcdObj *new_obj = NULL;
 
-  switch (vcd_type) {
-  case VCD_TYPE_VCD2:
-  case VCD_TYPE_SVCD:
-    break;
-  default:
-    return new_obj; /* NULL */
-  }
+  switch (vcd_type) 
+    {
+    /* case VCD_TYPE_VCD11: */
+    case VCD_TYPE_VCD2:
+    case VCD_TYPE_SVCD:
+      break;
+    default:
+      vcd_error ("VCD type not supported");
+      return new_obj; /* NULL */
+      break;
+    }
 
   new_obj = malloc (sizeof (VcdObj));
   memset (new_obj, 0, sizeof (VcdObj));
@@ -346,11 +365,11 @@ vcd_obj_destroy (VcdObj *obj)
 
   /* destroy cust_file linked list */
   {
-    struct cust_file *p = obj->custom_files;
+    struct _cust_file_t *p = obj->custom_files;
     
     while (p)
       {
-        struct cust_file *tmp = p->next;
+        struct _cust_file_t *tmp = p->next;
 
         free (p->iso_pathname);
         free (p);
@@ -463,7 +482,7 @@ vcd_obj_add_file (VcdObj *obj, const char iso_pathname[],
     sectors++;
 
   {
-    struct cust_file **p = &(obj->custom_files);
+    struct _cust_file_t **p = &(obj->custom_files);
     char *_iso_pathname = _vcd_iso_pathname_isofy (iso_pathname);
 
     if (!_vcd_iso_pathname_valid_p (_iso_pathname))
@@ -477,8 +496,8 @@ vcd_obj_add_file (VcdObj *obj, const char iso_pathname[],
     while (*p)
       p = &(*p)->next;
 
-    *p = malloc (sizeof (struct cust_file));
-    memset (*p, 0, sizeof (struct cust_file));
+    *p = malloc (sizeof (struct _cust_file_t));
+    memset (*p, 0, sizeof (struct _cust_file_t));
     
     (*p)->file = file;
     (*p)->iso_pathname = _iso_pathname;
@@ -520,50 +539,33 @@ _finalize_vcd_iso_track (VcdObj *obj)
   dir_secs = _vcd_salloc (obj->iso_bitmap, 18, 75-18);
 
   /* ... */
-  obj->info_sec = _vcd_salloc (obj->iso_bitmap, INFO_VCD_SECTOR, 1);    /* INFO.VCD */        /* EOF */
-  obj->entries_sec = _vcd_salloc (obj->iso_bitmap, ENTRIES_VCD_SECTOR, 1); /* ENTRIES.VCD  */ /* EOF */
-  obj->lot_secs = _vcd_salloc (obj->iso_bitmap, LOT_VCD_SECTOR, LOT_VCD_SIZE);  /* LOT.VCD */ /* EOF */
-  obj->psd_sec = _vcd_salloc (obj->iso_bitmap, PSD_VCD_SECTOR, 1); /* just one sec for now... */
+  
+  _dict_insert (obj, "info", INFO_VCD_SECTOR, 1, SM_EOF);              /* INFO.VCD */           /* EOF */
+  _dict_insert (obj, "entries", ENTRIES_VCD_SECTOR, 1, SM_EOF);        /* ENTRIES.VCD */        /* EOF */
 
-  switch (obj->type)
+  if (obj->type == VCD_TYPE_VCD2
+      || obj->type == VCD_TYPE_SVCD)
     {
-    case VCD_TYPE_SVCD:
-      obj->tracks_sec = _vcd_salloc (obj->iso_bitmap, TRACKS_SVD_SECTOR, 1); /* TRACKS.SVD */
+      _dict_insert (obj, "lot", LOT_VCD_SECTOR, LOT_VCD_SIZE, SM_EOF); /* LOT.VCD */            /* EOF */
+      _dict_insert (obj, "psd", PSD_VCD_SECTOR, 1, SM_EOF);            /* PSD.VCD */            /* EOF */
+    }
+
+  if (obj->type == VCD_TYPE_SVCD)
+    {
+      _dict_insert (obj, "tracks", TRACKS_SVD_SECTOR, 1, SM_EOF);      /* TRACKS.SVD */
       
       /* fixme -- we create it with zero scan points for now, cause it's simpler */
-      obj->search_secs = _vcd_salloc (obj->iso_bitmap, SEARCH_DAT_SECTOR, 1); /* SEARCH.DAT */
-
-      assert(obj->tracks_sec != SECTOR_NIL);
-      assert(obj->search_secs != SECTOR_NIL);
-      break;
-
-    case VCD_TYPE_VCD2:
-    case VCD_TYPE_VCD11:
-      {
-        uint32_t rc = _vcd_salloc (obj->iso_bitmap, 185,2);
-        assert(rc != SECTOR_NIL);
-      }
-      break;
-
-  default:
-    vcd_error("VCD type not supported");
-    break;
-
+      _dict_insert (obj, "search", SEARCH_DAT_SECTOR, 1, SM_EOF);      /* SEARCH.DAT */
     }
 
   /* keep rest of vcd sector blank -- paranoia */
-  for(n = 75;n < 225;n++) 
+  for(n = 0;n < 225;n++) 
     {
       uint32_t rc = _vcd_salloc (obj->iso_bitmap, n,1);
-      assert(rc == SECTOR_NIL);
+      /* assert(rc == SECTOR_NIL); */
+      if (rc != SECTOR_NIL)
+        vcd_warn ("blanking... %d", rc);
     }
-
-  set_psd_size (obj);
-    
-  assert (obj->info_sec != SECTOR_NIL);
-  assert (obj->entries_sec != SECTOR_NIL);
-  assert (obj->lot_secs != SECTOR_NIL);
-  assert (obj->psd_sec != SECTOR_NIL);
 
   switch (obj->type) {
   case VCD_TYPE_VCD11:
@@ -576,14 +578,22 @@ _finalize_vcd_iso_track (VcdObj *obj)
     _vcd_directory_mkdir (obj->dir, "SEGMENT");
     _vcd_directory_mkdir (obj->dir, "VCD");
 
-    _vcd_directory_mkfile (obj->dir, "VCD/ENTRIES.VCD;1", obj->entries_sec, ISO_BLOCKSIZE, FALSE, 0);    
-    _vcd_directory_mkfile (obj->dir, "VCD/INFO.VCD;1", obj->info_sec, ISO_BLOCKSIZE, FALSE, 0);
+    _vcd_directory_mkfile (obj->dir, "VCD/ENTRIES.VCD;1", 
+                           _dict_get_bykey (obj, "entries")->sector, 
+                           ISO_BLOCKSIZE, FALSE, 0);    
+    _vcd_directory_mkfile (obj->dir, "VCD/INFO.VCD;1",
+                           _dict_get_bykey (obj, "info")->sector, 
+                           ISO_BLOCKSIZE, FALSE, 0);
 
     /* only for vcd2.0 */
     if (obj->type == VCD_TYPE_VCD2)
       {
-        _vcd_directory_mkfile (obj->dir, "VCD/LOT.VCD;1", obj->lot_secs, ISO_BLOCKSIZE*LOT_VCD_SIZE, FALSE, 0);
-        _vcd_directory_mkfile (obj->dir, "VCD/PSD.VCD;1", obj->psd_sec, obj->psd_size, FALSE, 0);
+        _vcd_directory_mkfile (obj->dir, "VCD/LOT.VCD;1", 
+                               _dict_get_bykey (obj, "lot")->sector, 
+                               ISO_BLOCKSIZE*LOT_VCD_SIZE, FALSE, 0);
+        _vcd_directory_mkfile (obj->dir, "VCD/PSD.VCD;1", 
+                               _dict_get_bykey (obj, "psd")->sector, 
+                               get_psd_size (obj), FALSE, 0);
       }
     break;
 
@@ -592,26 +602,35 @@ _finalize_vcd_iso_track (VcdObj *obj)
     _vcd_directory_mkdir (obj->dir, "MPEG2");
     _vcd_directory_mkdir (obj->dir, "SVCD");
 
-    _vcd_directory_mkfile (obj->dir, "SVCD/ENTRIES.SVD;1", obj->entries_sec, ISO_BLOCKSIZE, FALSE, 0);    
-    _vcd_directory_mkfile (obj->dir, "SVCD/INFO.SVD;1", obj->info_sec, ISO_BLOCKSIZE, FALSE, 0);
-    _vcd_directory_mkfile (obj->dir, "SVCD/LOT.SVD;1", obj->lot_secs, ISO_BLOCKSIZE*LOT_VCD_SIZE, FALSE, 0);
-    _vcd_directory_mkfile (obj->dir, "SVCD/PSD.SVD;1", obj->psd_sec, obj->psd_size, FALSE, 0);
-
-    _vcd_directory_mkfile (obj->dir, "SVCD/SEARCH.DAT;1", obj->search_secs, sizeof (SearchDat), FALSE, 0);
-
-    _vcd_directory_mkfile (obj->dir, "SVCD/TRACKS.SVD;1", obj->tracks_sec, ISO_BLOCKSIZE, FALSE, 0);
-
+    _vcd_directory_mkfile (obj->dir, "SVCD/ENTRIES.SVD;1",
+                           _dict_get_bykey (obj, "entries")->sector, 
+                           ISO_BLOCKSIZE, FALSE, 0);    
+    _vcd_directory_mkfile (obj->dir, "SVCD/INFO.SVD;1",
+                           _dict_get_bykey (obj, "info")->sector, 
+                           ISO_BLOCKSIZE, FALSE, 0);
+    _vcd_directory_mkfile (obj->dir, "SVCD/LOT.SVD;1",
+                           _dict_get_bykey (obj, "lot")->sector, 
+                           ISO_BLOCKSIZE*LOT_VCD_SIZE, FALSE, 0);
+    _vcd_directory_mkfile (obj->dir, "SVCD/PSD.SVD;1", 
+                           _dict_get_bykey (obj, "psd")->sector, 
+                           get_psd_size (obj), FALSE, 0);
+    _vcd_directory_mkfile (obj->dir, "SVCD/SEARCH.DAT;1", 
+                           _dict_get_bykey (obj, "search")->sector, 
+                           sizeof (SearchDat), FALSE, 0);
+    _vcd_directory_mkfile (obj->dir, "SVCD/TRACKS.SVD;1",
+                           _dict_get_bykey (obj, "tracks")->sector, 
+                           ISO_BLOCKSIZE, FALSE, 0);
     break;
 
   default:
-    vcd_error("VCD type not supported");
+    assert (0);
     break;
   }
 
   /* custom files */
 
   {
-    struct cust_file *p = obj->custom_files;
+    struct _cust_file_t *p = obj->custom_files;
     
     while (p) 
       {
@@ -663,16 +682,19 @@ _finalize_vcd_iso_track (VcdObj *obj)
                            TRUE, n+1);
   }
 
-  /* register is fs stuff */
-  obj->dirs_size = _vcd_directory_get_size (obj->dir);
-  if (obj->dirs_size+2 >= 75)
-    vcd_error ("directory section to big");
-
-  _vcd_salloc_free (obj->iso_bitmap, 18, obj->dirs_size + 2);
-
-  _dict_insert (obj, "dir", 18, obj->dirs_size, SM_EOR|SM_EOF);
-  _dict_insert (obj, "ptl", 18 + obj->dirs_size, 1, SM_EOR|SM_EOF);
-  _dict_insert (obj, "ptm", 18 + obj->dirs_size + 1, 1, SM_EOR|SM_EOF);
+  /* register isofs dir structures */
+  {
+    uint32_t dirs_size = _vcd_directory_get_size (obj->dir);
+    
+    if (dirs_size+2 >= 75)
+      vcd_error ("directory section to big");
+    
+    _vcd_salloc_free (obj->iso_bitmap, 18, dirs_size + 2);
+    
+    _dict_insert (obj, "dir", 18, dirs_size, SM_EOR|SM_EOF);
+    _dict_insert (obj, "ptl", 18 + dirs_size, 1, SM_EOR|SM_EOF);
+    _dict_insert (obj, "ptm", 18 + dirs_size + 1, 1, SM_EOR|SM_EOF);
+  }
 }
 
 static int
@@ -803,28 +825,27 @@ _write_vcd_iso_track (VcdObj *obj)
 
   /* fill VCD relevant files with data */
 
-  set_info_vcd (obj);
-  set_entries_vcd (obj);
+  set_info_vcd (obj, _dict_get_bykey (obj, "info")->buf);
+  set_entries_vcd (obj, _dict_get_bykey (obj, "entries")->buf);
 
   if (obj->type == VCD_TYPE_VCD2) 
     {
-      set_lot_vcd (obj);
-      set_psd_vcd (obj);
+      set_lot_vcd (obj, _dict_get_bykey (obj, "lot")->buf);
+      set_psd_vcd (obj, _dict_get_bykey (obj, "psd")->buf);
     }
 
   if (obj->type == VCD_TYPE_SVCD) 
     {
-      set_tracks_svd (obj);
-      set_search_dat (obj);
+      set_tracks_svd (obj, _dict_get_bykey (obj, "tracks")->buf);
+      set_search_dat (obj, _dict_get_bykey (obj, "search")->buf);
     }
 
   /* start actually writing stuff */
 
   vcd_debug ("writing track 1 (ISO9660)...");
 
-  /* 00:00:00 */
-
-  for (n = 0;n < 75; n++)
+  /* 00:00:00 -> 00:02:74 */
+  for (n = 0;n < 225; n++)
     {
       const void *content = NULL;
       int flags = SM_DATA;
@@ -838,78 +859,9 @@ _write_vcd_iso_track (VcdObj *obj)
       _write_m2_image_sector (obj, content, n, 0, 0, flags, 0);
     }
 
-/*   _write_m2_image_sector (obj, pvd_buf, _dict_get_bykey (obj, "pvd")->sector, 0, 0, */
-/*                           SM_DATA|SM_EOR, 0); */
-/*   _write_m2_image_sector (obj, evd_buf, _dict_get_bykey (obj, "evd")->sector, 0, 0,  */
-/*                           SM_DATA|SM_EOR|SM_EOF, 0); */
-
-/*   for (n = 0;n < obj->dirs_size;n++) */
-/*     _write_m2_image_sector (obj, dir_buf + (ISO_BLOCKSIZE*n), 18+n, 0, 0, */
-/*                             n+1 != obj->dirs_size ? SM_DATA : SM_DATA|SM_EOR|SM_EOF, */
-/*                             0); */
-
-/*   _write_m2_image_sector (obj, ptl_buf, obj->ptl_sec, 0, 0, */
-/*                           SM_DATA|SM_EOR|SM_EOF, 0); */
-/*   _write_m2_image_sector (obj, ptm_buf, obj->ptm_sec, 0, 0, */
-/*                           SM_DATA|SM_EOR|SM_EOF, 0); */
-
-/*   for (n = obj->ptm_sec+1;n < 75;n++) */
-/*     _write_m2_image_sector (obj, zero, n, 0, 0, SM_DATA, 0); */
-  
-  /* 00:01:00 */
-
-  for (n = 75;n < 150; n++)
-    _write_m2_image_sector (obj, zero, n, 0, 0, SM_DATA, 0);
-
-  /* 00:02:00 */
-
-  _write_m2_image_sector (obj, obj->info_vcd_buf, obj->info_sec,
-                          0, 0, SM_DATA|SM_EOF, 0);
-  
-  _write_m2_image_sector (obj, obj->entries_vcd_buf, obj->entries_sec, 
-                          0, 0, SM_DATA|SM_EOF, 0);
-
-
-  /* PSD & LOT only for VCD2.0 and SVCD1.0 */
-  if(obj->type == VCD_TYPE_VCD2 || obj->type == VCD_TYPE_SVCD) 
-    {
-      for (n = 0;n < LOT_VCD_SIZE; n++)
-        _write_m2_image_sector (obj, obj->lot_vcd_buf+ (ISO_BLOCKSIZE*n), 
-                                obj->lot_secs+n, 0, 0, 
-                                ((n+1 < LOT_VCD_SIZE) ? SM_DATA : SM_DATA|SM_EOF),
-                                0);
-
-      _write_m2_image_sector (obj, obj->psd_vcd_buf, obj->psd_sec,
-                              0, 0, SM_DATA|SM_EOF, 0);
-    }
-  else
-    {
-      for (n = 0;n < LOT_VCD_SIZE; n++)
-        _write_m2_image_sector (obj, zero, obj->lot_secs+n, 0, 0, SM_DATA, 0);
-
-      _write_m2_image_sector (obj, zero, obj->psd_sec, 0, 0, SM_DATA, 0);
-    }
-    
-  /* TRACKS.SVD & SEARCH.DAT only for SVCD1.0 */
-  if(obj->type == VCD_TYPE_SVCD) 
-    {
-      _write_m2_image_sector (obj, obj->tracks_svd_buf, obj->tracks_sec,
-                              0, 0, SM_DATA|SM_EOF, 0);
-      _write_m2_image_sector (obj, obj->search_dat_buf, obj->search_secs,
-                              0, 0, SM_DATA|SM_EOF, 0);
-    }
-  else
-    {
-      _write_m2_image_sector (obj, zero, TRACKS_SVD_SECTOR, 0, 0, SM_DATA, 0);
-      _write_m2_image_sector (obj, zero, SEARCH_DAT_SECTOR, 0, 0, SM_DATA, 0);
-    }
-
-  for (n = 185+2;n < 225; n++)
-    _write_m2_image_sector (obj, zero, n, 0, 0, SM_DATA, 0);
-
   /* write custom files */
   {
-    struct cust_file *p = obj->custom_files;
+    struct _cust_file_t *p = obj->custom_files;
     
     while (p) 
       {
