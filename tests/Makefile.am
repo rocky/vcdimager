@@ -33,3 +33,6 @@ TESTS = \
 	check_vcd11.sh \
 	check_vcd20.sh \
 	check_svcd1.sh
+
+clean-generic:
+	-rm -f *.bin *.cue core.* *.dump
