@@ -92,38 +92,38 @@ typedef struct {
 /* This one-byte field describes certain characteristics of the disc */
 typedef struct {
 #if defined(BITFIELD_LSBF)
-  bitfield_t reserved1 : 1;                   /* Reserved, must be zero */
+  bool       reserved1 : 1;                   /* Reserved, must be zero */
   bitfield_t restriction : 2;                 /* restriction, eg. "unsuitable
                                               for kids":
                                               0x0 ==> unrestricted,
                                               0x1 ==> restricted category 1,
                                               0x2 ==> restricted category 2,
                                               0x3 ==> restricted category 3 */
-  bitfield_t special_info : 1;                /* Special Information is encoded 
+  bool       special_info : 1;                /* Special Information is encoded 
                                               in the pictures */
-  bitfield_t user_data_cc : 1;                /* MPEG User Data is used
+  bool       user_data_cc : 1;                /* MPEG User Data is used
                                               for Closed Caption */
-  bitfield_t use_lid2 : 1;                    /* If == 1 and the PSD is
+  bool       use_lid2 : 1;                    /* If == 1 and the PSD is
                                               interpreted and the next
                                               disc has the same album
                                               id then start the next
                                               disc at List ID #2,
                                               otherwise List ID #1 */ 
-  bitfield_t use_track3 : 1;                  /* If == 1 and the PSD is
+  bool       use_track3 : 1;                  /* If == 1 and the PSD is
                                               not interpreted  and
                                               next disc has same album
                                               id, then start next disc
                                               with track 3, otherwise
                                               start with track 2 */ 
-  bitfield_t pbc_x : 1;                       /* extended PBC available */
+  bool       pbc_x : 1;                       /* extended PBC available */
 #else
-  bitfield_t pbc_x : 1;
-  bitfield_t use_track3 : 1;
-  bitfield_t use_lid2 : 1;
-  bitfield_t user_data_cc : 1;
-  bitfield_t special_info : 1;
+  bool       pbc_x : 1;
+  bool       use_track3 : 1;
+  bool       use_lid2 : 1;
+  bool       user_data_cc : 1;
+  bool       special_info : 1;
   bitfield_t restriction : 2;
-  bitfield_t reserved1 : 1;
+  bool       reserved1 : 1;
 #endif
 } GNUC_PACKED InfoStatusFlags;
 
@@ -159,7 +159,7 @@ typedef struct
                                             0x5 - PAL still picture
                                             0x6 - Reserved (PAL hires?)
                                             0x7 - PAL motion picture */
-  bitfield_t item_cont : 1;                 /* Indicates segment is continuation
+  bool       item_cont : 1;                 /* Indicates segment is continuation
                                             0x0 - 1st or only segment of item
                                             0x1 - 2nd or later
                                                   segment of item */
@@ -170,7 +170,7 @@ typedef struct
                                                   available */
 #else
   bitfield_t ogt : 2;
-  bitfield_t item_cont : 1;
+  bool       item_cont : 1;
   bitfield_t video_type : 3;
   bitfield_t audio_type : 2;
 #endif
@@ -281,13 +281,13 @@ typedef struct {
 
 typedef struct {
 #if defined(BITFIELD_LSBF)
-  bitfield_t SelectionAreaFlag : 1;
-  bitfield_t CommandListFlag : 1;
+  bool       SelectionAreaFlag : 1;
+  bool       CommandListFlag : 1;
   bitfield_t reserved : 6;
 #else
   bitfield_t reserved : 6;
-  bitfield_t CommandListFlag : 1;
-  bitfield_t SelectionAreaFlag : 1;
+  bool       CommandListFlag : 1;
+  bool       SelectionAreaFlag : 1;
 #endif  
 } GNUC_PACKED PsdSelectionListFlags;
 
@@ -381,7 +381,7 @@ typedef struct {
                                              0x00 : No MPEG video
                                              0x03 : NTSC video
                                              0x07 : PAL video */
-  bitfield_t reserved1 : 1;                  /* Reserved, must be zero */
+  bool       reserved1 : 1;                  /* Reserved, must be zero */
   bitfield_t ogt : 2;                        /* 0x0 - no OGT substream 
                                              0x1 - sub-stream 0 available
                                              0x2 - sub-stream 0 & 1 available
@@ -389,7 +389,7 @@ typedef struct {
                                                    available */
 #else
   bitfield_t ogt : 2;
-  bitfield_t reserved1 : 1;
+  bool       reserved1 : 1;
   bitfield_t video : 3;
   bitfield_t audio : 2;
 #endif
