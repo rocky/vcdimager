@@ -197,9 +197,9 @@ from one place, these options are mutually exclusive; use only one
 option from this set.
 
 @menu
-* BIN/CUE or NRG file::  Reading from a file containing a CD disk image
+* BIN/CUE or NRG file::   Reading from a file containing a CD disk image
 * CD-ROM Device::         Reading from a CD-ROM device
-* Intelligent Input::     Reading from whereever
+* Intelligent Input::     Reading from wherever
 @end menu
 
 @node BIN/CUE or NRG file
@@ -251,8 +251,8 @@ the OS. For example on GNU/Linux, the default device may be
 @kbd{/vol/dev/aliases/cdrom0}.
 
 @node Intelligent Input
-@subsection Reading from whereever
-@cindex Reading, whereever
+@subsection Reading from wherever
+@cindex Reading, wherever
 
 The option @kbd{--input} or the short form of this @kbd{-i} tries to
 be intelligent by trying to figure out whether the thing you are
@@ -423,7 +423,7 @@ image}.
 @kindex @code{--input}
 This option is insensitive to whether the thing reading from is a
 CD-ROM device or a file. See @ref{Intelligent Input, ,Reading from
-whereever}.
+wherever}.
 
 @end table
 

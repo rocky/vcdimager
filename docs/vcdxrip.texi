@@ -113,7 +113,7 @@ But @value{program} can also disassemble pieces of a CD or CD disk
 image and can create an XML Video CD description file without
 extracting a single file located on the CD.
 
-You might use @value{program} as a step in remastering or reauthoring
+You might use @value{program} as a step in re-mastering or re-authoring
 and existing CD, or it could be used to extract MPEGs from a CD or CD
 disk image file. 
 
@@ -161,14 +161,14 @@ exclusive; use only one option from this set.
 @menu
 * BIN/CUE or NRG file::   Reading from a file containing a CD disk image
 * CD-ROM Device::         Reading from a CD-ROM device
-* Intelligent Input::     Reading from whereever
+* Intelligent Input::     Reading from wherever
 @end menu
 
 @node BIN/CUE or NRG file
 @subsection Reading from a file containing a CD disk image
 @cindex Reading, BIN, or NRG CD-ROM disk image
 
-The option @kbd{--bin-file} (the short forms for thise are @kbd{-b})
+The option @kbd{--bin-file} (the short forms for this is @kbd{-b})
 indicate to read from a file containing an image what might be burned
 onto Compact Disk. The format is expected to be in the BIN/CUE format
 that cdrdao uses and is used by a popular DOS/Windows CD mastering
@@ -200,8 +200,8 @@ the OS. For example on GNU/Linux, the default device may be
 @kbd{/vol/dev/aliases/cdrom0}.
 
 @node Intelligent Input
-@subsection Reading from whereever
-@cindex Reading, whereever
+@subsection Reading from wherever
+@cindex Reading, wherever
 
 The option @kbd{--input} or the short form of this @kbd{-i} tries to
 be intelligent by trying to figure out whether the thing you are
@@ -211,8 +211,8 @@ Currently the algorithm it uses is pretty simple. If the thing
 referred to is what in Unix is called a ``block'' or ``character''
 device, then it assumes a device name. When you do ``long listing''
 (``ls -l'') of the name and track down possible symbolic links
-you will see a ``b'' or ``c'' in the first colum if the file is a
-block or character devcies.
+you will see a ``b'' or ``c'' in the first column if the file is a
+block or character devices.
 
 If the thing referred to in an @kbd{--input} option is a ``regular''
 file then it is assumed you have a file image of a CD. If the filename
@@ -255,7 +255,7 @@ This option shows an abbreviated usage message
 @item --verbose
 @itemx -v
 @kindex @code{--verbose}
-This opton gives more verbose, debugging output.
+This option gives more verbose, debugging output.
 
 @item --quiet
 @itemx -q
@@ -299,7 +299,7 @@ image}.
 @kindex @code{--input}
 This option is insensitive to whether the thing reading from is a
 CD-ROM device or a file. See @ref{Intelligent Input, ,Reading from
-whereever}.
+wherever}.
 
 @end table
 
@@ -337,7 +337,7 @@ Video CD's are formatted on an ISO 9660 filesystem. As such they may
 have additional files that are not strictly necessary for VCD
 operation. For example, there may be some additional documentation or
 commentary in some sort of text format and these may be put under
-additional directories.  Nnormally, such files are extracted with the
+additional directories.  Normally, such files are extracted with the
 directory or path information removed. If you don't want these
 additional files extracted use the @code{--nofiles} option. 
 
