@@ -1,5 +1,8 @@
 2003-01-08  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* libvcd/vcd_image_nrg.c, libvcd/vcd_image_cdrdao.c: use C99
+	designated initializer syntax
+
 	* libvcd/vcd_image.[ch]: merged enhanced VcdImageSource interface (by
 	Rocky Bernstein)
 

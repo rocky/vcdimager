@@ -409,9 +409,9 @@ vcd_image_source_new_nrg (VcdDataSource *nrg_source)
   _img_nrg_src_t *_data;
 
   vcd_image_source_funcs _funcs = {
-    read_mode2_sector: _read_mode2_sector,
-    stat_size: _stat_size,
-    free: _source_free
+    .read_mode2_sector = _read_mode2_sector,
+    .stat_size         = _stat_size,
+    .free              = _source_free
   };
 
   if (!nrg_source)
@@ -657,10 +657,10 @@ vcd_image_sink_new_nrg (void)
   _img_nrg_snk_t *_data;
 
   vcd_image_sink_funcs _funcs = {
-    set_cuesheet: _set_cuesheet,
-    write: _write,
-    free: _sink_free,
-    set_arg: _sink_set_arg
+    .set_cuesheet = _set_cuesheet,
+    .write        = _write,
+    .free         = _sink_free,
+    .set_arg      = _sink_set_arg
   };
 
   _data = _vcd_malloc (sizeof (_img_nrg_snk_t));

@@ -293,10 +293,10 @@ vcd_image_sink_new_cdrdao (void)
   _img_cdrdao_snk_t *_data;
   
   vcd_image_sink_funcs _funcs = {
-    set_cuesheet: _set_cuesheet,
-    write: _write,
-    free: _sink_free,
-    set_arg: _sink_set_arg
+    .set_cuesheet = _set_cuesheet,
+    .write        = _write,
+    .free         = _sink_free,
+    .set_arg      = _sink_set_arg
   };
 
   _data = _vcd_malloc (sizeof (_img_cdrdao_snk_t));
