@@ -11,7 +11,8 @@ Release:        %rel
 Copyright:      GPL
 Group:          Applications/Multimedia
 Packager:       Herbert Valerio Riedel <hvr@gnu.org>
-Source:         http://www.gnu.org/pub/gnu/%{name}/%{name}-%{version}.tar.gz
+#Source:         http://www.gnu.org/pub/gnu/%{name}/%{name}-%{version}.tar.gz
+Source:         http://alpha.gnu.org/pub/gnu/%{name}/%{name}-%{version}.tar.gz
 URL:            http://www.gnu.org/software/vcdimager/
 BuildRoot:      %{_tmppath}/%{name}-root
 Requires:	libxml2 >= 2.3.8
@@ -73,7 +74,7 @@ rm -rf %{buildroot}
 %{_mandir}/man1/*
 
 %changelog
-* Sat Jan 04 2001 Herbert Valerio Riedel <hvr@gnu.org>
+* Sat Jan 04 2002 Herbert Valerio Riedel <hvr@gnu.org>
 - minor spec cleanups
 
 * Sat Jan 20 2001 Herbert Valerio Riedel <hvr@gnu.org>
