@@ -1200,23 +1200,8 @@ Video CD's.
 @node vcdxrip, vcdxminfo, vcdxbuild, Tools
 @subsection @command{vcdxrip}
 
-This tool implements the inverse operation to @command{vcdxbuild}, i.e.,
-taking an already built disc image and outputting all the file items and
-the @acronym{XML} description necessary to recreate this (Super) Video
-CD including any @acronym{PBC} information.
-
-@table @option
-@item --output-file
-@itemx -o
-This option allows to specify the xml file name for output. default:
-@file{videocd.xml}.
-
-@item --norip
-By the use of this option, only the XML description is created, without
-actually extracting any files or mpeg streams contained.
-@end table
-
-@emph{FIXME: write more}
+See @xref{Top, , Introduction, vcdxrip, The GNU Video CD Ripping
+Program}.
 
 @node vcdxminfo, cdxa2mpeg , vcdxrip, Tools
 @subsection @command{vcdxminfo}

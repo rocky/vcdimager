@@ -188,12 +188,13 @@ that contains an image that could be burned into a Compact Disk.  The
 option for the former category, reading a physical CD, is
 @kbd{--cdrom-device} (@kbd{-C}); options for the latter category,
 reading a file containing a CD disk image, are @kbd{--bin-file}
-(@kbd{-b}), @kbd{--cue-file} (@kbd{-c}). There is one other option
-@kbd{--input} (@kbd{-i}) which blurs the distinction---it tries to
-figure out based on the name whether you are reading from a device
-containing a CD or not and do the appropriate thing.  Of course, since
-it only makes sense to read from one place, these options are mutually
-exclusive; use only one option from this set.
+(@kbd{-b}), @kbd{--cue-file} (@kbd{-c}), and @kbd{--nrg-file}
+(@kbd{-N}. There is one other option @kbd{--input} (@kbd{-i}) which
+blurs the distinction---it tries to figure out based on the name
+whether you are reading from a device containing a CD or not and do
+the appropriate thing.  Of course, since it only makes sense to read
+from one place, these options are mutually exclusive; use only one
+option from this set.
 
 @menu
 * BIN/CUE or NRG file::  Reading from a file containing a CD disk image
@@ -267,8 +268,9 @@ block or character devcies.
 If the thing referred to in an @kbd{--input} option is a ``regular''
 file then it is assumed you have a file image of a CD. If the filename
 ends (i.e. the extension is) ``.bin'' or ``.BIN'' then we assume a
-``BIN file'' and if the filename ends ``.cue'' or ``.CUE'' then we
-assume a CUE file. 
+``BIN file''. If the filename ends ``.cue'' or ``.CUE'' then we
+assume a CUE file, and if the filename ends ``.nrg'' or ``.NRG'' we
+assume a Nero NRG disk image.
 
 Although this algorithm is subject to change and there may be more
 sophisticated or alternative methods, in practice I think this does
@@ -311,6 +313,9 @@ would use the command option @kbd{--show-pvd help}.
 @node All Options
 @section A complete list of options
 
+First some general-purpose options. These you might find on other
+programs.
+
 @table @code
 @item --help
 @kindex @code{--help}
@@ -323,25 +328,10 @@ type @kbd{-\?}.
 @kindex @code{--usage}
 This option shows an abbreviated usage message
 
-@item --access-mode
-@kindex @code{--access-mode}
-This option probably makes sense only if you are reading from a
-CD-ROM.  This overrides the default way that we read from the
-CD-ROM. The possible values allowed depend on the CD-ROM driver. Some
-values which work on some drivers are ``IOCTL'', ``READ_10,'' and
-``READ_CD.''
-
-@item --sector-2336
-@kindex @code{--2336}
-@kindex @code{--sector-2336}
-This option only makes sense if you are reading from a file CD-image.
-This indicates to @value{program} to assume a 2336-byte sector mode
-for image file.
-
 @item --verbose
 @itemx -v
 @kindex @code{--vebose}
-This opton gives more verbose, debugging  output.
+This opton gives more verbose, debugging output.
 
 @item --terse
 @itemx -t
@@ -350,6 +340,31 @@ This option is the same as giving the combined options
 @kbd{--no-header --no-banner --no-delimiter}.  This option can be
 useful if this program is getting called for information from another
 program and you don't want to have filter this information out.
+
+@item --quiet
+@itemx -q
+@kindex @code{--quiet}
+Show only critical messages
+
+@item --version
+@itemx -V
+@kindex @code{--version}
+Display version and copyright information (the stuff that is
+suppressed by @kbd{--no-banner} and exit after displaying this
+information. Sometimes, you just wanna know what version you got.
+@end table
+
+Next we have some miscellaneous options that don't fall into another
+particular category. 
+
+@table @code
+@item --access-mode
+@kindex @code{--access-mode}
+This option probably makes sense only if you are reading from a
+CD-ROM.  This overrides the default way that we read from the
+CD-ROM. The possible values allowed depend on the CD-ROM driver. Some
+values which work on some drivers are ``IOCTL'', ``READ_10,'' and
+``READ_CD.''
 
 @item --no-banner
 @itemx -B
@@ -364,17 +379,11 @@ but know that the version information is going to change over time.
 Do not show delimiter lines around various the sections of @ref{Output
 Sections, ,Output Sections}.
 
-@item --quiet
-@itemx -q
-@kindex @code{--quiet}
-Show only critical messages
-
-@item --version
-@itemx -V
-@kindex @code{--version}
-Display version and copyright information (the stuff that is
-suppressed by @kbd{--no-banner} and exit after displaying this
-information. Sometimes, you just wanna know what version you got.
+@item --sector-2336
+@kindex @code{--sector-2336}
+This option only makes sense if you are reading from a BIN CD disk
+image.  This indicates to @value{program} to assume a 2336-byte sector
+mode for image file. @emph{Note: This option is slated to disappear.}
 @end table
 
 Use at most one option in an invocation from the following list. These
@@ -418,7 +427,7 @@ whereever}.
 
 @end table
 
-The options below controll how much output you get and described in
+The options below control how much output you get and described in
 general in @ref{Output Sections, ,Output Sections}.
 
 @table @code
@@ -1059,9 +1068,9 @@ CUE file than a BIN file.
 @node Some Examples
 @chapter Some simple command invocations.
 
-Perhaps you want to dump all information about the CD that is
-currently sitting in your CD-ROM drive. If this location has a name
-that is ``default'' for that OS then this might work:
+Perhaps all you want to do is dump the information about a CD that is
+currently sitting in your CD-ROM drive. If the CD is in the
+``default'' location for your OS, then this might work:
 
 @smallexample
   vcddump
