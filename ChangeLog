@@ -1,3 +1,7 @@
+2001-07-01  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* implemented nero v5 output format
+
 2001-06-30  Herbert Valerio Riedel  <hvr@gnu.org>
 
  	* configure.in: bumped version up to 0.7.7

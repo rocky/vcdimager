@@ -58,6 +58,8 @@ _sink_free (void *user_data)
 {
   _img_cdrdao_snk_t *_obj = user_data;
 
+  /* fixme -- destroy cue list */
+
   vcd_data_sink_destroy (_obj->last_bin_snk);
   free (_obj->toc_fname);
   free (_obj->img_base);
@@ -85,8 +87,7 @@ _set_cuesheet (void *user_data, const VcdList *vcd_cue_list)
       vcd_cue_t *_cue2 = _vcd_malloc (sizeof (vcd_cue_t));
       *_cue2 = *_cue;
       _vcd_list_append (_obj->vcd_cue_list, _cue2);
-
-      
+    
       
       switch (_cue->type)
 	{

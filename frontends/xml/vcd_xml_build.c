@@ -108,6 +108,7 @@ static struct {
   char *bin_fname;
   char *cue_fname;
   char *cdrdao_base;
+  char *nrg_fname;
   int sector_2336_flag;
   int verbose_flag;
   int quiet_flag;
@@ -147,6 +148,9 @@ _do_cl (int argc, const char *argv[])
 
       {"cdrdao-file", '\0', POPT_ARG_STRING, &gl.cdrdao_base, 0,
        "specify cdrdao-style image filename base", "FILE"},
+
+      {"nrg-file", '\0', POPT_ARG_STRING, &gl.nrg_fname, 0,
+       "specify nrg-style image filename", "FILE"},
 
       { "sector-2336", '\0', POPT_ARG_NONE, &gl.sector_2336_flag, 0,
 	"use 2336 byte sectors for output"},
@@ -256,7 +260,11 @@ main (int argc, const char *argv[])
     if (vcd_xml_parse (&obj, vcd_doc, root, ns))
       vcd_error ("parsing tree failed");
 
-    if (vcd_xml_master (&obj, gl.cue_fname, gl.bin_fname, gl.cdrdao_base, gl.sector_2336_flag))
+    if (vcd_xml_master (&obj,
+			gl.cue_fname, gl.bin_fname,
+			gl.cdrdao_base, 
+			gl.nrg_fname, 
+			gl.sector_2336_flag))
       vcd_error ("building videocd failed");
   } 
 

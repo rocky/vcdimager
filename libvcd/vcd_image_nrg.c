@@ -37,18 +37,19 @@
 /* structures used */
 
 /* this ugly image format is typical for lazy win32 programmers... at
-   least structure were put big endian, so at least reverse
-   engineering wasn't such an headache... */
+   least structure were set big endian, so at reverse
+   engineering wasn't such a big headache... */
 
 typedef struct {
   uint32_t start      GNUC_PACKED;
   uint32_t length     GNUC_PACKED;
-  uint32_t type       GNUC_PACKED; /* only 0x3 seen so far... -> MIXED_MODE2 2336 blocksize */
+  uint32_t type       GNUC_PACKED; /* only 0x3 seen so far... 
+                                      -> MIXED_MODE2 2336 blocksize */
   uint32_t start_lsn  GNUC_PACKED; /* cummulated w/o pre-gap! */
   uint32_t _unknown   GNUC_PACKED; /* wtf is this for? -- always zero... */
 } _etnf_array_t;
 
-/* finally they realized that 32bit offsets are a bit outdated... */
+/* finally they realized that 32bit offsets are a bit outdated for IA64 *eg* */
 typedef struct {
   uint64_t start      GNUC_PACKED;
   uint64_t length     GNUC_PACKED;
@@ -64,6 +65,22 @@ typedef struct {
   uint8_t  _unknown2  GNUC_PACKED; /* ?? */
   uint32_t lsn        GNUC_PACKED; 
 } _cuex_array_t;
+
+typedef struct {
+  uint32_t id                    GNUC_PACKED;
+  uint32_t len                   GNUC_PACKED;
+  char data[EMPTY_ARRAY_SIZE]    GNUC_PACKED;
+} _chunk_t;
+
+/* to be converted into BE */
+#define CUEX_ID  0x43554558
+#define DAOX_ID  0x44414f58
+#define END1_ID  0x454e4421
+#define ETN2_ID  0x45544e32
+#define ETNF_ID  0x45544e46
+#define NER5_ID  0x4e455235
+#define NERO_ID  0x4e45524f
+#define SINF_ID  0x53494e46
 
 /* reader */
 
@@ -172,17 +189,13 @@ _parse_footer (_img_nrg_src_t *_obj)
 
     while (pos < size - footer_start)
       {
-	struct {
-	  uint32_t id                    GNUC_PACKED;
-	  uint32_t len                   GNUC_PACKED;
-	  char data[EMPTY_ARRAY_SIZE]    GNUC_PACKED;
-	} *chunk = (void *) (footer_buf + pos);
+	_chunk_t *chunk = (void *) (footer_buf + pos);
 
 	bool break_out = false;
 
 	switch (UINT32_FROM_BE (chunk->id))
 	  {
-	  case 0x43554558: /* "CUEX" */
+	  case CUEX_ID: /* "CUEX" */
 	    {
 	      unsigned entries = UINT32_FROM_BE (chunk->len);
 	      _cuex_array_t *_entries = (void *) chunk->data;
@@ -217,22 +230,22 @@ _parse_footer (_img_nrg_src_t *_obj)
 	    }
 	    break;
 
-	  case 0x44414f58: /* "DAOX" */
+	  case DAOX_ID: /* "DAOX" */
 	    vcd_debug ("DAOX tag detected...");
 	    break;
 
-	  case 0x4e455235: /* "NER5" */
-	  case 0x4e45524f: /* "NER0" */
+	  case NER5_ID: /* "NER5" */
+	  case NERO_ID: /* "NER0" */
 	    vcd_error ("unexpected nrg magic ID detected");
 	    return -1;
 	    break;
 
-	  case 0x454e4421: /* "END!" */
+	  case END1_ID: /* "END!" */
 	    vcd_debug ("nrg end tag detected");
 	    break_out = true;
 	    break;
 
-	  case 0x45544e46: /* "ETNF" */ 
+	  case ETNF_ID: /* "ETNF" */ 
 	    {
 	      unsigned entries = UINT32_FROM_BE (chunk->len);
 	      _etnf_array_t *_entries = (void *) chunk->data;
@@ -270,7 +283,7 @@ _parse_footer (_img_nrg_src_t *_obj)
 	    }
 	    break;
 
-	  case 0x45544e32: /* "ETN2", same as above, but with 64bit stuff instead */
+	  case ETN2_ID: /* "ETN2", same as above, but with 64bit stuff instead */
 	    {
 	      unsigned entries = uint32_from_be (chunk->len);
 	      _etn2_array_t *_entries = (void *) chunk->data;
@@ -309,7 +322,7 @@ _parse_footer (_img_nrg_src_t *_obj)
 	    
 	    break;
 
-	  case 0x53494e46: /* "SINF" */
+	  case SINF_ID: /* "SINF" */
 	    {
 	      uint32_t *_sessions = (void *) chunk->data;
 
@@ -413,6 +426,10 @@ vcd_image_source_new_nrg (VcdDataSource *nrg_source)
 
 typedef struct {
   VcdDataSink *nrg_snk;
+
+  VcdList *vcd_cue_list;
+  int tracks;
+  uint32_t cue_end_lsn;
 } _img_nrg_snk_t;
 
 static void
@@ -428,8 +445,138 @@ static int
 _set_cuesheet (void *user_data, const VcdList *vcd_cue_list)
 {
   _img_nrg_snk_t *_obj = user_data;
+  VcdListNode *node;
+  int num;
 
-  vcd_assert_not_reached ();
+  _obj->vcd_cue_list = _vcd_list_new ();
+
+  num = 0;
+  _VCD_LIST_FOREACH (node, (VcdList *) vcd_cue_list)
+    {
+      const vcd_cue_t *_cue = _vcd_list_node_data (node);
+      vcd_cue_t *_cue2 = _vcd_malloc (sizeof (vcd_cue_t));
+      *_cue2 = *_cue;
+      _vcd_list_append (_obj->vcd_cue_list, _cue2);
+  
+      if (_cue->type == VCD_CUE_TRACK_START)
+	num++;
+
+      if (_cue->type == VCD_CUE_END)
+	_obj->cue_end_lsn = _cue->lsn;
+    }
+
+  _obj->tracks = num;
+
+  vcd_assert (num > 0 && num < 100);
+
+  return 0;
+}
+
+static uint32_t
+_map (_img_nrg_snk_t *_obj, uint32_t lsn)
+{
+  VcdListNode *node;
+  uint32_t result = lsn;
+  vcd_cue_t *_cue = NULL, *_last = NULL;
+
+  vcd_assert (_obj->cue_end_lsn > lsn);
+
+  _VCD_LIST_FOREACH (node, _obj->vcd_cue_list)
+    {
+      _cue = _vcd_list_node_data (node);
+      
+      if (lsn < _cue->lsn)
+	break;
+
+      switch (_cue->type)
+	{
+	case VCD_CUE_TRACK_START:
+	  result -= _cue->lsn;
+	  break;
+	case VCD_CUE_PREGAP_START:
+	  result += _cue->lsn;
+	  break;
+	default:
+	  break;
+	}
+
+      _last = _cue;
+    }
+  
+  vcd_assert (node != NULL);
+
+  switch (_last->type)
+    {
+    case VCD_CUE_TRACK_START:
+      return result;
+      break;
+
+    case VCD_CUE_PREGAP_START:
+      return -1;
+      break;
+    
+    default:
+    case VCD_CUE_END:
+      vcd_assert_not_reached ();
+      break;
+    }
+
+  return -1;
+}
+
+static int
+_write_tail (_img_nrg_snk_t *_obj, uint32_t offset)
+{
+  VcdListNode *node;
+  int _size;
+  _chunk_t _chunk;
+
+  vcd_data_sink_seek (_obj->nrg_snk, offset);
+
+  _size = _obj->tracks * sizeof (_etnf_array_t);
+  _chunk.id = UINT32_TO_BE (ETNF_ID);
+  _chunk.len = UINT32_TO_BE (_size);
+
+  vcd_data_sink_write (_obj->nrg_snk, &_chunk, sizeof (_chunk_t), 1);
+
+  _VCD_LIST_FOREACH (node, _obj->vcd_cue_list)
+    {
+      vcd_cue_t *_cue = _vcd_list_node_data (node);
+      
+      if (_cue->type == VCD_CUE_TRACK_START)
+	{
+	  vcd_cue_t *_cue2 = _vcd_list_node_data (_vcd_list_node_next (node));
+
+	  _etnf_array_t _etnf = { 0, };
+
+	  _etnf.type = UINT32_TO_BE (0x3);
+	  _etnf.start_lsn = UINT32_TO_BE (_map (_obj, _cue->lsn));
+	  _etnf.start = UINT32_TO_BE (_map (_obj, _cue->lsn) * M2RAW_SIZE);
+	  
+	  _etnf.length = UINT32_TO_BE ((_cue2->lsn - _cue->lsn) * M2RAW_SIZE);
+
+	  vcd_data_sink_write (_obj->nrg_snk, &_etnf, sizeof (_etnf_array_t), 1);
+	}
+	
+    }
+  
+  {
+    uint32_t tracks = UINT32_TO_BE (_obj->tracks);
+
+    _chunk.id = UINT32_TO_BE (SINF_ID);
+    _chunk.len = UINT32_TO_BE (sizeof (uint32_t));
+    vcd_data_sink_write (_obj->nrg_snk, &_chunk, sizeof (_chunk_t), 1);
+
+    vcd_data_sink_write (_obj->nrg_snk, &tracks, sizeof (uint32_t), 1);
+  }
+
+  _chunk.id = UINT32_TO_BE (END1_ID);
+  _chunk.len = UINT32_TO_BE (0);
+  vcd_data_sink_write (_obj->nrg_snk, &_chunk, sizeof (_chunk_t), 1);
+
+  _chunk.id = UINT32_TO_BE (NERO_ID);
+  _chunk.len = UINT32_TO_BE (offset);
+  vcd_data_sink_write (_obj->nrg_snk, &_chunk, sizeof (_chunk_t), 1);
 
   return 0;
 }
@@ -437,9 +584,24 @@ _set_cuesheet (void *user_data, const VcdList *vcd_cue_list)
 static int
 _write (void *user_data, const void *data, uint32_t lsn)
 {
+  const char *buf = data;
   _img_nrg_snk_t *_obj = user_data;
+  uint32_t _lsn = _map (_obj, lsn);
 
-  vcd_assert_not_reached ();
+  if (_lsn == -1)
+    {
+      /* vcd_debug ("ignoring %d", lsn); */
+      return 0;
+    }
+
+  vcd_data_sink_seek(_obj->nrg_snk, _lsn * M2RAW_SIZE);
+  vcd_data_sink_write(_obj->nrg_snk, buf + 12 + 4, M2RAW_SIZE, 1);
+
+  if (_obj->cue_end_lsn - 1 == lsn)
+    {
+      vcd_debug ("ENDLSN reached! (%d == %d)", lsn, _lsn);
+      return _write_tail (_obj, (_lsn + 1) * M2RAW_SIZE);
+    }
 
   return 0;
 }

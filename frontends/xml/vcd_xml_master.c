@@ -33,13 +33,14 @@
 #include <libvcd/vcd_stream_stdio.h>
 #include <libvcd/vcd_image_bincue.h>
 #include <libvcd/vcd_image_cdrdao.h>
+#include <libvcd/vcd_image_nrg.h>
 #include <libvcd/vcd_bytesex.h>
 
 static const char _rcsid[] = "$Id$";
 
 bool vcd_xml_master (const struct vcdxml_t *obj, const char cue_fname[],
 		     const char bin_fname[], const char cdrdao_base[],
-		     bool sector_2336_flag)
+		     const char nrg_fname[], bool sector_2336_flag)
 {
   VcdObj *_vcd;
   VcdListNode *node;
@@ -201,6 +202,13 @@ bool vcd_xml_master (const struct vcdxml_t *obj, const char cue_fname[],
 
 	image_sink = 
 	  vcd_image_sink_new_cdrdao (buf, cdrdao_base, sector_2336_flag);
+      }
+    else if (nrg_fname)
+      {
+	vcd_info ("nrg-style image requested!");
+
+	image_sink = 
+	  vcd_image_sink_new_nrg (vcd_data_sink_new_stdio (nrg_fname));
       }
     else
       image_sink = 
