@@ -33,7 +33,7 @@ vcdxgen_SOURCES = \
 	vcd_xml_dtd.h 
 
 videocd_dtd.inc: $(srcdir)/videocd.dtd
-	(sed 's/\"/\\"/g' | $(AWK) 'BEGIN { print "char videocd_dtd[] = \\" } { print " \"" $$0 "\\n\" \\" } END { print ";" }') < $< >> $@
+	(sed 's/\"/\\"/g' | $(AWK) 'BEGIN { print "char videocd_dtd[] = \\" } { print " \"" $$0 "\\n\" \\" } END { print ";" }') < $< > $@
 
 clean-local:
 	-rm -f *.ps
