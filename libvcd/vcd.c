@@ -553,12 +553,23 @@ vcd_obj_set_param_bool (VcdObj *obj, vcd_parm_t param, bool arg)
       vcd_debug ("changing 'next volume use sequence 2' to %d", obj->info_use_seq2);
       break;
 
-    case VCD_PARM_BROKEN_SVCD_MODE:
+    case VCD_PARM_SVCD_VCD3_MPEGAV:
       if (obj->type == VCD_TYPE_SVCD)
         {
-          if ((obj->broken_svcd_mode_flag = arg ? true : false))
-            vcd_warn ("!! broken SVCD mode activated," 
-                      " SVCD will not be compliant !!");
+          if ((obj->svcd_vcd3_mpegav = arg ? true : false))
+            vcd_warn ("!! enabling deprecated VCD3.0 MPEGAV folder --" 
+                      " SVCD will not be IEC62107 compliant !!");
+        }
+      else
+        vcd_error ("parameter not applicable for vcd type");
+      break;
+
+    case VCD_PARM_SVCD_VCD3_ENTRYSVD:
+      if (obj->type == VCD_TYPE_SVCD)
+        {
+          if ((obj->svcd_vcd3_entrysvd = arg ? true : false))
+            vcd_warn ("!! enabling deprecated VCD3.0 ENTRYSVD signature --" 
+                      " SVCD will not be IEC62107 compliant !!");
         }
       else
         vcd_error ("parameter not applicable for vcd type");
@@ -829,11 +840,12 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
 
   case VCD_TYPE_SVCD:
     _vcd_directory_mkdir (obj->dir, "EXT");
-    _vcd_directory_mkdir (obj->dir, "MPEG2");
 
-    if (obj->broken_svcd_mode_flag)
+    if (!obj->svcd_vcd3_mpegav)
+      _vcd_directory_mkdir (obj->dir, "MPEG2");
+    else
       {
-        vcd_warn ("broken SVCD mode: adding MPEGAV dir");
+        vcd_warn ("adding MPEGAV dir for *DEPRECATED* SVCD VCD30 mode");
         _vcd_directory_mkdir (obj->dir, "MPEGAV");
       }
 
@@ -971,7 +983,9 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
           file_num = n + 1;
           break;
         case VCD_TYPE_SVCD:
-          fmt = "MPEG2/AVSEQ%2.2d.MPG";
+          fmt = (obj->svcd_vcd3_mpegav 
+                 ? "MPEGAV/AVSEQ%2.2d.MPG" 
+                 : "MPEG2/AVSEQ%2.2d.MPG");
           file_num = 0;
           break;
         default:
@@ -985,20 +999,6 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
       _vcd_directory_mkfile (obj->dir, avseq_pathname, extent + obj->pre_data_gap,
                              track->info->packets * ISO_BLOCKSIZE,
                              true, file_num);
-
-      if (obj->broken_svcd_mode_flag)
-        {
-          snprintf (avseq_pathname, sizeof (avseq_pathname), 
-                    "MPEGAV/AVSEQ%2.2d.MPG", n + 1);
-
-          vcd_warn ("broken svcd mode: adding additional `%s' entry", 
-                    avseq_pathname);
-            
-          _vcd_directory_mkfile (obj->dir, avseq_pathname,
-                                 extent+obj->pre_data_gap,
-                                 track->info->packets * ISO_BLOCKSIZE,
-                                 true, n + 1);
-        }
 
       extent += obj->iso_size;
       n++;

@@ -77,7 +77,8 @@ typedef struct {
 
 struct _VcdObj {
   vcd_type_t type;
-  bool broken_svcd_mode_flag;
+  bool svcd_vcd3_mpegav;
+  bool svcd_vcd3_entrysvd;
 
   unsigned pre_track_gap;
   unsigned pre_data_gap;

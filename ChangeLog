@@ -1,5 +1,9 @@
 2001-05-29  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* changed broken svcd mode operation
+
+	* configure.in: check whether popt is new enough
+
 	* libvcd/vcd_types.h: try to make it more flexible
 
 2001-05-28  Keith White <Keith.White@site.uottawa.ca>

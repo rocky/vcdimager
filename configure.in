@@ -53,6 +53,7 @@ if test "x$enable_cli_fe" = "xyes"; then
  AC_CHECK_LIB(popt, poptGetContext, POPT_LIBS="-lpopt", enable_cli_fe_popt=yes)
 fi
 
+
 if test "x$enable_xml_fe" = "xyes"; then
   AM_PATH_XML2(2.3.8, , enable_xml_fe=no)
 fi
@@ -89,6 +90,19 @@ if test "x$enable_cli_fe" = "xyes" \
 	-a "x$enable_cli_fe_popt" != "xyes"
 then
  AC_CHECK_HEADER(popt.h, , enable_cli_fe_popt=yes)
+fi
+
+if test "x$enable_cli_fe" = "xyes" \
+	-a "x$enable_cli_fe_popt" != "xyes"
+then
+ AC_MSG_CHECKING([checking whether popt new enough])
+ AC_EGREP_HEADER(poptHelpOptions, popt.h, , enable_cli_fe_popt=yes)
+
+ if test "x$enable_cli_fe_popt" = "xyes"; then
+  AC_MSG_RESULT([no])
+ else
+  AC_MSG_RESULT([seems so])
+ fi
 fi
 
 dnl GNOME_COMPILE_WARNINGS

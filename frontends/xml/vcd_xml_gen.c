@@ -439,11 +439,17 @@ main (int argc, const char *argv[])
     {
       struct option_t *_opt = _vcd_malloc (sizeof (struct option_t));
       
-      _opt->name = strdup ("broken svcd mode");
+      _opt->name = strdup ("svcd vcd30 mpegav");
       _opt->value = strdup ("true");
 
       _vcd_list_append (obj.option_list, _opt);
 
+      _opt = _vcd_malloc (sizeof (struct option_t));
+      
+      _opt->name = strdup ("svcd vcd30 entrysvd");
+      _opt->value = strdup ("true");
+
+      _vcd_list_append (obj.option_list, _opt);
     }
 
   vcd_xml_dump (&obj, xml_fname);

@@ -101,10 +101,11 @@ set_entries_vcd (VcdObj *obj, void *buf)
       break;
 
     case VCD_TYPE_SVCD:
-      strncpy(entries_vcd.ID, ENTRIES_ID_SVCD, 8);
-      if (obj->broken_svcd_mode_flag)
+      if (!obj->svcd_vcd3_entrysvd)
+        strncpy(entries_vcd.ID, ENTRIES_ID_SVCD, 8);
+      else
         {
-          vcd_warn ("broken SVCD mode: setting non-conforming ENTRYSVD id");
+          vcd_warn ("setting ENTRYSVD signature for *DEPRECATED* VCD30 type SVCD");
           strncpy(entries_vcd.ID, "ENTRYSVD", 8);
         }
       entries_vcd.version = ENTRIES_VERSION_SVCD;

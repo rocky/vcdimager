@@ -432,7 +432,8 @@ main (int argc, const char *argv[])
   if (type_id == VCD_TYPE_SVCD)
     {
       bool __tmp = gl.broken_svcd_mode_flag;
-      vcd_obj_set_param_bool (gl_vcd_obj, VCD_PARM_BROKEN_SVCD_MODE, __tmp);
+      vcd_obj_set_param_bool (gl_vcd_obj, VCD_PARM_SVCD_VCD3_MPEGAV, __tmp);
+      vcd_obj_set_param_bool (gl_vcd_obj, VCD_PARM_SVCD_VCD3_ENTRYSVD, __tmp);
     }
 
   {
