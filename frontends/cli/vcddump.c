@@ -314,7 +314,7 @@ dump_psd (const vcdinfo_obj_t *obj, bool ext)
                      "  Flags: 0x%.2x | NOS: %d | BSN: %d | LID: %d (rejected: %s)\n"
                      "  prev: %s | next: %s | return: %s\n"
                      "  default: %s | timeout: %s\n"
-                     "  timeout time: %d secs | loop: %d (delayed: %s)\n"
+                     "  wait: %d secs | loop: %d (delayed: %s)\n"
                      "  play-item: %s\n",
                      n, vcdinfo_ofs2str (obj, ofs->offset, ext),
                      (type == PSD_TYPE_EXT_SELECTION_LIST ? "extended " : ""),
@@ -518,7 +518,7 @@ dump_entries (const vcdinfo_obj_t *obj)
         const uint32_t lsn = vcdinfo_lba2lsn(msf_to_lba(msf));
         
         fprintf (stdout, " ENTRY[%2.2d]: track# %d (SEQUENCE[%d]), LSN %d "
-                 "(msf %2.2x:%2.2x:%2.2x)\n",
+                 "(MSF %2.2x:%2.2x:%2.2x)\n",
                  n, vcdinfo_get_track(obj, n),
                  vcdinfo_get_track(obj, n) - 1,               
                  lsn,
@@ -729,7 +729,7 @@ dump_scandata_dat (const vcdinfo_obj_t *obj)
             continue;
 
           fprintf (stdout, 
-                   "  scanpoint[%.4d] (ofs:%5d): LSN %u (msf %2.2x:%2.2x:%2.2x)\n",
+                   "  scanpoint[%.4d] (ofs:%5d): LSN %u (MSF %2.2x:%2.2x:%2.2x)\n",
                    n, scandata_ofs0 + (n * 3), lsn, msf->m, msf->s, msf->f);
 
           if (!gl.verbose_flag
@@ -775,7 +775,7 @@ dump_search_dat (const vcdinfo_obj_t *obj)
       ss2 = (ss2 % 2) * 5;
 
       fprintf (stdout, " scanpoint[%.4d]: (real time: %.2d:%.2d:%.2d.%.1d) "
-               " sector: LSN %u (msf %.2x:%.2x:%.2x)\n", m, hh, mm, ss, ss2,
+               " sector: LSN %u (MSF %.2x:%.2x:%.2x)\n", m, hh, mm, ss, ss2,
                lsn, msf->m, msf->s, msf->f);
       
       if (!gl.verbose_flag
@@ -817,7 +817,7 @@ _dump_fs_recurse (const vcdinfo_obj_t *obj, const char pathname[])
         _vcd_list_append (dirlist, strdup (_fullname));
 
       fprintf (stdout, 
-               "  %c %s %d %d [fn %.2d] [lsn %6d] ",
+               "  %c %s %d %d [fn %.2d] [LSN %6d] ",
                (statbuf.type == _STAT_DIR) ? 'd' : '-',
                vcdinfo_get_xa_attr_str (statbuf.xa.attributes),
                uint16_from_be (statbuf.xa.user_id),
@@ -1254,21 +1254,29 @@ process_suboption(const char *subopt, subopt_entry_t *sublist, const int num,
     bsearch(subopt, sublist, num, sizeof(subopt_entry_t), 
             &compare_subopts);
   if (subopt_rec != NULL) {
-    gl.show.all         = false;
-    *(subopt_rec->flag) = true;
-    *any_flag            = true;
-  } else 
-    {
-      unsigned int i;
-      fprintf (stderr, "Invalid option following %s: %s.\n", 
+    if (strcmp(subopt_name, "help") != 0) {
+      gl.show.all         = false;
+      *(subopt_rec->flag) = true;
+      *any_flag           = true;
+      return;
+    }
+  } else {
+    unsigned int i;
+    bool is_help=strcmp(subopt, "help")==0;
+    if (is_help) {
+      fprintf (stderr, "The list of sub options for \"%s\" are:\n", 
+               subopt_name);
+    } else {
+      fprintf (stderr, "Invalid option following \"%s\": %s.\n", 
                subopt_name, subopt);
       fprintf (stderr, "Should be one of: ");
-      for (i=0; i<num-1; i++) {
-        fprintf(stderr, "%s, ", sublist[i].name);
-      }
-      fprintf(stderr, "%s.\n", sublist[num-1].name);
-      exit (EXIT_FAILURE);
     }
+    for (i=0; i<num-1; i++) {
+      fprintf(stderr, "%s, ", sublist[i].name);
+    }
+    fprintf(stderr, "or %s.\n", sublist[num-1].name);
+    exit (is_help ? EXIT_SUCCESS : EXIT_FAILURE);
+  }
 }
 
 
@@ -1291,7 +1299,7 @@ main (int argc, const char *argv[])
     {"cue-file", 'c', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &source_name, 
      OP_SOURCE_CUE, "set \"cue\" image file as source", "FILE"},
 
-    {"input", 'i', POPT_ARG_STRING, &source_name, 
+    {"input", 'i', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &source_name, 
      OP_SOURCE_AUTO,
      "set source and determine if \"bin\" image or device", "INPUT"},
 
@@ -1300,7 +1308,7 @@ main (int argc, const char *argv[])
      OP_SOURCE_SECTOR_2336,
      "use 2336 byte sector mode for image file"},
 
-    {"cdrom-device", '\0', 
+    {"cdrom-device", 'C', 
      POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &source_name, 
      OP_SOURCE_DEVICE,
      "set CD-ROM device as source", "DEVICE"},

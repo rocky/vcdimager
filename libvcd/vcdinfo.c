@@ -1646,31 +1646,35 @@ vcdinfo_open(vcdinfo_obj_t *obj, char source_name[],
   bool null_source = NULL == source_name;
 
   if (VCDINFO_SOURCE_AUTO == source_type) {
-    struct stat buf;
-    if (0 != stat(source_name, &buf)) {
-      vcd_error ("Can't stat file %s:", strerror(errno));
-      return VCDINFO_OPEN_ERROR;
-    }
-    if (S_ISBLK(buf.st_mode) || S_ISCHR(buf.st_mode)) {
+    if (null_source) 
       source_type = VCDINFO_SOURCE_DEVICE;
-    } else if (S_ISREG(buf.st_mode)) {
-      /* FIXME: check to see if is a text file. If so, then 
-        set VCDINFO_SOURCE_CUE. _*/
-      int i=strlen(source_name)-strlen("bin");
-      if (i > 0
-          && (source_name[i] =='c' || source_name[i+1] =='C')
-          && (source_name[i+1] =='u' || source_name[i+1] =='U')
-          && (source_name[i+2] =='e' || source_name[i+2] =='E') ) 
-        source_type = VCDINFO_SOURCE_CUE;
-      else
-        source_type = VCDINFO_SOURCE_BIN;
-    } else {
-      vcd_error ("Source file `%s' should either be a block device "
-                 "or a regular file", source_name);
-      return VCDINFO_OPEN_ERROR;
+    else {
+      struct stat buf;
+      if (0 != stat(source_name, &buf)) {
+        vcd_error ("Can't stat file %s:", strerror(errno));
+        return VCDINFO_OPEN_ERROR;
+      }
+      if (S_ISBLK(buf.st_mode) || S_ISCHR(buf.st_mode)) {
+        source_type = VCDINFO_SOURCE_DEVICE;
+      } else if (S_ISREG(buf.st_mode)) {
+        /* FIXME: check to see if is a text file. If so, then 
+           set VCDINFO_SOURCE_CUE. */
+        int i=strlen(source_name)-strlen("bin");
+        if (i > 0
+            && (source_name[i] =='c' || source_name[i+1] =='C')
+            && (source_name[i+1] =='u' || source_name[i+1] =='U')
+            && (source_name[i+2] =='e' || source_name[i+2] =='E') ) 
+          source_type = VCDINFO_SOURCE_CUE;
+        else
+          source_type = VCDINFO_SOURCE_BIN;
+      } else {
+        vcd_error ("Source file `%s' should either be a block device "
+                   "or a regular file", source_name);
+        return VCDINFO_OPEN_ERROR;
+      }
     }
   }
-
+  
   switch (source_type) {
   case VCDINFO_SOURCE_DEVICE:
     img = vcd_image_source_new_cd ();

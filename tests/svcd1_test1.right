@@ -18,42 +18,42 @@ ISO9660 filesystem dump
  root dir in PVD set to lsn 18
 
  /:
-  d d---1xrxrxr 0 0 [fn 00] [lsn     18]      2048  .
-  d d---1xrxrxr 0 0 [fn 00] [lsn     18]      2048  ..
-  d d---1xrxrxr 0 0 [fn 00] [lsn     19]      2048  EXT
-  d d---1xrxrxr 0 0 [fn 00] [lsn     20]      2048  MPEG2
-  d d---1xrxrxr 0 0 [fn 00] [lsn     21]      2048  SEGMENT
-  d d---1xrxrxr 0 0 [fn 00] [lsn     22]      2048  SVCD
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  d d---1xrxrxr 0 0 [fn 00] [LSN     19]      2048  EXT
+  d d---1xrxrxr 0 0 [fn 00] [LSN     20]      2048  MPEG2
+  d d---1xrxrxr 0 0 [fn 00] [LSN     21]      2048  SEGMENT
+  d d---1xrxrxr 0 0 [fn 00] [LSN     22]      2048  SVCD
 
  /EXT/:
-  d d---1xrxrxr 0 0 [fn 00] [lsn     19]      2048  .
-  d d---1xrxrxr 0 0 [fn 00] [lsn     18]      2048  ..
-  - ----1xrxrxr 0 0 [fn 00] [lsn    675]        78  SCANDATA.DAT;1
+  d d---1xrxrxr 0 0 [fn 00] [LSN     19]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  - ----1xrxrxr 0 0 [fn 00] [LSN    675]        78  SCANDATA.DAT;1
 
  /MPEG2/:
-  d d---1xrxrxr 0 0 [fn 00] [lsn     20]      2048  .
-  d d---1xrxrxr 0 0 [fn 00] [lsn     18]      2048  ..
-  - ---2-xrxrxr 0 0 [fn 00] [lsn    826]    174300 (   153600)  AVSEQ01.MPG;1
-  - ---2-xrxrxr 0 0 [fn 00] [lsn   1051]    174300 (   153600)  AVSEQ02.MPG;1
-  - ---2-xrxrxr 0 0 [fn 00] [lsn   1276]    174300 (   153600)  AVSEQ03.MPG;1
-  - ---2-xrxrxr 0 0 [fn 00] [lsn   1501]    174300 (   153600)  AVSEQ04.MPG;1
+  d d---1xrxrxr 0 0 [fn 00] [LSN     20]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  - ---2-xrxrxr 0 0 [fn 00] [LSN    826]    174300 (   153600)  AVSEQ01.MPG;1
+  - ---2-xrxrxr 0 0 [fn 00] [LSN   1051]    174300 (   153600)  AVSEQ02.MPG;1
+  - ---2-xrxrxr 0 0 [fn 00] [LSN   1276]    174300 (   153600)  AVSEQ03.MPG;1
+  - ---2-xrxrxr 0 0 [fn 00] [LSN   1501]    174300 (   153600)  AVSEQ04.MPG;1
 
  /SEGMENT/:
-  d d---1xrxrxr 0 0 [fn 00] [lsn     21]      2048  .
-  d d---1xrxrxr 0 0 [fn 00] [lsn     18]      2048  ..
-  - ---2-xrxrxr 0 0 [fn 00] [lsn    225]     65072 (    57344)  ITEM0001.MPG;1
-  - ---2-xrxrxr 0 0 [fn 00] [lsn    375]     65072 (    57344)  ITEM0002.MPG;1
-  - ---2-xrxrxr 0 0 [fn 00] [lsn    525]     65072 (    57344)  ITEM0003.MPG;1
+  d d---1xrxrxr 0 0 [fn 00] [LSN     21]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  - ---2-xrxrxr 0 0 [fn 00] [LSN    225]     65072 (    57344)  ITEM0001.MPG;1
+  - ---2-xrxrxr 0 0 [fn 00] [LSN    375]     65072 (    57344)  ITEM0002.MPG;1
+  - ---2-xrxrxr 0 0 [fn 00] [LSN    525]     65072 (    57344)  ITEM0003.MPG;1
 
  /SVCD/:
-  d d---1xrxrxr 0 0 [fn 00] [lsn     22]      2048  .
-  d d---1xrxrxr 0 0 [fn 00] [lsn     18]      2048  ..
-  - ----1xrxrxr 0 0 [fn 00] [lsn    151]      2048  ENTRIES.SVD;1
-  - ----1xrxrxr 0 0 [fn 00] [lsn    150]      2048  INFO.SVD;1
-  - ----1xrxrxr 0 0 [fn 00] [lsn    152]     65536  LOT.SVD;1
-  - ----1xrxrxr 0 0 [fn 00] [lsn    184]       112  PSD.SVD;1
-  - ----1xrxrxr 0 0 [fn 00] [lsn    186]        40  SEARCH.DAT;1
-  - ----1xrxrxr 0 0 [fn 00] [lsn    185]      2048  TRACKS.SVD;1
+  d d---1xrxrxr 0 0 [fn 00] [LSN     22]      2048  .
+  d d---1xrxrxr 0 0 [fn 00] [LSN     18]      2048  ..
+  - ----1xrxrxr 0 0 [fn 00] [LSN    151]      2048  ENTRIES.SVD;1
+  - ----1xrxrxr 0 0 [fn 00] [LSN    150]      2048  INFO.SVD;1
+  - ----1xrxrxr 0 0 [fn 00] [LSN    152]     65536  LOT.SVD;1
+  - ----1xrxrxr 0 0 [fn 00] [LSN    184]       112  PSD.SVD;1
+  - ----1xrxrxr 0 0 [fn 00] [LSN    186]        40  SEARCH.DAT;1
+  - ----1xrxrxr 0 0 [fn 00] [LSN    185]      2048  TRACKS.SVD;1
 
 -------------------------------------------------------------------------------
 SVCD/INFO.SVD
@@ -92,10 +92,10 @@ SVCD/ENTRIES.SVD
  version: 0x01
  system profile tag: 0x00
  entries: 4
- ENTRY[00]: track# 1 (SEQUENCE[0]), LSN 826 (msf 00:13:01)
- ENTRY[01]: track# 2 (SEQUENCE[1]), LSN 1051 (msf 00:16:01)
- ENTRY[02]: track# 3 (SEQUENCE[2]), LSN 1276 (msf 00:19:01)
- ENTRY[03]: track# 4 (SEQUENCE[3]), LSN 1501 (msf 00:22:01)
+ ENTRY[00]: track# 1 (SEQUENCE[0]), LSN 826 (MSF 00:13:01)
+ ENTRY[01]: track# 2 (SEQUENCE[1]), LSN 1051 (MSF 00:16:01)
+ ENTRY[02]: track# 3 (SEQUENCE[2]), LSN 1276 (MSF 00:19:01)
+ ENTRY[03]: track# 4 (SEQUENCE[3]), LSN 1501 (MSF 00:22:01)
 -------------------------------------------------------------------------------
 SVCD/LOT.SVD
  LID[1]: offset = 0 (0x0000)
@@ -108,7 +108,7 @@ SVCD/PSD.SVD
   Flags: 0x01 | NOS: 3 | BSN: 1 | LID: 1 (rejected: no)
   prev: disabled | next: PSD[?] @0x000d | return: PSD[?] @0x000d
   default: disabled | timeout: disabled
-  timeout time: 5 secs | loop: 1 (delayed: no)
+  wait: 5 secs | loop: 1 (delayed: no)
   play-item: SEGMENT[1] (0x03e8)
   ofs[0]: LID[2] @0x0007
   ofs[1]: LID[3] @0x000a
@@ -163,15 +163,15 @@ SVCD/SEARCH.DAT
  version: 0x01
  scanpoints: 9
  scaninterval: 1 (in 0.5sec units -- must be `1')
- scanpoint[0000]: (real time: 00:00:00.0)  sector: LSN 828 (msf 00:13:03)
- scanpoint[0001]: (real time: 00:00:00.5)  sector: LSN 828 (msf 00:13:03)
- scanpoint[0002]: (real time: 00:00:01.0)  sector: LSN 1053 (msf 00:16:03)
- scanpoint[0003]: (real time: 00:00:01.5)  sector: LSN 1053 (msf 00:16:03)
- scanpoint[0004]: (real time: 00:00:02.0)  sector: LSN 1278 (msf 00:19:03)
- scanpoint[0005]: (real time: 00:00:02.5)  sector: LSN 1278 (msf 00:19:03)
- scanpoint[0006]: (real time: 00:00:03.0)  sector: LSN 1503 (msf 00:22:03)
- scanpoint[0007]: (real time: 00:00:03.5)  sector: LSN 1503 (msf 00:22:03)
- scanpoint[0008]: (real time: 00:00:04.0)  sector: LSN 1503 (msf 00:22:03)
+ scanpoint[0000]: (real time: 00:00:00.0)  sector: LSN 828 (MSF 00:13:03)
+ scanpoint[0001]: (real time: 00:00:00.5)  sector: LSN 828 (MSF 00:13:03)
+ scanpoint[0002]: (real time: 00:00:01.0)  sector: LSN 1053 (MSF 00:16:03)
+ scanpoint[0003]: (real time: 00:00:01.5)  sector: LSN 1053 (MSF 00:16:03)
+ scanpoint[0004]: (real time: 00:00:02.0)  sector: LSN 1278 (MSF 00:19:03)
+ scanpoint[0005]: (real time: 00:00:02.5)  sector: LSN 1278 (MSF 00:19:03)
+ scanpoint[0006]: (real time: 00:00:03.0)  sector: LSN 1503 (MSF 00:22:03)
+ scanpoint[0007]: (real time: 00:00:03.5)  sector: LSN 1503 (MSF 00:22:03)
+ scanpoint[0008]: (real time: 00:00:04.0)  sector: LSN 1503 (MSF 00:22:03)
 -------------------------------------------------------------------------------
 EXT/SCANDATA.DAT
  ID: `SCAN_VCD'
@@ -190,13 +190,13 @@ EXT/SCANDATA.DAT
   track [2]: TOC num: 4, sd offset: 30
   track [3]: TOC num: 5, sd offset: 39
  (scanpoint[0] offset = 12)
-  scanpoint[0000] (ofs:   12): LSN 828 (msf 00:13:03)
-  scanpoint[0001] (ofs:   15): LSN 828 (msf 00:13:03)
-  scanpoint[0002] (ofs:   18): LSN 828 (msf 00:13:03)
-  scanpoint[0003] (ofs:   21): LSN 1053 (msf 00:16:03)
-  scanpoint[0004] (ofs:   24): LSN 1053 (msf 00:16:03)
-  scanpoint[0005] (ofs:   27): LSN 1053 (msf 00:16:03)
-  scanpoint[0006] (ofs:   30): LSN 1278 (msf 00:19:03)
-  scanpoint[0007] (ofs:   33): LSN 1278 (msf 00:19:03)
-  scanpoint[0008] (ofs:   36): LSN 1278 (msf 00:19:03)
+  scanpoint[0000] (ofs:   12): LSN 828 (MSF 00:13:03)
+  scanpoint[0001] (ofs:   15): LSN 828 (MSF 00:13:03)
+  scanpoint[0002] (ofs:   18): LSN 828 (MSF 00:13:03)
+  scanpoint[0003] (ofs:   21): LSN 1053 (MSF 00:16:03)
+  scanpoint[0004] (ofs:   24): LSN 1053 (MSF 00:16:03)
+  scanpoint[0005] (ofs:   27): LSN 1053 (MSF 00:16:03)
+  scanpoint[0006] (ofs:   30): LSN 1278 (MSF 00:19:03)
+  scanpoint[0007] (ofs:   33): LSN 1278 (MSF 00:19:03)
+  scanpoint[0008] (ofs:   36): LSN 1278 (MSF 00:19:03)
 -------------------------------------------------------------------------------

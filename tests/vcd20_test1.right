@@ -7,7 +7,7 @@ VCD/PSD.VCD
   Flags: 0x00 | NOS: 3 | BSN: 1 | LID: 1 (rejected: no)
   prev: disabled | next: PSD[?] @0x000a | return: PSD[?] @0x000a
   default: disabled | timeout: disabled
-  timeout time: 5 secs | loop: 1 (delayed: no)
+  wait: 5 secs | loop: 1 (delayed: no)
   play-item: SEGMENT[1] (0x03e8)
   ofs[0]: LID[2] @0x0004
   ofs[1]: LID[3] @0x0007
@@ -37,7 +37,7 @@ EXT/PSD_X.VCD
   Flags: 0x00 | NOS: 3 | BSN: 1 | LID: 1 (rejected: no)
   prev: disabled | next: PSD[?] @0x000d | return: PSD[?] @0x000d
   default: disabled | timeout: disabled
-  timeout time: 5 secs | loop: 1 (delayed: no)
+  wait: 5 secs | loop: 1 (delayed: no)
   play-item: SEGMENT[1] (0x03e8)
   ofs[0]: LID[2] @0x0007
   ofs[1]: LID[3] @0x000a
