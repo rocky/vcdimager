@@ -449,20 +449,41 @@ typedef struct
 } _vcd_directory_dump_pathtables_t;
 
 static void
+_dump_pathtables_helper (_vcd_directory_dump_pathtables_t *args,
+                         data_t *d, uint16_t parent_id)
+{
+  uint16_t id_l, id_m;
+
+  assert (args != NULL);
+  assert (d != NULL);
+
+  assert (d->is_dir);
+
+  id_l = pathtable_l_add_entry (args->ptl, d->name, d->extent, parent_id);
+  
+  id_m = pathtable_m_add_entry (args->ptm, d->name, d->extent, parent_id);
+
+  assert (id_l == id_m);
+
+  d->pt_id = id_m;
+}
+
+static void
 traverse_vcd_directory_dump_pathtables (VcdDirNode *node, void *data)
 {
-  data_t *d = DATAP(node);
   _vcd_directory_dump_pathtables_t *args = data;
 
-  if (d->is_dir)
+  if (DATAP(node)->is_dir)
     {
-      unsigned parent_id = (!_vcd_tree_node_is_root (node)
-                            ? PT_ID(_vcd_tree_node_parent (node)) 
-                            : 1);
+      VcdDirNode* child = _vcd_tree_node_first_child (node);
 
-      pathtable_l_add_entry (args->ptl, d->name, d->extent, parent_id);
-      d->pt_id =
-        pathtable_m_add_entry (args->ptm, d->name, d->extent, parent_id);
+      while (child) 
+        {
+          if (DATAP(child)->is_dir) 
+            _dump_pathtables_helper (args, DATAP(child), PT_ID(node));
+          
+          child = _vcd_tree_node_next_sibling (child);
+        }
     }
 }
 
@@ -478,6 +499,8 @@ _vcd_directory_dump_pathtables (VcdDirectory *dir, void *ptl, void *ptm)
 
   args.ptl = ptl;
   args.ptm = ptm;
+
+  _dump_pathtables_helper (&args, DATAP(_vcd_tree_root (dir)), 1);
 
   _vcd_tree_node_traverse (_vcd_tree_root (dir),
                            traverse_vcd_directory_dump_pathtables, &args); 

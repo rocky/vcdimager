@@ -359,6 +359,7 @@ pathtable_l_add_entry (void *pt,
   memcpy (ipt->name, name, name_len);
 
   pathtable_get_size_and_entries (pt, NULL, &entrynum);
+  
   return entrynum;
 }
 
@@ -383,6 +384,7 @@ pathtable_m_add_entry (void *pt,
   memcpy (ipt->name, name, name_len);
 
   pathtable_get_size_and_entries (pt, NULL, &entrynum);
+
   return entrynum;
 }
 

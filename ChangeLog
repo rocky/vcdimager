@@ -1,3 +1,8 @@
+2001-03-18  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_directory.c: changed traversal method for pathtable 
+		generation
+
 2001-03-17  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* frontends/cli/vcdrip.c: implemented --sector-2336, --verbose
