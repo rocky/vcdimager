@@ -27,7 +27,7 @@
 static const char _rcsid[] = "$Id$";
 
 unsigned
-_len2blocks (unsigned len, int blocksize)
+_vcd_len2blocks (unsigned len, int blocksize)
 {
   unsigned blocks;
 
@@ -39,7 +39,7 @@ _len2blocks (unsigned len, int blocksize)
 }
 
 size_t
-_strlenv(char **str_array)
+_vcd_strlenv(char **str_array)
 {
   size_t n = 0;
 
@@ -52,7 +52,7 @@ _strlenv(char **str_array)
 }
 
 void
-_strfreev(char **strv)
+_vcd_strfreev(char **strv)
 {
   int n;
   
@@ -65,7 +65,7 @@ _strfreev(char **strv)
 }
 
 char **
-_strsplit(const char str[], char delim)
+_vcd_strsplit(const char str[], char delim)
 {
   int n;
   char **strv = NULL;

@@ -44,7 +44,8 @@
 
 #define CD_74MIN_SECTORS UINT32_C(74*60*75)
 #define CD_80MIN_SECTORS UINT32_C(80*60*75)
-#define CD_MAX_SECTORS   UINT32_C(99*60*75)
+#define CD_90MIN_SECTORS UINT32_C(90*60*75)
+#define CD_MAX_SECTORS   UINT32_C(100*60*75-1)
 
 /* make mode 2 form 1/2 sector
  *
@@ -52,13 +53,13 @@
  * raw_sector must be a writable buffer of size 2352
  */
 void
-make_mode2(void *raw_sector, const void *data, uint32_t extent,
-           uint8_t fnum, uint8_t cnum, uint8_t sm, uint8_t ci);
+_vcd_make_mode2 (void *raw_sector, const void *data, uint32_t extent,
+                 uint8_t fnum, uint8_t cnum, uint8_t sm, uint8_t ci);
 
 /* ...data must be a buffer of size 2336 */
 
 void
-make_raw_mode2(void *raw_sector, const void *data, uint32_t extent);
+_vcd_make_raw_mode2 (void *raw_sector, const void *data, uint32_t extent);
 
 #endif /* _CD_SECTOR_H_ */
 

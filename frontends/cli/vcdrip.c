@@ -38,8 +38,8 @@
 #include "vcd_files_private.h"
 #include "vcd_iso9660.h"
 #include "vcd_logging.h"
-#include "vcd_transfer.h"
 #include "vcd_util.h"
+#include "vcd_salloc.h"
 
 static const char _rcsid[] = "$Id$";
 
@@ -634,7 +634,7 @@ dump (const char image_fname[])
         size = (3 * UINT16_FROM_BE (((SearchDat *)tmp)->scan_points)) 
           + sizeof (SearchDat);
 
-        sectors = _len2blocks (size, ISO_BLOCKSIZE);
+        sectors = _vcd_len2blocks (size, ISO_BLOCKSIZE);
 
         vcd_debug ("found SEARCH.DAT signature at sector %d", n);
 

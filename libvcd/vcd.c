@@ -32,7 +32,6 @@
 #include "vcd_iso9660.h"
 #include "vcd_mpeg.h"
 #include "vcd_salloc.h"
-#include "vcd_transfer.h"
 #include "vcd_files.h"
 #include "vcd_files_private.h"
 #include "vcd_cd_sector.h"
@@ -721,7 +720,7 @@ _finalize_vcd_iso_track (VcdObj *obj)
     {
       _dict_insert (obj, "tracks", TRACKS_SVD_SECTOR, 1, SM_EOF);      /* TRACKS.SVD */
       _dict_insert (obj, "search", SEARCH_DAT_SECTOR, 
-                    _len2blocks (get_search_dat_size (obj), ISO_BLOCKSIZE), SM_EOF); /* SEARCH.DAT */
+                    _vcd_len2blocks (get_search_dat_size (obj), ISO_BLOCKSIZE), SM_EOF); /* SEARCH.DAT */
     }
 
   /* keep rest of vcd sector blank -- paranoia */
@@ -908,11 +907,22 @@ static int
 _write_m2_image_sector (VcdObj *obj, const void *data, uint32_t extent,
                         uint8_t fnum, uint8_t cnum, uint8_t sm, uint8_t ci) 
 {
+  char buf[CDDA_SIZE] = { 0, };
+
   assert (extent == obj->sectors_written);
 
-  write_mode2_sector (obj->bin_file, obj->bin_file_2336_flag,
-                      data, extent, fnum, cnum, sm, ci);
+  _vcd_make_mode2(buf, data, extent, fnum, cnum, sm, ci);
 
+  vcd_data_sink_seek(obj->bin_file, 
+                     extent * (obj->bin_file_2336_flag
+                               ? M2RAW_SIZE
+                               : CDDA_SIZE));
+
+  if(obj->bin_file_2336_flag) 
+    vcd_data_sink_write(obj->bin_file, buf+12, M2RAW_SIZE, 1);
+  else
+    vcd_data_sink_write(obj->bin_file, buf, CDDA_SIZE, 1);
+  
   obj->sectors_written++;
 
   return _callback_wrapper (obj, false);
@@ -921,10 +931,21 @@ _write_m2_image_sector (VcdObj *obj, const void *data, uint32_t extent,
 static int
 _write_m2_raw_image_sector (VcdObj *obj, const void *data, uint32_t extent)
 {
+  char buf[CDDA_SIZE] = { 0, };
+
   assert (extent == obj->sectors_written);
 
-  write_mode2_raw_sector (obj->bin_file, obj->bin_file_2336_flag,
-                          data, extent);
+  _vcd_make_raw_mode2(buf, data, extent);
+
+  vcd_data_sink_seek(obj->bin_file, 
+                     extent * (obj->bin_file_2336_flag
+                               ? M2RAW_SIZE : CDDA_SIZE));
+
+  if(obj->bin_file_2336_flag) 
+    vcd_data_sink_write(obj->bin_file, buf+12, M2RAW_SIZE, 1);
+  else
+    vcd_data_sink_write(obj->bin_file, buf, CDDA_SIZE, 1);
+
   obj->sectors_written++;
 
   return _callback_wrapper (obj, false);
@@ -960,7 +981,7 @@ _write_source_mode2_form1 (VcdObj *obj, VcdDataSource *source, uint32_t extent)
 
   size = vcd_data_source_stat (source);
 
-  sectors = _len2blocks (size, M2F1_SIZE);
+  sectors = _vcd_len2blocks (size, M2F1_SIZE);
 
   vcd_data_source_seek (source, 0); 
 

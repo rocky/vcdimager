@@ -30,16 +30,16 @@
 #define MIN(a, b)  (((a) < (b)) ? (a) : (b))
 
 unsigned
-_len2blocks (unsigned len, int blocksize);
+_vcd_len2blocks (unsigned len, int blocksize);
 
 size_t
-_strlenv(char **str_array);
+_vcd_strlenv(char **str_array);
 
 char **
-_strsplit(const char str[], char delim);
+_vcd_strsplit(const char str[], char delim);
 
 void
-_strfreev(char **strv);
+_vcd_strfreev(char **strv);
 
 void *
 _vcd_malloc (size_t size);

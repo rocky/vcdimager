@@ -35,7 +35,9 @@ rm -rf "$RPM_BUILD_ROOT"
 /sbin/install-info          --info-dir=%{_infodir} %{_infodir}/vcdimager.info*
 
 %preun
+if [ $1 = 0 ] ;then
 /sbin/install-info --delete --info-dir=%{_infodir} %{_infodir}/vcdimager.info*
+fi
 
 %install
 rm -rf "$RPM_BUILD_ROOT"
@@ -53,6 +55,9 @@ rm -rf "$RPM_BUILD_ROOT"
 %{_mandir}/man1/*
 
 %changelog
+* Thu Jan  4 2001 Herbert Valerio Riedel <hvr@gnu.org>
+- fixed removal of info pages on updating packages
+
 * Sat Dec 23 2000 Herbert Valerio Riedel <hvr@gnu.org>
 - added vcdrip
 - removed glib dependancy

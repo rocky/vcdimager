@@ -2,6 +2,12 @@ $Id$
 
 see ChangeLog for more information
 
+version 0.5.9alpha3
+===================
+2001-..-..
+
+* ...
+
 version 0.5.9alpha2
 ===================
 2001-01-03
@@ -15,6 +21,7 @@ version 0.5.9alpha1
 ===================
 2000-12-23
 
+* 2336-byte-sector image support
 * improved cli frontend (progress visualization, short options)
 * experimental SVCD support
 * improved VCD 2.0 and VCD 1.1 support

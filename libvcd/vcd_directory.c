@@ -355,9 +355,9 @@ _vcd_directory_mkdir (VcdDirectory *dir, const char pathname[])
   assert(pathname != NULL);
   assert(dir->root != NULL);
 
-  splitpath = _strsplit(pathname, '/');
+  splitpath = _vcd_strsplit(pathname, '/');
 
-  level = _strlenv(splitpath);
+  level = _vcd_strlenv(splitpath);
 
   for(n = 0; n < level-1; n++) 
     if(!(pdir = lookup_child(pdir, splitpath[n]))) {
@@ -384,7 +384,7 @@ _vcd_directory_mkdir (VcdDirectory *dir, const char pathname[])
     /* .. */
   }
 
-  _strfreev (splitpath);
+  _vcd_strfreev (splitpath);
 
   return 0;
 }
@@ -401,9 +401,9 @@ _vcd_directory_mkfile (VcdDirectory *dir, const char pathname[],
   assert (pathname != NULL);
   assert (dir->root != NULL);
 
-  splitpath = _strsplit (pathname, '/');
+  splitpath = _vcd_strsplit (pathname, '/');
 
-  level = _strlenv (splitpath);
+  level = _vcd_strlenv (splitpath);
 
   for (n = 0; n < level-1; n++) 
     if (!(pdir = lookup_child (pdir, splitpath[n]))) 
@@ -433,7 +433,7 @@ _vcd_directory_mkfile (VcdDirectory *dir, const char pathname[],
     /* .. */
   }
 
-  _strfreev (splitpath);
+  _vcd_strfreev (splitpath);
 
   return 0;
 }

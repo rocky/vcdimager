@@ -33,8 +33,6 @@ libvcd_a_SOURCES = \
 	vcd_stream.h \
 	vcd_stream_stdio.c \
 	vcd_stream_stdio.h \
-	vcd_transfer.c \
-	vcd_transfer.h \
 	vcd_util.c \
 	vcd_util.h \
 	vcd_types.h 

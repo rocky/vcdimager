@@ -1,3 +1,11 @@
+2001-01-04  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_cd_sector.c: enforced _vcd prefix
+
+	* libvcd/vcd_transfer.c: removed module, merged with vcd.c
+
+	* libvcd/vcd_util.c: enforced _vcd prefix
+
 2001-01-03  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* configure.in: bumped version up to 0.5.9alpha2
