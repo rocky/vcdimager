@@ -26,6 +26,7 @@
 #include <popt.h>
 #include <errno.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #ifdef __linux__
 #warning expect missing prototype warnings from swab.h
@@ -43,6 +44,122 @@
 static const char DELIM[] = \
 "----------------------------------------" \
 "---------------------------------------\n";
+
+static int
+(*gl_read_mode2_sector) (FILE *fd, void *buf, uint32_t lba, bool form2);
+
+static uint32_t 
+(*gl_get_image_size) (FILE *fd);
+
+/* image file */
+
+/* static bool _read_mode2_sector_file_2336_flag = false; */
+
+static int
+_read_mode2_sector_file (FILE *fd, void *data, uint32_t lba, bool form2)
+{
+  char buf[CDDA_SIZE] = { 0, };
+
+  assert (fd != NULL);
+
+  if (fseek (fd, lba * CDDA_SIZE, SEEK_SET))
+    vcd_error ("fseek(): %s", strerror (errno));
+
+  fread (buf, CDDA_SIZE, 1, fd);
+
+  if (ferror (fd))
+    vcd_error ("fwrite(): %s", strerror (errno));
+
+  if (feof (fd))
+    vcd_error ("fread(): unexpected EOF");
+
+  if (form2)
+    memcpy (data, buf + 12 + 4, M2RAW_SIZE);
+  else
+    memcpy (data, buf + 12 + 4 + 8, ISO_BLOCKSIZE);
+
+  return 0;
+}
+
+static uint32_t 
+_get_image_size_file (FILE *fd)
+{
+  struct stat statbuf;
+  uint32_t size;
+
+  if (fstat (fileno (fd), &statbuf))
+    {
+      perror ("fstat()");
+      exit (EXIT_FAILURE);
+    }
+
+  size = statbuf.st_size;
+
+  if (size % CDDA_SIZE)
+    {
+      fprintf (stderr, "file not multiple of blocksize\n");
+      exit (EXIT_FAILURE);
+    }
+
+  size /= CDDA_SIZE;
+
+  return size;
+}
+
+/* device */
+
+static int
+_read_mode2_sector_device (FILE *fd, void *data, uint32_t lba, bool form2)
+{
+  assert (fd != NULL);
+
+  if (form2)
+    {
+      char buf[M2RAW_SIZE] = { 0, };
+      struct cdrom_msf *msf = (struct cdrom_msf *) &buf;
+
+      msf->cdmsf_min0 = lba / (60 * 75);
+      msf->cdmsf_sec0 = ((lba / 75) % 60 + 2);
+      msf->cdmsf_frame0 = lba % 75;
+
+      if (!msf->cdmsf_frame0)
+        fprintf (stdout, "debug: %2.2d:%2.2d:%2.2d\n",
+                 msf->cdmsf_min0, msf->cdmsf_sec0, msf->cdmsf_frame0);
+
+      if (ioctl (fileno (fd), CDROMREADMODE2, &buf) == -1)
+        {
+          perror ("ioctl()");
+          exit (EXIT_FAILURE);
+        }
+    }
+  else
+    {
+      fseek (fd, lba * ISO_BLOCKSIZE, SEEK_SET);
+      fread (data, ISO_BLOCKSIZE, 1, fd);
+    }
+
+  return 0;
+}
+
+static uint32_t 
+_get_image_size_device (FILE *fd)
+{
+  struct cdrom_tocentry tocent;
+  uint32_t size;
+
+  tocent.cdte_track = CDROM_LEADOUT;
+  tocent.cdte_format = CDROM_LBA;
+  if (ioctl (fileno (fd), CDROMREADTOCENTRY, &tocent) == -1)
+    {
+      perror ("ioctl(CDROMREADTOCENTRY)");
+      exit (EXIT_FAILURE);
+    }
+  size = tocent.cdte_addr.lba;
+
+  return size;
+}
+
+/******************************************************************************/
 
 static uint32_t
 _get_psd_size (const void *info_p)
@@ -161,14 +278,46 @@ dump_info_vcd (const void *data)
   gl_vcd_type = VCD_TYPE_INVALID;
 
   if (!strncmp (info.ID, INFO_ID_VCD, sizeof (info.ID)))
-    gl_vcd_type = VCD_TYPE_VCD2;
+    switch (info.version)
+      {
+      case INFO_VERSION_VCD2:
+        if (info.sys_prof_tag != INFO_SPTAG_VCD2)
+          vcd_warn ("unexpected system profile tag encountered");
+        gl_vcd_type = VCD_TYPE_VCD2;
+        break;
+
+      case INFO_VERSION_VCD11:
+        if (info.sys_prof_tag != INFO_SPTAG_VCD11)
+          vcd_warn ("unexpected system profile tag encountered");
+        gl_vcd_type = VCD_TYPE_VCD11;
+        break;
+
+      default:
+        vcd_warn ("unexpected vcd version encountered -- assuming vcd 2.0");
+        break;
+      }
   else if (!strncmp (info.ID, INFO_ID_SVCD, sizeof (info.ID)))
-    gl_vcd_type = VCD_TYPE_SVCD;
+    switch (info.version) 
+      {
+      case INFO_VERSION_SVCD:
+        if (info.sys_prof_tag != INFO_SPTAG_VCD2)
+          vcd_warn ("unexpected system profile tag value -- assuming svcd");
+        gl_vcd_type = VCD_TYPE_SVCD;
+        break;
+        
+      default:
+        vcd_warn ("unexpected svcd version...");
+        gl_vcd_type = VCD_TYPE_SVCD;
+        break;
+      }
 
   switch (gl_vcd_type)
     {
+    case VCD_TYPE_VCD11:
+      fprintf (stdout, "VCD 1.1 detected\n");
+      break;
     case VCD_TYPE_VCD2:
-      fprintf (stdout, "VCD detected\n");
+      fprintf (stdout, "VCD 2.0 detected\n");
       break;
     case VCD_TYPE_SVCD:
       fprintf (stdout, "SVCD detected\n");
@@ -260,7 +409,7 @@ dump_all (const void *info_p, const void *entries_p,
   dump_info_vcd (info_p);
   fprintf (stdout, DELIM);
   dump_entries_vcd (entries_p);
-  if (lot_p)
+  if (lot_p && psd_p)
     {
       fprintf (stdout, DELIM);
       dump_lot_and_psd_vcd (lot_p, psd_p, _get_psd_size (info_p));
@@ -269,108 +418,12 @@ dump_all (const void *info_p, const void *entries_p,
 }
 
 static void
-dump_device (const char device_fname[])
-{
-  FILE *fd = fopen (device_fname, "rb");
-  char info_buf[ISO_BLOCKSIZE] = { 0, };
-  char entries_buf[ISO_BLOCKSIZE] = { 0, };
-  char *lot_buf = NULL, *psd_buf = NULL;
-  uint32_t psd_size;
-  uint32_t size = -1;
-
-  if (!fd)
-    {
-      perror ("fopen()");
-      exit (EXIT_FAILURE);
-    }
-
-  {
-    struct cdrom_tocentry tocent;
-
-    tocent.cdte_track = CDROM_LEADOUT;
-    tocent.cdte_format = CDROM_LBA;
-    if (ioctl (fileno (fd), CDROMREADTOCENTRY, &tocent) == -1)
-      {
-        perror ("ioctl(CDROMREADTOCENTRY)");
-        exit (EXIT_FAILURE);
-      }
-    size = tocent.cdte_addr.lba;
-  }
-
-  fprintf (stdout, DELIM);
-
-  fprintf (stdout, "Source: `%s'\n", device_fname);
-  fprintf (stdout, "Image size: %d sectors\n", size);
-
-  fseek (fd, INFO_VCD_SECTOR * ISO_BLOCKSIZE, SEEK_SET);
-  fread (info_buf, ISO_BLOCKSIZE, 1, fd);
-  psd_size = _get_psd_size (info_buf);
-
-  fseek (fd, ENTRIES_VCD_SECTOR * ISO_BLOCKSIZE, SEEK_SET);
-  fread (entries_buf, ISO_BLOCKSIZE, 1, fd);
-  
-  if (psd_size)
-    {
-      int n;
-
-      lot_buf = malloc (ISO_BLOCKSIZE * 32);
-      psd_buf =
-        malloc (ISO_BLOCKSIZE * (((psd_size - 1) / ISO_BLOCKSIZE) + 1));
-      
-      for (n = LOT_VCD_SECTOR; n < PSD_VCD_SECTOR; n++)
-        {
-          fseek (fd, n * ISO_BLOCKSIZE, SEEK_SET);
-          fread (lot_buf + (ISO_BLOCKSIZE * (n - LOT_VCD_SECTOR)),
-                 ISO_BLOCKSIZE, 1, fd);
-        }
-
-      for (n = PSD_VCD_SECTOR;
-           n < PSD_VCD_SECTOR + ((psd_size - 1) / ISO_BLOCKSIZE) + 1; n++)
-        {
-          fseek (fd, n * ISO_BLOCKSIZE, SEEK_SET);
-          fread (psd_buf + (ISO_BLOCKSIZE * (n - PSD_VCD_SECTOR)),
-                 ISO_BLOCKSIZE, 1, fd);
-        }
-    }
-
-  dump_all (info_buf, entries_buf, lot_buf, psd_buf);
-
-  free (lot_buf);
-  free (psd_buf);
-
-  fclose (fd);
-}
-
-static void
-read_raw_mode2_sector (FILE *fd, void *data, uint32_t extent)
-{
-  char buf[CDDA_SIZE] = { 0, };
-
-  assert (fd != NULL);
-
-  if (fseek (fd, extent * CDDA_SIZE, SEEK_SET))
-    vcd_error ("fseek(): %s", strerror (errno));
-
-  fread (buf, CDDA_SIZE, 1, fd);
-
-  if (ferror (fd))
-    vcd_error ("fwrite(): %s", strerror (errno));
-
-  if (feof (fd))
-    vcd_error ("fread(): unexpected EOF");
-
-  memcpy (data, buf + 16, M2RAW_SIZE);
-}
-
-static void
-dump_file (const char image_fname[])
+dump (const char image_fname[])
 {
   FILE *fd = fopen (image_fname, "rb");
-  char buf[M2RAW_SIZE] = { 0, };
   char info_buf[ISO_BLOCKSIZE] = { 0, };
   char entries_buf[ISO_BLOCKSIZE] = { 0, };
   char *lot_buf = NULL, *psd_buf = NULL;
-  struct stat statbuf;
   uint32_t size, psd_size;
 
   if (!fd)
@@ -379,29 +432,14 @@ dump_file (const char image_fname[])
       exit (EXIT_FAILURE);
     }
 
-  if (fstat (fileno (fd), &statbuf))
-    {
-      perror ("fstat()");
-      exit (EXIT_FAILURE);
-    }
+  size = gl_get_image_size (fd);
 
-  size = statbuf.st_size;
+  gl_read_mode2_sector (fd, info_buf, INFO_VCD_SECTOR, false);
 
-  if (size % CDDA_SIZE)
-    {
-      fprintf (stderr, "file not multiple of blocksize\n");
-      exit (EXIT_FAILURE);
-    }
-
-  size /= CDDA_SIZE;
-
-  read_raw_mode2_sector (fd, buf, INFO_VCD_SECTOR);
-  memcpy (info_buf, buf + 8, ISO_BLOCKSIZE);
   psd_size = _get_psd_size (info_buf);
 
-  read_raw_mode2_sector (fd, buf, ENTRIES_VCD_SECTOR);
-  memcpy (entries_buf, buf + 8, ISO_BLOCKSIZE);
-
+  gl_read_mode2_sector (fd, entries_buf, ENTRIES_VCD_SECTOR, false);
+  
   if (psd_size)
     {
       int n;
@@ -411,17 +449,17 @@ dump_file (const char image_fname[])
 
       for (n = LOT_VCD_SECTOR; n < PSD_VCD_SECTOR; n++)
         {
-          read_raw_mode2_sector (fd, buf, n);
-          memcpy (lot_buf + (ISO_BLOCKSIZE * (n - LOT_VCD_SECTOR)), buf + 8,
-                  ISO_BLOCKSIZE);
+          char *p = lot_buf + (ISO_BLOCKSIZE * (n - LOT_VCD_SECTOR));
+
+          gl_read_mode2_sector (fd, p, n, false);
         }
 
       for (n = PSD_VCD_SECTOR;
            n < PSD_VCD_SECTOR + ((psd_size - 1) / ISO_BLOCKSIZE) + 1; n++)
         {
-          read_raw_mode2_sector (fd, buf, n);
-          memcpy (psd_buf + (ISO_BLOCKSIZE * (n - PSD_VCD_SECTOR)), buf + 8,
-                  ISO_BLOCKSIZE);
+          char *p = psd_buf + (ISO_BLOCKSIZE * (n - PSD_VCD_SECTOR));
+
+          gl_read_mode2_sector (fd, p, n, false);
         }
     }
 
@@ -439,13 +477,7 @@ dump_file (const char image_fname[])
 }
 
 static void
-rip_file (const char device_fname[])
-{
-  fprintf (stderr, "ripping file image not supported yet\n");
-}
-
-static void
-rip_device (const char device_fname[])
+rip (const char device_fname[])
 {
   FILE *fd = fopen (device_fname, "rb");
   EntriesVcd entries;
@@ -458,38 +490,23 @@ rip_device (const char device_fname[])
       exit (EXIT_FAILURE);
     }
 
-  {
-    struct cdrom_tocentry tocent;
-
-    tocent.cdte_track = CDROM_LEADOUT;
-    tocent.cdte_format = CDROM_LBA;
-    if (ioctl (fileno (fd), CDROMREADTOCENTRY, &tocent) == -1)
-      {
-        perror ("ioctl(CDROMREADTOCENTRY)");
-        exit (EXIT_FAILURE);
-      }
-    size = tocent.cdte_addr.lba;
-  }
+  size = gl_get_image_size (fd);
 
   memset (&entries, 0, sizeof (EntriesVcd));
-
   assert (sizeof (EntriesVcd) == ISO_BLOCKSIZE);
 
-  fseek (fd, ENTRIES_VCD_SECTOR * ISO_BLOCKSIZE, SEEK_SET);
-  fread (&entries, ISO_BLOCKSIZE, 1, fd);
+  gl_read_mode2_sector (fd, &entries, ENTRIES_VCD_SECTOR, false);
 
   for (i = 0; i < UINT16_FROM_BE (entries.tracks); i++)
     {
       uint32_t startlba = msf_to_lba (&(entries.entry[i].msf)) - 150;
-
       uint32_t endlba = (i + 1 == UINT16_FROM_BE (entries.tracks))
         ? size : (msf_to_lba (&(entries.entry[i + 1].msf)) - 150);
-
-      uint32_t pos = -1;
-
+      uint32_t pos;
       FILE *outfd = NULL;
-
       char fname[80] = { 0, };
+
+      bool in_data = false;
 
       snprintf (fname, sizeof (fname), "track_%2.2d.mpg", i);
 
@@ -498,12 +515,6 @@ rip_device (const char device_fname[])
       if (!(outfd = fopen (fname, "wb")))
         {
           perror ("fopen()");
-          exit (EXIT_FAILURE);
-        }
-
-      if (ioctl (fileno (fd), CDROM_SELECT_SPEED, 8) == -1)
-        {
-          perror ("ioctl()");
           exit (EXIT_FAILURE);
         }
 
@@ -517,31 +528,36 @@ rip_device (const char device_fname[])
           }
           buf;
 
-          struct cdrom_msf *msf = (struct cdrom_msf *) &buf;
-
           memset (&buf, 0, sizeof (buf));
 
-          msf->cdmsf_min0 = pos / (60 * 75);
-          msf->cdmsf_sec0 = ((pos / 75) % 60 + 2);
-          msf->cdmsf_frame0 = pos % 75;
+          gl_read_mode2_sector (fd, &buf, pos, true);
 
-          if (!msf->cdmsf_frame0)
-            fprintf (stdout, "debug: %2.2d:%2.2d:%2.2d\n",
-                     msf->cdmsf_min0, msf->cdmsf_sec0, msf->cdmsf_frame0);
-
-          if (ioctl (fileno (fd), CDROMREADMODE2, &buf) == -1)
+          if (buf.subheader[1])
             {
-              perror ("ioctl()");
-              exit (EXIT_FAILURE);
+              if (!in_data)
+                {
+                  fprintf (stdout, " stream leadin at %d\n", pos);
+                  in_data = true;
+                }
             }
-
-          if (!buf.subheader[1])
+          else
             {
-              fprintf (stdout, "skipping...\n");
+              if (in_data)
+                {
+                  fprintf (stdout, " stream leadout at %d\n", pos);
+                  in_data = false;
+                }
+              
               continue;
             }
 
           fwrite (buf.data, 2324, 1, outfd);
+
+          if (ferror (outfd))
+            {
+              perror ("fwrite()");
+              exit (EXIT_FAILURE);
+            }
         }
 
       fclose (outfd);
@@ -657,41 +673,30 @@ main (int argc, const char *argv[])
       exit (EXIT_FAILURE);
     }
 
+  switch (gl_source_type)
+    {
+    case SOURCE_DIRECTORY:
+      fprintf (stderr, "source type not implemented yet!\n");
+      exit (EXIT_FAILURE);
+      break;
+    case SOURCE_DEVICE:
+      gl_get_image_size = _get_image_size_device;
+      gl_read_mode2_sector = _read_mode2_sector_device;
+      break;
+    case SOURCE_FILE:
+      gl_get_image_size = _get_image_size_file;
+      gl_read_mode2_sector = _read_mode2_sector_file;
+      break;
+    default:
+      fprintf (stderr, "no source given -- can't do anything...\n");
+      exit (EXIT_FAILURE);
+    }
+
   if (gl_operation & OP_DUMP)
-    switch (gl_source_type)
-      {
-      case SOURCE_DIRECTORY:
-        fprintf (stderr, "source type not implemented yet!\n");
-        exit (EXIT_FAILURE);
-        break;
-      case SOURCE_DEVICE:
-        dump_device (gl_source_name);
-        break;
-      case SOURCE_FILE:
-        dump_file (gl_source_name);
-        break;
-      default:
-        fprintf (stderr, "no source given -- can't do anything...\n");
-        exit (EXIT_FAILURE);
-      }
+    dump (gl_source_name);
 
   if (gl_operation & OP_RIP)
-    switch (gl_source_type)
-      {
-      case SOURCE_DIRECTORY:
-        fprintf (stderr, "source type not implemented yet!\n");
-        exit (EXIT_FAILURE);
-        break;
-      case SOURCE_DEVICE:
-        rip_device (gl_source_name);
-        break;
-      case SOURCE_FILE:
-        rip_file (gl_source_name);
-        break;
-      default:
-        fprintf (stderr, "no source given -- can't do anything...\n");
-        exit (EXIT_FAILURE);
-      }
+    rip (gl_source_name);
 
   return EXIT_SUCCESS;
 }

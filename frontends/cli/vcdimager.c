@@ -38,7 +38,7 @@
 #define DEFAULT_CUE_FILE      "videocd.cue"
 #define DEFAULT_BIN_FILE      "videocd.bin"
 #define DEFAULT_VOLUME_LABEL  "VideoCD"
-#define DEFAULT_TYPE          "vcd"
+#define DEFAULT_TYPE          "vcd2"
 
 /* global stuff kept as a singleton makes for less typing effort :-) 
  */
@@ -161,7 +161,7 @@ main (int argc, const char *argv[])
     struct poptOption optionsTable[] = 
       {
         {"type", 't', POPT_ARG_STRING, &gl.type, 0,
-         "select VideoCD type ('vcd' or 'svcd') (default: '" DEFAULT_TYPE "')", 
+         "select VideoCD type ('vcd11', 'vcd2' or 'svcd') (default: '" DEFAULT_TYPE "')", 
          "TYPE"},
         
         {"volume-label", 'l', POPT_ARG_STRING, &gl.volume_label, 0,
@@ -266,7 +266,8 @@ main (int argc, const char *argv[])
         vcd_type_t id;
       } type_str[] = 
         {
-          { "vcd", VCD_TYPE_VCD2 },
+          { "vcd11", VCD_TYPE_VCD11 },
+          { "vcd2", VCD_TYPE_VCD2 },
           { "svcd", VCD_TYPE_SVCD },
           { NULL, }
         };

@@ -207,7 +207,7 @@ vcd_obj_new (vcd_type_t vcd_type)
 
   switch (vcd_type) 
     {
-    /* case VCD_TYPE_VCD11: */
+    case VCD_TYPE_VCD11:
     case VCD_TYPE_VCD2:
     case VCD_TYPE_SVCD:
       break;
@@ -877,8 +877,9 @@ _write_vcd_iso_track (VcdObj *obj)
 
   set_info_vcd (obj, _dict_get_bykey (obj, "info")->buf);
   set_entries_vcd (obj, _dict_get_bykey (obj, "entries")->buf);
-
-  if (obj->type == VCD_TYPE_VCD2) 
+  
+  if (obj->type == VCD_TYPE_VCD2 
+      || obj->type == VCD_TYPE_SVCD) 
     {
       set_lot_vcd (obj, _dict_get_bykey (obj, "lot")->buf);
       set_psd_vcd (obj, _dict_get_bykey (obj, "psd")->buf);

@@ -30,7 +30,7 @@
 #include "vcd_util.h"
 
 void
-set_entries_vcd(VcdObj *obj, void *buf)
+set_entries_vcd (VcdObj *obj, void *buf)
 {
   VcdListNode *node = NULL;
   int n = 0;
@@ -45,6 +45,11 @@ set_entries_vcd(VcdObj *obj, void *buf)
 
   switch (obj->type)
     {
+    case VCD_TYPE_VCD11:
+      strncpy(entries_vcd.ID, ENTRIES_ID_VCD, 8);
+      entries_vcd.version = ENTRIES_VERSION_VCD11;
+      break;
+
     case VCD_TYPE_VCD2:
       strncpy(entries_vcd.ID, ENTRIES_ID_VCD, 8);
       entries_vcd.version = ENTRIES_VERSION_VCD2;
@@ -56,7 +61,7 @@ set_entries_vcd(VcdObj *obj, void *buf)
       break;
       
     default:
-      vcd_error("VCD type not supported");
+      assert (0);
       break;
     }
 
@@ -81,7 +86,7 @@ set_entries_vcd(VcdObj *obj, void *buf)
 
 
 static void
-_set_bit(uint8_t bitset[], unsigned bitnum)
+_set_bit (uint8_t bitset[], unsigned bitnum)
 {
   unsigned _byte = bitnum / 8;
   unsigned _bit  = bitnum % 8;
@@ -90,7 +95,7 @@ _set_bit(uint8_t bitset[], unsigned bitnum)
 }
 
 uint32_t 
-get_psd_size(VcdObj *obj)
+get_psd_size (VcdObj *obj)
 {
   uint32_t psd_size;
   
@@ -106,7 +111,8 @@ set_psd_vcd (VcdObj *obj, void *buf)
   int n;
   char psd_buf[ISO_BLOCKSIZE] = { 0, };
 
-  /* memset (psd_buf, 0, sizeof (obj->psd_vcd_buf)); */
+  assert (obj->type == VCD_TYPE_SVCD
+          || obj->type == VCD_TYPE_VCD2);
 
   for (n = 0; n < _vcd_list_length (obj->mpeg_track_list); n++)
     {
@@ -146,6 +152,9 @@ set_lot_vcd(VcdObj *obj, void *buf)
   LotVcd *lot_vcd = NULL;
   int n;
 
+  assert (obj->type == VCD_TYPE_SVCD
+          || obj->type == VCD_TYPE_VCD2);
+
   lot_vcd = _vcd_malloc (sizeof (LotVcd));
   memset(lot_vcd, 0xff, sizeof(LotVcd));
 
@@ -164,7 +173,7 @@ set_info_vcd(VcdObj *obj, void *buf)
   InfoVcd info_vcd;
   VcdListNode *node = NULL;
   int n = 0;
-  
+
   assert(sizeof(InfoVcd) == 2048);
   assert(_vcd_list_length (obj->mpeg_track_list) <= 98);
   
@@ -172,6 +181,12 @@ set_info_vcd(VcdObj *obj, void *buf)
 
   switch (obj->type)
     {
+    case VCD_TYPE_VCD11:
+      strncpy(info_vcd.ID, INFO_ID_VCD, sizeof(info_vcd.ID));
+      info_vcd.version = INFO_VERSION_VCD11;
+      info_vcd.sys_prof_tag = INFO_SPTAG_VCD11;
+      break;
+
     case VCD_TYPE_VCD2:
       strncpy(info_vcd.ID, INFO_ID_VCD, sizeof(info_vcd.ID));
       info_vcd.version = INFO_VERSION_VCD2;
@@ -185,7 +200,7 @@ set_info_vcd(VcdObj *obj, void *buf)
       break;
       
     default:
-      vcd_error("VCD type not supported");
+      assert (0);
       break;
     }
   
@@ -207,13 +222,25 @@ set_info_vcd(VcdObj *obj, void *buf)
         _set_bit(info_vcd.pal_flags, n);
     }
 
-  info_vcd.psd_size = UINT32_TO_BE(get_psd_size (obj));
+  switch (obj->type)
+    {
+    case VCD_TYPE_VCD2:
+    case VCD_TYPE_SVCD:
+      info_vcd.psd_size = UINT32_TO_BE(get_psd_size (obj));
+      info_vcd.offset_mult = INFO_OFFSET_MULT;
+      info_vcd.last_psd_ofs = UINT16_TO_BE((_vcd_list_length (obj->mpeg_track_list))<<1);
+      
+      /* info_vcd.item_count = UINT16_TO_BE(0x0000); no items in /SEGMENT supported yet */
+      break;
 
-  info_vcd.offset_mult = INFO_OFFSET_MULT;
+    case VCD_TYPE_VCD11:
+      /* keep 0ed */
+      break;
 
-  info_vcd.last_psd_ofs = UINT16_TO_BE((_vcd_list_length (obj->mpeg_track_list))<<1);
-
-  info_vcd.item_count = UINT16_TO_BE(0x0000); /* no items in /SEGMENT supported yet */
+    default:
+      assert (0);
+      break;
+    }
 
   memcpy(buf, &info_vcd, sizeof(info_vcd));
 }
@@ -278,6 +305,7 @@ set_search_dat (VcdObj *obj, void *buf)
 {
   SearchDat search_dat;
 
+  assert (obj->type == VCD_TYPE_SVCD);
   /* assert (sizeof (SearchDat) == ?) */
 
   memset (&search_dat, 0, sizeof (search_dat));

@@ -1,3 +1,17 @@
+2000-12-23  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd.c (_write_vcd_iso_track): fixed set_lot/psd for svcd
+
+2000-12-22  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* frontends/cli/vcdrip.c: complete rework
+
+2000-12-20  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_files.c: added vcd11 support
+
+	* frontends/cli/vcdimager.c (main): added vcd11 --type arg
+
 2000-12-19  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* make use of C99's <stdbool.h> defines
