@@ -405,15 +405,20 @@ Sub-options are: ``count'', ``data'', ``id'', ``prof'', or ``vers''.
 
 @ftable @code
 @item count
-The number of entries. A number.
+The number of entries. A number. See line 5 of the example in
+@ref{Entries,,Entries Section}.
 @item data
-A complete list of the entries.
+A complete list of the entries. See lines 6--9. of the example in
+@ref{Entries,,Entries Section}.
 @item id
-An 8 characters name, probably ``ENTRYVCD''
+An 8 characters name, probably ``ENTRYVCD''. See line 2 of the example
+in @ref{Entries,,Entries Section}.
 @item prof
-System profile tag.
+System profile tag. See line 4 of the example in @ref{Entries,,Entries
+Section}.
 @item vers
-A 2-hex digit number.
+A 2-hex digit version number. See line 3 of the example in
+@ref{Entries,,Entries Section}.
 @end ftable
 
 @item --show-filesystem
@@ -444,47 +449,65 @@ prof, psds, res, seg, segn, segs, spec, start, st2, vers, or vol.
 @item album
 A description of the album; it could be an album id. The XML tag for
 this is <album-id>. It is a fixed-length blank-padded string of 16
-characters.
+characters. See line 5 of the example in @ref{Info,,Info Section}.
 @item cc
-user data cc.
+user data cc. See line 14 of the example in @ref{Info,,Info Section}.
 @item count
 The number of disks in the volume, an integer. The XML tag for this is
-<volume-count>.
+<volume-count>. See line 6 of the example in @ref{Info,,Info Section}.
 @item id
-A string representing the VCD format; e.g. ``SUPERVCD'' or
-``VIDEO_CD''. Maxiumum of 8 characters.
+A string representing the VCD format. ``VIDEO_CD'' for VCD 1.0, VCD 1.1,
+or VCD 2.0, ``SUPERVCD'' for SVCD or HQ-VCD. A Maxiumum of 8
+characters. See line 2 of the example in @ref{Info,,Info Section}.
 @item ofm
-offset multiplier. Value is given is in hexadecimal.
+offset multiplier. Value is given is in hexadecimal. See line 20 of
+the example in @ref{Info,,Info Section}.
 @item lid2
 start lid #2. A boolean value. The XML tag for this is
-<next-volume-use-lid2>.
+<next-volume-use-lid2>. See line 15 of the example in @ref{Info,,Info
+Section}.
 @item lidn
-Maximum LID number.
+Maximum LID number. See line 21 of the example in @ref{Info,,Info
+Section}.
 @item pal
+bitset of 98 PAL(=set)/NTSC flags. See lines 8--9 of the example in
+@ref{Info,,Info Section}.
 @item pbc
 @item prof
-System profile tag. A hexadecimal number 
+System profile tag.  Used to define the set of mandatory parts to be
+applied for compatibility. Tag, 0x00 for "SUPERVCD", 0x01 for
+"HQ-VCD", 0x0@emph{n} for VCD@emph{x}.@emph{n}. A hexidecimal number.
+See line 4 of the example in @ref{Info,,Info Section}.
 @item psds
-PSD size.
-@item res
-Restriction number. The XML tag for this is <restriction>.
+PSD size. See line 18 of the example in @ref{Info,,Info Section}.
+@item res 
+Restriction number, e.g. ``unsuitiable for kids''; 0 is unrestricted,
+1 is restricted category 1, 2 is restricted category 2, 3 is
+restricted category 3. The XML tag for this is <restriction>.
 @item seg
-First segment MSF address. 
+First segment MSF address. See line 19 of the example in
+@ref{Info,,Info Section}.
 @item segn
-Max segment number. A number. 
+Max segment number. See line 22 of the example in @ref{Info,,Info Section}.
 @item segs
-Number of segments. A number.
+The name of file containing segment information. VCD/INFO.VCD or
+SVCD/INFO.SVD. See line 1 of the example in @ref{Info,,Info Section}.
 @item spec
-Special info. A boolean value.
+Special info is encoded into the pictures. A boolean value. See line
+13 of the example in @ref{Info,,Info Section}.
 @item start
 start time offset. Only relevant if SVCD or HQVCD. The XML tag for
-this is <start-time-offset>.
+this is <start-time-offset>. 
 @item st2
 start track #2. A boolean value. The XML tag for this is
-<next-volume-use-sequence2>.
+<next-volume-use-sequence2>. See line 16 of the example in
+@ref{Info,,Info Section}.
 @item vers
+0x01 for SVCD and VCD1.@emph{x}; 0x02 -- VCD2.0. A hexadecimal number.
+See line 3 of the example in @ref{Info,,Info Section}.
 @item vol
-The volume number. The XML tag for this is <volume-number>.
+The volume number. The XML tag for this is <volume-number>. See line 7
+of the example in @ref{Info,,Info Section}.
 @end ftable
 
 @item --show-lot
@@ -504,9 +527,9 @@ section.
 
 @item --show-pvd-all
 @kindex @code{--show-pvd-all}
-List everything in the PVD section. See @ref{PVD,,Primary Volume
-Descriptor (PVD) Section} for information about what is in this
-section.
+List everything in the PVD section. See the listing @ref{PVD,,Primary
+Volume Descriptor (PVD) Section} for an example of this section and
+some additional information.
 
 @item --show-pvd @var{suboption}
 @itemx -P @ovar{sub-option}
@@ -518,27 +541,38 @@ volset, or xa.
 @ftable @code
 @item app
 The application id; a string of at most 128 characters. The XML tag for
-this is <application-id>.
+this is <application-id>. See line 9 of the example in @ref{PVD,,Primary Volume
+Descriptor (PVD) Section}.
 @item id
-Some sort of string ID.
+Some sort of string ID. See line 2 of the example in @ref{PVD,,Primary Volume
+Descriptor (PVD) Section}.
 @item iso
-ISO size in blocks.
+ISO size in blocks. See line 10 of the example in @ref{PVD,,Primary
+Volume Descriptor (PVD) Section}.
 @item prep
 preparer id; a string of at most 128 characters. The XML tag for this
-is <preparer-id>.
+is <preparer-id>. See line 7 of the example in @ref{PVD,,Primary
+Volume Descriptor (PVD) Section}.
 @item pub
-publisher id. The XML tag for this is <publisher-id>.
+publisher id. The XML tag for this is <publisher-id>. See line 7 of
+the example in @ref{PVD,,Primary Volume Descriptor (PVD) Section}.
 @item sys
 The system ID; a string of at most 32 characters. The XML tag for this
-is <system-id>.
+is <system-id>. See line 4 of the example in @ref{PVD,,Primary Volume
+Descriptor (PVD) Section}.
 @item vers
-The version ID. A decimal number.
+The version ID. A decimal number. See line 3 of the example in
+@ref{PVD,,Primary Volume Descriptor (PVD) Section}.
 @item vol
-The volume ID. The XML tag for this is <volume-id>.
+The volume ID. The XML tag for this is <volume-id>. See line 5 of the
+example in @ref{PVD,,Primary Volume Descriptor (PVD) Section}.
 @item volset
-Volumeset id. 
+Volumeset id. See line 5 of the example in @ref{PVD,,Primary Volume
+Descriptor (PVD) Section}.
 @item xa
-A boolean indicating whether the XA marker is present or not.
+A boolean indicating whether the XA marker is present or not. See line
+11 of the example in @ref{PVD,,Primary Volume Descriptor (PVD)
+Section}.
 @end ftable
 
 @item --show-scandata
@@ -587,22 +621,31 @@ These separate the major logical sections of a VCD
 * Tracks::              Tracks 
 @end menu
 
+Note that in example given in these sections, numbers at the beginning
+of a line are line numbers and are not part of the actual output. We
+use these to help refer to parts of the example.
+
 @node PVD
 @section Primary Volume Descriptor (PVD) Section
 @cindex Primary Volume Descriptor (PVD) 
 
+This section which comes first has overall information about the VCD.
+Here is part of sample output from the test PAL SVCD that can be found
+from:
+@url{http://www.vcdimager.org/pub/vcdimager/examples/test_svcd/test_svcd_pal.zip}
+
 @smallexample
-ISO9660 primary volume descriptor
- ID: `CD001'
- version: 1
- system id: `CD-RTOS CD-BRIDGE'
- volume id: `PAL_TEST_SVCD'
- volumeset id: `'
- publisher id: `Herbert Valerio Riedel'
- preparer id: `GNU VCDIMAGER 0.7.10 LINUX-GNU/I386'
- application id: `'
- ISO size: 1426 blocks (logical blocksize: 2048 bytes)
- XA marker present: yes
+ 1. ISO9660 primary volume descriptor
+ 2.  ID: `CD001'
+ 3.  version: 1
+ 4.  system id: `CD-RTOS CD-BRIDGE'
+ 5.  volume id: `PAL_TEST_SVCD'
+ 6.  volumeset id: `'
+ 7.  publisher id: `Herbert Valerio Riedel'
+ 8.  preparer id: `GNU VCDIMAGER 0.7.10 LINUX-GNU/I386'
+ 9.  application id: `'
+10. ISO size: 1426 blocks (logical blocksize: 2048 bytes)
+11. XA marker present: yes
 @end smallexample
 
 @node Filesystem
@@ -705,22 +748,22 @@ entry starts.
 Here is part of sample output from the VCD used above.
 
 @smallexample
-VCD/ENTRIES.VCD
- ID: `ENTRYVCD'
- version: 0x02
- system profile tag: 0x00
- entries: 31
- ENTRY[00]: track# 1 (SEQUENCE[0]), LSN 450 (MSF 00:08:00)
- ENTRY[01]: track# 1 (SEQUENCE[0]), LSN 482 (MSF 00:08:32)
- ENTRY[02]: track# 1 (SEQUENCE[0]), LSN 5888 (MSF 01:20:38)
- ENTRY[03]: track# 1 (SEQUENCE[0]), LSN 8925 (MSF 02:01:00)
+ 1. VCD/ENTRIES.VCD
+ 2. ID: `ENTRYVCD'
+ 3. version: 0x02
+ 4. system profile tag: 0x00
+ 5. entries: 31
+ 6. ENTRY[00]: track# 1 (SEQUENCE[0]), LSN 450 (MSF 00:08:00)
+ 7. ENTRY[01]: track# 1 (SEQUENCE[0]), LSN 482 (MSF 00:08:32)
+ 8. ENTRY[02]: track# 1 (SEQUENCE[0]), LSN 5888 (MSF 01:20:38)
+ 9. ENTRY[03]: track# 1 (SEQUENCE[0]), LSN 8925 (MSF 02:01:00)
  ...
 @end smallexample
 
 In the above example, in the first line corresponds the ``filename''
 in the files section that starts at logical sector number 151. If this
 VCD were in SVCD format that line would probably say
-``SVCD/ENTRIES.SVD.'' As is indicated above I made 31 entries for the
+``SVCD/ENTRIES.SVD.'' As shown In line 5, I made 31 entries for the
 VCD; only the first 4 are shown. Depending on how playback control is
 set up you should be able to randomly access up to 31 different
 playback locations on this VCD. If you use a media player like xine
@@ -728,7 +771,7 @@ and my plugin for it, there is a way jump to the beginning of each of
 these entries.
 
 The ``track #'' and SEQUENCE number are about the same thing, the
-track being one more than the SEQUENCE number. Note the first entry is
+track being one more than the SEQUENCE number. Note on line 6 ENTRY[00] is
 also at logical sector number 450, the same as AVSEQ01.DAT. In other
 words ``Entry 0'' is the start of the movie.
 
@@ -748,36 +791,36 @@ Here is part of sample output from a SVCD. (This is not the same
 example as the VCD used before.)
 
 @smallexample
-SVCD/INFO.SVD
- ID: `SUPERVCD'
- version: 0x01
- system profile tag: 0x00
- album desc: `                '
- volume count: 3
- volume number: 2
- pal flags: 00000000 00000000 00000000 00000000 00000000 00000000
-  (bslbf)   00000000 00000000 00000000 00000000 00000000 00000000 00
- flags:
-  reserved1: no
-  restriction: 0
-  special info: no
-  user data cc: no
-  start lid #2: no
-  start track #2: no
-  reserved2: no
- psd size: 2376
- first segment addr: 00:05:00
- offset multiplier: 0x08
- maximum lid: 15
- maximum segment number: 3
- SEGMENT[1]: audio: no stream, video: NTSC still, continuation no, OGT substream: None
- SEGMENT[2]: audio: no stream, video: NTSC still, continuation no, OGT substream: None
- SEGMENT[3]: audio: no stream, video: NTSC still, continuation no, OGT substream: None
- volume start time[0]: 0 secs
- volume start time[1]: 0 secs
- volume start time[2]: 0 secs
- volume start time[3]: 0 secs
- volume start time[4]: 0 secs
+ 1. SVCD/INFO.SVD
+ 2. ID: `SUPERVCD'
+ 3. version: 0x01
+ 4. system profile tag: 0x00
+ 5. album id: `                '
+ 6. volume count: 3
+ 7. volume number: 2
+ 8. pal flags: 00000000 00000000 00000000 00000000 00000000 00000000
+ 9.  (bslbf)   00000000 00000000 00000000 00000000 00000000 00000000 00
+10. flags:
+11.  reserved1: no
+12.  restriction: 0
+13.  special info: no
+14.  user data cc: no
+15.  start lid #2: no
+16.  start track #2: no
+17.  reserved2: no
+18. psd size: 2376
+19. first segment addr: 00:05:00
+20. offset multiplier: 0x08
+21. maximum lid: 15
+22. maximum segment number: 3
+23. SEGMENT[1]: audio: no stream, video: NTSC still, continuation no, OGT substream: None
+24. SEGMENT[2]: audio: no stream, video: NTSC still, continuation no, OGT substream: None
+25. SEGMENT[3]: audio: no stream, video: NTSC still, continuation no, OGT substream: None
+26. volume start time[0]: 0 secs
+27. volume start time[1]: 0 secs
+28. volume start time[2]: 0 secs
+29. volume start time[3]: 0 secs
+30. volume start time[4]: 0 secs
 @end smallexample
 
 @node LOT
@@ -927,8 +970,10 @@ There is one track on this SVCD with two audio streams (channel 0 is
 in German and stream 1 is in English but the language information
 can't be determined from information on the dist). The video stream is
 in PAL format and there is a subtitle as OGT (Overlay Graphics
-Text). The subtitle's a private stream id in the MPEG file ahs
-hexidecimal number 0xde.
+Text). 
+
+The VCD3.0 interpretation is a bit of a guess. The subtitle's a
+private stream id in the MPEG file has hexidecimal number 0xde.
 
 The bottom part of the display shows track info obtained in a
 lower-level way. The information above CDROM TRACKS comes from
