@@ -34,5 +34,4 @@ TESTS = \
 	check_vcd20.sh \
 	check_svcd1.sh
 
-clean-generic:
-	-rm -f *.bin *.cue core.* *.dump
+MOSTLYCLEANFILES = *.bin *.cue core.* *.dump
