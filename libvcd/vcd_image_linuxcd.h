@@ -24,6 +24,6 @@
 #include <libvcd/vcd_image.h>
 
 VcdImageSource *
-vcd_image_source_new_linuxcd (const char device_filename[]);
+vcd_image_source_new_linuxcd (void);
 
 #endif /* __VCD_IMAGE_LINUXCD_H__ */

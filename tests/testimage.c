@@ -54,10 +54,10 @@ main (int argc, const char *argv[])
       VcdDataSource *src = vcd_data_source_new_stdio (argv[2]);
       vcd_assert (src != NULL);
 
-      img = vcd_image_source_new_bincue (src, NULL, false); 
+      img = vcd_image_source_new_bincue () /* src, NULL, false) */; 
     }
   else if (!strcmp ("linuxcd", argv[1]))
-    img = vcd_image_source_new_linuxcd (argv[2]);
+    img = vcd_image_source_new_linuxcd () /* argv[2]) */;
   else 
     vcd_error ("unrecognized img type");
 

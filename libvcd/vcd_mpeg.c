@@ -82,10 +82,10 @@ const static double frame_rates[16] =  {
 
 #ifdef DEBUG
 # define MARKER(buf, offset) \
- vcd_assert (vcd_bitvec_read_bits (buf, offset, 1) == 1)
+ vcd_assert (vcd_bitvec_read_bit (buf, offset) == 1)
 #else
 # define MARKER(buf, offset) \
- { if (vcd_bitvec_read_bits (buf, offset, 1) != 1) vcd_debug ("mpeg: some marker is not set..."); }
+ { if (vcd_bitvec_read_bit (buf, offset) != 1) vcd_debug ("mpeg: some marker is not set..."); }
 #endif
 
 static inline bool
@@ -196,9 +196,8 @@ _parse_sequence_header (uint8_t streamid, const void *buf,
   frate = vcd_bitvec_read_bits (data, &offset, 4);
 
   brate = vcd_bitvec_read_bits (data, &offset, 18);
-              
-  /* marker bit const == 1 */
-  (void) vcd_bitvec_read_bits (data, &offset, 1);
+
+  MARKER (data, &offset);
 
   bufsize = vcd_bitvec_read_bits (data, &offset, 10);
 
@@ -218,7 +217,7 @@ _parse_sequence_header (uint8_t streamid, const void *buf,
   state->stream.shdr[vid_idx].vsize = vsize;
   state->stream.shdr[vid_idx].aratio = aspect_ratios[aratio];
   state->stream.shdr[vid_idx].frate = frame_rates[frate];
-  state->stream.shdr[vid_idx].bitrate = 400*brate;
+  state->stream.shdr[vid_idx].bitrate = 400 * brate;
   state->stream.shdr[vid_idx].vbvsize = bufsize * 16 * 1024; 
   state->stream.shdr[vid_idx].constrained_flag = (constr != 0);
 
@@ -244,7 +243,7 @@ _parse_gop_header (uint8_t streamid, const void *buf,
 
   minute = vcd_bitvec_read_bits(data, &offset, 6);
 
-  (void) vcd_bitvec_read_bits(data, &offset, 1); 
+  MARKER (data, &offset);
 
   second = vcd_bitvec_read_bits(data, &offset, 6);
 
@@ -564,7 +563,7 @@ _analyze_audio_pes (uint8_t streamid, const uint8_t *buf, int len, bool only_pts
 
       if (!vcd_bitvec_read_bits (buf, &bitpos, 1))
         {
-          vcd_warn ("non-MPEG1 audio stream header seen");
+          vcd_debug ("non-MPEG1 audio stream header seen");
           break;
         }
 
@@ -942,11 +941,11 @@ vcd_mpeg_parse_packet (const void *_buf, unsigned buflen, bool parse_pes,
 
               _scr = _parse_timecode (buf, &bitpos);
 
-              bitpos++; /* marker */
+              MARKER (buf, &bitpos);
 
               _muxrate = vcd_bitvec_read_bits (buf, &bitpos, 22);
 
-              bitpos++; /* marker */
+              MARKER (buf, &bitpos);
 
               vcd_assert (bitpos % 8 == 0);
               pos = bitpos >> 3;
@@ -973,12 +972,12 @@ vcd_mpeg_parse_packet (const void *_buf, unsigned buflen, bool parse_pes,
               _scr *= 300;
               _scr += vcd_bitvec_read_bits (buf, &bitpos, 9); /* SCR ext */
 
-              bitpos++; /* marker */
+              MARKER (buf, &bitpos);
               
               _muxrate = vcd_bitvec_read_bits (buf, &bitpos, 22);
               
-              bitpos++; /* marker */
-              bitpos++; /* marker */
+              MARKER (buf, &bitpos);
+              MARKER (buf, &bitpos);
 
               bitpos += 5; /* reserved */
 

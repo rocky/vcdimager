@@ -1468,17 +1468,17 @@ main (int argc, const char *argv[])
     switch (gl_source_type)
       {
       case SOURCE_DEVICE:
-        img_src = vcd_image_source_new_linuxcd (gl_source_name);
+        img_src = vcd_image_source_new_linuxcd ();
+
+        vcd_image_source_set_arg (img_src, "device", gl_source_name);
         break;
       case SOURCE_FILE:
-        {
-          VcdDataSource *bin_source;
+        img_src = vcd_image_source_new_bincue ();
 
-          bin_source = vcd_data_source_new_stdio (gl_source_name);
-          vcd_assert (bin_source != NULL);
+        vcd_image_source_set_arg (img_src, "bin", gl_source_name);
 
-          img_src = vcd_image_source_new_bincue (bin_source, NULL, gl_sector_2336_flag);
-        }
+        vcd_image_source_set_arg (img_src, "sector", 
+                                    gl_sector_2336_flag ? "2336" : "2352");
         break;
       default:
         fprintf (stderr, "no source given -- can't do anything...\n");

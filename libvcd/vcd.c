@@ -373,7 +373,8 @@ vcd_obj_append_segment_play_item (VcdObj *obj, VcdMpegSource *mpeg_source,
   vcd_info ("scanning mpeg segment item #%d for scanpoints...", 
             _vcd_list_length (obj->mpeg_segment_list));
 
-  vcd_mpeg_source_scan (mpeg_source, !obj->relaxed_aps, NULL, NULL);
+  vcd_mpeg_source_scan (mpeg_source, !obj->relaxed_aps,
+                        obj->update_scan_offsets, NULL, NULL);
 
   if (vcd_mpeg_source_get_info (mpeg_source)->packets == 0)
     {
@@ -434,7 +435,8 @@ vcd_obj_append_sequence_play_item (VcdObj *obj, VcdMpegSource *mpeg_source,
     }
 
   vcd_info ("scanning mpeg sequence item #%d for scanpoints...", track_no);
-  vcd_mpeg_source_scan (mpeg_source, !obj->relaxed_aps, NULL, NULL);
+  vcd_mpeg_source_scan (mpeg_source, !obj->relaxed_aps,
+                        obj->update_scan_offsets, NULL, NULL);
 
   sequence = _vcd_malloc (sizeof (mpeg_sequence_t));
 

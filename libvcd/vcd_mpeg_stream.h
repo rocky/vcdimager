@@ -82,7 +82,7 @@ typedef int (*vcd_mpeg_prog_cb_t) (const vcd_mpeg_prog_info_t *progress_info,
                                    void *user_data);
 
 void
-vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps,
+vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps, bool fix_scan_info,
                       vcd_mpeg_prog_cb_t callback, void *user_data);
 
 /* gets the packet at given position */

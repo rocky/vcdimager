@@ -96,6 +96,17 @@ vcd_image_source_stat_size (VcdImageSource *obj)
   return obj->op.stat_size (obj->user_data);
 }
 
+int
+vcd_image_source_set_arg (VcdImageSource *obj, const char key[],
+			  const char value[])
+{
+  vcd_assert (obj != NULL);
+  vcd_assert (obj->op.setarg != NULL);
+  vcd_assert (key != NULL);
+
+  return obj->op.setarg (obj->user_data, key, value);
+}
+
 /*
  * VcdImageSource 
  */
@@ -143,3 +154,13 @@ vcd_image_sink_write (VcdImageSink *obj, void *buf, uint32_t lsn)
   return obj->op.write (obj->user_data, buf, lsn);
 }
 
+int
+vcd_image_sink_set_arg (VcdImageSink *obj, const char key[],
+			  const char value[])
+{
+  vcd_assert (obj != NULL);
+  vcd_assert (obj->op.setarg != NULL);
+  vcd_assert (key != NULL);
+
+  return obj->op.setarg (obj->user_data, key, value);
+}

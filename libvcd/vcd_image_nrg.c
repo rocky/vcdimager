@@ -28,6 +28,7 @@
 #include <libvcd/vcd_iso9660.h>
 #include <libvcd/vcd_util.h>
 #include <libvcd/vcd_bytesex.h>
+#include <libvcd/vcd_stream_stdio.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -428,18 +429,36 @@ vcd_image_source_new_nrg (VcdDataSource *nrg_source)
 
 typedef struct {
   VcdDataSink *nrg_snk;
+  char *nrg_fname;
 
   VcdList *vcd_cue_list;
   int tracks;
   uint32_t cue_end_lsn;
+
+  bool init;
 } _img_nrg_snk_t;
+
+static void
+_sink_init (_img_nrg_snk_t *_obj)
+{
+  if (_obj->init)
+    return;
+
+  if (!(_obj->nrg_snk = vcd_data_sink_new_stdio (_obj->nrg_fname)))
+    vcd_error ("init failed");
+
+  _obj->init = true;  
+}
+
 
 static void
 _sink_free (void *user_data)
 {
   _img_nrg_snk_t *_obj = user_data;
 
+  free (_obj->nrg_fname);
   vcd_data_sink_destroy (_obj->nrg_snk);
+
   free (_obj);
 }
 
@@ -449,6 +468,8 @@ _set_cuesheet (void *user_data, const VcdList *vcd_cue_list)
   _img_nrg_snk_t *_obj = user_data;
   VcdListNode *node;
   int num;
+
+  _sink_init (_obj);
 
   _obj->vcd_cue_list = _vcd_list_new ();
 
@@ -590,6 +611,8 @@ _write (void *user_data, const void *data, uint32_t lsn)
   _img_nrg_snk_t *_obj = user_data;
   uint32_t _lsn = _map (_obj, lsn);
 
+  _sink_init (_obj);
+
   if (_lsn == -1)
     {
       /* vcd_debug ("ignoring %d", lsn); */
@@ -608,22 +631,40 @@ _write (void *user_data, const void *data, uint32_t lsn)
   return 0;
 }
 
+static int
+_sink_set_arg (void *user_data, const char key[], const char value[])
+{
+  _img_nrg_snk_t *_obj = user_data;
+
+  if (!strcmp (key, "nrg"))
+    {
+      free (_obj->nrg_fname);
+
+      if (!value)
+	return -2;
+
+      _obj->nrg_fname = strdup (value);
+    }
+  else
+    return -1;
+
+  return 0;
+}
+
 VcdImageSink *
-vcd_image_sink_new_nrg (VcdDataSink *nrg_sink)
+vcd_image_sink_new_nrg (void)
 {
   _img_nrg_snk_t *_data;
 
   vcd_image_sink_funcs _funcs = {
     set_cuesheet: _set_cuesheet,
     write: _write,
-    free: _sink_free
+    free: _sink_free,
+    setarg: _sink_set_arg
   };
 
-  if (!nrg_sink)
-    return NULL;
-
   _data = _vcd_malloc (sizeof (_img_nrg_snk_t));
-  _data->nrg_snk = nrg_sink;
+  _data->nrg_fname = strdup ("videocd.nrg");
 
   vcd_warn ("opening TAO NRG image for writing; TAO (S)VCD are NOT 100%% compliant!");
 

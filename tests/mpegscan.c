@@ -44,7 +44,7 @@ main (int argc, const char *argv[])
 
   src = vcd_mpeg_source_new (vcd_data_source_new_stdio (argv[1]));
 
-  vcd_mpeg_source_scan (src, true, NULL, NULL);
+  vcd_mpeg_source_scan (src, true, false, NULL, NULL);
 
   printf ("packets: %d\n", vcd_mpeg_source_get_info (src)->packets);
 

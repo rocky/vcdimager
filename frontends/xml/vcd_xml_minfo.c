@@ -196,8 +196,8 @@ main (int argc, const char *argv[])
       switch (opt)
         {
         case OP_VERSION:
-          fputs (vcd_version_string (true), stdout);
-          fflush (stdout);
+          vcd_xml_gui_mode = _gui_flag;
+          vcd_xml_print_version ();
           exit (EXIT_SUCCESS);
           break;
 
@@ -246,7 +246,7 @@ main (int argc, const char *argv[])
 
     src = vcd_mpeg_source_new (vcd_data_source_new_stdio (_mpeg_fname));
 
-    vcd_mpeg_source_scan (src, _relaxed_aps ? false : true, 
+    vcd_mpeg_source_scan (src, _relaxed_aps ? false : true, false,
                           vcd_xml_show_progress ? vcd_xml_scan_progress_cb : NULL, _mpeg_fname);
 
     vcd_debug ("stream scan completed");

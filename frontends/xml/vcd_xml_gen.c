@@ -335,8 +335,8 @@ main (int argc, const char *argv[])
       switch (opt)
         {
         case CL_VERSION:
-          fputs (vcd_version_string (true), stdout);
-          fflush (stdout);
+          /* vcd_xml_gui_mode = gl.gui_flag; */
+          vcd_xml_print_version ();
           exit (EXIT_SUCCESS);
           break;
 

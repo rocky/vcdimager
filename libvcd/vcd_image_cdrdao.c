@@ -246,28 +246,60 @@ _write (void *user_data, const void *data, uint32_t lsn)
   return 0;
 }
 
+static int
+_sink_set_arg (void *user_data, const char key[], const char value[])
+{
+  _img_cdrdao_snk_t *_obj = user_data;
+
+  if (!strcmp (key, "toc"))
+    {
+      free (_obj->toc_fname);
+
+      if (!value)
+	return -2;
+
+      _obj->toc_fname = strdup (value);
+    }
+  else if (!strcmp (key, "img_base"))
+    {
+      free (_obj->img_base);
+
+      if (!value)
+	return -2;
+
+      _obj->img_base = strdup (value);
+    }
+  else if (!strcmp (key, "sector"))
+    {
+      if (!strcmp (value, "2336"))
+	_obj->sector_2336_flag = true;
+      else if (!strcmp (value, "2352"))
+	_obj->sector_2336_flag = false;
+      else
+	return -2;
+    }
+  else
+    return -1;
+
+  return 0;
+}
+
 VcdImageSink *
-vcd_image_sink_new_cdrdao (const char toc_fname[],
-			   const char img_basename[],
-			   bool sector_2336)
+vcd_image_sink_new_cdrdao (void)
 {
   _img_cdrdao_snk_t *_data;
   
   vcd_image_sink_funcs _funcs = {
     set_cuesheet: _set_cuesheet,
     write: _write,
-    free: _sink_free
+    free: _sink_free,
+    setarg: _sink_set_arg
   };
-
-  if (!toc_fname || !img_basename)
-    return NULL;
 
   _data = _vcd_malloc (sizeof (_img_cdrdao_snk_t));
 
-  _data->toc_fname = strdup (toc_fname);
-  _data->img_base = strdup (img_basename);
-
-  _data->sector_2336_flag = sector_2336;
+  _data->toc_fname = strdup ("videocd.toc");
+  _data->img_base = strdup ("videocd");
 
   return vcd_image_sink_new (_data, &_funcs);
 }

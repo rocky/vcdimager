@@ -35,4 +35,6 @@ int vcd_xml_scan_progress_cb (const vcd_mpeg_prog_info_t *info, void *user_data)
 
 int vcd_xml_write_progress_cb (const progress_info_t *info, void *user_data);
 
+void vcd_xml_print_version (void);
+
 #endif /* __VCD_XML_COMMON_H__ */

@@ -105,7 +105,7 @@ vcd_mpeg_source_stat (VcdMpegSource *obj)
 }
 
 void
-vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps,
+vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps, bool fix_scan_info,
                       vcd_mpeg_prog_cb_t callback, void *user_data)
 {
   unsigned length = 0;
@@ -128,6 +128,9 @@ vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps,
   vcd_assert (!obj->scanned);
 
   memset (&state, 0, sizeof (state));
+  
+  if (fix_scan_info)
+    state.stream.scan_data_warnings = VCD_MPEG_SCAN_DATA_WARNS + 1;
 
   vcd_data_source_seek (obj->data_source, 0);
   length = vcd_data_source_stat (obj->data_source);

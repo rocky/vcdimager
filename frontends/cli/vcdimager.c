@@ -445,11 +445,13 @@ main (int argc, const char *argv[])
     unsigned sectors;
     VcdImageSink *image_sink;
 
-    image_sink = 
-      vcd_image_sink_new_bincue (vcd_data_sink_new_stdio (gl.image_fname),
-                                 vcd_data_sink_new_stdio (gl.cue_fname),
-                                 gl.image_fname, gl.sector_2336_flag);
+    image_sink = vcd_image_sink_new_bincue ();
 
+    vcd_image_sink_set_arg (image_sink, "bin", gl.image_fname);
+    vcd_image_sink_set_arg (image_sink, "cue", gl.cue_fname);
+    vcd_image_sink_set_arg (image_sink, "sector", 
+                            gl.sector_2336_flag ? "2336" : "2352");
+    
     if (!image_sink)
       {
         vcd_error ("failed to create image object");

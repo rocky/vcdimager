@@ -31,22 +31,19 @@
 
 #include <libvcd/vcd.h>
 #include <libvcd/vcd_logging.h>
-#include <libvcd/vcd_stream_stdio.h>
-#include <libvcd/vcd_image_bincue.h>
-#include <libvcd/vcd_image_cdrdao.h>
-#include <libvcd/vcd_image_nrg.h>
+#include <libvcd/vcd_image.h>
 #include <libvcd/vcd_bytesex.h>
+#include <libvcd/vcd_stream_stdio.h>
 
 static const char _rcsid[] = "$Id$";
 
-bool vcd_xml_master (const struct vcdxml_t *obj, const char cue_fname[],
-		     const char bin_fname[], const char cdrdao_base[],
-		     const char nrg_fname[], bool sector_2336_flag)
+bool vcd_xml_master (const struct vcdxml_t *obj, VcdImageSink *image_sink)
 {
   VcdObj *_vcd;
   VcdListNode *node;
   int idx;
   bool _relaxed_aps = false;
+  bool _update_scan_offsets = false;
 
   vcd_assert (obj != NULL);
 
@@ -132,6 +129,8 @@ bool vcd_xml_master (const struct vcdxml_t *obj, const char cue_fname[],
 
 	    vcd_obj_set_param_bool (_vcd, _opt_cfg_p->parm_id, _value);
 
+	    if (_opt_cfg_p->parm_id == VCD_PARM_UPDATE_SCAN_OFFSETS)
+	      _update_scan_offsets = _value;
 	    if (_opt_cfg_p->parm_id == VCD_PARM_RELAXED_APS)
 	      _relaxed_aps = _value;
 	  }
@@ -201,7 +200,7 @@ bool vcd_xml_master (const struct vcdxml_t *obj, const char cue_fname[],
 
       _mpeg_src = vcd_mpeg_source_new (_source);
 
-      vcd_mpeg_source_scan (_mpeg_src, !_relaxed_aps,
+      vcd_mpeg_source_scan (_mpeg_src, !_relaxed_aps, _update_scan_offsets,
 			    vcd_xml_show_progress ? vcd_xml_scan_progress_cb : NULL,
 			    segment->id);
 
@@ -234,7 +233,7 @@ bool vcd_xml_master (const struct vcdxml_t *obj, const char cue_fname[],
 
       _mpeg_src = vcd_mpeg_source_new (data_source);
 
-      vcd_mpeg_source_scan (_mpeg_src, !_relaxed_aps,
+      vcd_mpeg_source_scan (_mpeg_src, !_relaxed_aps, _update_scan_offsets,
 			    vcd_xml_show_progress ? vcd_xml_scan_progress_cb : NULL,
 			    sequence->id);
 
@@ -262,39 +261,7 @@ bool vcd_xml_master (const struct vcdxml_t *obj, const char cue_fname[],
 
   {
     unsigned sectors;
-    VcdImageSink *image_sink;
     char *_tmp;
-
-    if (cdrdao_base)
-      {
-	char buf[4096] = { 0, };
-
-	vcd_info ("cdrdao-style image requested!");
-
-	strncat (buf, cdrdao_base, sizeof (buf));
-	strncat (buf, ".toc", sizeof (buf));
-
-	image_sink = 
-	  vcd_image_sink_new_cdrdao (buf, cdrdao_base, sector_2336_flag);
-      }
-    else if (nrg_fname)
-      {
-	vcd_info ("nrg-style image requested!");
-
-	image_sink = 
-	  vcd_image_sink_new_nrg (vcd_data_sink_new_stdio (nrg_fname));
-      }
-    else
-      image_sink = 
-	vcd_image_sink_new_bincue (vcd_data_sink_new_stdio (bin_fname),
-				   vcd_data_sink_new_stdio (cue_fname),
-				   bin_fname, sector_2336_flag);
-
-    if (!image_sink)
-      {
-        vcd_error ("failed to create image object");
-        exit (EXIT_FAILURE);
-      }
 
     sectors = vcd_obj_begin_output (_vcd);
 

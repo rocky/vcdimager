@@ -37,6 +37,7 @@ static const char _rcsid[] = "$Id$";
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 #include <linux/cdrom.h>
 #include <sys/stat.h>
@@ -47,12 +48,36 @@ static const char _rcsid[] = "$Id$";
 typedef struct {
   FILE *fd;
   int ioctls_debugged; /* for debugging */
+
+  char *device;
+  
+  bool init;
 } _img_linuxcd_src_t;
+
+static void
+_source_init (_img_linuxcd_src_t *_obj)
+{
+  if (_obj->init)
+    return;
+
+  _obj->fd = fopen (_obj->device, "rb");
+
+  if (!_obj->fd)
+    {
+      vcd_error ("fopen (%s): %s", _obj->device, strerror (errno));
+      return;
+    }
+
+  _obj->init = true;
+}
+
 
 static void
 _source_free (void *user_data)
 {
   _img_linuxcd_src_t *_obj = user_data;
+
+  free (_obj->device);
 
   if (_obj->fd)
     fclose (_obj->fd);
@@ -64,6 +89,8 @@ static int
 _read_mode2_sector (void *user_data, void *data, uint32_t lsn, bool form2)
 {
   _img_linuxcd_src_t *_obj = user_data;
+
+  _source_init (_obj);
 
   if (form2)
     {
@@ -131,6 +158,8 @@ _stat_size (void *user_data)
   struct cdrom_tocentry tocent;
   uint32_t size;
 
+  _source_init (_obj);
+
   tocent.cdte_track = CDROM_LEADOUT;
   tocent.cdte_format = CDROM_LBA;
   if (ioctl (fileno (_obj->fd), CDROMREADTOCENTRY, &tocent) == -1)
@@ -143,10 +172,30 @@ _stat_size (void *user_data)
   return size;
 }
 
+static int
+_source_set_arg (void *user_data, const char key[], const char value[])
+{
+  _img_linuxcd_src_t *_obj = user_data;
+
+  if (!strcmp (key, "device"))
+    {
+      if (!value)
+	return -2;
+
+      free (_obj->device);
+      
+      _obj->device = strdup (value);
+    }
+  else 
+    return -1;
+
+  return 0;
+}
+
 #endif /* defined(__linux__) */
 
 VcdImageSource *
-vcd_image_source_new_linuxcd (const char device_filename[])
+vcd_image_source_new_linuxcd (void)
 {
 #if defined(__linux__)
   _img_linuxcd_src_t *_data;
@@ -154,21 +203,12 @@ vcd_image_source_new_linuxcd (const char device_filename[])
   vcd_image_source_funcs _funcs = {
     read_mode2_sector: _read_mode2_sector,
     stat_size: _stat_size,
-    free: _source_free
+    free: _source_free,
+    setarg: _source_set_arg
   };
 
-  if (!device_filename)
-    return NULL;
-
   _data = _vcd_malloc (sizeof (_img_linuxcd_src_t));
-  _data->fd = fopen (device_filename, "rb");
-
-  if (!_data->fd)
-    {
-      free (_data);
-      perror ("fopen()");
-      return NULL;
-    }
+  _data->device = strdup ("/dev/cdrom");
 
   return vcd_image_source_new (_data, &_funcs);
 #else 

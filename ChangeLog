@@ -1,3 +1,17 @@
+2001-08-28  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_bitvec.h: optimized code
+
+	* frontends/xml/vcd_xml_build.c: added new options --image-type and 
+	 	--image-option
+
+2001-08-27  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* frontends/xml/vcd_xml_common.c (vcd_xml_print_version): added 
+		XML friendly version output string
+
+	* libvcd/vcd_image.h: implemented set_arg mechanism and adapted frontends
+
 2001-08-25  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd.c (_write_sequence): 

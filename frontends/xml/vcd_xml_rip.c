@@ -1328,8 +1328,8 @@ main (int argc, const char *argv[])
       switch (opt)
 	{
 	case CL_VERSION:
-	  fputs (vcd_version_string (true), stdout);
-	  fflush (stdout);
+          vcd_xml_gui_mode = _gui_flag;
+          vcd_xml_print_version ();
 	  exit (EXIT_SUCCESS);
 	  break;
 
@@ -1375,14 +1375,12 @@ main (int argc, const char *argv[])
   switch (_img_type) 
     {
     case CL_BINCUE:
-      {
-	VcdDataSource *bin_source;
-	
-	bin_source = vcd_data_source_new_stdio (img_fname);
-	vcd_assert (bin_source != NULL);
+      img_src = vcd_image_source_new_bincue ();
 
-	img_src = vcd_image_source_new_bincue (bin_source, NULL, sector_2336_flag);
-      }
+      vcd_image_source_set_arg (img_src, "bin", img_fname);
+
+      vcd_image_source_set_arg (img_src, "sector", 
+				sector_2336_flag ? "2336" : "2352");
       break;
 
     case CL_NRG:
@@ -1397,7 +1395,9 @@ main (int argc, const char *argv[])
       break;
 
     case CL_LINUXCD:
-      img_src = vcd_image_source_new_linuxcd (img_fname);
+      img_src = vcd_image_source_new_linuxcd ();
+
+      vcd_image_source_set_arg (img_src, "device", img_fname);
       break;
 
     default:

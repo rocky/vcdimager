@@ -23,11 +23,7 @@
 #include "vcdxml.h"
 
 bool vcd_xml_master (const struct vcdxml_t *obj, 
-		     const char cue_fname[],
-		     const char bin_fname[],
-		     const char cdrdao_base[],
-		     const char nrg_fname[],
-		     bool sector_2336_flag);
+		     VcdImageSink *image_sink);
 
 #endif /* __VCD_XML_MASTER_H__ */
 

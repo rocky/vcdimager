@@ -32,6 +32,7 @@ typedef struct {
   int (*read_mode2_sector) (void *user_data, void *buf, uint32_t lsn, bool mode2raw);
   uint32_t (*stat_size) (void *user_data);
   void (*free) (void *user_data);
+  int (*setarg) (void *user_data, const char key[], const char value[]);
 } vcd_image_source_funcs;
 
 VcdImageSource *
@@ -52,6 +53,10 @@ vcd_image_source_read_mode2_sectors (VcdImageSource *obj, void *buf,
 uint32_t
 vcd_image_source_stat_size (VcdImageSource *obj);
 
+int
+vcd_image_source_set_arg (VcdImageSource *obj, const char key[],
+			  const char value[]);
+
 /* VcdImageSink ( --> image writer) */
 
 typedef struct _VcdImageSink VcdImageSink;
@@ -70,6 +75,7 @@ typedef struct {
   int (*set_cuesheet) (void *user_data, const VcdList *vcd_cue_list);
   int (*write) (void *user_data, const void *buf, uint32_t lsn);
   void (*free) (void *user_data);
+  int (*setarg) (void *user_data, const char key[], const char value[]);
 } vcd_image_sink_funcs;
 
 VcdImageSink *
@@ -83,5 +89,9 @@ vcd_image_sink_set_cuesheet (VcdImageSink *obj, const VcdList *vcd_cue_list);
 
 int
 vcd_image_sink_write (VcdImageSink *obj, void *buf, uint32_t lsn);
+
+int
+vcd_image_sink_set_arg (VcdImageSink *obj, const char key[], 
+			const char value[]);
 
 #endif /* __VCD_IMAGE_H__ */

@@ -25,7 +25,7 @@
 #include <libvcd/vcd_image.h>
 
 VcdImageSink *
-vcd_image_sink_new_nrg (VcdDataSink *nrg_sink);
+vcd_image_sink_new_nrg (void);
 
 VcdImageSource *
 vcd_image_source_new_nrg (VcdDataSource *nrg_source);

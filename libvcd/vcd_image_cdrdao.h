@@ -25,8 +25,6 @@
 #include <libvcd/vcd_image.h>
 
 VcdImageSink *
-vcd_image_sink_new_cdrdao (const char toc_fname[],
-			   const char img_basename[],
-			   bool sector_2336);
+vcd_image_sink_new_cdrdao (void);
 
 #endif /* __VCD_IMAGE_CDRDAO_H__ */

@@ -25,14 +25,9 @@
 #include <libvcd/vcd_image.h>
 
 VcdImageSink *
-vcd_image_sink_new_bincue (VcdDataSink *bin_sink, 
-			   VcdDataSink *cue_sink,
-			   const char cue_fname[],
-			   bool sector_2336);
+vcd_image_sink_new_bincue (void);
 
 VcdImageSource *
-vcd_image_source_new_bincue (VcdDataSource *bin_source,
-			     VcdDataSource *cue_source,
-			     bool sector_2336);
+vcd_image_source_new_bincue (void);
 
 #endif /* __VCD_IMAGE_BINCUE_H__ */

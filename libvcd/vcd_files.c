@@ -53,8 +53,12 @@ _derive_vid_type (const struct vcd_mpeg_stream_info *_info, bool svcd)
   if (_info->shdr[0].seen)
     return _pal_p (&_info->shdr[0]) ? 0x7 : 0x3;
 
-  if (!svcd && _info->shdr[2].seen)
-    return _pal_p (&_info->shdr[2]) ? 0x6 : 0x2;
+  if (_info->shdr[2].seen)
+    {
+      if (svcd)
+        vcd_warn ("stream with 0xE2 still stream id not allowed for IEC62107 compliant SVCDs");
+      return _pal_p (&_info->shdr[2]) ? 0x6 : 0x2;
+    }
 
   if (_info->shdr[1].seen)
     return _pal_p (&_info->shdr[1]) ? 0x5 : 0x1;
@@ -415,6 +419,10 @@ set_info_vcd(VcdObj *obj, void *buf)
               contents.ogt =
                 _derive_ogt_type (segment->info,
                                   _vcd_obj_has_cap_p (obj, _CAP_4C_SVCD));
+
+              if (!contents.video_type && !contents.audio_type)
+                vcd_warn ("segment item '%s' seems contains neither video nor audio",
+                          segment->id);
 
               for (idx = 0; idx < segment->segment_count; idx++)
                 {

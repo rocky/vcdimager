@@ -148,3 +148,33 @@ vcd_xml_write_progress_cb (const progress_info_t *info, void *user_data)
 
   return 0;
 }
+
+void vcd_xml_print_version (void)
+{
+  if (vcd_xml_gui_mode)
+    {
+      char buf[] = VERSION;
+      char *major, *minor, *micro;
+
+      major = buf;
+      minor = strchr (major, '.');
+
+      vcd_assert (minor != NULL);
+
+      *minor++ = '\0';
+
+      micro = strchr (minor, '.');
+
+      vcd_assert (micro != NULL);
+
+      *micro++ = '\0';
+
+      fprintf (stdout,
+	       "<version major=\"%s\" minor=\"%s\" micro=\"%s\""
+	       " platform=\"%s\" />\n", major, minor, micro, HOST_ARCH);
+    }
+  else
+    fputs (vcd_version_string (true), stdout);
+
+  fflush (stdout);
+}
