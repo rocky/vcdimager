@@ -36,6 +36,55 @@
 #include "vcd_xml_dump.h"
 #include "vcd_xml_dtd.h"
 
+static xmlNodePtr 
+_get_file_node (xmlDocPtr doc, xmlNodePtr cur, xmlNsPtr ns, const char pathname[])
+{
+  char *_dir, *c;
+  xmlNodePtr retval = NULL;
+
+  _dir = strdup (pathname);
+  c = strchr (_dir, '/');
+
+  if (c)
+    { /* subdir... */
+      xmlNodePtr n;
+
+      *c++ = '\0';
+
+      FOR_EACH (n, cur)
+        {
+          char *tmp;
+
+          if (xmlStrcmp (n->name, (const xmlChar *) "folder"))
+            continue;
+
+          assert (!xmlStrcmp (n->children->name, "name"));
+
+          tmp = xmlNodeListGetString (doc, n->children->children, 1);
+
+          if (!xmlStrcmp (tmp, _dir))
+            break;
+        }
+
+      if (!n)
+        {
+          n = xmlNewChild (cur, ns, "folder", NULL);
+          xmlNewChild (n, ns, "name", _dir);
+        }
+
+      retval = _get_file_node (doc, n, ns, c);
+    }
+  else
+    { /* finally there! */
+      retval = xmlNewChild (cur, ns, "file", NULL);
+      xmlNewChild (retval, ns, "name", pathname);
+    }
+
+  free (_dir);
+
+  return retval;
+}
+
 static void
 _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 {
@@ -123,6 +172,25 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 	  seg_node = xmlNewChild (section, ns, "segment-item", NULL);
 	  xmlSetProp (seg_node, "src", _segment->src);
 	  xmlSetProp (seg_node, "id", _segment->id);
+	}
+    }
+
+  /* filesystem */
+
+  if (_vcd_list_length (obj->filesystem))
+    {
+      section = xmlNewChild (vcd_node, ns, "filesystem", NULL);
+
+      _VCD_LIST_FOREACH (node, obj->filesystem)
+	{
+	  struct filesystem_t *p = _vcd_list_node_data (node);
+	  xmlNodePtr filenode;
+
+	  filenode = _get_file_node (doc, section, ns, p->name);
+
+	  xmlSetProp (filenode, "src", p->file_src);
+	  if (p->file_raw)
+	    xmlSetProp (filenode, "format", "mixed");
 	}
     }
 

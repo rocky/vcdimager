@@ -40,63 +40,25 @@
 #include <libvcd/vcd_types.h>
 #include <libvcd/vcd_data_structures.h>
 #include <libvcd/vcd_cd_sector.h>
+#include <libvcd/vcd_util.h>
+#include <libvcd/vcd_pbc.h>
 
 #include "vcd_xml_dtd.h"
+#include "vcd_xml_dump.h"
+#include "vcdxml.h"
 
 static const char _rcsid[] = "$Id$";
 
 /* defaults */
+#define DEFAULT_SYSTEM_ID      "CD-RTOS CD-BRIDGE"
 #define DEFAULT_VOLUME_ID      "VideoCD"
 #define DEFAULT_APPLICATION_ID ""
 #define DEFAULT_ALBUM_ID       ""
 #define DEFAULT_TYPE           "vcd2"
 #define DEFAULT_XML_FNAME      "videocd.xml"
 
-/* global stuff kept as a singleton makes for less typing effort :-) 
- */
-static struct
-{
-  const char *type;
-  vcd_type_t type_id;
-
-  VcdList *file_list;
-  VcdList *tracks_list;
-
-  const char *xml_fname;
-
-  const char *volume_label;
-  const char *application_id;
-  const char *album_id;
-
-  int volume_number;
-  int volume_count;
-
-  int broken_svcd_mode_flag;
-
-  int verbose_flag;
-  int quiet_flag;
-
-  int nopbc_flag;
-}
-gl;                             /* global */
-
-struct add_files_t {
-  char *fname;
-  char *iso_fname;
-  bool raw_flag;
-};
-
-static void
-gl_add_file (char *fname, char *iso_fname, int raw_flag)
-{
-  struct add_files_t *tmp = malloc (sizeof (struct add_files_t));
-
-  _vcd_list_append (gl.file_list, tmp);
-
-  tmp->fname = fname;
-  tmp->iso_fname = iso_fname;
-  tmp->raw_flag = raw_flag;
-}
+static int _verbose_flag = 0;
+static int _quiet_flag = 0;
 
 /****************************************************************************/
 
@@ -117,7 +79,7 @@ _parse_type_arg (const char arg[])
   int i = 0;
 
   while (type_str[i].str) 
-    if (strcasecmp(gl.type, type_str[i].str))
+    if (strcasecmp(arg, type_str[i].str))
       i++;
     else
       break;
@@ -166,7 +128,8 @@ _parse_file_arg (const char *arg, char **fname1, char **fname2)
 }
 
 static void
-_add_dir (const char pathname[], const char iso_pathname[])
+_add_dir (struct vcdxml_t *obj, const char pathname[], 
+          const char iso_pathname[])
 {
   DIR *dir = NULL;
   struct dirent *dentry = NULL;
@@ -206,73 +169,23 @@ _add_dir (const char pathname[], const char iso_pathname[])
       if (S_ISDIR(st.st_mode))
         {
           strcat (iso_name, "/");
-          _add_dir (buf, iso_name);
+          _add_dir (obj, buf, iso_name);
         }
       else if (S_ISREG(st.st_mode))
         {
-          gl_add_file (strdup (buf), strdup (iso_name), false);
+          struct filesystem_t *_file = _vcd_malloc (sizeof (struct filesystem_t));
+
+          _file->name = strdup (iso_name);
+          _file->file_src = strdup (buf);
+          _file->file_raw = false;
+
+          _vcd_list_append (obj->filesystem, _file);
         }
       else
         fprintf (stdout, "ignoring %s\n", buf);
     }
 
   closedir (dir);
-}
-
-#include <libxml/tree.h>
-#include <libxml/parser.h>
-#include <libxml/parserInternals.h>
-#include <libxml/xmlmemory.h>
-
-#define FOR_EACH(iter, parent) for(iter = parent->xmlChildrenNode; iter != NULL; iter = iter->next)
-
-static xmlNodePtr 
-_get_file_node (xmlDocPtr doc, xmlNodePtr cur, xmlNsPtr ns, const char pathname[])
-{
-  char *_dir, *c;
-  xmlNodePtr retval = NULL;
-
-  _dir = strdup (pathname);
-  c = strchr (_dir, '/');
-
-  if (c)
-    { /* subdir... */
-      xmlNodePtr n;
-
-      *c++ = '\0';
-
-      FOR_EACH (n, cur)
-        {
-          char *tmp;
-
-          if (xmlStrcmp (n->name, (const xmlChar *) "folder"))
-            continue;
-
-          assert (!xmlStrcmp (n->children->name, "name"));
-
-          tmp = xmlNodeListGetString (doc, n->children->children, 1);
-
-          if (!xmlStrcmp (tmp, _dir))
-            break;
-        }
-
-      if (!n)
-        {
-          n = xmlNewChild (cur, ns, "folder", NULL);
-          xmlNewChild (n, ns, "name", _dir);
-        }
-
-      retval = _get_file_node (doc, n, ns, c);
-    }
-  else
-    { /* finally there! */
-      retval = xmlNewChild (cur, ns, "file", NULL);
-      xmlNewChild (retval, ns, "name", pathname);
-    }
-
-  free (_dir);
-
-  return retval;
 }
 
 static const char *
@@ -295,166 +208,31 @@ _sequence_str (int n)
   return buf;
 }
 
-
-static void
-_make_xml (void)
-{
-  xmlDtdPtr dtd;
-  xmlDocPtr doc;
-  xmlNodePtr vcd_node, section;
-  xmlNsPtr ns = NULL;
-  char buf[1024];
-  VcdListNode *node;
-  int n;
-
-  xmlKeepBlanksDefault(0);
-
-  doc = xmlNewDoc ("1.0");
-  
-  dtd = xmlNewDtd (doc, "videocd", VIDEOCD_DTD_PUBID, VIDEOCD_DTD_SYSID);
-  xmlAddChild ((xmlNodePtr) doc, (xmlNodePtr) dtd);
-
-  vcd_node = xmlNewDocNode (doc, ns, "videocd", NULL);
-  xmlAddChild ((xmlNodePtr) doc, vcd_node);
-
-  ns = xmlNewNs (vcd_node, VIDEOCD_DTD_XMLNS, NULL);
-  xmlSetNs (vcd_node, ns);
-
-  switch (gl.type_id) 
-    {
-    case VCD_TYPE_SVCD:
-      xmlSetProp (vcd_node, "class", "svcd");
-      xmlSetProp (vcd_node, "version", "1.0");
-      break;
-    case VCD_TYPE_VCD2:
-      xmlSetProp (vcd_node, "class", "vcd");
-      xmlSetProp (vcd_node, "version", "2.0");
-      break;
-    case VCD_TYPE_VCD11:
-      xmlSetProp (vcd_node, "class", "vcd");
-      xmlSetProp (vcd_node, "version", "1.1");
-      break;
-    default:
-      assert (0);
-      break;
-    }
-
-  /* options */
-
-  if (gl.type_id == VCD_TYPE_SVCD && gl.broken_svcd_mode_flag)
-    {
-      section = xmlNewChild (vcd_node, ns, "option", NULL);
-      xmlSetProp (section, "name", "broken svcd mode");
-      xmlSetProp (section, "value", "true");
-    }
-
-  /* INFO */
-
-  section = xmlNewChild (vcd_node, ns, "info", NULL);
-
-  xmlNewChild (section, ns, "album-id", gl.album_id);
-  
-  snprintf (buf, sizeof (buf), "%d", gl.volume_count);
-  xmlNewChild (section, ns, "volume-count", buf);
-
-  snprintf (buf, sizeof (buf), "%d", gl.volume_number);
-  xmlNewChild (section, ns, "volume-number", buf);
-
-  /* PVD */
-
-  section = xmlNewChild (vcd_node, ns, "pvd", NULL);
-
-  xmlNewChild (section, ns, "volume-id", gl.volume_label);
-
-  xmlNewChild (section, ns, "application-id", gl.application_id);
-
-  /* filesystem */
-
-  section = xmlNewChild (vcd_node, ns, "filesystem", NULL);
-
-  _VCD_LIST_FOREACH (node, gl.file_list)
-    {
-      struct add_files_t *p = _vcd_list_node_data (node);
-      xmlNodePtr filenode;
-
-      filenode = _get_file_node (doc, section, ns, p->iso_fname);
-
-      xmlSetProp (filenode, "src", p->fname);
-      if (p->raw_flag)
-        xmlSetProp (filenode, "format", "mixed");
-    }
-
-  /* sequences */
-    
-  section = xmlNewChild (vcd_node, ns, "sequence-items", NULL);
-
-  n = 0;
-  _VCD_LIST_FOREACH (node, gl.tracks_list)
-    {
-      char *track_fname =  _vcd_list_node_data (node);
-      xmlNodePtr seq_node;
-
-      seq_node = xmlNewChild (section, ns, "sequence-item", NULL);
-      xmlSetProp (seq_node, "src", track_fname);
-
-      snprintf (buf, sizeof (buf), _sequence_str (n), n);
-      xmlSetProp (seq_node, "id", buf);
-        
-      n++;
-    }
-
-  if (!gl.nopbc_flag) 
-    {
-      xmlNodePtr pl;
-
-      section = xmlNewChild (vcd_node, ns, "pbc", NULL);
-
-      for (n = 0; n < _vcd_list_length (gl.tracks_list); n++)
-        {
-          pl = xmlNewChild (section, ns, "playlist", NULL);
-          xmlSetProp (pl, "id", _lid_str (n));
-
-          if (n)
-            xmlSetProp (xmlNewChild (pl, ns, "prev", NULL), "ref", _lid_str (n - 1));
-
-          if (n + 1 != _vcd_list_length (gl.tracks_list))
-            xmlSetProp (xmlNewChild (pl, ns, "next", NULL), "ref", _lid_str (n + 1));
-          else
-            xmlSetProp (xmlNewChild (pl, ns, "next", NULL), "ref", "lid-end");
-
-          xmlSetProp (xmlNewChild (pl, ns, "return", NULL), "ref", "lid-end");
-
-          xmlNewChild (pl, ns, "wait", "5");
-
-          xmlSetProp (xmlNewChild (pl, ns, "play-item", NULL), "ref", _sequence_str (n));
-        }
-
-      pl = xmlNewChild (section, ns, "endlist", NULL);
-      xmlSetProp (pl, "id", "lid-end");
-    }
-
-  xmlSaveFormatFile (gl.xml_fname, doc, true);
-
-  xmlFreeDoc (doc);
-}
-
 int
 main (int argc, const char *argv[])
 {
-  int n = 0;
-
-  gl.xml_fname = DEFAULT_XML_FNAME;
-
-  gl.type = DEFAULT_TYPE;
-
-  gl.file_list = _vcd_list_new ();
-
-  gl.volume_label = DEFAULT_VOLUME_ID;
-  gl.application_id = DEFAULT_APPLICATION_ID;
-  gl.album_id = DEFAULT_ALBUM_ID;
+  struct vcdxml_t obj;
+  int n;
   
-  gl.volume_count = 1;
-  gl.volume_number = 1;
+  char *xml_fname = strdup (DEFAULT_XML_FNAME);
+  char *type_str = strdup (DEFAULT_TYPE);
+  int broken_svcd_mode_flag = 0;
+  int nopbc_flag = 0;
+
+  memset (&obj, 0, sizeof (struct vcdxml_t));
+
+  obj.segment_list = _vcd_list_new ();
+  obj.sequence_list = _vcd_list_new ();
+  obj.pbc_list = _vcd_list_new ();
+  obj.filesystem = _vcd_list_new ();
+
+  obj.pvd.system_id = strdup (DEFAULT_SYSTEM_ID);
+  obj.pvd.volume_id = strdup (DEFAULT_VOLUME_ID);
+  obj.pvd.application_id = strdup (DEFAULT_APPLICATION_ID);
+  obj.info.album_id = strdup (DEFAULT_ALBUM_ID);
+  
+  obj.info.volume_count = 1;
+  obj.info.volume_number = 1;
 
   {
     const char **args = NULL;
@@ -469,36 +247,36 @@ main (int argc, const char *argv[])
 
     struct poptOption optionsTable[] = 
       {
-        {"output-file", 'o', POPT_ARG_STRING, &gl.xml_fname, 0,
+        {"output-file", 'o', POPT_ARG_STRING, &xml_fname, 0,
          "specify xml file for output (default: '" DEFAULT_XML_FNAME "')",
          "FILE"},
 
-        {"type", 't', POPT_ARG_STRING, &gl.type, 0,
+        {"type", 't', POPT_ARG_STRING, &type_str, 0,
          "select VideoCD type ('vcd11', 'vcd2' or 'svcd') (default: '" DEFAULT_TYPE "')", 
          "TYPE"},
 
-        {"iso-volume-label", 'l', POPT_ARG_STRING, &gl.volume_label, 0,
+        {"iso-volume-label", 'l', POPT_ARG_STRING, &obj.pvd.volume_id, 0,
          "specify ISO volume label for video cd (default: '" DEFAULT_VOLUME_ID
          "')", "LABEL"},
 
-        {"iso-application-id", '\0', POPT_ARG_STRING, &gl.application_id, 0,
+        {"iso-application-id", '\0', POPT_ARG_STRING, &obj.pvd.application_id, 0,
          "specify ISO application id for video cd (default: '" DEFAULT_APPLICATION_ID
          "')", "LABEL"},
 
-        {"info-album-id", '\0', POPT_ARG_STRING, &gl.album_id, 0,
+        {"info-album-id", '\0', POPT_ARG_STRING, &obj.info.album_id, 0,
          "specify album id for video cd set (default: '" DEFAULT_ALBUM_ID
          "')", "LABEL"},
 
-        {"volume-count", '\0', POPT_ARG_INT, &gl.volume_count, 0,
+        {"volume-count", '\0', POPT_ARG_INT, &obj.info.volume_count, 0,
          "specify number of volumes in album set", "NUMBER"},
 
-        {"volume-number", '\0', POPT_ARG_INT, &gl.volume_number, 0,
+        {"volume-number", '\0', POPT_ARG_INT, &obj.info.volume_number, 0,
          "specify album set sequence number (< volume-count)", "NUMBER"},
 
-        {"broken-svcd-mode", '\0', POPT_ARG_NONE, &gl.broken_svcd_mode_flag, 0,
+        {"broken-svcd-mode", '\0', POPT_ARG_NONE, &broken_svcd_mode_flag, 0,
          "enable non-compliant compatibility mode for broken devices"},
 
-        {"nopbc", '\0', POPT_ARG_NONE, &gl.nopbc_flag, 0, "don't create PBC"},
+        {"nopbc", '\0', POPT_ARG_NONE, &nopbc_flag, 0, "don't create PBC"},
         
         {"add-dir", '\0', POPT_ARG_STRING, NULL, CL_ADD_DIR,
          "add directory contents recursively to ISO fs root", "DIR"},
@@ -510,9 +288,9 @@ main (int argc, const char *argv[])
          "add file containing full 2336 byte sectors to ISO fs",
          "FILE,ISO_FILENAME"},
 
-        {"verbose", 'v', POPT_ARG_NONE, &gl.verbose_flag, 0, "be verbose"},
+        {"verbose", 'v', POPT_ARG_NONE, &_verbose_flag, 0, "be verbose"},
 
-        {"quiet", 'q', POPT_ARG_NONE, &gl.quiet_flag, 0, "show only critical messages"},
+        {"quiet", 'q', POPT_ARG_NONE, &_quiet_flag, 0, "show only critical messages"},
 
         {"version", 'V', POPT_ARG_NONE, NULL, CL_VERSION,
          "display version and copyright information and exit"},
@@ -545,7 +323,7 @@ main (int argc, const char *argv[])
 
             assert (arg != NULL);
             
-            _add_dir (arg, "");
+            _add_dir (&obj, arg, "");
           }
           break;
 
@@ -558,7 +336,15 @@ main (int argc, const char *argv[])
             assert (arg != NULL);
 
             if(!_parse_file_arg (arg, &fname1, &fname2)) 
-              gl_add_file (fname1, fname2, (opt == CL_ADD_FILE_RAW));
+              {
+                struct filesystem_t *_file = _vcd_malloc (sizeof (struct filesystem_t));
+
+                _file->name = strdup (fname2);
+                _file->file_src = strdup (fname1);
+                _file->file_raw = (opt == CL_ADD_FILE_RAW);
+
+                _vcd_list_append (obj.filesystem, _file);
+              }
             else
               {
                 fprintf (stderr, "file parsing of `%s' failed\n", arg);
@@ -573,7 +359,7 @@ main (int argc, const char *argv[])
           break;
         }
 
-    if (gl.verbose_flag && gl.quiet_flag)
+    if (_verbose_flag && _quiet_flag)
       fprintf (stderr, "I can't be both, quiet and verbose... either one or another ;-)");
     
     if ((args = poptGetArgs (optCon)) == NULL)
@@ -583,19 +369,26 @@ main (int argc, const char *argv[])
         exit (EXIT_FAILURE);
       }
 
-    gl.tracks_list = _vcd_list_new ();
-
     for (n = 0; args[n]; n++)
-      _vcd_list_append (gl.tracks_list, strdup (args[n]));
+      {
+        struct sequence_t *_seq = _vcd_malloc (sizeof (struct sequence_t));
 
-    if (_vcd_list_length (gl.tracks_list) > CD_MAX_TRACKS - 1)
+        _seq->entry_point_list = _vcd_list_new ();
+        _seq->autopause_list = _vcd_list_new ();
+        _seq->src = strdup (args[n]);
+        _seq->id = strdup (_sequence_str (n));
+
+        _vcd_list_append (obj.sequence_list, _seq);
+      }
+
+    if (_vcd_list_length (obj.sequence_list) > CD_MAX_TRACKS - 1)
       {
         fprintf (stderr, "error: maximal number of supported mpeg tracks (%d) reached",
                  CD_MAX_TRACKS - 1);
         exit (EXIT_FAILURE);
       }
                         
-    if ((gl.type_id = _parse_type_arg (gl.type)) == VCD_TYPE_INVALID)
+    if ((obj.vcd_type = _parse_type_arg (type_str)) == VCD_TYPE_INVALID)
       exit (EXIT_FAILURE);
 
     poptFreeContext (optCon);
@@ -603,10 +396,51 @@ main (int argc, const char *argv[])
 
   /* done with argument processing */
 
-  _make_xml ();
+  if (!nopbc_flag) 
+    {
+      pbc_t *_pbc;
+      VcdListNode *node;
+
+      int n = 0;
+      _VCD_LIST_FOREACH (node, obj.sequence_list)
+        {
+          struct sequence_t *_sequence = _vcd_list_node_data (node);
+
+          _pbc = vcd_pbc_new (PBC_PLAYLIST);
+
+          _pbc->id = strdup (_lid_str (n));
+
+          if (n)
+            _pbc->prev_id = strdup (_lid_str (n - 1));
+
+          if (_vcd_list_node_next (node))
+            _pbc->next_id = strdup (_lid_str (n + 1));
+          else
+            _pbc->next_id = strdup ("lid-end");
+
+          _pbc->retn_id = strdup ("lid-end");
+
+          _pbc->wait_time = 5;
+
+          _vcd_list_append (_pbc->item_id_list, strdup (_sequence->id));
+          
+          _vcd_list_append (obj.pbc_list, _pbc);
+
+          n++;
+        }
+
+      /* create end list */
+
+      _pbc = vcd_pbc_new (PBC_END);
+      _pbc->id = strdup ("lid-end");
+
+      _vcd_list_append (obj.pbc_list, _pbc);
+    }
+
+  vcd_xml_dump (&obj, xml_fname);
 
   fprintf (stdout, "(Super) VideoCD xml description created successfully as `%s'\n",
-           gl.xml_fname);
+           xml_fname);
 
   return EXIT_SUCCESS;
 }
