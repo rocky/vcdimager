@@ -1,4 +1,4 @@
-/* -*- c -*- 
+/* -*- c -*-
    $Id$
 
    Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
@@ -7,7 +7,7 @@
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
-    
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -46,7 +46,7 @@ static struct {
   vcd_log_handler_t default_vcd_log_handler;
 } gl = { 0, }; /* global */
 
-static void 
+static void
 _vcd_log_handler (log_level_t level, const char message[])
 {
   if (level == LOG_DEBUG && !gl.verbose_flag)
@@ -54,7 +54,7 @@ _vcd_log_handler (log_level_t level, const char message[])
 
   if (level == LOG_INFO && gl.quiet_flag)
     return;
-  
+
   gl.default_vcd_log_handler (level, message);
 }
 
@@ -74,24 +74,35 @@ read_le_u32 (riff_context *ctxt)
   uint32_t tmp;
 
   if (fread (&tmp, sizeof (uint32_t), 1, ctxt->fd) != 1)
-    vcd_error ("fread () failed");
+    {
+      if (ferror (ctxt->fd))
+        vcd_error ("fread (): %s", strerror (errno));
+
+      if (feof (ctxt->fd))
+        vcd_warn ("premature end of file encountered");
+
+      fclose (ctxt->fd);
+      if (ctxt->fd_out)
+        fclose (ctxt->fd_out);
+      exit (EXIT_FAILURE);
+    }
 
   return uint32_from_le (tmp);
 }
 
-static int 
+static int
 handler_RIFF (riff_context *ctxt)
 {
   const uint32_t size = read_le_u32 (ctxt);
 
   vcd_info ("RIFF data[%d]", size);
-  
+
   ctxt->lsize = ctxt->size = size;
 
   return next_id (ctxt);
 }
 
-static int 
+static int
 handler_CDXA (riff_context *ctxt)
 {
   vcd_info ("CDXA RIFF detected");
@@ -102,7 +113,7 @@ handler_CDXA (riff_context *ctxt)
   return 0;
 }
 
-static int 
+static int
 handler_data (riff_context *ctxt)
 {
   const uint32_t size = read_le_u32 (ctxt);
@@ -124,7 +135,7 @@ handler_data (riff_context *ctxt)
 	uint8_t data[2324];
 	uint8_t edc[4];
       } GNUC_PACKED sbuf;
-      
+
       vcd_assert (sizeof (sbuf) == 2352);
 
       vcd_info ("...converting...");
@@ -147,7 +158,7 @@ handler_data (riff_context *ctxt)
 
 	      if (feof (ctxt->fd))
 		vcd_warn ("premature end of file encountered after %ld sectors", s);
-	      
+
 	      fclose (ctxt->fd);
 	      fclose (ctxt->fd_out);
 	      exit (EXIT_FAILURE);
@@ -170,11 +181,11 @@ handler_data (riff_context *ctxt)
 	}
 
       fflush (ctxt->fd_out);
-      
+
       {
 	const long allsecs = (last_nzero - first_nzero + 1);
 	ftruncate (fileno (ctxt->fd_out), allsecs * 2324);
-	
+
 	vcd_info ("...stripped %ld leading and %ld trailing empty sectors...",
 		first_nzero, (sectors - last_nzero - 1));
 	vcd_info ("...extraction done (%ld sectors extracted to file)!", allsecs);
@@ -186,7 +197,7 @@ handler_data (riff_context *ctxt)
   return 0;
 }
 
-static int 
+static int
 handler_fmt (riff_context *ctxt)
 {
   uint8_t buf[1024] = { 0, };
@@ -194,7 +205,19 @@ handler_fmt (riff_context *ctxt)
   int i;
 
   vcd_assert (size < sizeof (buf));
-  fread (buf, 1, (size % 2) ? size + 1 : size, ctxt->fd);
+  if (fread (buf, 1, (size % 2) ? size + 1 : size, ctxt->fd) != ((size % 2) ? size + 1 : size))
+    {
+      if (ferror (ctxt->fd))
+        vcd_error ("fread (): %s", strerror (errno));
+
+      if (feof (ctxt->fd))
+        vcd_warn ("premature end of file encountered");
+
+      fclose (ctxt->fd);
+      if (ctxt->fd_out)
+        fclose (ctxt->fd_out);
+      exit (EXIT_FAILURE);
+    }
 
   {
     char *strbuf = _vcd_malloc (1 + size * 6);
@@ -243,12 +266,24 @@ next_id (riff_context *ctxt)
 {
   char id[4] = { 0, };
 
-  fread (id, 1, 4, ctxt->fd);
+  if (fread (id, 1, 4, ctxt->fd) != 4)
+    {
+      if (ferror (ctxt->fd))
+        vcd_error ("fread (): %s", strerror (errno));
+
+      if (feof (ctxt->fd))
+        vcd_warn ("premature end of file encountered");
+
+      fclose (ctxt->fd);
+      if (ctxt->fd_out)
+        fclose (ctxt->fd_out);
+      exit (EXIT_FAILURE);
+    }
 
   return handle (ctxt, id);
 }
 
-int 
+int
 main (int argc, const char *argv[])
 {
   FILE *in = NULL, *out = NULL;
@@ -257,13 +292,13 @@ main (int argc, const char *argv[])
   gl.default_vcd_log_handler = vcd_log_set_handler (_vcd_log_handler);
 
   {
-    struct poptOption optionsTable[] = 
+    struct poptOption optionsTable[] =
       {
         {"verbose", 'v', POPT_ARG_NONE, &gl.verbose_flag, 0, "be verbose"},
         {"quiet", 'q', POPT_ARG_NONE, &gl.quiet_flag, 0, "show only critical messages"},
         {"version", 'V', POPT_ARG_NONE, NULL, 1, "display version and copyright information and exit"},
-        
-        POPT_AUTOHELP 
+
+        POPT_AUTOHELP
         {NULL, 0, 0, NULL, 0}
       };
 
@@ -274,8 +309,8 @@ main (int argc, const char *argv[])
     poptContext optCon = poptGetContext ("vcdimager", argc, argv, optionsTable, 0);
     poptSetOtherOptionHelp (optCon, "[OPTION...] <input-cdxa-file> [<output-mpeg-file>]");
 
-    if (poptReadDefaultConfig (optCon, 0)) 
-      fprintf (stderr, "warning, reading popt configuration failed\n"); 
+    if (poptReadDefaultConfig (optCon, 0))
+      fprintf (stderr, "warning, reading popt configuration failed\n");
 
     while ((opt = poptGetNextOpt (optCon)) != -1)
       switch (opt)
@@ -302,7 +337,7 @@ main (int argc, const char *argv[])
       vcd_error ("error: too many arguments -- try --help");
 
     in = fopen (args[0], "rb");
-    if (!in) 
+    if (!in)
       {
         vcd_error ("fopen (`%s'): %s", args[0], strerror (errno));
         exit (EXIT_FAILURE);
@@ -310,7 +345,7 @@ main (int argc, const char *argv[])
 
     if (args[1]) {
       out = fopen (args[1], "wb");
-      if (!out) 
+      if (!out)
         {
           vcd_error ("fopen (`%s'): %s", args[1], strerror (errno));
           exit (EXIT_FAILURE);
@@ -321,7 +356,7 @@ main (int argc, const char *argv[])
 
   ctxt.fd = in;
   ctxt.fd_out = out;
-  
+
   next_id (&ctxt);
 
   if (in)
@@ -329,7 +364,7 @@ main (int argc, const char *argv[])
 
   if (out)
     fclose (out);
- 
+
   return 0;
 }
 
@@ -339,4 +374,4 @@ main (int argc, const char *argv[])
   tab-width: 8
   indent-tabs-mode: nil
   End:
-*/ 
+*/
