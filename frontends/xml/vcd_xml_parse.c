@@ -37,9 +37,31 @@
 
 #define FOR_EACH(iter, parent) for(iter = parent->xmlChildrenNode; iter != NULL; iter = iter->next)
 
+typedef struct {
+  xmlChar *name; /* node name */
+} handlers_t;
+
+static bool
+_generic_do_children (void)
+{
+  /* todo */
+  return false;
+}
+
+#define GET_ELEM_(id, doc, node, ns) \
+ if ((!xmlStrcmp (node->name, (const xmlChar *) id)) && (node->ns == ns)) 
+
 #define GET_ELEM_STR(str, id, doc, node, ns) \
  if ((!xmlStrcmp (node->name, (const xmlChar *) id)) && (node->ns == ns)) \
    str = xmlNodeListGetString (doc, node->xmlChildrenNode, 1)
+
+#define GET_ELEM_LONG(val, id, doc, node, ns) \
+ if ((!xmlStrcmp (node->name, (const xmlChar *) id)) && (node->ns == ns)) \
+   val = _get_elem_long (id, doc, node, ns)
+
+#define GET_ELEM_DOUBLE(val, id, doc, node, ns) \
+ if ((!xmlStrcmp (node->name, (const xmlChar *) id)) && (node->ns == ns)) \
+   val = _get_elem_double (id, doc, node, ns)
 
 #define GET_PROP_STR(str, id, doc, node, ns) \
  if (xmlHasProp (node, id)) \
@@ -117,10 +139,15 @@ _parse_info (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
   FOR_EACH (cur, node)
     {
       GET_ELEM_STR (obj->info.album_id, "album-id", doc, cur, ns);
-      GET_ELSE GET_ELEM_STR (obj->info.volume_count, "volume-count", doc, cur, ns);
-      GET_ELSE GET_ELEM_STR (obj->info.volume_number, "volume-number", doc, cur, ns);
-      GET_ELSE GET_ELEM_STR (obj->info.restriction, "restriction", doc, cur, ns);
-      GET_ELSE printf ("??? %s\n", cur->name); 
+      GET_ELSE GET_ELEM_LONG (obj->info.volume_count, "volume-count", doc, cur, ns);
+      GET_ELSE GET_ELEM_LONG (obj->info.volume_number, "volume-number", doc, cur, ns);
+      GET_ELSE GET_ELEM_LONG (obj->info.restriction, "restriction", doc, cur, ns);
+      GET_ELSE GET_ELEM_DOUBLE (obj->info.time_offset, "time-offset", doc, cur, ns);
+      GET_ELSE GET_ELEM_ ("next-volume-use-sequence2", doc, cur, ns)
+	obj->info.use_sequence2 = true;
+      GET_ELSE GET_ELEM_ ("next-volume-use-lid2", doc, cur, ns)
+	obj->info.use_lid2 = true;
+      GET_ELSE assert (0);
     }
 
   return false;
@@ -142,7 +169,7 @@ _parse_pvd (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
       GET_ELSE GET_ELEM_STR (obj->pvd.application_id, "application-id", doc, cur, ns);
       GET_ELSE GET_ELEM_STR (obj->pvd.preparer_id, "preparer-id", doc, cur, ns);
       GET_ELSE GET_ELEM_STR (obj->pvd.publisher_id, "publisher-id", doc, cur, ns);
-      GET_ELSE printf ("??? %s\n", cur->name); 
+      GET_ELSE assert (0);
     }
 
   return false;
@@ -153,33 +180,26 @@ _parse_pvd (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
  */
 
 static bool
-_parse_items (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+_parse_segments (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
   xmlNodePtr cur;
-
-  assert (obj->mpeg_item_list == NULL);
-  
-  obj->mpeg_item_list = _vcd_list_new ();
 
   FOR_EACH (cur, node)
     {
       bool rc = false;
 
-      if (!xmlStrcmp (cur->name, "mpeg-item")) 
+      if (!xmlStrcmp (cur->name, "segment-item")) 
 	{
-	  struct mpeg_item_t *_item = malloc (sizeof (struct mpeg_item_t));
-	  memset (_item, 0, sizeof (sizeof (struct mpeg_item_t)));
+	  struct segment_t *_item = malloc (sizeof (struct segment_t));
+	  memset (_item, 0, sizeof (sizeof (struct segment_t)));
 	  
 	  GET_PROP_STR (_item->id, "id", doc, cur, ns);
 	  GET_PROP_STR (_item->src, "src", doc, cur, ns);
 
-	  _vcd_list_append (obj->mpeg_item_list, _item);
+	  _vcd_list_append (obj->segment_list, _item);
 	}
       else
-	{
-	  printf ("unexpected element: %s\n", cur->name);
-	  rc = true;
-	}
+	assert (0);
 
       if (rc)
 	return rc;
@@ -250,7 +270,7 @@ _parse_pbc_selection (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlN
 	  _vcd_list_append (_pbc->select_id_list, _select_ref);
 	}
       else
-	printf ("%s %s -- sorry, not fully implemented yet\n", __PRETTY_FUNCTION__, cur->name);
+	assert (0);
     }
 
   _vcd_list_append (obj->pbc_list, _pbc);
@@ -263,8 +283,6 @@ _parse_pbc_playlist (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNs
 {
   xmlNodePtr cur;
   pbc_t *_pbc;
-
-  printf ("%s\n", __PRETTY_FUNCTION__);
 
   _pbc = vcd_pbc_new (PBC_PLAYLIST);
 
@@ -296,7 +314,7 @@ _parse_pbc_playlist (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNs
 	  _vcd_list_append (_pbc->item_id_list, _item_ref);
 	}
       else
-	printf ("%s %s -- sorry, not fully implemented yet\n", __PRETTY_FUNCTION__, cur->name);
+	assert (0);
     }
 
   _vcd_list_append (obj->pbc_list, _pbc);
@@ -310,8 +328,6 @@ _parse_pbc_endlist (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsP
   xmlNodePtr cur;
   pbc_t *_pbc;
 
-  printf ("%s\n", __PRETTY_FUNCTION__);
-
   _pbc = vcd_pbc_new (PBC_END);
 
   GET_PROP_STR (_pbc->id, "id", doc, node, ns);
@@ -322,6 +338,7 @@ _parse_pbc_endlist (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsP
 	continue; 
       
       printf ("%s %s -- sorry, not fully implemented yet\n", __PRETTY_FUNCTION__, cur->name);
+      assert (0);
     }
 
   _vcd_list_append (obj->pbc_list, _pbc);
@@ -333,10 +350,6 @@ static bool
 _parse_pbc (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
   xmlNodePtr cur;
-
-  assert (obj->pbc_list == NULL);
-
-  obj->pbc_list = _vcd_list_new ();
 
   FOR_EACH (cur, node)
     {
@@ -352,7 +365,7 @@ _parse_pbc (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
       else if (!xmlStrcmp (cur->name, "endlist")) 
 	rc = _parse_pbc_endlist (obj, doc, cur, ns);
       else 
-	printf ("????? %s\n", cur->name);
+	assert (0);
 
       if (rc)
 	return rc;
@@ -366,27 +379,20 @@ _parse_pbc (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
  */
 
 static bool
-_parse_cdda_track (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+_parse_mpeg_sequence (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
-  printf ("sorry, CDDA tracks not supported yet\n");
-  return true;
-}
-
-static bool
-_parse_mpeg_track (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
-{
-  struct mpeg_track_t *track;
+  struct sequence_t *sequence;
   xmlNodePtr cur;
 
-  track = malloc (sizeof (struct mpeg_track_t));
-  memset (track, 0, sizeof (struct mpeg_track_t));
+  sequence = malloc (sizeof (struct sequence_t));
+  memset (sequence, 0, sizeof (struct sequence_t));
 
-  _vcd_list_append (obj->mpeg_track_list, track);
+  _vcd_list_append (obj->sequence_list, sequence);
 
-  GET_PROP_STR (track->id, "id", doc, node, ns);
-  GET_PROP_STR (track->src, "src", doc, node, ns);
+  GET_PROP_STR (sequence->id, "id", doc, node, ns);
+  GET_PROP_STR (sequence->src, "src", doc, node, ns);
 
-  track->entry_point_list = _vcd_list_new ();
+  sequence->entry_point_list = _vcd_list_new ();
 
   FOR_EACH (cur, node)
     if (!xmlStrcmp (cur->name, "entry"))
@@ -395,38 +401,29 @@ _parse_mpeg_track (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPt
 	memset (entry, 0, sizeof (struct entry_point_t));
 
 	GET_PROP_STR (entry->id, "id", doc, cur, ns);
-	GET_ELEM_STR (entry->timestamp, "entry", doc, cur, ns);
+	GET_ELEM_DOUBLE (entry->timestamp, "entry", doc, cur, ns);
 
-	_vcd_list_append (track->entry_point_list, entry);
+	_vcd_list_append (sequence->entry_point_list, entry);
       }
     else
-      printf ("??? %s\n", cur->name);
+      assert (0);
 
   return false;
 }
 
 static bool
-_parse_tracks (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+_parse_sequences (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
   xmlNodePtr cur;
-
-  assert (obj->mpeg_track_list == NULL);
-
-  obj->mpeg_track_list = _vcd_list_new ();
 
   FOR_EACH (cur, node)
     {
       bool rc = false;
 
-      if (!xmlStrcmp (cur->name, "mpeg-track")) 
-	rc = _parse_mpeg_track (obj, doc, cur, ns);
-      else if (!xmlStrcmp (cur->name, "cdda-track")) 
-	rc = _parse_cdda_track (obj, doc, cur, ns);
+      if (!xmlStrcmp (cur->name, "sequence-item")) 
+	rc = _parse_mpeg_sequence (obj, doc, cur, ns);
       else
-	{
-	  printf ("unexpected element: %s\n", cur->name);
-	  rc = false;
-	}
+	assert (0);
 
       if (rc)
 	return rc;
@@ -457,14 +454,13 @@ _parse_file (struct vcdxml_t *obj, const char path[], xmlDocPtr doc, xmlNodePtr 
   FOR_EACH (cur, node)
     {
       GET_ELEM_STR (_name, "name", doc, cur, ns);
-      GET_ELSE printf ("??? %s\n", cur->name); 
+      GET_ELSE assert (0);
     }
 
   if (!_name)
     return true;
 
   {
-
     struct filesystem_t *_data;
     char *_tmp;
 
@@ -472,7 +468,6 @@ _parse_file (struct vcdxml_t *obj, const char path[], xmlDocPtr doc, xmlNodePtr 
     
     strcpy (_tmp, path);
     strcat (_tmp, _name);
-
 	    
     _data = malloc (sizeof (struct filesystem_t));
     _data->name = _tmp;
@@ -536,8 +531,8 @@ _parse_folder (struct vcdxml_t *obj, const char path[], xmlDocPtr doc, xmlNodePt
       else if (!xmlStrcmp (cur->name, "file"))
 	rc = _parse_file (obj, new_path, doc, cur, ns);
       else 
-	printf ("?????\n");
-
+	assert (0);
+      
       if (new_path == NULL)
 	rc = true;
 
@@ -553,10 +548,6 @@ _parse_filesystem (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPt
 {
   xmlNodePtr cur;
 
-  assert (obj->filesystem == NULL);
-
-  obj->filesystem = _vcd_list_new ();
-
   FOR_EACH (cur, node)
     {
       bool rc = true;
@@ -569,7 +560,7 @@ _parse_filesystem (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPt
       else if (!xmlStrcmp (cur->name, "file"))
 	rc = _parse_file (obj, "", doc, cur, ns);
       else 
-	printf ("?????\n");
+	assert (0);
 
       if (rc)
 	return rc;
@@ -592,6 +583,12 @@ _parse_videocd (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr n
   GET_PROP_STR (obj->class, "class", doc, node, ns);
   GET_PROP_STR (obj->version, "version", doc, node, ns);
 
+  obj->segment_list = _vcd_list_new ();
+  obj->pbc_list = _vcd_list_new ();
+  obj->sequence_list = _vcd_list_new ();
+  obj->filesystem = _vcd_list_new ();
+  obj->option_list = _vcd_list_new ();
+
   FOR_EACH (cur, node)
     {
       bool rc = false;
@@ -610,12 +607,12 @@ _parse_videocd (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr n
 	rc = _parse_pvd (obj, doc, cur, ns);
       else if (!xmlStrcmp (cur->name, "pbc")) 
 	rc = _parse_pbc (obj, doc, cur, ns);
-      else if (!xmlStrcmp (cur->name, "items")) 
-	rc = _parse_items (obj, doc, cur, ns);
+      else if (!xmlStrcmp (cur->name, "segment-items")) 
+	rc = _parse_segments (obj, doc, cur, ns);
       else if (!xmlStrcmp (cur->name, "filesystem")) 
 	rc = _parse_filesystem (obj, doc, cur, ns);
-      else if (!xmlStrcmp (cur->name, "tracks")) 
-	rc = _parse_tracks (obj, doc, cur, ns);
+      else if (!xmlStrcmp (cur->name, "sequence-items")) 
+	rc = _parse_sequences (obj, doc, cur, ns);
       else printf ("unexpected element: %s\n", cur->name);
 
       if (rc)

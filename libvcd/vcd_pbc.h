@@ -107,7 +107,7 @@ _vcd_pbc_finalize (VcdObj *obj);
 bool
 _vcd_pbc_available (const VcdObj *obj);
 
-uint32_t
+uint16_t
 _vcd_pbc_max_lid (const VcdObj *obj);
 
 void

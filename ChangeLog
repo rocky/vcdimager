@@ -1,3 +1,15 @@
+2001-05-14  Herbert Valerio Riedel  <hvr@gnu.org>
+
+ 	* improved xml parsing
+	* added some more customizable info.vcd flags
+	
+	* frontends/xml/videocd.dtd: some redesign done...
+
+	* libvcd/vcd.c: replaced set param by type safe variant
+		added some more parameters
+
+	* frontends/xml/vcdxml.c: bail out on validation errors
+
 2001-05-13  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_pbc.c: improved PBC support, consistency checks missing..

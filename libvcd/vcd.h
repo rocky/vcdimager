@@ -53,19 +53,28 @@ vcd_obj_new (vcd_type_t vcd_type);
 typedef enum
 {
   VCD_PARM_INVALID = 0,
-  VCD_PARM_VOLUME_LABEL,        /* char *  max length 32 */
-  VCD_PARM_ALBUM_ID,            /* char *  max length 16 */
-  VCD_PARM_VOLUME_COUNT,        /* unsigned */
-  VCD_PARM_VOLUME_NUMBER,       /* unsigned */
-  VCD_PARM_APPLICATION_ID,      /* char *  max length 128 */
-  VCD_PARM_SEC_TYPE,            /* int     (2336|2352)   */
+  VCD_PARM_VOLUME_ID,           /* char *          max length 32  */
+  VCD_PARM_ALBUM_ID,            /* char *          max length 16  */
+  VCD_PARM_VOLUME_COUNT,        /* unsigned        [1..65535]     */
+  VCD_PARM_VOLUME_NUMBER,       /* unsigned        [0..65535]     */
+  VCD_PARM_RESTRICTION,         /* unsigned        [0..3]         */
+  VCD_PARM_NEXT_VOL_LID2,       /* bool */
+  VCD_PARM_NEXT_VOL_SEQ2,       /* bool */
+  VCD_PARM_APPLICATION_ID,      /* char *          max length 128 */
+  VCD_PARM_SEC_TYPE,            /* unsigned        [2336, 2352]   */
   VCD_PARM_BROKEN_SVCD_MODE     /* bool */
 }
 vcd_parm_t;
 
 /* sets VideoCD parameter */
-void 
-vcd_obj_set_param (VcdObj *obj, vcd_parm_t param, const void *arg);
+int 
+vcd_obj_set_param_uint (VcdObj *obj, vcd_parm_t param, unsigned arg);
+
+int 
+vcd_obj_set_param_str (VcdObj *obj, vcd_parm_t param, const char *arg);
+
+int 
+vcd_obj_set_param_bool (VcdObj *obj, vcd_parm_t param, bool arg);
 
 /* add custom files; if raw_flag set, the data source has to include a
    mode2 subheader, and thus needs to be a multiple of 2336 byte blocksize */
@@ -86,6 +95,10 @@ vcd_obj_append_sequence_play_item (VcdObj *obj, VcdMpegSource *mpeg_source,
 int 
 vcd_obj_add_sequence_entry (VcdObj *obj, const char sequence_id[], 
                             double entry_time, const char entry_id[]);
+
+int 
+vcd_obj_add_sequence_pause (VcdObj *obj, const char sequence_id[], 
+                            double pause_timestamp, const char pause_id[]);
 
 int 
 vcd_obj_append_segment_play_item (VcdObj *obj, VcdMpegSource *mpeg_source, 

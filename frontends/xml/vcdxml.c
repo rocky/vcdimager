@@ -27,8 +27,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <libxml/parserInternals.h>
 #include <libxml/parser.h>
 #include <libxml/valid.h>
+#include <libxml/xmlmemory.h>
+#include <libxml/xmlerror.h>
+
 #include "videocd_dtd.h"
 
 #include "vcd_types.h"
@@ -41,12 +45,14 @@
 #define VIDEOCD_DTD_SYSID "http://www.gnu.org/software/vcdimager/videocd.dtd"
 #define VIDEOCD_DTD_XMLNS "http://www.gnu.org/software/vcdimager/1.0/"
 
-static xmlExternalEntityLoader _xmlEEL = 0;
+/* static xmlExternalEntityLoader _xmlExternalEntityLoaderDefault = 0; */
+static bool videocd_dtd_loaded = false;
 
 static xmlParserInputPtr 
-_myEEL (const char *URL, const char *ID, xmlParserCtxtPtr context)
+_xmlExternalEntityLoader (const char *URL, const char *ID, xmlParserCtxtPtr context)
 {
-  printf ("%s (\"%s\", \"%s\", %p);\n", __PRETTY_FUNCTION__, URL, ID, context);
+
+  videocd_dtd_loaded = true;
 
   if (ID && !strcmp (ID, VIDEOCD_DTD_PUBID))
     {
@@ -60,27 +66,63 @@ _myEEL (const char *URL, const char *ID, xmlParserCtxtPtr context)
 				  XML_CHAR_ENCODING_8859_1);
     }
 
+  printf ("%s (\"%s\", \"%s\", %p);\n", __PRETTY_FUNCTION__, URL, ID, context);
   printf ("unsupported doctype encountered\n");
   exit (EXIT_FAILURE);
   
-  return _xmlEEL (URL, ID, context);
+  /* return _xmlExternalEntityLoaderDefault (URL, ID, context); */
 }
 
 static void
 _init_xml (void)
 {
-  extern int xmlDoValidityCheckingDefaultValue;
   static bool _init_done = false;
 
-  assert (_init_done == false);
+  assert (!_init_done);
   _init_done = true;
 
-  xmlDoValidityCheckingDefaultValue = 1;
+  /* _xmlExternalEntityLoaderDefault = xmlGetExternalEntityLoader (); */
+  xmlSetExternalEntityLoader (_xmlExternalEntityLoader);
+}
 
-  xmlKeepBlanksDefault (0);
+static xmlDocPtr
+_xmlParseFile(const char *filename)
+{
+  xmlDocPtr ret = NULL;
+  xmlParserCtxtPtr ctxt = NULL;
+  char *directory = NULL;
 
-  _xmlEEL = xmlGetExternalEntityLoader ();
-  xmlSetExternalEntityLoader (_myEEL);
+  /* assert (_init_done == true); */
+
+  ctxt = xmlCreateFileParserCtxt(filename);
+  
+  if (!ctxt)
+    return NULL;
+
+  ctxt->keepBlanks = false;
+  ctxt->pedantic = true; 
+  ctxt->validate = true;
+  ctxt->vctxt.nodeMax = 0;
+  ctxt->vctxt.error = xmlParserValidityError;
+  ctxt->vctxt.warning = xmlParserValidityWarning;
+
+  if (!ctxt->directory 
+      && (directory = xmlParserGetDirectory(filename)))
+    ctxt->directory = (char *) xmlStrdup((xmlChar *) directory);
+  
+  xmlParseDocument(ctxt);
+
+  if (ctxt->wellFormed && ctxt->valid)
+    ret = ctxt->myDoc;
+  else
+    {
+      xmlFreeDoc (ctxt->myDoc);
+      ctxt->myDoc = NULL;
+    }
+
+  xmlFreeParserCtxt(ctxt);
+    
+  return(ret);
 }
 
 int 
@@ -97,11 +139,18 @@ main (int argc, const char *argv[])
       return EXIT_FAILURE;
     }
 
-  if (!(vcd_doc = xmlParseFile (argv[1])))
+  if (!(vcd_doc = _xmlParseFile (argv[1])))
     {
       printf ("parsing file failed\n");
       return EXIT_FAILURE;
     }
+
+  if (!videocd_dtd_loaded)
+    {
+      printf ("doctype declaration missing\n");
+      return EXIT_FAILURE;
+    }
+    
 
   do {
     xmlNodePtr root;

@@ -415,67 +415,150 @@ vcd_obj_write_cuefile (VcdObj *obj, VcdDataSink *cue_file,
   return 0;
 }
 
-void
-vcd_obj_set_param (VcdObj *obj, vcd_parm_t param, const void *arg)
+int 
+vcd_obj_set_param_uint (VcdObj *obj, vcd_parm_t param, unsigned arg)
 {
-  assert (arg != NULL);
+  assert (obj != NULL);
 
-  switch (param) {
-  case VCD_PARM_VOLUME_LABEL:
-    free (obj->iso_volume_label);
-    obj->iso_volume_label = strdup ((const char *) arg);
-    if (strlen (obj->iso_volume_label) > 32)
-      vcd_warn ("Volume label too long, will be truncated");
-    break;
-
-  case VCD_PARM_APPLICATION_ID:
-    free (obj->iso_application_id);
-    obj->iso_application_id = strdup ((const char *) arg);
-    if (strlen (obj->iso_application_id) > 128)
-      vcd_warn ("Application ID too long, will be truncated");
-    break;
-  
-  case VCD_PARM_ALBUM_ID:
-    free (obj->info_album_id);
-    obj->info_album_id = strdup ((const char *) arg);
-    if (strlen (obj->info_album_id) > 16)
-      vcd_warn ("Album ID too long, will be truncated");
-    break;
-
-  case VCD_PARM_VOLUME_COUNT:
-    obj->info_volume_count = (*(const unsigned *) arg);
-    break;
-
-  case VCD_PARM_VOLUME_NUMBER:
-    obj->info_volume_number = (*(const unsigned *) arg);
-    break;
-
-  case VCD_PARM_SEC_TYPE:
-    switch (*(const int *)arg) {
-    case 2336:
-      obj->bin_file_2336_flag = true;
+  switch (param) 
+    {
+    case VCD_PARM_VOLUME_COUNT:
+      obj->info_volume_count = arg;
+      if (!IN (obj->info_volume_count, 1, 65535))
+        {
+          obj->info_volume_count = CLAMP (obj->info_volume_count, 1, 65535);
+          vcd_warn ("volume count out of range, clamping to range");
+        }
+      vcd_debug ("changed volume count to %u", obj->info_volume_count);
       break;
-    case 2352:
-      obj->bin_file_2336_flag = false;
+
+    case VCD_PARM_VOLUME_NUMBER:
+      obj->info_volume_number = arg;
+      if (!IN (obj->info_volume_number, 0, 65534))
+        {
+          obj->info_volume_number = CLAMP (obj->info_volume_number, 0, 65534);
+          vcd_warn ("volume number out of range, clamping to range");
+        }
+      vcd_debug ("changed volume number to %u", obj->info_volume_number);
       break;
+
+    case VCD_PARM_RESTRICTION:
+      obj->info_restriction = arg;
+      if (!IN (obj->info_restriction, 0, 3))
+        {
+          obj->info_restriction = CLAMP (obj->info_restriction, 0, 65534);
+          vcd_warn ("restriction out of range, clamping to range");
+        }
+      vcd_debug ("changed restriction number to %u", obj->info_restriction);
+      break;
+
+    case VCD_PARM_SEC_TYPE:
+      switch (arg)
+        {
+        case 2336:
+          obj->bin_file_2336_flag = true;
+          break;
+        case 2352:
+          obj->bin_file_2336_flag = false;
+          break;
+        default:
+          vcd_warn ("invalid argument for image sector size, leaving old value");
+        }
+      vcd_debug ("changed sector mode to %u byte", 
+                 obj->bin_file_2336_flag ? 2336 : 2352);
+      break;
+
     default:
       assert (0);
+      break;
     }
-    break;
-  case VCD_PARM_BROKEN_SVCD_MODE:
-    if (obj->type == VCD_TYPE_SVCD)
-      {
-        if ((obj->broken_svcd_mode_flag = *(const bool*)arg))
-          vcd_warn ("!! broken SVCD mode activated," 
-                    " SVCD will not be compliant !!");
-      }
-    else
-      vcd_error ("parameter not applicable for vcd type");
-    break;
-  default:
-    assert (0);
-    break;
-  }
+
+  return 0;
+}
+
+int 
+vcd_obj_set_param_str (VcdObj *obj, vcd_parm_t param, const char *arg)
+{
+  assert (obj != NULL);
+  assert (arg != NULL);
+
+  switch (param) 
+    {
+    case VCD_PARM_VOLUME_ID:
+      free (obj->iso_volume_label);
+      obj->iso_volume_label = strdup (arg);
+      if (strlen (obj->iso_volume_label) > 32)
+        {
+          obj->iso_volume_label[32] = '\0';
+          vcd_warn ("Volume label too long, will be truncated");
+        }
+      vcd_debug ("changed volume label to `%s'", obj->iso_volume_label);
+      break;
+
+    case VCD_PARM_APPLICATION_ID:
+      free (obj->iso_application_id);
+      obj->iso_application_id = strdup (arg);
+      if (strlen (obj->iso_application_id) > 128)
+        {
+          obj->iso_application_id[128] = '\0';
+          vcd_warn ("Application ID too long, will be truncated");
+        }
+      vcd_debug ("changed application id to `%s'", obj->iso_application_id);
+      break;
+      
+    case VCD_PARM_ALBUM_ID:
+      free (obj->info_album_id);
+      obj->info_album_id = strdup (arg);
+      if (strlen (obj->info_album_id) > 16)
+        {
+          obj->info_album_id[16] = '\0';
+          vcd_warn ("Album ID too long, will be truncated");
+        }
+      vcd_debug ("changed album id to `%s'", obj->info_album_id);
+      break;
+
+    default:
+      assert (0);
+      break;
+    }
+
+  return 0;
+}
+
+int 
+vcd_obj_set_param_bool (VcdObj *obj, vcd_parm_t param, bool arg)
+{
+  assert (obj != NULL);
+
+  switch (param) 
+    {
+    case VCD_PARM_NEXT_VOL_LID2:
+      obj->info_use_lid2 = arg ? true : false;
+      vcd_debug ("changing 'next volume use lid 2' to %d", obj->info_use_lid2);
+      break;
+
+    case VCD_PARM_NEXT_VOL_SEQ2:
+      obj->info_use_seq2 = arg ? true : false;
+      vcd_debug ("changing 'next volume use sequence 2' to %d", obj->info_use_seq2);
+      break;
+
+    case VCD_PARM_BROKEN_SVCD_MODE:
+      if (obj->type == VCD_TYPE_SVCD)
+        {
+          if ((obj->broken_svcd_mode_flag = arg ? true : false))
+            vcd_warn ("!! broken SVCD mode activated," 
+                      " SVCD will not be compliant !!");
+        }
+      else
+        vcd_error ("parameter not applicable for vcd type");
+      break;
+
+    default:
+      assert (0);
+      break;
+    }
+
+  return 0;
 }
 
 int

@@ -23,7 +23,7 @@
   src       %URI;        #REQUIRED"
 >
 
-<!ELEMENT videocd (option*,info,pvd,filesystem?,items?,tracks,pbc?)>
+<!ELEMENT videocd (option*,info,pvd,filesystem?,segment-items?,sequence-items,pbc?)>
 <!ATTLIST videocd
   class     CDATA                    #REQUIRED
   version   CDATA                    #REQUIRED
@@ -36,12 +36,14 @@
   value 	CDATA   #IMPLIED
 >
 
-<!ELEMENT info (album-id?,volume-count?,volume-number?,restriction?,time-offset?)>
+<!ELEMENT info (album-id?,volume-count?,volume-number?,next-volume-use-sequence2?,next-volume-use-lid2?,restriction?,time-offset?)>
 <!ELEMENT album-id (#PCDATA)>
 <!ELEMENT volume-count (#PCDATA)>
 <!ELEMENT volume-number (#PCDATA)>
 <!ELEMENT restriction (#PCDATA)>
 <!ELEMENT time-offset (#PCDATA)>
+<!ELEMENT next-volume-use-sequence2 EMPTY>
+<!ELEMENT next-volume-use-lid2 EMPTY>
 
 <!ELEMENT pvd (volume-id?,system-id?,application-id?,preparer-id?,publisher-id)>
 <!ELEMENT volume-id (#PCDATA)>
@@ -59,16 +61,16 @@
 >
 <!ELEMENT name (#PCDATA)>
 
-<!ELEMENT items (mpeg-item)*>
-<!ELEMENT mpeg-item EMPTY>
-<!ATTLIST mpeg-item 
+<!ELEMENT segment-items (segment-item)+>
+<!ELEMENT segment-item EMPTY>
+<!ATTLIST segment-item 
   %itemattrs;
 >
 
-<!ELEMENT tracks (mpeg-track*,cdda-track*)>
+<!ELEMENT sequence-items (sequence-item)+>
 
-<!ELEMENT mpeg-track (entry*,auto-pause*)>
-<!ATTLIST mpeg-track
+<!ELEMENT sequence-item (entry*,auto-pause*)>
+<!ATTLIST sequence-item
   %itemattrs;
 >
 
@@ -79,16 +81,21 @@
   id        ID           #REQUIRED
 >
 
-<!ELEMENT cdda-track EMPTY>
-<!ATTLIST cdda-track
-  %itemattrs;
->
-
-<!ELEMENT pbc (selection|playlist|endlist)*>
+<!ELEMENT pbc (selection|playlist|endlist)+>
 
 <!ENTITY % pbcattrs
 " id        ID           #REQUIRED
   rejected  (true|false) 'false'"
+>
+
+<!ENTITY % XY "CDATA">
+
+<!ENTITY % ofsattrs
+ " ref       IDREF       #REQUIRED
+   x1        %XY;        #IMPLIED
+   y1        %XY;        #IMPLIED
+   x2        %XY;        #IMPLIED
+   y2        %XY;        #IMPLIED"
 >
 
 <!ELEMENT selection (bsn?,prev?,next?,return?,default*,timeout?,wait?,loop?,play-item?,select*)>
@@ -125,19 +132,19 @@
 >
 
 <!ATTLIST prev 
-  ref       IDREF       #REQUIRED
+  %ofsattrs;
 >
 
 <!ATTLIST next
-  ref       IDREF       #REQUIRED
+  %ofsattrs;
 >
 
 <!ATTLIST return 
-  ref       IDREF       #REQUIRED
+  %ofsattrs;
 >
 
 <!ATTLIST default
-  ref       IDREF       #REQUIRED
+  %ofsattrs;
 >
 
 <!ATTLIST timeout
@@ -149,6 +156,6 @@
 >
 
 <!ATTLIST select
-  ref       IDREF       #REQUIRED
+  %ofsattrs;
 >
 

@@ -30,14 +30,18 @@
 struct vcdxml_t {
   xmlChar *class;
   xmlChar *version;
-  xmlChar *options;
+  VcdList *option_list;
+
   struct {
     xmlChar *album_id;
-    xmlChar *volume_count;
-    xmlChar *volume_number;
-    xmlChar *restriction;
-    xmlChar *time_offset;
+    unsigned volume_count;
+    unsigned volume_number;
+    unsigned restriction;
+    bool use_sequence2;
+    bool use_lid2;
+    double time_offset;
   } info;
+
   struct {
     xmlChar *volume_id;
     xmlChar *system_id;
@@ -48,25 +52,31 @@ struct vcdxml_t {
 
   VcdList *pbc_list;
 
-  VcdList *mpeg_track_list;
+  VcdList *sequence_list;
 
-  VcdList *mpeg_item_list;
+  VcdList *segment_list;
 
   VcdList *filesystem;
 };
 
-struct mpeg_track_t {
+struct option_t {
+  xmlChar *name;
+  xmlChar *value;
+};
+
+struct sequence_t {
   xmlChar *id;
   xmlChar *src;
-  VcdList *entry_point_list;
+  VcdList *entry_point_list; /* entry_point_t */
+  VcdList *autopause_list; /* double * */
 };
 
 struct entry_point_t {
   xmlChar *id;
-  xmlChar *timestamp;
+  double timestamp;
 };
 
-struct mpeg_item_t
+struct segment_t
 {
   xmlChar *id;
   xmlChar *src;

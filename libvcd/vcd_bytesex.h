@@ -26,6 +26,7 @@
 #define UINT16_SWAP_LE_BE(val) ((uint16_t) ( \
     (((uint16_t) (val) & (uint16_t) 0x00ffU) << 8) | \
     (((uint16_t) (val) & (uint16_t) 0xff00U) >> 8)))
+
 #define UINT32_SWAP_LE_BE(val) ((uint32_t) ( \
     (((uint32_t) (val) & (uint32_t) 0x000000ffU) << 24) | \
     (((uint32_t) (val) & (uint32_t) 0x0000ff00U) <<  8) | \
@@ -65,7 +66,7 @@ uint16_to_be (uint16_t val)
   return UINT16_TO_BE (val);
 }
 
-static inline uint16_t
+static inline uint32_t
 uint32_to_be (uint32_t val) 
 {
   return UINT32_TO_BE (val);
@@ -86,9 +87,7 @@ uint16_t from_723(uint32_t p);
 uint32_t from_733(uint64_t p);
 
 uint8_t  to_bcd8(uint8_t n);
-
 uint8_t  from_bcd8(uint8_t p);
-
 
 void
 lba_to_msf(uint32_t lba, msf_t *msf);

@@ -47,7 +47,7 @@ static const char _rcsid[] = "$Id$";
 /* defaults */
 #define DEFAULT_CUE_FILE       "videocd.cue"
 #define DEFAULT_BIN_FILE       "videocd.bin"
-#define DEFAULT_VOLUME_LABEL   "VideoCD"
+#define DEFAULT_VOLUME_ID      "VideoCD"
 #define DEFAULT_APPLICATION_ID ""
 #define DEFAULT_ALBUM_ID       ""
 #define DEFAULT_TYPE           "vcd2"
@@ -233,7 +233,7 @@ main (int argc, const char *argv[])
 
   gl.type = DEFAULT_TYPE;
 
-  gl.volume_label = DEFAULT_VOLUME_LABEL;
+  gl.volume_label = DEFAULT_VOLUME_ID;
   gl.application_id = DEFAULT_APPLICATION_ID;
   gl.album_id = DEFAULT_ALBUM_ID;
   
@@ -268,7 +268,7 @@ main (int argc, const char *argv[])
          "FILE"},
 
         {"iso-volume-label", 'l', POPT_ARG_STRING, &gl.volume_label, 0,
-         "specify ISO volume label for video cd (default: '" DEFAULT_VOLUME_LABEL
+         "specify ISO volume label for video cd (default: '" DEFAULT_VOLUME_ID
          "')", "LABEL"},
 
         {"iso-application-id", '\0', POPT_ARG_STRING, &gl.application_id, 0,
@@ -420,22 +420,22 @@ main (int argc, const char *argv[])
 
   gl_vcd_obj = vcd_obj_new (type_id);
 
-  vcd_obj_set_param (gl_vcd_obj, VCD_PARM_VOLUME_LABEL, gl.volume_label);
-  vcd_obj_set_param (gl_vcd_obj, VCD_PARM_APPLICATION_ID, gl.application_id);
-  vcd_obj_set_param (gl_vcd_obj, VCD_PARM_ALBUM_ID, gl.album_id);
+  vcd_obj_set_param_str (gl_vcd_obj, VCD_PARM_VOLUME_ID, gl.volume_label);
+  vcd_obj_set_param_str (gl_vcd_obj, VCD_PARM_APPLICATION_ID, gl.application_id);
+  vcd_obj_set_param_str (gl_vcd_obj, VCD_PARM_ALBUM_ID, gl.album_id);
 
-  vcd_obj_set_param (gl_vcd_obj, VCD_PARM_VOLUME_COUNT, &gl.volume_count);
-  vcd_obj_set_param (gl_vcd_obj, VCD_PARM_VOLUME_NUMBER, &gl.volume_number);
+  vcd_obj_set_param_uint (gl_vcd_obj, VCD_PARM_VOLUME_COUNT, gl.volume_count);
+  vcd_obj_set_param_uint (gl_vcd_obj, VCD_PARM_VOLUME_NUMBER, gl.volume_number);
 
   {
     int sect_size = gl.sector_2336_flag ? M2RAW_SIZE : CDDA_SIZE;
-    vcd_obj_set_param (gl_vcd_obj, VCD_PARM_SEC_TYPE, &sect_size);
+    vcd_obj_set_param_uint (gl_vcd_obj, VCD_PARM_SEC_TYPE, sect_size);
   }
 
   if (type_id == VCD_TYPE_SVCD)
     {
       bool __tmp = gl.broken_svcd_mode_flag;
-      vcd_obj_set_param (gl_vcd_obj, VCD_PARM_BROKEN_SVCD_MODE, &__tmp);
+      vcd_obj_set_param_bool (gl_vcd_obj, VCD_PARM_BROKEN_SVCD_MODE, __tmp);
     }
 
   {

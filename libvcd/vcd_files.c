@@ -154,7 +154,7 @@ set_entries_vcd (VcdObj *obj, void *buf)
       track_idx++;
     }
 
-  entries_vcd.entry_count = UINT16_TO_BE(idx);
+  entries_vcd.entry_count = UINT16_TO_BE (idx);
 
   memcpy(buf, &entries_vcd, sizeof(entries_vcd));
 }
@@ -240,7 +240,7 @@ set_info_vcd(VcdObj *obj, void *buf)
   assert (sizeof (InfoVcd) == 2048);
   assert (_vcd_list_length (obj->mpeg_track_list) <= 98);
   
-  memset (&info_vcd, 0, sizeof(info_vcd));
+  memset (&info_vcd, 0, sizeof (info_vcd));
 
   switch (obj->type)
     {
@@ -271,14 +271,18 @@ set_info_vcd(VcdObj *obj, void *buf)
                     obj->info_album_id,
                     sizeof(info_vcd.album_desc));
 
-  info_vcd.vol_count = UINT16_TO_BE(obj->info_volume_count);
-  info_vcd.vol_id = UINT16_TO_BE(obj->info_volume_number);
+  info_vcd.vol_count = UINT16_TO_BE (obj->info_volume_count);
+  info_vcd.vol_id = UINT16_TO_BE (obj->info_volume_number);
 
   switch (obj->type)
     {
     case VCD_TYPE_VCD2:
     case VCD_TYPE_SVCD:
       /* NTSC/PAL bitset */
+
+      info_vcd.flags.restriction = obj->info_restriction;
+      info_vcd.flags.use_lid2 = obj->info_use_lid2;
+      info_vcd.flags.use_track3 = obj->info_use_seq2;
 
       n = 0;
       _VCD_LIST_FOREACH (node, obj->mpeg_track_list)
@@ -298,10 +302,9 @@ set_info_vcd(VcdObj *obj, void *buf)
           n++;
         }
       
-      info_vcd.psd_size = UINT32_TO_BE(get_psd_size (obj, false));
+      info_vcd.psd_size = uint32_to_be (get_psd_size (obj, false));
       info_vcd.offset_mult = INFO_OFFSET_MULT;
-      info_vcd.lot_entries = UINT32_TO_BE (_vcd_pbc_max_lid (obj));
-      /* UINT16_TO_BE(_vcd_list_length (obj->mpeg_track_list) + 1); */
+      info_vcd.lot_entries = uint16_to_be (_vcd_pbc_max_lid (obj));
 
       if (_vcd_list_length (obj->mpeg_segment_list))
         {
@@ -332,7 +335,7 @@ set_info_vcd(VcdObj *obj, void *buf)
               segments += idx;
             }
 
-          info_vcd.item_count = UINT16_TO_BE(segments); 
+          info_vcd.item_count = UINT16_TO_BE (segments); 
 
           lba_to_msf (obj->mpeg_segment_start_extent + 150, &info_vcd.first_seg_addr);
         }
@@ -569,7 +572,7 @@ set_search_dat (VcdObj *obj, void *buf)
   strncpy (search_dat.file_id, SEARCH_FILE_ID, sizeof (SEARCH_FILE_ID));
   
   search_dat.version = SEARCH_VERSION;
-  search_dat.scan_points = UINT16_TO_BE (_get_scanpoint_count (obj));
+  search_dat.scan_points = uint16_to_be (_get_scanpoint_count (obj));
   search_dat.time_interval = SEARCH_TIME_INTERVAL;
 
   memcpy (buf, &search_dat, sizeof (search_dat));
@@ -698,7 +701,7 @@ set_scandata_dat (VcdObj *obj, void *buf)
   
   scandata_dat1->version = 0x01;
   scandata_dat1->reserved = 0x00;
-  scandata_dat1->scandata_count = UINT16_TO_BE (_get_scanpoint_count (obj));
+  scandata_dat1->scandata_count = uint16_to_be (_get_scanpoint_count (obj));
 
   scandata_dat1->track_count = UINT16_TO_BE (tracks);
   scandata_dat1->spi_count = UINT16_TO_BE (0);

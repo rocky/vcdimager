@@ -88,6 +88,9 @@ struct _VcdObj {
   char *info_album_id;
   unsigned info_volume_count;
   unsigned info_volume_number;
+  unsigned info_restriction;
+  bool info_use_seq2;
+  bool info_use_lid2;
 
   /* input */
   unsigned mpeg_segment_start_extent;

@@ -60,6 +60,32 @@ _wtime (int seconds)
   return 254;
 }
 
+enum _sel_mode_t {
+  _SEL_MODE_NORMAL = 0,
+  _SEL_MODE_MULTI,
+  _SEL_MODE_MULTI_ONLY
+};
+
+static enum _sel_mode_t
+_get_sel_mode (const pbc_t *_pbc)
+{
+  enum _sel_mode_t _mode = _SEL_MODE_NORMAL;
+
+  if (_vcd_list_length (_pbc->default_id_list) > 1)
+    _mode = _SEL_MODE_MULTI_ONLY;
+  
+  if (_mode == _SEL_MODE_MULTI_ONLY 
+      && _vcd_list_length (_pbc->select_id_list))
+    {
+      assert (_vcd_list_length (_pbc->default_id_list)
+	      == _vcd_list_length (_pbc->select_id_list));
+
+      _mode = _SEL_MODE_MULTI;
+    }
+
+  return _mode;
+}
+
 unsigned
 _vcd_pbc_lid_lookup (const VcdObj *obj, const char item_id[])
 {
@@ -203,13 +229,15 @@ _vcd_pbc_available (const VcdObj *obj)
   return false;
 }
 
-uint32_t
+uint16_t
 _vcd_pbc_max_lid (const VcdObj *obj)
 {
-  if (!_vcd_pbc_available (obj))
-    return 0;
+  uint16_t retval = 0;
+  
+  if (_vcd_pbc_available (obj))
+    retval = _vcd_list_length (obj->pbc_list);
 
-  return (_vcd_list_length (obj->pbc_list));
+  return retval;
 }
 
 static size_t
@@ -227,18 +255,34 @@ _vcd_pbc_node_length (const pbc_t *_pbc, bool extended)
       break;
 
     case PBC_SELECTION:
-      n = _vcd_list_length (_pbc->default_id_list);
-      if (n > 1)
-	{ /* multi defaults */
-	  if (_vcd_list_length (_pbc->select_id_list))
-	    { /* if numeric selects are available they must be as many as 
-		 multi default targets exists */
-	      assert (_vcd_list_length (_pbc->select_id_list) == n);
-	      n *= 2;
-	    }
-	}
-      else /* only numeric targets */
-	n = _vcd_list_length (_pbc->select_id_list);
+      n = 0;
+
+      {
+	enum _sel_mode_t _mode;
+
+	_mode = _get_sel_mode (_pbc);
+	
+	switch (_mode)
+	  {
+	  case _SEL_MODE_MULTI:
+	    n = _vcd_list_length (_pbc->select_id_list) + _vcd_list_length (_pbc->default_id_list);
+	    break;
+
+	  case _SEL_MODE_MULTI_ONLY:
+	    n = _vcd_list_length (_pbc->default_id_list);
+	    assert (_vcd_list_length (_pbc->select_id_list) == 0);
+	    break;
+
+	  case _SEL_MODE_NORMAL:
+	    n = _vcd_list_length (_pbc->select_id_list);
+	    assert (_vcd_list_length (_pbc->default_id_list) <= 1);
+	    break;
+
+	  default:
+	    assert (0);
+	    break;
+	  }
+      }
 
       retval = offsetof (PsdSelectionListDescriptor, ofs[n]);
 
@@ -334,11 +378,10 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
     case PBC_SELECTION:
       {
 	PsdSelectionListDescriptor *_md = buf;
-	enum {
-	  _SEL_MODE_NORMAL,
-	  _SEL_MODE_MULTI,
-	  _SEL_MODE_MULTI_ONLY
-	} _mode = _SEL_MODE_NORMAL;
+
+	enum _sel_mode_t _mode;
+
+	_mode = _get_sel_mode (_pbc);
 
 	if (_vcd_list_length (_pbc->default_id_list) > 1)
 	  _mode = _SEL_MODE_MULTI_ONLY;
