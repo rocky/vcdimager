@@ -23,7 +23,6 @@
 
 #include <cdio/cdio.h>
 #include <libvcd/types.h>
-#include <libvcd/logging.h>
 
 /* Private includes */
 #include "bytesex_asm.h"
