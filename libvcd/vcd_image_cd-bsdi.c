@@ -65,10 +65,14 @@ typedef struct {
   bool init;
 } _img_cd_src_t;
 
+static const u_char scsi_cdblen[8] = {6, 10, 10, 12, 12, 12, 10, 10};
+
 static int
 _scsi_cmd (int fd, struct scsi_user_cdb *sucp, const char *tag)
 {
   u_char *cp;
+
+  sucp->suc_cdblen = scsi_cdblen[(sucp->suc_cdb[0] >> 5) & 7];
 
   if  (ioctl (fd, SCSIRAWCDB, sucp))
     {
@@ -149,7 +153,6 @@ _set_bsize (int fd, unsigned bsize)
   suc.suc_cdb[0] = 0x15;
   suc.suc_cdb[1] = 1 << 4;
   suc.suc_cdb[4] = 12;
-  suc.suc_cdblen = 6;;
 
   suc.suc_data = (u_char *)&mh;
   suc.suc_datalen = sizeof (mh);
@@ -192,8 +195,6 @@ _read_mode2 (int fd, void *buf, uint32_t lba, unsigned nblocks,
 
   if (!_workaround)
     suc.suc_cdb[9] = 0x58; /* 2336 mode2 mixed form */
-
-  suc.suc_cdblen = _workaround ? 10 : 12;
 
   suc.suc_data = buf;
   suc.suc_datalen = 2336 * nblocks;
@@ -273,8 +274,6 @@ _read_mode2_sector (void *user_data, void *data, uint32_t lsn, bool form2)
   return 0;
 }
 
-static const u_char scsi_cdblen[8] = {6, 10, 10, 12, 12, 12, 10, 10};
-
 static uint32_t 
 _stat_size (void *user_data)
 {
@@ -293,7 +292,6 @@ _stat_size (void *user_data)
   suc.suc_cdb[1] = 0; /* lba; msf: 0x2 */
   suc.suc_cdb[6] = 0xaa; /* CDROM_LEADOUT */
   suc.suc_cdb[8] = 12; /* ? */
-  suc.suc_cdblen = 10;
 
   suc.suc_data = buf;
   suc.suc_datalen = sizeof (buf);
@@ -351,6 +349,28 @@ _source_set_arg (void *user_data, const char key[], const char value[])
 }
 
 /*!
+  Eject media in CD drive. If successful, as a side effect we
+  also free obj.
+ */
+static int
+_vcd_eject_media (void *user_data) {
+    _img_cd_src_t *_obj = user_data;
+    struct scsi_user_cdb suc;
+
+    if (!_obj->init) _vcd_source_init(_obj);
+
+    if (_obj->fd == -1)
+       return 2;
+
+    memset(&suc, 0, sizeof (suc));
+    suc.suc_flags = SUC_READ;
+    suc.suc_cdb[0] = 0x1b;	/* CMD_START_STOP_DEVICE */
+    suc.suc_cdb[1] = 0x1;	/* immediate */
+    suc.suc_cdb[4] = 0x2;	/* eject */
+    return(_scsi_cmd(_obj->fd, &suc, "_eject_media"));
+}
+
+/*!
   Return a string containing the default VCD device if none is specified.
  */
 static char *
@@ -368,6 +388,7 @@ vcd_image_source_new_cd (void)
   _img_cd_src_t *_data;
 
   vcd_image_source_funcs _funcs = {
+    .eject_media       = _vcd_eject_media,
     .free              = _source_free,
     .get_default_device= _vcd_get_default_device,
     .read_mode2_sector = _read_mode2_sector,
@@ -388,5 +409,3 @@ vcd_image_source_new_cd (void)
   return NULL;
 #endif
 }
-
-
