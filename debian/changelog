@@ -1,8 +1,17 @@
-vcdimager (0.7.19+cvs-1) unstable; urgency=low
+vcdimager (0.7.19+cvs-1) UNRELEASED; urgency=low
 
   * CVS snapshot of 0.7.20.
 
- -- Nicolas Boullis <nboullis@debian.org>  Sun,  8 Feb 2004 23:50:23 +0100
+ -- Nicolas Boullis <nboullis@debian.org>  Wed, 18 Feb 2004 02:17:55 +0100
+
+vcdimager (0.7.14.debian.2-1) unstable; urgency=medium
+
+  * The "how did this get lost?" release.
+  * New "orig" tarball:
+    - redo the changes that were required and prepared for
+      0.7.14.debian.1-1 but somehow got lost...
+
+ -- Nicolas Boullis <nboullis@debian.org>  Mon, 16 Feb 2004 03:43:08 +0100
 
 vcdimager (0.7.14.debian.1-1) unstable; urgency=medium
 

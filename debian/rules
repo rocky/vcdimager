@@ -23,6 +23,8 @@ DEB_HOST_GNU_TYPE := $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
 DEB_BUILD_GNU_TYPE := $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 DEB_HOST_ARCH := $(shell dpkg-architecture -qDEB_HOST_ARCH)
 
+LIBCDEV=$(shell dpkg-awk 'Provides:libc-dev' -- Package | sed -ne 's/^Package:[[:space:]]*//p' | head -1) | libc-dev
+
 configure: configure-stamp
 configure-stamp:
 	dh_testdir
@@ -74,7 +76,7 @@ binary-arch: build install
 	dh_makeshlibs -a
 	dh_installdeb -a
 	dh_shlibdeps -a -L libvcdinfo0 -l debian/libvcdinfo0/usr/lib
-	dh_gencontrol -a
+	dh_gencontrol -a -- -Vlibcdev="$(LIBCDEV)"
 	dh_md5sums -a
 	dh_builddeb -a
 
