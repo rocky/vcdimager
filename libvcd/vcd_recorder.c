@@ -196,20 +196,20 @@ vcd_recorder_write_sector (VcdRecorder * obj, const uint8_t * buffer, int lsn)
   /* append sector data to buffer */
   switch (obj->sector_size)
     {
-    case M2SUB_SIZE:
+    case M2SUB_SECTOR_SIZE:
       /* 2332 bytes: sub-header plus 2324 data bytes */
-      memcpy (obj->buffer + M2SUB_SIZE * obj->next_sector,
-	      buffer + 12 + 4, M2SUB_SIZE);
+      memcpy (obj->buffer + M2SUB_SECTOR_SIZE * obj->next_sector,
+	      buffer + 12 + 4, M2SUB_SECTOR_SIZE);
       break;
-    case M2RAW_SIZE:
+    case M2RAW_SECTOR_SIZE:
       /* seems to be broken. My Yamaha 6416S writes 2048 byte FORM1 sectors
        * instead of 2336 byte FORM1/2 sectors. */
-      memcpy (obj->buffer + M2RAW_SIZE * obj->next_sector,
-	      buffer + 12 + 4, M2RAW_SIZE);
+      memcpy (obj->buffer + M2RAW_SECTOR_SIZE * obj->next_sector,
+	      buffer + 12 + 4, M2RAW_SECTOR_SIZE);
       break;
-    case CDDA_SIZE:
+    case CDDA_SECTOR_SIZE:
       /* behaviour is not defined for packet writing */
-      memcpy (obj->buffer + CDDA_SIZE * obj->next_sector, buffer, CDDA_SIZE);
+      memcpy (obj->buffer + CDDA_SECTOR_SIZE * obj->next_sector, buffer, CDDA_SECTOR_SIZE);
       break;
     case 0:
       vcd_error ("sector size not set");
@@ -284,13 +284,13 @@ vcd_recorder_set_data_block_type (VcdRecorder * obj,
   switch (data_block_type)
     {
     case _VCD_DB_RAW:
-      _set_sector_size (obj, CDDA_SIZE);
+      _set_sector_size (obj, CDDA_SECTOR_SIZE);
       break;
     case _VCD_DB_MODE2:
-      _set_sector_size (obj, M2RAW_SIZE);
+      _set_sector_size (obj, M2RAW_SECTOR_SIZE);
       break;
     case _VCD_DB_XA_FORM2_S:
-      _set_sector_size (obj, M2SUB_SIZE);
+      _set_sector_size (obj, M2SUB_SECTOR_SIZE);
       break;
     }
 

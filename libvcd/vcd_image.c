@@ -67,7 +67,7 @@ vcd_image_source_read_mode2_sectors (VcdImageSource *obj, void *buf,
 				     uint32_t lsn, bool mode2raw, unsigned num_sectors)
 {
   char *_buf = buf;
-  const int blocksize = mode2raw ? M2RAW_SIZE : ISO_BLOCKSIZE;
+  const int blocksize = mode2raw ? M2RAW_SECTOR_SIZE : ISO_BLOCKSIZE;
   int n, rc;
 
   vcd_assert (obj != NULL);

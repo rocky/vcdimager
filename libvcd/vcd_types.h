@@ -144,6 +144,12 @@ typedef struct {
 
 #define msf_t_SIZEOF 3
 
+/* The type of a Logical Block Address. */
+typedef uint32_t lba_t;
+ 
+/* The type of an Logical Sector Number. */
+typedef uint32_t lsn_t;
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -258,7 +258,7 @@ char *
 _vcd_lba_to_msf_str (uint32_t lba)
 {
   char buf[16];
-  msf_t _msf = { 0, };
+  msf_t _msf = { .m = 0, .s = 0, .f = 0 };
 
   lba_to_msf (lba, &_msf);
 

@@ -53,29 +53,29 @@ typedef struct {
   uint8_t data[2336];
 } mode0_sector_t;
 
-#define mode0_sector_t_SIZEOF CDDA_SIZE
+#define mode0_sector_t_SIZEOF CDDA_SECTOR_SIZE
 
 #define SUBHDR_LEN 8
 
 typedef struct {
   raw_cd_sector_t sector_header;
   uint8_t subheader[SUBHDR_LEN];
-  uint8_t data[M2F1_SIZE];
+  uint8_t data[M2F1_SECTOR_SIZE];
   uint32_t edc;
   uint8_t l2_p[L2_P];
   uint8_t l2_q[L2_Q];
 } mode2_form1_sector_t;
 
-#define mode2_form1_sector_t_SIZEOF CDDA_SIZE
+#define mode2_form1_sector_t_SIZEOF CDDA_SECTOR_SIZE
 
 typedef struct {
   raw_cd_sector_t sector_header;
   uint8_t subheader[SUBHDR_LEN];
-  uint8_t data[M2F2_SIZE];
+  uint8_t data[M2F2_SECTOR_SIZE];
   uint32_t edc;
 } mode2_form2_sector_t;
 
-#define mode2_form2_sector_t_SIZEOF CDDA_SIZE
+#define mode2_form2_sector_t_SIZEOF CDDA_SECTOR_SIZE
 
 static const uint32_t EDC_crctable[256] = {
   0x00000000l, 0x90910101l, 0x91210201l, 0x01b00300l,

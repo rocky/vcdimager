@@ -232,7 +232,7 @@ _read_mode2_sectors (void *user_data, void *data, uint32_t lsn, bool form2,
 
   if (form2)
     {
-      char buf[M2RAW_SIZE] = { 0, };
+      char buf[M2RAW_SECTOR_SIZE] = { 0, };
       struct cdrom_msf *msf = (struct cdrom_msf *) &buf;
       msf_t _msf;
       
@@ -271,7 +271,7 @@ _read_mode2_sectors (void *user_data, void *data, uint32_t lsn, bool form2,
 		
 		for (i = 0; i < nblocks; i++)
 		  if (_read_mode2_sectors (_obj, 
-					   ((char *)data) + (M2RAW_SIZE * i),
+					   ((char *)data) + (M2RAW_SECTOR_SIZE * i),
 					   lsn + i, form2, 1))
 		    return 1;
 	      }
@@ -282,7 +282,7 @@ _read_mode2_sectors (void *user_data, void *data, uint32_t lsn, bool form2,
 		/* exit (EXIT_FAILURE); */
 	      }
 	    else
-	      memcpy (data, buf, M2RAW_SIZE);
+	      memcpy (data, buf, M2RAW_SECTOR_SIZE);
 	    break;
 
 	  case _AM_READ_CD:
@@ -314,7 +314,7 @@ _read_mode2_sectors (void *user_data, void *data, uint32_t lsn, bool form2,
 
       for (i = 0; i < nblocks; i++)
 	{
-	  char buf[M2RAW_SIZE] = { 0, };
+	  char buf[M2RAW_SECTOR_SIZE] = { 0, };
 	  int retval;
 
 	  if ((retval = _read_mode2_sectors (_obj, buf, lsn + i, true, 1)))

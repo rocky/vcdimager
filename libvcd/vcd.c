@@ -48,7 +48,7 @@
 
 static const char _rcsid[] = "$Id$";
 
-static const char zero[CDDA_SIZE] = { 0, };
+static const char zero[CDDA_SECTOR_SIZE] = { 0, };
 
 #define DEFAULT_ISO_PREPARER_ID       "GNU VCDImager " VERSION " " HOST_ARCH
 
@@ -291,8 +291,10 @@ vcd_obj_new (vcd_type_t vcd_type)
   new_obj->pbc_list = _vcd_list_new ();
 
   /* gap's defined by IEC-10149 / ECMA-130 */
-  new_obj->track_pregap = 150; /* pre-gap's for tracks but the first one */
-  new_obj->leadout_pregap = 150; /* post-gap after last track */
+
+  /* pre-gap's for tracks but the first one */
+  new_obj->track_pregap = PREGAP_SECTORS; 
+  new_obj->leadout_pregap = POSTGAP_SECTORS; /* post-gap after last track */
 
   if (_vcd_obj_has_cap_p (new_obj, _CAP_TRACK_MARGINS))
     {
@@ -749,8 +751,8 @@ vcd_obj_set_param_uint (VcdObj *obj, vcd_parm_t param, unsigned arg)
           obj->leadout_pregap = CLAMP (obj->leadout_pregap, 0, 300);
           vcd_warn ("ledout pregap out of range, clamping to allowed range");
         }
-      if (obj->leadout_pregap < 150)
-        vcd_warn ("track leadout pregap set below 150 sectors; created (s)vcd may be non-working");
+      if (obj->leadout_pregap < PREGAP_SECTORS)
+        vcd_warn ("track leadout pregap set below %d sectors; created (s)vcd may be non-working", PREGAP_SECTORS);
 
       vcd_debug ("changed leadout pregap to %u", obj->leadout_pregap);
       break;
@@ -762,16 +764,16 @@ vcd_obj_set_param_uint (VcdObj *obj, vcd_parm_t param, unsigned arg)
           obj->track_pregap = CLAMP (obj->track_pregap, 1, 300);
           vcd_warn ("track pregap out of range, clamping to allowed range");
         }
-      if (obj->track_pregap < 150)
-        vcd_warn ("track pre gap set below 150 sectors; created (s)vcd may be non-working");
+      if (obj->track_pregap < PREGAP_SECTORS)
+        vcd_warn ("track pre gap set below %d sectors; created (s)vcd may be non-working", PREGAP_SECTORS);
       vcd_debug ("changed track pregap to %u", obj->track_pregap);
       break;
 
     case VCD_PARM_TRACK_FRONT_MARGIN:
       obj->track_front_margin = arg;
-      if (!IN (obj->track_front_margin, 0, 150))
+      if (!IN (obj->track_front_margin, 0, PREGAP_SECTORS))
         {
-          obj->track_front_margin = CLAMP (obj->track_front_margin, 0, 150);
+          obj->track_front_margin = CLAMP (obj->track_front_margin, 0, PREGAP_SECTORS);
           vcd_warn ("front margin out of range, clamping to allowed range");
         }
       if (_vcd_obj_has_cap_p (obj, _CAP_TRACK_MARGINS) 
@@ -784,9 +786,9 @@ vcd_obj_set_param_uint (VcdObj *obj, vcd_parm_t param, unsigned arg)
 
     case VCD_PARM_TRACK_REAR_MARGIN:
       obj->track_rear_margin = arg;
-      if (!IN (obj->track_rear_margin, 0, 150))
+      if (!IN (obj->track_rear_margin, 0, POSTGAP_SECTORS))
         {
-          obj->track_rear_margin = CLAMP (obj->track_rear_margin, 0, 150);
+          obj->track_rear_margin = CLAMP (obj->track_rear_margin, 0, POSTGAP_SECTORS);
           vcd_warn ("rear margin out of range, clamping to allowed range");
         }
       if (_vcd_obj_has_cap_p (obj, _CAP_TRACK_MARGINS) 
@@ -943,7 +945,7 @@ vcd_obj_set_param_bool (VcdObj *obj, vcd_parm_t param, bool arg)
     case VCD_PARM_LEADOUT_PAUSE:
       vcd_warn ("use of 'leadout pause' is deprecated and may be removed in later releases;"
                 " use 'leadout pregap' instead");
-      vcd_obj_set_param_uint (obj, VCD_PARM_LEADOUT_PREGAP, (arg ? 150 : 0));
+      vcd_obj_set_param_uint (obj, VCD_PARM_LEADOUT_PREGAP, (arg ? PREGAP_SECTORS : 0));
       break;
 
     default:
@@ -1005,17 +1007,17 @@ vcd_obj_add_file (VcdObj *obj, const char iso_pathname[],
           return 1;
         }
 
-      sectors = size / M2RAW_SIZE;
+      sectors = size / M2RAW_SECTOR_SIZE;
 
-      if (size % M2RAW_SIZE)
+      if (size % M2RAW_SECTOR_SIZE)
         {
           vcd_error("raw mode2 file must have size multiple of %d \n", 
-                    M2RAW_SIZE);
+                    M2RAW_SECTOR_SIZE);
           return 1;
         }
     }
   else
-    sectors = _vcd_len2blocks (size, M2F1_SIZE);
+    sectors = _vcd_len2blocks (size, M2F1_SECTOR_SIZE);
 
   {
     custom_file_t *p;
@@ -1342,7 +1344,7 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
 
       _vcd_directory_mkfile (obj->dir, p->iso_pathname, p->start_extent,
                              (p->raw_flag 
-                              ? (ISO_BLOCKSIZE * (p->size / M2RAW_SIZE))
+                              ? (ISO_BLOCKSIZE * (p->size / M2RAW_SECTOR_SIZE))
                               : p->size), 
                              p->raw_flag, 1);
     }
@@ -1476,7 +1478,7 @@ static int
 _write_m2_image_sector (VcdObj *obj, const void *data, uint32_t extent,
                         uint8_t fnum, uint8_t cnum, uint8_t sm, uint8_t ci) 
 {
-  char buf[CDDA_SIZE] = { 0, };
+  char buf[CDDA_SECTOR_SIZE] = { 0, };
 
   vcd_assert (extent == obj->sectors_written);
 
@@ -1492,7 +1494,7 @@ _write_m2_image_sector (VcdObj *obj, const void *data, uint32_t extent,
 static int
 _write_m2_raw_image_sector (VcdObj *obj, const void *data, uint32_t extent)
 {
-  char buf[CDDA_SIZE] = { 0, };
+  char buf[CDDA_SECTOR_SIZE] = { 0, };
 
   vcd_assert (extent == obj->sectors_written);
 
@@ -1511,14 +1513,14 @@ _write_source_mode2_raw (VcdObj *obj, VcdDataSource *source, uint32_t extent)
   int n;
   uint32_t sectors;
 
-  sectors = vcd_data_source_stat (source) / M2RAW_SIZE;
+  sectors = vcd_data_source_stat (source) / M2RAW_SECTOR_SIZE;
 
   vcd_data_source_seek (source, 0); 
 
   for (n = 0;n < sectors;n++) {
-    char buf[M2RAW_SIZE] = { 0, };
+    char buf[M2RAW_SECTOR_SIZE] = { 0, };
 
-    vcd_data_source_read (source, buf, M2RAW_SIZE, 1);
+    vcd_data_source_read (source, buf, M2RAW_SECTOR_SIZE, 1);
 
     if (_write_m2_raw_image_sector (obj, buf, extent+n))
       break;
@@ -1535,21 +1537,21 @@ _write_source_mode2_form1 (VcdObj *obj, VcdDataSource *source, uint32_t extent)
 
   size = vcd_data_source_stat (source);
 
-  sectors = _vcd_len2blocks (size, M2F1_SIZE);
+  sectors = _vcd_len2blocks (size, M2F1_SECTOR_SIZE);
 
-  last_block_size = size % M2F1_SIZE;
+  last_block_size = size % M2F1_SECTOR_SIZE;
   if (!last_block_size)
-    last_block_size = M2F1_SIZE;
+    last_block_size = M2F1_SECTOR_SIZE;
 
   vcd_data_source_seek (source, 0); 
 
   for (n = 0;n < sectors;n++) {
-    char buf[M2F1_SIZE] = { 0, };
+    char buf[M2F1_SECTOR_SIZE] = { 0, };
 
     vcd_data_source_read (source, buf, 
                           ((n + 1 == sectors) 
                            ? last_block_size
-                           : M2F1_SIZE), 1);
+                           : M2F1_SECTOR_SIZE), 1);
 
     if (_write_m2_image_sector (obj, buf, extent+n, 1, 0, 
                                 ((n+1 < sectors) 
@@ -1803,7 +1805,7 @@ _write_segment (VcdObj *obj, mpeg_segment_t *_segment)
 
   for (packet_no = 0;packet_no < (_segment->segment_count * 150);packet_no++)
     {
-      uint8_t buf[M2F2_SIZE] = { 0, };
+      uint8_t buf[M2F2_SECTOR_SIZE] = { 0, };
       uint8_t fn, cn, sm, ci;
 
       if (packet_no < _segment->info->packets)

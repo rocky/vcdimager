@@ -136,9 +136,9 @@ _register_file (struct vcdxml_t *obj, const char *pathname,
 	    if (_fs->size % ISO_BLOCKSIZE == 0)
 	      { 
 		_fs->size /= ISO_BLOCKSIZE;
-		_fs->size *= M2RAW_SIZE;
+		_fs->size *= M2RAW_SECTOR_SIZE;
 	      }
-	    else if (_fs->size % M2RAW_SIZE == 0)
+	    else if (_fs->size % M2RAW_SECTOR_SIZE == 0)
 	      vcd_warn ("detected wrong size calculation for form2 file `%s'; fixing up", namebuf);
 	    else 
 	      vcd_error ("form2 file has invalid file size");
@@ -948,7 +948,7 @@ _rip_isofs (struct vcdxml_t *obj, VcdImageSource *img)
       struct filesystem_t *_fs = _vcd_list_node_data (node);
       int idx;
       FILE *outfd;
-      const int blocksize = _fs->file_raw ? M2RAW_SIZE : ISO_BLOCKSIZE;
+      const int blocksize = _fs->file_raw ? M2RAW_SECTOR_SIZE : ISO_BLOCKSIZE;
 
       if (!_fs->file_src)
 	continue;

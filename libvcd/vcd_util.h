@@ -112,7 +112,14 @@ _vcd_bool_str (bool b)
 
 /* warning, returns new allocated string */
 char *
-_vcd_lba_to_msf_str (uint32_t lba);
+_vcd_lba_to_msf_str (lba_t lba);
+
+static inline lba_t
+_vcd_lsn_to_lba (lsn_t lsn)
+{
+  /* return lsn + PREGAP_SECTORS; */
+  return lsn + 150; /* fixme */
+}
 
 #endif /* __VCD_UTIL_H__ */
 

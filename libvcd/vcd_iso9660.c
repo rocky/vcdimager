@@ -97,7 +97,9 @@ set_iso_evd(void *pd)
   memcpy(pd, &ied, sizeof(ied));
 }
 
-const time_t _time = 269222400L;
+/* important date to celebrate (for me at least =)
+   -- until user customization is implemented... */
+static const time_t _vcd_time = 269222400L;
                                        
 void
 set_iso_pvd(void *pd,
@@ -155,8 +157,8 @@ set_iso_pvd(void *pd,
   _vcd_strncpy_pad (ipd.abstract_file_id     , "", 37, VCD_DCHARS);
   _vcd_strncpy_pad (ipd.bibliographic_file_id, "", 37, VCD_DCHARS);
 
-  _pvd_set_time (ipd.creation_date, gmtime (&_time));
-  _pvd_set_time (ipd.modification_date, gmtime (&_time));
+  _pvd_set_time (ipd.creation_date, gmtime (&_vcd_time));
+  _pvd_set_time (ipd.modification_date, gmtime (&_vcd_time));
   _pvd_set_time (ipd.expiration_date, NULL);
   _pvd_set_time (ipd.effective_date, NULL);
 
@@ -255,7 +257,7 @@ dir_add_entry_su(void *dir,
   idr->extent = to_733(extent);
   idr->size = to_733(size);
   
-  _idr_set_time (idr->date, gmtime (&_time));
+  _idr_set_time (idr->date, gmtime (&_vcd_time));
   
   idr->flags = to_711(flags);
 

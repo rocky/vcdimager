@@ -461,7 +461,7 @@ main (int argc, const char *argv[])
     vcd_obj_end_output (gl_vcd_obj);
 
     {
-      unsigned _bytes = sectors * (gl.sector_2336_flag ? M2RAW_SIZE : CDDA_SIZE);
+      unsigned _bytes = sectors * (gl.sector_2336_flag ? M2RAW_SECTOR_SIZE : CDDA_SECTOR_SIZE);
       char *_msfstr = _vcd_lba_to_msf_str (sectors);
 
       fprintf (stdout, 

@@ -237,14 +237,14 @@ _write (void *user_data, const void *data, uint32_t lsn)
     offset = lsn - _ofs;
   }
 
-  offset *= _obj->sector_2336_flag ? M2RAW_SIZE : CDDA_SIZE;
+  offset *= _obj->sector_2336_flag ? M2RAW_SECTOR_SIZE : CDDA_SECTOR_SIZE;
 
   vcd_data_sink_seek(_obj->last_bin_snk, offset);
   
   if (_obj->sector_2336_flag)
-    vcd_data_sink_write(_obj->last_bin_snk, buf + 12 + 4, M2RAW_SIZE, 1);
+    vcd_data_sink_write(_obj->last_bin_snk, buf + 12 + 4, M2RAW_SECTOR_SIZE, 1);
   else
-    vcd_data_sink_write(_obj->last_bin_snk, buf, CDDA_SIZE, 1);
+    vcd_data_sink_write(_obj->last_bin_snk, buf, CDDA_SECTOR_SIZE, 1);
   
   return 0;
 }

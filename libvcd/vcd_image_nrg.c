@@ -355,7 +355,7 @@ _parse_footer (_img_nrg_src_t *_obj)
 _read_mode2_sector (void *user_data, void *data, uint32_t lsn, bool form2)
 {
   _img_nrg_src_t *_obj = user_data;
-  char buf[M2RAW_SIZE] = { 0, };
+  char buf[M2RAW_SECTOR_SIZE] = { 0, };
   VcdListNode *node;
 
   _parse_footer (_obj);
@@ -387,7 +387,7 @@ _read_mode2_sector (void *user_data, void *data, uint32_t lsn, bool form2)
     vcd_warn ("reading into pre gap (lsn %d)", lsn);
 
   if (form2)
-    memcpy (data, buf, M2RAW_SIZE);
+    memcpy (data, buf, M2RAW_SECTOR_SIZE);
   else
     memcpy (data, buf + 8, ISO_BLOCKSIZE);
 
@@ -574,9 +574,9 @@ _write_tail (_img_nrg_snk_t *_obj, uint32_t offset)
 
 	  _etnf.type = UINT32_TO_BE (0x3);
 	  _etnf.start_lsn = uint32_to_be (_map (_obj, _cue->lsn));
-	  _etnf.start = uint32_to_be (_map (_obj, _cue->lsn) * M2RAW_SIZE);
+	  _etnf.start = uint32_to_be (_map (_obj, _cue->lsn) * M2RAW_SECTOR_SIZE);
 	  
-	  _etnf.length = uint32_to_be ((_cue2->lsn - _cue->lsn) * M2RAW_SIZE);
+	  _etnf.length = uint32_to_be ((_cue2->lsn - _cue->lsn) * M2RAW_SECTOR_SIZE);
 
 	  vcd_data_sink_write (_obj->nrg_snk, &_etnf, sizeof (_etnf_array_t), 1);
 	}
@@ -619,13 +619,13 @@ _write (void *user_data, const void *data, uint32_t lsn)
       return 0;
     }
 
-  vcd_data_sink_seek(_obj->nrg_snk, _lsn * M2RAW_SIZE);
-  vcd_data_sink_write(_obj->nrg_snk, buf + 12 + 4, M2RAW_SIZE, 1);
+  vcd_data_sink_seek(_obj->nrg_snk, _lsn * M2RAW_SECTOR_SIZE);
+  vcd_data_sink_write(_obj->nrg_snk, buf + 12 + 4, M2RAW_SECTOR_SIZE, 1);
 
   if (_obj->cue_end_lsn - 1 == lsn)
     {
       vcd_debug ("ENDLSN reached! (%d == %d)", lsn, _lsn);
-      return _write_tail (_obj, (_lsn + 1) * M2RAW_SIZE);
+      return _write_tail (_obj, (_lsn + 1) * M2RAW_SECTOR_SIZE);
     }
 
   return 0;

@@ -47,7 +47,7 @@ build_address (void *buf, sectortype_t sectortype, uint32_t address)
 {
   raw_cd_sector_t *sector = buf;
   
-  vcd_assert (sizeof(raw_cd_sector_t) == CDDA_SIZE-DATA_LEN);
+  vcd_assert (sizeof(raw_cd_sector_t) == CDDA_SECTOR_SIZE-DATA_LEN);
 
   lba_to_msf(address, &(sector->msf));
 
@@ -190,9 +190,9 @@ do_encode_L2 (void *buf, sectortype_t sectortype, uint32_t address)
   vcd_assert (buf != NULL);
 
   vcd_assert (sizeof (sync_pattern) == SYNC_LEN);
-  vcd_assert (sizeof (mode2_form1_sector_t) == CDDA_SIZE);
-  vcd_assert (sizeof (mode2_form2_sector_t) == CDDA_SIZE);
-  vcd_assert (sizeof (mode0_sector_t) == CDDA_SIZE);
+  vcd_assert (sizeof (mode2_form1_sector_t) == CDDA_SECTOR_SIZE);
+  vcd_assert (sizeof (mode2_form2_sector_t) == CDDA_SECTOR_SIZE);
+  vcd_assert (sizeof (mode0_sector_t) == CDDA_SECTOR_SIZE);
   vcd_assert (sizeof (raw_cd_sector_t) == SYNC_LEN+HEADER_LEN);
   
   memset (raw_sector, 0, SYNC_LEN+HEADER_LEN);
@@ -242,7 +242,7 @@ _vcd_make_mode2 (void *raw_sector, const void *data, uint32_t extent,
   vcd_assert (data != NULL);
   vcd_assert (extent != SECTOR_NIL);
 
-  memset (raw_sector, 0, CDDA_SIZE);
+  memset (raw_sector, 0, CDDA_SECTOR_SIZE);
   
   subhdr[0] = subhdr[4] = fnum;
   subhdr[1] = subhdr[5] = cnum;
@@ -251,12 +251,12 @@ _vcd_make_mode2 (void *raw_sector, const void *data, uint32_t extent,
 
   if (sm & SM_FORM2) 
     {
-      memcpy ((char*)raw_sector+12+4+8, data, M2F2_SIZE);
+      memcpy ((char*)raw_sector+12+4+8, data, M2F2_SECTOR_SIZE);
       do_encode_L2 (raw_sector, MODE_2_FORM_2, extent+2*75);
     } 
   else 
     {
-      memcpy ((char*)raw_sector+12+4+8, data, M2F1_SIZE);
+      memcpy ((char*)raw_sector+12+4+8, data, M2F1_SECTOR_SIZE);
       do_encode_L2 (raw_sector, MODE_2_FORM_1, extent+2*75);
     } 
 }
@@ -268,9 +268,9 @@ _vcd_make_raw_mode2 (void *raw_sector, const void *data, uint32_t extent)
   vcd_assert (data != NULL);
   vcd_assert (extent != SECTOR_NIL);
   
-  memset (raw_sector, 0, CDDA_SIZE);
+  memset (raw_sector, 0, CDDA_SECTOR_SIZE);
 
-  memcpy ((char*)raw_sector+12+4, data, M2RAW_SIZE);
+  memcpy ((char*)raw_sector+12+4, data, M2RAW_SECTOR_SIZE);
   do_encode_L2 (raw_sector, MODE_2, extent+2*75);
 }
 

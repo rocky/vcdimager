@@ -1,3 +1,11 @@
+2003-01-06  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_util.h: added _vcd_lsn_to_lba() helper function
+
+	* libvcd/vcd_cd_sector.h: renamed xxxx_SIZE #defines to
+	xxxx_SECTOR_SIZE (based on Rocky Bernstein's xine-vcdnav fork) and
+	propagated change through files using it
+
 2002-12-28  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* frontends/cli/cdxa2mpeg.c: make commandline behave like other tools
