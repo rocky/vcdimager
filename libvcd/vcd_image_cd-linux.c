@@ -78,7 +78,6 @@ _source_init (_img_linuxcd_src_t *_obj)
     return;
 
   _obj->fd = open (_obj->device, O_RDONLY, 0);
-  _obj->access_mode = _AM_READ_CD;
 
   if (_obj->fd < 0)
     {
@@ -365,6 +364,17 @@ _source_set_arg (void *user_data, const char key[], const char value[])
       
       _obj->device = strdup (value);
     }
+  else if (!strcmp (key, "access-mode"))
+    {
+      if (!strcmp(value, "IOCTL"))
+	_obj->access_mode = _AM_IOCTL;
+      else if (!strcmp(value, "READ_CD"))
+	_obj->access_mode = _AM_READ_CD;
+      else if (!strcmp(value, "READ_10"))
+	_obj->access_mode = _AM_READ_10;
+      else
+	vcd_error ("unknown access type: %s. ignored.", value);
+    }
   else 
     return -1;
 
@@ -387,6 +397,7 @@ vcd_image_source_new_cd (void)
   };
 
   _data->device = strdup ("/dev/cdrom");
+  _data->access_mode = _AM_READ_CD;
   _data->fd = -1;
 
   return vcd_image_source_new (_data, &_funcs);
