@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* #define STREAM_DEBUG */
+/* #define STREAM_DEBUG  */
 
 #include "vcd_stream.h"
 #include "vcd_logging.h"
@@ -127,8 +127,11 @@ _vcd_data_source_open_if_necessary(VcdDataSource *obj)
 {
   if(!obj->is_open) {
     if(obj->op.open(obj->user_data))
-      vcd_error("could not opening input stream...");
+      vcd_error ("could not opening input stream...");
     else {
+#ifdef STREAM_DEBUG
+      vcd_debug ("opened source...");
+#endif
       obj->is_open = 1;
       obj->position = 0;
     }
@@ -167,9 +170,14 @@ vcd_data_source_new(void *user_data, const vcd_data_source_io_functions *funcs)
 long
 vcd_data_source_read(VcdDataSource* obj, void *ptr, long size, long nmemb)
 {
+  long read_bytes;
+
   _vcd_data_source_open_if_necessary(obj);
 
-  return obj->op.read(obj->user_data, ptr, size*nmemb);
+  read_bytes = obj->op.read(obj->user_data, ptr, size*nmemb);
+  obj->position += read_bytes;
+
+  return read_bytes;
 }
 
 long
@@ -184,6 +192,9 @@ void
 vcd_data_source_close(VcdDataSource* obj)
 {
   if(obj->is_open) {
+#ifdef STREAM_DEBUG
+    vcd_debug ("closed source...");
+#endif
     obj->op.close(obj->user_data);
     obj->is_open = 0;
     obj->position = 0;

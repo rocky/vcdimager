@@ -39,6 +39,7 @@ typedef struct {
 
 struct _VcdObj {
   vcd_type_t type;
+  bool broken_svcd_mode_flag;
 
   /* output */
   bool bin_file_2336_flag;

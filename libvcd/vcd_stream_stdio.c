@@ -112,8 +112,21 @@ _stdio_read(void *user_data, void *buf, long count)
 
   read = fread(buf, 1, count, ud->fd);
 
-  if (read != count) /* fixme -- ferror/feof */
-    vcd_error ("fread (): %s", strerror (errno));
+  if (read != count)
+    { /* fixme -- ferror/feof */
+      if (feof (ud->fd))
+        {
+          vcd_debug ("fread (): EOF encountered");
+          clearerr (ud->fd);
+        }
+      else if (ferror (ud->fd))
+        {
+          vcd_error ("fread (): %s", strerror (errno));
+          clearerr (ud->fd);
+        }
+      else
+        vcd_debug ("fread (): short read and no EOF?!?");
+    }
 
   return read;
 }

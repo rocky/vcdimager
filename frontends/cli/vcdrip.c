@@ -80,9 +80,9 @@ itemid2str (uint16_t itemid)
   if (itemid < 2) 
     snprintf (buf, sizeof (buf), "no item (0x%4.4x)", itemid);
   else if (itemid < 100)
-    snprintf (buf, sizeof (buf), "cd track# %d (0x%4.4x)", itemid, itemid);
+    snprintf (buf, sizeof (buf), "TRACK[%d] (0x%4.4x)", itemid - 2, itemid);
   else if (itemid < 600)
-    snprintf (buf, sizeof (buf), "ENTRIES[%d] (0x%4.4x)", itemid - 100, itemid);
+    snprintf (buf, sizeof (buf), "ENTRY[%d] (0x%4.4x)", itemid - 100, itemid);
   else if (itemid < 1000)
     snprintf (buf, sizeof (buf), "spare id (0x%4.4x)", itemid);
   else if (itemid < 2980)
@@ -272,6 +272,9 @@ _ofs2idx (const void *data, uint16_t ofs)
   const LotVcd *lot = data;
   uint16_t n;
   
+  if (ofs == 0xffff)
+    return -1;
+
   for (n = 0; n < LOT_VCD_OFFSETS; n++)
     if (UINT16_FROM_BE (lot->offset[n]) == ofs)
       return n;
@@ -535,8 +538,8 @@ dump_info_vcd (const void *data)
   fprintf (stdout, "  restriction: %d\n", info.flags.restriction);
   fprintf (stdout, "  special info: %s\n", bool_str (info.flags.special_info));
   fprintf (stdout, "  user data cc: %s\n", bool_str (info.flags.user_data_cc));
-  fprintf (stdout, "  start lid#1: %s\n", bool_str (info.flags.use_lid1));
-  fprintf (stdout, "  start track#3: %s\n", bool_str (info.flags.use_track3));
+  fprintf (stdout, "  start lid #2: %s\n", bool_str (info.flags.use_lid2));
+  fprintf (stdout, "  start TRACK[1]: %s\n", bool_str (info.flags.use_track3));
 
   fprintf (stdout, " psd size: %d\n", UINT32_FROM_BE (info.psd_size));
   fprintf (stdout, " first segment addr: %2.2x:%2.2x:%2.2x\n",
@@ -545,9 +548,8 @@ dump_info_vcd (const void *data)
 
   fprintf (stdout, " offset multiplier: 0x%2.2x (must be 0x08)\n", info.offset_mult);
 
-  fprintf (stdout, " highest psd offset: 0x%4.4x (real offset = %d)\n",
-           UINT16_FROM_BE (info.last_psd_ofs),
-           UINT16_FROM_BE (info.last_psd_ofs) << 3);
+  fprintf (stdout, " lot entries: %d\n",
+           UINT16_FROM_BE (info.lot_entries));
 
   fprintf (stdout, " item count: %d\n", UINT16_FROM_BE (info.item_count));
 
@@ -573,7 +575,7 @@ dump_info_vcd (const void *data)
           "PAL stream"
         };
 
-      fprintf (stdout, "  Item contents[%d]: audio: %s,"
+      fprintf (stdout, " ITEM[%d]: audio: %s,"
                " video: %s, continuation %s\n",
                n,
                audio_types[info.spi_contents[n].audio_type],
@@ -596,6 +598,13 @@ dump_entries_vcd (const void *data)
            gl_vcd_type == VCD_TYPE_SVCD 
            ? "SVCD/ENTRIES.SVD\n"
            : "VCD/ENTRIES.VCD\n");
+
+  if (!strncmp (entries.ID, ENTRIES_ID_VCD, sizeof (entries.ID)))
+    { /* noop */ }
+  else if (!strncmp (entries.ID, "ENTRYSVD", sizeof (entries.ID)))
+    vcd_warn ("found (non-compliant) SVCD ENTRIES.SVD signature");
+  else
+    vcd_warn ("unexpected ID signature encountered");
 
   fprintf (stdout, " ID: `%.8s'\n", entries.ID);
   fprintf (stdout, " version: 0x%2.2x\n", entries.version);

@@ -62,6 +62,11 @@ set_entries_vcd (VcdObj *obj, void *buf)
 
     case VCD_TYPE_SVCD:
       strncpy(entries_vcd.ID, ENTRIES_ID_SVCD, 8);
+      if (obj->broken_svcd_mode_flag)
+        {
+          vcd_warn ("broken SVCD mode: setting non-conforming ENTRYSVD id");
+          strncpy(entries_vcd.ID, "ENTRYSVD", 8);
+        }
       entries_vcd.version = ENTRIES_VERSION_SVCD;
       entries_vcd.sys_prof_tag = ENTRIES_SPTAG_SVCD;
       break;
@@ -237,8 +242,8 @@ set_info_vcd(VcdObj *obj, void *buf)
       
       info_vcd.psd_size = UINT32_TO_BE(get_psd_size (obj));
       info_vcd.offset_mult = INFO_OFFSET_MULT;
-      info_vcd.last_psd_ofs = 
-        UINT16_TO_BE((_vcd_list_length (obj->mpeg_track_list))<<1);
+      info_vcd.lot_entries = 
+        UINT16_TO_BE(_vcd_list_length (obj->mpeg_track_list) + 1);
       info_vcd.item_count = UINT16_TO_BE(0x0000); /* no items in /SEGMENT
                                                      supported yet */
       break;

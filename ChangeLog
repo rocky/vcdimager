@@ -1,4 +1,18 @@
+2001-01-13  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_files.c (set_info_vcd): lot entry count fixed
+
+	* libvcd/vcd_stream.c (vcd_data_source_read): fixed stream 
+		reposition bug
+
+	* libvcd/vcd.c (vcd_obj_append_mpeg_track): fixed eof condition
+
+	* added broken svcd mode
+
 2001-01-12  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_files_private.h: fixed lid1 typo
+		fixed last_psd_ofs/lot_entries misconception
 
 	* frontends/cli/vcdrip.c: fixed LOT max index bug..
 	(dump_lot_and_psd_vcd): #ifdef'ed extended psd stuff

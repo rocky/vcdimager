@@ -66,6 +66,7 @@ static struct
   const char *application_id;
 
   int sector_2336_flag;
+  int broken_svcd_mode_flag;
 
   int verbose_flag;
   int quiet_flag;
@@ -173,6 +174,9 @@ main (int argc, const char *argv[])
         {"type", 't', POPT_ARG_STRING, &gl.type, 0,
          "select VideoCD type ('vcd11', 'vcd2' or 'svcd') (default: '" DEFAULT_TYPE "')", 
          "TYPE"},
+
+        {"broken-svcd-mode", '\0', POPT_ARG_NONE, &gl.broken_svcd_mode_flag, 0,
+         "enable non-compliant compatibility mode for broken devices"},
         
         {"iso-volume-label", 'l', POPT_ARG_STRING, &gl.volume_label, 0,
          "specify ISO volume label for video cd (default: '" DEFAULT_VOLUME_LABEL
@@ -316,6 +320,12 @@ main (int argc, const char *argv[])
 
   vcd_obj_set_param (gl_vcd_obj, VCD_PARM_VOLUME_LABEL, gl.volume_label);
   vcd_obj_set_param (gl_vcd_obj, VCD_PARM_APPLICATION_ID, gl.application_id);
+
+  if (type_id == VCD_TYPE_SVCD)
+    {
+      bool __tmp = gl.broken_svcd_mode_flag;
+      vcd_obj_set_param (gl_vcd_obj, VCD_PARM_BROKEN_SVCD_MODE, &__tmp);
+    }
 
   {
     struct add_files_t *p = gl.add_files;

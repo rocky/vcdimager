@@ -462,7 +462,10 @@ vcd_obj_append_mpeg_track (VcdObj *obj, VcdDataSource *mpeg_file)
 
   obj->relative_end_extent += PRE_DATA_GAP + length / 2324 + POST_DATA_GAP;
 
-  for (j = 0;;j++) 
+  if (track->length_sectors < 75)
+    vcd_warn ("mpeg stream shorter than 75 sectors");
+
+  for (j = 0;j < MIN(150, track->length_sectors);j++) 
     {
       char buf[M2F2_SIZE] = { 0, };
       
@@ -486,9 +489,6 @@ vcd_obj_append_mpeg_track (VcdObj *obj, VcdDataSource *mpeg_file)
           got_info = true;
           break;
         }
-
-      if (j > 150)
-        break;
   }
 
   if (!got_info) 
@@ -622,6 +622,16 @@ vcd_obj_set_param (VcdObj *obj, vcd_parm_t param, const void *arg)
     default:
       assert (0);
     }
+    break;
+  case VCD_PARM_BROKEN_SVCD_MODE:
+    if (obj->type == VCD_TYPE_SVCD)
+      {
+        if ((obj->broken_svcd_mode_flag = *(const bool*)arg))
+          vcd_warn ("!! broken SVCD mode activated," 
+                    " SVCD will not be compliant !!");
+      }
+    else
+      vcd_error ("parameter not applicable for vcd type");
     break;
   default:
     assert (0);
@@ -775,6 +785,11 @@ _finalize_vcd_iso_track (VcdObj *obj)
   case VCD_TYPE_SVCD:
     _vcd_directory_mkdir (obj->dir, "EXT");
     _vcd_directory_mkdir (obj->dir, "MPEG2");
+    if (obj->broken_svcd_mode_flag)
+      {
+        vcd_warn ("broken SVCD mode: adding MPEGAV dir");
+        _vcd_directory_mkdir (obj->dir, "MPEGAV");
+      }
     _vcd_directory_mkdir (obj->dir, "SVCD");
 
     _vcd_directory_mkfile (obj->dir, "SVCD/ENTRIES.SVD",
@@ -822,11 +837,11 @@ _finalize_vcd_iso_track (VcdObj *obj)
       }
   }
 
-
   /* calculate iso size -- after this point no sector shall be
      allocated anymore */
 
-  obj->iso_size = MAX (MIN_ISO_SIZE, _vcd_salloc_get_highest (obj->iso_bitmap));
+  obj->iso_size =
+    MAX (MIN_ISO_SIZE, _vcd_salloc_get_highest (obj->iso_bitmap));
 
   vcd_debug ("iso9660: highest alloced sector is %d (using %d as isosize)", 
              _vcd_salloc_get_highest (obj->iso_bitmap), obj->iso_size);
@@ -863,11 +878,25 @@ _finalize_vcd_iso_track (VcdObj *obj)
       
         snprintf (avseq_pathname, sizeof (avseq_pathname), fmt, n+1);
         
-        extent += obj->iso_size;
-
         _vcd_directory_mkfile (obj->dir, avseq_pathname, extent+PRE_DATA_GAP,
                                track->length_sectors*ISO_BLOCKSIZE,
                                true, n + 1);
+
+        if (obj->broken_svcd_mode_flag)
+          {
+            snprintf (avseq_pathname, sizeof (avseq_pathname), 
+                      "MPEGAV/AVSEQ%2.2d.MPG", n+1);
+
+            vcd_warn ("broken svcd mode: adding additional `%s' entry", 
+                      avseq_pathname);
+            
+            _vcd_directory_mkfile (obj->dir, avseq_pathname,
+                                   extent+PRE_DATA_GAP,
+                                   track->length_sectors*ISO_BLOCKSIZE,
+                                   true, n + 1);
+          }
+
+        extent += obj->iso_size;
       }
 
   }

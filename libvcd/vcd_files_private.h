@@ -91,7 +91,7 @@ typedef struct {
                                               in the pictures */
   uint8_t user_data_cc : 1;                /* MPEG User Data is used
                                               for Closed Caption */
-  uint8_t use_lid1 : 1;                    /* If == 1 and the PSD is
+  uint8_t use_lid2 : 1;                    /* If == 1 and the PSD is
                                               interpreted and the next
                                               disc has the same album
                                               id then start the next
@@ -180,8 +180,8 @@ typedef struct {
                                               00:00:00 if the PSD size
                                               is 0. */
   uint8_t  offset_mult       GNUC_PACKED;  /* offset multiplier, must be 8 */
-  uint16_t last_psd_ofs      GNUC_PACKED;  /* last offset in psd */
-  uint16_t item_count        GNUC_PACKED;  /* items in /SEGMENT/ */
+  uint16_t lot_entries       GNUC_PACKED;  /* offsets in lot */
+  uint16_t item_count        GNUC_PACKED;  /* segments used for segmentitems */
   InfoSpiContents spi_contents[1980]
                              GNUC_PACKED;  /* The next 1980 bytes contain one
                                               byte for each possible segment
