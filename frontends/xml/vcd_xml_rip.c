@@ -693,6 +693,12 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
 
     case PSD_TYPE_END_LIST:
       _pbc = vcd_pbc_new (PBC_END);
+      {
+	const PsdEndListDescriptor *d = (const void *) _buf;
+	
+	_pbc->next_disc = d->next_disc;
+	_pbc->image_id = _xstrdup (_pin2id (uint16_from_be (d->change_pic), _ctx));
+      }      
       break;
 
     default:
@@ -927,7 +933,7 @@ _parse_pbc (struct vcdxml_t *obj, VcdImageSource *img)
       pbc_t *_pbc;
 
       vcd_assert (ofs->offset != PSD_OFS_DISABLED);
-
+      
       if ((_pbc = _pbc_node_read (&_pctx, ofs->offset)))
 	_vcd_list_append (obj->pbc_list, _pbc);
     }

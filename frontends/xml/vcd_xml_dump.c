@@ -418,6 +418,16 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 	      
 	    case PBC_END:
 	      pl = xmlNewChild (section, ns, "endlist", NULL);
+
+	      if (_pbc->next_disc)
+		{
+		  snprintf (buf, sizeof (buf), "%d", _pbc->next_disc);
+		  xmlNewChild (pl, ns, "next-volume", buf);
+		}
+
+	      if (_pbc->image_id)
+		xmlSetProp (xmlNewChild (pl, ns, "play-item", NULL),
+			    "ref", _pbc->image_id);
 	      break;
 
 	    default:

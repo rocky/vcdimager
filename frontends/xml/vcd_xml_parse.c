@@ -429,9 +429,13 @@ _parse_pbc_endlist (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsP
     {
       if (cur->ns != ns) 
 	continue; 
-      
-      printf ("%s %s -- sorry, not fully implemented yet\n", __PRETTY_FUNCTION__, cur->name);
-      vcd_assert_not_reached ();
+
+      if (!xmlStrcmp (cur->name, "next-volume"))
+	{ _pbc->next_disc = _get_elem_long ("next-volume", doc, cur, ns); }
+      else if (!xmlStrcmp (cur->name, "play-item"))
+	{ GET_PROP_STR (_pbc->image_id, "ref", doc, cur, ns); }
+      else
+	vcd_assert_not_reached ();
     }
 
   _vcd_list_append (obj->pbc_list, _pbc);
