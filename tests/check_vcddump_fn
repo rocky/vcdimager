@@ -1,39 +1,41 @@
 # $Id$
 # Pssst.... This file is intended to be sourced...
 
+test_vcdrip_cleanup() {
+  rm $1
+}
+
 test_vcddump() {
-  if [ ! -x "../frontends/cli/vcddump" ]; then
-    echo "$0: No vcddump test skipped"
-    return 77
-  fi
 
-  if have_cmp; then
-      :
-  else
-    echo "$0: No cmp(1) found - cannot test vcddump"
-    return 77
-  fi
-
-  VCDDUMP="../frontends/cli/vcddump"
   opts="$1"
   outfile="$2"
   rightfile="$3"
 
+  VCDDUMP="../frontends/cli/vcddump"
+
+  if [ ! -x ${VCDDUMP} ]; then
+    echo "$0: No vcddump test skipped"
+    return 77
+  fi
+
   if ${VCDDUMP} ${opts} >${outfile} 2>&1 ; then 
-    :
+    if have_cmp; then
+      if cmp ${outfile} ${rightfile} ; then
+	test_vcdrip_cleanup $outfile
+	return 0
+      else
+	return 3
+      fi
+    else
+      echo "$0: No cmp(1) found - cannot test vcddump"
+      test_vcdrip_cleanup $outfile
+      return 77
+    fi
   else
     echo "$0: ${VCDDUMP} ${opts} failed"
     return 2
   fi
 
-  if cmp ${outfile} ${rightfile} ; then
-      :
-  else
-    return 3
-  fi
-
-  rm ${outfile}
-  return 0
 }
 
 #;;; Local Variables: ***
