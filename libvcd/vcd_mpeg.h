@@ -59,7 +59,7 @@ typedef struct
   double frate;
   unsigned bitrate;
   unsigned vbvsize;
-  int constrained_flag;
+  bool constrained_flag;
   
   mpeg_vers_t version;
   mpeg_norm_t norm;
@@ -83,17 +83,16 @@ typedef struct
       double frate;
       unsigned bitrate;
       unsigned vbvsize;
-      int constrained_flag;
+      bool constrained_flag;
     
       double timecode; /* linear timecode given in seconds */
       int rel_timecode; /* relative timecode offset to last gop given
                            in frames */
 
       /* flags to be set if corresponding element was present */
-      int gop_flag:1; /* if set then timecode was set too */
+      bool gop_flag; /* if set then timecode was set too */
 
-      int i_frame_flag:1; /* if set then rel_timecode was set too */
-      
+      bool i_frame_flag; /* if set then rel_timecode was set too */
     } video;
 #ifdef ANON_UNION
   };

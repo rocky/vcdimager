@@ -189,7 +189,7 @@ _vcd_mpeg_parse_sequence_header (const void *packet, int *offsetp,
   info->video.frate = frame_rates[frate];
   info->video.bitrate = 400*brate;
   info->video.vbvsize = bufsize * 16 * 1024; 
-  info->video.constrained_flag = constr;
+  info->video.constrained_flag = (constr != 0);
 
   *offsetp = offset;
 }
@@ -215,7 +215,7 @@ _vcd_mpeg_parse_picture (const void *packet, int *offsetp, mpeg_type_info_t *inf
   switch (pict_type)
     {
     case PICT_TYPE_I:
-      info->video.i_frame_flag = 1;
+      info->video.i_frame_flag = true;
       info->video.rel_timecode = timecode;
       break;
     case PICT_TYPE_P:
@@ -237,14 +237,13 @@ _vcd_mpeg_parse_gop (const void *packet, int *offsetp, mpeg_type_info_t *info)
   const uint8_t *data = packet;
   int offset = *offsetp;
 
-  int drop_flag;
-  int close_gop;
-  int broken_link;
+  bool drop_flag;
+  bool close_gop;
+  bool broken_link;
 
   unsigned hour, minute, second, frame;
 
-  drop_flag = _bitvec_get_bits32(data, offset, 1);
-  offset += 1;
+  drop_flag = _bitvec_get_bits32(data, offset++, 1) != 0;
 
   hour = _bitvec_get_bits32(data, offset, 5);
   offset += 5;
@@ -252,8 +251,7 @@ _vcd_mpeg_parse_gop (const void *packet, int *offsetp, mpeg_type_info_t *info)
   minute = _bitvec_get_bits32(data, offset, 6);
   offset += 6;
 
-  /* (void) _bitvec_get_bits32(data, offset, 1); */
-  offset += 1;
+  (void) _bitvec_get_bits32(data, offset++, 1); 
 
   second = _bitvec_get_bits32(data, offset, 6);
   offset += 6;
@@ -261,11 +259,9 @@ _vcd_mpeg_parse_gop (const void *packet, int *offsetp, mpeg_type_info_t *info)
   frame = _bitvec_get_bits32(data, offset, 6);
   offset += 6;
 
-  close_gop = _bitvec_get_bits32(data, offset, 1);
-  offset += 1;
+  close_gop = _bitvec_get_bits32(data, offset++, 1) != 0;
 
-  broken_link = _bitvec_get_bits32(data, offset, 1);
-  offset += 1;
+  broken_link = _bitvec_get_bits32(data, offset++, 1) != 0;
 
   if (info->video.frate > 0)
     {
@@ -277,7 +273,7 @@ _vcd_mpeg_parse_gop (const void *packet, int *offsetp, mpeg_type_info_t *info)
   info->video.timecode += minute * 60;
   info->video.timecode += hour * 60 * 60;
 
-  info->video.gop_flag = 1;
+  info->video.gop_flag = true;
 
   *offsetp = offset;
 }

@@ -38,7 +38,7 @@ _vcd_directory_mkdir (VcdDirectory *dir, const char pathname[]);
 int
 _vcd_directory_mkfile (VcdDirectory *dir, const char pathname[], 
                        uint32_t start, uint32_t size,
-                       int form2_flag, uint8_t filenum);
+                       bool form2_flag, uint8_t filenum);
 
 uint32_t
 _vcd_directory_get_size (VcdDirectory *dir);
