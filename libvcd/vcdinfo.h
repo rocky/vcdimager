@@ -121,8 +121,9 @@ typedef enum {
 typedef enum {
   VCDINFO_SOURCE_UNDEF,          /* none of the below, e.g. uninitialized */
   VCDINFO_SOURCE_AUTO,           /* figure out whether a device or a flie */
-  VCDINFO_SOURCE_BIN,            /* bin file; default is 2352 bytes */
-  VCDINFO_SOURCE_CUE,            /* cue file */
+  VCDINFO_SOURCE_BIN,            /* bin disk image; default is 2352 bytes */
+  VCDINFO_SOURCE_CUE,            /* Cue-sheet CD-ROM disk image */
+  VCDINFO_SOURCE_NRG,            /* Nero CD-ROM disk image */
   VCDINFO_SOURCE_DEVICE,         /* a device like /dev/cdrom */
   VCDINFO_SOURCE_SECTOR_2336,    /* bin file emulating 2336 bytes/sector */
 } vcdinfo_source_t;
@@ -823,6 +824,7 @@ vcdinfo_init(vcdinfo_obj_t *obj);
  
    source_name is the device or file to use for inspection, and
    source_type indicates if this is a device or a file.
+   access_mode gives special access options for reading.
     
    VCDINFO_OPEN_VCD is returned if everything went okay; 
    VCDINFO_OPEN_ERROR if there was an error and VCDINFO_OPEN_OTHER if the
@@ -830,7 +832,7 @@ vcdinfo_init(vcdinfo_obj_t *obj);
  */
 vcdinfo_open_return_t
 vcdinfo_open(vcdinfo_obj_t *obj, char source_name[], 
-             vcdinfo_source_t source_type);
+             vcdinfo_source_t source_type, const char access_mode[]);
 
 
 /*!

@@ -53,6 +53,7 @@
 #include <libvcd/vcd_salloc.h>
 #include <libvcd/vcd_stream_stdio.h>
 #include <libvcd/vcd_image_bincue.h>
+#include <libvcd/vcd_image_nrg.h>
 #include <libvcd/vcd_image_cd.h>
 #include <libvcd/vcd_image_fs.h>
 #include <libvcd/vcd_xa.h>
@@ -1889,6 +1890,7 @@ vcdinfo_init(vcdinfo_obj_t *obj)
  
    source_name is the device or file to use for inspection, and
    source_type indicates if this is a device or a file.
+   access_mode gives special access options for reading.
     
    VCDINFO_OPEN_VCD is returned if everything went okay; 
    VCDINFO_OPEN_ERROR if there was an error and VCDINFO_OPEN_OTHER if the
@@ -1896,7 +1898,7 @@ vcdinfo_init(vcdinfo_obj_t *obj)
  */
 vcdinfo_open_return_t
 vcdinfo_open(vcdinfo_obj_t *obj, char source_name[], 
-             vcdinfo_source_t source_type)
+             vcdinfo_source_t source_type, const char access_mode[])
 {
 
   VcdImageSource *img;
@@ -1923,6 +1925,11 @@ vcdinfo_open(vcdinfo_obj_t *obj, char source_name[],
             && (source_name[i+1] =='u' || source_name[i+1] =='U')
             && (source_name[i+2] =='e' || source_name[i+2] =='E') ) 
           source_type = VCDINFO_SOURCE_CUE;
+        else if (i > 0
+            && (source_name[i] =='n' || source_name[i+1] =='N')
+            && (source_name[i+1] =='r' || source_name[i+1] =='R')
+            && (source_name[i+2] =='g' || source_name[i+2] =='G') ) 
+          source_type = VCDINFO_SOURCE_NRG;
         else
           source_type = VCDINFO_SOURCE_BIN;
       } else {
@@ -1940,6 +1947,8 @@ vcdinfo_open(vcdinfo_obj_t *obj, char source_name[],
       source_name=vcd_image_source_get_default_device(img);
     }
     vcd_image_source_set_arg (img, "device", source_name);
+    if (access_mode != NULL) 
+      vcd_image_source_set_arg (img, "access-mode", access_mode);
     break;
   case VCDINFO_SOURCE_SECTOR_2336:
     is_sector_2352 = false;
@@ -1974,6 +1983,13 @@ vcdinfo_open(vcdinfo_obj_t *obj, char source_name[],
       
     }
     vcd_image_source_set_arg (img, "sector", is_sector_2352 ? "2352": "2336");
+    break;
+  case VCDINFO_SOURCE_NRG:
+    img = vcd_image_source_new_nrg ();
+    if (null_source) {
+      source_name=vcd_image_source_get_default_device(img);
+    }
+    vcd_image_source_set_arg (img, "nrg", source_name);
     break;
   default: 
     return VCDINFO_OPEN_ERROR;
