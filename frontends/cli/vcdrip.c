@@ -1023,9 +1023,9 @@ ripspi (const char device_fname[])
 
   assert (first_spi_lba >= 225);
 
-  fprintf (stdout, " first segment addr: %d\n", first_spi_lba);
+  vcd_debug ("first segment addr: %d", first_spi_lba);
 
-  fprintf (stdout, " item count: %d\n", UINT16_FROM_BE (info.item_count));
+  vcd_debug ("item count: %d", UINT16_FROM_BE (info.item_count));
 
   for (n = 0; n < UINT16_FROM_BE (info.item_count); n++)
     {
@@ -1034,15 +1034,15 @@ ripspi (const char device_fname[])
       uint32_t start_lba = first_spi_lba + (n * 150);
       FILE *outfd = NULL;
 
-      snprintf (fname, sizeof (fname), "item_%3.3d.mpg", n);
+      snprintf (fname, sizeof (fname), "item%4.4d.mpg", n + 1);
+
+      vcd_info ("%s: %d -> ...", fname, start_lba);
       
       if (!(outfd = fopen (fname, "wb")))
         {
           perror ("fopen()");
           exit (EXIT_FAILURE);
         }
-
-      fprintf (stdout, "item %d...\n", n);
 
       for (pos = start_lba; pos < start_lba + 150; pos++)
         {
@@ -1059,6 +1059,15 @@ ripspi (const char device_fname[])
           if (gl_read_mode2_sector (fd, &buf, pos, true))
             vcd_warn ("IO Error at %u (ignored)\n", pos);
 
+          if (!buf.subheader[0] 
+              && !buf.subheader[1]
+              && (buf.subheader[2] | SM_FORM2) == SM_FORM2
+              && !buf.subheader[3])
+            {
+              vcd_warn ("no EOF seen, but stream ended");
+              break;
+            }
+
           fwrite (buf.data, 2324, 1, outfd);
 
           if (buf.subheader[2] & SM_EOF)
@@ -1072,6 +1081,36 @@ ripspi (const char device_fname[])
     }
 
   fclose (fd);
+}
+
+static unsigned
+_entries_get_max_track (const EntriesVcd *_entries)
+{
+  int idx;
+  int retval = 1;
+
+  for (idx = 0; idx < UINT16_FROM_BE(_entries->entry_count); idx++)
+    retval = MAX (retval, from_bcd8(_entries->entry[idx].n));
+
+  return retval;
+}
+
+static long
+_entries_get_track_start (const EntriesVcd *_entries, int tracknum)
+{
+  int idx;
+  long retval = -1;
+
+  for (idx = 0; idx < UINT16_FROM_BE(_entries->entry_count); idx++)
+    if (from_bcd8(_entries->entry[idx].n) == tracknum)
+      {
+        retval = msf_to_lba (&_entries->entry[idx].msf);
+        break;
+      }
+
+  assert (retval >= 0);
+  
+  return retval;
 }
 
 static void
@@ -1105,11 +1144,11 @@ rip (const char device_fname[])
       vcd_error ("ENTRIES.VCD/SVD signature not found");
     }
 
-  for (i = 0; i < UINT16_FROM_BE (entries.entry_count); i++)
+  for (i = 2; i <= _entries_get_max_track (&entries); i++)
     {
-      uint32_t startlba = msf_to_lba (&(entries.entry[i].msf)) - 150;
-      uint32_t endlba = (i + 1 == UINT16_FROM_BE (entries.entry_count))
-        ? size : (msf_to_lba (&(entries.entry[i + 1].msf)) - 150);
+      uint32_t startlba = _entries_get_track_start (&entries, i) - 150;
+      uint32_t endlba = (i == _entries_get_max_track (&entries))
+        ? size : (_entries_get_track_start (&entries, i + 1) - 150);
       uint32_t pos;
       FILE *outfd = NULL;
       char fname[80] = { 0, };
@@ -1118,7 +1157,7 @@ rip (const char device_fname[])
 
       bool in_data = false;
 
-      snprintf (fname, sizeof (fname), "track_%2.2d.mpg", i);
+      snprintf (fname, sizeof (fname), "avseq%2.2d.mpg", i - 1);
 
       vcd_info ("%s: %d -> %d", fname, startlba, endlba);
 

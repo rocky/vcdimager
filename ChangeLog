@@ -33,6 +33,22 @@
 		(_finalize_vcd_iso_track_filesystem): allow for bigger directory section for SVCDs
 		generalized pbc
 
+2001-05-15  Herbert Valerio Riedel  <hvr@gnu.org>
+
+ 	* configure.in: bumped version up to 0.6.2
+
+2001-05-13  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_types.h: fixed for bsdi
+
+2001-05-12  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* frontends/cli/vcdrip.c (ripspi): fixed spi ripping
+	(ripspi): improved track ripping, when multiple entry points are available
+
+	* libvcd/vcd.c (_write_vcd_iso_track): set fileno to 0 for svcds
+		in EXT area...
+
 2001-05-11  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* intense coding session; extended framework to support spi's;

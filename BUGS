@@ -3,7 +3,11 @@
 compilers/architectures
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-this package has been developed with GNU CC in mind. Caution has been taken to stay compatible with other compilers, but there's been no testing or whatsoever to ensure anything. This package has been tested on ppc, alpha and ia32 architectures -- it should work on 64bit big endian as well.
+This package has been developed with GNU CC in mind. Caution has been
+taken to stay compatible with other compilers, but there's been no
+testing or whatsoever to ensure anything. This package has been tested
+on ppc, alpha and ia32 architectures -- it should work on 64bit big
+endian as well.
 
 try avoiding gcc version 2.96 20000731 (Red Hat Linux 7.0)  -- it is known
 to slightly miscompile vcdimager.
@@ -24,7 +28,6 @@ vcdimager
 vcdrip
 ~~~~~~
 
-*) ripping of videocds containing multiple entry points is broken
 *) SPI spanning multiple segments untested
 
 --

@@ -11,7 +11,7 @@
 @include version.texi
 
 @ifinfo
-This file documents GNU VCDImager, The GNU Video CD Image Maker
+This file documents GNU VCDImager, The GNU Video CD image creating tool.
 
 Copyright (C) Herbert Valerio Riedel @email{hvr@@gnu.org}
 
@@ -41,7 +41,7 @@ approved by Herbert Valerio Riedel.
 @titlepage
 @title GNU VCDImager
 @subtitle $Id$
-@subtitle The GNU Video CD Image Maker
+@subtitle The GNU Video CD image authoring tool.
 @subtitle for version @value{VERSION}, @value{UPDATED}
 @author Herbert Valerio Riedel
 
@@ -81,50 +81,50 @@ instead of in the original English.
 @unnumbered Introduction
 
 This manual describes the @dfn{GNU VCDImager}@footnote{see
-@url{http://www.gnu.org/software/vcdimager/}} package, which provides a
-front end, @file{vcdimager}, for generating @acronym{CD-ROM} image files
-suitable for being burned to CD recordables. It takes @acronym{MPEG}
-movie files as input and generates an image file and a cue-sheet file
-which can be fed to any CD-recording program which understands the
-@acronym{BIN/CUE}-format, like cdrdao@footnote{see
-@url{http://www.ping.de/sites/daneb/cdrdao.html}} for instance.
+@url{http://www.gnu.org/software/vcdimager/}} package. It provides a
+front end, @file{vcdimager}, to generate @acronym{CD-ROM} images
+suitable for being burnt on to CD recordables. It takes @acronym{MPEG}
+movie files as its input and generates an image file and a cue-sheet file.
+These can then be fed to a CD-recording program which recognizes the
+@acronym{BIN/CUE}-format, such as cdrdao@footnote{see
+@url{http://www.ping.de/sites/daneb/cdrdao.html}}, for instance.
 
 @noindent
-Features of the back end library@footnote{the core of the GNU VCDImager
-package consists of a library named @code{libvcd}, the front ends are
-just user interfaces to the exported C-API}, on which all front ends
-relay, include:
+Features of the backend library@footnote{the core of the GNU VCDImager
+package consists of a library named @code{libvcd}, the frontends are
+just user interfaces to the exported C-API}, on which all frontends
+rely, include:
 
 @itemize @bullet
 @item
-Video CD 1.1 image output support
+Video CD 1.1 image output support.
 
 @item
-Video CD 2.0 image output support
+Video CD 2.0 image output support.
 
 @item
-Super Video CD 1.0 image output support
+Super Video CD 1.0 image output support.
 
 @item
-general facility for adding files as mode 2 form 1 and 2 sectors to
-the @acronym{ISO9660} file-system and setting the @acronym{ISO9660}
+General facility for adding files as mode 2 form 1 and 2 sectors to
+the @acronym{ISO9660} filesystem and setting the @acronym{ISO9660}
 volume label and application id fields.
 
 @item
-support for up to 98 @acronym{MPEG} tracks per (Super) Video CD.
+Support for up to 98 @acronym{MPEG} tracks per (Super) Video CD.
 
 @item
-supports 99 minute @acronym{CD-R} media@footnote{...though most devices
+Supports 99 minute @acronym{CD-R} media@footnote{...though most devices
 will have problems with such out of specification media. You may want
 use the @option{--sector-2336} option for images longer than 80
 minutes}.
 
 @end itemize
 
-Also contained in this package is @file{vcdrip}, a tool for dumping
+This package also includes @file{vcdrip}, a tool for dumping
 information about (Super) Video CD image files@footnote{on Linux it is
 supported to operate directly on @acronym{CD-ROM} devices} and
-extracting the contained @acronym{MPEG}-streams.
+extracting the @acronym{MPEG} streams from them.
 
 @c well well well
 @include gpl.texi
@@ -134,7 +134,7 @@ extracting the contained @acronym{MPEG}-streams.
 This chapter gives some background information regarding the underlying
 Video CD technology.
 
-@strong{Warning:} All information given in this chapter is given without
+@strong{Warning:} All information this chapter is presented without
 any warranty of accuracy or correctness. You are encouraged to send
 corrections and improvements for this manual to
 @email{bug-vcdimager@@gnu.org}.
@@ -144,87 +144,90 @@ corrections and improvements for this manual to
 The Video Compact Disc (@dfn{Video CD} or @dfn{VCD}) is a standardized
 digital video storage format. It is based on the commonly available
 Compact Disc technology, which allows for low cost video authoring.
-Video CDs can be played in most @acronym{DVD} stand-alone player,
-dedicated VCD players and finally most modern computer based systems
-with multimedia support.
+Video CDs can be played in most @acronym{DVD} standalone player,
+dedicated VCD players and finally, modern Personal Computers with
+multimedia support.
 
 @section Anatomy of Video CDs
 
-In general the layout of a Video CD is made up of the following areas:
+In general, the layout of a Video CD is as follows:
 
 @itemize @bullet
 @item
-ISO9660 data track
+ISO9660 data track.
 
-@itemize @bullet
-@item
-ISO9660 structure at @code{00:02:00}, consisting of 16 empty sectors,
+@itemize @bullet 
+@item 
+ISO9660 structure at @code{00:02:00} consisting of 16 empty sectors,
 primary volume descriptor (@dfn{PVD}) and directory records with file
-pointers to the later mentioned information area structures and external
-pointers to @acronym{MPEG}/@acronym{CD-DA} tracks following the ISO9660 data track.
+pointers to information area structures (described below) and external
+pointers to @acronym{MPEG}/@acronym{CD-DA} tracks following the
+ISO9660 data track.
 
 @item
-Karaoke area at @code{00:03:00}
+Karaoke area at @code{00:03:00}.
 
 @item
-Video CD information area at @code{00:04:00}
+Video CD information area at @code{00:04:00}.
 
 @item
-optional segment play item area with @acronym{MPEG} items aligned in 150
-sector segments
+Optional segment play item area with @acronym{MPEG} items aligned in 150
+sector segments.
 
 @item
-optional program and data file area, for additional files added to the
-ISO9660 track
+Optional program and data file area, for additional files added to the
+ISO9660 track.
 
 @end itemize
 
 @item
-up to 98 @acronym{MPEG} mode 2 form 2 or @acronym{CD-DA} tracks embedded in lead-in and
-lead-out empty sectors.
+Up to 98 @acronym{MPEG} mode 2 form 2 or @acronym{CD-DA} tracks
+embedded in lead-in and lead-out empty sectors.
 
 @end itemize
 
 @section Known Video CD Flavors
 
-There are different Video CD flavors commonly used. The following
+There are different Video CD flavours commonly used. The following
 sections tries to explain the differences amongst them.
 
 @subsection Video CD 1.1
 
 This is the most basic Video CD specification dating back to
-1993@footnote{actually this flavor was based on the Karaoke-CD, which
+1993@footnote{actually this flavour was based on the Karaoke-CD, which
 was the first @acronym{MPEG} based @acronym{CD-ROM} format.}, which has
 the following characteristics:
 
 @itemize @bullet
 @item
-one mode 2 mixed form ISO9660 track containing file pointers to the
-information areas
+One mode 2 mixed form ISO9660 track containing file pointers to the
+information areas.
 
 @item
-up to 98 multiplexed @acronym{MPEG}-1 audio/video streams or
-@acronym{CD-DA} audio tracks
+Up to 98 multiplexed @acronym{MPEG}-1 audio/video streams or
+@acronym{CD-DA} audio tracks.
 
 @item
-up to 500 @acronym{MPEG} track entry points
+Up to 500 @acronym{MPEG} track entry points.
 
 @end itemize
 
 The Video CD specification requires the multiplexed @acronym{MPEG}-1
 stream to have a @acronym{CBR} of about 174300 bytes per
-second@footnote{2324 bytes of payload per sector * 75 sectors per second
-= 174300 bytes per second} in order to accommodate single speed
-@acronym{CD-ROM} drives. The @acronym{CBR} @acronym{MPEG}-1, layer II
-audio stream is fixed at 224kbps with 1 stereo or 2 mono channels. 
-to have one of the following two resolutions:
+second@footnote{2324 bytes of payload per sector * 75 sectors per
+second = 174300 bytes per second} in order to accommodate single speed
+@acronym{CD-ROM} drives. This allows one of the following two
+resolutions:
 
 @itemize @bullet
 @item
-352 x 240 @@ 29.97 Hz (@acronym{NTSC})
+352 x 240 @@ 29.97 Hz (@acronym{NTSC}).
 @item
-352 x 240 @@ 23.976 Hz (@acronym{FILM})
+352 x 240 @@ 23.976 Hz (@acronym{FILM}).
 @end itemize
+
+The @acronym{CBR} @acronym{MPEG}-1, layer II audio stream is fixed at
+224kbps with 1 stereo or 2 mono channels.
 
 @subsection Video CD 2.0
 
@@ -236,7 +239,7 @@ specification:
 @itemize @bullet
 @item
 Support for (optional) @acronym{MPEG} segment play items (@dfn{SPI}),
-consisting of still pictures, motion pictures or audio streams, was
+consisting of still pictures, motion pictures or audio streams was
 added.
 
 @item
@@ -245,29 +248,29 @@ added.
 
 @item
 Support for (optional) playing related access by providing a scan point
-index file was added (@file{EXT/SCANDATA.DAT})
+index file was added. (@file{EXT/SCANDATA.DAT})
 
 @end itemize
 
 @noindent
 By adding PAL support to the Video CD 1.1 specification, the following
-resolution become available:
+resolutions became available:
 @itemize @bullet
 @item
-352 x 240 @@ 29.97 Hz (@acronym{NTSC})
+352 x 240 @@ 29.97 Hz (@acronym{NTSC}).
 @item
-352 x 240 @@ 23.976 Hz (@acronym{FILM})
+352 x 240 @@ 23.976 Hz (@acronym{FILM}).
 @item
-352 x 288 @@ 25 Hz (@acronym{PAL})
+352 x 288 @@ 25 Hz (@acronym{PAL}).
 @end itemize
 
 @subsection Extended Video CD
 
 Also known as @dfn{XVCD}, this is not an official standard. It's
-actually just a name for VCDs trying to break conformance to the
-official standards in order to use the additional performance of the
-@acronym{DVD} decoders and thus achieve better image quality. Such a
-XVCD may be unsupported by many available stand-alone playing devices.
+actually just a name for VCDs which do not conform with the official
+standards in order to use the additional performance of the
+@acronym{DVD} decoders and thus achieve better image quality. Such an
+XVCD may be unsupported by many available standalone playing devices.
 
 @subsection Super Video CD 1.0
 
@@ -275,33 +278,34 @@ With the upcoming of the @acronym{DVD} media, a new VCD standard had to
 be published in order to be able to keep up with technology, so the
 Super Video CD specification was called into life. Most notably a switch
 from @acronym{MPEG}-1 CBR to @acronym{MPEG}-2 VBR encoding for the video
-stream was performed. Based on the Video CD 2.0 features the following
-items are new:
+stream was performed. The following new features are based upon the Video 
+CD specification.
 
-@itemize @bullet
-@item
-Use of @acronym{MPEG}-2 encoding instead of @acronym{MPEG}-1 for the video stream
-
-@item
-Allowed VBR encoding of @acronym{MPEG}-1 audio stream
+@itemize @bullet 
+@item 
+Use of @acronym{MPEG}-2 encoding instead of @acronym{MPEG}-1 for the
+video stream.
 
 @item
-Higher resolutions (see below) for the video stream resolution.
+Allowed VBR encoding of @acronym{MPEG}-1 audio stream.
+
+@item
+Higher resolutions (see below) for video stream resolution.
 
 @item
 Overlay graphics and text (@dfn{OGT}) sub-channel coding for user
-switchable subtitle displaying
+switchable subtitle displaying.
 @end itemize
 
 @noindent
-For the Super Video CD only the following two resolutions are supported
+For the Super Video CD, only the following two resolutions are supported
 for motion pictures:
 
 @itemize @bullet
 @item
-480 x 480 @@ 29.97 Hz (@acronym{NTSC})
+480 x 480 @@ 29.97 Hz (@acronym{NTSC}).
 @item
-480 x 576 @@ 25 Hz (@acronym{PAL})
+480 x 576 @@ 25 Hz (@acronym{PAL}).
 @end itemize
 
 @subsection Extended Super Video CD
@@ -370,11 +374,11 @@ stream is required to have one of the following resolutions:
 
 @itemize @bullet
 @item
-352 x 240 @@ 29.97 Hz (@acronym{NTSC})
+352 x 240 @@ 29.97 Hz (@acronym{NTSC}).
 @item
-352 x 240 @@ 23.976 Hz (@acronym{FILM})
+352 x 240 @@ 23.976 Hz (@acronym{FILM}).
 @item
-352 x 288 @@ 25 Hz (@acronym{PAL}) (not supported on VCD 1.x!)
+352 x 288 @@ 25 Hz (@acronym{PAL}) (not supported on VCD 1.x!).
 @end itemize
 
 The audio stream must be @acronym{MPEG}-1 layer II, fixed to a 224
@@ -383,19 +387,19 @@ kbits/sec @acronym{CBR} with 1 stereo or 2 mono audio channels.
 @subsubsection Super Video CD
 
 When creating Super Video CD images @acronym{MPEG}-2 @acronym{VBR}
-streams are expected with a maximum allowed bit-rate of ~2.6 mbits/sec.
-The following video resolutions are (officially)
-supported@footnote{actually you can try other resoulutions as well, but
-then you are leaving the SVCD specification behind you...}:
+streams are expected with a maximum allowed bit-rate of approximately
+2.6 mbits/sec.  The following video resolutions are (officially)
+supported@footnote{actually you can try other resoulutions as well,
+but then you are leaving the SVCD specification behind you...}:
 
 @itemize @bullet
 @item
-480 x 480 @@ 29.97 Hz (@acronym{NTSC})
+480 x 480 @@ 29.97 Hz (@acronym{NTSC}).
 @item
-480 x 576 @@ 25 Hz (@acronym{PAL})
+480 x 576 @@ 25 Hz (@acronym{PAL}).
 @end itemize
 
-There are a few other requirements imposed the specification, like the
+There are a few other requirements imposed by the specification, like the
 need to encode scan information as user data in the picture layer of all
 intra pictures, and the requirement to precede every I picture by a GOP
 header which shall be preceded by a sequence header in its turn and
@@ -413,9 +417,9 @@ Furthermore the @acronym{MPEG} files should be aligned to 2324 byte
 @acronym{MPEG} packet boundaries. If they aren't GNU VCDImager will 
 try to align them on the fly while issuing a warning that padding was needed.
 
-If on-the-fly padding should fail, you can try fixing those files with VCDpad
-@footnote{see @url{http://www.nocrew.org/?part=vcdpad}} or any other
-program capable of aligning or fixing @acronym{MPEG} packets.
+%If on-the-fly padding should fail, you can try fixing those files with VCDpad
+%@footnote{see @url{http://www.nocrew.org/?part=vcdpad}} or any other
+%program capable of aligning or fixing @acronym{MPEG} packets.
 
 @subsection Adding Files to the Video CD 
 
@@ -424,17 +428,16 @@ track of the Video CD, by making use of the command-line options
 @option{--add-file=@var{FILE},@var{ISO_FILENAME}} and
 @option{--add-file-2336=@var{FILE},@var{ISO_FILENAME}}.
 The latter option allows you to include files containing the complete
-user data of mode 2 CD-ROM sectors
-@footnote{8 bytes for sub-header, 2324 bytes payload and finally 4 bytes
-for @acronym{EDC}}.
+user data of mode 2 CD-ROM sectors @footnote{8 bytes for subheader,
+2324 bytes payload and finally 4 bytes for @acronym{EDC}}.
 
 The path name given as @var{ISO_FILENAME} determines where to link the
 file in the file-system of the Video CD. The given path name must be a
 valid ISO9660 file name with the following restrictions:
 @itemize @bullet
 @item
-The Character set is restricted to upper case letters, numbers, the
-underscore @samp{_}, the dot @samp{.} and the slash @samp{/}.
+The Character set is restricted to upper case letters, numbers, 
+underscore @samp{_}, dot @samp{.} and slash @samp{/}.
 
 @item
 The maximum file name length is restricted to 31 characters, the
@@ -447,7 +450,7 @@ extension is supposed to exist the dot must be placed as a trailing
 dot.}
 
 @item
-The path-name must not begin or end with a slash. Nor should it contain
+The path-name must not begin or end with a slash nor should it contain
 slashes following directly each other.
 
 @end itemize

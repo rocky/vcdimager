@@ -1,0 +1,15 @@
+vcdimager (0.6.1-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Viral <viral@debian.org>  Fri, 11 May 2001 17:25:06 +0530
+
+vcdimager (0.6.0-1) unstable; urgency=low
+
+  * Initial Release. Closes: Bug#95590
+
+ -- Viral <viral@debian.org>  Fri, 27 Apr 2001 10:13:45 +0530
+
+Local variables:
+mode: debian-changelog
+End:

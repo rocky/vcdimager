@@ -1,0 +1,5 @@
+# watch control file for uscan
+# Site           Directory       Pattern                 Version Script
+
+http://www.hvrlab.org ~/hvrlab/vcdimager  vcdimager-(.*)\.tar\.gz    debian  uupdate
+

@@ -44,6 +44,20 @@ typedef u_int64_t uint64_t;
 /* fixme */
 #endif /* HAVE_STDINT_H */
 
+/* if it's still not defined, take a good guess... should work for
+   32bit archs */
+#ifndef UINT16_C
+# define UINT16_C(c) c ## U
+#endif
+
+#ifndef UINT32_C
+# define UINT32_C(c) c ## U
+#endif
+
+#ifndef UINT64_C
+# define UINT64_C(c) c ## ULL
+#endif
+
 #if defined(HAVE_STDBOOL_H)
 #include <stdbool.h>
 #else

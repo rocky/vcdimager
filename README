@@ -1,10 +1,11 @@
 -*- text -*-
 
-This is GNU VCDImager, a VideoCD image mastering tool. 
+This is GNU VCDImager, the GNU (Super)VideoCD authoring solution.
 
-This package consists of 'vcdimager', the image createn tool, and
-'vcdrip', a VideoCD ripping tool, for ripping mpeg streams from
-VideoCD images and showing VideoCD information about the image.
+This package contains 'vcdimager', an image authoring tool, and
+'vcdrip', a VideoCD ripping tool. 'vcdrip' can be used to rip mpeg
+streams from VideoCD images and to show VideoCD information about the
+image.
 
 See the file NEWS for a list of major changes in the current release.
 

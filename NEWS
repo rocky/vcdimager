@@ -6,14 +6,17 @@ version 0.7.0 (development)
 ===========================
 2001-....
 
+* support for segment items added
 * support for additional entry points added
 * (full) PBC support added
-* new XML based frontend added
+* new XML based frontend(s) added
 
 version 0.6.2 (stable)
 ======================
-2001-05-..
+2001-05-15
 
+* improved SPI ripping
+* fixed ripping of vcds with additional entry points
 * made album set parameters configurable by commandline
 * mpeg padding on the fly implemented
 * create /EXT/SCANDATA.DAT for SVCD (disabled for VCD2.0)

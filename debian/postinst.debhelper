@@ -1,0 +1,12 @@
+# Automatically added by dh_installdocs
+if [ "$1" = "configure" ]; then
+	if [ -d /usr/doc -a ! -e /usr/doc/vcdimager -a -d /usr/share/doc/vcdimager ]; then
+		ln -sf ../share/doc/vcdimager /usr/doc/vcdimager
+	fi
+fi
+# End automatically added section
+# Automatically added by dh_installinfo
+if [ "$1" = "configure" ]; then
+	install-info --quiet --section "Miscellaneous" "Miscellaneous" /usr/share/info/vcdimager.info
+fi
+# End automatically added section

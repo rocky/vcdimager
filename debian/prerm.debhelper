@@ -1,0 +1,8 @@
+# Automatically added by dh_installdocs
+if [ \( "$1" = "upgrade" -o "$1" = "remove" \) -a -L /usr/doc/vcdimager ]; then
+	rm -f /usr/doc/vcdimager
+fi
+# End automatically added section
+# Automatically added by dh_installinfo
+install-info --quiet --remove /usr/share/info/vcdimager.info
+# End automatically added section
