@@ -31,7 +31,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
+#include <libvcd/vcd_assert.h>
 #include <string.h>
 
 /* reader */

@@ -1,5 +1,7 @@
 2001-05-22  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* libvcd: implemented new assertion macros, and replaced system asserts
+
 	* frontends/xml/vcd_xml_rip.c (_rip_sequences): resolve pts times
 
 	* libvcd/vcd_bitvec.h: inline functions for bit handling moved here

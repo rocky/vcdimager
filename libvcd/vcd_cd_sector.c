@@ -25,7 +25,7 @@
 #endif
 
 #include <string.h>
-#include <assert.h>
+#include <libvcd/vcd_assert.h>
 
 #include "vcd_types.h"
 
@@ -47,7 +47,7 @@ build_address (void *buf, sectortype_t sectortype, uint32_t address)
 {
   raw_cd_sector_t *sector = buf;
   
-  assert(sizeof(raw_cd_sector_t) == CDDA_SIZE-DATA_LEN);
+  vcd_assert (sizeof(raw_cd_sector_t) == CDDA_SIZE-DATA_LEN);
 
   lba_to_msf(address, &(sector->msf));
 
@@ -61,7 +61,7 @@ build_address (void *buf, sectortype_t sectortype, uint32_t address)
     sector->mode = 2;
     break;
   default:
-    assert(0);
+    vcd_assert_not_reached ();
     break;
   }
 }
@@ -187,13 +187,13 @@ do_encode_L2 (void *buf, sectortype_t sectortype, uint32_t address)
 {
   raw_cd_sector_t *raw_sector = buf;
 
-  assert (buf != NULL);
+  vcd_assert (buf != NULL);
 
-  assert (sizeof (sync_pattern) == SYNC_LEN);
-  assert (sizeof (mode2_form1_sector_t) == CDDA_SIZE);
-  assert (sizeof (mode2_form2_sector_t) == CDDA_SIZE);
-  assert (sizeof (mode0_sector_t) == CDDA_SIZE);
-  assert (sizeof (raw_cd_sector_t) == SYNC_LEN+HEADER_LEN);
+  vcd_assert (sizeof (sync_pattern) == SYNC_LEN);
+  vcd_assert (sizeof (mode2_form1_sector_t) == CDDA_SIZE);
+  vcd_assert (sizeof (mode2_form2_sector_t) == CDDA_SIZE);
+  vcd_assert (sizeof (mode0_sector_t) == CDDA_SIZE);
+  vcd_assert (sizeof (raw_cd_sector_t) == SYNC_LEN+HEADER_LEN);
   
   memset (raw_sector, 0, SYNC_LEN+HEADER_LEN);
   memcpy (raw_sector->sync, sync_pattern, sizeof (sync_pattern));
@@ -226,7 +226,7 @@ do_encode_L2 (void *buf, sectortype_t sectortype, uint32_t address)
     }
     break;
   default:
-    assert(0);
+    vcd_assert_not_reached ();
   }
 
   build_address (buf, sectortype, address);
@@ -238,9 +238,9 @@ _vcd_make_mode2 (void *raw_sector, const void *data, uint32_t extent,
 {
   uint8_t *subhdr = (uint8_t*)raw_sector+16;
 
-  assert (raw_sector != NULL);
-  assert (data != NULL);
-  assert (extent != SECTOR_NIL);
+  vcd_assert (raw_sector != NULL);
+  vcd_assert (data != NULL);
+  vcd_assert (extent != SECTOR_NIL);
 
   memset (raw_sector, 0, CDDA_SIZE);
   
@@ -264,9 +264,9 @@ _vcd_make_mode2 (void *raw_sector, const void *data, uint32_t extent,
 void
 _vcd_make_raw_mode2 (void *raw_sector, const void *data, uint32_t extent)
 {
-  assert (raw_sector != NULL);
-  assert (data != NULL);
-  assert (extent != SECTOR_NIL);
+  vcd_assert (raw_sector != NULL);
+  vcd_assert (data != NULL);
+  vcd_assert (extent != SECTOR_NIL);
   
   memset (raw_sector, 0, CDDA_SIZE);
 

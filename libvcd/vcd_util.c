@@ -25,7 +25,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
+#include <libvcd/vcd_assert.h>
 
 #include "vcd_util.h"
 
@@ -48,7 +48,7 @@ _vcd_strlenv(char **str_array)
 {
   size_t n = 0;
 
-  assert(str_array != NULL);
+  vcd_assert (str_array != NULL);
 
   while(str_array[n])
     n++;
@@ -61,7 +61,7 @@ _vcd_strfreev(char **strv)
 {
   int n;
   
-  assert(strv != NULL);
+  vcd_assert (strv != NULL);
 
   for(n = 0; strv[n]; n++)
     free(strv[n]);
@@ -76,8 +76,8 @@ _vcd_strjoin (char *strv[], unsigned count, const char delim[])
   char *new_str;
   unsigned n;
 
-  assert (strv != NULL);
-  assert (delim != NULL);
+  vcd_assert (strv != NULL);
+  vcd_assert (delim != NULL);
 
   len = (count-1) * strlen (delim);
 
@@ -107,12 +107,12 @@ _vcd_strsplit(const char str[], char delim) /* fixme -- non-reentrant */
   char *_str, *p;
   char _delim[2] = { 0, 0 };
 
-  assert(str != NULL);
+  vcd_assert (str != NULL);
 
   _str = strdup(str);
   _delim[0] = delim;
 
-  assert(_str != NULL);
+  vcd_assert (_str != NULL);
 
   n = 1;
   p = _str;
@@ -136,7 +136,7 @@ _vcd_malloc (size_t size)
 {
   void *new_mem = malloc (size);
 
-  assert (new_mem != NULL);
+  vcd_assert (new_mem != NULL);
 
   memset (new_mem, 0, size);
 
@@ -183,9 +183,9 @@ _vcd_strncpy_pad(char dst[], const char src[], size_t len)
 {
   size_t rlen;
 
-  assert (dst != NULL);
-  assert (src != NULL);
-  assert (len > 0);
+  vcd_assert (dst != NULL);
+  vcd_assert (src != NULL);
+  vcd_assert (len > 0);
 
   rlen = strlen(src);
   strncpy (dst, src, len);

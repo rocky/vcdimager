@@ -21,8 +21,7 @@
 #ifndef __VCD_BITVEC_H__
 #define __VCD_BITVEC_H__
 
-#include <assert.h>
-
+#include <libvcd/vcd_assert.h>
 #include <libvcd/vcd_types.h>
 
 #define vcd_bitvec_peek_bits32(bitvec, offset) \
@@ -43,7 +42,7 @@ vcd_bitvec_peek_bits (const uint8_t bitvec[], int offset, int bits)
   uint32_t result = 0;
   int i;
 
-  assert (bits > 0 && bits <= 32);
+  vcd_assert (bits > 0 && bits <= 32);
 
   if ((offset & 7) == 0 && (bits & 7) == 0) /* optimization */
     for (i = offset; i < (offset + bits); i+= 8)

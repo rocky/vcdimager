@@ -7,6 +7,7 @@ INCLUDES = -I$(top_srcdir)
 libvcd_a_SOURCES = \
 	vcd.c \
 	vcd.h \
+	vcd_assert.h \
 	vcd_bitvec.h \
 	vcd_bytesex.c \
 	vcd_bytesex.h \

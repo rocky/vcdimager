@@ -23,7 +23,7 @@
 #endif
 
 #include <string.h>
-#include <assert.h>
+#include <libvcd/vcd_assert.h>
 #include <stdlib.h>
 #include <math.h>
 
@@ -47,8 +47,8 @@ _get_closest_aps (const struct vcd_mpeg_source_info *_mpeg_info, double t,
   struct aps_data best_aps;
   bool first = true;
 
-  assert (_mpeg_info != NULL);
-  assert (_mpeg_info->aps_list != NULL);
+  vcd_assert (_mpeg_info != NULL);
+  vcd_assert (_mpeg_info->aps_list != NULL);
 
   _VCD_LIST_FOREACH (node, _mpeg_info->aps_list)
     {
@@ -79,10 +79,10 @@ set_entries_vcd (VcdObj *obj, void *buf)
   int track_idx = 0;
   EntriesVcd entries_vcd;
 
-  assert(sizeof(EntriesVcd) == 2048);
+  vcd_assert (sizeof(EntriesVcd) == 2048);
 
-  assert(_vcd_list_length (obj->mpeg_track_list) <= 500);
-  assert(_vcd_list_length (obj->mpeg_track_list) > 0);
+  vcd_assert (_vcd_list_length (obj->mpeg_track_list) <= 500);
+  vcd_assert (_vcd_list_length (obj->mpeg_track_list) > 0);
 
   memset(&entries_vcd, 0, sizeof(entries_vcd)); /* paranoia / fixme */
 
@@ -112,7 +112,7 @@ set_entries_vcd (VcdObj *obj, void *buf)
       break;
       
     default:
-      assert (0);
+      vcd_assert_not_reached ();
       break;
     }
 
@@ -187,7 +187,7 @@ set_psd_vcd (VcdObj *obj, void *buf, bool extended)
 {
   VcdListNode *node;
 
-  assert (_vcd_pbc_available (obj));
+  vcd_assert (_vcd_pbc_available (obj));
 
   _VCD_LIST_FOREACH (node, obj->pbc_list)
     {
@@ -195,7 +195,7 @@ set_psd_vcd (VcdObj *obj, void *buf, bool extended)
       char *_buf = buf;
       unsigned offset = (extended ? _pbc->offset_ext : _pbc->offset);
       
-      assert (offset % INFO_OFFSET_MULT == 0);
+      vcd_assert (offset % INFO_OFFSET_MULT == 0);
 
       _vcd_pbc_node_write (obj, _pbc, _buf + offset, extended);
     }
@@ -207,7 +207,7 @@ set_lot_vcd(VcdObj *obj, void *buf, bool extended)
   LotVcd *lot_vcd = NULL;
   VcdListNode *node;
 
-  assert (_vcd_pbc_available (obj));
+  vcd_assert (_vcd_pbc_available (obj));
 
   lot_vcd = _vcd_malloc (sizeof (LotVcd));
   memset(lot_vcd, 0xff, sizeof(LotVcd));
@@ -219,7 +219,7 @@ set_lot_vcd(VcdObj *obj, void *buf, bool extended)
       pbc_t *_pbc = _vcd_list_node_data (node);
       unsigned offset = extended ? _pbc->offset_ext : _pbc->offset;
       
-      assert (offset % INFO_OFFSET_MULT == 0);
+      vcd_assert (offset % INFO_OFFSET_MULT == 0);
 
       offset /= INFO_OFFSET_MULT;
 
@@ -237,8 +237,8 @@ set_info_vcd(VcdObj *obj, void *buf)
   VcdListNode *node = NULL;
   int n = 0;
 
-  assert (sizeof (InfoVcd) == 2048);
-  assert (_vcd_list_length (obj->mpeg_track_list) <= 98);
+  vcd_assert (sizeof (InfoVcd) == 2048);
+  vcd_assert (_vcd_list_length (obj->mpeg_track_list) <= 98);
   
   memset (&info_vcd, 0, sizeof (info_vcd));
 
@@ -263,7 +263,7 @@ set_info_vcd(VcdObj *obj, void *buf)
       break;
       
     default:
-      assert (0);
+      vcd_assert_not_reached ();
       break;
     }
   
@@ -342,7 +342,7 @@ set_info_vcd(VcdObj *obj, void *buf)
       break;
 
     default:
-      assert (0);
+      vcd_assert_not_reached ();
       break;
     }
 
@@ -358,8 +358,8 @@ set_tracks_svd (VcdObj *obj, void *buf)
   VcdListNode *node;
   int n;
   
-  assert (obj->type == VCD_TYPE_SVCD);
-  assert (sizeof (SVDTrackContent) == 1);
+  vcd_assert (obj->type == VCD_TYPE_SVCD);
+  vcd_assert (sizeof (SVDTrackContent) == 1);
 
   strncpy (tracks_svd1->file_id, TRACKS_SVD_FILE_ID, sizeof (TRACKS_SVD_FILE_ID));
   tracks_svd1->version = TRACKS_SVD_VERSION;
@@ -546,7 +546,7 @@ _make_track_scantable (const VcdObj *obj)
 
   _vcd_list_free (all_aps, true);
 
-  assert (scanpoints == _vcd_list_length (scantable));
+  vcd_assert (scanpoints == _vcd_list_length (scantable));
 
   return scantable;
 }
@@ -559,8 +559,8 @@ set_search_dat (VcdObj *obj, void *buf)
   SearchDat search_dat;
   unsigned n;
 
-  assert (obj->type == VCD_TYPE_SVCD);
-  /* assert (sizeof (SearchDat) == ?) */
+  vcd_assert (obj->type == VCD_TYPE_SVCD);
+  /* vcd_assert (sizeof (SearchDat) == ?) */
 
   memset (&search_dat, 0, sizeof (search_dat));
 
@@ -585,7 +585,7 @@ set_search_dat (VcdObj *obj, void *buf)
       n++;
     }
 
-  assert (n = _get_scanpoint_count (obj));
+  vcd_assert (n = _get_scanpoint_count (obj));
 
   _vcd_list_free (scantable, true);
 }
@@ -630,12 +630,12 @@ _get_scandata_table (const struct vcd_mpeg_source_info *info)
 
       /* vcd_debug ("%f %f %d", t, aps_time, aps_packet); */
 
-      assert (i < _get_scandata_count (info));
+      vcd_assert (i < _get_scandata_count (info));
 
       retval[i] = aps_packet;
     }
 
-  assert (i = _get_scandata_count (info));
+  vcd_assert (i = _get_scandata_count (info));
 
   return retval;
 }
@@ -650,7 +650,7 @@ get_scandata_dat_size (const VcdObj *obj)
   retval += sizeof (msf_t) * _vcd_list_length (obj->mpeg_track_list);
 
   /* struct 2 */
-  assert (sizeof (ScandataDat2) == 0);
+  vcd_assert (sizeof (ScandataDat2) == 0);
   retval += sizeof (ScandataDat2);
   retval += sizeof (uint16_t) * 0;
 
@@ -659,7 +659,7 @@ get_scandata_dat_size (const VcdObj *obj)
   retval += (sizeof (uint8_t) + sizeof (uint16_t)) * _vcd_list_length (obj->mpeg_track_list);
 
   /* struct 4 */
-  assert (sizeof (ScandataDat4) == 0);
+  vcd_assert (sizeof (ScandataDat4) == 0);
   retval += sizeof (ScandataDat4);
   {
     VcdListNode *node;
@@ -687,7 +687,7 @@ set_scandata_dat (VcdObj *obj, void *buf)
   unsigned n;
   uint16_t _tmp_offset;
 
-  assert (obj->type == VCD_TYPE_SVCD);
+  vcd_assert (obj->type == VCD_TYPE_SVCD);
 
   /* memset (buf, 0, get_scandata_dat_size (obj)); */
 
@@ -711,7 +711,7 @@ set_scandata_dat (VcdObj *obj, void *buf)
       while (i >= (60 * 100))
         i -= (60 * 100);
 
-      assert (i >= 0);
+      vcd_assert (i >= 0);
 
       lba_to_msf (i * 75, &(scandata_dat1->cum_playtimes[n]));
       scandata_dat1->cum_playtimes[n].f = to_bcd8 (floor (f * 75.0));

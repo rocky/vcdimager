@@ -23,7 +23,7 @@
 #endif
 
 #include <string.h>
-#include <assert.h>
+#include <libvcd/vcd_assert.h>
 #include <stddef.h>
 #include <math.h>
 
@@ -77,7 +77,7 @@ _get_sel_mode (const pbc_t *_pbc)
   if (_mode == _SEL_MODE_MULTI_ONLY 
       && _vcd_list_length (_pbc->select_id_list))
     {
-      assert (_vcd_list_length (_pbc->default_id_list)
+      vcd_assert (_vcd_list_length (_pbc->default_id_list)
 	      == _vcd_list_length (_pbc->select_id_list));
 
       _mode = _SEL_MODE_MULTI;
@@ -96,7 +96,7 @@ _vcd_pbc_lid_lookup (const VcdObj *obj, const char item_id[])
     {
       pbc_t *_pbc = _vcd_list_node_data (node);
 
-      assert (n < 0x8000);
+      vcd_assert (n < 0x8000);
 
       if (_pbc->id && !strcmp (item_id, _pbc->id))
 	return n;
@@ -113,7 +113,7 @@ _vcd_pbc_lookup (const VcdObj *obj, const char item_id[])
 {
   unsigned id;
 
-  assert (item_id != NULL);
+  vcd_assert (item_id != NULL);
 
   if ((id = _vcd_pbc_pin_lookup (obj, item_id)))
     {
@@ -126,7 +126,7 @@ _vcd_pbc_lookup (const VcdObj *obj, const char item_id[])
       else if (id < 2980)
 	return ITEM_TYPE_SEGMENT;
       else 
-	assert (0);
+	vcd_assert_not_reached ();
     }
   else if (_vcd_pbc_lid_lookup (obj, item_id))
     return ITEM_TYPE_PBC;
@@ -150,7 +150,7 @@ _vcd_pbc_pin_lookup (const VcdObj *obj, const char item_id[])
     {
       mpeg_sequence_t *_sequence = _vcd_list_node_data (node);
 
-      assert (n < 98);
+      vcd_assert (n < 98);
 
       if (_sequence->id && !strcmp (item_id, _sequence->id))
 	return n + 2;
@@ -173,7 +173,7 @@ _vcd_pbc_pin_lookup (const VcdObj *obj, const char item_id[])
 	{
 	  entry_t *_entry = _vcd_list_node_data (node);
 
-	  assert (n < 500);
+	  vcd_assert (n < 500);
 
 	  if (_entry->id && !strcmp (item_id, _entry->id))
 	    return n + 100;
@@ -189,7 +189,7 @@ _vcd_pbc_pin_lookup (const VcdObj *obj, const char item_id[])
     {
       mpeg_segment_t *_segment = _vcd_list_node_data (node);
 
-      assert (n < 1980);
+      vcd_assert (n < 1980);
 
       if (_segment->id && !strcmp (item_id, _segment->id))
 	return n + 1000;
@@ -203,8 +203,8 @@ _vcd_pbc_pin_lookup (const VcdObj *obj, const char item_id[])
 bool
 _vcd_pbc_available (const VcdObj *obj)
 {
-  assert (obj != NULL);
-  assert (obj->pbc_list != NULL);
+  vcd_assert (obj != NULL);
+  vcd_assert (obj->pbc_list != NULL);
 
   if (!_vcd_list_length (obj->pbc_list))
     return false;
@@ -222,7 +222,7 @@ _vcd_pbc_available (const VcdObj *obj)
       break;
 
     default:
-      assert (0);
+      vcd_assert_not_reached ();
       break;
     }
 
@@ -270,16 +270,16 @@ _vcd_pbc_node_length (const pbc_t *_pbc, bool extended)
 
 	  case _SEL_MODE_MULTI_ONLY:
 	    n = _vcd_list_length (_pbc->default_id_list);
-	    assert (_vcd_list_length (_pbc->select_id_list) == 0);
+	    vcd_assert (_vcd_list_length (_pbc->select_id_list) == 0);
 	    break;
 
 	  case _SEL_MODE_NORMAL:
 	    n = _vcd_list_length (_pbc->select_id_list);
-	    assert (_vcd_list_length (_pbc->default_id_list) <= 1);
+	    vcd_assert (_vcd_list_length (_pbc->default_id_list) <= 1);
 	    break;
 
 	  default:
-	    assert (0);
+	    vcd_assert_not_reached ();
 	    break;
 	  }
       }
@@ -298,7 +298,7 @@ _vcd_pbc_node_length (const pbc_t *_pbc, bool extended)
       break;
 
     default:
-      assert (0);
+      vcd_assert_not_reached ();
       break;
     }
 
@@ -362,7 +362,7 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 	    char *_id = _vcd_list_node_data (node);
 	    uint16_t _pin;
 
-	    assert (_id != NULL);
+	    vcd_assert (_id != NULL);
 
 	    _pin = _vcd_pbc_pin_lookup (obj, _id);
 
@@ -389,7 +389,7 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 	if (_mode == _SEL_MODE_MULTI_ONLY 
 	    && _vcd_list_length (_pbc->select_id_list))
 	  {
-	    assert (_vcd_list_length (_pbc->default_id_list)
+	    vcd_assert (_vcd_list_length (_pbc->default_id_list)
 		    == _vcd_list_length (_pbc->select_id_list));
 
 	    _mode = _SEL_MODE_MULTI;
@@ -439,7 +439,7 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 	    int idx;
 	    
 	  case _SEL_MODE_MULTI:
-	    assert (_md->bsn == 1);
+	    vcd_assert (_md->bsn == 1);
 	    _md->default_ofs = UINT16_TO_BE (0xfffd);
 
 	    idx = 0;
@@ -464,7 +464,7 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 	    break;
 
 	  case _SEL_MODE_MULTI_ONLY:
-	    assert (_md->bsn == 1);
+	    vcd_assert (_md->bsn == 1);
 	    _md->default_ofs = UINT16_TO_BE (0xfffe);
 	    _md->nos = _vcd_list_length (_pbc->default_id_list);
 	    /* fixme -- assert entry nums */
@@ -500,7 +500,7 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 	    break;
 
 	  default:
-	    assert (0);
+	    vcd_assert_not_reached ();
 	  }
       }
       break;
@@ -514,7 +514,7 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
       break;
 
     default:
-      assert (0);
+      vcd_assert_not_reached ();
       break;
     }
 }
@@ -542,7 +542,7 @@ vcd_pbc_new (enum pbc_type_t type)
       break;
 
     default:
-      assert (0);
+      vcd_assert_not_reached ();
       break;
     }
 

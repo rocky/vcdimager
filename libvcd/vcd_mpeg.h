@@ -21,7 +21,6 @@
 #ifndef __VCD_MPEG_H__
 #define __VCD_MPEG_H__
 
-#include <assert.h>
 #include <string.h>
 
 #include <libvcd/vcd_types.h>

@@ -22,7 +22,7 @@
 # include "config.h"
 #endif
 
-#include <assert.h>
+#include <libvcd/vcd_assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -58,8 +58,8 @@ _get_sequence_by_id (VcdObj *obj, const char id[])
 {
   VcdListNode *node;
 
-  assert (id != NULL);
-  assert (obj != NULL);
+  vcd_assert (id != NULL);
+  vcd_assert (obj != NULL);
 
   _VCD_LIST_FOREACH (node, obj->mpeg_sequence_list)
     {
@@ -144,7 +144,7 @@ vcd_obj_new (vcd_type_t vcd_type)
       break;
 
     default:
-      assert (0);
+      vcd_assert_not_reached ();
     }
 
   return new_obj;
@@ -165,11 +165,11 @@ _vcd_obj_remove_mpeg_track (VcdObj *obj, int track_id)
   mpeg_sequence_t *track = NULL;
   VcdListNode *node = NULL;
 
-  assert (track_id >= 0);
+  vcd_assert (track_id >= 0);
 
   node = _vcd_list_at (obj->mpeg_sequence_list, track_id);
   
-  assert (node != NULL);
+  vcd_assert (node != NULL);
 
   track = (mpeg_sequence_t *) _vcd_list_node_data (node);
 
@@ -197,8 +197,8 @@ vcd_obj_append_segment_play_item (VcdObj *obj, VcdMpegSource *mpeg_source,
 {
   mpeg_segment_t *segment = NULL;
 
-  assert (obj != NULL);
-  assert (mpeg_source != NULL);
+  vcd_assert (obj != NULL);
+  vcd_assert (mpeg_source != NULL);
 
   if (obj->type != VCD_TYPE_SVCD
       && obj->type != VCD_TYPE_VCD2)
@@ -252,8 +252,8 @@ vcd_obj_append_sequence_play_item (VcdObj *obj, VcdMpegSource *mpeg_source,
   mpeg_sequence_t *track = NULL;
   int track_no = _vcd_list_length (obj->mpeg_sequence_list);
 
-  assert (obj != NULL);
-  assert (mpeg_source != NULL);
+  vcd_assert (obj != NULL);
+  vcd_assert (mpeg_source != NULL);
 
   if (item_id && _vcd_pbc_lookup (obj, item_id))
     {
@@ -324,7 +324,7 @@ vcd_obj_add_sequence_entry (VcdObj *obj, const char sequence_id[],
 {
   mpeg_sequence_t *_sequence;
 
-  assert (obj != NULL);
+  vcd_assert (obj != NULL);
 
   if (sequence_id)
     _sequence = _get_sequence_by_id (obj, sequence_id);
@@ -360,8 +360,8 @@ vcd_obj_destroy (VcdObj *obj)
 {
   VcdListNode *node;
 
-  assert (obj != NULL);
-  assert (!obj->in_output);
+  vcd_assert (obj != NULL);
+  vcd_assert (!obj->in_output);
 
   free (obj->iso_volume_label);
   free (obj->iso_application_id);
@@ -385,7 +385,7 @@ vcd_obj_destroy (VcdObj *obj)
 int 
 vcd_obj_set_param_uint (VcdObj *obj, vcd_parm_t param, unsigned arg)
 {
-  assert (obj != NULL);
+  vcd_assert (obj != NULL);
 
   switch (param) 
     {
@@ -420,7 +420,7 @@ vcd_obj_set_param_uint (VcdObj *obj, vcd_parm_t param, unsigned arg)
       break;
 
     default:
-      assert (0);
+      vcd_assert_not_reached ();
       break;
     }
 
@@ -430,8 +430,8 @@ vcd_obj_set_param_uint (VcdObj *obj, vcd_parm_t param, unsigned arg)
 int 
 vcd_obj_set_param_str (VcdObj *obj, vcd_parm_t param, const char *arg)
 {
-  assert (obj != NULL);
-  assert (arg != NULL);
+  vcd_assert (obj != NULL);
+  vcd_assert (arg != NULL);
 
   switch (param) 
     {
@@ -469,7 +469,7 @@ vcd_obj_set_param_str (VcdObj *obj, vcd_parm_t param, const char *arg)
       break;
 
     default:
-      assert (0);
+      vcd_assert_not_reached ();
       break;
     }
 
@@ -479,7 +479,7 @@ vcd_obj_set_param_str (VcdObj *obj, vcd_parm_t param, const char *arg)
 int 
 vcd_obj_set_param_bool (VcdObj *obj, vcd_parm_t param, bool arg)
 {
-  assert (obj != NULL);
+  vcd_assert (obj != NULL);
 
   switch (param) 
     {
@@ -505,7 +505,7 @@ vcd_obj_set_param_bool (VcdObj *obj, vcd_parm_t param, bool arg)
       break;
 
     default:
-      assert (0);
+      vcd_assert_not_reached ();
       break;
     }
 
@@ -526,11 +526,11 @@ vcd_obj_add_file (VcdObj *obj, const char iso_pathname[],
 {
   uint32_t size = 0, sectors = 0;
  
-  assert (obj != NULL);
-  assert (file != NULL);
-  assert (iso_pathname != NULL);
-  assert (strlen (iso_pathname) > 0);
-  assert (file != NULL);
+  vcd_assert (obj != NULL);
+  vcd_assert (file != NULL);
+  vcd_assert (iso_pathname != NULL);
+  vcd_assert (strlen (iso_pathname) > 0);
+  vcd_assert (file != NULL);
 
   size = vcd_data_source_stat (file);
 
@@ -596,11 +596,11 @@ _finalize_vcd_iso_track_allocation (VcdObj *obj)
 
   /* pre-alloc 16 blocks of ISO9660 required silence */
   if (_vcd_salloc (obj->iso_bitmap, 0, 16) == SECTOR_NIL)
-    assert (0);
+    vcd_assert_not_reached ();
 
   /* keep karaoke sectors blank -- well... guess I'm too paranoid :) */
   if (_vcd_salloc (obj->iso_bitmap, 75, 75) == SECTOR_NIL) 
-    assert (0);
+    vcd_assert_not_reached ();
 
   /* pre-alloc descriptors, PVD */
   _dict_insert (obj, "pvd", ISO_PVD_SECTOR, 1, SM_EOR);           /* EOR */
@@ -630,8 +630,8 @@ _finalize_vcd_iso_track_allocation (VcdObj *obj)
                     _vcd_len2blocks (get_search_dat_size (obj), ISO_BLOCKSIZE), SM_EOF); /* SEARCH.DAT */
       _dict_insert (obj, "tracks", SECTOR_NIL, 1, SM_EOF);      /* TRACKS.SVD */
 
-      assert (_dict_get_bykey (obj, "tracks")->sector > INFO_VCD_SECTOR);
-      assert (_dict_get_bykey (obj, "search")->sector > INFO_VCD_SECTOR);
+      vcd_assert (_dict_get_bykey (obj, "tracks")->sector > INFO_VCD_SECTOR);
+      vcd_assert (_dict_get_bykey (obj, "search")->sector > INFO_VCD_SECTOR);
     }
 
   /* done with primary information area */
@@ -643,7 +643,7 @@ _finalize_vcd_iso_track_allocation (VcdObj *obj)
   for(n = 0;n < obj->mpeg_segment_start_extent;n++) 
     _vcd_salloc (obj->iso_bitmap, n, 1);
   
-  assert (_vcd_salloc_get_highest (obj->iso_bitmap) + 1 == obj->mpeg_segment_start_extent);
+  vcd_assert (_vcd_salloc_get_highest (obj->iso_bitmap) + 1 == obj->mpeg_segment_start_extent);
 
   /* insert segments */
 
@@ -654,14 +654,14 @@ _finalize_vcd_iso_track_allocation (VcdObj *obj)
       _segment->start_extent = _vcd_salloc (obj->iso_bitmap, SECTOR_NIL, 
                                             _segment->segment_count * 150);
 
-      assert (_segment->start_extent % 75 == 0);
-      assert (_vcd_salloc_get_highest (obj->iso_bitmap) + 1 
+      vcd_assert (_segment->start_extent % 75 == 0);
+      vcd_assert (_vcd_salloc_get_highest (obj->iso_bitmap) + 1 
               == _segment->start_extent + _segment->segment_count * 150);
     }
 
   obj->ext_file_start_extent = _vcd_salloc_get_highest (obj->iso_bitmap) + 1;
 
-  assert (obj->ext_file_start_extent % 75 == 0);
+  vcd_assert (obj->ext_file_start_extent % 75 == 0);
 
   /* go on with EXT area */
 
@@ -689,7 +689,7 @@ _finalize_vcd_iso_track_allocation (VcdObj *obj)
                     SM_EOF);
       break;
     default:
-      assert (0);
+      vcd_assert_not_reached ();
       break;
     }
 
@@ -706,7 +706,7 @@ _finalize_vcd_iso_track_allocation (VcdObj *obj)
         {
           p->start_extent =
             _vcd_salloc(obj->iso_bitmap, SECTOR_NIL, p->sectors);
-          assert (p->start_extent != SECTOR_NIL);
+          vcd_assert (p->start_extent != SECTOR_NIL);
         }
       else /* zero sized files -- set dummy extent */
         p->start_extent = obj->custom_file_start_extent;
@@ -807,7 +807,7 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
     break;
 
   default:
-    assert (0);
+    vcd_assert_not_reached ();
     break;
   }
 
@@ -829,10 +829,10 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
           fmt = "SEGMENT/ITEM%4.4d.MPG";
           break;
         default:
-          assert(0);
+          vcd_assert_not_reached ();
         }
 
-      assert (n < 500);
+      vcd_assert (n < 500);
       
       snprintf (segment_pathname, sizeof (segment_pathname), fmt, n + 1);
         
@@ -886,7 +886,7 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
       break;
 
     default:
-      assert (0);
+      vcd_assert_not_reached ();
     }
 
 
@@ -924,10 +924,10 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
           file_num = 0;
           break;
         default:
-          assert(0);
+          vcd_assert_not_reached ();
         }
 
-      assert (n < 98);
+      vcd_assert (n < 98);
       
       snprintf (avseq_pathname, sizeof (avseq_pathname), fmt, n + 1);
         
@@ -973,7 +973,7 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
           vcd_error ("directory section to big for a SVCD");
         break;
       default:
-        assert(0);
+        vcd_assert_not_reached ();
       }
     
     /* un-alloc small area */
@@ -1026,7 +1026,7 @@ _write_m2_image_sector (VcdObj *obj, const void *data, uint32_t extent,
 {
   char buf[CDDA_SIZE] = { 0, };
 
-  assert (extent == obj->sectors_written);
+  vcd_assert (extent == obj->sectors_written);
 
   _vcd_make_mode2(buf, data, extent, fnum, cnum, sm, ci);
 
@@ -1042,7 +1042,7 @@ _write_m2_raw_image_sector (VcdObj *obj, const void *data, uint32_t extent)
 {
   char buf[CDDA_SIZE] = { 0, };
 
-  assert (extent == obj->sectors_written);
+  vcd_assert (extent == obj->sectors_written);
 
   _vcd_make_raw_mode2(buf, data, extent);
 
@@ -1180,14 +1180,14 @@ _write_vcd_iso_track (VcdObj *obj)
 
   /* SEGMENTS */
 
-  assert (n == obj->mpeg_segment_start_extent);
+  vcd_assert (n == obj->mpeg_segment_start_extent);
 
   _VCD_LIST_FOREACH (node, obj->mpeg_segment_list)
     {
       mpeg_segment_t *_segment = _vcd_list_node_data (node);
       unsigned packet_no;
 
-      assert (_segment->start_extent == n);
+      vcd_assert (_segment->start_extent == n);
 
       for (packet_no = 0;packet_no < (_segment->segment_count * 150);packet_no++)
         {
@@ -1224,7 +1224,7 @@ _write_vcd_iso_track (VcdObj *obj)
 
   /* EXT stuff */
 
-  assert (n == obj->ext_file_start_extent);
+  vcd_assert (n == obj->ext_file_start_extent);
 
   for (;n < obj->custom_file_start_extent; n++)
     {
@@ -1246,7 +1246,7 @@ _write_vcd_iso_track (VcdObj *obj)
 
   /* write custom files */
 
-  assert (n == obj->custom_file_start_extent);
+  vcd_assert (n == obj->custom_file_start_extent);
     
   _VCD_LIST_FOREACH (node, obj->custom_file_list)
     {
@@ -1387,7 +1387,7 @@ _write_sectors (VcdObj *obj, int track_idx)
       break;
 
     default:
-      assert (0);
+      vcd_assert_not_reached ();
     }
 
     if (n == track->info->packets - 1)
@@ -1423,7 +1423,7 @@ vcd_obj_get_image_size (VcdObj *obj)
 {
   long size_sectors = -1;
 
-  assert (!obj->in_output);
+  vcd_assert (!obj->in_output);
   
   if (_vcd_list_length (obj->mpeg_sequence_list) > 0) 
     {
@@ -1440,10 +1440,10 @@ vcd_obj_begin_output (VcdObj *obj)
 {
   uint32_t image_size;
 
-  assert (obj != NULL);
-  assert (_vcd_list_length (obj->mpeg_sequence_list) > 0);
+  vcd_assert (obj != NULL);
+  vcd_assert (_vcd_list_length (obj->mpeg_sequence_list) > 0);
 
-  assert (!obj->in_output);
+  vcd_assert (!obj->in_output);
   obj->in_output = true;
 
   obj->in_track = 1;
@@ -1474,9 +1474,9 @@ vcd_obj_begin_output (VcdObj *obj)
 void
 vcd_obj_end_output (VcdObj *obj)
 {
-  assert (obj != NULL);
+  vcd_assert (obj != NULL);
 
-  assert (obj->in_output);
+  vcd_assert (obj->in_output);
   obj->in_output = false;
 
   _vcd_directory_destroy (obj->dir);
@@ -1489,8 +1489,8 @@ vcd_obj_end_output (VcdObj *obj)
 int
 vcd_obj_append_pbc_node (VcdObj *obj, struct _pbc_t *_pbc)
 {
-  assert (obj != NULL);
-  assert (_pbc != NULL);
+  vcd_assert (obj != NULL);
+  vcd_assert (_pbc != NULL);
 
   if (obj->type != VCD_TYPE_SVCD
       && obj->type != VCD_TYPE_VCD2)
@@ -1516,8 +1516,8 @@ vcd_obj_write_image (VcdObj *obj, VcdImageSink *image_sink,
 {
   VcdListNode *node;
 
-  assert (obj != NULL);
-  assert (obj->in_output);
+  vcd_assert (obj != NULL);
+  vcd_assert (obj->in_output);
 
   if (!image_sink)
     return -1;
@@ -1570,10 +1570,10 @@ vcd_obj_write_image (VcdObj *obj, VcdImageSink *image_sink,
   {
     unsigned track;
 
-    assert (obj != NULL);
-    assert (obj->sectors_written == 0);
+    vcd_assert (obj != NULL);
+    vcd_assert (obj->sectors_written == 0);
 
-    assert (obj->in_output);
+    vcd_assert (obj->in_output);
 
     obj->progress_callback = callback;
     obj->callback_user_data = user_data;

@@ -25,32 +25,38 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdio.h>
-#include <assert.h>
+#include <libvcd/vcd_assert.h>
 
 #include "vcd_logging.h"
 
 static const char _rcsid[] = "$Id$";
 
 static void
-default_vcd_log_handler(log_level_t level, const char message[])
+default_vcd_log_handler (log_level_t level, const char message[])
 {
-  switch(level) {
-  case LOG_ERROR:
-    fprintf(stderr, "**ERROR: %s\n", message);
-    exit(EXIT_FAILURE);
-    break;
-  case LOG_DEBUG:
-    fprintf(stdout, "--DEBUG: %s\n", message);
-    break;
-  case LOG_WARN:
-    fprintf(stdout, "++ WARN: %s\n", message);
-    break;
-  case LOG_INFO:
-    fprintf(stdout, "   INFO: %s\n", message);
-    break;
-  default:
-    assert(0);
-  }
+  switch (level)
+    {
+    case LOG_ERROR:
+      fprintf (stderr, "**ERROR: %s\n", message);
+      exit (EXIT_FAILURE);
+      break;
+    case LOG_DEBUG:
+      fprintf (stdout, "--DEBUG: %s\n", message);
+      break;
+    case LOG_WARN:
+      fprintf (stdout, "++ WARN: %s\n", message);
+      break;
+    case LOG_INFO:
+      fprintf (stdout, "   INFO: %s\n", message);
+      break;
+    case LOG_ASSERT:
+      fprintf (stderr, "!ASSERT: %s\n", message);
+      abort ();
+      break;
+    default:
+      vcd_assert_not_reached ();
+      break;
+    }
 }
 
 static vcd_log_handler_t _handler = default_vcd_log_handler;
@@ -72,7 +78,7 @@ vcd_logv(log_level_t level, const char format[], va_list args)
   static int in_recursion = 0;
 
   if(in_recursion)
-    assert(0);
+    vcd_assert_not_reached ();
 
   in_recursion = 1;
   

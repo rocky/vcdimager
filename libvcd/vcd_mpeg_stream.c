@@ -23,7 +23,7 @@
 #endif
 
 #include <string.h>
-#include <assert.h>
+#include <libvcd/vcd_assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -58,7 +58,7 @@ vcd_mpeg_source_new (VcdDataSource *mpeg_file)
 {
   VcdMpegSource *new_obj;
   
-  assert (mpeg_file != NULL);
+  vcd_assert (mpeg_file != NULL);
 
   new_obj = _vcd_malloc (sizeof (VcdMpegSource));
 
@@ -71,7 +71,7 @@ vcd_mpeg_source_new (VcdDataSource *mpeg_file)
 void
 vcd_mpeg_source_destroy (VcdMpegSource *obj, bool destroy_file_obj)
 {
-  assert (obj != NULL);
+  vcd_assert (obj != NULL);
 
   if (destroy_file_obj)
     vcd_data_source_destroy (obj->data_source);
@@ -84,9 +84,9 @@ vcd_mpeg_source_destroy (VcdMpegSource *obj, bool destroy_file_obj)
 const struct vcd_mpeg_source_info *
 vcd_mpeg_source_get_info (VcdMpegSource *obj)
 {
-  assert (obj != NULL);
+  vcd_assert (obj != NULL);
 
-  assert (obj->scanned);
+  vcd_assert (obj->scanned);
 
   return &(obj->info);
 }
@@ -96,8 +96,8 @@ vcd_mpeg_source_get_info (VcdMpegSource *obj)
 long
 vcd_mpeg_source_stat (VcdMpegSource *obj)
 {
-  assert (obj != NULL);
-  assert (!obj->scanned);
+  vcd_assert (obj != NULL);
+  vcd_assert (!obj->scanned);
   
   return obj->info.packets * 2324;
 }
@@ -114,7 +114,7 @@ vcd_mpeg_source_scan (VcdMpegSource *obj)
   bool _warned_padding = false;
   bool _pal = false;
 
-  assert (obj != NULL);
+  vcd_assert (obj != NULL);
 
   if (obj->scanned)
     {
@@ -122,7 +122,7 @@ vcd_mpeg_source_scan (VcdMpegSource *obj)
       return;
     }
 
-  assert (!obj->scanned);
+  vcd_assert (!obj->scanned);
 
   memset (&state, 0, sizeof (state));
 
@@ -168,7 +168,7 @@ vcd_mpeg_source_scan (VcdMpegSource *obj)
 
   vcd_data_source_close (obj->data_source);
 
-  assert (pos == length);
+  vcd_assert (pos == length);
 
   obj->info.audio_c0 = state.stream.audio[0];
   obj->info.audio_c1 = state.stream.audio[1];
@@ -265,9 +265,9 @@ vcd_mpeg_source_get_packet (VcdMpegSource *obj, unsigned long packet_no,
   unsigned pno;
   VcdMpegStreamCtx state;
 
-  assert (obj != NULL);
-  assert (obj->scanned);
-  assert (packet_buf != NULL);
+  vcd_assert (obj != NULL);
+  vcd_assert (obj->scanned);
+  vcd_assert (packet_buf != NULL);
 
   if (packet_no >= obj->info.packets)
     {
@@ -351,7 +351,7 @@ vcd_mpeg_source_get_packet (VcdMpegSource *obj, unsigned long packet_no,
 	vcd_data_source_seek (obj->data_source, pos);
     }
 
-  assert (pos == length);
+  vcd_assert (pos == length);
 
   vcd_error ("shouldnt be reached...");
 
@@ -361,7 +361,7 @@ vcd_mpeg_source_get_packet (VcdMpegSource *obj, unsigned long packet_no,
 void
 vcd_mpeg_source_close (VcdMpegSource *obj)
 {
-  assert (obj != NULL);
+  vcd_assert (obj != NULL);
 
   vcd_data_source_close (obj->data_source);
 }

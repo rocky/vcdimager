@@ -22,7 +22,7 @@
 # include "config.h"
 #endif
 
-#include <assert.h>
+#include <libvcd/vcd_assert.h>
 
 #include "vcd_bytesex.h"
 
@@ -81,7 +81,7 @@ from_733 (uint64_t p)
 uint8_t
 to_bcd8 (uint8_t n)
 {
-  assert(n < 100);
+  vcd_assert (n < 100);
 
   return ((n/10)<<4) | (n%10);
 }
@@ -95,7 +95,7 @@ from_bcd8(uint8_t p)
 void
 lba_to_msf (uint32_t lba, msf_t *msf)
 {
-  assert (msf != 0);
+  vcd_assert (msf != 0);
 
   msf->m = to_bcd8 (lba / (60 * 75));
   msf->s = to_bcd8 ((lba / 75) % 60);
@@ -107,7 +107,7 @@ msf_to_lba (const msf_t *msf)
 {
   uint32_t lba = 0;
 
-  assert (msf != 0);
+  vcd_assert (msf != 0);
 
   lba = from_bcd8 (msf->m);
   lba *= 60;

@@ -25,7 +25,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdio.h>
-#include <assert.h>
+#include <libvcd/vcd_assert.h>
 
 #include "vcd_iso9660.h"
 #include "vcd_iso9660_private.h"
@@ -51,9 +51,9 @@ set_iso_evd(void *pd)
 {
   struct iso_volume_descriptor ied;
 
-  assert(sizeof(struct iso_volume_descriptor) == ISO_BLOCKSIZE);
+  vcd_assert (sizeof(struct iso_volume_descriptor) == ISO_BLOCKSIZE);
 
-  assert(pd != NULL);
+  vcd_assert (pd != NULL);
   
   memset(&ied, 0, sizeof(ied));
 
@@ -76,11 +76,11 @@ set_iso_pvd(void *pd,
 {
   struct iso_primary_descriptor ipd;
 
-  assert(sizeof(struct iso_primary_descriptor) == ISO_BLOCKSIZE);
+  vcd_assert (sizeof(struct iso_primary_descriptor) == ISO_BLOCKSIZE);
 
-  assert(pd != NULL);
-  assert(volume_id != NULL);
-  assert(application_id != NULL);
+  vcd_assert (pd != NULL);
+  vcd_assert (volume_id != NULL);
+  vcd_assert (application_id != NULL);
 
   memset(&ipd,0,sizeof(ipd)); /* paranoia? */
 
@@ -104,7 +104,7 @@ set_iso_pvd(void *pd,
   ipd.type_l_path_table = to_731(path_table_l_extent); 
   ipd.type_m_path_table = to_732(path_table_m_extent); 
   
-  assert(sizeof(ipd.root_directory_record) == 34);
+  vcd_assert (sizeof(ipd.root_directory_record) == 34);
   memcpy(ipd.root_directory_record, root_dir, sizeof(ipd.root_directory_record));
   ipd.root_directory_record[0] = 34;
 
@@ -173,16 +173,16 @@ dir_add_entry_su(void *dir,
 
   int length, su_offset;
 
-  assert(sizeof(struct iso_directory_record) == 33);
+  vcd_assert (sizeof(struct iso_directory_record) == 33);
 
   if(!dsize && !idr->length)
     dsize = ISO_BLOCKSIZE; /* for when dir lacks '.' entry */
   
-  assert(dsize > 0 && !(dsize % ISO_BLOCKSIZE));
-  assert(dir != NULL);
-  assert(extent > 17);
-  assert(name != NULL);
-  assert(strlen(name) <= MAX_ISOPATHNAME);
+  vcd_assert (dsize > 0 && !(dsize % ISO_BLOCKSIZE));
+  vcd_assert (dir != NULL);
+  vcd_assert (extent > 17);
+  vcd_assert (name != NULL);
+  vcd_assert (strlen(name) <= MAX_ISOPATHNAME);
 
   length = sizeof(struct iso_directory_record);
   length += strlen(name);
@@ -226,11 +226,11 @@ dir_add_entry_su(void *dir,
 
   /* g_printerr("using offset %d (for len %d of '%s')\n", offset, length, name); */
 
-  assert(offset+length < dsize);
+  vcd_assert (offset+length < dsize);
 
   idr = (struct iso_directory_record*)tmp8;
   
-  assert(offset+length < dsize); 
+  vcd_assert (offset+length < dsize); 
   
   memset(idr, 0, length);
   idr->length = to_711(length);
@@ -272,9 +272,9 @@ void dir_init_new_su (void *dir,
                       const void *psu_data,
                       unsigned psu_size)
 {
-  assert (ssize > 0 && !(ssize % ISO_BLOCKSIZE));
-  assert (psize > 0 && !(psize % ISO_BLOCKSIZE));
-  assert (dir != NULL);
+  vcd_assert (ssize > 0 && !(ssize % ISO_BLOCKSIZE));
+  vcd_assert (psize > 0 && !(psize % ISO_BLOCKSIZE));
+  vcd_assert (dir != NULL);
 
   memset (dir, 0, ssize);
 
@@ -287,9 +287,9 @@ void dir_init_new_su (void *dir,
 void 
 pathtable_init (void *pt)
 {
-  assert (sizeof (struct iso_path_table) == 8);
+  vcd_assert (sizeof (struct iso_path_table) == 8);
 
-  assert (pt != NULL);
+  vcd_assert (pt != NULL);
   
   memset (pt, 0, ISO_BLOCKSIZE); /* fixme */
 }
@@ -303,7 +303,7 @@ pathtable_get_size_and_entries (const void *pt,
   unsigned offset = 0;
   unsigned count = 0;
 
-  assert (pt != NULL);
+  vcd_assert (pt != NULL);
 
   while (from_711 (*tmp)) 
     {
@@ -341,7 +341,7 @@ pathtable_l_add_entry (void *pt,
   size_t name_len = strlen (name) ? strlen (name) : 1;
   unsigned entrynum = 0;
 
-  assert (pathtable_get_size (pt) < ISO_BLOCKSIZE); /*fixme */
+  vcd_assert (pathtable_get_size (pt) < ISO_BLOCKSIZE); /*fixme */
 
   memset (ipt, 0, sizeof (struct iso_path_table) + name_len); /* paranoia */
 
@@ -366,7 +366,7 @@ pathtable_m_add_entry (void *pt,
   size_t name_len = strlen (name) ? strlen (name) : 1;
   unsigned entrynum = 0;
 
-  assert (pathtable_get_size(pt) < ISO_BLOCKSIZE); /* fixme */
+  vcd_assert (pathtable_get_size(pt) < ISO_BLOCKSIZE); /* fixme */
 
   memset(ipt, 0, sizeof (struct iso_path_table) + name_len); /* paranoia */
 
@@ -397,7 +397,7 @@ _vcd_iso_pathname_valid_p (const char pathname[])
   const char *p = pathname;
   int dots;
   
-  assert (pathname != NULL);
+  vcd_assert (pathname != NULL);
 
   if (strlen (pathname) > (MAX_ISOPATHNAME - 6))
     return false;
@@ -447,7 +447,7 @@ _vcd_iso_pathname_isofy (const char pathname[], uint16_t version)
 {
   char tmpbuf[1024] = { 0, };
     
-  assert (strlen (pathname) < (sizeof (tmpbuf) - sizeof (";65535")));
+  vcd_assert (strlen (pathname) < (sizeof (tmpbuf) - sizeof (";65535")));
 
   snprintf (tmpbuf, sizeof(tmpbuf), "%s;%d", pathname, version);
 

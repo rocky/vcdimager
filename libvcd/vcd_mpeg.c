@@ -102,7 +102,7 @@ _vid_streamid_idx (uint8_t streamid)
       break;
 
     default:
-      assert (0);
+      vcd_assert_not_reached ();
       break;
     }
   
@@ -127,7 +127,7 @@ _aud_streamid_idx (uint8_t streamid)
       break;
 
     default:
-      assert (0);
+      vcd_assert_not_reached ();
       break;
     }
   
@@ -237,7 +237,7 @@ static void
 _analyze_video_pes (uint8_t streamid, const uint8_t *buf, int len, bool only_pts,
 		    VcdMpegStreamCtx *state)
 {
-  int pos;
+  int pos = 0;
   int sequence_header_pos = -1;
   int gop_header_pos = -1;
   int ipicture_header_pos = -1;
@@ -247,7 +247,7 @@ _analyze_video_pes (uint8_t streamid, const uint8_t *buf, int len, bool only_pts
   int mpeg_ver = 0;
   int _pts_pos = 0;
 
-  assert (_vid_streamid_idx (streamid) != -1);
+  vcd_assert (_vid_streamid_idx (streamid) != -1);
 
   switch (vcd_bitvec_peek_bits (buf, 0, 2))
     {
@@ -262,7 +262,7 @@ _analyze_video_pes (uint8_t streamid, const uint8_t *buf, int len, bool only_pts
       break;
 
     default:
-      assert (0);
+      vcd_assert_not_reached ();
       break;
     }
 
@@ -344,7 +344,7 @@ _analyze_video_pes (uint8_t streamid, const uint8_t *buf, int len, bool only_pts
       pos = pos2 >> 3;
     }
   else
-    assert (0);
+    vcd_assert_not_reached ();
 
   if (_has_pts)
     {
@@ -356,7 +356,7 @@ _analyze_video_pes (uint8_t streamid, const uint8_t *buf, int len, bool only_pts
 
       //vcd_warn ("%d @%d", marker, _pts_pos);
 
-      assert (marker == 2 || marker == 3);
+      vcd_assert (marker == 2 || marker == 3);
 
       pts = vcd_bitvec_read_bits (buf, &pos2, 3);
 
@@ -520,8 +520,8 @@ vcd_mpeg_parse_packet (const void *_buf, unsigned buflen, bool parse_pes,
   const uint8_t *buf = _buf;
   int pos;
 
-  assert (buf != NULL);
-  assert (ctx != NULL);
+  vcd_assert (buf != NULL);
+  vcd_assert (ctx != NULL);
   
   /* clear packet info */
   memset (&(ctx->packet), 0, sizeof (ctx->packet));

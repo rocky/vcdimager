@@ -21,6 +21,7 @@
 #ifndef __VCD_DICT_H__
 #define __VCD_DICT_H__
 
+#include <libvcd/vcd_assert.h>
 #include <libvcd/vcd_types.h>
 #include <libvcd/vcd_obj.h>
 
@@ -39,11 +40,11 @@ _dict_insert (VcdObj *obj, const char key[], uint32_t sector, uint32_t length,
 {
   struct _dict_t *_new_node;
 
-  assert (key != NULL);
-  assert (length > 0);
+  vcd_assert (key != NULL);
+  vcd_assert (length > 0);
 
   if ((sector =_vcd_salloc (obj->iso_bitmap, sector, length)) == SECTOR_NIL)
-    assert (0);
+    vcd_assert_not_reached ();
 
   _new_node = _vcd_malloc (sizeof (struct _dict_t));
 
@@ -59,8 +60,8 @@ _dict_insert (VcdObj *obj, const char key[], uint32_t sector, uint32_t length,
 static 
 int _dict_key_cmp (struct _dict_t *a, char *b)
 {
-  assert (a != NULL);
-  assert (b != NULL);
+  vcd_assert (a != NULL);
+  vcd_assert (b != NULL);
 
   return !strcmp (a->key, b);
 }
@@ -68,8 +69,8 @@ int _dict_key_cmp (struct _dict_t *a, char *b)
 static 
 int _dict_sector_cmp (struct _dict_t *a, uint32_t *b)
 {
-  assert (a != NULL);
-  assert (b != NULL);
+  vcd_assert (a != NULL);
+  vcd_assert (b != NULL);
 
   return (a->sector <= *b && (*b - a->sector) < a->length);
 }
@@ -79,8 +80,8 @@ _dict_get_bykey (VcdObj *obj, const char key[])
 {
   VcdListNode *node;
 
-  assert (obj != NULL);
-  assert (key != NULL);
+  vcd_assert (obj != NULL);
+  vcd_assert (key != NULL);
 
   node = _vcd_list_find (obj->buffer_dict_list,
                          (_vcd_list_iterfunc) _dict_key_cmp,
@@ -97,8 +98,8 @@ _dict_get_bysector (VcdObj *obj, uint32_t sector)
 {
   VcdListNode *node;
 
-  assert (obj != NULL);
-  assert (sector != SECTOR_NIL);
+  vcd_assert (obj != NULL);
+  vcd_assert (sector != SECTOR_NIL);
 
   node = _vcd_list_find (obj->buffer_dict_list, 
                          (_vcd_list_iterfunc) _dict_sector_cmp, 
@@ -115,7 +116,7 @@ _dict_get_sector_flags (VcdObj *obj, uint32_t sector)
 {
   const struct _dict_t *p;
 
-  assert (sector != SECTOR_NIL);
+  vcd_assert (sector != SECTOR_NIL);
 
   p = _dict_get_bysector (obj, sector);
 
@@ -131,7 +132,7 @@ _dict_get_sector (VcdObj *obj, uint32_t sector)
 {
   const struct _dict_t *p;
 
-  assert (sector != SECTOR_NIL);
+  vcd_assert (sector != SECTOR_NIL);
 
   p = _dict_get_bysector (obj, sector);
 

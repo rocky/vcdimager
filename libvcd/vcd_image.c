@@ -22,7 +22,7 @@
 # include "config.h"
 #endif
 
-#include <assert.h>
+#include <libvcd/vcd_assert.h>
 
 #include <libvcd/vcd_util.h>
 #include <libvcd/vcd_image.h>
@@ -54,7 +54,7 @@ vcd_image_source_new (void *user_data, const vcd_image_source_funcs *funcs)
 void
 vcd_image_source_destroy (VcdImageSource *obj)
 {
-  assert (obj != NULL);
+  vcd_assert (obj != NULL);
   
   obj->op.free (obj->user_data);
   free (obj);
@@ -63,7 +63,7 @@ vcd_image_source_destroy (VcdImageSource *obj)
 int
 vcd_image_source_read_mode2_sector (VcdImageSource *obj, void *buf, uint32_t lsn, bool mode2raw)
 {
-  assert (obj != NULL);
+  vcd_assert (obj != NULL);
 
   return obj->op.read_mode2_sector (obj->user_data, buf, lsn, mode2raw);
 }
@@ -71,7 +71,7 @@ vcd_image_source_read_mode2_sector (VcdImageSource *obj, void *buf, uint32_t lsn
 uint32_t
 vcd_image_source_stat_size (VcdImageSource *obj)
 {
-  assert (obj != NULL);
+  vcd_assert (obj != NULL);
 
   return obj->op.stat_size (obj->user_data);
 }
@@ -101,7 +101,7 @@ vcd_image_sink_new (void *user_data, const vcd_image_sink_funcs *funcs)
 void
 vcd_image_sink_destroy (VcdImageSink *obj)
 {
-  assert (obj != NULL);
+  vcd_assert (obj != NULL);
   
   obj->op.free (obj->user_data);
   free (obj);
@@ -110,7 +110,7 @@ vcd_image_sink_destroy (VcdImageSink *obj)
 int
 vcd_image_sink_set_cuesheet (VcdImageSink *obj, const VcdList *vcd_cue_list)
 {
-  assert (obj != NULL);
+  vcd_assert (obj != NULL);
 
   return obj->op.set_cuesheet (obj->user_data, vcd_cue_list);
 }
@@ -118,7 +118,7 @@ vcd_image_sink_set_cuesheet (VcdImageSink *obj, const VcdList *vcd_cue_list)
 int
 vcd_image_sink_write (VcdImageSink *obj, void *buf, uint32_t lsn)
 {
-  assert (obj != NULL);
+  vcd_assert (obj != NULL);
 
   return obj->op.write (obj->user_data, buf, lsn);
 }

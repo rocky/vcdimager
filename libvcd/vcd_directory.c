@@ -24,7 +24,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
+#include <libvcd/vcd_assert.h>
 
 #include "vcd_directory.h"
 #include "vcd_iso9660.h"
@@ -111,7 +111,7 @@ traverse_update_dirextents (VcdDirNode *dirnode, void *data)
         {
           data_t *d = DATAP(child);
           
-          assert (d != NULL);
+          vcd_assert (d != NULL);
           
           if (d->is_dir) 
             {
@@ -156,7 +156,7 @@ traverse_update_sizes(VcdDirNode *node, void *data)
                             ? strdup (d->name)
                             : _vcd_iso_pathname_isofy (d->name, d->version));
           
-          assert(d != NULL);
+          vcd_assert (d != NULL);
           
           reclen = dir_calc_record_size (strlen (pathname), sizeof (xa_t));
 
@@ -191,7 +191,7 @@ _vcd_directory_new (void)
   data_t *data;
   VcdDirectory *dir = NULL;
 
-  assert(sizeof(xa_t) == 14);
+  vcd_assert (sizeof(xa_t) == 14);
 
   data = _vcd_malloc (sizeof (data_t));
   dir = _vcd_tree_new (data);
@@ -215,7 +215,7 @@ traverse_vcd_directory_done (VcdDirNode *node, void *data)
 void
 _vcd_directory_destroy (VcdDirectory *dir)
 {
-  assert (dir != NULL);
+  vcd_assert (dir != NULL);
 
   _vcd_tree_node_traverse (_vcd_tree_root (dir),
                            traverse_vcd_directory_done, NULL);
@@ -260,8 +260,8 @@ _vcd_directory_mkdir (VcdDirectory *dir, const char pathname[])
   unsigned level, n;
   VcdDirNode* pdir = _vcd_tree_root (dir);
 
-  assert (dir != NULL);
-  assert (pathname != NULL);
+  vcd_assert (dir != NULL);
+  vcd_assert (pathname != NULL);
 
   splitpath = _vcd_strsplit (pathname, '/');
 
@@ -272,13 +272,13 @@ _vcd_directory_mkdir (VcdDirectory *dir, const char pathname[])
       {
         vcd_error("mkdir: parent dir `%s' (level=%d) for `%s' missing!",
                   splitpath[n], n, pathname);
-        assert(0);
+        vcd_assert_not_reached ();
       }
 
   if (lookup_child (pdir, splitpath[level-1])) 
     {
       vcd_error ("mkdir: `%s' already exists", pathname);
-      assert (0);
+      vcd_assert_not_reached ();
     }
 
   {
@@ -311,8 +311,8 @@ _vcd_directory_mkfile (VcdDirectory *dir, const char pathname[],
 
   VcdDirNode* pdir = NULL;
 
-  assert (dir != NULL);
-  assert (pathname != NULL);
+  vcd_assert (dir != NULL);
+  vcd_assert (pathname != NULL);
 
   splitpath = _vcd_strsplit (pathname, '/');
 
@@ -334,7 +334,7 @@ _vcd_directory_mkfile (VcdDirectory *dir, const char pathname[],
             
             free (newdir);
         
-            assert (pdir == NULL);
+            vcd_assert (pdir == NULL);
 
             break;
           }
@@ -382,7 +382,7 @@ _vcd_directory_mkfile (VcdDirectory *dir, const char pathname[],
 uint32_t
 _vcd_directory_get_size (VcdDirectory *dir)
 {
-  assert (dir != NULL);
+  vcd_assert (dir != NULL);
 
   update_sizes (dir);
   return get_dirsizes (_vcd_tree_root (dir));
@@ -436,7 +436,7 @@ traverse_vcd_directory_dump_entries (VcdDirNode *node, void *data)
 void
 _vcd_directory_dump_entries (VcdDirectory *dir, void *buf, uint32_t extent)
 {
-  assert (dir != NULL);
+  vcd_assert (dir != NULL);
 
   update_sizes (dir); /* better call it one time more than one less */
   update_dirextents (dir, extent);
@@ -457,16 +457,16 @@ _dump_pathtables_helper (_vcd_directory_dump_pathtables_t *args,
 {
   uint16_t id_l, id_m;
 
-  assert (args != NULL);
-  assert (d != NULL);
+  vcd_assert (args != NULL);
+  vcd_assert (d != NULL);
 
-  assert (d->is_dir);
+  vcd_assert (d->is_dir);
 
   id_l = pathtable_l_add_entry (args->ptl, d->name, d->extent, parent_id);
   
   id_m = pathtable_m_add_entry (args->ptm, d->name, d->extent, parent_id);
 
-  assert (id_l == id_m);
+  vcd_assert (id_l == id_m);
 
   d->pt_id = id_m;
 }
@@ -495,7 +495,7 @@ _vcd_directory_dump_pathtables (VcdDirectory *dir, void *ptl, void *ptm)
 {
   _vcd_directory_dump_pathtables_t args;
 
-  assert (dir != NULL);
+  vcd_assert (dir != NULL);
 
   pathtable_init (ptl);
   pathtable_init (ptm);

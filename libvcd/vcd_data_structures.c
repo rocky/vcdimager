@@ -28,7 +28,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
+#include <libvcd/vcd_assert.h>
 
 static const char _rcsid[] = "$Id$";
 
@@ -71,7 +71,7 @@ _vcd_list_free (VcdList *list, int free_data)
 unsigned
 _vcd_list_length (VcdList *list)
 {
-  assert (list != NULL);
+  vcd_assert (list != NULL);
 
   return list->length;
 }
@@ -109,8 +109,8 @@ void _vcd_list_sort (VcdList *list, _vcd_list_cmp_func cmp_func)
 {
   /* fixme -- this is bubble sort -- worst sorting algo... */
 
-  assert (list != NULL);
-  assert (cmp_func != 0);
+  vcd_assert (list != NULL);
+  vcd_assert (cmp_func != 0);
   
   while (_bubble_sort_iteration (list, cmp_func));
 }
@@ -120,7 +120,7 @@ _vcd_list_prepend (VcdList *list, void *data)
 {
   VcdListNode *new_node;
 
-  assert (list != NULL);
+  vcd_assert (list != NULL);
 
   new_node = _vcd_malloc (sizeof (VcdListNode));
   
@@ -138,7 +138,7 @@ _vcd_list_prepend (VcdList *list, void *data)
 void
 _vcd_list_append (VcdList *list, void *data)
 {
-  assert (list != NULL);
+  vcd_assert (list != NULL);
 
   if (list->length == 0)
     {
@@ -164,8 +164,8 @@ _vcd_list_foreach (VcdList *list, _vcd_list_iterfunc func, void *user_data)
 {
   VcdListNode *node;
 
-  assert (list != NULL);
-  assert (func != 0);
+  vcd_assert (list != NULL);
+  vcd_assert (func != 0);
   
   for (node = _vcd_list_begin (list);
        node != NULL;
@@ -178,8 +178,8 @@ _vcd_list_find (VcdList *list, _vcd_list_iterfunc cmp_func, void *user_data)
 {
   VcdListNode *node;
 
-  assert (list != NULL);
-  assert (cmp_func != 0);
+  vcd_assert (list != NULL);
+  vcd_assert (cmp_func != 0);
   
   for (node = _vcd_list_begin (list);
        node != NULL;
@@ -200,7 +200,7 @@ _vcd_list_at (VcdList *list, int idx)
   if (idx < 0)
     return _vcd_list_at (list, _vcd_list_length (list) + idx);
 
-  assert (idx >= 0);
+  vcd_assert (idx >= 0);
 
   while (node && idx)
     {
@@ -214,7 +214,7 @@ _vcd_list_at (VcdList *list, int idx)
 VcdListNode *
 _vcd_list_begin (VcdList *list)
 {
-  assert (list != NULL);
+  vcd_assert (list != NULL);
 
   return list->begin;
 }
@@ -222,7 +222,7 @@ _vcd_list_begin (VcdList *list)
 VcdListNode *
 _vcd_list_end (VcdList *list)
 {
-  assert (list != NULL);
+  vcd_assert (list != NULL);
 
   return list->end;
 }
@@ -242,18 +242,18 @@ _vcd_list_node_free (VcdListNode *node, int free_data)
   VcdList *list;
   VcdListNode *prev_node;
 
-  assert (node != NULL);
+  vcd_assert (node != NULL);
   
   list = node->list;
 
-  assert (_vcd_list_length (list) > 0);
+  vcd_assert (_vcd_list_length (list) > 0);
 
   if (free_data)
     free (_vcd_list_node_data (node));
 
   if (_vcd_list_length (list) == 1)
     {
-      assert (list->begin == list->end);
+      vcd_assert (list->begin == list->end);
 
       list->end = list->begin = NULL;
       list->length = 0;
@@ -261,7 +261,7 @@ _vcd_list_node_free (VcdListNode *node, int free_data)
       return;
     }
 
-  assert (list->begin != list->end);
+  vcd_assert (list->begin != list->end);
 
   if (list->begin == node)
     {
@@ -275,7 +275,7 @@ _vcd_list_node_free (VcdListNode *node, int free_data)
     if (prev_node->next == node)
       break;
 
-  assert (prev_node->next != NULL);
+  vcd_assert (prev_node->next != NULL);
 
   if (list->end == node)
     list->end = prev_node;
@@ -347,7 +347,7 @@ _vcd_tree_node_destroy (VcdTreeNode *node, bool free_data)
 {
   VcdTreeNode *child, *nxt_child;
   
-  assert(node != NULL);
+  vcd_assert (node != NULL);
 
   child = _vcd_tree_node_first_child (node);
   while(child) {
@@ -358,7 +358,7 @@ _vcd_tree_node_destroy (VcdTreeNode *node, bool free_data)
 
   if (node->children)
     {
-      assert (_vcd_list_length (node->children) == 0);
+      vcd_assert (_vcd_list_length (node->children) == 0);
       _vcd_list_free (node->children, true);
       node->children = NULL;
     }
@@ -399,7 +399,7 @@ _vcd_tree_node_append_child (VcdTreeNode *pnode, void *cdata)
 {
   VcdTreeNode *nnode;
 
-  assert(pnode != NULL);
+  vcd_assert (pnode != NULL);
 
   if (!pnode->children)
     pnode->children = _vcd_list_new ();
@@ -419,7 +419,7 @@ _vcd_tree_node_append_child (VcdTreeNode *pnode, void *cdata)
 VcdTreeNode *
 _vcd_tree_node_first_child (VcdTreeNode *node)
 {
-  assert (node != NULL);
+  vcd_assert (node != NULL);
 
   if (!node->children)
     return NULL;
@@ -430,7 +430,7 @@ _vcd_tree_node_first_child (VcdTreeNode *node)
 VcdTreeNode *
 _vcd_tree_node_next_sibling (VcdTreeNode *node)
 {
-  assert (node != NULL);
+  vcd_assert (node != NULL);
 
   return _vcd_list_node_data (_vcd_list_node_next (node->listnode));
 }
@@ -438,7 +438,7 @@ _vcd_tree_node_next_sibling (VcdTreeNode *node)
 void
 _vcd_tree_node_sort_children (VcdTreeNode *node, _vcd_tree_node_cmp_func cmp_func)
 {
-  assert (node != NULL);
+  vcd_assert (node != NULL);
 
   if (node->children)
     _vcd_list_sort (node->children, (_vcd_list_cmp_func) cmp_func);
@@ -451,7 +451,7 @@ _vcd_tree_node_traverse (VcdTreeNode *node,
 {
   VcdTreeNode *child;
 
-  assert (node != NULL);
+  vcd_assert (node != NULL);
 
   trav_func (node, user_data);
 

@@ -18,46 +18,37 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef __VCD_LOGGING_H__
-#define __VCD_LOGGING_H__
+#ifndef __VCD_ASSERT_H__
+#define __VCD_ASSERT_H__
 
-#include "vcd_types.h"
+#if defined(__GNUC__)
 
-typedef enum {
-  LOG_DEBUG = 1,
-  LOG_INFO,
-  LOG_WARN,
-  LOG_ERROR,
-  LOG_ASSERT
-} log_level_t;
+#include <libvcd/vcd_logging.h>
 
-void
-vcd_log (log_level_t level, const char format[], ...) GNUC_PRINTF(2, 3);
-    
-typedef void (*vcd_log_handler_t) (log_level_t level, const char message[]);
+#define vcd_assert(expr) \
+ (void) ({ \
+   if (!(expr)) vcd_log (LOG_ASSERT, \
+     "file %s: line %d (%s): assertion failed: (%s)", \
+     __FILE__, __LINE__, __PRETTY_FUNCTION__, #expr); \
+ }) 
 
-vcd_log_handler_t
-vcd_log_set_handler (vcd_log_handler_t new_handler);
+#define vcd_assert_not_reached() \
+ (void) ({ \
+   vcd_log (LOG_ASSERT, \
+     "file %s: line %d (%s): should not be reached", \
+     __FILE__, __LINE__, __PRETTY_FUNCTION__); \
+ })
 
-void
-vcd_debug (const char format[], ...) GNUC_PRINTF(1,2);
+#else /* non GNU C */
 
-void
-vcd_info (const char format[], ...) GNUC_PRINTF(1,2);
+#include <assert.h>
 
-void
-vcd_warn (const char format[], ...) GNUC_PRINTF(1,2);
+#define vcd_assert(expr) \
+ assert(expr)
 
-void
-vcd_error (const char format[], ...) GNUC_PRINTF(1,2);
+#define vcd_assert_not_reached() \
+ assert(0)
 
-#endif /* __VCD_LOGGING_H__ */
+#endif
 
-
-/* 
- * Local variables:
- *  c-file-style: "gnu"
- *  tab-width: 8
- *  indent-tabs-mode: nil
- * End:
- */
+#endif /* __VCD_ASSERT_H__ */
