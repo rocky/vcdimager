@@ -18,12 +18,12 @@ do_cksum() {
 	if cksum "$NAME" | (
 		read CRC2 SIZE2 NAME2
 
-		if [ "$CRC" -ne "$CRC2" ]; then
+		if [ "$CRC" != "$CRC2" ]; then
 		    echo "$0: CRC didn't match for $NAME ($CRC != $CRC2)"
 		    return 0;
 		fi
 
-		if [ "$SIZE" -ne "$SIZE2" ]; then
+		if [ "$SIZE" != "$SIZE2" ]; then
 		    echo "$0: SIZE didn't match for $NAME ($SIZE != $SIZE2)"
 		    return 0;
 		fi
