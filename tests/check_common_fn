@@ -51,6 +51,22 @@ have_cksum() {
     return 0;
 }
 
+check_result() {
+  RC=$1
+  shift
+  msg=$*
+  if test $RC -ne 0 ; then 
+    if test $RC -ne 77 ; then
+      echo "$0: $msg failed."
+      exit $RC
+    else 
+      echo "$0: $msg skipped."
+    fi
+  else 
+    echo "$0: $msg ok."
+  fi
+}
+
 #;;; Local Variables: ***
 #;;; mode:shell-script ***
 #;;; eval: (sh-set-shell "bash") ***

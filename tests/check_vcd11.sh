@@ -43,7 +43,7 @@ if test_vcddump '-B -i videocd.bin ' \
     vcd11_test0.dump ${srcdir}/vcd11_test0.right ; then 
     :
 else
-    echo "$0: vcddump test 0 failed "
+    echo "$0: vcddump test 0 failed."
     test_vcdxbuild_cleanup
     exit 1
 fi
@@ -73,35 +73,24 @@ fi
 
 echo "$0: vcdxbuild cksum(1) checksums matched :-)"
 
-if test_vcdxrip '--norip --input videocd.bin --output-file vcd11_test1.xml' \
-    vcd11_test1.xml ${srcdir}/vcd11_test1.xml-right ; then 
-    :
-else
-    echo "$0: vcdxrip test 1 failed "
-    exit 1
-fi
+test_vcdxrip '--norip --input videocd.bin --output-file vcd11_test1.xml' \
+    vcd11_test1.xml ${srcdir}/vcd11_test1.xml-right
+RC=$?
+check_result $RC 'vcdxrip test 1'
 
-if test_vcddump '-B -i videocd.bin -I --show-filesystem' \
-    vcd11_test1.dump ${srcdir}/vcd11_test1.right ; then 
-    :
-else
-    echo "$0: vcddump test 1 failed "
-    test_vcdxbuild_cleanup
-    exit 1
-fi
+test_vcddump '-B -i videocd.bin -I --show-filesystem' \
+  vcd11_test1.dump ${srcdir}/vcd11_test1.right
+RC=$?
+check_result $RC 'vcddump test 1'
 
-if test_vcddump '-B --bin-file videocd.bin -X -S --show-pvd vol' \
-    vcd11_test2.dump ${srcdir}/vcd11_test2.right ; then 
-    :
-else 
-    echo "$0: vcddump test 2 failed "
-    test_vcdxbuild_cleanup
-    exit 1
-fi
+test_vcddump '-B --bin-file videocd.bin -X -S --show-pvd vol' \
+    vcd11_test2.dump ${srcdir}/vcd11_test2.right
+RC=$?
+check_result $RC 'vcddump test 2'
 
 # if we got this far, everything should be ok
 test_vcdxbuild_cleanup
-exit 0
+exit $RC
 
 #;;; Local Variables: ***
 #;;; mode:shell-script ***

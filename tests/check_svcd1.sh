@@ -12,14 +12,16 @@ fi
 . ${srcdir}/check_vcdxrip_fn
 
 BASE=`basename $0 .sh`
-RC=0
 
-if test_vcdimager -t svcd ${srcdir}/avseq00.m1p; then
-    :
-else
-    echo vcdimager failed 
+test_vcdimager -t svcd ${srcdir}/avseq00.m1p
+RC=$?
+
+if test $RC -ne 0 ; then
+  echo vcdimager failed 
+  if test $RC -ne 77 ; then 
     test_vcdimager_cleanup
-    exit $RC
+  fi
+  exit $RC
 fi
 
 if do_cksum <<EOF
@@ -33,7 +35,6 @@ else
 
     cksum videocd.bin videocd.cue
 
-    test_vcdimager_cleanup
     exit 1
 fi
 
@@ -48,12 +49,14 @@ else
     exit 1
 fi
 
-if test_vcdxbuild ${srcdir}/$BASE.xml; then
-    :
-else
-    echo vcdxbuild failed 
+test_vcdxbuild ${srcdir}/$BASE.xml
+RC=$?
+if test $RC -ne 0 ; then
+  echo vcdxbuild failed 
+  if test $RC -eq 77 ; then
     test_vcdxbuild_cleanup
-    exit $RC
+  fi
+  exit $RC
 fi
 
 if do_cksum <<EOF
@@ -73,36 +76,24 @@ fi
 
 echo "$0: vcdxbuild cksum(1) checksums matched :-)"
 
-if test_vcdxrip '--norip -b videocd.bin --output-file svcd1_test1.xml' \
-    svcd1_test1.xml ${srcdir}/svcd1_test1.xml-right ; then 
-    :
-else
-    echo "$0: vcdxrip test 1 failed "
-    test_vcdxrip_cleanup
-    exit 1
-fi
+test_vcdxrip '--norip -b videocd.bin --output-file svcd1_test1.xml' \
+  svcd1_test1.xml ${srcdir}/svcd1_test1.xml-right
+RC=$?
+check_result $RC 'vcdxrip test 1'
 
-if test_vcddump '--no-banner -i videocd.bin' \
-    svcd1_test1.dump ${srcdir}/svcd1_test1.right ; then 
-    :
-else
-    echo "$0: vcddump test 1 failed "
-    test_vcdxbuild_cleanup
-    exit 1
-fi
+test_vcddump '--no-banner -i videocd.bin' \
+    svcd1_test1.dump ${srcdir}/svcd1_test1.right
+RC=$?
+check_result $RC 'vcddump test 1'
 
-if test_vcddump '--no-banner --bin-file videocd.bin --show-info-all' \
-    svcd1_test2.dump ${srcdir}/svcd1_test2.right ; then 
-    :
-else
-    echo "$0: vcddump test 2 failed "
-    test_vcdxbuild_cleanup
-    exit 1
-fi
+test_vcddump '--no-banner --bin-file videocd.bin --show-info-all' \
+    svcd1_test2.dump ${srcdir}/svcd1_test2.right 
+RC=$?
+check_result $RC 'vcddump test 2'
 
 # if we got this far, everything should be ok
 test_vcdxbuild_cleanup
-exit 0
+exit $RC
 
 #;;; Local Variables: ***
 #;;; mode:shell-script ***
