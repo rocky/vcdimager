@@ -207,7 +207,13 @@ vcd_obj_append_segment_play_item (VcdObj *obj, VcdMpegSource *mpeg_source,
       return -1;
     }
 
-  if (item_id && _vcd_pbc_lookup (obj, item_id))
+  if (!item_id)
+    {
+      vcd_error ("no id given for segment play item");
+      return -1;
+    }
+
+  if (_vcd_pbc_lookup (obj, item_id))
     {
       vcd_error ("item id (%s) exists already", item_id);
       return -1;
@@ -229,8 +235,7 @@ vcd_obj_append_segment_play_item (VcdObj *obj, VcdMpegSource *mpeg_source,
 
   segment->source = mpeg_source;
 
-  if (item_id)
-    segment->id = strdup (item_id);
+  segment->id = strdup (item_id);
  
   segment->info = vcd_mpeg_source_get_info (mpeg_source);
   segment->segment_count = _vcd_len2blocks (segment->info->packets, 150);

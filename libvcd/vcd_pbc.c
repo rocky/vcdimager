@@ -324,7 +324,7 @@ _lookup_psd_offset (const VcdObj *obj, const char item_id[], bool extended)
       return (extended ? _pbc->offset_ext : _pbc->offset) / INFO_OFFSET_MULT;
     }
 
-  vcd_warn ("PSD: referenced PSD '%s' not found", item_id);
+  vcd_error ("PSD: referenced PSD '%s' not found", item_id);
 	    
   /* not found */
   return 0xffff;
@@ -350,7 +350,7 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 	_md->noi = _vcd_list_length (_pbc->item_id_list);
 	
 	vcd_assert (_pbc->lid < 0x8000);
-	_md->lid = UINT16_TO_BE (_pbc->lid | (_pbc->rejected ? 0x8000 : 0));
+	_md->lid = uint16_to_be (_pbc->lid | (_pbc->rejected ? 0x8000 : 0));
 	
 	_md->prev_ofs = 
 	  uint16_to_be (_lookup_psd_offset (obj, _pbc->prev_id, extended));
@@ -373,7 +373,7 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 	    _pin = _vcd_pbc_pin_lookup (obj, _id);
 
 	    if (!_pin)
-	      vcd_warn ("PSD: referenced PIN '%s' not found", _id);
+	      vcd_error ("PSD: referenced play item '%s' not found", _id);
 
 	    _md->itemid[n] = UINT16_TO_BE (_pin);
 	    n++;
@@ -436,7 +436,7 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 	  _pin = _vcd_pbc_pin_lookup (obj, _pbc->item_id);
 
 	  if (!_pin)
-	    vcd_warn ("PSD: referenced PIN '%s' not found", _pbc->item_id);
+	    vcd_error ("PSD: referenced play item '%s' not found", _pbc->item_id);
 
 	  _md->itemid = UINT16_TO_BE (_pin);
 	}

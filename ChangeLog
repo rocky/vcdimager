@@ -1,3 +1,8 @@
+2001-06-12  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_pbc.c: made broken references generate errors instead
+		of warnings.
+
 2001-06-11  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* make logging output a bit more readable
