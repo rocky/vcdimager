@@ -60,8 +60,16 @@ National Television Standards Committee. The NTSC is responsible for
 setting television and video standards in the United.  States
 
 @item OGT
-Overlay Graphics & Text. A run-length encoded subtitle format devised
-by Philips.
+Overlay Graphics & Text. A subtitle format devised by Philips. The
+format has subtitle meta-information before an interleaved bitmap of 4
+palette entries. Palette color 0 entries can be run-length encoded.
+
+A more detailed description of this format can be found in the
+documentation directory of VCDimager.
+
+@item LID
+List ID. A unit of playback control navigation inside a PSD. Numbering
+starts from 1.
 
 @item PAL
 Phase Alternating Line, the dominant television standard in Europe. 
@@ -70,10 +78,12 @@ Phase Alternating Line, the dominant television standard in Europe.
 Program End Marker. 
 
 @item PBC
-PlayBack Control. 
+Play-back Control. 
 
 @item PSD
-Play Sequence Descriptor. A section of a Video CD.
+Play Sequence Descriptor. A section of a Video CD related to playback
+control. Also the individual units inside that section. We start
+numbering from 0.  See also LID.
 
 @item PVD
 Primary Volume Descriptor. A section of a Video CD.

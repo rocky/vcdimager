@@ -23,4 +23,6 @@ html: vcdimager.html vcd-info.html vcdxrip.html
 
 all-formats: pdf dvi txt ps html
 
+EXTRA_DIST = cvd-subtitles.txt svcd-ogt-subtitles.txt
+
 MOSTLYCLEANFILES = vcdimager.tgs vcdimager.ps.gz vcdimager.pdf vcdimager.html vcdimager_toc.html vcdimager_foot.html vcd-info.cps vcd-info.kys vcd-info.html vcd-info.fns vcd-info.ps.gz vcd-info.pdf vcdxrip.cps vcdxrip.kys vcdxrip.html vcdxrip.fns vcdxrip.ps.gz vcdxrip.pdf
