@@ -25,15 +25,15 @@
 #include "vcd_mpeg.h"
 #include "vcd_logging.h"
 
-const static uint8_t mpeg_sync[] = {
+const static uint8_t mpeg_sync[4] = {
   0x00, 0x00, 0x01, 0xba 
 };
 
-const static uint8_t mpeg_seq_start[] = {
+const static uint8_t mpeg_seq_start[4] = {
   0x00, 0x00, 0x01, 0xb3 
 };
 
-const static uint8_t mpeg_end[] = {
+const static uint8_t mpeg_end[4] = {
   0x00, 0x00, 0x01, 0xb9 
 };
 
@@ -99,60 +99,62 @@ int
 mpeg_analyze_start_seq(const void *packet, mpeg_info_t *info)
 {
   const uint8_t *pkt = packet;
-  int fixup = 0;
+  int fixup = -30;
 
-  assert(info != NULL);
+  assert (info != NULL);
+  assert (sizeof (mpeg_seq_start) == 4);
 
   if(memcmp(pkt, mpeg_sync, sizeof(mpeg_sync)))
     return FALSE;
   
   /* fixme -- this is just a hack, due to little understanding of mpeg format */
   
-  for(fixup = -6;fixup < 6;fixup++, pkt++)
-    if(!memcmp(pkt+30, mpeg_seq_start, sizeof(mpeg_seq_start)) ) {
-      unsigned hsize, vsize, aratio, frate, brate, bufsize;
+  for (fixup = 0;fixup < 8;fixup++, pkt++)
+    if (!memcmp (pkt+30, mpeg_seq_start, sizeof (mpeg_seq_start)))
+      {
+        unsigned hsize, vsize, aratio, frate, brate, bufsize;
+        
+        hsize = pkt[34] << 4;
+        hsize += pkt[35] >> 4;
 
-      hsize = pkt[34] << 4;
-      hsize += pkt[35] >> 4;
+        vsize = (pkt[35] & 0x0f) << 8;
+        vsize += pkt[36];
 
-      vsize = (pkt[35] & 0x0f) << 8;
-      vsize += pkt[36];
+        aratio = pkt[37] >> 4;
+        frate = pkt[37] & 0x0f;
 
-      aratio = pkt[37] >> 4;
-      frate = pkt[37] & 0x0f;
+        brate = pkt[38] << 10;
+        brate += pkt[39] << 2;
+        brate += pkt[40] >> 6;
 
-      brate = pkt[38] << 10;
-      brate += pkt[39] << 2;
-      brate += pkt[40] >> 6;
-
-      bufsize = (pkt[40] & 0x3f) << 6;
-      bufsize += pkt[41] >> 4;
+        bufsize = (pkt[40] & 0x3f) << 6;
+        bufsize += pkt[41] >> 4;
     
-      info->hsize = hsize;
-      info->vsize = vsize;
-      info->aratio = aspect_ratios[aratio];
-      info->frate = frame_rates[frate];
-      info->bitrate = 400*brate;
-      info->vbvsize = bufsize;
+        info->hsize = hsize;
+        info->vsize = vsize;
+        info->aratio = aspect_ratios[aratio];
+        info->frate = frame_rates[frate];
+        info->bitrate = 400*brate;
+        info->vbvsize = bufsize;
 
-      if(hsize == 352 && vsize == 288 && frate == 3)
-        info->norm = MPEG_NORM_PAL;
-      else if(hsize == 352 && vsize == 240 && frate == 1)
-        info->norm = MPEG_NORM_FILM;
-      else if(hsize == 352 && vsize == 240 && frate == 4)
-        info->norm = MPEG_NORM_NTSC;
-      else if (hsize == 480 && vsize == 480 && frate == 4)
-	info->norm = MPEG_NORM_NTSC_S;
-      else if (hsize == 480 && vsize == 576 && frate == 3)
-	info->norm = MPEG_NORM_PAL_S;
-      else
-        info->norm = MPEG_NORM_OTHER;
+        if(hsize == 352 && vsize == 288 && frate == 3)
+          info->norm = MPEG_NORM_PAL;
+        else if(hsize == 352 && vsize == 240 && frate == 1)
+          info->norm = MPEG_NORM_FILM;
+        else if(hsize == 352 && vsize == 240 && frate == 4)
+          info->norm = MPEG_NORM_NTSC;
+        else if (hsize == 480 && vsize == 480 && frate == 4)
+          info->norm = MPEG_NORM_NTSC_S;
+        else if (hsize == 480 && vsize == 576 && frate == 3)
+          info->norm = MPEG_NORM_PAL_S;
+        else
+          info->norm = MPEG_NORM_OTHER;
 
-      if(fixup)
-        vcd_debug("fixup of %d bytes was necessary for mpeg format detection...\n", fixup);
+        if(fixup)
+          vcd_debug("fixup of %d bytes was necessary for mpeg format detection...", fixup);
 
-      return TRUE;
-  }
+        return TRUE;
+      }
 
   return FALSE;
 

@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "vcd.h"
 #include "vcd_obj.h"
@@ -157,6 +158,8 @@ vcd_obj_destroy (VcdObj *obj)
     while (p)
       {
         struct cust_file *tmp = p->next;
+
+        free (p->iso_pathname);
         free (p);
         p = tmp;
       }
@@ -245,12 +248,14 @@ int
 vcd_obj_add_file (VcdObj *obj, const char iso_pathname[],
                   VcdDataSource *file, int raw_flag)
 {
-  uint32_t size = 0, sectors = 0, start_extent = 0;
+  uint32_t size = 0, sectors = 0;
  
   assert (obj != NULL);
-  assert (iso_pathname != NULL);
   assert (file != NULL);
-  
+  assert (iso_pathname != NULL);
+  assert (strlen (iso_pathname) > 0);
+  assert (file != NULL);
+
   size = vcd_data_source_stat(file);
 
   sectors = size / (raw_flag ? M2RAW_SIZE : M2F1_SIZE);
@@ -264,21 +269,30 @@ vcd_obj_add_file (VcdObj *obj, const char iso_pathname[],
   if (size % M2F1_SIZE)
     sectors++;
 
-  start_extent = _vcd_salloc(obj->iso_bitmap, SECTOR_NIL, sectors);
-
-  _vcd_directory_mkfile(obj->dir, iso_pathname, start_extent, size, raw_flag, 1);
-
   {
     struct cust_file **p = &(obj->custom_files);
+    char *_iso_pathname = _vcd_iso_pathname_isofy (iso_pathname);
 
-    while(*p)
+    if (!_vcd_iso_pathname_valid_p (_iso_pathname))
+      {
+        vcd_error("pathname `%s' is not a valid iso pathname", 
+                  _iso_pathname);
+        return 1;
+      }
+
+
+    while (*p)
       p = &(*p)->next;
 
     *p = malloc (sizeof (struct cust_file));
     memset (*p, 0, sizeof (struct cust_file));
     
     (*p)->file = file;
-    (*p)->start_extent = start_extent;
+    (*p)->iso_pathname = _iso_pathname;
+    (*p)->raw_flag = raw_flag;
+  
+    (*p)->size = size;
+    (*p)->start_extent = 0;
     (*p)->sectors = sectors;
   }
 
@@ -394,6 +408,25 @@ _finalize_vcd_iso_track (VcdObj *obj)
     vcd_error("VCD type not supported");
     break;
   }
+
+  /* custom files */
+
+  {
+    struct cust_file *p = obj->custom_files;
+    
+    while (p) 
+      {
+        p->start_extent = _vcd_salloc(obj->iso_bitmap, SECTOR_NIL, p->sectors);
+        
+        assert(p->start_extent != SECTOR_NIL);
+
+        _vcd_directory_mkfile(obj->dir, p->iso_pathname, p->start_extent,
+                              p->size, p->raw_flag, 1);
+        
+        p = p->next;
+      }
+  }
+
 
   /* calculate iso size -- after this point no sector shall be
      allocated anymore */
@@ -645,7 +678,8 @@ _write_vcd_iso_track (VcdObj *obj)
     
     while (p) 
       {
-        vcd_debug ("writing custom file...");
+        vcd_debug ("Writing custom file as `%s' (size=%d)", 
+                   p->iso_pathname, p->size);
         if (p->raw_flag)
           _write_source_mode2_raw (obj, p->file, p->start_extent);
         else

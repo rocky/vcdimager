@@ -36,13 +36,11 @@
 #define ISO_DIRECTORY   2
 
 /* file/dirname's */
+int
+_vcd_iso_pathname_valid_p (const char pathname[]);
 
-/* functions return newly allocated string !! */
-char*
-iso_mkfilename(const char fname[]);
-
-char*
-iso_mkdirname(const char dname[]);
+char *
+_vcd_iso_pathname_isofy (const char pathname[]);
 
 /* volume descriptors */
 

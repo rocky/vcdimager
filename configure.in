@@ -16,10 +16,9 @@ AC_PROG_RANLIB
 
 dnl libs
 
-enable_cli_fe=no
+enable_cli_fe=yes
 enable_gnome_fe=no
 
-AM_PATH_GLIB(1.2.6, enable_cli_fe=yes)
 AC_CHECK_LIB(popt, poptGetContext, POPT_LIBS="-lpopt", enable_cli_fe=no)
 
 GNOME_INIT_HOOK(enable_gnome_fe=yes,,)

@@ -50,10 +50,13 @@ struct _VcdObj {
 
   /* custom files */
   struct cust_file {
+    char *iso_pathname;
     VcdDataSource *file;
+    int raw_flag;
+
+    uint32_t size;
     uint32_t start_extent;
     uint32_t sectors;
-    int raw_flag;
     
     struct cust_file *next;
   } *custom_files;

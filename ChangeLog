@@ -1,3 +1,13 @@
+2000-11-20  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_iso9660.c (_vcd_iso_pathname_isofy): new function
+	(_vcd_iso_pathname_valid_p): new function
+
+	* libvcd/vcd_directory.c: improved error messages
+
+	* frontends/cli/vcdimager.c: enabled poptrc parsing
+		added --add-file and --add-file-2336 feature
+
 2000-11-19  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* frontends/cli/vcdrip.c: removed glib dependancy

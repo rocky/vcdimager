@@ -18,6 +18,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#include <ctype.h>
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
@@ -375,6 +376,77 @@ pathtable_m_add_entry(void *pt,
   return entrynum;
 }
 
+static int
+is_isochar(char c)
+{
+  return isupper(c)
+    || isdigit(c)
+    || c == '.'
+    || c == '_'
+    || c == '/'
+    || c == ';';
+}
+
+int
+_vcd_iso_pathname_valid_p (const char pathname[])
+{
+  const char *p = pathname;
+
+  assert (pathname != NULL);
+
+  if (*p == ';' || *p == '.')
+    return 0;
+
+  while (*p) 
+    {
+      if (!is_isochar (*p))
+        return 0;
+
+      if (*p == ';') 
+        {
+          p++;
+
+          if(!*p)
+            return 0;
+
+          while (*p)
+            {
+              if (!isdigit (*p))
+                return 0;
+
+              p++;
+            }
+          break;
+        }
+
+      p++;
+    }
+
+  return 1;
+}
+
+char *
+_vcd_iso_pathname_isofy (const char pathname[])
+{
+  char tmpbuf[1024] = { 0, };
+  const char *p = pathname;
+  char *p2 = tmpbuf;
+    
+  assert (strlen (pathname) < (sizeof (tmpbuf) - sizeof (";65535")));
+
+  while (*p == '/')
+    p++;
+
+  snprintf (tmpbuf, sizeof(tmpbuf), "%s;1", p);
+
+  while (*p2)
+    {
+      *p2 = toupper(*p2);
+      p2++;
+    }
+
+  return strdup (tmpbuf);
+}
 
 
 /* 

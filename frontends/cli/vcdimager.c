@@ -18,6 +18,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <popt.h>
@@ -48,6 +49,13 @@ static struct
   const char *cue_fname;
   char **track_fnames;
 
+  struct add_files_t {
+    char *fname;
+    char *iso_fname;
+    int raw_flag;
+    struct add_files_t *next;
+  } *add_files;
+
   char *add_files_path;
 
   const char *volume_label;
@@ -74,6 +82,43 @@ _progress_callback (const progress_info_t * info, void *user_data)
   return 0;
 }
 
+static int
+_parse_file_arg (const char *arg, char **fname1, char **fname2)
+{
+  int rc = 0;
+  char *tmp, *arg_cpy = strdup (arg);
+
+  *fname1 = *fname2 = NULL;
+
+  tmp = strtok(arg_cpy, ",");
+  if (tmp)
+    *fname1 = strdup (tmp);
+  else
+    rc = -1;
+  
+  tmp = strtok(NULL, ",");
+  if (tmp)
+    *fname2 = strdup (tmp);
+  else
+    rc = -1;
+  
+  tmp = strtok(NULL, ",");
+  if (tmp)
+    rc = -1;
+
+  free (tmp);
+
+  if(rc)
+    {
+      free (*fname1);
+      free (*fname2);
+
+      *fname1 = *fname2 = NULL;
+    }
+
+  return rc;
+}
+
 int
 main (int argc, const char *argv[])
 {
@@ -94,6 +139,12 @@ main (int argc, const char *argv[])
     const char **args = NULL;
     int opt = 0;
 
+    enum {
+      CL_VERSION = 1,
+      CL_ADD_FILE,
+      CL_ADD_FILE_RAW
+    };
+
     struct poptOption optionsTable[] = 
       {
         {"type", 't', POPT_ARG_STRING, &gl.type, 0,
@@ -112,24 +163,34 @@ main (int argc, const char *argv[])
          "specify bin file for output (default: '" DEFAULT_BIN_FILE "')",
          "FILE"},
 
-        {"sector-2336", 0, POPT_ARG_NONE, &gl.sector_2336_flag, 0,
+        {"sector-2336", '\0', POPT_ARG_NONE, &gl.sector_2336_flag, 0,
          "use 2336 byte sectors for output"},
+
+        {"add-file", '\0', POPT_ARG_STRING, NULL, CL_ADD_FILE, "add file to ISO fs",
+         "FILE,ISO_FILENAME"},
+
+        {"add-file-2336", '\0', POPT_ARG_STRING, NULL, CL_ADD_FILE_RAW, 
+         "add file containing full 2336 byte sectors to ISO fs",
+         "FILE,ISO_FILENAME"},
 
         {"progress", 'p', POPT_ARG_NONE, &gl.progress_flag, 0, "show progress"},
         {"verbose", 'v', POPT_ARG_NONE, &gl.verbose_flag, 0, "be verbose"},
 
-        {"version", 'V', POPT_ARG_NONE, NULL, 1,
+        {"version", 'V', POPT_ARG_NONE, NULL, CL_VERSION,
          "display version and copyright information and exit"},
 
         POPT_AUTOHELP {NULL, 0, 0, NULL, 0}
       };
     
-    poptContext optCon = poptGetContext (NULL, argc, argv, optionsTable, 0);
+    poptContext optCon = poptGetContext ("vcdimager", argc, argv, optionsTable, 0);
+
+    if (poptReadDefaultConfig (optCon, 0)) 
+      fprintf (stderr, "warning, reading popt configuration failed\n"); 
 
     while ((opt = poptGetNextOpt (optCon)) != -1)
       switch (opt)
         {
-        case 1:
+        case CL_VERSION:
           fprintf (stdout, "GNU VCDImager " VERSION "\n\n"
                    "Copyright (c) 2000 Herbert Valerio Riedel <hvr@gnu.org>\n\n"
                    "VCDImager may be distributed under the terms of the GNU General Public Licence;\n"
@@ -137,6 +198,34 @@ main (int argc, const char *argv[])
                    "distribution. There is no warranty, to the extent permitted by law.\n");
           exit (EXIT_SUCCESS);
           break;
+
+        case CL_ADD_FILE:
+        case CL_ADD_FILE_RAW:
+          {
+            const char *arg = poptGetOptArg (optCon);
+            char *fname1 = NULL, *fname2 = NULL;
+
+            assert (arg != NULL);
+
+            if(!_parse_file_arg (arg, &fname1, &fname2)) 
+              {
+                struct add_files_t *tmp = malloc (sizeof (struct add_files_t));
+
+                tmp->next = gl.add_files;
+                gl.add_files = tmp;
+
+                tmp->fname = fname1;
+                tmp->iso_fname = fname2;
+                tmp->raw_flag = (opt == CL_ADD_FILE_RAW);
+              }
+            else
+              {
+                fprintf (stderr, "file parsing of `%s' failed\n", arg);
+                exit (EXIT_FAILURE);
+              }
+          }
+          break;
+
         default:
           vcd_error ("error while parsing command line - try --help");
           break;
@@ -191,6 +280,25 @@ main (int argc, const char *argv[])
   gl_vcd_obj = vcd_obj_new (type_id);
 
   vcd_obj_set_param (gl_vcd_obj, VCD_PARM_VOLUME_LABEL, gl.volume_label);
+
+  {
+    struct add_files_t *p = gl.add_files;
+
+    while(p)
+      {
+        fprintf (stdout, "debug: adding [%s] as [%s] (raw=%d)\n", p->fname, p->iso_fname, p->raw_flag);
+        
+        if(vcd_obj_add_file(gl_vcd_obj, p->iso_fname,
+                            vcd_data_source_new_stdio (p->fname),
+                            p->raw_flag))
+          {
+            fprintf (stderr, "error while adding file `%s' as `%s' to (S)VCD\n", p->fname, p->iso_fname);
+            exit (EXIT_FAILURE);
+          }
+
+        p = p->next;
+      }
+  }
 
   for (n = 0; gl.track_fnames[n] != NULL; n++)
     vcd_obj_append_mpeg_track (gl_vcd_obj,
