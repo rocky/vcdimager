@@ -26,9 +26,54 @@
 #include <assert.h>
 
 #include <libvcd/vcd_pbc.h>
+#include <libvcd/vcd_logging.h>
 
-uint32_t 
+unsigned
+_vcd_pbc_lid_lookup (const VcdObj *obj, const char item_id[])
+{
+  VcdListNode *node;
+  unsigned n = 1;
+
+  _VCD_LIST_FOREACH (node, obj->pbc_list)
+    {
+      pbc_t *_pbc = _vcd_list_node_data (node);
+
+      assert (n < 0x8000);
+
+      if (_pbc->id && !strcmp (item_id, _pbc->id))
+	return n;
+
+      n++;
+    }
+
+  /* not found */
+  return 0;
+}
+
+enum item_type_t
 _vcd_pbc_lookup (const VcdObj *obj, const char item_id[])
+{
+  unsigned id;
+
+  if ((id = _vcd_pbc_pin_lookup (obj, item_id)))
+    {
+      if (id < 100)
+	return ITEM_TYPE_TRACK;
+      else if (id < 600)
+	return ITEM_TYPE_ENTRY;
+      else if (id < 2980)
+	return ITEM_TYPE_SEGMENT;
+      else 
+	assert (1);
+    }
+  else if (_vcd_pbc_lid_lookup (obj, item_id))
+    return ITEM_TYPE_PBC;
+
+  return ITEM_TYPE_NOTFOUND;
+}
+
+uint32_t
+_vcd_pbc_pin_lookup (const VcdObj *obj, const char item_id[])
 {
   int n;
   VcdListNode *node;
@@ -87,8 +132,43 @@ _vcd_pbc_lookup (const VcdObj *obj, const char item_id[])
       n += _segment->segment_count;
     }
 
-  /* check lid's */
-
   return 0;
 }
 
+bool
+_vcd_pbc_available (const VcdObj *obj)
+{
+  assert (obj != NULL);
+  assert (obj->pbc_list != NULL);
+
+  if (!_vcd_list_length (obj->pbc_list))
+    return false;
+
+  switch (obj->type) 
+    {
+    case VCD_TYPE_VCD2:
+    case VCD_TYPE_SVCD:
+      return true;
+      break;
+
+    case VCD_TYPE_VCD11:
+      vcd_warn ("PBC list not empty but VCD type not capable of PBC!");
+      return false;
+      break;
+
+    default:
+      assert (1);
+      break;
+    }
+
+  return false;
+}
+
+uint32_t
+_vcd_pbc_max_lid (const VcdObj *obj)
+{
+  if (!_vcd_pbc_available (obj))
+    return 0;
+
+  return (_vcd_list_length (obj->pbc_list));
+}

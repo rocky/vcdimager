@@ -38,6 +38,8 @@ typedef struct {
   char *id;
   const struct vcd_mpeg_source_info *info;
   VcdList *entry_list; /* entry_t */
+
+  /* computed on sector allocation */
   unsigned relative_start_extent; /* relative to iso data end */
 } mpeg_sequence_t;
 
@@ -50,8 +52,11 @@ typedef struct {
   char *id;
   const struct vcd_mpeg_source_info *info;
   unsigned segment_count;
+
+  /* computed on sector allocation */
   unsigned start_extent;
 } mpeg_segment_t;
+
 
 typedef struct {
   char *iso_pathname;
@@ -91,6 +96,9 @@ struct _VcdObj {
   VcdList *mpeg_sequence_list; /* mpeg_sequence_t */
 
   unsigned relative_end_extent; /* last mpeg sequence track end extent */
+
+  /* PBC */
+  VcdList *pbc_list; /* pbc_t */
 
   /* custom files */
   unsigned ext_file_start_extent; 

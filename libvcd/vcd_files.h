@@ -40,13 +40,13 @@ void
 set_info_vcd (VcdObj *obj, void *buf);
 
 uint32_t
-get_psd_size (VcdObj *obj);
+get_psd_size (VcdObj *obj, bool extended);
 
 void
-set_lot_vcd (VcdObj *obj, void *buf);
+set_lot_vcd (VcdObj *obj, void *buf, bool extended);
 
 void
-set_psd_vcd (VcdObj *obj, void *buf);
+set_psd_vcd (VcdObj *obj, void *buf, bool extended);
 
 void
 set_tracks_svd (VcdObj *obj, void *buf);

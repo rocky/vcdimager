@@ -35,8 +35,9 @@
 #include "vcd_util.h"
 #include "vcd_mpeg_stream.h"
 
-static const char _rcsid[] = "$Id$";
+#include <libvcd/vcd_pbc.h>
 
+static const char _rcsid[] = "$Id$";
 
 static uint32_t
 _get_closest_aps (const struct vcd_mpeg_source_info *_mpeg_info, double t,
@@ -170,9 +171,12 @@ _set_bit (uint8_t bitset[], unsigned bitnum)
 
 
 uint32_t 
-get_psd_size (VcdObj *obj)
+get_psd_size (VcdObj *obj, bool extended)
 {
   uint32_t psd_size;
+
+  if (!_vcd_pbc_available (obj))
+    return 0;
   
   psd_size = _vcd_list_length (obj->mpeg_track_list)*16; /* 2<<3 */
   psd_size += 8; /* stop descriptor */
@@ -181,7 +185,7 @@ get_psd_size (VcdObj *obj)
 }
 
 void
-set_psd_vcd (VcdObj *obj, void *buf)
+set_psd_vcd (VcdObj *obj, void *buf, bool extended)
 {
   int n;
   char psd_buf[ISO_BLOCKSIZE] = { 0, };
@@ -200,7 +204,7 @@ set_psd_vcd (VcdObj *obj, void *buf)
       _md->lid = UINT16_TO_BE (n+1);
       _md->prev_ofs = UINT16_TO_BE (n ? (n - 1) << 1 : 0xffff);
       _md->next_ofs = UINT16_TO_BE ((n + 1) << 1);
-      _md->return_ofs = UINT16_TO_BE ((get_psd_size (obj) - 8) >> 3);
+      _md->return_ofs = UINT16_TO_BE ((get_psd_size (obj, false) - 8) >> 3);
       _md->ptime = UINT16_TO_BE (0x0000);
       _md->wtime = 0x05;
       _md->atime = 0x00;
@@ -222,7 +226,7 @@ set_psd_vcd (VcdObj *obj, void *buf)
 }
 
 void
-set_lot_vcd(VcdObj *obj, void *buf)
+set_lot_vcd(VcdObj *obj, void *buf, bool extended)
 {
   LotVcd *lot_vcd = NULL;
   int n;
@@ -310,10 +314,10 @@ set_info_vcd(VcdObj *obj, void *buf)
           n++;
         }
       
-      info_vcd.psd_size = UINT32_TO_BE(get_psd_size (obj));
+      info_vcd.psd_size = UINT32_TO_BE(get_psd_size (obj, false));
       info_vcd.offset_mult = INFO_OFFSET_MULT;
-      info_vcd.lot_entries = 
-        UINT16_TO_BE(_vcd_list_length (obj->mpeg_track_list) + 1);
+      info_vcd.lot_entries = UINT32_TO_BE (_vcd_pbc_max_lid (obj));
+      /* UINT16_TO_BE(_vcd_list_length (obj->mpeg_track_list) + 1); */
 
       if (_vcd_list_length (obj->mpeg_segment_list))
         {

@@ -67,10 +67,12 @@
 
 <!ELEMENT tracks (mpeg-track*,cdda-track*)>
 
-<!ELEMENT mpeg-track (entry)*>
+<!ELEMENT mpeg-track (entry*,auto-pause*)>
 <!ATTLIST mpeg-track
   %itemattrs;
 >
+
+<!ELEMENT auto-pause (#PCDATA)>
 
 <!ELEMENT entry (#PCDATA)>
 <!ATTLIST entry

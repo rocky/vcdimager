@@ -24,7 +24,76 @@
 #include <libvcd/vcd_types.h>
 #include <libvcd/vcd_obj.h>
 
-uint32_t 
+typedef struct {
+  enum {
+    PBC_INVALID = 0,
+    PBC_PLAY,
+    PBC_SELECTION,
+    PBC_END
+  } type;
+
+  char *id;
+
+  /* used for play/selection lists */
+  char *prev_id;
+  char *next_id;
+  char *retn_id;
+
+  /* used for play lists */
+  double playing_time;
+  unsigned wait_time;
+  unsigned auto_pause_time;
+  VcdList *item_id_list; /* char */
+
+  /* used for selection lists */
+  unsigned bsn;
+  VcdList *default_id_list; /* char */
+  char *timeout_id;
+  unsigned timeout_time;
+  unsigned loop_count;
+  bool jump_delayed;
+  char *item_id;
+  VcdList *select_id_list; /* char */
+
+  /* used for end lists */
+  char *image_id;
+  unsigned next_disc_no;
+
+  /* computed... */
+  unsigned lid;
+  unsigned offset;
+  unsigned offset_ext;
+} pbc_t;
+
+enum item_type_t {
+  ITEM_TYPE_NOTFOUND = 0,
+  ITEM_TYPE_TRACK,
+  ITEM_TYPE_ENTRY,
+  ITEM_TYPE_SEGMENT,
+  ITEM_TYPE_PBC
+};
+
+/* functions */
+
+unsigned
+_vcd_pbc_lid_lookup (const VcdObj *obj, const char item_id[]);
+
+enum item_type_t
 _vcd_pbc_lookup (const VcdObj *obj, const char item_id[]);
+
+uint32_t
+_vcd_pbc_pin_lookup (const VcdObj *obj, const char item_id[]);
+
+unsigned 
+_vcd_pbc_list_calc_size (const pbc_t *_pbc, bool extended);
+
+bool
+_vcd_pbc_link (VcdObj *obj);
+
+bool
+_vcd_pbc_available (const VcdObj *obj);
+
+uint32_t
+_vcd_pbc_max_lid (const VcdObj *obj);
 
 #endif /* __VCD_PBC_H__ */

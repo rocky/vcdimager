@@ -116,6 +116,8 @@ vcd_obj_new (vcd_type_t vcd_type)
 
   new_obj->mpeg_segment_list = _vcd_list_new ();
 
+  new_obj->pbc_list = _vcd_list_new ();
+
   switch (vcd_type) 
     {
     case VCD_TYPE_VCD11:
@@ -548,9 +550,8 @@ vcd_obj_add_file (VcdObj *obj, const char iso_pathname[],
   return 0;
 }
 
-/* fixme -- function is very long... */
 static void
-_finalize_vcd_iso_track (VcdObj *obj)
+_finalize_vcd_iso_track_allocation (VcdObj *obj)
 {
   int n;
   VcdListNode *node;
@@ -580,18 +581,23 @@ _finalize_vcd_iso_track (VcdObj *obj)
   _dict_insert (obj, "info", INFO_VCD_SECTOR, 1, SM_EOF);              /* INFO.VCD */           /* EOF */
   _dict_insert (obj, "entries", ENTRIES_VCD_SECTOR, 1, SM_EOF);        /* ENTRIES.VCD */        /* EOF */
 
-  if (obj->type == VCD_TYPE_VCD2
-      || obj->type == VCD_TYPE_SVCD)
+  /* PBC */
+
+  if (_vcd_pbc_available (obj))
     {
       _dict_insert (obj, "lot", LOT_VCD_SECTOR, LOT_VCD_SIZE, SM_EOF); /* LOT.VCD */            /* EOF */
-      _dict_insert (obj, "psd", PSD_VCD_SECTOR, _vcd_len2blocks (get_psd_size (obj), ISO_BLOCKSIZE), SM_EOF);            /* PSD.VCD */            /* EOF */
+      _dict_insert (obj, "psd", PSD_VCD_SECTOR, 
+                    _vcd_len2blocks (get_psd_size (obj, false), ISO_BLOCKSIZE), SM_EOF); /* PSD.VCD */ /* EOF */
     }
 
   if (obj->type == VCD_TYPE_SVCD)
     {
-      _dict_insert (obj, "tracks", TRACKS_SVD_SECTOR, 1, SM_EOF);      /* TRACKS.SVD */
-      _dict_insert (obj, "search", SEARCH_DAT_SECTOR, 
+      _dict_insert (obj, "search", SECTOR_NIL, 
                     _vcd_len2blocks (get_search_dat_size (obj), ISO_BLOCKSIZE), SM_EOF); /* SEARCH.DAT */
+      _dict_insert (obj, "tracks", SECTOR_NIL, 1, SM_EOF);      /* TRACKS.SVD */
+
+      assert (_dict_get_bykey (obj, "tracks")->sector > INFO_VCD_SECTOR);
+      assert (_dict_get_bykey (obj, "search")->sector > INFO_VCD_SECTOR);
     }
 
   /* done with primary information area */
@@ -607,46 +613,89 @@ _finalize_vcd_iso_track (VcdObj *obj)
 
   /* insert segments */
 
-  {
-    VcdListNode *node;
-
-    _VCD_LIST_FOREACH (node, obj->mpeg_segment_list)
-      {
-        mpeg_segment_t *_segment = _vcd_list_node_data (node);
-
-        _segment->start_extent = _vcd_salloc (obj->iso_bitmap, SECTOR_NIL, 
-                                              _segment->segment_count * 150);
-
-        assert (_segment->start_extent % 75 == 0);
-        assert (_vcd_salloc_get_highest (obj->iso_bitmap) + 1 
-                == _segment->start_extent + _segment->segment_count * 150);
-      }
+  _VCD_LIST_FOREACH (node, obj->mpeg_segment_list)
+    {
+      mpeg_segment_t *_segment = _vcd_list_node_data (node);
       
-  }
+      _segment->start_extent = _vcd_salloc (obj->iso_bitmap, SECTOR_NIL, 
+                                            _segment->segment_count * 150);
+
+      assert (_segment->start_extent % 75 == 0);
+      assert (_vcd_salloc_get_highest (obj->iso_bitmap) + 1 
+              == _segment->start_extent + _segment->segment_count * 150);
+    }
 
   obj->ext_file_start_extent = _vcd_salloc_get_highest (obj->iso_bitmap) + 1;
 
   assert (obj->ext_file_start_extent % 75 == 0);
 
-  if (obj->type == VCD_TYPE_VCD2)
+  /* go on with EXT area */
+
+  if (_vcd_pbc_available (obj))
     {
       _dict_insert (obj, "lot_x", SECTOR_NIL, LOT_VCD_SIZE, SM_EOF);
-
+      
       _dict_insert (obj, "psd_x", SECTOR_NIL,
-                    _vcd_len2blocks (get_psd_size (obj), ISO_BLOCKSIZE),
+                    _vcd_len2blocks (get_psd_size (obj, true), ISO_BLOCKSIZE),
                     SM_EOF);
     }
 
-  if (obj->type == VCD_TYPE_SVCD)
+  switch (obj->type) 
     {
+    case VCD_TYPE_VCD11:
+      /* noop */
+      break;
+    case VCD_TYPE_VCD2:
+      /* scantable.dat */
+      break;
+    case VCD_TYPE_SVCD:
       _dict_insert (obj, "scandata", SECTOR_NIL, 
                     _vcd_len2blocks (get_scandata_dat_size (obj),
                                      ISO_BLOCKSIZE),
                     SM_EOF);
+    default:
+      assert (1);
+      break;
     }
 
   obj->custom_file_start_extent =
     _vcd_salloc_get_highest (obj->iso_bitmap) + 1;
+
+  /* now for the custom files */
+
+  _VCD_LIST_FOREACH (node, obj->custom_file_list)
+    {
+      custom_file_t *p = _vcd_list_node_data (node);
+      
+      if (p->sectors)
+        {
+          p->start_extent =
+            _vcd_salloc(obj->iso_bitmap, SECTOR_NIL, p->sectors);
+          assert (p->start_extent != SECTOR_NIL);
+        }
+      else /* zero sized files -- set dummy extent */
+        p->start_extent = obj->custom_file_start_extent;
+    }
+
+  /* calculate iso size -- after this point no sector shall be
+     allocated anymore */
+
+  obj->iso_size =
+    MAX (MIN_ISO_SIZE, _vcd_salloc_get_highest (obj->iso_bitmap) + 1);
+
+  vcd_debug ("iso9660: highest alloced sector is %d (using %d as isosize)", 
+             _vcd_salloc_get_highest (obj->iso_bitmap), obj->iso_size);
+
+  /* after this point the ISO9660's size is frozen */
+}
+
+static void
+_finalize_vcd_iso_track_filesystem (VcdObj *obj)
+{
+  int n;
+  VcdListNode *node;
+
+  /* create filesystem entries */
 
   switch (obj->type) {
   case VCD_TYPE_VCD11:
@@ -656,9 +705,11 @@ _finalize_vcd_iso_track (VcdObj *obj)
     _vcd_directory_mkdir (obj->dir, "EXT");
     /* _vcd_directory_mkdir (obj->dir, "KARAOKE"); */
     _vcd_directory_mkdir (obj->dir, "MPEGAV");
+    _vcd_directory_mkdir (obj->dir, "VCD");
+
+    /* add segment dir only when there are actually segment play items */
     if (_vcd_list_length (obj->mpeg_segment_list))
       _vcd_directory_mkdir (obj->dir, "SEGMENT");
-    _vcd_directory_mkdir (obj->dir, "VCD");
 
     _vcd_directory_mkfile (obj->dir, "VCD/ENTRIES.VCD", 
                            _dict_get_bykey (obj, "entries")->sector, 
@@ -668,27 +719,30 @@ _finalize_vcd_iso_track (VcdObj *obj)
                            ISO_BLOCKSIZE, false, 0);
 
     /* only for vcd2.0 */
-    if (obj->type == VCD_TYPE_VCD2)
+    if (_vcd_pbc_available (obj))
       {
         _vcd_directory_mkfile (obj->dir, "VCD/LOT.VCD", 
                                _dict_get_bykey (obj, "lot")->sector, 
                                ISO_BLOCKSIZE*LOT_VCD_SIZE, false, 0);
         _vcd_directory_mkfile (obj->dir, "VCD/PSD.VCD", 
                                _dict_get_bykey (obj, "psd")->sector, 
-                               get_psd_size (obj), false, 0);
+                               get_psd_size (obj, false), false, 0);
       }
     break;
 
   case VCD_TYPE_SVCD:
     _vcd_directory_mkdir (obj->dir, "EXT");
-    if (_vcd_list_length (obj->mpeg_segment_list))
-      _vcd_directory_mkdir (obj->dir, "SEGMENT");
     _vcd_directory_mkdir (obj->dir, "MPEG2");
+
     if (obj->broken_svcd_mode_flag)
       {
         vcd_warn ("broken SVCD mode: adding MPEGAV dir");
         _vcd_directory_mkdir (obj->dir, "MPEGAV");
       }
+
+    /* add segment dir only when there are actually segment play items */
+    if (_vcd_list_length (obj->mpeg_segment_list))
+      _vcd_directory_mkdir (obj->dir, "SEGMENT");
 
     _vcd_directory_mkdir (obj->dir, "SVCD");
 
@@ -698,12 +752,17 @@ _finalize_vcd_iso_track (VcdObj *obj)
     _vcd_directory_mkfile (obj->dir, "SVCD/INFO.SVD",
                            _dict_get_bykey (obj, "info")->sector, 
                            ISO_BLOCKSIZE, false, 0);
-    _vcd_directory_mkfile (obj->dir, "SVCD/LOT.SVD",
-                           _dict_get_bykey (obj, "lot")->sector, 
-                           ISO_BLOCKSIZE*LOT_VCD_SIZE, false, 0);
-    _vcd_directory_mkfile (obj->dir, "SVCD/PSD.SVD", 
-                           _dict_get_bykey (obj, "psd")->sector, 
-                           get_psd_size (obj), false, 0);
+
+    if (_vcd_pbc_available (obj))
+      {
+        _vcd_directory_mkfile (obj->dir, "SVCD/LOT.SVD",
+                               _dict_get_bykey (obj, "lot")->sector, 
+                               ISO_BLOCKSIZE*LOT_VCD_SIZE, false, 0);
+        _vcd_directory_mkfile (obj->dir, "SVCD/PSD.SVD", 
+                               _dict_get_bykey (obj, "psd")->sector, 
+                               get_psd_size (obj, false), false, 0);
+      }
+
     _vcd_directory_mkfile (obj->dir, "SVCD/SEARCH.DAT", 
                            _dict_get_bykey (obj, "search")->sector, 
                            get_search_dat_size (obj), false, 0);
@@ -751,61 +810,61 @@ _finalize_vcd_iso_track (VcdObj *obj)
 
   /* EXT files */
 
-  if (obj->type == VCD_TYPE_VCD2) 
+  switch (obj->type) 
     {
-      /* psd_x -- extended PSD */
-      _vcd_directory_mkfile (obj->dir, "EXT/PSD_X.VCD",
-                             _dict_get_bykey (obj, "psd_x")->sector, 
-                             get_psd_size (obj), false, 1);
+    case VCD_TYPE_VCD2:
+      if (_vcd_pbc_available (obj))
+        {
+          /* psd_x -- extended PSD */
+          _vcd_directory_mkfile (obj->dir, "EXT/PSD_X.VCD",
+                                 _dict_get_bykey (obj, "psd_x")->sector, 
+                                 get_psd_size (obj, true), false, 1);
 
-      /* lot_x -- extended LOT */
-      _vcd_directory_mkfile (obj->dir, "EXT/LOT_X.VCD",
-                             _dict_get_bykey (obj, "lot_x")->sector, 
-                             ISO_BLOCKSIZE*LOT_VCD_SIZE, false, 1);
+          /* lot_x -- extended LOT */
+          _vcd_directory_mkfile (obj->dir, "EXT/LOT_X.VCD",
+                                 _dict_get_bykey (obj, "lot_x")->sector, 
+                                 ISO_BLOCKSIZE*LOT_VCD_SIZE, false, 1);
+        }
+      break;
 
-    }
+    case VCD_TYPE_SVCD:
+      if (_vcd_pbc_available (obj))
+        {
+          /* psd_x -- extended PSD */
+          _vcd_directory_mkfile (obj->dir, "EXT/PSD_X.SVD",
+                                 _dict_get_bykey (obj, "psd_x")->sector, 
+                                 get_psd_size (obj, true), false, 1);
 
-  if (obj->type == VCD_TYPE_SVCD)
-    {
+          /* lot_x -- extended LOT */
+          _vcd_directory_mkfile (obj->dir, "EXT/LOT_X.SVD",
+                                 _dict_get_bykey (obj, "lot_x")->sector, 
+                                 ISO_BLOCKSIZE*LOT_VCD_SIZE, false, 1);
+        }
+
       /* scandata.dat -- scanpoints */
       _vcd_directory_mkfile (obj->dir, "EXT/SCANDATA.DAT",
                              _dict_get_bykey (obj, "scandata")->sector, 
                              get_scandata_dat_size (obj), false, 0);
+      break;
+
+    case VCD_TYPE_VCD11:
+      break;
+
+    default:
+      assert (1);
     }
+
 
   /* custom files */
 
-  {
-    VcdListNode *node;
+  _VCD_LIST_FOREACH (node, obj->custom_file_list)
+    {
+      custom_file_t *p = _vcd_list_node_data (node);
 
-    _VCD_LIST_FOREACH (node, obj->custom_file_list)
-      {
-        custom_file_t *p = _vcd_list_node_data (node);
-
-        if (p->sectors)
-          {
-            p->start_extent =
-              _vcd_salloc(obj->iso_bitmap, SECTOR_NIL, p->sectors);
-            assert(p->start_extent != SECTOR_NIL);
-          }
-        else /* zero sized files -- set dummy extent */
-          p->start_extent = obj->custom_file_start_extent;
-
-        _vcd_directory_mkfile(obj->dir, p->iso_pathname, p->start_extent,
+      _vcd_directory_mkfile(obj->dir, p->iso_pathname, p->start_extent,
                               p->size, p->raw_flag, 1);
-      }
-  }
+    }
 
-  /* calculate iso size -- after this point no sector shall be
-     allocated anymore */
-
-  obj->iso_size =
-    MAX (MIN_ISO_SIZE, _vcd_salloc_get_highest (obj->iso_bitmap) + 1);
-
-  vcd_debug ("iso9660: highest alloced sector is %d (using %d as isosize)", 
-             _vcd_salloc_get_highest (obj->iso_bitmap), obj->iso_size);
-
-  /* after this point the ISO9660's size is frozen */
 
   n = 0;
   _VCD_LIST_FOREACH (node, obj->mpeg_sequence_list)
@@ -863,16 +922,42 @@ _finalize_vcd_iso_track (VcdObj *obj)
   {
     uint32_t dirs_size = _vcd_directory_get_size (obj->dir);
     
-    /* be sure to stay within first 75 sectors */
-    if (16 + 2 + dirs_size + 2 >= 75) 
-      vcd_error ("directory section to big for a VCD");
+    /* be sure to stay out of information areas */
+
+    switch (obj->type) 
+      {
+      case VCD_TYPE_VCD11:
+      case VCD_TYPE_VCD2:
+        /* karaoke area starts at 03:00 */
+        if (16 + 2 + dirs_size + 2 >= 75) 
+          vcd_error ("directory section to big for a VCD");
+        break;
+      case VCD_TYPE_SVCD:
+        /* since no karaoke exists the next fixed area starts at 04:00 */
+        if (16 + 2 + dirs_size + 2 >= 150) 
+          vcd_error ("directory section to big for a SVCD");
+        break;
+      default:
+        assert(1);
+      }
+    
+    /* un-alloc small area */
     
     _vcd_salloc_free (obj->iso_bitmap, 18, dirs_size + 2);
     
+    /* alloc it again! */
+
     _dict_insert (obj, "dir", 18, dirs_size, SM_EOR|SM_EOF);
     _dict_insert (obj, "ptl", 18 + dirs_size, 1, SM_EOR|SM_EOF);
     _dict_insert (obj, "ptm", 18 + dirs_size + 1, 1, SM_EOR|SM_EOF);
   }
+}
+
+static void
+_finalize_vcd_iso_track (VcdObj *obj)
+{
+  _finalize_vcd_iso_track_allocation (obj);
+  _finalize_vcd_iso_track_filesystem (obj);
 }
 
 static int
@@ -1037,17 +1122,13 @@ _write_vcd_iso_track (VcdObj *obj)
   set_info_vcd (obj, _dict_get_bykey (obj, "info")->buf);
   set_entries_vcd (obj, _dict_get_bykey (obj, "entries")->buf);
 
-  if (obj->type == VCD_TYPE_VCD2)
+  if (_vcd_pbc_available (obj))
     {
-      set_lot_vcd (obj, _dict_get_bykey (obj, "lot_x")->buf);
-      set_psd_vcd (obj, _dict_get_bykey (obj, "psd_x")->buf);
-    }
+      set_lot_vcd (obj, _dict_get_bykey (obj, "lot_x")->buf, true);
+      set_psd_vcd (obj, _dict_get_bykey (obj, "psd_x")->buf, true);
   
-  if (obj->type == VCD_TYPE_VCD2 
-      || obj->type == VCD_TYPE_SVCD) 
-    {
-      set_lot_vcd (obj, _dict_get_bykey (obj, "lot")->buf);
-      set_psd_vcd (obj, _dict_get_bykey (obj, "psd")->buf);
+      set_lot_vcd (obj, _dict_get_bykey (obj, "lot")->buf, false);
+      set_psd_vcd (obj, _dict_get_bykey (obj, "psd")->buf, false);
     }
 
   if (obj->type == VCD_TYPE_SVCD) 
