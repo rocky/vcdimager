@@ -4,7 +4,7 @@ see ChangeLog for more information
 
 version 0.7.9 (unstable/development)
 ====================================
-2001-...
+2001-07-01
 
 * fixed assertion bug in vcdimager cli frontend
 * added support for HQ-VCD and VCD 1.0 formats

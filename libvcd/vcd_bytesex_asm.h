@@ -25,55 +25,55 @@
 
 #include "vcd_types.h"
 
-#if defined(__PPC__) && defined(__STORM__)
+#if defined(__powerpc__) && defined(__GNUC__)
 
 inline static
 uint32_t uint32_swap_le_be_asm(const uint32_t a)
 {
   uint32_t b;
-  __asm("la r5,%1;lwbrx %0,0,r5"
-	:"=r"(b)
-	:"m"(a)
-	:"r5");
 
-  return(b);
+  __asm__ ("lwbrx %0,0,%1"
+           :"=r"(b)
+           :"r"(&a), "m"(a));
+
+  return b;
 }
 
 inline static
 uint16_t uint16_swap_le_be_asm(const uint16_t a)
 {
-  uint16_t b;
-  __asm("la r5,%1;lhbrx %0,0,r5"
-	:"=r"(b)
-	:"m"(a)
-	:"r5");
+  uint32_t b;
 
-  return(b);
+  __asm__ ("lhbrx %0,0,%1"
+           :"=r"(b)
+           :"r"(&a), "m"(a));
+
+  return b;
 }
 
 #define UINT16_SWAP_LE_BE uint16_swap_le_be_asm
 #define UINT32_SWAP_LE_BE uint32_swap_le_be_asm
 
-#elif defined(mc68000) &&  defined(__STORM__)
+#elif defined(__mc68000__) &&  defined(__STORMGCC__)
 
 inline static 
-uint32_t uint32_swap_le_be_asm(uint32_t a __asm("d0"))
+uint32_t uint32_swap_le_be_asm(uint32_t a __asm__("d0"))
 {
   /* __asm__("rolw #8,%0; swap %0; rolw #8,%0" : "=d" (val) : "0" (val)); */
 
-  __asm("move.l %1,d0;rol.w #8,d0;swap d0;rol.w #8,d0;move.l d0,%0"
-	:"=r"(a)
-	:"r"(a));
+  __asm__("move.l %1,d0;rol.w #8,d0;swap d0;rol.w #8,d0;move.l d0,%0"
+          :"=r"(a)
+          :"r"(a));
 
   return(a);
 }
 
 inline static
-uint16_t uint16_swap_le_be_asm(uint16_t a __asm("d0"))
+uint16_t uint16_swap_le_be_asm(uint16_t a __asm__("d0"))
 {
-  __asm("move.l %1,d0;rol.w #8,d0;move.l d0,%0"
-	:"=r"(a)
-	:"r"(a));
+  __asm__("move.l %1,d0;rol.w #8,d0;move.l d0,%0"
+          :"=r"(a)
+          :"r"(a));
   
   return(a);
 }
