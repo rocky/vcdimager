@@ -76,7 +76,7 @@ vcd_image_sink_set_cuesheet (VcdImageSink *obj, const VcdList *vcd_cue_list)
 }
 
 int
-vcd_image_sink_write (VcdImageSink *obj, void *buf, uint32_t lsn)
+vcd_image_sink_write (VcdImageSink *obj, void *buf, lsn_t lsn)
 {
   vcd_assert (obj != NULL);
 

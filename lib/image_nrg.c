@@ -281,7 +281,7 @@ _write_tail (_img_nrg_snk_t *_obj, uint32_t offset)
 }
  
 static int
-_vcd_image_nrg_write (void *user_data, const void *data, uint32_t lsn)
+_vcd_image_nrg_write (void *user_data, const void *data, lsn_t lsn)
 {
   const char *buf = data;
   _img_nrg_snk_t *_obj = user_data;
