@@ -34,24 +34,26 @@ else
 
   warning_flags=""
 
-  WOPT="-std=c99 -pedantic"
-  SAVE_CFLAGS="$CFLAGS"
-  CFLAGS="$CFLAGS $WOPT"
-  AC_MSG_CHECKING([whether $CC understands $WOPT])
-  AC_TRY_COMPILE([], [], 
-    [has_option=yes; warning_flags="$warning_flags $WOPT"], 
-    has_option=no)
-  CFLAGS="$SAVE_CFLAGS"
-  AC_MSG_RESULT($has_option)
+  if test "x$enable_maintainer_mode" = "xyes"; then
+    WOPT="-std=c99 -pedantic"
+    SAVE_CFLAGS="$CFLAGS"
+    CFLAGS="$CFLAGS $WOPT"
+    AC_MSG_CHECKING([whether $CC accepts $WOPT])
+    AC_TRY_COMPILE([], [], 
+      [has_option=yes; warning_flags="$warning_flags $WOPT"], 
+      has_option=no)
+    CFLAGS="$SAVE_CFLAGS"
+    AC_MSG_RESULT($has_option)
+  fi
 
   for WOPT in $WARN_CFLAGS; do
     SAVE_CFLAGS="$CFLAGS"
     CFLAGS="$CFLAGS $WOPT"
-    AC_MSG_CHECKING([whether $CC understands $WOPT])
+    AC_MSG_CHECKING([whether $CC accepts $WOPT])
     AC_TRY_COMPILE([], [], has_option=yes, has_option=no)
     CFLAGS="$SAVE_CFLAGS"
     AC_MSG_RESULT($has_option)
-    if test $has_option = yes; then
+    if test "x$has_option" = "xyes"; then
       warning_flags="$warning_flags $WOPT"
     fi
     unset has_option
@@ -98,7 +100,7 @@ AC_C_CONST
 AC_C_INLINE
 
 dnl ISOC99_PRAGMA
-AC_MSG_CHECKING([whether $CC supports ISOC99 _Pragma()])
+AC_MSG_CHECKING([whether $CC supports ISO C99 _Pragma()])
 AC_TRY_COMPILE([_Pragma("pack(1)")], [], [
   ISOC99_PRAGMA=yes 
   AC_DEFINE(HAVE_ISOC99_PRAGMA, [], [Supports ISO _Pragma() macro])
