@@ -21,7 +21,8 @@
 # Things to make the libvcd and libvcdinfo librares
 ####################################################
 
-# From libtool documentation:
+# From libtool documentation amended with guidance from N. Boullis: 
+#
 #  1. Start with version information of `0:0:0' for each libtool library.
 #
 #  2. It is probably not a good idea to update the version information 
@@ -43,7 +44,7 @@
 #     incompatibility with previous versions.
 
 libvcdinfo_la_CURRENT := 0
-libvcdinfo_la_REVISION := 1
+libvcdinfo_la_REVISION := 2
 libvcdinfo_la_AGE := 0
 
 noinst_LTLIBRARIES = libvcd.la
