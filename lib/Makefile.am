@@ -100,4 +100,34 @@ libvcdinfo_la_LIBADD = $(LIBCDIO_LIBS) $(LIBISO9660_LIBS) $(LIBVCD_LIBS)
 libvcdinfo_la_LDFLAGS = -version-info $(libvcdinfo_la_CURRENT):$(libvcdinfo_la_REVISION):$(libvcdinfo_la_AGE)
 libvcdinfo_la_DEPENDENCIES = libvcd.la
 
+# Below is some simple versioning where every symbol is versioned with
+# something that looks like the SONAME of the library. More complex (and
+# better) versioning is possible; it is for example what is used by glibc.
+# But good complex versioning is something that requires much more
+# work...
+
+
+# The below is a impliments symbol versioning.  First of all, I
+# compute MAJOR as CURENT - AGE; that is what is used within libtool
+# (at least on GNU/Linux systems) for the number in the SONAME.  The
+# nm command gives the list of symbols known in each of the object
+# files that will be part of the shared library. And the sed command
+# extracts from this list those symbols that will be shared. (This sed
+# command comes from libtool.)
+
+libvcdinfo_la_MAJOR := $(shell expr $(libvcdinfo_la_CURRENT) - $(libvcdinfo_la_AGE))
+
+libvcdinfo_la_DEPENDENCIES += libvcdinfo.la.ver
+libvcdinfo_la_LDFLAGS += -Wl,--version-script=libvcdinfo.la.ver
+
+libvcdinfo.la.ver: $(libvcdinfo_la_OBJECTS)
+	echo 'VCDINFO_$(libvcdinfo_la_MAJOR) {' > $@
+	echo "  global:" >> $@
+	nm $(patsubst %lo,%o,$(libvcdinfo_la_OBJECTS)) | sed -n -e 's/^.*[ 	][ABCDGIRSTW][ABCDGIRSTW]*[ 	][ 	]*\([_A-Za-z][_A-Za-z0-9]*\)$$/    \1;/p' | sort | uniq >> $@
+	echo "  local:" >> $@
+	echo "    *;" >> $@
+	echo '};' >> $@
+
+MOSTLYCLEANFILES = libvcdinfo.la.ver libiso9660.la
+
 # EOF
