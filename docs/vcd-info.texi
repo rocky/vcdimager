@@ -605,9 +605,10 @@ volset, or xa.
 
 @ftable @code
 @item app
-The application id; a string of at most 128 characters. The XML tag for
-this is <application-id>. See line 9 of the example in @ref{PVD, ,Primary Volume
-Descriptor (PVD) Section}.
+The application id; a string of at most 128 characters and often
+indicates the program used to create the CD. The XML tag for this is
+<application-id>. See line 9 of the example in @ref{PVD, ,Primary
+Volume Descriptor (PVD) Section}.
 @item id
 Some sort of string ID. See line 2 of the example in @ref{PVD, ,Primary Volume
 Descriptor (PVD) Section}.
