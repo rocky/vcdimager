@@ -77,7 +77,7 @@ if test_vcdxrip '--norip --bin-file videocd.bin -o vcd20_test1.xml' \
     vcd20_test1.xml ${srcdir}/vcd20_test1.xml-right ; then 
     :
 else
-    echo "$0: vcddump test 1 failed "
+    echo "$0: vcdxrip test 1 failed "
     test_vcdxbuild_cleanup
     exit 1
 fi
