@@ -1,0 +1,11 @@
+$Id$
+
+thanks to:
+
+* Andreas Varga, for his inspiration of this package's name and for his strong conception of portability
+* wimpy, for taking over the win32 port
+* Franz Ackermann, for suffering from my lack of patience and finally surrendering and getting me a CD-i player
+* Heiko Eissfeldt, for providing OSS edc/ecc routines
+* Rainer Johanni, for creating mkvcdfs, from which I stole a few ideas 
+
+...and finally to all those people who helped with testing VCDImager!

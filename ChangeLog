@@ -1,0 +1,101 @@
+2000-09-20  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_files_private.h: tiny fixups
+
+2000-09-17  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_files_private.h: further improvements...
+
+2000-09-16  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_files_private.h: merging in stuff from jbj1
+	 	reindenting
+
+	* libvcd/vcd.c (vcd_obj_get_image_size): reflected changes in vcd.h
+
+	* libvcd/vcd_obj.h: redid interface to accomodate SVCD creation and future
+		extensions...
+
+2000-09-11  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd.h: moved around arguments amongs output functions
+
+	* configure.in: conditionally build frontends based on available libs
+
+2000-09-10  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_obj.h: took out cue_file field
+
+	* libvcd/vcd.c (vcd_obj_end_output): moved deallocing here
+
+2000-09-09  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd.c (_write_sectors): abort on invalid mpeg packet
+	(vcd_obj_write_image): return directly if aborted writing...
+	(_write_vcd_iso_track): added return value
+
+2000-09-08  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd.c (vcd_obj_remove_mpeg_track): new function
+
+2000-09-07  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd.c: really abort sometime if progess callback returns !=0
+
+	* libvcd/vcd_directory.c (directory_done): set _root = NULL when done
+
+2000-09-06  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_mpeg.c (mpeg_analyze_start_seq): added hack for finding 
+		transposed start of format info
+
+	* libvcd/vcd.c (vcd_obj_append_mpeg_track): warn instead of error if 
+		mpeg not padded to 2324 size, return trackid
+
+	* libvcd/vcd_stream_stdio.c (vcd_data_source_new_stdio): stat() 
+		file when creating source obj
+
+2000-09-05  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_stream_stdio.c: include <sys/stat.h> instead of
+		<sys/types.h>, removed <fcntl.h>
+
+	* libvcd/vcd_directory.c, libvcd/vcd_iso9660.c, 
+	libvcd/vcd_cd_sector.c: pointer arithmetic casts...
+
+	* libvcd/vcd.c (_write_vcd_iso_track): use malloc() for dir_buf
+
+	* libvcd/vcd_files.c (set_lot_vcd): allocate lot_vcd on the heap
+
+	* libvcd/vcd_logging.c (vcd_log): de-macroized ##-using macros...
+
+	* libvcd/vcd_util.c (_strlenv), (_strfreev), (_strsplit): 
+		new functions
+
+	* libvcd/vcd_directory.c: reimplemented n-way tree
+
+	* libvcd/vcd_iso9660_private.h, libvcd/vcd_files_private.h:
+		added #pragma's for metroworks compiler
+
+	* propagated change in vcd_salloc.h to affected modules
+
+	* libvcd/vcd_salloc.h: renamed functions/exported bitmap object
+
+	* libvcd/vcd_salloc.c: reimplemented dynamic array
+
+	* started re-importing branch to CVS
+
+2000-09-04  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* PBC support added and functional
+	* progress meter abstraction done
+
+2000-09-02  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* backend/: implementing stream abstraction...
+
+2000-09-01  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* started new ChangeLog, since a complete restructuring is taking
+		place, separating the backend from the frontend (aka UI)
+

@@ -1,2 +1,18 @@
-GNU VCDImager
-=============
+-*- text -*-
+
+This is GNU VCDImager, a VideoCD image mastering tool.
+
+See the file NEWS for a list of major changes in the current release.
+
+See the file INSTALL for general compilation and installation instructions.
+
+See the texinfo documentation for more information.
+
+See http://www.gnu.org/software/vcdimager/ for latest news about GNU VCDImager.
+
+Mail suggestions and bug reports to bug-automake@gnu.org.
+
+Herbert Valerio Riedel
+hvr@gnu.org
+--
+$Id$

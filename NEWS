@@ -1,0 +1,65 @@
+$Id$
+
+see ChangeLog for more information
+
+version 0.4
+===========
+2000-08-27
+
+* CD-i support enabled by default with default cdi path
+* added short options
+* improved portability
+
+version 0.4alpha4
+=================
+2000-08-25
+
+* added simple support for video format detection/warnings
+* added PAL support
+
+version 0.4alpha3
+=================
+2000-08-25
+
+* fixed missing EOF subheader marking
+* improved logging output
+* internal bugfixes/restructuring
+
+version 0.4alpha2
+=================
+2000-08-24
+
+* custom file support bugfix
+* fixed wrongly reported start sectors in verbose output
+* internal bugfixes
+
+version 0.4alpha1
+=================
+2000-08-22
+
+* big endian fix
+* supports upto 98 mpeg tracks (of previously 33 possible tracks)
+* more CD-ROM XA compliance/fix
+* CD-i support
+* experimental support for adding custom files to ISO9660 fs
+
+version 0.3
+===========
+2000-08-16
+
+* EDC/ECC calculation bug fixed
+* portability fixes
+
+version 0.2
+===========
+2000-08-14
+
+* fixed a few core dumps
+* --bin-file= option bug fixed
+* more verbose warnings/error messages
+
+version 0.1
+===========
+2000-08-13
+
+* initial release
