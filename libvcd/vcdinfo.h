@@ -50,6 +50,10 @@ extern "C" {
 
 #define VCDINFO_ISO_BLOCK_SIZE    2048
 
+/*!
+  Unvalid LBA, Note: VCD player uses the fact that this is a very high
+  value.
+ */
 #define VCDINFO_NULL_LBA          0xFFFFFFFF
 
 /*========== End move somewhere else? ================*/
@@ -73,7 +77,7 @@ extern "C" {
 /*! 
   Constant for invalid track number
 */
-#define VCDINFO_INVALID_TRACK   0xFFFF
+#define VCDINFO_INVALID_TRACK   0xFF
 
 /*! 
   Constant for invalid offset.
@@ -568,8 +572,7 @@ vcdinfo_get_seg_size(const vcdinfo_obj_t *obj, const unsigned int seg_num);
     Note: track 1 is usually the first track.
   */
   unsigned int
-  vcdinfo_get_track_audio_type(const vcdinfo_obj_t *obj, 
-			       unsigned int track_num);
+  vcdinfo_get_track_audio_type(const vcdinfo_obj_t *obj, track_t track_num);
   
   /*!  
     Return the starting LBA (logical block address) for track number
@@ -583,7 +586,7 @@ vcdinfo_get_seg_size(const vcdinfo_obj_t *obj, const unsigned int seg_num);
     VCDINFO_NULL_LBA is returned on failure.
   */
   lba_t
-  vcdinfo_get_track_lba(const vcdinfo_obj_t *obj, unsigned int track_num);
+  vcdinfo_get_track_lba(const vcdinfo_obj_t *obj, track_t track_num);
   
   /*!  
     Return the starting MSF (minutes/secs/frames) for track number
@@ -593,18 +596,30 @@ vcdinfo_get_seg_size(const vcdinfo_obj_t *obj, const unsigned int seg_num);
     1 is returned on error, 0.
   */
   int
-  vcdinfo_get_track_msf(const vcdinfo_obj_t *obj, unsigned int track_num,
+  vcdinfo_get_track_msf(const vcdinfo_obj_t *obj, track_t track_num,
 			uint8_t *min, uint8_t *sec, uint8_t *frame);
   
   /*!
-    Return the size in sectors for track n. The first track is 1.
+    Return the size in sectors for track n. 
+
+    The IS0-9660 filesystem track has number 0. Tracks associated
+    with playable entries numbers start at 1.
+    
+    FIXME: Whether we count the track pregap sectors is a bit haphazard.
+    We should add a parameter to indicate whether this is wanted or not.
   */
   unsigned int
   vcdinfo_get_track_sect_count(const vcdinfo_obj_t *obj, 
-			       const unsigned int track_num);
+			       const track_t track_num);
   
   /*!
     Return size in bytes for track number for entry n in obj.
+
+    The IS0-9660 filesystem track has number 0. Tracks associated
+    with playable entries numbers start at 1.
+
+    FIXME: Do we count the track pregap sectors is a bit haphazard.
+    We should add a parameter to indicate whether this is wanted or not.
   */
   unsigned int
   vcdinfo_get_track_size(const vcdinfo_obj_t *obj, unsigned int track_num);
