@@ -91,6 +91,8 @@ vcd_xml_log_init (void)
 int 
 vcd_xml_scan_progress_cb (const vcd_mpeg_prog_info_t *info, void *user_data)
 {
+  const bool _last = info->current_pos == info->length;
+
   if (!vcd_xml_show_progress)
     return 0;
 
@@ -98,9 +100,18 @@ vcd_xml_scan_progress_cb (const vcd_mpeg_prog_info_t *info, void *user_data)
     fprintf (stdout, "<progress operation=\"scan\" id=\"%s\" position=\"%ld\" size=\"%ld\" />\n",
 	     (char *) user_data, info->current_pos, info->length);
   else
-    fprintf (stdout, "#scan[%s]: %ld/%ld (%2.0f%%)          \r",
-	     (char *) user_data, info->current_pos, info->length,
-	     (double) info->current_pos / info->length * 100);
+    {
+      fprintf (stdout, "#scan[%s]: %ld/%ld (%2.0f%%)          \r",
+	       (char *) user_data, info->current_pos, info->length,
+	       (double) info->current_pos / info->length * 100);
+
+      if (_last)
+	{
+	  fflush (stdout);
+
+	  fprintf (stdout, "                                                                            \r");
+	}
+    }
 
   fflush (stdout);
 }
@@ -108,6 +119,8 @@ vcd_xml_scan_progress_cb (const vcd_mpeg_prog_info_t *info, void *user_data)
 int
 vcd_xml_write_progress_cb (const progress_info_t *info, void *user_data)
 {
+  const bool _last = info->sectors_written == info->total_sectors;
+
   if (!vcd_xml_show_progress)
     return 0;
 
@@ -115,10 +128,19 @@ vcd_xml_write_progress_cb (const progress_info_t *info, void *user_data)
     fprintf (stdout, "<progress operation=\"write\" position=\"%ld\" size=\"%ld\" />\n",
 	     info->sectors_written, info->total_sectors);
   else
-    fprintf (stdout, "#write[%d/%d]: %ld/%ld (%2.0f%%)          \r",
-	     info->in_track, info->total_tracks, info->sectors_written,
-	     info->total_sectors,
-	     (double) info->sectors_written / info->total_sectors * 100);
+    {
+      fprintf (stdout, "#write[%d/%d]: %ld/%ld (%2.0f%%)          \r",
+	       info->in_track, info->total_tracks, info->sectors_written,
+	       info->total_sectors,
+	       (double) info->sectors_written / info->total_sectors * 100);
+      
+      if (_last)
+	{
+	  fflush (stdout);
+
+	  fprintf (stdout, "                                                                            \r");
+	}
+    }
 
   fflush (stdout);
 

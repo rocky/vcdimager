@@ -45,6 +45,7 @@
 #include "vcd_xml_dtd.h"
 #include "vcd_xml_dump.h"
 #include "vcdxml.h"
+#include "vcd_xml_common.h"
 
 static const char _rcsid[] = "$Id$";
 
@@ -240,6 +241,8 @@ main (int argc, const char *argv[])
 
   vcd_xml_init (&obj);
 
+  vcd_xml_log_init ();
+
   obj.comment = vcd_xml_dump_cl_comment (argc, argv);
 
   obj.pvd.system_id = strdup (DEFAULT_SYSTEM_ID);
@@ -423,6 +426,13 @@ main (int argc, const char *argv[])
 
     poptFreeContext (optCon);
   }
+
+  if (_quiet_flag)
+    vcd_xml_verbosity = LOG_WARN;
+  else if (_verbose_flag)
+    vcd_xml_verbosity = LOG_DEBUG;
+  else
+    vcd_xml_verbosity = LOG_INFO;
 
   /* done with argument processing */
 

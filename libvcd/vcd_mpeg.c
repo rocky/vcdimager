@@ -326,6 +326,13 @@ _parse_user_data (uint8_t streamid, const void *buf, unsigned len,
           {
             struct vcd_mpeg_scan_data_t *usdi = (void *) udg;
             vcd_assert (sizeof (struct vcd_mpeg_scan_data_t) == 14);
+            
+            if (usdi->len != 14)
+              {
+                vcd_warn ("invalid user scan data length (%d != 14)", usdi->len);
+                break;
+              }
+
             vcd_assert (usdi->len == 14);
             _check_scan_data ("previous_I_offset", &usdi->prev_ofs, state);
             _check_scan_data ("next_I_offset    ", &usdi->next_ofs, state);

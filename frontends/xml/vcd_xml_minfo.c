@@ -37,24 +37,10 @@
 #include <libvcd/vcd_util.h>
 #include <libvcd/vcd_stream_stdio.h>
 
+#include "vcd_xml_common.h"
+
 static const char _rcsid[] = "$Id$";
 
-static int gl_quiet_flag = 0;
-static int gl_verbose_flag = 0;
-
-static vcd_log_handler_t gl_default_vcd_log_handler = NULL;
-
-static void 
-_vcd_log_handler (log_level_t level, const char message[])
-{
-  if (level == LOG_DEBUG && !gl_verbose_flag)
-    return;
-
-  if (level == LOG_INFO && gl_quiet_flag)
-    return;
-  
-  gl_default_vcd_log_handler (level, message);
-}
 
 enum {
   OP_NONE = 0,
@@ -72,6 +58,13 @@ main (int argc, const char *argv[])
   int _relaxed_aps = 0;
   int _dump_aps = 0;
 
+  int _quiet_flag = 0;
+  int _verbose_flag = 0;
+  int _progress_flag = 0;
+  int _gui_flag = 0;
+
+  vcd_xml_log_init ();
+
   /* command line processing */
   {
     int opt = 0;
@@ -86,13 +79,16 @@ main (int argc, const char *argv[])
       {"relaxed-aps", '\0', POPT_ARG_NONE, &_relaxed_aps, OP_NONE,
        "relax APS constraints"},
 
-      /* */
+      {"progress", 'p', POPT_ARG_NONE, &_progress_flag, 0,  
+       "show progress"}, 
       
-      {"verbose", 'v', POPT_ARG_NONE, &gl_verbose_flag, OP_NONE, 
+      {"verbose", 'v', POPT_ARG_NONE, &_verbose_flag, OP_NONE, 
        "be verbose"},
     
-      {"quiet", 'q', POPT_ARG_NONE, &gl_quiet_flag, OP_NONE, 
+      {"quiet", 'q', POPT_ARG_NONE, &_quiet_flag, OP_NONE, 
        "show only critical messages"},
+
+      {"gui", '\0', POPT_ARG_NONE, &_gui_flag, 0, "enable GUI mode"},
 
       {"version", 'V', POPT_ARG_NONE, NULL, OP_VERSION,
        "display version and copyright information and exit"},
@@ -139,7 +135,18 @@ main (int argc, const char *argv[])
     poptFreeContext (optCon);
   } /* command line processing */
 
-  gl_default_vcd_log_handler = vcd_log_set_handler (_vcd_log_handler);
+  if (_quiet_flag)
+    vcd_xml_verbosity = LOG_WARN;
+  else if (_verbose_flag)
+    vcd_xml_verbosity = LOG_DEBUG;
+  else
+    vcd_xml_verbosity = LOG_INFO;
+
+  if (_gui_flag)
+    vcd_xml_gui_mode = true;
+
+  if (_progress_flag)
+    vcd_xml_show_progress = true;
 
   {
     VcdMpegSource *src;
@@ -149,11 +156,12 @@ main (int argc, const char *argv[])
 
     src = vcd_mpeg_source_new (vcd_data_source_new_stdio (_mpeg_fname));
 
-    vcd_mpeg_source_scan (src, _relaxed_aps ? false : true, NULL, NULL);
+    vcd_mpeg_source_scan (src, _relaxed_aps ? false : true, 
+                          vcd_xml_show_progress ? vcd_xml_scan_progress_cb : NULL, _mpeg_fname);
 
     vcd_debug ("stream scan completed");
 
-    fprintf (stdout, "<mpeg-info>\n");
+    fprintf (stdout, "<mpeg-info src=\"%s\">\n", _mpeg_fname);
 
     if (_generic_info)
       { 

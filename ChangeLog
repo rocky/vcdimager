@@ -1,3 +1,13 @@
+2001-08-16  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_mpeg.c (_parse_user_data): just warn and break out if invalid scan data len
+
+	* frontends/xml/vcd_xml_minfo.c (main): scan progress and gui mode added
+
+	* frontends/xml/vcd_xml_master.c (vcd_xml_master): scan progress added
+
+	* frontends/xml/vcd_xml_common.c: clear line after last progress statement
+
 2001-08-15  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* frontends/xml/vcd_xml_rip.c: new option for ignoring extended pbc 
