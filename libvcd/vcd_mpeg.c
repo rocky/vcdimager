@@ -60,12 +60,12 @@ static const char _rcsid[] = "$Id$";
 #define PICT_TYPE_B             3
 #define PICT_TYPE_D             4
 
-struct {
+static struct {
   mpeg_norm_t norm;
   unsigned hsize;
   unsigned vsize;
   int frate_idx;
-} static const norm_table[] = {
+} const norm_table[] = {
   { MPEG_NORM_FILM,   352, 240, 1 },
   { MPEG_NORM_PAL,    352, 288, 3 },
   { MPEG_NORM_NTSC,   352, 240, 4 },

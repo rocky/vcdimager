@@ -303,7 +303,7 @@ _approx_pts (VcdList *aps_list, uint32_t packet_no)
   return retval;
 }
 
-void static
+static void 
 _set_scan_msf (msf_t *_msf, long lsn)
 {
   if (lsn == -1)
@@ -317,7 +317,7 @@ _set_scan_msf (msf_t *_msf, long lsn)
   _msf->f |= 0x80;
 }
 
-void static
+static void 
 _fix_scan_info (struct vcd_mpeg_scan_data_t *scan_data_ptr,
                 unsigned packet_no, double pts, VcdList *aps_list)
 {
