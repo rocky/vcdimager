@@ -1,6 +1,7 @@
-SUBDIRS = libvcd frontends tests docs
+SUBDIRS = libvcd frontends tests amiga docs
 
-EXTRA_DIST = BUGS FAQ cygwin-dist.sh debian amiga HACKING libpopt.m4
+EXTRA_DIST = BUGS FAQ cygwin-dist.sh HACKING libpopt.m4 \
+	debian/changelog debian/control debian/copyright debian/dirs debian/docs debian/info debian/watch
 
 dist-hook: vcdimager.spec
 	cp vcdimager.spec $(distdir)
