@@ -1,0 +1,101 @@
+/*
+    $Id$
+
+    Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
+
+#ifndef __VCD_OBJ_H__
+#define __VCD_OBJ_H__
+
+#include "vcd_mpeg.h"
+#include "vcd_iso9660.h"
+#include "vcd_files.h"
+#include "vcd_salloc.h"
+
+struct _VcdObj {
+  vcd_type_t type;
+
+  /* output */
+  bool bin_file_2336_flag;
+  VcdDataSink* bin_file;
+  /* VcdDataSink* cue_file; */
+
+  unsigned iso_size;
+  char *iso_volume_label;
+
+  /* input */
+  unsigned relative_end_extent; /* last mpeg end extent */
+  struct {
+    VcdDataSource *source;
+    unsigned relative_start_extent; /* relative to iso data end */
+    unsigned length_sectors;
+    mpeg_info_t mpeg_info;
+  } mpeg_tracks[100]; /* fixme */
+  int mpeg_tracks_num;
+
+  /* cdi support files */
+  VcdDataSource* cdi_image_file;
+  VcdDataSource* cdi_text_file;
+  VcdDataSource* cdi_vcd_file;
+
+  uint32_t cdi_image_extent;
+  uint32_t cdi_text_extent;
+  uint32_t cdi_vcd_extent;
+
+  /* fixme -- vcd files */
+  char info_vcd_buf[ISO_BLOCKSIZE];
+  char entries_vcd_buf[ISO_BLOCKSIZE];
+  char lot_vcd_buf[ISO_BLOCKSIZE*LOT_VCD_SIZE];
+  char psd_vcd_buf[ISO_BLOCKSIZE]; /* fixme */
+
+  uint32_t pvd_sec;
+  uint32_t evd_sec;
+  uint32_t dir_secs;
+
+  uint32_t info_sec;
+  uint32_t entries_sec;
+  uint32_t lot_secs;
+  uint32_t psd_sec;
+  uint32_t psd_size;
+
+  uint32_t ptl_sec;
+  uint32_t ptm_sec;
+
+  unsigned dirs_size;
+
+  VcdSalloc *iso_bitmap;
+
+  /* state info */
+  unsigned sectors_written;
+  unsigned in_track;
+
+  long last_cb_call;
+
+  progress_callback_t progress_callback;
+  void *callback_user_data;
+};
+
+#endif /* __VCD_OBJ_H__ */
+
+
+/* 
+ * Local variables:
+ *  c-file-style: "gnu"
+ *  tab-width: 8
+ *  indent-tabs-mode: nil
+ * End:
+ */

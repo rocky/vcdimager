@@ -1,0 +1,366 @@
+/*
+    $Id$
+
+    Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
+              (C) 2000 Jens B. Jorgensen <jbj1@ultraemail.net>
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
+
+#ifndef __VCD_FILES_PRIVATE_H__
+#define __VCD_FILES_PRIVATE_H__
+
+#include "vcd_types.h"
+
+/* random note: most stuff is big endian here */
+
+#define ENTRIES_ID "ENTRYVCD"
+#define ENTRIES_VERSION 0x0200
+
+#ifdef __MWERKS__
+#pragma options align=packed
+#endif
+
+/* In many structures on the disk a sector address is stored as a
+   BCD-encoded mmssff in three bytes. */
+typedef struct {
+  uint8_t m1 : 4;
+  uint8_t m2 : 4;
+  uint8_t s1 : 4;
+  uint8_t s2 : 4;
+  uint8_t f1 : 4;
+  uint8_t f2 : 4;
+} MMSSFF;
+
+
+typedef struct {
+  char ID[8]                 GNUC_PACKED; /* "ENTRYVCD" */
+  uint8_t version            GNUC_PACKED; /* 0x02 --- VCD2.0
+                                             0x01 --- SVCD, should be
+                                             same as version in
+                                             INFO.SVD */
+  uint8_t reserved1          GNUC_PACKED; /* RESERVED, must be 0x00 */
+  uint16_t tracks            GNUC_PACKED; /* 1 <= tracks <= 500 */
+  struct { /* all fields are BCD */
+    uint8_t n                GNUC_PACKED;
+    uint8_t m                GNUC_PACKED;
+    uint8_t s                GNUC_PACKED;
+    uint8_t f                GNUC_PACKED;
+  } entry[500]               GNUC_PACKED;
+  uint8_t reserved2[36]      GNUC_PACKED; /* RESERVED, must be 0x00 */
+} EntriesVcd; /* sector 00:04:01 */
+
+#define INFO_ID_VCD   "VIDEO_CD"
+#define INFO_ID_SVCD  "SUPERVCD"
+#define INFO_ID_HQVCD "HQ-VCD  "
+
+#define INFO_VERSION_VCD2  0x02
+#define INFO_SPTAG_VCD2    0x00   
+
+#define INFO_VERSION_SVCD  0x01
+#define INFO_SPTAG_SVCD    0x00
+
+#define INFO_VERSION_HQVCD 0x01
+#define INFO_SPTAG_HQVCD   0x01
+
+#define INFO_OFFSET_MULT   0x08
+
+/* This one-byte field describes certain characteristics of the disc */
+
+typedef struct {
+  uint8_t reserved1 : 1                 ;  /* Reserved, must be zero */
+  uint8_t restriction : 2               ;  /* restriction, eg. "unsuitable
+                                              for kids":
+                                              0x0 ==> unrestricted,
+                                              0x1 ==> restricted category 1,
+                                              0x2 ==> restricted category 2,
+                                              0x3 ==> restricted category 3 */
+  uint8_t special_info : 1              ;  /* Special Information is encoded 
+                                              in the pictures */
+  uint8_t user_data_cc : 1              ;  /* MPEG User Data is used
+                                              for Closed Caption */
+  uint8_t use_lid1 : 1                  ;  /* If == 1 and the PSD is
+                                              interpreted and the next
+                                              disc has the same album
+                                              id then start the next
+                                              disc at List ID #2,
+                                              otherwise List ID #1 */ 
+  uint8_t use_track3 : 1                ;  /* If == 1 and the PSD is
+                                              not interpreted  and
+                                              next disc has same album
+                                              id, then start next disc
+                                              with track 3, otherwise
+                                              start with track 2 */ 
+  uint8_t reserved2 : 1                 ;  /* Reserved, must be zero */
+} InfoStatusFlags;
+
+typedef struct {
+  char   ID[8]               GNUC_PACKED;  /* const "VIDEO_CD" for
+                                              VCD, "SUPERVCD" or
+                                              "HQ-VCD  " for SVCD */
+  uint8_t version            GNUC_PACKED;  /* 0x02 -- VCD2.0,
+                                              0x01 for SVCD and VCD1.x */ 
+  uint8_t sys_prof_tag       GNUC_PACKED;  /* System Profile Tag, used
+                                              to define the set of
+                                              mandatory parts to be
+                                              applied for compatibility;
+                                              0x00 for "SUPERVCD",
+                                              0x01 for "HQ-VCD  ",
+                                              0x0n for VCDx.n */ 
+  char album_desc[16]        GNUC_PACKED;  /* album identification/desc. */
+
+  uint16_t vol_count         GNUC_PACKED;  /* number of volumes in album */
+  uint16_t vol_id            GNUC_PACKED;  /* number id of this volume
+                                              in album */
+  uint8_t  pal_flags[13]     GNUC_PACKED;  /* bitset of 98
+                                              PAL(=set)/NTSC flags */
+  InfoStatusFlags flags      GNUC_PACKED;  /* status flags bit field */
+  uint32_t psd_size          GNUC_PACKED;  /* size of PSD.VCD file */
+  uint8_t  first_seg_addr[3] GNUC_PACKED;  /* first segment addresses,
+                                              coded BCD The location
+                                              of the first sector of
+                                              the Segment Play Item
+                                              Area, in the form
+                                              mm:ss:00. Must be
+                                              00:00:00 if the PSD size
+                                              is 0. */
+  uint8_t  offset_mult       GNUC_PACKED;  /* offset multiplier, must be 8 */
+  uint16_t last_psd_ofs      GNUC_PACKED;  /* last offset in psd */
+  uint16_t item_count        GNUC_PACKED;  /* items in /SEGMENT/ */
+  struct {                                 /* The next 1980 bytes contain one
+                                              byte for each possible segment
+                                              play item. Each byte indicates
+                                              contents. */
+    uint8_t audio_type : 2   GNUC_PACKED;  /* Audio characteristics:
+                                              0x0 - No MPEG audio stream
+                                              0x1 - One MPEG1 or MPEG2 audio
+                                                    stream without extension
+                                              0x2 - Two MPEG1 or MPEG2 audio
+                                                    streams without extension
+                                              0x3 - One MPEG2 multi-channel 
+                                                    audio stream w/ extension*/
+    uint8_t video_type : 3   GNUC_PACKED;  /* Video characteristics:
+                                              0x0 - No MPEG video data
+                                              0x1 - NTSC still picture
+                                              0x2 - Reserved
+                                              0x3 - NTSC motion picture
+                                              0x4 - Reserved
+                                              0x5 - PAL still picture
+                                              0x6 - Reserved
+                                              0x7 - PAL motion picture */
+    uint8_t item_cont : 1    GNUC_PACKED;  /* Indicates segment is continuation
+                                              0x0 - 1st or only segment of item
+                                              0x1 - 2nd or later
+                                                    segment of item */
+    uint8_t reserved2 : 2    GNUC_PACKED;  /* Reserved, must be zero */
+  } spi_contents[1980];
+  char reserved1[12]         GNUC_PACKED;  /* Reserved, must be zero */
+} InfoVcd;
+
+
+/* LOT.VCD
+   This optional file is only necessary if the PSD size is not zero.
+   This List ID Offset Table allows you to start playing the PSD from
+   lists other than the default List ID number. This table has a fixed length
+   of 32 sectors and maps List ID numbers into List Offsets. It's got
+   an entry for each List ID Number with the 16-bit offset. Note that
+   List ID 1 has an offset of 0x0000. All unused or non-user-accessible
+   entries must be 0xffff. */
+
+typedef struct {
+  uint16_t reserved          GNUC_PACKED;  /* Reserved, must be zero */
+  uint16_t offset[32768-1]   GNUC_PACKED;  /* offset given in 8 byte units */
+} LotVcd;
+
+/* PSD.VCD
+   The PSD controls the "user interaction" mode which can be used to make
+   menus, etc. The PSD contains a set of Lists. Each List defines a set of
+   Items which are played in sequence. An Item can be an mpeg track (in whole
+   or part) or a Segment Play Item which can subsequently be mpeg video
+   with or without audio, one more more mpeg still pictures (with or without
+   audio) or mpeg audio only.
+
+   The Selection List defines the action to be taken in response to a set
+   of defined user actions: Next, Previous, Default Select, Numeric, Return.
+
+   The End List terminates the control flow.
+
+   Each list has a unique list id number. The first must be 1, the others can
+   be anything (up to 32767).
+
+   References to PSD list addresses are expressed as an offset into the PSD
+   file. The offset indicated in the file must be multiplied by the Offset
+   Multiplier found in the info file (although this seems to always have to
+   be 8). Unused areas are filled with zeros. List ID 1 starts at offset 0.
+*/
+
+/* ...difficult to represent as monolithic C struct... */
+
+typedef enum {
+  PSD_TYPE_PLAY_LIST = 0x10,        /* Play List */
+  PSD_TYPE_SELECTION_LIST = 0x18,   /* Selection List -- (jbj1: more
+                                       on list later) */
+  PSD_TYPE_END_OF_LIST = 0x1f       /* End of List */
+} psd_descriptor_types;
+
+typedef struct {
+  uint8_t type               GNUC_PACKED;
+  uint8_t unknown[7]         GNUC_PACKED;
+} PsdEndOfListDescriptor;
+
+typedef struct {
+  uint8_t type               GNUC_PACKED;
+  uint8_t noi                GNUC_PACKED; /* number of items */
+  uint16_t lid               GNUC_PACKED; /* list id: high-bit means this 
+                                             list is rejected in the LOT
+                                             (also, can't use 0) */
+  uint16_t prev_ofs          GNUC_PACKED; /* previous list offset 
+                                             (0xffff disables) */
+  uint16_t next_ofs          GNUC_PACKED; /* next list offset
+                                             (0xffff disables) */
+  uint16_t retn_ofs          GNUC_PACKED; /* return list offset
+                                             (0xffff disables) */
+  uint16_t ptime             GNUC_PACKED; /* play time in 1/15 s,
+                                             0x000 meaning full item */
+  uint8_t  wtime             GNUC_PACKED; /* delay after, in seconds,
+                                             if 1 <= wtime <= 60
+                                                wait is wtime
+                                             else if 61 <= wtime <= 254 
+                                                wait is (wtime-60) * 10 + 60
+                                             else wtime == 255
+                                                wait is infinite  */
+  uint8_t  atime             GNUC_PACKED; /* auto pause wait time
+                                             calculated same as wtime, used
+                                             for each item in list if the auto
+                                             pause flag in a sector is true */
+  uint16_t itemid[0]         GNUC_PACKED; /* item number
+                                                0 <= n <= 1      - play nothing
+                                                2 <= n <= 99     - play track n
+                                              100 <= n <= 599    - play entry
+                                                          (n - 99) from entries
+                                                          table to end of track
+                                              600 <= n <= 999    - reserved
+                                             1000 <= n <= 2979   - play segment
+                                                          play item (n - 999)
+                                             2980 <= n <= 0xffff - reserved */
+} PsdPlayListDescriptor;
+
+/* TRACKS.SVD
+   SVCD\TRACKS.SVD is a mandatory file which describes the numbers and types
+   of MPEG tracks on the disc. */
+
+/* SVDTrackContent indicates the audio/video content of an MPEG Track */
+typedef struct {
+  uint8_t audio : 2                     ; /* Audio Content
+                                             0x00 : No MPEG audio stream
+                                             0x01 : One MPEG{1|2} audio stream
+                                             0x02 : Two MPEG{1|2} streams
+                                             0x03 : One MPEG2 multi-channel
+                                                    audio stream with
+                                                    extension */
+  uint8_t video : 3                     ; /* Video Content
+                                             0x00 : No MPEG video
+                                             0x03 : NTSC video
+                                             0x07 : PAL video */
+  uint8_t reserved1 : 1                 ; /* Reserved, must be zero */
+  uint8_t reserved2 : 2                 ; /* Reserved, must be zero */
+} SVDTrackContent;
+
+/* The file contains a series of the TracksSVDTrack structures, one for each
+   track, which indicates the track's playing time (in sectors, not actually
+   real time) and contents. */
+
+typedef struct {
+    MMSSFF playing_time  GNUC_PACKED; /* BCD coded mm:ss:ff */
+    SVDTrackContent contents GNUC_PACKED; /* indicates track contents */
+} TracksSVDTrack;
+
+/* Here's the whole file structure */
+
+typedef struct {
+  char file_id[8]               GNUC_PACKED; /* == "TRACKSVD" */
+  uint8_t version               GNUC_PACKED; /* == 0x01 */
+  uint8_t reserved              GNUC_PACKED; /* Reserved, must be zero */
+  uint8_t tracks                GNUC_PACKED; /* number of MPEG tracks */
+  TracksSVDTrack tracks_info[0] GNUC_PACKED; /* track info, one per track */
+} TracksSVD;
+
+/* SEARCH.DAT
+   This file defines where the scan points are. It covers all mpeg tracks
+   together. A scan point at time T is the nearest I-picture in the MPEG
+   stream to the given time T. Scan points are given at every half-second
+   for the entire duration of the disc. */
+
+typedef struct {
+  char file_id[8]             GNUC_PACKED; /* = "SEARCHSV" */
+  uint8_t version             GNUC_PACKED; /* = 0x01 */
+  uint8_t reserved            GNUC_PACKED; /* Reserved, must be zero */
+  u_short scan_points         GNUC_PACKED; /* the number of scan points */
+  uint8_t time_interval       GNUC_PACKED; /* The interval of time in
+                                              between scan points, in units
+                                              of 0.5 seconds, must be 0x01 */
+  MMSSFF points[0]        GNUC_PACKED; /* The series of scan points */
+} SearchDat;
+
+/* SCANDATA.DAT
+   This file fulfills much the same purpose of the SEARCH.DAT file except
+   that this file is mandatory only if the System Profile Tag of the
+   INFO.SVD file is 0x01 (HQ-VCD) and also that it contains sector addresses
+   also for each video Segment Play Items in addition to the regular MPEG
+   tracks. */
+
+typedef struct {
+  char file_id[8]             GNUC_PACKED; /* = "SCAN_VCD" */
+  uint8_t version             GNUC_PACKED; /* = 0x01 */
+  uint8_t reserved            GNUC_PACKED; /* Reserved, must be zero */
+  uint16_t data_count         GNUC_PACKED; /* number of 3-byte entries in
+                                              the table */
+  uint16_t track_count        GNUC_PACKED; /* number of mpeg tracks on disc */
+  uint16_t spi_count          GNUC_PACKED; /* number of consecutively recorded
+                                              play item segments (as opposed
+                                              to the number of segment play
+                                              items). */
+  /* MMSSFF playtimes[track_count]            cumulative playing time up to
+                                              track N. Track time just
+                                              wraps at 99:59:74 */
+  /* uint16_t spi_indexes[spi_count]          Indexes into the following
+                                              scandata table */
+  /* uint16_t mpegtrack_start_index           Index into the following 
+                                              scandata table where the MPEG
+                                              track scan points start */
+  /* The scandata table starts here */
+  /* struct {
+       uint8_t track_num;                     Track number as in TOC
+       uint16_t table_offset;                 Index into scandata table
+     } mpeg_track_offsets[track_count]                                  */
+  /* MMSSFF spi_item_points[spi_count][time(item)/0.5s] scan points for spis */
+  /* MMSSFF mpeg_track_points[track_count][time(item)/0.5s] scan points */
+} ScandataDat;
+
+#ifdef __MWERKS__
+#pragma options align=reset
+#endif
+
+#endif /* __VCD_FILES_PRIVATE_H__ */
+
+
+/* 
+ * Local variables:
+ *  c-file-style: "gnu"
+ *  tab-width: 8
+ *  indent-tabs-mode: nil
+ * End:
+ */
