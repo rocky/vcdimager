@@ -22,16 +22,15 @@
 # include "config.h"
 #endif
 
-#include <libvcd/vcd_image_bincue.h>
-#include <libvcd/vcd_cd_sector.h>
-#include <libvcd/vcd_logging.h>
-#include <libvcd/vcd_iso9660.h>
-#include <libvcd/vcd_util.h>
-#include <libvcd/vcd_bytesex.h>
-
-#include <stdio.h>
-#include <stdlib.h>
 #include <libvcd/vcd_assert.h>
+#include <libvcd/vcd_bytesex.h>
+#include <libvcd/vcd_cd_sector.h>
+#include <libvcd/vcd_image_bincue.h>
+#include <libvcd/vcd_iso9660.h>
+#include <libvcd/vcd_logging.h>
+#include <libvcd/vcd_util.h>
+
+#include <stdlib.h>
 #include <string.h>
 
 static const char _rcsid[] = "$Id$";
@@ -152,40 +151,79 @@ static int
 _set_cuesheet (void *user_data, const VcdList *vcd_cue_list)
 {
   _img_bincue_snk_t *_obj = user_data;
-  char buf[1024] = { 0, };
   VcdListNode *node;
-  int num;
+  int track_no, index_no;
+  const vcd_cue_t *_last_cue = 0;
+  
+  vcd_data_sink_printf (_obj->cue_snk, "FILE \"%s\" BINARY\r\n",
+			_obj->cue_fname);
 
-  snprintf (buf, sizeof (buf), "FILE \"%s\" BINARY\r\n", _obj->cue_fname);
-
-  vcd_data_sink_write (_obj->cue_snk, buf, 1, strlen (buf));
-
-  num = 1;
+  track_no = 0;
+  index_no = 0;
   _VCD_LIST_FOREACH (node, (VcdList *) vcd_cue_list)
     {
       const vcd_cue_t *_cue = _vcd_list_node_data (node);
       
       msf_t _msf = { 0, 0, 0 };
       
-      if (_cue->type != VCD_CUE_TRACK_START)
-	continue;
+      switch (_cue->type)
+	{
+	case VCD_CUE_TRACK_START:
+	  track_no++;
+	  index_no = 0;
 
-      lba_to_msf (_cue->lsn, &_msf);
+	  vcd_data_sink_printf (_obj->cue_snk, 
+				"  TRACK %2.2d MODE2/%d\r\n"
+				"    FLAGS DCP\r\n",
+				track_no, (_obj->sector_2336_flag ? 2336 : 2352));
 
-      snprintf (buf, sizeof (buf),
-		"  TRACK %2.2d MODE2/%d\r\n"
-		"    INDEX %2.2d %2.2x:%2.2x:%2.2x\r\n",
-		num, (_obj->sector_2336_flag ? 2336 : 2352), 
-		1, _msf.m, _msf.s, _msf.f);
+	  if (_last_cue && _last_cue->type == VCD_CUE_PREGAP_START)
+	    {
+	      lba_to_msf (_last_cue->lsn, &_msf);
 
-      num++;
+	      vcd_data_sink_printf (_obj->cue_snk, 
+				    "    INDEX %2.2d %2.2x:%2.2x:%2.2x\r\n",
+				    index_no, _msf.m, _msf.s, _msf.f);
+	    }
 
-      vcd_data_sink_write (_obj->cue_snk, buf, 1, strlen (buf));
+	  index_no++;
+
+	  lba_to_msf (_cue->lsn, &_msf);
+
+	  vcd_data_sink_printf (_obj->cue_snk, 
+				"    INDEX %2.2d %2.2x:%2.2x:%2.2x\r\n",
+				index_no, _msf.m, _msf.s, _msf.f);
+	  break;
+
+	case VCD_CUE_PREGAP_START:
+	  /* handled in next iteration */
+	  break;
+
+	case VCD_CUE_SUBINDEX:
+	  vcd_assert (_last_cue != 0);
+
+	  index_no++;
+	  vcd_assert (index_no < 100);
+
+	  lba_to_msf (_cue->lsn, &_msf);
+
+	  vcd_data_sink_printf (_obj->cue_snk, 
+				"    INDEX %2.2d %2.2x:%2.2x:%2.2x\r\n",
+				index_no, _msf.m, _msf.s, _msf.f);
+	  break;
+	  
+	case VCD_CUE_END:
+	  vcd_data_sink_close (_obj->cue_snk);
+	  return 0;
+	  break;
+	}
+
+      _last_cue = _cue;
     }
 
-  vcd_data_sink_close (_obj->cue_snk);
+  vcd_assert_not_reached ();
 
-  return 0;
+  return -1;
 }
  
 static int

@@ -66,7 +66,7 @@ default_vcd_log_handler (log_level_t level, const char message[])
 static vcd_log_handler_t _handler = default_vcd_log_handler;
 
 vcd_log_handler_t
-vcd_log_set_handler(vcd_log_handler_t new_handler)
+vcd_log_set_handler (vcd_log_handler_t new_handler)
 {
   vcd_log_handler_t old_handler = _handler;
 
@@ -76,7 +76,7 @@ vcd_log_set_handler(vcd_log_handler_t new_handler)
 }
 
 static void
-vcd_logv(log_level_t level, const char format[], va_list args)
+vcd_logv (log_level_t level, const char format[], va_list args)
 {
   char buf[1024] = { 0, };
   static int in_recursion = 0;
@@ -94,49 +94,30 @@ vcd_logv(log_level_t level, const char format[], va_list args)
 }
 
 void
-vcd_log(log_level_t level, const char format[], ...)
+vcd_log (log_level_t level, const char format[], ...)
 {
   va_list args;
   va_start (args, format);
-  vcd_logv(level, format, args);
+  vcd_logv (level, format, args);
   va_end (args);
 }
 
-void
-vcd_debug(const char format[], ...)
-{
-  va_list args;
-  va_start (args, format);
-  vcd_logv(LOG_DEBUG, format, args);
-  va_end (args);
-}
+#define VCD_LOG_TEMPLATE(level, LEVEL) \
+void \
+vcd_ ## level (const char format[], ...) \
+{ \
+  va_list args; \
+  va_start (args, format); \
+  vcd_logv (LOG_ ## LEVEL, format, args); \
+  va_end (args); \
+} 
 
-void
-vcd_info(const char format[], ...)
-{
-  va_list args;
-  va_start (args, format);
-  vcd_logv(LOG_INFO, format, args);
-  va_end (args);
-}
+VCD_LOG_TEMPLATE(debug, DEBUG)
+VCD_LOG_TEMPLATE(info, INFO)
+VCD_LOG_TEMPLATE(warn, WARN)
+VCD_LOG_TEMPLATE(error, ERROR)
 
-void
-vcd_warn(const char format[], ...)
-{
-  va_list args;
-  va_start (args, format);
-  vcd_logv(LOG_WARN, format, args);
-  va_end (args);
-}
-
-void
-vcd_error(const char format[], ...)
-{
-  va_list args;
-  va_start (args, format);
-  vcd_logv(LOG_ERROR, format, args);
-  va_end (args);
-}
+#undef VCD_LOG_TEMPLATE
 
 
 /* 

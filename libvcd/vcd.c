@@ -1742,6 +1742,71 @@ _write_segment (VcdObj *obj, mpeg_segment_t *_segment)
   return 0;
 }
 
+static uint32_t
+_get_closest_aps (const struct vcd_mpeg_source_info *_mpeg_info, double t,
+                  struct aps_data *_best_aps)
+{
+  VcdListNode *node;
+  struct aps_data best_aps;
+  bool first = true;
+
+  vcd_assert (_mpeg_info != NULL);
+  vcd_assert (_mpeg_info->aps_list != NULL);
+
+  _VCD_LIST_FOREACH (node, _mpeg_info->aps_list)
+    {
+      struct aps_data *_aps = _vcd_list_node_data (node);
+  
+      if (first)
+        {
+          best_aps = *_aps;
+          first = false;
+        }
+      else if (fabs (_aps->timestamp - t) < fabs (best_aps.timestamp - t))
+        best_aps = *_aps;
+      else 
+        break;
+    }
+
+  if (_best_aps)
+    *_best_aps = best_aps;
+
+  return best_aps.packet_no;
+}
+
+static void
+_update_entry_points (VcdObj *obj)
+{
+  VcdListNode *sequence_node;
+
+  _VCD_LIST_FOREACH (sequence_node, obj->mpeg_sequence_list)
+    {
+      mpeg_sequence_t *_sequence = _vcd_list_node_data (sequence_node);
+      VcdListNode *entry_node;
+      unsigned last_packet_no = 0;
+
+      _VCD_LIST_FOREACH (entry_node, _sequence->entry_list)
+        {
+          entry_t *_entry = _vcd_list_node_data (entry_node);
+
+          _get_closest_aps (_sequence->info, _entry->time, &_entry->aps);
+
+          vcd_log ((fabs (_entry->aps.timestamp - _entry->time) > 1
+                    ? LOG_WARN
+                    : LOG_DEBUG),
+                   "requested entry point (id=%s) at %f, "
+                   "closest possible entry point at %f",
+                   _entry->id, _entry->time, _entry->aps.timestamp);
+
+          if (last_packet_no == _entry->aps.packet_no)
+            vcd_warn ("entry point '%s' falls into same sector as previous one!",
+                      _entry->id);
+
+          last_packet_no = _entry->aps.packet_no;
+        }
+    }
+}
+
 static int
 _write_vcd_iso_track (VcdObj *obj)
 {
@@ -1914,6 +1979,8 @@ vcd_obj_begin_output (VcdObj *obj)
 
   _finalize_vcd_iso_track (obj);
 
+  _update_entry_points (obj);
+
   image_size = obj->relative_end_extent + obj->iso_size;
 
   if (obj->leadout_pause)
@@ -2004,6 +2071,7 @@ vcd_obj_write_image (VcdObj *obj, VcdImageSink *image_sink,
     _VCD_LIST_FOREACH (node, obj->mpeg_sequence_list)
       {
         mpeg_sequence_t *track = _vcd_list_node_data (node);
+        VcdListNode *entry_node;
 
         _vcd_list_append (cue_list, (_cue = _vcd_malloc (sizeof (vcd_cue_t))));
         
@@ -2015,6 +2083,20 @@ vcd_obj_write_image (VcdObj *obj, VcdImageSink *image_sink,
 
         _cue->lsn = track->relative_start_extent + obj->iso_size;
         _cue->type = VCD_CUE_TRACK_START;
+
+        _VCD_LIST_FOREACH (entry_node, track->entry_list)
+          {
+            entry_t *_entry = _vcd_list_node_data (entry_node);
+
+            _vcd_list_append (cue_list, (_cue = _vcd_malloc (sizeof (vcd_cue_t))));
+            
+            _cue->lsn = obj->iso_size;
+            _cue->lsn += track->relative_start_extent;
+            _cue->lsn += obj->pre_data_gap;
+            _cue->lsn += _entry->aps.packet_no;
+
+            _cue->type = VCD_CUE_SUBINDEX;
+          }
       }
 
     /* add last one... */

@@ -22,6 +22,8 @@
 #ifndef __VCD_STREAM_H__
 #define __VCD_STREAM_H__
 
+#include <libvcd/vcd_types.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -61,6 +63,9 @@ vcd_data_sink_new(void *user_data, const vcd_data_sink_io_functions *funcs);
 
 long
 vcd_data_sink_write(VcdDataSink* obj, const void *ptr, long size, long nmemb);
+
+long
+vcd_data_sink_printf (VcdDataSink *obj, const char format[], ...) GNUC_PRINTF(2, 3);
 
 long
 vcd_data_sink_seek(VcdDataSink* obj, long offset);

@@ -22,8 +22,10 @@
 # include "config.h"
 #endif
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 #include <libvcd/vcd_assert.h>
 
 /* #define STREAM_DEBUG  */
@@ -102,6 +104,28 @@ vcd_data_sink_write(VcdDataSink* obj, const void *ptr, long size, long nmemb)
   obj->position += written;
 
   return written;
+}
+
+long
+vcd_data_sink_printf (VcdDataSink *obj, const char format[], ...)
+{
+  char buf[4096] = { 0, };
+  long retval;
+  int len;
+
+  va_list args;
+  va_start (args, format);
+
+  len = vsnprintf (buf, sizeof(buf), format, args);
+
+  if (len < 0 || len > (sizeof (buf) - 1))
+    vcd_error ("vsnprintf() returned %d", len);
+  
+  retval = vcd_data_sink_write (obj, buf, 1, len);
+
+  va_end (args);
+
+  return retval;
 }
 
 void

@@ -41,37 +41,6 @@
 
 static const char _rcsid[] = "$Id$";
 
-static uint32_t
-_get_closest_aps (const struct vcd_mpeg_source_info *_mpeg_info, double t,
-                  struct aps_data *_best_aps)
-{
-  VcdListNode *node;
-  struct aps_data best_aps;
-  bool first = true;
-
-  vcd_assert (_mpeg_info != NULL);
-  vcd_assert (_mpeg_info->aps_list != NULL);
-
-  _VCD_LIST_FOREACH (node, _mpeg_info->aps_list)
-    {
-      struct aps_data *_aps = _vcd_list_node_data (node);
-  
-      if (first)
-        {
-          best_aps = *_aps;
-          first = false;
-        }
-      else if (fabs (_aps->timestamp - t) < fabs (best_aps.timestamp - t))
-        best_aps = *_aps;
-      else 
-        break;
-    }
-
-  if (_best_aps)
-    *_best_aps = best_aps;
-
-  return best_aps.packet_no;
-}
 
 void
 set_entries_vcd (VcdObj *obj, void *buf)
@@ -131,7 +100,6 @@ set_entries_vcd (VcdObj *obj, void *buf)
       break;
     }
 
-
   idx = 0;
   track_idx = 2;
   _VCD_LIST_FOREACH (node, obj->mpeg_sequence_list)
@@ -152,22 +120,12 @@ set_entries_vcd (VcdObj *obj, void *buf)
         {
           entry_t *_entry = _vcd_list_node_data (node2);
           /* additional entries */
-          struct aps_data _closest_aps;
 
           vcd_assert (idx < MAX_ENTRIES);
 
-          _get_closest_aps (track->info, _entry->time, &_closest_aps);
-
           entries_vcd.entry[idx].n = to_bcd8(track_idx);
-          lba_to_msf(lsect + _closest_aps.packet_no + 150,
+          lba_to_msf(lsect + _entry->aps.packet_no + 150,
                      &(entries_vcd.entry[idx].msf));
-
-          vcd_log ((fabs (_closest_aps.timestamp - _entry->time) > 1
-                    ? LOG_WARN
-                    : LOG_DEBUG),
-                   "requested entry point at %f, "
-                   "closest possible entry point at %f",
-                   _entry->time, _closest_aps.timestamp);
 
           idx++;
         }

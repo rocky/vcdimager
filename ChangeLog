@@ -1,3 +1,21 @@
+2001-08-20  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd.c (_get_closest_aps): moved from vcd_files.c
+	(_update_entry_points): new function
+	(vcd_obj_write_image): set VCD_CUE_SUBINDEX in cue sheet
+
+	* libvcd/vcd_files.c (set_entries_vcd): move entry point resolving to vcd.c
+
+	* libvcd/vcd_image_cdrdao.c (_set_cuesheet),
+	  libvcd/vcd_image_bincue.c (_set_cuesheet): added support for VCD_CUE_SUBINDEX 
+		and VCD_CUE_PREGAP_START
+
+	* libvcd/vcd_image.h: added VCD_CUE_SUBINDEX cue item
+
+	* libvcd/vcd_stream.c (vcd_data_sink_printf): new convenience function
+
+	* libvcd/vcd_logging.c: replaced logging shortcuts by macro templates
+
 2001-08-19  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_mpeg.c: major cleanups

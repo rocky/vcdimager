@@ -65,8 +65,9 @@ _stdio_close(void *user_data)
 {
   _UserData *ud = user_data;
 
-  fclose(ud->fd);
-
+  if (fclose (ud->fd))
+    vcd_error ("fclose (): %s", strerror (errno));
+ 
   ud->fd = NULL;
 
   return 0;
@@ -90,8 +91,9 @@ static long
 _stdio_seek(void *user_data, long offset)
 {
   _UserData *ud = user_data;
-  
-  fseek(ud->fd, offset, SEEK_SET);
+
+  if (fseek(ud->fd, offset, SEEK_SET))
+    vcd_error ("fseek (): %s", strerror (errno));
 
   return offset;
 }

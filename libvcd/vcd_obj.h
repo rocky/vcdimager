@@ -31,6 +31,7 @@
 
 typedef struct {
   double time;
+  struct aps_data aps;
   char *id;
 } entry_t;
 

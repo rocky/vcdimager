@@ -59,9 +59,10 @@ typedef struct _VcdImageSink VcdImageSink;
 typedef struct {
   uint32_t lsn;
   enum {
-    VCD_CUE_TRACK_START = 1,
-    VCD_CUE_PREGAP_START,
-    VCD_CUE_END,
+    VCD_CUE_TRACK_START = 1, /* INDEX 0 -> 1 transition, TOC entry */
+    VCD_CUE_PREGAP_START,    /* INDEX = 0 start */
+    VCD_CUE_SUBINDEX,        /* INDEX++; sub-index */
+    VCD_CUE_END,             /* lead-out start */
   } type;
 } vcd_cue_t;
 

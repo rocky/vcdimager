@@ -80,8 +80,13 @@ const static double frame_rates[16] =  {
     60.00, 00.0, 
   };
 
-#define MARKER(buf, offset) \
+#ifdef DEBUG
+# define MARKER(buf, offset) \
  vcd_assert (vcd_bitvec_read_bits (buf, offset, 1) == 1)
+#else
+# define MARKER(buf, offset) \
+ { if (vcd_bitvec_read_bits (buf, offset, 1) != 1) vcd_debug ("mpeg: some marker is not set..."); }
+#endif
 
 static inline bool
 _start_code_p (uint32_t code)
@@ -560,8 +565,6 @@ _analyze_video_pes (uint8_t streamid, const uint8_t *buf, int len, bool only_pts
   int gop_header_pos = -1;
   int ipicture_header_pos = -1;
   
-  int bits;
-
   vcd_assert (_vid_streamid_idx (streamid) != -1);
 
   _analyze_pes_header (buf, len, state);
