@@ -1,9 +1,11 @@
 2001-01-13  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* configure.in: bumped version up to 0.5.9alpha4
+	
 	* libvcd/vcd_files.c (set_info_vcd): lot entry count fixed
 
 	* libvcd/vcd_stream.c (vcd_data_source_read): fixed stream 
-		reposition bug
+		reposition bug (fixes search.dat transposition)
 
 	* libvcd/vcd.c (vcd_obj_append_mpeg_track): fixed eof condition
 

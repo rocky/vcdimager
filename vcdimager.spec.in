@@ -32,11 +32,13 @@ rm -rf "$RPM_BUILD_ROOT"
 %configure
 
 %post
-/sbin/install-info          --info-dir=%{_infodir} %{_infodir}/vcdimager.info*
+/sbin/install-info \
+        --info-dir=%{_infodir} %{_infodir}/vcdimager.info*
 
 %preun
-if [ $1 = 0 ] ;then
-/sbin/install-info --delete --info-dir=%{_infodir} %{_infodir}/vcdimager.info*
+if [ $1 = 0 ]; then
+    /sbin/install-info --delete \
+        --info-dir=%{_infodir} %{_infodir}/vcdimager.info*
 fi
 
 %install

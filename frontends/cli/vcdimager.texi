@@ -72,8 +72,8 @@ instead of in the original English.
 
 @dircategory Miscellaneous
 @direntry
-* GNU VCDImager: (vcdimager).      The GNU VideoCD Image Maker
-* GNU VCDRip:    (vcdimager).      The GNU VideoCD Image Ripper
+* VCDImager: (vcdimager).      The GNU VideoCD Image Maker
+* VCDRip: (vcdimager).         The GNU VideoCD Image Ripper
 @end direntry
 
 @node Top, , (dir), (dir)

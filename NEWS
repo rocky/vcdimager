@@ -2,6 +2,16 @@ $Id$
 
 see ChangeLog for more information
 
+version 0.5.9alpha4
+===================
+2001-01-13
+
+* major vcdrip dump output improvement
+* VCD1.1 compatibility improved
+* fixed I/O error handling
+* added --broken-svcd-mode compatibility (mis)feature
+* search.dat transposition fix
+
 version 0.5.9alpha3
 ===================
 2001-01-06
