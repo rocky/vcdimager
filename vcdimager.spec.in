@@ -18,13 +18,25 @@ Requires:	libxml2 >= 2.3.8
 BuildPrereq:	libxml2-devel >= 2.3.8
 
 %description 
-VCDImager allows you to create VideoCD BIN/CUE CD images from mpeg
-files which can be burned with cdrdao or any other program capable of
-burning BIN/CUE files.
+GNU VCDImager is a full-featured mastering suite for authoring,
+disassembling and analyzing Video CD's and Super Video CD's.
 
-VCDRip, which comes with VCDImager, does the reverse operation. That
-is, ripping mpeg streams from images (and already burned VideoCDs)
-and showing some information about the VideoCD.
+The core functionality consists of directly making Video CD
+BIN/CUE-style CD images from mpeg files, which (after being written to
+CDR(W) media) can be played on standalone VCD players or DVD players
+and on computers running GNU/Linux, MacOS, Win32 or any other OS
+capable of accessing VCD's. BIN/CUE images can be burned with [cdrdao]
+(please use a recent version, since older ones do not support
+BIN/CUE-style cuesheets) under GNU/Linux (and other supported
+platforms by cdrdao, e.g. freeBSD, Irix, Solaris and even win32)
+
+vcdimager   generates simple pbc-less VCD and SVCD disc images directly
+vcddebug    Analyzing tool and report generator for VCD and SVCD discs.
+vcdxgen     XML VCD-description generator
+vcdxbuild   Builds a VCD/SVCD according to a supplied XML control file.
+vcdxrip     Reverses the process for a given VCD or SVCD disc.
+vcdxminfo   Debugging tool for displaying MPEG stream properties.
+cdxa2mpeg   Simple tool for converting RIFF CDXA file to plain mpeg.
 
 %prep
 rm -rf "$RPM_BUILD_ROOT"
@@ -56,6 +68,7 @@ rm -rf "$RPM_BUILD_ROOT"
 %defattr(-, root, root)
 %doc AUTHORS BUGS FAQ TODO COPYING ChangeLog INSTALL NEWS README THANKS docs/vcdimager.ps.gz frontends/xml/videocd.dtd
 %{_bindir}/vcd*
+%{_bindir}/cdxa2mpeg
 %{_infodir}/vcdimager.info*
 %{_mandir}/man1/*
 
