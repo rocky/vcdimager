@@ -678,6 +678,7 @@ _finalize_vcd_iso_track_allocation (VcdObj *obj)
                     _vcd_len2blocks (get_scandata_dat_size (obj),
                                      ISO_BLOCKSIZE),
                     SM_EOF);
+      break;
     default:
       assert (0);
       break;

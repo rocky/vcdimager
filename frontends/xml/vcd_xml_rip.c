@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #include <popt.h>
 
@@ -500,8 +501,6 @@ _rip_segments (struct vcdxml_t *obj, VcdImageSource *img)
   VcdListNode *node;
   uint32_t start_extent;
 
-  vcd_warn ("NIY");
-
   start_extent = obj->info.segments_start;
 
   assert (start_extent % 75 == 0);
@@ -561,7 +560,129 @@ _rip_segments (struct vcdxml_t *obj, VcdImageSource *img)
 static int
 _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img)
 {
+  VcdListNode *node;
+
   vcd_warn ("NIY");
+
+  _VCD_LIST_FOREACH (node, obj->sequence_list)
+    {
+      struct sequence_t *_seq = _vcd_list_node_data (node);
+      VcdListNode *nnode = _vcd_list_node_next (node);
+      struct sequence_t *_nseq = nnode ? _vcd_list_node_data (nnode) : NULL;
+      FILE *outfd = NULL;
+      bool in_data = false;
+
+      uint32_t start_lsn, end_lsn, n, last_nonzero, first_data;
+
+      start_lsn = _seq->start_extent;
+      end_lsn = _nseq ? _nseq->start_extent : vcd_image_source_stat_size (img);
+
+      vcd_info ("extracting %s... (start lsn %d (+%d))",
+		_seq->src, start_lsn, end_lsn - start_lsn);
+
+      if (!(outfd = fopen (_seq->src, "wb")))
+        {
+          perror ("fopen()");
+          exit (EXIT_FAILURE);
+        }
+
+      last_nonzero = start_lsn - 1;
+      first_data = 0;
+      for (n = start_lsn; n < end_lsn; n++)
+	{
+	  struct m2f2sector
+          {
+            uint8_t subheader[8];
+            uint8_t data[2324];
+            uint8_t spare[4];
+          }
+          buf;
+	  memset (&buf, 0, sizeof (buf));
+	  vcd_image_source_read_mode2_sector (img, &buf, n, true);
+
+	  if (_nseq && n + 150 == end_lsn + 1)
+	    vcd_warn ("reading into gap @%d... :-(", n);
+
+	  if (!(buf.subheader[2] & SM_FORM2))
+	    {
+	      vcd_warn ("encountered non-form2 sector -- leaving loop");
+	      break;
+	    }
+	  
+	  if (in_data)
+	    { /* end conditions... */
+	      if (!buf.subheader[0])
+		{
+		  vcd_debug ("fn -edge @%d", n);
+		  break;
+		}
+
+	      if (!(buf.subheader[2] & SM_REALT))
+		{
+		  vcd_debug ("subheader: no realtime data anymore @%d", n);
+		  break;
+		}
+	    }
+
+	  if (buf.subheader[1] && !in_data)
+	    {
+	      vcd_debug ("cn +edge @%d", n);
+	      in_data = true;
+	    }
+
+#ifdef DEBUG	 
+	  if (!in_data)
+	    vcd_debug ("%2.2x %2.2x %2.2x %2.2x",
+		       buf.subheader[0],
+		       buf.subheader[1],
+		       buf.subheader[2],
+		       buf.subheader[3]);
+#endif
+
+	  if (in_data)
+	    {
+	      int i;
+
+	      if (!first_data)
+		first_data = n;
+	      
+	      for (i = 0; i < 2324; i++)
+		if (buf.data[i])
+		  {
+		    last_nonzero = n;
+		    break;
+		  }
+	      
+	      if (buf.subheader[2] & SM_TRIG)
+		vcd_debug ("autopause @%d", n);
+	      
+	      fwrite (buf.data, 2324, 1, outfd);
+	    }
+	  
+	  if (buf.subheader[2] & SM_EOF)
+	    {
+	      vcd_debug ("encountered subheader EOF @%d", n);
+	      break;
+	    }
+	}
+      if (in_data)
+	{
+	  uint32_t length;
+
+	  if (n == end_lsn)
+	    vcd_debug ("stream till end of track");
+	  
+	  length = (1 + last_nonzero) - first_data;
+
+	  vcd_debug ("truncating file to %d packets", length);
+
+	  fflush (outfd);
+	  if (ftruncate (fileno (outfd), length * 2324))
+	    perror ("ftruncate()");
+	}
+
+      fclose (outfd);
+    }
 
   return 0;
 }
