@@ -126,6 +126,8 @@
 <!ELEMENT play-item EMPTY>
 <!ELEMENT select EMPTY>
 
+<!ELEMENT next-volume (#PCDATA)>
+
 <!ATTLIST loop
   jump-timing  (immediate|delayed)   'immediate'
 >
