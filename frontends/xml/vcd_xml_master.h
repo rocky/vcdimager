@@ -18,16 +18,12 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef __VCD_XML_PARSE_H__
-#define __VCD_XML_PARSE_H__
-
-#include "vcd_types.h"
-
+#ifndef __VCD_XML_MASTER_H__
+#define __VCD_XML_MASTER_H__
 #include "vcdxml.h"
-#include <libxml/tree.h>
 
-bool vcd_xml_parse (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns);
+bool vcd_xml_master (const struct vcdxml_t *obj);
 
-#endif /* __VCD_XML_PARSE_H__ */
+#endif /* __VCD_XML_MASTER_H__ */
 
 

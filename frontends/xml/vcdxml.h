@@ -21,6 +21,8 @@
 #ifndef __VCDXML_H__
 #define __VCDXML_H__
 
+#include <vcd_types.h>
+
 #include <libxml/tree.h>
 
 struct vcdxml_t {

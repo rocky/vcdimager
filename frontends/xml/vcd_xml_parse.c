@@ -18,6 +18,10 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
 #include "vcd_xml_parse.h"
 
 #include <stdlib.h>
@@ -35,11 +39,11 @@
 
 #define GET_ELEM_STR(str, id, doc, node, ns) \
  if ((!xmlStrcmp (node->name, (const xmlChar *) id)) && (node->ns == ns)) \
-   free (str), str = xmlNodeListGetString (doc, node->xmlChildrenNode, 1)
+   str = xmlNodeListGetString (doc, node->xmlChildrenNode, 1)
 
 #define GET_PROP_STR(str, id, doc, node, ns) \
  if (xmlHasProp (node, id)) \
-   free (str), str = xmlGetProp (node, id)
+   str = xmlGetProp (node, id)
 
 #define GET_ELSE else
 
@@ -66,10 +70,10 @@ _parse_info (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
   FOR_EACH (cur, node)
     {
       GET_ELEM_STR (obj->info.album_id, "album-id", doc, cur, ns);
-      else GET_ELEM_STR (obj->info.volume_count, "volume-count", doc, cur, ns);
-      else GET_ELEM_STR (obj->info.volume_number, "volume-number", doc, cur, ns);
-      else GET_ELEM_STR (obj->info.restriction, "restriction", doc, cur, ns);
-      else printf ("??? %s\n", cur->name); 
+      GET_ELSE GET_ELEM_STR (obj->info.volume_count, "volume-count", doc, cur, ns);
+      GET_ELSE GET_ELEM_STR (obj->info.volume_number, "volume-number", doc, cur, ns);
+      GET_ELSE GET_ELEM_STR (obj->info.restriction, "restriction", doc, cur, ns);
+      GET_ELSE printf ("??? %s\n", cur->name); 
     }
 
   return false;
@@ -87,11 +91,11 @@ _parse_pvd (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
   FOR_EACH (cur, node)
     {
       GET_ELEM_STR (obj->pvd.volume_id, "volume-id", doc, cur, ns);
-      else GET_ELEM_STR (obj->pvd.system_id, "system-id", doc, cur, ns);
-      else GET_ELEM_STR (obj->pvd.application_id, "application-id", doc, cur, ns);
-      else GET_ELEM_STR (obj->pvd.preparer_id, "preparer-id", doc, cur, ns);
-      else GET_ELEM_STR (obj->pvd.publisher_id, "publisher-id", doc, cur, ns);
-      else printf ("??? %s\n", cur->name); 
+      GET_ELSE GET_ELEM_STR (obj->pvd.system_id, "system-id", doc, cur, ns);
+      GET_ELSE GET_ELEM_STR (obj->pvd.application_id, "application-id", doc, cur, ns);
+      GET_ELSE GET_ELEM_STR (obj->pvd.preparer_id, "preparer-id", doc, cur, ns);
+      GET_ELSE GET_ELEM_STR (obj->pvd.publisher_id, "publisher-id", doc, cur, ns);
+      GET_ELSE printf ("??? %s\n", cur->name); 
     }
 
   return false;
@@ -222,6 +226,11 @@ _parse_videocd (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr n
 {
   xmlNodePtr cur;
 
+  assert (obj != NULL);
+
+  GET_PROP_STR (obj->class, "class", doc, node, ns);
+  GET_PROP_STR (obj->version, "version", doc, node, ns);
+
   FOR_EACH (cur, node)
     {
       bool rc = false;
@@ -231,9 +240,6 @@ _parse_videocd (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr n
 	  printf ("foreign namespace ignored (%s)\n", cur->name);
 	  continue;
 	}
-
-      GET_PROP_STR (obj->class, "class", doc, cur, ns);
-      GET_PROP_STR (obj->version, "version", doc, cur, ns);
 
       if (!xmlStrcmp (cur->name, "option")) 
 	rc = _parse_option (obj, doc, cur, ns);
@@ -276,6 +282,8 @@ vcd_xml_parse (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns
       printf ("root element not videocd...\n");
       return true;
     }
+
+  memset (obj, 0, sizeof (struct vcdxml_t));
 
   return _parse_videocd (obj, doc, node, ns);
 }

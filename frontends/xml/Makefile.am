@@ -15,7 +15,8 @@ vcdxml_SOURCES = \
 	vcdxml.h \
 	vcd_xml_parse.h \
 	vcd_xml_parse.c \
-	videocd_dtd.h
+	vcd_xml_master.c \
+	vcd_xml_master.h
 
 vcdxml_LDADD = $(LIBXML2_LIBS) $(VCD_LIBS) $(POPT_LIBS)
 

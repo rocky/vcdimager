@@ -35,6 +35,7 @@
 
 #include "vcdxml.h"
 #include "vcd_xml_parse.h"
+#include "vcd_xml_master.h"
 
 #define VIDEOCD_DTD_PUBID "-//GNU//DTD VideoCD//EN"
 #define VIDEOCD_DTD_SYSID "http://www.gnu.org/software/vcdimager/videocd.dtd"
@@ -107,8 +108,6 @@ main (int argc, const char *argv[])
     xmlNsPtr ns;
     struct vcdxml_t obj;
     
-    memset (&obj, 0, sizeof (struct vcdxml_t));
-
     if (!(root = xmlDocGetRootElement (vcd_doc)))
       {
 	printf ("sorry, doc is empty\n");
@@ -127,12 +126,20 @@ main (int argc, const char *argv[])
 	break;
       }
 
+    if (vcd_xml_master (&obj))
+      {
+	printf ("sorry, mastering vcd failed\n");
+	break;
+      }
+
+    printf ("everything worked!\n");
+
     rc = EXIT_SUCCESS;
   } while (false);
 
-  xmlFreeDoc (vcd_doc);
-
   /* xmlDocDump (stdout, vcd_doc); */
+
+  xmlFreeDoc (vcd_doc);
 
   return rc;
 }
