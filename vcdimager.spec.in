@@ -13,7 +13,7 @@ Group:          Applications/Multimedia
 Packager:       Herbert Valerio Riedel <hvr@gnu.org>
 Source:         http://www.gnu.org/pub/gnu/%{name}/%{name}-%{version}.tar.gz
 URL:            http://www.gnu.org/software/vcdimager/
-BuildRoot:      %{_tmppath}/%{name}-%{version}-root
+BuildRoot:      %{_tmppath}/%{name}-root
 
 %description 
 VCDImager allows you to create VideoCD BIN/CUE CD images from mpeg
@@ -25,6 +25,7 @@ is, ripping mpeg streams from images (and already burned VideoCDs)
 and showing some information about the VideoCD.
 
 %prep
+rm -rf "$RPM_BUILD_ROOT"
 %setup -q
 
 %build
@@ -50,13 +51,16 @@ rm -rf "$RPM_BUILD_ROOT"
 
 %files
 %defattr(-, root, root)
-%doc AUTHORS COPYING ChangeLog INSTALL NEWS README
+%doc AUTHORS COPYING ChangeLog INSTALL NEWS README THANKS
 %{_bindir}/vcdrip
 %{_bindir}/vcdimager
 %{_infodir}/vcdimager.info*
 %{_mandir}/man1/*
 
 %changelog
+* Sat Jan 20 2001 Herbert Valerio Riedel <hvr@gnu.org>
+- added THANKS file as doc
+
 * Thu Jan  4 2001 Herbert Valerio Riedel <hvr@gnu.org>
 - fixed removal of info pages on updating packages
 

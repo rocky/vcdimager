@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -156,6 +156,7 @@ _get_image_size_file (FILE *fd)
 
 /* device */
 
+#if 0
 static void
 _hexdump_full (FILE *fd, char *buf, int len)
 {
@@ -173,6 +174,7 @@ _hexdump_full (FILE *fd, char *buf, int len)
     }
   fprintf (fd, "\n");
 }
+#endif
 
 static int
 _read_mode2_sector_device (FILE *fd, void *data, uint32_t lba, bool form2)
@@ -361,7 +363,7 @@ dump_lot_and_psd_vcd (const void *data, const void *data2,
 
             for (i = 0; i < d->noi; i++)
               {
-                fprintf (stdout, "  itemid[%d]: %s\n",
+                fprintf (stdout, "  item[%d]: %s\n",
                          i, itemid2str (UINT16_FROM_BE (d->itemid[i])));
               }
             fprintf (stdout, "\n");
@@ -383,7 +385,7 @@ dump_lot_and_psd_vcd (const void *data, const void *data2,
                      "  prev: PSD[%d] (0x%4.4x) | next: PSD[%d] (0x%4.4x) | return: PSD[%d] (0x%4.4x)\n"
                      "  default: PSD[%d] (0x%4.4x) | timeout: PSD[%d] (0x%4.4x)\n"
                      "  wtime: %ds | loop: %d (delayed: %s)\n"
-                     "  itemid: %s\n",
+                     "  item: %s\n",
                      n,
                      d->nos, 
                      d->bsn,
@@ -1091,14 +1093,14 @@ main (int argc, const char *argv[])
 
 #ifdef __linux__
     {"cdrom-device", '\0', POPT_ARG_STRING, &gl_source_name, SOURCE_DEVICE,
-     "set CDROM device as source (only linux)", "DEVICE"},
+     "set CDROM device as source (linux only)", "DEVICE"},
 #endif
 
     {"dump", 'd', POPT_ARG_NONE, NULL, OP_DUMP,
      "dump information about VideoCD"},
 
     {"rip", '\0', POPT_ARG_NONE, NULL, OP_RIP,
-     "rip data tracks"},
+     "rip mpeg tracks"},
 
     {"version", 'V', POPT_ARG_NONE, NULL, OP_VERSION,
      "display version and copyright information and exit"},
@@ -1115,8 +1117,8 @@ main (int argc, const char *argv[])
       case OP_VERSION:
         fprintf (stdout, "GNU VCDRip " VERSION "\n\n"
                  "Copyright (c) 2001 Herbert Valerio Riedel <hvr@gnu.org>\n\n"
-                 "VCDImager may be distributed under the terms of the GNU General Public Licence;\n"
-                 "For details, see the file `COPYING', which is included in the VCDImager\n"
+                 "GNU VCDRip may be distributed under the terms of the GNU General Public Licence;\n"
+                 "For details, see the file `COPYING', which is included in the GNU VCDImager\n"
                  "distribution. There is no warranty, to the extent permitted by law.\n");
         exit (EXIT_SUCCESS);
         break;

@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -228,9 +228,9 @@ main (int argc, const char *argv[])
         case CL_VERSION:
           fprintf (stdout, "GNU VCDImager " VERSION "\n\n"
                    "Copyright (c) 2001 Herbert Valerio Riedel <hvr@gnu.org>\n\n"
-                   "VCDImager may be distributed under the terms of the GNU General Public Licence;\n"
-                   "For details, see the file `COPYING', which is included in the VCDImager\n"
-                   "distribution. There is no warranty, to the extent permitted by law.\n");
+                   "GNU VCDImager may be distributed under the terms of the GNU General Public\n"
+                   "Licence; For details, see the file `COPYING', which is included in the GNU\n"
+                   "VCDImager distribution. There is no warranty, to the extent permitted by law.\n");
           exit (EXIT_SUCCESS);
           break;
 

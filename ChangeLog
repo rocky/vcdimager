@@ -1,5 +1,8 @@
 2001-01-20  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* frontends/cli/vcdrip.c, frontends/cli/vcdimager.c: 
+		minor printf-fixes
+
 	* libvcd/vcd_files.c (set_search_dat): new function
 	(get_scandata_dat_size): new function
 	(_get_scanpoint_count): renamed function
