@@ -68,6 +68,7 @@ _derive_vid_type (const struct vcd_mpeg_stream_info *_info, bool svcd)
 static int
 _derive_ogt_type (const struct vcd_mpeg_stream_info *_info, bool svcd)
 {
+  
   if (!svcd)
     return 0;
 
@@ -80,6 +81,10 @@ _derive_ogt_type (const struct vcd_mpeg_stream_info *_info, bool svcd)
 
   if (_info->ogt[0])
     return 0x1;
+
+  vcd_debug ("OGT streams available: %d %d %d %d",
+             _info->ogt[0], _info->ogt[1], 
+             _info->ogt[2], _info->ogt[3]);
 
   return 0x0;
 }

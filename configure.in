@@ -1,7 +1,7 @@
 AC_REVISION([$Id$])dnl
 AC_INIT(libvcd/vcd.h)
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(vcdimager, 0.7.11)
+AM_INIT_AUTOMAKE(vcdimager, 0.7.12pre1)
 AM_MISSING_PROG(HELP2MAN, help2man, $missing_dir)
 AM_MAINTAINER_MODE
 
@@ -38,9 +38,8 @@ then
 fi
 
 AC_PROG_CPP
-if test "x$enable_gnome_fe" = "xyes"; then
- AC_PROG_CXX
-fi
+AC_PROG_CXX
+AC_PROG_CXXCPP
 AM_PROG_CC_STDC
 AM_PROG_LIBTOOL
 AC_PROG_AWK

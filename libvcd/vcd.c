@@ -1690,6 +1690,13 @@ _write_sequence (VcdObj *obj, int track_idx)
       ci = CI_VIDEO;
       cnum = CN_VIDEO;
       break;
+
+    case PKT_TYPE_OGT:
+      mpeg_packets.ogt++;
+      sm = SM_FORM2|SM_REALT|SM_VIDEO;
+      ci = CI_OGT;
+      cnum = CN_OGT;
+      break;
     
     case PKT_TYPE_AUDIO:
       mpeg_packets.audio++;
@@ -1703,12 +1710,6 @@ _write_sequence (VcdObj *obj, int track_idx)
         }
       break;
 
-    case PKT_TYPE_OGT:
-      mpeg_packets.ogt++;
-      sm = SM_FORM2|SM_REALT|SM_VIDEO;
-      ci = CI_OGT;
-      cnum = CN_OGT;
-      break;
 
     case PKT_TYPE_ZERO:
       mpeg_packets.zero++;

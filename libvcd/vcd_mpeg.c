@@ -44,7 +44,7 @@ static const char _rcsid[] = "$Id$";
 #define MPEG_PROGRAM_END_CODE    ((uint32_t) 0x000001b9)
 #define MPEG_PACK_HEADER_CODE    ((uint32_t) 0x000001ba)
 #define MPEG_SYSTEM_HEADER_CODE  ((uint32_t) 0x000001bb)
-#define MPEG_OGT_CODE            ((uint32_t) 0x000001bd)
+#define MPEG_PRIVATE_1_CODE      ((uint32_t) 0x000001bd)
 #define MPEG_PAD_CODE            ((uint32_t) 0x000001be)
 
 #define MPEG_AUDIO_C0_CODE       ((uint32_t) 0x000001c0) /* default */
@@ -818,23 +818,57 @@ _analyze_system_header (const uint8_t *buf, int len,
 }
 
 static void
-_analyze_ogt_stream (const uint8_t *buf, int len, 
-                     VcdMpegStreamCtx *state)
+_analyze_private_1_stream (const uint8_t *buf, int len, 
+                           VcdMpegStreamCtx *state)
 {
   int bitpos = _analyze_pes_header (buf, len, state);
-  unsigned ogt_idx;
+  int ogt_idx = -1;
+
+  uint8_t private_data_id;
 
   bitpos <<= 3;
 
-  ogt_idx = vcd_bitvec_peek_bits (buf, bitpos, 8);
-  
-  if (!IN(ogt_idx, 0, 3))
+  private_data_id = vcd_bitvec_read_bits (buf, &bitpos, 8);
+
+  switch (private_data_id) 
     {
-      vcd_warn ("OGT channel out of range %d", ogt_idx);
+      uint8_t sub_stream_id;
+
+    case 0x00:
+    case 0x01:
+    case 0x02:
+    case 0x03:
+      /* CVD subs */
+      ogt_idx = private_data_id;
+
+      if (!state->stream.ogt[ogt_idx])
+        vcd_debug ("Assuming CVD-style subtitles for data_id 0x%.2x in private stream 1", ogt_idx);
+
+      break;
+
+    case 0x70:
+      /* SVCD OGT */
+      sub_stream_id = vcd_bitvec_read_bits (buf, &bitpos, 8);
+
+      if (sub_stream_id < 4)
+        {
+          ogt_idx = sub_stream_id;
+          if (!state->stream.ogt[ogt_idx])
+            vcd_debug ("subtitles detect for channel 0x%.2x", ogt_idx);
+        }
+      else
+        vcd_warn ("sub_stream_id out of range (0x%.2x)", sub_stream_id);
+      break;
+
+    default:
+      vcd_warn ("unknown private_data_id for private stream 1 seen (0x%.2x)",
+                private_data_id);
       return;
+      break;
     }
 
-  state->stream.ogt[ogt_idx] = state->packet.ogt[ogt_idx] = true;
+  if (ogt_idx >= 0)
+    state->stream.ogt[ogt_idx] = state->packet.ogt[ogt_idx] = true;
 }
 
 int
@@ -1003,7 +1037,7 @@ vcd_mpeg_parse_packet (const void *_buf, unsigned buflen, bool parse_pes,
 
 	case MPEG_SYSTEM_HEADER_CODE:
 	case MPEG_PAD_CODE:
-	case MPEG_OGT_CODE:
+	case MPEG_PRIVATE_1_CODE:
 	case MPEG_VIDEO_E0_CODE:
 	case MPEG_VIDEO_E1_CODE:
 	case MPEG_VIDEO_E2_CODE:
@@ -1044,8 +1078,8 @@ vcd_mpeg_parse_packet (const void *_buf, unsigned buflen, bool parse_pes,
               _analyze_audio_pes (code & 0xff, buf + pos, size, !parse_pes, ctx);
               break;
 
-            case MPEG_OGT_CODE:
-              _analyze_ogt_stream (buf + pos, size, ctx);
+            case MPEG_PRIVATE_1_CODE:
+              _analyze_private_1_stream (buf + pos, size, ctx);
               break;
 	    }
 
@@ -1101,8 +1135,11 @@ vcd_mpeg_packet_get_type (const struct vcd_mpeg_packet_info *_info)
     return PKT_TYPE_AUDIO;
   else if (_info->zero)
     return PKT_TYPE_ZERO;
-/*   else if (_info->ogt) */
-/*     return PKT_TYPE_OGT; */
+  else if (_info->ogt[0] 
+           || _info->ogt[1] 
+           || _info->ogt[2]
+           || _info->ogt[3])
+    return PKT_TYPE_OGT; 
   else if (_info->system_header || _info->padding)
     return PKT_TYPE_EMPTY;
 

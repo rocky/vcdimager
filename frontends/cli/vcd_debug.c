@@ -682,9 +682,9 @@ dump_info (const debug_obj_t *obj)
       const char *ogt_str[] =
         {
           "None",
-          "0 available",
+          "1 available",
           "0 & 1 available",
-          "all available"
+          "all 4 available"
         };
 
       fprintf (stdout, " SEGMENT[%d]: audio: %s,"
