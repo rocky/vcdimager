@@ -1,3 +1,10 @@
+2001-05-15  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_image_bincue.c (vcd_image_sink_new_bincue): implemented
+		bin cue image writer/reader in terms of the vcd_image interface
+
+	* libvcd/vcd.c (vcd_obj_write_image): changed to new image abstraction
+
 2001-05-14  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_image.c: new abstraction layer: vcd image source and sink

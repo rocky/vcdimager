@@ -31,6 +31,7 @@
 #include <libvcd/vcd.h>
 #include <libvcd/vcd_logging.h>
 #include <libvcd/vcd_stream_stdio.h>
+#include <libvcd/vcd_image_bincue.h>
 
 static vcd_type_t
 _type_id_by_str (const char class[], const char version[])
@@ -168,14 +169,23 @@ vcd_xml_master (const struct vcdxml_t *obj)
    */
 
   {
-    unsigned sectors = vcd_obj_begin_output (_vcd);
+    unsigned sectors;
+    VcdImageSink *image_sink;
 
-    vcd_obj_write_image (_vcd,
-			 vcd_data_sink_new_stdio ("videocd.bin"),
-			 NULL, NULL);
+    image_sink = 
+      vcd_image_sink_new_bincue (vcd_data_sink_new_stdio ("videocd.bin"),
+                                 vcd_data_sink_new_stdio ("videocd.cue"),
+                                 "videocd.bin", false);
 
-    vcd_obj_write_cuefile (_vcd, vcd_data_sink_new_stdio ("videocd.cue"),
-			   "videocd.bin");
+    if (!image_sink)
+      {
+        vcd_error ("failed to create image object");
+        exit (EXIT_FAILURE);
+      }
+
+    sectors = vcd_obj_begin_output (_vcd);
+
+    vcd_obj_write_image (_vcd, image_sink, NULL, NULL);
 
     vcd_obj_end_output (_vcd);
 

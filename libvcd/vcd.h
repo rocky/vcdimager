@@ -23,6 +23,7 @@
 #ifndef __VCD_H__
 #define __VCD_H__
 
+#include <libvcd/vcd_image.h>
 #include <libvcd/vcd_stream.h>
 #include <libvcd/vcd_mpeg_stream.h>
 
@@ -141,13 +142,8 @@ typedef int (*progress_callback_t) (const progress_info_t *progress_info,
 /* writes the actual bin image file; a return value != 0 means the
    action was aborted by user or some other error has occured... */
 int
-vcd_obj_write_image (VcdObj *obj, VcdDataSink *bin_file,
+vcd_obj_write_image (VcdObj *obj, VcdImageSink *image_sink,
                      progress_callback_t callback, void *user_data);
-
-/* spit out cue file; return != 0 --> error */
-int
-vcd_obj_write_cuefile (VcdObj *obj, VcdDataSink *cue_file,
-                       const char bin_fname[]);
 
 /* this should be called writing the bin and/or cue file is done---even if 
    an error occurred */

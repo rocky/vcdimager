@@ -189,7 +189,7 @@ main (int argc, const char *argv[])
     rc = EXIT_SUCCESS;
   } while (false);
 
-  xmlDocDump (stdout, vcd_doc);
+  /* xmlDocDump (stdout, vcd_doc); */
 
   xmlFreeDoc (vcd_doc);
 

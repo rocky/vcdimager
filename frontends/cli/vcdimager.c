@@ -41,6 +41,7 @@
 #include <libvcd/vcd_stream_stdio.h>
 #include <libvcd/vcd_logging.h>
 #include <libvcd/vcd_cd_sector.h>
+#include <libvcd/vcd_image_bincue.h>
 
 static const char _rcsid[] = "$Id$";
 
@@ -222,7 +223,7 @@ _add_dir (const char pathname[], const char iso_pathname[])
 int
 main (int argc, const char *argv[])
 {
-  int n = 0, sectors;
+  int n = 0;
   vcd_type_t type_id;
 
   /* g_set_prgname (argv[0]); */
@@ -427,11 +428,6 @@ main (int argc, const char *argv[])
   vcd_obj_set_param_uint (gl_vcd_obj, VCD_PARM_VOLUME_COUNT, gl.volume_count);
   vcd_obj_set_param_uint (gl_vcd_obj, VCD_PARM_VOLUME_NUMBER, gl.volume_number);
 
-  {
-    int sect_size = gl.sector_2336_flag ? M2RAW_SIZE : CDDA_SIZE;
-    vcd_obj_set_param_uint (gl_vcd_obj, VCD_PARM_SEC_TYPE, sect_size);
-  }
-
   if (type_id == VCD_TYPE_SVCD)
     {
       bool __tmp = gl.broken_svcd_mode_flag;
@@ -468,19 +464,32 @@ main (int argc, const char *argv[])
                                          NULL);
     }
 
-  sectors = vcd_obj_begin_output (gl_vcd_obj);
 
-  vcd_obj_write_image (gl_vcd_obj,
-                       vcd_data_sink_new_stdio (gl.image_fname),
-                       gl.progress_flag ? _progress_callback : NULL, NULL);
+  {
+    unsigned sectors;
+    VcdImageSink *image_sink;
 
-  vcd_obj_write_cuefile (gl_vcd_obj, vcd_data_sink_new_stdio (gl.cue_fname),
-                         gl.image_fname);
+    image_sink = 
+      vcd_image_sink_new_bincue (vcd_data_sink_new_stdio (gl.image_fname),
+                                 vcd_data_sink_new_stdio (gl.cue_fname),
+                                 gl.image_fname, gl.sector_2336_flag);
 
-  vcd_obj_end_output (gl_vcd_obj);
+    if (!image_sink)
+      {
+        vcd_error ("failed to create image object");
+        exit (EXIT_FAILURE);
+      }
 
-  fprintf (stdout, "finished ok, image created with %d sectors (%d bytes)\n",
-           sectors, sectors * (gl.sector_2336_flag ? M2RAW_SIZE : CDDA_SIZE));
+    sectors = vcd_obj_begin_output (gl_vcd_obj);
+
+    vcd_obj_write_image (gl_vcd_obj, image_sink,
+                         gl.progress_flag ? _progress_callback : NULL, NULL);
+
+    vcd_obj_end_output (gl_vcd_obj);
+
+    fprintf (stdout, "finished ok, image created with %d sectors (%d bytes)\n",
+             sectors, sectors * (gl.sector_2336_flag ? M2RAW_SIZE : CDDA_SIZE));
+  }
 
   return EXIT_SUCCESS;
 }

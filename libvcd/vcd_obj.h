@@ -27,6 +27,7 @@
 #include "vcd_files.h"
 #include "vcd_salloc.h"
 #include "vcd_directory.h"
+#include <libvcd/vcd_image.h>
 
 typedef struct {
   double time;
@@ -77,10 +78,9 @@ struct _VcdObj {
   unsigned post_data_gap;
 
   /* output */
-  bool bin_file_2336_flag;
-  VcdDataSink *bin_file;
-  /* VcdDataSink* cue_file; */
+  VcdImageSink *image_sink;
 
+  /* ... */
   unsigned iso_size;
   char *iso_volume_label;
   char *iso_application_id;

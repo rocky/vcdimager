@@ -61,7 +61,7 @@ typedef struct {
 
 typedef struct {
   int (*set_cuesheet) (void *user_data, const VcdList *vcd_cue_list);
-  int (*write) (void *user_data, void *buf, uint32_t lsn);
+  int (*write) (void *user_data, const void *buf, uint32_t lsn);
   void (*free) (void *user_data);
 } vcd_image_sink_funcs;
 

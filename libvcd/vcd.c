@@ -44,6 +44,7 @@
 
 #include <libvcd/vcd_pbc.h>
 #include <libvcd/vcd_dict.h>
+#include <libvcd/vcd_image.h>
 
 static const char _rcsid[] = "$Id$";
 
@@ -359,61 +360,6 @@ vcd_obj_destroy (VcdObj *obj)
   free (obj);
 }
 
-static void
-cue_start (VcdDataSink *sink, const char fname[])
-{
-  char buf[1024] = { 0, };
-
-  snprintf (buf, sizeof (buf), "FILE \"%s\" BINARY\r\n", fname);
-
-  vcd_data_sink_write (sink, buf, 1, strlen (buf));
-}
-
-static void
-cue_track (VcdDataSink *sink, int sect2336, uint8_t num, uint32_t extent)
-{
-  char buf[1024] = { 0, };
-
-  uint8_t f = extent % 75;
-  uint8_t s = (extent / 75) % 60;
-  uint8_t m = (extent / 75) / 60;
-
-  snprintf (buf, sizeof (buf),
-            "  TRACK %2.2d MODE2/%d\r\n"
-            "    INDEX %2.2d %2.2d:%2.2d:%2.2d\r\n",
-            num, (sect2336 ? 2336 : 2352), 1, m, s, f);
-
-  vcd_data_sink_write (sink, buf, 1, strlen (buf));
-}
-
-int
-vcd_obj_write_cuefile (VcdObj *obj, VcdDataSink *cue_file,
-                       const char bin_fname[])
-{
-  int n;
-  VcdListNode *node;
-
-  assert (obj != NULL);
-  assert (obj->in_output);
-
-  cue_start (cue_file, bin_fname);
-  cue_track (cue_file, obj->bin_file_2336_flag, 1, 0); /* ISO9660 track */
-
-  n = 0;
-  _VCD_LIST_FOREACH (node, obj->mpeg_sequence_list)
-    {
-      mpeg_sequence_t *track = _vcd_list_node_data (node);
-
-      cue_track (cue_file, obj->bin_file_2336_flag, n+2, 
-                 track->relative_start_extent + obj->iso_size);
-
-      n++;
-    }
-
-  vcd_data_sink_destroy (cue_file);
-
-  return 0;
-}
 
 int 
 vcd_obj_set_param_uint (VcdObj *obj, vcd_parm_t param, unsigned arg)
@@ -450,22 +396,6 @@ vcd_obj_set_param_uint (VcdObj *obj, vcd_parm_t param, unsigned arg)
           vcd_warn ("restriction out of range, clamping to range");
         }
       vcd_debug ("changed restriction number to %u", obj->info_restriction);
-      break;
-
-    case VCD_PARM_SEC_TYPE:
-      switch (arg)
-        {
-        case 2336:
-          obj->bin_file_2336_flag = true;
-          break;
-        case 2352:
-          obj->bin_file_2336_flag = false;
-          break;
-        default:
-          vcd_warn ("invalid argument for image sector size, leaving old value");
-        }
-      vcd_debug ("changed sector mode to %u byte", 
-                 obj->bin_file_2336_flag ? 2336 : 2352);
       break;
 
     default:
@@ -1078,15 +1008,7 @@ _write_m2_image_sector (VcdObj *obj, const void *data, uint32_t extent,
 
   _vcd_make_mode2(buf, data, extent, fnum, cnum, sm, ci);
 
-  vcd_data_sink_seek(obj->bin_file, 
-                     extent * (obj->bin_file_2336_flag
-                               ? M2RAW_SIZE
-                               : CDDA_SIZE));
-
-  if(obj->bin_file_2336_flag) 
-    vcd_data_sink_write(obj->bin_file, buf + 12 + 4, M2RAW_SIZE, 1);
-  else
-    vcd_data_sink_write(obj->bin_file, buf, CDDA_SIZE, 1);
+  vcd_image_sink_write (obj->image_sink, buf, extent);
   
   obj->sectors_written++;
 
@@ -1102,14 +1024,7 @@ _write_m2_raw_image_sector (VcdObj *obj, const void *data, uint32_t extent)
 
   _vcd_make_raw_mode2(buf, data, extent);
 
-  vcd_data_sink_seek(obj->bin_file, 
-                     extent * (obj->bin_file_2336_flag
-                               ? M2RAW_SIZE : CDDA_SIZE));
-
-  if(obj->bin_file_2336_flag) 
-    vcd_data_sink_write(obj->bin_file, buf+12, M2RAW_SIZE, 1);
-  else
-    vcd_data_sink_write(obj->bin_file, buf, CDDA_SIZE, 1);
+  vcd_image_sink_write (obj->image_sink, buf, extent);
 
   obj->sectors_written++;
 
@@ -1533,43 +1448,6 @@ vcd_obj_begin_output (VcdObj *obj)
   return image_size;
 }
 
-int
-vcd_obj_write_image (VcdObj *obj, VcdDataSink *bin_file,
-                     progress_callback_t callback, void *user_data)
-{
-  unsigned sectors, track;
-
-  assert (obj != NULL);
-  assert (sectors >= 0);
-  assert (obj->sectors_written == 0);
-
-  assert (obj->in_output);
-
-  obj->progress_callback = callback;
-  obj->callback_user_data = user_data;
-  obj->bin_file = bin_file;
-  
-  if (_callback_wrapper (obj, true))
-    return 1;
-
-  if (_write_vcd_iso_track (obj))
-    return 1;
-
-  for (track = 0;track < _vcd_list_length (obj->mpeg_sequence_list);track++) {
-    obj->in_track++;
-
-    if (_callback_wrapper (obj, true))
-      return 1;
-
-    if (_write_sectors (obj, track))
-      return 1;
-  }
-
-  if (_callback_wrapper (obj, true))
-    return 1;
-  
-  return 0; /* ok */
-}
 
 void
 vcd_obj_end_output (VcdObj *obj)
@@ -1584,11 +1462,6 @@ vcd_obj_end_output (VcdObj *obj)
 
   _dict_clean (obj);
   _vcd_list_free (obj->buffer_dict_list, true);
-
-  if (obj->bin_file)
-    vcd_data_sink_destroy (obj->bin_file); /* fixme -- try moving it to
-                                              write_image */
-  obj->bin_file = NULL;
 }
 
 int
@@ -1614,6 +1487,103 @@ vcd_obj_append_pbc_node (VcdObj *obj, struct _pbc_t *_pbc)
 
   return 0;
 }
+
+int
+vcd_obj_write_image (VcdObj *obj, VcdImageSink *image_sink,
+                     progress_callback_t callback, void *user_data)
+{
+  VcdListNode *node;
+
+  assert (obj != NULL);
+  assert (obj->in_output);
+
+  if (!image_sink)
+    return -1;
+
+  /* start with meta info */
+
+  {
+    VcdList *cue_list;
+    vcd_cue_t *_cue;
+
+    cue_list = _vcd_list_new ();
+
+    _vcd_list_append (cue_list, (_cue = _vcd_malloc (sizeof (vcd_cue_t))));
+
+    _cue->lsn = 0;
+    _cue->type = VCD_CUE_TRACK_START;
+
+    _VCD_LIST_FOREACH (node, obj->mpeg_sequence_list)
+      {
+        mpeg_sequence_t *track = _vcd_list_node_data (node);
+
+        _vcd_list_append (cue_list, (_cue = _vcd_malloc (sizeof (vcd_cue_t))));
+        
+        _cue->lsn = track->relative_start_extent + obj->iso_size;
+        _cue->lsn -= obj->pre_track_gap;
+        _cue->type = VCD_CUE_PREGAP_START;
+
+        _vcd_list_append (cue_list, (_cue = _vcd_malloc (sizeof (vcd_cue_t))));
+
+        _cue->lsn = track->relative_start_extent + obj->iso_size;
+        _cue->type = VCD_CUE_TRACK_START;
+      }
+
+    /* add last one... */
+
+    _vcd_list_append (cue_list, (_cue = _vcd_malloc (sizeof (vcd_cue_t))));
+
+    _cue->lsn = obj->relative_end_extent + obj->iso_size;
+    _cue->type = VCD_CUE_END;
+
+    /* send it to image object */
+
+    vcd_image_sink_set_cuesheet (image_sink, cue_list);
+
+    _vcd_list_free (cue_list, true);
+  }
+
+  /* and now for the pay load */
+
+  {
+    unsigned track;
+
+    assert (obj != NULL);
+    assert (obj->sectors_written == 0);
+
+    assert (obj->in_output);
+
+    obj->progress_callback = callback;
+    obj->callback_user_data = user_data;
+    obj->image_sink = image_sink;
+  
+    if (_callback_wrapper (obj, true))
+      return 1;
+
+    if (_write_vcd_iso_track (obj))
+      return 1;
+
+    for (track = 0;track < _vcd_list_length (obj->mpeg_sequence_list);track++)
+      {
+        obj->in_track++;
+
+        if (_callback_wrapper (obj, true))
+          return 1;
+
+        if (_write_sectors (obj, track))
+          return 1;
+      }
+
+    if (_callback_wrapper (obj, true))
+      return 1;
+
+    obj->image_sink = NULL;
+  
+    vcd_image_sink_destroy (image_sink);
+
+    return 0; /* ok */
+  }
+}  
 
 
 /* 
