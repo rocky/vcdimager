@@ -93,12 +93,12 @@ Indices
 @node Introduction
 @chapter Introduction
 
-Note in the guide, we use the term VCD to mean some sort of Video
+Note in the guide, we use the term Video CD to mean some sort of Video
 Compact Disk. There are various formats of Video Compact Disks, the
-oldest format of which is called VCD followed by a version number:
-1.0, 1.1 or 2.0. Hopefully by context it should be clear whether we
-are referring to a class of Video Compact Disks or the specific older
-format called VCD @emph{version-number}.
+oldest format of which is called ``VCD'' and is followed by a version
+number: 1.0, 1.1 or 2.0. Hopefully it should also be clear by context
+whether we are referring to a class of Video Compact Disks or the
+specific older format called VCD @emph{version-number}.
 
 @value{program} can be used to extract or disassemble the contents of
 a CD or a CD disk image (commonly referred to as ``ripping'').
@@ -117,10 +117,10 @@ You might use @value{program} as a step in re-mastering or re-authoring
 and existing CD, or it could be used to extract MPEGs from a CD or CD
 disk image file. 
 
-Since VCD's use the ISO-9660 format, another way to ``extract'' an
-MPEG or piece of a VCD is simply to mount the CD and use file copy
-commands. However this program will interpret the Video-CD specific
-files and output a corresponding XML description file.  So
+Since Video CD's use the ISO-9660 format, another way to ``extract''
+an MPEG or piece of a Video CD is simply to mount the CD and use file
+copy commands. However this program will interpret the Video-CD
+specific files and output a corresponding XML description file.  So
 @value{program} is something similar to the program @kbd{vcddump};
 however the latter gives lower-level Video-CD specific information and
 does not output its results in XML.
@@ -307,7 +307,7 @@ mode for image file. @emph{Note: This option is slated to disappear.}
 @node What Options
 @section Options controlling what do you want done
 
-By default @value{program} will extract everything it can about a VCD
+By default @value{program} will extract everything it can about a Video CD
 image. 
 
 However if you specify something in particular you don't want to
@@ -332,7 +332,7 @@ MPEGs.
 @item --nofiles
 @kindex @code{--nofiles}
 Video CD's are formatted on an ISO-9660 filesystem. As such they may
-have additional files that are not strictly necessary for VCD
+have additional files that are not strictly necessary for Video CD
 operation. For example, there may be some additional documentation or
 commentary in some sort of text format and these may be put under
 additional directories.  Normally, such files are extracted with the
@@ -340,9 +340,9 @@ directory or path information removed. If you don't want these
 additional files extracted use the @code{--nofiles} option. 
 
 Using @code{--nofiles} will still extract files which are necessary
-for VCD playback however. (These are located under the /SEGMENT, /EXT,
+for Video CD playback however. (These are located under the /SEGMENT, /EXT,
 /CDDDA, /SVCD, and/or /VCD directories).  The options below however
-may affect VCD operation and they are mutually exclusive of this
+may affect Video CD operation and they are mutually exclusive of this
 operation. That is, this operation does not touch any of the files
 that the options below will and vice versa.
 

@@ -93,46 +93,47 @@ Indices
 @node Introduction
 @chapter Introduction
 
-Note in the guide, we use the term VCD to mean some sort of Video
+Note in the guide, we use the term Video CD to mean some sort of Video
 Compact Disk. There are various formats of Video Compact Disks, the
-oldest format of which is called VCD followed by a version number:
-1.0, 1.1 or 2.0. Hopefully by context it should be clear whether we
-are referring to a class of Video Compact Disks or the specific older
-format called VCD @emph{version-number}.
+oldest format of which is called ``VCD'' and is followed by a version
+number: 1.0, 1.1 or 2.0. Hopefully it should also be clear by context
+whether we are referring to a class of Video Compact Disks or the
+specific older format called VCD @emph{version-number}.
 
-@value{program}'s mission in life is to display the contents of a VCD
-image. Well, that's not actually true---if given an audio CD (CD-DA)
-or some other kind of CD, @value{program} will try to display some
-information about that, perhaps just a list of the tracks, with
-varying degrees of success; However VCDs are what @value{program}
+@value{program}'s mission in life is to display the contents of a
+Video CD image. Well, that's not actually true---if given an audio CD
+(CD-DA) or some other kind of CD, @value{program} will try to display
+some information about that, perhaps just a list of the tracks, with
+varying degrees of success; However Video CDs are what @value{program}
 understands best and it will you the most detail about.  The disk
 ``image'' does not have to reside on a physical Compact Disk;
 @value{program} understand the BIN/CUE disk-image format used by a
 popular DOS/Window mastering tool.
 
 You might use the information from @value{program} as a diagnostic or
-analytical tool. It may help you understand a particular VCD that you
-have. Or it might be useful in conjunction with or in debugging a VCD
-you are creating (``authoring''). But debugging is probably best left
-for another tool; @value{program} will only let you display information, you
-can't modify anything with this tool and it is not interactive.
+analytical tool. It may help you understand a particular Video CD that
+you have. Or it might be useful in conjunction with or in debugging a
+Video CD you are creating (``authoring''). But debugging is probably
+best left for another tool; @value{program} will only let you display
+information, you can't modify anything with this tool and it is not
+interactive.
 
 Although I imagine most of the time this is how you will use
 @value{program}, there are some subsidiary uses.
 
-@value{program} shows information about a VCD and as such the
+@value{program} shows information about a Video CD and as such the
 information shown reflects, sort of, the way the information is
 stored. So in a sense @value{program} can teach you a little bit about
-how a VCD is laid out.
+how a Video CD is laid out.
 
-In writing an VCD input plugin for a media player, I wanted to get
-bits of information about the VCD to display in the media player, such
-as the VCD format used and the volume name. Before writing a C library
-for such purposes, a lower-tech, and more loosely-coupled way to do
-this was used. The program ran @value{program} with the specific
-information request and parsed the text output. For example, to get just
-the format that the VCD on the``default'' CD-ROM device is in you
-might run:
+In writing an Video CD input plugin for a media player, I wanted to
+get bits of information about the Video CD to display in the media
+player, such as the Video CD format used and the volume name. Before
+writing a C library for such purposes, a lower-tech, and more
+loosely-coupled way to do this was used. The program ran
+@value{program} with the specific information request and parsed the
+text output. For example, to get just the format that the Video CD on
+the``default'' CD-ROM device is in you might run:
 
 @smallexample
   vcddump --no-banner --show-format
@@ -145,7 +146,7 @@ To get the album information you might run:
 @end smallexample 
 
 After doing this for a while and seeing this was useful, I then wrote
-a VCD ``info'' library. A library is much faster and furthermore much
+a Video CD ``info'' library. A library is much faster and furthermore much
 of the information is saved away in memory reducing the amount of disk
 I/O. Later it turned out that I could shift the I/O completely from my
 program and use the I/O from that or another library, but that's a
@@ -283,7 +284,7 @@ pretty much what's expected.
 you.
 
 By default @value{program} will show just about everything it can
-about a VCD image. There is additional information you can get using
+about a Video CD image. There is additional information you can get using
 the option @kbd{--verbose}, but this is of a debugging nature. 
 
 However if you specify something in particular to dump, for example to
@@ -298,7 +299,7 @@ time, you can list many individual items or sections together.
 
 Most of the individual items that can be shown are part of a larger
 group listed in @ref{Output Sections, ,Output Sections}. For example to
-show the volume id of the VCD image which resides in the PVD
+show the volume id of the Video CD image which resides in the PVD
 sections of output you would use the option @kbd{--show-pvd vol}.
 
 @cindex suboptions
@@ -474,7 +475,7 @@ this section,  see @ref{Filesystem, ,ISO-9660 section}.
 @item --show-format
 @itemx -f 
 @kindex @code{--show-format}
-Show the format that the VCD is in. The value will be one of ``VCD
+Show the format that the Video CD is in. The value will be one of ``VCD
 1.1'', ``VCD 2.0'', ``SVCD'', or ``HQVCD''. Note that @value{program}
 does not validate that the CD image conforms rigorously to any set
 of standards. However this does suggest what it might most closely
@@ -502,7 +503,7 @@ user data cc. See line 14 of the example in @ref{Info, ,Disc Information}.
 The number of disks in the volume, an integer. The XML tag for this is
 <volume-count>. See line 6 of the example in @ref{Info, ,Disc Information}.
 @item id
-A string representing the VCD format. ``VIDEO_CD'' for VCD 1.0, VCD
+A string representing the Video CD format. ``VIDEO_CD'' for VCD 1.0, VCD
 1.1, or VCD 2.0, ``SUPERVCD'' for SVCD, XVCD, CVD, and ``HQ-VCD'' for
 HQVCD. A Maxiumum of 8 characters. See line 2 of the example in
 @ref{Info, ,Disc Information}.
@@ -630,7 +631,7 @@ Section}.
 
 @item --show-scandata
 This option is relevant only if the program streams are MPEG2's. That is
-the VCD image is not VCD 1.0, VCD 1.1 VCD 2.0. 
+the Video CD image is not VCD 1.0, VCD 1.1 VCD 2.0. 
 
 @itemx -s
 @kindex @code{--show-scandata}
@@ -673,7 +674,7 @@ sections of output separated by a string of dashes like this:
 ------------------------------------------------------------------------
 @end smallexample 
 
-These separate the major logical sections of a VCD
+These separate the major logical sections of a Video CD
 
 @menu
 * PVD::                 Primary Volume Descriptor (PVD) Section
@@ -693,9 +694,9 @@ use these to help refer to parts of the example.
 @section Primary Volume Descriptor (PVD) Section
 @cindex Primary Volume Descriptor (PVD) 
 
-This section which comes first has overall information about the VCD.
-Here is part of sample output from the test PAL SVCD that can be found
-from:
+This section which comes first has overall information about the Video
+CD.  Here is part of sample output from the test PAL SVCD that can be
+found from:
 @url{http://www.vcdimager.org/pub/vcdimager/examples/test_svcd/test_svcd_pal.zip}
 
 @smallexample
@@ -809,7 +810,7 @@ entry starts.
 @node Entries
 @section Entries Section
 
-Here is part of sample output from the VCD used above.
+Here is part of sample output from the Video CD used above.
 
 @smallexample
  1. VCD/ENTRIES.VCD
@@ -826,13 +827,13 @@ Here is part of sample output from the VCD used above.
 
 In the above example, in the first line corresponds the ``filename''
 in the files section that starts at logical sector number 151. If this
-VCD were in SVCD, XVCD, HQVCD or CVD format that line would probably
-say ``SVCD/ENTRIES.SVD.'' As shown In line 5, I made 31 entries for
-the VCD; only the first 4 are shown. Depending on how playback control
-is set up you should be able to randomly access up to 31 different
-playback locations on this VCD. If you use a media player like xine
-and my plugin for it, there is a way jump to the beginning of each of
-these entries.
+Video CD were in SVCD, XVCD, HQVCD or CVD format that line would
+probably say ``SVCD/ENTRIES.SVD.'' As shown In line 5, I made 31
+entries for the Video CD; only the first 4 are shown. Depending on how
+playback control is set up you should be able to randomly access up to
+31 different playback locations on this Video CD. If you use a media
+player like xine and my plugin for it, there is a way jump to the
+beginning of each of these entries.
 
 The ``track #'' and SEQUENCE number are about the same thing, the
 track being one more than the SEQUENCE number. Note on line 6 ENTRY[00] is
@@ -852,7 +853,7 @@ sector size.''
 @section Disc Information
 
 Here is part of sample output from a SVCD. (This is not the same
-example as the VCD used before.)
+example as the Video CD used before.)
 
 @smallexample
  1. SVCD/INFO.SVD
@@ -1029,8 +1030,8 @@ from:
 12. leadout   : LSN   7486, MSF: 01:41:61, size:          0
 @end smallexample
 
-Lines 1 and 2 you will see if the format is a SVCD, XVCD, or CVD. 
-If the format is some sort of VCD you will lines 1 and 2 will be:
+Lines 1 and 2 you will see if the format is a SVCD, XVCD, or CVD.  If
+the format is some sort of Video CD you will lines 1 and 2 will be:
 
 @smallexample
 VCD/INFO.VCD
@@ -1046,14 +1047,14 @@ defined by Philips called OGT (Overlay Graphics Text) as it is listed
 above or it might be in another format used in CVD's.  
 
 On line 6, the CVD interpretation is a bit of a guess, and lines 6--7
-only appears if the VCD image is not VCD 1.@emph{x} or VCD 2.0.  There
-are all sorts of ways to violate standards and @value{program} doesn't
-do a rigorous job in determining if they have been violated. So it
-doesn't really know if the CD image is a CVD or not. Worse, we really
-don't have a firm grasp of what the CVD specifications are.  Having
-written all this though, a guess is that if the subtitle's a private
-stream id in the MPEG file has hexidecimal number 0xde. This may be
-completely bogus though.
+only appears if the Video CD image is not VCD 1.@emph{x} or VCD 2.0.
+There are all sorts of ways to violate standards and @value{program}
+doesn't do a rigorous job in determining if they have been
+violated. So it doesn't really know if the CD image is a CVD or
+not. Worse, we really don't have a firm grasp of what the CVD
+specifications are.  Having written all this though, a guess is that
+if the subtitle's a private stream id in the MPEG file has hexidecimal
+number 0xde. This may be completely bogus though.
 
 The bottom part of the display shows track info obtained in a
 lower-level way. The information above CDROM TRACKS comes from
@@ -1129,10 +1130,10 @@ Descriptor section (PVD) try this:
 @end smallexample 
 
 Okay, now for for some more obscure stuff. Let's say I'm writing a
-front-end GUI to do all sorts of stuff and I just need something to
-pick out the format (VCD 1.1, VCD 2.0, SVCD, CVD, XVCD, or HQVCD) that
-a VCD in drive is located. Since I have to read in this output, I
-don't want any extra lines not relevant other than the version.
+front-end GUI to do all sorts of stuff and I just need to pick out the
+format (VCD 1.1, VCD 2.0, SVCD, CVD, XVCD, or HQVCD) of the Video CD
+in the default drive. Since I have to read in this output, I don't
+want any extra lines not relevant other than the version.
 
 @smallexample
   vcddump --no-banner --show-format
@@ -1164,41 +1165,42 @@ of the entries section, no summary information like a count or ID tag.
 
 This program started its life under the name ``vcddebug'' by Herbert
 Valerio Riedel. The overall structure is still largely that of this
-program. However vcddebug dumps all information about a VCD always.  I
-needed to pick out individual pieces of information from this for a a
-media player plugin. Initially I was running vcddebug and parsing
-output. It became clear that it would be convenient to add options to
-reduce the amount of output. Initially there were single options added
-such as to show the VCD format. However with the bulk of information
-that's that is available, a sub-option system became very useful; that
-was added.
+program. However vcddebug dumps all information about a Video CD
+always.  I needed to pick out individual pieces of information from
+this for a a media player plugin. Initially I was running vcddebug and
+parsing output. It became clear that it would be convenient to add
+options to reduce the amount of output. Initially there were single
+options added such as to show the Video CD format. However with the
+bulk of information that's that is available, a sub-option system
+became very useful; that was added.
 
 I was unhappy about the name ``vcddebug'' since there really was no
 debugging involved. Furthermore getting changes back into vcddebug was
-going a bit slowly. So @value{program} was started and that allowed me more
-freedom to change the program in more drastic ways. In particular, it
-was becoming clear to me that what I really needed was a library to
-give information about a VCD and much of this code was ``inlined''
-inside vcddebug. So I pulled pieces of that out and a library was
-created. As a result @value{program} became a test-bed for this library.
+going a bit slowly. So @value{program} was started and that allowed me
+more freedom to change the program in more drastic ways. In
+particular, it was becoming clear to me that what I really needed was
+a library to give information about a Video CD and much of this code
+was ``inlined'' inside vcddebug. So I pulled pieces of that out and a
+library was created. As a result @value{program} became a test-bed for
+this library.
 
-In developing my VCD plugin, I used @value{program} quite a bit. One of the
-annoying things about vcddebug was it's verbosity in specifying
-where to read from; I was constantly typing
+In developing my Video CD plugin, I used @value{program} quite a
+bit. One of the annoying things about vcddebug was it's verbosity in
+specifying where to read from; I was constantly typing
 ``--cdrom-device=/dev/cdrom'' when I felt that the program should be
 able to figure this out. The distinction between a ``device'' and a
 file containing CD image while it may be fascinating to the program,
 was just not of interest to me as a user. So the ability to figure
 make what seems to be a reasonable guess about what's being read,
 short options for the classes of input and optional names were then
-added. 
+added.
 
-When my VCD input plugin got good enough to read CD-images from a
+When my Video CD input plugin got good enough to read CD-images from a
 file, I realized that in order to recover track information one needs
 to consult the CUE file. So the ability to read this kind of file was
 added to the library routines, and @value{program} was adjusted
 accordingly. Likewise dumping out track information when a image is
-not a VCD was added.
+not a Video CD was added.
 
 @node General Index
 @unnumbered General Index
