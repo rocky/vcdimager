@@ -14,42 +14,47 @@ fi
 BASE=`basename $0 .sh`
 RC=0
 
-if test_vcdimager --type=vcd20 ${srcdir}/avseq00.m1p ; then
-    :
-else
-    echo vcdimager failed 
-    test_vcdimager_cleanup
-    exit $RC
-fi
+test_vcdimager --type=vcd20 ${srcdir}/avseq00.m1p
+RC=$?
 
-if do_cksum <<EOF
+if test $RC -ne 0 ; then
+  if test $RC -ne 77 ; then 
+    echo vcdimager failed 
+    exit $RC
+  else
+    echo vcdimager skipped
+    test_vcdimager_cleanup
+  fi
+else 
+  if do_cksum <<EOF
 2927361135 1764000 videocd.bin
 3699460731 172 videocd.cue
 EOF
     then
     :
-else
+  else
     echo "$0: cksum(1) checksums didn't match :-("
 
     cksum videocd.bin videocd.cue
-
-    test_vcdimager_cleanup
     exit 1
+  fi
+
+  echo "$0: vcdimager cksum(1) checksums matched :-)"
+
+  test_vcddump '-B -i videocd.bin ' \
+    vcd20_test0.dump ${srcdir}/vcd20_test0.right
+  RC=$?
+  check_result $RC 'vcddump test 0'
 fi
 
-echo "$0: vcdimager cksum(1) checksums matched :-)"
-
-test_vcddump '-B -i videocd.bin ' \
-    vcd20_test0.dump ${srcdir}/vcd20_test0.right
+test_vcdxbuild ${srcdir}/${BASE}.xml
 RC=$?
-check_result $RC 'vcddump test 0'
-
-if test_vcdxbuild ${srcdir}/${BASE}.xml; then
- :
-else 
-    echo vcdxbuild failed 
+if test $RC -ne 0 ; then
+  echo vcdxbuild failed 
+  if test $RC -eq 77 ; then
     test_vcdxbuild_cleanup
-    exit $RC
+  fi
+  exit $RC
 fi
 
 if do_cksum <<EOF

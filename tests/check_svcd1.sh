@@ -24,28 +24,27 @@ if test $RC -ne 0 ; then
     echo vcdimager skipped
     test_vcdimager_cleanup
   fi
-fi
-
-if do_cksum <<EOF
+else
+  if do_cksum <<EOF
 2858408396 1587600 videocd.bin
 3699460731 172 videocd.cue
 EOF
     then
     :
-else
+  else
     echo "$0: cksum(1) checksums didn't match :-("
 
     cksum videocd.bin videocd.cue
-
     exit 1
-fi
+  fi
 
-echo "$0: vcdimager cksum(1) checksums matched :-)"
+  echo "$0: vcdimager cksum(1) checksums matched :-)"
 
-test_vcddump '--no-banner -i videocd.bin' \
+  test_vcddump '--no-banner -i videocd.bin' \
     svcd1_test0.dump ${srcdir}/svcd1_test0.right
-RC=$?
-check_result $RC 'vcddump test 0'
+  RC=$?
+  check_result $RC 'vcddump test 0'
+fi
 
 test_vcdxbuild ${srcdir}/$BASE.xml
 RC=$?
