@@ -322,7 +322,7 @@ vcdimager alias --cdi \
 	--add-file-2336 /usr/share/cdi/cdi_imag.rtf,CDI/CDI_IMAG.RTF \
 	--add-file      /usr/share/cdi/cdi_text.fnt,CDI/CDI_TEXT.FNT \
 	--add-file      /usr/share/cdi/cdi_vcd.app,CDI/CDI_VCD.APP \
-	--add-file      /usr/share/cdi/cdi_vcd.app,CDI/CDI_VCD.CFG 
+	--add-file      /usr/share/cdi/cdi_vcd.cfg,CDI/CDI_VCD.CFG 
 @end example
 
 @bye

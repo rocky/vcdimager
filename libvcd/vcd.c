@@ -657,10 +657,19 @@ vcd_obj_add_file (VcdObj *obj, const char iso_pathname[],
   assert (strlen (iso_pathname) > 0);
   assert (file != NULL);
 
-  size = vcd_data_source_stat(file);
+  size = vcd_data_source_stat (file);
+
+  /* close file to save file descriptors */
+  vcd_data_source_close (file);
 
   if (raw_flag)
     {
+      if (!size)
+        {
+          vcd_error("raw mode2 file must not be empty\n");
+          return 1;
+        }
+
       sectors = size / M2RAW_SIZE;
 
       if (size % M2RAW_SIZE)
@@ -880,9 +889,14 @@ _finalize_vcd_iso_track (VcdObj *obj)
       {
         struct _cust_file_t *p = _vcd_list_node_data (node);
 
-        p->start_extent = _vcd_salloc(obj->iso_bitmap, SECTOR_NIL, p->sectors);
-        
-        assert(p->start_extent != SECTOR_NIL);
+        if (p->sectors)
+          {
+            p->start_extent =
+              _vcd_salloc(obj->iso_bitmap, SECTOR_NIL, p->sectors);
+            assert(p->start_extent != SECTOR_NIL);
+          }
+        else /* zero sized files -- set dummy extent */
+          p->start_extent = obj->custom_file_start_extent;
 
         _vcd_directory_mkfile(obj->dir, p->iso_pathname, p->start_extent,
                               p->size, p->raw_flag, 1);
@@ -1400,7 +1414,8 @@ vcd_obj_begin_output (VcdObj *obj)
   image_size = obj->relative_end_extent + obj->iso_size;
 
   if (image_size > CD_MAX_SECTORS)
-    vcd_error ("image too big (%d sectors)", image_size);
+    vcd_error ("image too big (%d sectors > %d sectors)", 
+               image_size, CD_MAX_SECTORS);
 
   if (image_size > CD_74MIN_SECTORS)
     vcd_warn ("generated image (%d sectors) may not fit "

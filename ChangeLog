@@ -1,4 +1,20 @@
+2001-03-15  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd.c (vcd_obj_add_file): 
+		check that raw file is not zero sized
+		(_finalize_vcd_iso_track): fix zero custom file
+		size handling
+
+	* libvcd/vcd_cd_sector.h (CD_MAX_SECTORS): reduced max 
+		sector count take into account that a image
+		starts on 00:02:00
+
+	* libvcd/vcd.c (vcd_obj_add_file): added fix from
+		Phoury Lei to reduce fd leaking
+
 2001-03-11  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* configure.in: bumped version up to 0.5.9beta3
 
 	* libvcd/vcd_mpeg.c (_vcd_mpeg_parse_video): handle 
 		boundary check more gracefully...
