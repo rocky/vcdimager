@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2001,2003 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2001,2003,2004 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -284,6 +284,7 @@ main (int argc, const char *argv[])
         case CL_VERSION:
           fprintf (stdout, vcd_version_string (true), "vcdimager");
           fflush (stdout);
+          poptFreeContext(optCon);
           exit (EXIT_SUCCESS);
           break;
 
@@ -309,6 +310,7 @@ main (int argc, const char *argv[])
             else
               {
                 fprintf (stderr, "file parsing of `%s' failed\n", arg);
+                poptFreeContext(optCon);
                 exit (EXIT_FAILURE);
               }
           }

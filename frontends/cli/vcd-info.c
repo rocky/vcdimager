@@ -2,7 +2,7 @@
     $Id$
 
     Copyright (C) 2001,2002 Herbert Valerio Riedel <hvr@gnu.org>
-    Copyright (C) 2002,2003 Rocky Bernstein <rocky@panix.com>
+    Copyright (C) 2002,2003,2004 Rocky Bernstein <rocky@panix.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1116,7 +1116,13 @@ dump (char image_fname[])
   open_rc = vcdinfo_open(&obj, &image_fname, gl.source_type, gl.access_mode);
 
   if (NULL == obj) {
-    fprintf (stdout, "error allocating a new VCD object\n");
+    if (image_fname == NULL) {
+      fprintf (stdout, "Couldn't automatically find a Video CD.\n");
+    } else {
+      fprintf (stdout, "Error opening requested Video CD object %s\n",
+               image_fname);
+      fprintf (stdout, "Perhaps this is not a Video CD.n");
+    }
     exit (EXIT_FAILURE);
   }
 
@@ -1494,6 +1500,7 @@ main (int argc, const char *argv[])
       case OP_VERSION:
         fprintf (stdout, vcd_version_string (true), "vcdinfo");
         fflush (stdout);
+        poptFreeContext(optCon);
         exit (EXIT_SUCCESS);
         break;
 
@@ -1537,6 +1544,7 @@ main (int argc, const char *argv[])
           if (!okay) 
           {
             fprintf (stderr, "only one source allowed! - try --help\n");
+            poptFreeContext(optCon);
             exit (EXIT_FAILURE);
           }
           break;
@@ -1547,12 +1555,14 @@ main (int argc, const char *argv[])
                  poptBadOption(optCon, POPT_BADOPTION_NOALIAS),
                  poptStrerror(opt));
         fprintf (stderr, "error while parsing command line - try --help\n");
+        poptFreeContext(optCon);
         exit (EXIT_FAILURE);
       }
 
   if (poptGetArgs (optCon) != NULL)
     {
       fprintf (stderr, "error - no arguments expected! - try --help\n");
+      poptFreeContext(optCon);
       exit (EXIT_FAILURE);
     }
 
@@ -1589,6 +1599,7 @@ main (int argc, const char *argv[])
 
   dump (source_name);
 
+  poptFreeContext(optCon);
   return EXIT_SUCCESS;
 }
 

@@ -319,6 +319,7 @@ main (int argc, const char *argv[])
         case 1:
           fprintf (stdout, vcd_version_string (true), "cdxa2mpeg");
           fflush (stdout);
+          poptFreeContext(optCon);
           exit (EXIT_SUCCESS);
           break;
         default:
@@ -341,6 +342,7 @@ main (int argc, const char *argv[])
     if (!in)
       {
         vcd_error ("fopen (`%s'): %s", args[0], strerror (errno));
+        poptFreeContext(optCon);
         exit (EXIT_FAILURE);
       }
 
@@ -348,6 +350,7 @@ main (int argc, const char *argv[])
       if ( strcmp(args[0], args[1]) == 0 ) 
         {
           vcd_error ("input and output can't refer to the same file");
+          poptFreeContext(optCon);
           exit (EXIT_FAILURE);
         }
            
@@ -355,10 +358,12 @@ main (int argc, const char *argv[])
       if (!out)
         {
           vcd_error ("fopen (`%s'): %s", args[1], strerror (errno));
+          poptFreeContext(optCon);
           exit (EXIT_FAILURE);
 	}
     }
 
+    poptFreeContext(optCon);
   }
 
   ctxt.fd = in;
