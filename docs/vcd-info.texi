@@ -11,13 +11,13 @@
 @r{[}@var{\varname\}@r{]}
 @end macro
 
-@settitle The GNU Video CD Dump Program (@value{program})
+@settitle The GNU VCD Info Program (@value{program})
 @setchapternewpage on
 @c %**end of header
 
 @include version-vcd-info.texi
 @ifinfo
-This file documents GNU Video CD Info Dump Program (@value{program})
+This file documents GNU VCD Info Program (@value{program})
 
 Copyright (C) Rocky Bernstein @email{<rocky@@panix.com>}
 
@@ -35,7 +35,7 @@ development.''
 @end ifinfo
 
 @titlepage
-@title GNU Video CD Dump Program (@value{program})
+@title GNU Video CD Info Program (@value{program})
 @subtitle $Id$
 @subtitle The GNU Video CD Authoring Tools.
 @subtitle for version @value{VERSION}, @value{UPDATED}
@@ -44,7 +44,7 @@ development.''
 
 @vskip 0pt plus 1filll
 
-Copyright @copyright{} 2003, 2004 Rocky Bernstein @email{<rocky@@panix.com>}
+Copyright @copyright{} 2003, 2004, 2005 Rocky Bernstein @email{<rocky@@panix.com>}
 @sp 1
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1 or
@@ -72,7 +72,7 @@ development.''
 
 This file documents GNU Video CD Dump Program.
 
-Copyright (C) 2003 Rocky Bernstein
+Copyright (C) 2003, 2004, 2005 Rocky Bernstein
 
 @menu
 * Introduction::        What is the program and why would I use it? 
@@ -151,7 +151,7 @@ of the information is saved away in memory reducing the amount of disk
 I/O. Later it turned out that I could shift the I/O completely from my
 program and use the I/O from that or another library, but that's a
 different story. What's relevant is that after creating this library,
-I then modified @value{program} to use this library. The
+I then modified @value{program} to use this library @kbd{libvcdinfo}. The
 @value{program} code then got shorter (as some of it getting moved
 inside the library), and this program served as a test bed for
 the library. (It also happens that the input plugin was much harder
@@ -1186,42 +1186,55 @@ of the entries section, no summary information like a count or ID tag.
 
 This program started its life under the name ``vcddebug'' by Herbert
 Valerio Riedel. The overall structure is still largely that of this
-program. However vcddebug dumps all information about a Video CD
+program. However @kbd{vcddebug} dumps all information about a Video CD
 always.  I needed to pick out individual pieces of information from
-this for a a media player plugin. Initially I was running vcddebug and
-parsing output. It became clear that it would be convenient to add
+this for a media player plugin. Initially I was running @kbd{vcddebug}
+and parsing output. It became clear that it would be convenient to add
 options to reduce the amount of output. Initially there were single
-options added such as to show the Video CD format. However with the
-bulk of information that's that is available, a sub-option system
-became very useful; that was added.
+options added such as to show the VCD format. However with the bulk of
+information that's that is available, a sub-option system became very
+useful; that was added.
 
 I was unhappy about the name ``vcddebug'' since there really was no
-debugging involved. Furthermore getting changes back into vcddebug was
-going a bit slowly. So @value{program} was started and that allowed me
-more freedom to change the program in more drastic ways. In
-particular, it was becoming clear to me that what I really needed was
-a library to give information about a Video CD and much of this code
-was ``inlined'' inside vcddebug. So I pulled pieces of that out and a
-library was created. As a result @value{program} became a test-bed for
-this library.
+debugging involved. Furthermore getting changes back into @kbd{vcddebug} was
+going a bit slowly. So @kbd{vcddump} (the original name of this
+program) was started and that allowed me more freedom to change the
+program in more drastic ways. In particular, it was becoming clear to
+me that what I really needed was a library to give information about a
+Video CD and much of this code was ``inlined'' inside
+@kbd{vcddebug}. So I pulled pieces of that out and a library,
+@kbd{libvcdinfo}, was created. As a result @value{program} became a
+test-bed for this library.
 
-In developing my Video CD plugin, I used @value{program} quite a
-bit. One of the annoying things about vcddebug was it's verbosity in
-specifying where to read from; I was constantly typing
+In developing my VCD plugin, I used @value{program} quite a
+bit. One of the annoying things about @kbd{vcddebug} was it's
+verbosity in specifying where to read from; I was constantly typing
 ``--cdrom-device=/dev/cdrom'' when I felt that the program should be
 able to figure this out. The distinction between a ``device'' and a
 file containing CD image while it may be fascinating to the program,
-was just not of interest to me as a user. So the ability to figure
-make what seems to be a reasonable guess about what's being read,
-short options for the classes of input and optional names were then
-added.
+was just not of interest to me as a user. So the ability to figure out
+what seems to be a reasonable guess about what's being read, short
+options for the classes of input and optional names were then added.
 
-When my Video CD input plugin got good enough to read CD-images from a
+When my VCD input plugin got good enough to read CD-images from a
 file, I realized that in order to recover track information one needs
 to consult the CUE file. So the ability to read this kind of file was
 added to the library routines, and @value{program} was adjusted
 accordingly. Likewise dumping out track information when a image is
-not a Video CD was added.
+not a VCD was added. Later, I realized that CD information (and
+control) was a beast of its own outside of @kbd{vcddump},
+@kbd{libvcdinfo} or even @kbd{vcdimager}. So with Herbert Valerio
+Riedel's blessing, @kbd{libcdio} and later @kbd{libiso9660} were
+started by splitting off code from the @kbd{vcdimager} package.
+
+In writing a utility programs to show off @kbd{libcdio}, I came across
+Gerd Knorr's @kbd{cdinfo} and with his permission I modified it
+calling @kbd{cd-info} (so both programs could be available
+simultaenously). I then reliezed that if @kbd{vcddump} were renamed
+@kbd{vcd-info} it might make a stronger uniform connection between
+these two similar programs.
+
+And the rest is history.
 
 @node General Index
 @unnumbered General Index
