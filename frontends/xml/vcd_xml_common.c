@@ -121,6 +121,36 @@ vcd_xml_scan_progress_cb (const vcd_mpeg_prog_info_t *info, void *user_data)
 }
 
 int
+vcd_xml_read_progress_cb (const _read_progress_t *info, void *user_data)
+{
+  const bool _last = info->done == info->total;
+
+  if (!vcd_xml_show_progress)
+    return 0;
+  
+  if (vcd_xml_gui_mode)
+    fprintf (stdout, "<progress operation=\"extract\" id=\"%s\" position=\"%ld\" size=\"%ld\" />\n",
+	     (char *) user_data, info->done, info->total);
+  else
+    {
+      fprintf (stdout, "#extract[%s]: %ld/%ld (%2.0f%%)          \r",
+	       (char *) user_data, info->done, info->total,
+	       (double) info->done / info->total * 100);
+      
+      if (_last)
+	{
+	  fflush (stdout);
+
+	  fprintf (stdout, "                                                                            \r");
+	}
+    }
+
+  fflush (stdout);
+
+  return 0;
+}
+
+int
 vcd_xml_write_progress_cb (const progress_info_t *info, void *user_data)
 {
   const bool _last = info->sectors_written == info->total_sectors;

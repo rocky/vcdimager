@@ -882,7 +882,7 @@ vcd_obj_set_param_bool (VcdObj *obj, vcd_parm_t param, bool arg)
 
     case VCD_PARM_LEADOUT_PAUSE:
       obj->leadout_pause = arg ? true : false;
-      vcd_debug ("changing 'leadout pause' to %d", obj->relaxed_aps);
+      vcd_debug ("changing 'leadout pause' to %d", obj->leadout_pause);
       break;
 
     default:

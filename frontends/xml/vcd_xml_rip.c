@@ -56,7 +56,6 @@ static const char _rcsid[] = "$Id$";
 
 static int _verbose_flag = 0;
 static int _quiet_flag = 0;
-static int _gui_flag = 0;
 
 static const char *
 _strip_trail (const char str[], size_t n)
@@ -448,6 +447,7 @@ struct _pbc_ctx {
 
   uint8_t *psd;
   LotVcd *lot;
+  bool extended;
 };
 
 static const char *
@@ -716,7 +716,14 @@ _visit_pbc (struct _pbc_ctx *obj, unsigned lid, unsigned offset, bool in_lot)
     }
 
   if (_rofs >= obj->psd_size)
-    vcd_error ("psd offset out of range (try --no-ext-psd option)");
+    {
+      if (obj->extended)
+	vcd_error ("psd offset out of range in extended PSD"
+		   " (try --no-ext-psd option)");
+      else
+	vcd_warn ("psd offset out of range, ignoring...");
+      return;
+    }
 
   vcd_assert (_rofs < obj->psd_size);
 
@@ -874,6 +881,7 @@ _parse_pbc (struct vcdxml_t *obj, VcdImageSource *img, bool no_ext_psd)
 	extended = false;
     }
 
+  _pctx.extended = extended;
 
   if (extended && !no_ext_psd)
     vcd_info ("detected extended VCD2.0 PBC files");
@@ -881,6 +889,8 @@ _parse_pbc (struct vcdxml_t *obj, VcdImageSource *img, bool no_ext_psd)
     {
       if (extended)
 	vcd_info ("ignoring detected extended VCD2.0 PBC files");
+
+      _pctx.extended = false;
 
       _lot_vcd_sector = LOT_VCD_SECTOR;
       _psd_vcd_sector = PSD_VCD_SECTOR;
@@ -1094,6 +1104,8 @@ _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img)
       uint32_t start_lsn, end_lsn, n, last_nonzero, first_data;
       double last_pts = 0;
 
+      _read_progress_t _progress;
+
       struct m2f2sector
       {
 	uint8_t subheader[8];
@@ -1119,9 +1131,17 @@ _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img)
       last_nonzero = start_lsn - 1;
       first_data = 0;
 
+      _progress.total = end_lsn;
+
       for (n = start_lsn; n < end_lsn; n++)
 	{
 	  const int buf_idx = (n - start_lsn) % 15;
+
+	  if (n - _progress.done > (end_lsn / 100))
+	    {
+	      _progress.done = n;
+	      vcd_xml_read_progress_cb (&_progress, _seq->src);
+	    }
 
 	  if (!buf_idx)
 	    {
@@ -1227,14 +1247,18 @@ _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img)
 		    }
 		}
 
-	    }
+	    } /* if (in_data) */
 	  
 	  if (buf[buf_idx].subheader[2] & SM_EOF)
 	    {
 	      vcd_debug ("encountered subheader EOF @%d", n);
 	      break;
 	    }
-	}
+	} /* for */
+      
+      _progress.done = _progress.total;
+      vcd_xml_read_progress_cb (&_progress, _seq->src);
+
       if (in_data)
 	{
 	  uint32_t length;
@@ -1252,7 +1276,7 @@ _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img)
 	}
 
       fclose (outfd);
-    }
+    } /* _VCD_LIST_FOREACH */
 
   return 0;
 }
@@ -1272,6 +1296,8 @@ main (int argc, const char *argv[])
   int norip_flag = 0;
   int no_ext_psd_flag = 0;
   int sector_2336_flag = 0;
+  int _progress_flag = 0;
+  int _gui_flag = 0;
 
   enum { 
     CL_VERSION = 1,
@@ -1316,6 +1342,9 @@ main (int argc, const char *argv[])
 
       {"norip", '\0', POPT_ARG_NONE, &norip_flag, 0,
        "dont rip mpeg streams"},
+
+      {"progress", 'p', POPT_ARG_NONE, &_progress_flag, 0,  
+       "show progress"}, 
 
       {"verbose", 'v', POPT_ARG_NONE, &_verbose_flag, 0, 
        "be verbose"},
@@ -1380,6 +1409,9 @@ main (int argc, const char *argv[])
 
   if (_gui_flag)
     vcd_xml_gui_mode = true;
+
+  if (_progress_flag)
+    vcd_xml_show_progress = true;
 
   if (!xml_fname)
     xml_fname = strdup (DEFAULT_XML_FNAME);

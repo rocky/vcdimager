@@ -31,6 +31,7 @@
 #include <libxml/parser.h>
 
 #include <libvcd/vcd_util.h>
+#include <libvcd/vcd_logging.h>
 
 static const char _rcsid[] = "$Id$";
 
@@ -76,14 +77,15 @@ _get_elem_long (const char id[], xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 
   if (!_tmp)
     {
-      printf ("empty element??\n");
+      vcd_warn ("XML: empty content where integer value was expected,"
+		" assuming 0");
       return retval;
     }
 
   retval = strtol (_tmp, &endptr, 10);
 
   if (*endptr)
-    printf ("error while converting string to integer?\n");
+    vcd_error ("XML: error while converting string '%s' to an integer.", _tmp);
 
   return retval;
 }
@@ -99,14 +101,16 @@ _get_elem_double (const char id[], xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 
   if (!_tmp)
     {
-      printf ("empty element??\n");
+      vcd_warn ("XML: empty content where floating point value was expected,"
+		" assuming 0.0");
       return retval;
     }
 
   retval = strtod (_tmp, &endptr);
 
   if (*endptr)
-    printf ("error while converting string to floating point?\n");
+    vcd_error ("XML: error while converting string '%s' to floating point.", 
+	       _tmp);
 
   return retval;
 }
@@ -287,10 +291,8 @@ _get_prop_long (const char _prop_name[], xmlDocPtr doc, xmlNodePtr node,
       retval = strtol (str, &endptr, 10);
 
       if (*endptr)
-	{
-	  printf ("error while converting string to integer?\n");
-	  retval = 0;
-	}
+	vcd_error ("XML: error while converting string '%s' to an integer.", 
+		   str);
 
       return retval;
     }
@@ -791,7 +793,7 @@ _parse_videocd (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr n
 	rc = _parse_filesystem (obj, doc, cur, ns);
       else if (!xmlStrcmp (cur->name, "sequence-items")) 
 	rc = _parse_sequences (obj, doc, cur, ns);
-      else printf ("unexpected element: %s\n", cur->name);
+      else vcd_warn ("XML: unexpected element: %s", cur->name);
 
       if (rc)
 	return rc;
@@ -813,7 +815,7 @@ vcd_xml_parse (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns
 
   if (xmlStrcmp (node->name, "videocd") || (node->ns != ns))
     {
-      printf ("root element not videocd...\n");
+      vcd_warn ("XML: root element not videocd...");
       return true;
     }
 

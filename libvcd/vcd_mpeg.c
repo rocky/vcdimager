@@ -1099,8 +1099,8 @@ vcd_mpeg_packet_get_type (const struct vcd_mpeg_packet_info *_info)
     return PKT_TYPE_AUDIO;
   else if (_info->zero)
     return PKT_TYPE_ZERO;
-  else if (_info->ogt)
-    return PKT_TYPE_OGT;
+/*   else if (_info->ogt) */
+/*     return PKT_TYPE_OGT; */
   else if (_info->system_header || _info->padding)
     return PKT_TYPE_EMPTY;
 

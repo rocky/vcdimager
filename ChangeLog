@@ -1,3 +1,18 @@
+2001-09-10  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_mpeg.c (vcd_mpeg_packet_get_type): PKT_TYPE_OGT was
+		returned instead of PKT_TYPE_EMPTY
+
+2001-09-08  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* frontends/xml/vcd_xml_rip.c: implemented progress display for 
+		sequences
+
+2001-09-07  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* frontends/xml/vcd_xml_rip.c (_visit_pbc): be more tolerant when 
+		psd offset out of range...
+
 2001-09-02  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* frontends/xml/vcd_xml_dtd.c (_xmlExternalEntityLoader): 

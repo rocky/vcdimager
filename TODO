@@ -4,7 +4,7 @@ TODO LIST:
 ~~~~~~~~~~
 
 - version 1.0
- * check for VideoCD1.1/VideoCD2.0/SuperVideoCD1.0 conformance
+ * check for VideoCD1.x/VideoCD2.0/SuperVideoCD1.0 conformance
  * optimize/improve MPEG detection/scanning/handling code
  * documentation/examples (XML!!)
 
@@ -24,24 +24,11 @@ BUGS:
 MISSING INFORMATION (read `INFO WISHLIST'):
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
- * VideoCD 1.1/2.0 (aka White Book) specification
+ * more infos about VideoCD 1.0 (aka Karaoke CD)
 
- * Philips' 4C SVCD 1.0 specification 
-
- * is pre/post zero sector padding in mpeg tracks really required for
-   VCD 1.1/2.0?
-
- * is the extended sel list structure correct? (for VCD2.0)
-
- * how are access point sectors defined for VCD 1.1/2.0?
-
- * what about command lists? (how are the opcodes defined)
-
- * SCANDATA.DAT for VCD2.0?
- 
- * more infos on OGT 
-
- * more infos on chinese SVCD spec (aka VCD 3.0) and CVD
+ * more infos on chinese/asian SVCD spec (aka VCD 3.0) and CVD
+  
+ * more infos on closed caption for VCD2.0/SVCD1.0
 
  * ...so much more... :-)
 
