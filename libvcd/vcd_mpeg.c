@@ -507,8 +507,14 @@ _analyze_pes_header (const uint8_t *buf, int len,
           pos2 += 8;
           break;
 
+        case 0xf: /* %1111 - actually a syntax error! */
+          vcd_assert (vcd_bitvec_peek_bits (buf, pos2, 8) == 0xff);
+          vcd_warn ("Unexpected stuffing byte noticed in ISO11172 PES header!");
+          pos2 += 8;
+          break; 
+
         default:
-          vcd_error ("error in mpeg1 stream");
+          vcd_error ("Error in ISO11172 PES header");
           break;
         }
 
