@@ -341,8 +341,10 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 	    default:
 	      assert (0);
 	    }
-
+	  
 	  xmlSetProp (pl, "id", _pbc->id);
+	  if (_pbc->rejected)
+	    xmlSetProp (pl, "rejected", "true");
 	}
     }
 

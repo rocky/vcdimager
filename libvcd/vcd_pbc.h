@@ -39,6 +39,8 @@ struct _pbc_t {
 
   char *id;
 
+  bool rejected;
+
   /* used for play/selection lists */
   char *prev_id;
   char *next_id;

@@ -45,13 +45,6 @@ typedef struct {
   xmlChar *name; /* node name */
 } handlers_t;
 
-static bool
-_generic_do_children (void)
-{
-  /* todo */
-  return false;
-}
-
 #define GET_ELEM_(id, doc, node, ns) \
  if ((!xmlStrcmp (node->name, (const xmlChar *) id)) && (node->ns == ns)) 
 
@@ -225,6 +218,21 @@ _parse_segments (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr 
  * PBC block 
  */
 
+static void
+_parse_common_pbcattrs (pbc_t *pbc, xmlDocPtr doc, xmlNodePtr node, 
+			xmlNsPtr ns)
+{
+  xmlChar *_tmp = NULL;
+
+  vcd_assert (pbc != NULL);
+
+  GET_PROP_STR (pbc->id, "id", doc, node, ns);
+
+  GET_PROP_STR (_tmp, "rejected", doc, node, ns);
+
+  pbc->rejected = (_tmp && !xmlStrcmp (_tmp, "true"));
+}
+
 static bool
 _parse_pbc_selection (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
@@ -233,7 +241,7 @@ _parse_pbc_selection (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlN
 
   _pbc = vcd_pbc_new (PBC_SELECTION);
 
-  GET_PROP_STR (_pbc->id, "id", doc, node, ns);
+  _parse_common_pbcattrs (_pbc, doc, node, ns);
 
   FOR_EACH (cur, node)
     {
@@ -298,7 +306,7 @@ _parse_pbc_playlist (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNs
 
   _pbc = vcd_pbc_new (PBC_PLAYLIST);
 
-  GET_PROP_STR (_pbc->id, "id", doc, node, ns);
+  _parse_common_pbcattrs (_pbc, doc, node, ns);
 
   FOR_EACH (cur, node)
     {
@@ -342,7 +350,7 @@ _parse_pbc_endlist (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsP
 
   _pbc = vcd_pbc_new (PBC_END);
 
-  GET_PROP_STR (_pbc->id, "id", doc, node, ns);
+  _parse_common_pbcattrs (_pbc, doc, node, ns);
 
   FOR_EACH (cur, node)
     {

@@ -6,7 +6,7 @@ else
 POPT_LIBS = -lpopt
 endif
 
-bin_PROGRAMS = vcdimager vcdrip
+bin_PROGRAMS = vcdimager vcddebug
 
 SUBDIRS = $(POPT_SUBDIR)
 
@@ -17,8 +17,8 @@ VCD_LIBS = $(top_builddir)/libvcd/libvcd.a
 vcdimager_SOURCES = vcdimager.c
 vcdimager_LDADD = $(VCD_LIBS) $(POPT_LIBS)
 
-vcdrip_SOURCES = vcdrip.c
-vcdrip_LDADD = $(VCD_LIBS) $(POPT_LIBS)
+vcddebug_SOURCES = vcd_debug.c
+vcddebug_LDADD = $(VCD_LIBS) $(POPT_LIBS)
 
 info_TEXINFOS = vcdimager.texi
 vcdimager_TEXINFOS = gpl.texi
@@ -29,7 +29,7 @@ vcdimager.ps.gz: vcdimager.ps
 vcdimager.pdf: vcdimager.texi
 	texi2pdf $<
 
-man_MANS = vcdimager.1 vcdrip.1
+man_MANS = vcdimager.1
 
 EXTRA_DIST = $(man_MANS)
 

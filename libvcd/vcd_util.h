@@ -77,6 +77,12 @@ _vcd_isdchar (int c);
 int
 _vcd_isachar (int c);
 
+static inline const char *
+_vcd_bool_str (bool b)
+{
+  return b ? "yes" : "no";
+}
+
 #endif /* __VCD_UTIL_H__ */
 
 

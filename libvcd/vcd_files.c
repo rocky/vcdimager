@@ -221,6 +221,9 @@ set_lot_vcd(VcdObj *obj, void *buf, bool extended)
       
       vcd_assert (offset % INFO_OFFSET_MULT == 0);
 
+      if (_pbc->rejected)
+        continue;
+
       offset /= INFO_OFFSET_MULT;
 
       lot_vcd->offset[_pbc->lid - 1] = UINT16_TO_BE (offset);
@@ -304,13 +307,17 @@ set_info_vcd(VcdObj *obj, void *buf)
         }
       
       info_vcd.psd_size = uint32_to_be (get_psd_size (obj, false));
-      info_vcd.offset_mult = INFO_OFFSET_MULT;
+      info_vcd.offset_mult = _vcd_pbc_available (obj) ? INFO_OFFSET_MULT : 0;
       info_vcd.lot_entries = uint16_to_be (_vcd_pbc_max_lid (obj));
 
       if (_vcd_list_length (obj->mpeg_segment_list))
         {
           unsigned segments = 0;
         
+          if (!_vcd_pbc_available (obj))
+            vcd_warn ("segment items available, but no PBC items set!"
+                      " SPIs will be unreachable");
+
           _VCD_LIST_FOREACH (node, obj->mpeg_segment_list)
             {
               mpeg_segment_t *segment = _vcd_list_node_data (node);

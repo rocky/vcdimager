@@ -345,7 +345,10 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 	
 	_md->type = PSD_TYPE_PLAY_LIST;
 	_md->noi = _vcd_list_length (_pbc->item_id_list);
-	_md->lid = UINT16_TO_BE (_pbc->lid);
+	
+	vcd_assert (_pbc->lid < 0x8000);
+	_md->lid = UINT16_TO_BE (_pbc->lid | (_pbc->rejected ? 0x8000 : 0));
+	
 	_md->prev_ofs = 
 	  uint16_to_be (_lookup_psd_offset (obj, _pbc->prev_id, extended));
 	_md->next_ofs = 
@@ -399,10 +402,11 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 	_md->nos = _vcd_list_length (_pbc->select_id_list);
 	_md->default_ofs = UINT16_TO_BE (0xffff);
 
-
 	_md->type = PSD_TYPE_SELECTION_LIST;
 	_md->reserved = 0x00;
-	_md->lid = UINT16_TO_BE (_pbc->lid);
+
+	vcd_assert (_pbc->lid < 0x8000);
+	_md->lid = UINT16_TO_BE (_pbc->lid | (_pbc->rejected ? 0x8000 : 0));
 
 	_md->prev_ofs = 
 	  uint16_to_be (_lookup_psd_offset (obj, _pbc->prev_id, extended));
@@ -493,7 +497,8 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 	      {
 		char *_id = _vcd_list_node_data (node);
 		
-		_md->ofs[idx] = uint16_to_be (_lookup_psd_offset (obj, _id, extended));
+		_md->ofs[idx] = 
+		  uint16_to_be (_lookup_psd_offset (obj, _id, extended));
 
 		idx++;
 	      }
@@ -573,7 +578,8 @@ _vcd_pbc_finalize (VcdObj *obj)
 	offset = ISO_BLOCKSIZE * _vcd_len2blocks (offset, ISO_BLOCKSIZE);
 
       if (ISO_BLOCKSIZE - (offset_ext % ISO_BLOCKSIZE) < length_ext)
-	offset_ext = ISO_BLOCKSIZE * _vcd_len2blocks (offset_ext, ISO_BLOCKSIZE);
+	offset_ext = ISO_BLOCKSIZE * _vcd_len2blocks (offset_ext, 
+						      ISO_BLOCKSIZE);
 
       _pbc->offset = offset;
       _pbc->offset_ext = offset_ext;
@@ -581,14 +587,16 @@ _vcd_pbc_finalize (VcdObj *obj)
       /* vcd_debug ("pbc %d+%d (%d+%d)", offset, length, offset_ext, length_ext); */
 
       offset += _vcd_len2blocks (length, INFO_OFFSET_MULT) * INFO_OFFSET_MULT;
-      offset_ext += _vcd_len2blocks (length_ext, INFO_OFFSET_MULT) * INFO_OFFSET_MULT;
+      offset_ext += 
+	_vcd_len2blocks (length_ext, INFO_OFFSET_MULT) * INFO_OFFSET_MULT;
+
       lid++;
     }
 
   obj->psd_size = offset;
   obj->psdx_size = offset_ext;
 
-  vcd_debug ("pbc size %d (extended %d)", offset, offset_ext);
+  vcd_debug ("pbc: psd size %d (extended psd %d)", offset, offset_ext);
 
   return true;
 }

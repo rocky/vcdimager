@@ -430,6 +430,7 @@ main (int argc, const char *argv[])
 
       _pbc = vcd_pbc_new (PBC_END);
       _pbc->id = strdup ("lid-end");
+      _pbc->rejected = true;
 
       _vcd_list_append (obj.pbc_list, _pbc);
     }

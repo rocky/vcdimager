@@ -1,5 +1,29 @@
-2001-05-23  Herbert Valerio Riedel  <hvr@hvrlab.dhs.org>
+2001-05-25  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* frontends/cli/vcd_debug.c: got rid of vcdrip in favour of vcddebug
+
+	* frontends/cli/Makefile.am: renamed vcdrip to vcddebug
+
+	* frontends/xml/vcd_xml_dump.c: added output of rejected atrribute
+
+	* frontends/xml/vcd_xml_gen.c: make end list rejected
+
+	* frontends/xml/vcd_xml_parse.c: added parsing of rejected pbc 
+		attribute
+
+	* implemented 'rejected' (aka unlisted PBC items)
+
+	* frontends/xml/vcd_xml_rip.c: added IO error checking for fwrite()s
+
+	* libvcd/vcd_files.c (set_info_vcd): set offset multiplayer to 0 
+		if no PBC available, warn about SPIs w/o PBC items
+
+2001-05-24  Herbert Valerio Riedel  <hvr@gnu.org>
+
+ 	* 0.7.0 released
+
+2001-05-23  Herbert Valerio Riedel  <hvr@gnu.org>
+	
 	* libvcd/vcd.c: implemented auto pause setting
 
 	* implemented warning if strings in PVD break charset constraints

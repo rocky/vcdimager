@@ -10,6 +10,12 @@ if [ ! -f /bin/cygwin1.dll ]
    exit 1
  fi
 
+if [ ! -f /bin/cygz.dll ]
+ then
+   echo "where is cygz.dll, missing?"
+   exit 2
+ fi
+
 if [ -z "$1" ]
  then
    echo "no version given"
@@ -22,7 +28,7 @@ if [ ! -f configure.in ]
    exit 1
  fi
 
-EXECUTABLES="frontends/cli/vcdimager.exe frontends/cli/vcdrip.exe frontends/xml/vcdxgen.exe frontends/xml/vcdxbuild.exe frontends/xml/vcdxrip.exe"
+EXECUTABLES="frontends/cli/vcdimager.exe frontends/cli/vcddebug.exe frontends/xml/vcdxgen.exe frontends/xml/vcdxbuild.exe frontends/xml/vcdxrip.exe"
 
 for E in $EXECUTABLES
 do if [ ! -f "$E" ]
@@ -48,7 +54,7 @@ for DOCFILE in BUGS TODO README NEWS ChangeLog THANKS AUTHORS COPYING FAQ
 
 unix2dos $TMPDIR/*.txt
 
-cp -v $EXECUTABLES frontends/xml/videocd.dtd /bin/cygwin1.dll $TMPDIR/
+cp -v $EXECUTABLES frontends/xml/videocd.dtd /bin/cygwin1.dll /bin/cygz.dll $TMPDIR/
 strip -v $TMPDIR/*.exe
 
 rm -fv "$DISTZIP"

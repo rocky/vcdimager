@@ -548,6 +548,12 @@ _rip_segments (struct vcdxml_t *obj, VcdImageSource *img)
 
 	  fwrite (buf.data, 2324, 1, outfd);
 
+	  if (ferror (outfd))
+            {
+              perror ("fwrite()");
+              exit (EXIT_FAILURE);
+            }
+
 	  if (buf.subheader[2] & SM_EOF)
             break;
 	}
@@ -691,7 +697,16 @@ _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img)
 		}
 	      
 	      if (first_data)
-		fwrite (buf.data, 2324, 1, outfd);
+		{
+		  fwrite (buf.data, 2324, 1, outfd);
+
+		  if (ferror (outfd))
+		    {
+		      perror ("fwrite()");
+		      exit (EXIT_FAILURE);
+		    }
+		}
+
 	    }
 	  
 	  if (buf.subheader[2] & SM_EOF)
