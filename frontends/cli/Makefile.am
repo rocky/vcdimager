@@ -12,6 +12,6 @@ vcdrip_LDADD = $(VCD_LIBS) $(POPT_LIBS)
 
 info_TEXINFOS = vcdimager.texi
 
-man_MANS = vcdimager.1
+man_MANS = vcdimager.1 vcdrip.1
 
 EXTRA_DIST = $(man_MANS)
