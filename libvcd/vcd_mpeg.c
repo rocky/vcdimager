@@ -476,14 +476,15 @@ _analyze_video_pes (uint8_t streamid, const uint8_t *buf, int len, bool only_pts
           double pts2 = (double) pts / 90000.0;
           int vid_idx = _vid_streamid_idx (streamid);
 
-          state->packet.aps = _aps_type;
-          state->packet.aps_pts = pts2;
-
           if (state->stream.last_aps_pts[vid_idx] > pts2)
-            vcd_warn ("aps pts seems out of order (actual pts %f, last seen pts %f)",
+            vcd_warn ("aps pts seems out of order (actual pts %f, last seen pts %f) -- ignoring this aps",
                       pts2, state->stream.last_aps_pts[vid_idx]);
-
-          state->stream.last_aps_pts[vid_idx] = pts2;
+          else
+            {
+              state->packet.aps = _aps_type;
+              state->packet.aps_pts = pts2;
+              state->stream.last_aps_pts[vid_idx] = pts2;
+            }
         }
     }
 }

@@ -1,5 +1,7 @@
 2001-06-01  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* libvcd/vcd_mpeg.c (_analyze_video_pes): ignore aps with pts out of order for now...
+
 	* libvcd/vcd_image.c (vcd_image_source_read_mode2_sectors): new commodity function
 
 	* frontends/cli/vcd_debug.c: implemented dumping of extended selection lists
