@@ -312,7 +312,7 @@ typedef struct {
   uint8_t time_interval       GNUC_PACKED; /* The interval of time in
                                               between scan points, in units
                                               of 0.5 seconds, must be 0x01 */
-  MMSSFF points[0]        GNUC_PACKED; /* The series of scan points */
+  MMSSFF points[0]            GNUC_PACKED; /* The series of scan points */
 } SearchDat;
 
 /* SCANDATA.DAT

@@ -30,43 +30,47 @@
 typedef struct _VcdObj VcdObj;
 
 /* enum defining supported VideoCD types */
-typedef enum {
+typedef enum
+{
   VCD_TYPE_INVALID = 0,
   /* VCD_TYPE_VCD1, */
   /* VCD_TYPE_VCD11, */
   VCD_TYPE_VCD2,
   VCD_TYPE_SVCD
-  /* VCD_TYPE_HQVCD */
-} vcd_type_t;
+    /* VCD_TYPE_HQVCD */
+}
+vcd_type_t;
 
 /* allocates and initializes a new VideoCD object */
 VcdObj *
 vcd_obj_new (vcd_type_t vcd_type);
 
 /* VideoCD parameters */
-typedef enum {
+typedef enum
+{
   VCD_PARM_INVALID = 0,
-  VCD_PARM_VOLUME_LABEL,      /* char *  max length 32 */
-  VCD_PARM_SEC_TYPE           /* int     (2336/2352)   */
-} vcd_parm_t;
+  VCD_PARM_VOLUME_LABEL,        /* char *  max length 32 */
+  VCD_PARM_SEC_TYPE             /* int     (2336/2352)   */
+}
+vcd_parm_t;
 
 /* sets VideoCD parameter */
-void
+void 
 vcd_obj_set_param (VcdObj *obj, vcd_parm_t param, const void *arg);
 
 /* add custom files; if raw_flag set, the data source has to include a
    mode2 subheader, and needs to be a multiple of 2336 byte blocksize */
 int
-vcd_obj_add_file(VcdObj *obj, const char iso_pathname[], VcdDataSource *file,
-                 int raw_flag);
+vcd_obj_add_file (VcdObj *obj, const char iso_pathname[],
+                  VcdDataSource *file, int raw_flag);
 
 /* this one is for actually adding mpeg tracks to VCD, returns item a
    id, or a negative value for error..  */
-int
+int 
 vcd_obj_append_mpeg_track (VcdObj *obj, VcdDataSource *mpeg_file);
 
 /* removes mpeg tracks by item id */
-void
+void 
 vcd_obj_remove_mpeg_track (VcdObj *obj, int track_id);
 
 /* returns information structure of mpeg track by item id */
@@ -74,25 +78,27 @@ const mpeg_info_t *
 vcd_obj_get_mpeg_info (VcdObj *obj, int track_id);
 
 /* returns image size in sectors */
-long
+long 
 vcd_obj_get_image_size (VcdObj *obj);
 
 /* this one is to be called when every parameter has been set and the
    image is about to be written. returns sectors to be written... */
-long
+long 
 vcd_obj_begin_output (VcdObj *obj);
 
 /* callback hook called every few (>|<) iterations, if it returns a value != 0
    the writing process gets aborted */
-typedef struct {
+typedef struct
+{
   long sectors_written;
   long total_sectors;
   int in_track;
   int total_tracks;
-} progress_info_t;
+}
+progress_info_t;
 
-typedef int (*progress_callback_t)(const progress_info_t *progress_info,
-                                   void *user_data);
+typedef int (*progress_callback_t) (const progress_info_t *progress_info,
+                                    void *user_data);
 
 /* writes the actual bin image file; a return value != 0 means the
    action was aborted by user or some other error has occured... */
@@ -107,7 +113,7 @@ vcd_obj_write_cuefile (VcdObj *obj, VcdDataSink *cue_file,
 
 /* this should be called writing the bin and/or cue file is done---even if 
    an error occurred */
-void
+void 
 vcd_obj_end_output (VcdObj *obj);
 
 /* destructor for VideoCD objects; call this to destory a VideoCD
