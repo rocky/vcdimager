@@ -45,7 +45,7 @@
 
 libvcdinfo_la_CURRENT := 1
 libvcdinfo_la_REVISION := 0
-libvcdinfo_la_AGE := 0
+libvcdinfo_la_AGE := 1
 
 noinst_LTLIBRARIES = libvcd.la
 lib_LTLIBRARIES = libvcdinfo.la
