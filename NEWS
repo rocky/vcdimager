@@ -2,6 +2,19 @@ $Id$
 
 see ChangeLog for more information
 
+version 0.5.9beta4
+==================
+2001-03-18
+
+* improved manual
+* added 2336 byte sectors support to vcdrip
+* fixed fd-leaking when adding files
+* fixed maximal cd image size boundary check
+* fixed zero file size bug
+* handle play times >= 100 mins (for svcd)
+* fixed pathtable entry ordering
+* added experimental --add-dir feature to vcdimager
+
 version 0.5.9beta3
 ==================
 2001-03-11

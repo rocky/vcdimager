@@ -1,6 +1,6 @@
 2001-03-18  Herbert Valerio Riedel  <hvr@gnu.org>
 
-	* configure.in: bumped version up to 0.5.9beta3
+	* configure.in: bumped version up to 0.5.9beta4
 
 	* frontends/cli/vcdimager.c (_add_dir): 
 		experimental addition of --add-dir option
