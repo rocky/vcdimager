@@ -78,6 +78,7 @@ Copyright (C) 2003 Rocky Bernstein
 * History and Thanks::  History and Acknowledgments
 * General Index::       Overall index
 * Option Index::        Index for options
+* Sub-Option Index::    Index for sub-options
 @end menu
 @end ifnottex
 
@@ -212,9 +213,9 @@ constructed from the CUE file name by replacing ".cue" by ".bin".  The
 CUE file must have exactly one FILE statement.
 
 If you do not specify a file name after @kbd{--bin-file}, a default
-name is used ``VIDEOCD.BIN'' is probably used; likewise if you do not
+name is used ``videocd.bin'' is probably used; likewise if you do not
 specify a filename after --cue-file a default name is used, probably
-``VIDEOCD.CUE.'' These names I believe are the default output file
+``videocd.cue.'' These names I believe are the default output file
 names used when you use vcdimager or vcdxbuild.
 
 It is preferable to specify a CUE file over a BIN file since this will
@@ -402,6 +403,19 @@ information about what is in this section.
 
 Sub-options are: ``count'', ``data'', ``id'', ``prof'', or ``vers''.
 
+@ftable @code
+@item count
+The number of entries. A number.
+@item data
+A complete list of the entries.
+@item id
+An 8 characters name, probably ``ENTRYVCD''
+@item prof
+System profile tag.
+@item vers
+A 2-hex digit number.
+@end ftable
+
 @item --show-filesystem
 @itemx -F 
 @kindex @code{--show-filesystem}
@@ -425,6 +439,53 @@ information about what is in this section.
 
 Sub-options are: album, cc, count, id, ofm, lid2, lidn, pal, pbc,
 prof, psds, res, seg, segn, segs, spec, start, st2, vers, or vol.
+
+@ftable @code
+@item album
+A description of the album; it could be an album id. The XML tag for
+this is <album-id>. It is a fixed-length blank-padded string of 16
+characters.
+@item cc
+user data cc.
+@item count
+The number of disks in the volume, an integer. The XML tag for this is
+<volume-count>.
+@item id
+A string representing the VCD format; e.g. ``SUPERVCD'' or
+``VIDEO_CD''. Maxiumum of 8 characters.
+@item ofm
+offset multiplier. Value is given is in hexadecimal.
+@item lid2
+start lid #2. A boolean value. The XML tag for this is
+<next-volume-use-lid2>.
+@item lidn
+Maximum LID number.
+@item pal
+@item pbc
+@item prof
+System profile tag. A hexadecimal number 
+@item psds
+PSD size.
+@item res
+Restriction number. The XML tag for this is <restriction>.
+@item seg
+First segment MSF address. 
+@item segn
+Max segment number. A number. 
+@item segs
+Number of segments. A number.
+@item spec
+Special info. A boolean value.
+@item start
+start time offset. Only relevant if SVCD or HQVCD. The XML tag for
+this is <start-time-offset>.
+@item st2
+start track #2. A boolean value. The XML tag for this is
+<next-volume-use-sequence2>.
+@item vers
+@item vol
+The volume number. The XML tag for this is <volume-number>.
+@end ftable
 
 @item --show-lot
 @itemx -L
@@ -451,8 +512,34 @@ section.
 @itemx -P @ovar{sub-option}
 @kindex @code{--show-pvd}
 
-Sub-options are: album, app, id, iso, prep, pub, sys, vers, vol,
+Sub-options are: app, id, iso, prep, pub, sys, vers, vol,
 volset, or xa.
+
+@ftable @code
+@item app
+The application id; a string of at most 128 characters. The XML tag for
+this is <application-id>.
+@item id
+Some sort of string ID.
+@item iso
+ISO size in blocks.
+@item prep
+preparer id; a string of at most 128 characters. The XML tag for this
+is <preparer-id>.
+@item pub
+publisher id. The XML tag for this is <publisher-id>.
+@item sys
+The system ID; a string of at most 32 characters. The XML tag for this
+is <system-id>.
+@item vers
+The version ID. A decimal number.
+@item vol
+The volume ID. The XML tag for this is <volume-id>.
+@item volset
+Volumeset id. 
+@item xa
+A boolean indicating whether the XA marker is present or not.
+@end ftable
 
 @item --show-scandata
 @itemx -s
@@ -551,6 +638,10 @@ directory listing. Here's a sample:
   - ----1xrxrxr 0 0 [fn 00] [LSN    152]     65536  LOT.VCD;1
   - ----1xrxrxr 0 0 [fn 00] [LSN    184]      2456  PSD.VCD;1
 @end smallexample
+
+Note that all the filenames seem to end with @kbd{;1}. ISO 9660
+filename translation is not performaed; if it were, this would be
+stripped. 
 
 A little about the funny ``attribute'' characters at the beginning of
 left-hand side of the listing. For the most part it looks like what
@@ -840,12 +931,14 @@ Text). The subtitle's a private stream id in the MPEG file ahs
 hexidecimal number 0xde.
 
 The bottom part of the display shows track info obtained in a
-lower-level way. Most of the information above comes from metadata
-read in that IS09660 filesystem. If you are reading from a device this
-information comes from comes requsts from the device to give track
-information. If what you are reading is a disk image, the only way to
-get this information has to come from the CUE file which is why it is
-better to specify a CUE file than a BIN file.
+lower-level way. The information above CDROM TRACKS comes from
+meta-data read in that IS09660 filesystem. 
+
+If you are reading from a CD-ROM device, this information comes from
+comes requsts from the device to give track information. If what you
+are reading is a disk image, the only way to get this information has
+to come from the CUE file which is why it is better to specify a CUE
+file than a BIN file.
 
 @node Some Examples
 @chapter Some simple command invocations.
@@ -965,7 +1058,7 @@ inside vcddebug. So I pulled pieces of that out and a library was
 created. As a result @value{program} became a test-bed for this library.
 
 In developing my VCD plugin, I used @value{program} quite a bit. One of the
-annoying things about vcddebug was it's inflexibility in specifying
+annoying things about vcddebug was it's verbosity in specifying
 where to read from; I was constantly typing
 ``--cdrom-device=/dev/cdrom'' when I felt that the program should be
 able to figure this out. The distinction between a ``device'' and a
@@ -989,6 +1082,10 @@ not a VCD was added.
 @node Option Index
 @unnumbered Option Index
 @printindex ky
+
+@node Sub-Option Index
+@unnumbered Sub-Option Index
+@printindex fn
 
 @tex
 % I think something like @colophon should be in texinfo.  In the
