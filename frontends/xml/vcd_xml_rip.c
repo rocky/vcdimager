@@ -1432,9 +1432,10 @@ main (int argc, const char *argv[])
   /* needs to be parsed last! */
   _parse_pbc (&obj, img_src, no_ext_psd_flag);
 
-  if (norip_flag || noseq_flag || noseg_flag || _track_flag)
-    vcd_warn ("Some entry point and auto pause locations might not be "
-	      "checked.");
+  if (norip_flag || noseq_flag || noseg_flag || _track_flag) {
+    vcd_warn ("Entry offsets inside sequence-items may incorrect...");
+    vcd_warn ("and auto-pause locations might not be checked.");
+  }
 
   if (!norip_flag)
     {
