@@ -23,6 +23,7 @@
 #endif
 
 #include <assert.h>
+#include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <popt.h>
@@ -79,6 +80,19 @@ static struct
   vcd_log_handler_t default_vcd_log_handler;
 }
 gl;                             /* global */
+
+static void
+gl_add_file (char *fname, char *iso_fname, int raw_flag)
+{
+  struct add_files_t *tmp = malloc (sizeof (struct add_files_t));
+
+  tmp->next = gl.add_files;
+  gl.add_files = tmp;
+
+  tmp->fname = fname;
+  tmp->iso_fname = iso_fname;
+  tmp->raw_flag = raw_flag;
+}
 
 /****************************************************************************/
 
@@ -144,6 +158,60 @@ _parse_file_arg (const char *arg, char **fname1, char **fname2)
   return rc;
 }
 
+static void
+_add_dir (const char pathname[], const char iso_pathname[])
+{
+  DIR *dir = NULL;
+  struct dirent *dentry = NULL;
+
+  assert (pathname != NULL);
+  assert (iso_pathname != NULL);
+
+  dir = opendir (pathname);
+
+  if (!dir)
+    {
+      perror ("--add-dir: opendir()");
+      exit (EXIT_FAILURE);
+    }
+
+  while ((dentry = readdir (dir)))
+    {
+      char buf[1024] = { 0, };
+      char iso_name[1024] = { 0, };
+      struct stat st;
+
+      if (!strcmp (dentry->d_name, "."))
+        continue;
+
+      if (!strcmp (dentry->d_name, ".."))
+        continue;
+
+      strcat (buf, pathname);
+      strcat (buf, "/");
+      strcat (buf, dentry->d_name);
+
+      strcat (iso_name, dentry->d_name);
+
+      if (stat (buf, &st))
+        perror ("stat()");
+
+      if (S_ISDIR(st.st_mode))
+        {
+          strcat (iso_name, "/");
+          _add_dir (buf, iso_name);
+        }
+      else if (S_ISREG(st.st_mode))
+        {
+          gl_add_file (strdup (buf), strdup (iso_name), false);
+        }
+      else
+        fprintf (stdout, "ignoring %s\n", buf);
+    }
+
+  closedir (dir);
+}
+
 int
 main (int argc, const char *argv[])
 {
@@ -169,6 +237,7 @@ main (int argc, const char *argv[])
 
     enum {
       CL_VERSION = 1,
+      CL_ADD_DIR,
       CL_ADD_FILE,
       CL_ADD_FILE_RAW
     };
@@ -201,8 +270,11 @@ main (int argc, const char *argv[])
         {"sector-2336", '\0', POPT_ARG_NONE, &gl.sector_2336_flag, 0,
          "use 2336 byte sectors for output"},
 
-        {"add-file", '\0', POPT_ARG_STRING, NULL, CL_ADD_FILE, "add file to ISO fs",
-         "FILE,ISO_FILENAME"},
+        {"add-dir", '\0', POPT_ARG_STRING, NULL, CL_ADD_DIR,
+         "add directory contents recursively to ISO fs root", "DIR"},
+
+        {"add-file", '\0', POPT_ARG_STRING, NULL, CL_ADD_FILE, 
+         "add single file to ISO fs", "FILE,ISO_FILENAME"},
 
         {"add-file-2336", '\0', POPT_ARG_STRING, NULL, CL_ADD_FILE_RAW, 
          "add file containing full 2336 byte sectors to ISO fs",
@@ -238,6 +310,16 @@ main (int argc, const char *argv[])
           exit (EXIT_SUCCESS);
           break;
 
+        case CL_ADD_DIR:
+          {
+            const char *arg = poptGetOptArg (optCon);
+
+            assert (arg != NULL);
+            
+            _add_dir (arg, "");
+          }
+          break;
+
         case CL_ADD_FILE:
         case CL_ADD_FILE_RAW:
           {
@@ -247,16 +329,7 @@ main (int argc, const char *argv[])
             assert (arg != NULL);
 
             if(!_parse_file_arg (arg, &fname1, &fname2)) 
-              {
-                struct add_files_t *tmp = malloc (sizeof (struct add_files_t));
-
-                tmp->next = gl.add_files;
-                gl.add_files = tmp;
-
-                tmp->fname = fname1;
-                tmp->iso_fname = fname2;
-                tmp->raw_flag = (opt == CL_ADD_FILE_RAW);
-              }
+              gl_add_file (fname1, fname2, (opt == CL_ADD_FILE_RAW));
             else
               {
                 fprintf (stderr, "file parsing of `%s' failed\n", arg);
