@@ -1,58 +1,51 @@
-#!/bin/sh
+#!/bin/bash
 #$Id$
 
-#echo ${srcdir}
-
+. ${srcdir}/check_common_fn
 . ${srcdir}/check_vcddump_fn
+. ${srcdir}/check_vcdxbuild_fn
 
-VCDXBUILD="../frontends/xml/vcdxbuild"
+BASE=`basename $0 .sh`
+RC=0
 
-if ! md5sum < /dev/null > /dev/null; then
-    echo "$0: md5sum not found, check not possible";
-    exit 77
+if ! test_vcdxbuild ${srcdir}/$BASE.xml; then
+    echo vcdxbuild failed 
+    test_vcdxbuild_cleanup
+    exit $RC
 fi
 
-if [ ! -x "${VCDXBUILD}" ]; then
-    echo "$0: ${VCDXBUILD} missing, check not possible"
-    exit 77
-fi
+if ! do_cksum <<EOF
+1013953491 3880800 videocd.bin
+2088931809 424 videocd.cue
+EOF
+    then
+    echo "$0: cksum(1) checksums didn't match :-("
 
-if ! ${VCDXBUILD} --check --file-prefix "${srcdir}/" ${srcdir}/check_vcd11.xml; then
-    echo "$0: execution failed"
-    rm -vf core videocd.{bin,cue}
+    cksum videocd.bin videocd.cue
+
+    test_vcdxbuild_cleanup
     exit 1
 fi
 
-if md5sum -c <<EOF
-98fa8b9348f94cd8676ccfcb411af5d1 *videocd.bin
-55e5ab512c130f06ea525e267626f4d4 *videocd.cue
-EOF
- then
-    echo "$0: md5sum checksum matched :-)"
+echo "$0: cksum(1) checksums matched :-)"
 
-    if ! test_vcddump '-B -i videocd.bin -I --show-filesystem' \
-      vcd11_test1.dump ${srcdir}/vcd11_test1.right ; then 
-      echo "$0: vcddump test 1 failed "
-      rm -vf core videocd.{bin,cue}
-      exit 1
-    fi
-    
-    if ! test_vcddump '-B --bin-file videocd.bin -X -S --show-pvd vol' \
-      vcd11_test2.dump ${srcdir}/vcd11_test2.right ; then 
-      echo "$0: vcddump test 2 failed "
-      rm -vf core videocd.{bin,cue}
-      exit 1
-    fi
-    
-    rm -vf core videocd.{bin,cue}
-    exit 0
+if ! test_vcddump '-B -i videocd.bin -I --show-filesystem' \
+    vcd11_test1.dump ${srcdir}/vcd11_test1.right ; then 
+    echo "$0: vcddump test 1 failed "
+    test_vcdxbuild_cleanup
+    exit 1
 fi
 
-#md5sum -b videocd.{bin,cue}
+if ! test_vcddump '-B --bin-file videocd.bin -X -S --show-pvd vol' \
+    vcd11_test2.dump ${srcdir}/vcd11_test2.right ; then 
+    echo "$0: vcddump test 2 failed "
+    test_vcdxbuild_cleanup
+    exit 1
+fi
 
-echo "$0: md5sum checksums didn't match :-("
-rm -vf core videocd.{bin,cue}
-exit 1
+# if we got this far, everything should be ok
+test_vcdxbuild_cleanup
+exit 0
 
 #;;; Local Variables: ***
 #;;; mode:shell-script ***

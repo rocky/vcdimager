@@ -4,19 +4,25 @@
 test_vcddump() {
   if [ ! -x "../frontends/cli/vcddump" ]; then
     echo "$0: No vcddump test skipped"
-    return 1
+    return 77
+  fi
+
+  if ! have_cmp; then
+    echo "$0: No cmp(1) found - cannot test vcddump"
+    return 77
   fi
 
   VCDDUMP="../frontends/cli/vcddump"
   opts="$1"
   outfile="$2"
   rightfile="$3"
+
   if ! ${VCDDUMP} ${opts} >${outfile} 2>&1 ; then 
     echo "$0: ${VCDDUMP} ${opts} failed"
     return 2
   fi
 
-  if ! diff -u ${outfile} ${rightfile} ; then
+  if ! cmp ${outfile} ${rightfile} ; then
     return 3
   fi
 
