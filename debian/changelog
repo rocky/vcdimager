@@ -1,8 +1,10 @@
 vcdimager (0.7.13-1) unstable; urgency=low
 
-  * New upstream release
+  * New upstream release.
+  * Fix behavior of noopt in DEB_BUILD_OPTIONS .
+  * Bumped up Standards-Version to 3.5.8 .
 
- -- Herbert Valerio Riedel <hvr@gnu.org>  Fri, 27 Dec 2002 17:35:36 +0100
+ -- Nicolas Boullis <nboullis@debian.org>  Tue, 21 Jan 2003 00:17:43 +0100
 
 vcdimager (0.7.12-2) unstable; urgency=low
 

@@ -3,7 +3,7 @@ Section: otherosfs
 Priority: optional
 Maintainer: Nicolas Boullis <nboullis@debian.org>
 Build-Depends: debhelper (>> 3.0.0), libxml2-dev, libpopt-dev, help2man
-Standards-Version: 3.5.7
+Standards-Version: 3.5.8
 
 Package: vcdimager
 Architecture: any

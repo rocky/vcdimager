@@ -14,9 +14,9 @@ export DH_COMPAT=3
 
 CFLAGS = -g -Wall
 ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
-CFLAGS += -O2
-else
 CFLAGS += -O0
+else
+CFLAGS += -O2
 endif
 
 #this hack shouldn't be necessary anymore
