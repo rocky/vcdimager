@@ -47,7 +47,7 @@
 #include <libvcd/vcd_image_fs.h>
 
 /* Eventually move above libvcd includes but having vcdinfo including. */
-#include "vcdinfo.h"
+#include <libvcd/vcdinfo.h>
 
 static const char _rcsid[] = "$Id$";
 
@@ -1020,7 +1020,7 @@ dump (char image_fname[])
       if (!gl.show.no.delimiter)
         fprintf (stdout, DELIM);
 
-      fprintf (stdout, "VCDdebug - GNU VCDImager - (Super) Video CD Report\n"
+      fprintf (stdout, "vcddump - GNU VCDImager - (Super) Video CD Report\n"
                "%s\n\n", _rcsid);
     }
 
@@ -1451,7 +1451,7 @@ main (int argc, const char *argv[])
         gl.show.all = false;
         break;
       case OP_VERSION:
-        fprintf (stdout, vcd_version_string (true), "vcddebug");
+        fprintf (stdout, vcd_version_string (true), "vcddump");
         fflush (stdout);
         exit (EXIT_SUCCESS);
         break;
