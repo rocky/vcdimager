@@ -81,7 +81,7 @@ instead of in the original English.
 * Introduction::                
 * Video CD Concepts::           
 * Reference::                   
-* VideoCD @acronym{XML} Description::  
+* VideoCD XML Description::     
 * Examples::                    
 * Tips and Hints::              
 * Character Sets::              
@@ -103,6 +103,8 @@ Video CD Concepts
 * Known Video CD Flavors::      
 * The ISO9660 Track::           
 * Constraints on @acronym{MPEG} streams::  
+* Play Items::                  
+* Playback Control::            
 
 Known Video CD Flavors
 
@@ -141,25 +143,55 @@ Common Constraints
 * Alignment::                   
 * Access Point Sectors::        
 
+Play Items
+
+* Sequence Items::              
+* Segment Items::               
+
+Sequence Items
+
+* Advantages::                  
+* Disadvantages::               
+
+Segment Items
+
+* Advantages2::                 
+* Disadvantages2::              
+
+Playback Control
+
+* Function Keys for Interaction::  
+* Linear Playback::             
+* PBC Lists::                   
+* Applications::                
+
+PBC Lists
+
+* Play List::                   
+* Selection List::              
+* End List::                    
+* Command List::                
+
 Reference
 
 * Tools::                       
 
 Tools
 
-* @file{vcdimager}::            
-* @file{vcddebug}::             
-* @file{vcdxgen}::              
-* @file{vcdxbuild}::            
-* @file{vcdxrip}::              
+* @command{vcdimager}::         
+* @command{vcddebug}::          
+* @command{vcdxgen}::           
+* @command{vcdxbuild}::         
+* @command{vcdxrip}::           
 
-@file{vcdimager}
+@command{vcdimager}
 
 * Adding Files to the Video CD ::  
 * CD-i Support::                
 
-VideoCD @acronym{XML} Description
+VideoCD XML Description
 
+* Common Rules::                
 * @code{<videocd>} Root::       
 
 @code{<videocd>} Root
@@ -194,7 +226,7 @@ VideoCD @acronym{XML} Description
 Examples
 
 * Simple Multitrack Example::   
-* @acronym{MPEG} Extraction::   
+* Video CD Disassembling::      
 
 Tips and Hints
 
@@ -226,7 +258,7 @@ authoring, disassembling and analyzing Video CDs and Super Video CDs.
 
 The following commandline tools are provided with this package:
 
-@table @code
+@table @command
 @item vcdimager
 Simple frontend, allowing for easy commandline controlled generation of
 basic @acronym{VCD} and @acronym{SVCD} disc images without an
@@ -237,8 +269,8 @@ Analysation tool and report generator for @acronym{VCD} and
 @acronym{SVCD} discs.
 
 @item vcdxgen
-@acronym{XML} @acronym{VCD}-description generator, with commandline
-interface similiar to the classic @code{vcdimager} frontend.
+@acronym{XML} @acronym{VCD}-description generator, with a commandline
+interface similiar to the classic @command{vcdimager} frontend.
 
 @item vcdxbuild
 Builds a @acronym{VCD}/@acronym{SVCD} according to a supplied
@@ -325,6 +357,8 @@ corrections and improvements for this manual to
 * Known Video CD Flavors::      
 * The ISO9660 Track::           
 * Constraints on @acronym{MPEG} streams::  
+* Play Items::                  
+* Playback Control::            
 @end menu
 
 @node Overview, Anatomy of Video CDs, Video CD Concepts, Video CD Concepts
@@ -630,7 +664,7 @@ Closed caption data file entries.
 This directory is provided for @acronym{CD-i} player applications. (Only
 usefull for Video CDs)
 
-@node Constraints on @acronym{MPEG} streams,  , The ISO9660 Track, Video CD Concepts
+@node Constraints on @acronym{MPEG} streams, Play Items, The ISO9660 Track, Video CD Concepts
 @section Constraints on @acronym{MPEG} streams
 
 GNU VCDImager expects @acronym{MPEG} streams in a format suitable for
@@ -744,7 +778,209 @@ device to figure out display parameters, such as display resoulution and
 frame rate, relaxing the aps requirement may lead to non-working entry
 points.
 
-@node Reference, VideoCD @acronym{XML} Description, Video CD Concepts, Top
+@node Play Items, Playback Control, Constraints on @acronym{MPEG} streams, Video CD Concepts
+@section Play Items
+
+@dfn{Play items} are the @acronym{MPEG} payload on (Super) Video
+CDs. Sequences are usefull for seamless play of larger video sections,
+whereas segments are better for smaller items in interactive
+applications.
+
+@menu
+* Sequence Items::              
+* Segment Items::               
+@end menu
+
+@node Sequence Items, Segment Items, Play Items, Play Items
+@subsection Sequence Items
+
+Each @dfn{sequence} is put in its own @acronym{CD} track. Motion video
+stream is required, with optionally up to 2 audio streams.
+
+@menu
+* Advantages::                  
+* Disadvantages::               
+@end menu
+
+@node Advantages, Disadvantages, Sequence Items, Sequence Items
+@subsubsection Advantages
+
+@itemize @bullet
+@item 
+Can be directly accessed without @acronym{PBC}.
+
+@item
+Entry points.
+
+@item
+Auto pause points.
+
+@end itemize
+
+@node Disadvantages,  , Advantages, Sequence Items
+@subsubsection Disadvantages
+
+@itemize @bullet
+@item
+Pre-gap of 150 empty sectors.
+
+@item
+Limit of 98 sequences.
+
+@item
+Must contain motion video.
+
+@end itemize
+
+@node Segment Items,  , Sequence Items, Play Items
+@subsection Segment Items
+
+A segment item can be
+@itemize @bullet
+@item 
+@acronym{MPEG} video with @emph{optional} @acronym{MPEG} audio.
+
+@item
+@acronym{MPEG} encoded still pictures with @emph{optional}
+@acronym{MPEG} audio.
+
+@item
+@acronym{MPEG} audio only.
+@end itemize
+
+@menu
+* Advantages2::                 
+* Disadvantages2::              
+@end menu
+
+@node Advantages2, Disadvantages2, Segment Items, Segment Items
+@subsubsection Advantages
+
+@itemize @bullet
+@item
+Up to 1980 segment items possible.
+
+@item
+Still pictures and audio only @acronym{MPEG} streams allowed.
+
+@item
+No pre-gaps.
+
+@end itemize
+
+@node Disadvantages2,  , Advantages2, Segment Items
+@subsubsection Disadvantages
+
+@itemize @bullet
+@item
+Only @acronym{PBC} accessible through @acronym{PBC}.
+
+@item
+Segement item size limited by @acronym{SPI} area size.
+
+@end itemize
+
+@node Playback Control,  , Play Items, Video CD Concepts
+@section Playback Control
+
+@dfn{Playback control}, @acronym{PBC}, is available for Video CD 2.0
+and Super Video CD 1.0 disc formats. @acronym{PBC} allows control of the
+playback of play items@footnote{sequence items and segment items} and
+the possibility of interaction with the user through the remote control.
+
+@menu
+* Function Keys for Interaction::  
+* Linear Playback::             
+* PBC Lists::                   
+* Applications::                
+@end menu
+
+@node Function Keys for Interaction, Linear Playback, Playback Control, Playback Control
+@subsection Function Keys for Interaction
+
+The following keys are usually found on the remote control belonging to
+the playing device.
+
+@table @key
+@item NEXT
+May also look like @key{>>|} on the remote control.
+
+@item PREVIOUS
+May also look like @key{|<<} on the remote control.
+
+@item DEFAULT
+This key is usually mapped to the @key{>} or @key{PLAY} key.
+
+@item RETURN
+This key may be mapped to the @key{STOP} key.
+
+@item NUMERIC
+This is actually a pseudo key, representing the numeric keys @key{0},
+@key{1}, ..., @key{9}.
+
+@end table
+
+@node Linear Playback, PBC Lists, Function Keys for Interaction, Playback Control
+@subsection Linear Playback
+
+This playback mode is active, when the @acronym{PSD} is not
+interpreted. In this mode, the @key{NUMERIC} key causes to start
+playback at the entry in @file{ENTRY.VCD}/@file{ENTRY.SVD} with the
+index number pressed. The @key{NEXT} and @key{PREVIOUS} keys play the
+next or previous entry in that the entry file. This mode allows for
+compliant playing devices to honour the entry points defined as chapter
+entries.
+
+@node PBC Lists, Applications, Linear Playback, Playback Control
+@subsection PBC Lists
+
+The control structures involved in @acronym{PBC} are called @dfn{lists}
+and are stored in the @dfn{play sequence descriptor} file.
+
+@menu
+* Play List::                   
+* Selection List::              
+* End List::                    
+* Command List::                
+@end menu
+
+@node Play List, Selection List, PBC Lists, PBC Lists
+@subsubsection Play List
+
+A @dfn{Play list} is basically a collection of play items which are to
+be played in the order specified. Play lists allow to define target
+lists for the @key{NEXT}, @key{PREVIOUS} and @key{RETURN} keys on the
+remote control.
+
+@node Selection List, End List, Play List, PBC Lists
+@subsubsection Selection List
+
+@dfn{Selection lists} are used to offer a user selection based on
+numeric (@key{NUMERIC}) input or---if available---pointer device based
+selection, while showing a play item.
+
+Also features such as random selection, default target (@key{DEFAULT}),
+timeout target and looping are supported.
+
+@node End List, Command List, Selection List, PBC Lists
+@subsubsection End List
+
+An @dfn{end list} can be used to terminate the interpretation of the
+@acronym{PBC} information.
+
+@node Command List,  , End List, PBC Lists
+@subsubsection Command List
+
+@dfn{Command lists} are an optional feature defined for Super Video CDs,
+allowing to execute opcodes in a virtual machine, allowing for enhanced
+interactivity.
+
+@node Applications,  , PBC Lists, Playback Control
+@subsection Applications
+
+@emph{...to be written...}
+
+@node Reference, VideoCD XML Description, Video CD Concepts, Top
 @chapter Reference
 
 @menu
@@ -755,17 +991,17 @@ points.
 @section Tools
 
 @menu
-* @file{vcdimager}::            
-* @file{vcddebug}::             
-* @file{vcdxgen}::              
-* @file{vcdxbuild}::            
-* @file{vcdxrip}::              
+* @command{vcdimager}::         
+* @command{vcddebug}::          
+* @command{vcdxgen}::           
+* @command{vcdxbuild}::         
+* @command{vcdxrip}::           
 @end menu
 
-@node @file{vcdimager}, @file{vcddebug}, Tools, Tools
-@subsection @file{vcdimager}
+@node @command{vcdimager}, @command{vcddebug}, Tools, Tools
+@subsection @command{vcdimager}
 
-There are a few command-line options for @file{vcdimager} at the moment:
+There are a few command-line options for @command{vcdimager} at the moment:
 @example
 @cartouche
 $ vcdimager --help
@@ -777,7 +1013,7 @@ $ vcdimager --help
 * CD-i Support::                
 @end menu
 
-@node Adding Files to the Video CD , CD-i Support, @file{vcdimager}, @file{vcdimager}
+@node Adding Files to the Video CD , CD-i Support, @command{vcdimager}, @command{vcdimager}
 @subsubsection Adding Files to the Video CD 
 
 Files can be added to the @acronym{ISO} file-system, that is the first
@@ -815,7 +1051,7 @@ slashes following directly each other.
 If the parent directory for a file entry does not exist it will be
 created automatically on demand.
 
-@node CD-i Support,  , Adding Files to the Video CD , @file{vcdimager}
+@node CD-i Support,  , Adding Files to the Video CD , @command{vcdimager}
 @subsubsection CD-i Support
 There is no specific CD-i support in GNU VCDImager. But you
 can use the general facilities for adding a custom CD-i player
@@ -838,37 +1074,84 @@ vcdimager alias --cdi \
 	--add-file      /usr/share/cdi/cdi_vcd.cfg,CDI/CDI_VCD.CFG 
 @end example
 
-@node @file{vcddebug}, @file{vcdxgen}, @file{vcdimager}, Tools
-@subsection @file{vcddebug}
+@node @command{vcddebug}, @command{vcdxgen}, @command{vcdimager}, Tools
+@subsection @command{vcddebug}
 
 @emph{...not written yet...}
 
-@node @file{vcdxgen}, @file{vcdxbuild}, @file{vcddebug}, Tools
-@subsection @file{vcdxgen}
+@node @command{vcdxgen}, @command{vcdxbuild}, @command{vcddebug}, Tools
+@subsection @command{vcdxgen}
+
+This tool works almost like the @command{vcdimager} tool, except that it
+creates an intermediate @acronym{XML} description, instead of directly
+building the disc image. This @acronym{XML} can be used as a starting
+point for customization.
+
+The @acronym{XML} file can then be fed to @command{vcdxbuild} for
+building the actual image file(s).
+
+@emph{FIXME: write more}
+
+@node @command{vcdxbuild}, @command{vcdxrip}, @command{vcdxgen}, Tools
+@subsection @command{vcdxbuild}
 
 @emph{...not written yet...}
 
-@node @file{vcdxbuild}, @file{vcdxrip}, @file{vcdxgen}, Tools
-@subsection @file{vcdxbuild}
+@node @command{vcdxrip},  , @command{vcdxbuild}, Tools
+@subsection @command{vcdxrip}
 
 @emph{...not written yet...}
 
-@node @file{vcdxrip},  , @file{vcdxbuild}, Tools
-@subsection @file{vcdxrip}
+@node VideoCD XML Description, Examples, Reference, Top
+@chapter VideoCD XML Description
 
-@emph{...not written yet...}
-
-@node VideoCD @acronym{XML} Description, Examples, Reference, Top
-@chapter VideoCD @acronym{XML} Description
-
-The @acronym{DTD} the @acronym{XML} description conforms to,, can be
+The @acronym{DTD} the @acronym{XML} description conforms to, can be
 downloaded from @uref{http://www.gnu.org/software/vcdimager/videocd.dtd}.
 
+XML examples are available at
+@uref{http://www.hvrlab.org/~hvr/vcdimager/xml_repository.html}.
+
 @menu
+* Common Rules::                
 * @code{<videocd>} Root::       
 @end menu
 
-@node @code{<videocd>} Root,  , VideoCD @acronym{XML} Description, VideoCD @acronym{XML} Description
+@node Common Rules, @code{<videocd>} Root, VideoCD XML Description, VideoCD XML Description
+@section Common Rules
+
+All time related entries@footnote{@code{<wait>}, @code{<autowait>},
+@code{<playtime>}, @code{<time-offset>}} are given in seconds.
+
+For the @code{<wait>} and @code{<autowait>} time entries, @samp{-1}
+means @emph{infinite}. For @code{<loop>} and @code{<playtime>} @samp{0}
+means @emph{repeat forever} and @emph{play until end} accordingly.
+
+Items and their associated IDs fall into two categories, @emph{play
+items} and @emph{PSD items}. Every reference to an ID has to be of the
+right class, otherwise the reference can't be resolved, due to a missing
+lookup. A @emph{play item} can be any of the following:
+
+@itemize @bullet
+@item
+sequence item, @code{<sequence-item>}.
+@item
+entry point into sequence item, @code{<entry>}.
+@item segment item
+segment play item, @code{<segment-item>}.
+@end itemize
+
+Whereas a @emph{PSD item} is required to be one of:
+
+@itemize @bullet
+@item
+selection list, @code{<selection>}.
+@item
+play list, @code{<playlist>}.
+@item
+end list, @code{<endlist>}.
+@end itemize
+
+@node @code{<videocd>} Root,  , Common Rules, VideoCD XML Description
 @section @code{<videocd>} Root
 
 @menu
@@ -1103,6 +1386,23 @@ Data}.
 >
 @end example
 
+@table @code
+@item id
+ID value referenced in @code{ref} attributes.
+
+@item rejected
+Attribute controlling, whether item is not listed, i.e. @emph{rejected},
+in the @acronym{LOT}.
+
+@item x1
+@itemx y1
+@itemx x2
+@itemx y2
+Screen Co-ordinates for selection hotspot areas, with @samp{0,0} being
+the upper left and @samp{255,255} being the lower right screen point.
+
+@end table
+
 @node @code{<selection>} Element, @code{<playlist>} Element, @code{<pbc>} Container, @code{<pbc>} Container
 @subsubsection @code{<selection>} Element
 
@@ -1138,6 +1438,48 @@ Data}.
 <!ELEMENT      select                   EMPTY>
 @end example
 
+@table @code
+@item <bsn>
+Base selection number, the numeric value which is taken as the first
+selection number.
+
+@item <prev>
+Target list id jumped to on @key{PREVIOUS} key press.
+
+@item <next>
+Target list id jumped to on @key{NEXT} key press.
+
+@item <return>
+Target list id jumped to on @key{RETURN} key press.
+
+@item <default>
+Target list id jumped to on @key{DEFAULT} key press.
+
+@item <timeout>
+Target list id to be jumped on timeout of @code{<wait>}. If ommitted, a
+@code{<select>} is selected at random!
+
+@item <wait>
+Time in seconds to wait after playback of @code{<play-item>} before
+triggering timeout action (unless the user triggers some action before
+time ran up).
+
+@item <loop>
+Times to repeat the playback of @code{<play-item>}. the
+@code{jump-timing} attribute controls whether the playback of
+@code{<play-item>} is finished, thus @emph{delayed}, before executing
+user triggered action or an @emph{immediate} jump is perfomed. After the
+specified amount of repetions are completed, the @code{<wait>} time
+begins to count down.
+
+@item <play-item>
+The @emph{play item} to be played while waiting for user intervention.
+
+@item <select>
+Target list id(s) jumped to on @key{NUMERIC} key presses.
+
+@end table
+
 @node @code{<playlist>} Element, @code{<endlist>} Element, @code{<selection>} Element, @code{<pbc>} Container
 @subsubsection @code{<playlist>} Element
 
@@ -1162,6 +1504,33 @@ Data}.
 <!ELEMENT      play-item                EMPTY>
 @end example
 
+@table @code
+
+@item <prev>
+Target list id jumped to on @key{PREVIOUS} key press.
+
+@item <next>
+Target list id jumped to on @key{NEXT} key press.
+
+@item <return>
+Target list id jumped to on @key{RETURN} key press.
+
+@item <playtime>
+The amount of seconds to play of every @code{<play-item>}.
+
+@item <wait>
+Time in seconds to wait after each playback of @code{<play-item>} before
+proceding.
+
+@item <autowait>
+Time in seconds to wait at each defined @code{<auto-pause>} point for
+sequence items referenced in this play list.
+
+@item <play-item>
+The @emph{play item(s)} to play in order.
+
+@end table
+
 @node @code{<endlist>} Element,  , @code{<playlist>} Element, @code{<pbc>} Container
 @subsubsection @code{<endlist>} Element
 
@@ -1173,17 +1542,15 @@ Data}.
 >
 @end example
 
-@node Examples, Tips and Hints, VideoCD @acronym{XML} Description, Top
+@node Examples, Tips and Hints, VideoCD XML Description, Top
 @chapter Examples
 
 @menu
 * Simple Multitrack Example::   
-* @acronym{MPEG} Extraction::   
+* Video CD Disassembling::      
 @end menu
 
-@strong{outdated!!!}
-
-@node Simple Multitrack Example, @acronym{MPEG} Extraction, Examples, Examples
+@node Simple Multitrack Example, Video CD Disassembling, Examples, Examples
 @section Simple Multitrack Example
 
 In the following example session, the files @file{track1.mpg},
@@ -1193,36 +1560,56 @@ is set to `My Test VCD'.
 
 @example
 @cartouche
-$ vcdimager --iso-volume-label="My Test VCD" track1.mpg track2 track3.mpg 
-finished ok, image created with 13421 sectors (31566192 bytes)
+$ vcdimager --iso-volume-label="MY_TEST_VCD" track1.mpg track2 track3.mpg 
+   INFO: scanning mpeg sequence item #0 for scanpoints...
+   INFO: scanning mpeg sequence item #1 for scanpoints...
+   INFO: scanning mpeg sequence item #2 for scanpoints...
+   INFO: writing track 1 (ISO9660)...
+   INFO: writing track 2, MPEG1, NTSC (352x240/30fps), 1 audio stream...
+   INFO: writing track 3, MPEG1, PAL (352x288/25fps), 1 audio stream...
+   INFO: writing track 4, MPEG1, NTSC (352x240/30fps), 1 audio stream...
+finished ok, image created with 13626 sectors [03:01.51]
 $
 @end cartouche
 @end example
 
-@node @acronym{MPEG} Extraction,  , Simple Multitrack Example, Examples
-@section @acronym{MPEG} Extraction
-
-The next example show how to extract the @acronym{MPEG} streams
-contained in the image file @file{test.bin} (the resulting streams are
-stored in files named @file{track_##.mpg} with @samp{##} being the track
-number, starting with 0).
+The same with @acronym{XML} based tools:
 
 @example
 @cartouche
-$ vcdrip-devel -v --rip --bin-file=test.bin     
---DEBUG: found ENTRIES.VCD/SVD
-   INFO: track_00.mpg: 1262 -> 2555
---DEBUG:  stream leadin at 1292
---DEBUG:  stream leadout at 2360
-   INFO: track_01.mpg: 2555 -> 101705
---DEBUG:  stream leadin at 2585
---DEBUG:  stream leadout at 101510
-   INFO: track_02.mpg: 101705 -> 200994
---DEBUG:  stream leadin at 101735
---DEBUG:  stream leadout at 200799
-   INFO: track_03.mpg: 200994 -> 300041
---DEBUG:  stream leadin at 201024
---DEBUG:  stream leadout at 299996
+$ vcdxgen --iso-volume-label="MY_TEST_VCD" track1.mpg track2 track3.mpg 
+(Super) VideoCD xml description created successfully as `videocd.xml'
+$ vcdxbuild videocd.xml
+   INFO: scanning mpeg sequence item #0 for scanpoints...
+   INFO: scanning mpeg sequence item #1 for scanpoints...
+   INFO: scanning mpeg sequence item #2 for scanpoints...
+   INFO: writing track 1 (ISO9660)...
+   INFO: writing track 2, MPEG1, NTSC (352x240/30fps), 1 audio stream...
+   INFO: writing track 3, MPEG1, PAL (352x288/25fps), 1 audio stream...
+   INFO: writing track 4, MPEG1, NTSC (352x240/30fps), 1 audio stream...
+finished ok, image created with 13626 sectors [03:01.51]
+$
+@end cartouche
+@end example
+
+@node Video CD Disassembling,  , Simple Multitrack Example, Examples
+@section Video CD Disassembling
+
+The next example show how to extract the @acronym{PBC} information and
+the @acronym{MPEG} streams contained in the image file
+@file{videocd.bin} (the resulting streams are stored in files named
+@file{avseq##.mpg} with @samp{##} being the track number, starting with
+0).
+
+@example
+@cartouche
+$ vcdxrip -b videocd.bin
+   INFO: detected extended VCD2.0 PBC files
+   INFO: extracting avseq00.mpg... (start lsn 450 (+4739))
+   INFO: extracting avseq01.mpg... (start lsn 5189 (+4160))
+   INFO: extracting avseq02.mpg... (start lsn 9349 (+4277))
+   INFO: writing xml description to `videocd.xml'...
+   INFO: done
 $
 @end cartouche
 @end example
@@ -1249,7 +1636,7 @@ building process, chances are the problems are related to them.
 
 @item 
 Make sure the @acronym{SVCD} is physically ok (e.g., analyze the disc
-with @file{vcddebug} or try it on some other playing device).
+with @command{vcddebug} or try it on some other playing device).
 
 @item
 Try creating the @acronym{SVCD} by enabling the @code{svcd vcd30 mpegav}
@@ -1349,14 +1736,13 @@ f |     / ? O _
 @include glossary.texi
 
 @iftex
-@node GNU General Public License, , Acronym Expansions, Top
 @appendix GNU General Public License
 @center Version 2, June 1991
 @include gpl.texi
 @end iftex
 
 @ifinfo
-@node GNU General Public License, , Acronym Expansions, Top
+@node GNU General Public License,  , Acronym Expansions, Top
 @appendix GNU GENERAL PUBLIC LICENSE
 @center Version 2, June 1991
 @include gpl.texi

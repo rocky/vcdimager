@@ -36,6 +36,9 @@ program end marker
 @item PBC
 playback control
 
+@item PSD
+play sequence descriptor
+
 @item PVD
 primary volume descriptor
 

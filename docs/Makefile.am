@@ -10,6 +10,11 @@ vcdimager.pdf: vcdimager.texi
 vcdimager.html: vcdimager.texi
 	texi2html $<
 
+vcdimager.txt: vcdimager.texi
+	makeinfo --no-headers $< > $@
+
+all-formats: vcdimager.txt vcdimager.html vcdimager.dvi vcdimager.ps vcdimager.pdf
+
 man_MANS = vcdimager.1
 
 EXTRA_DIST = $(man_MANS)
