@@ -204,7 +204,7 @@ vcd_image_sink_new_vpkt (VcdRecorder * recorder)
     set_cuesheet:_set_cuesheet,
     write:_write,
     free:_sink_free,
-    setarg: _sink_set_arg
+    set_arg: _sink_set_arg
   };
 
   if (!recorder)

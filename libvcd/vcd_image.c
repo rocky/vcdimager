@@ -116,10 +116,10 @@ vcd_image_source_set_arg (VcdImageSource *obj, const char key[],
 			  const char value[])
 {
   vcd_assert (obj != NULL);
-  vcd_assert (obj->op.setarg != NULL);
+  vcd_assert (obj->op.set_arg != NULL);
   vcd_assert (key != NULL);
 
-  return obj->op.setarg (obj->user_data, key, value);
+  return obj->op.set_arg (obj->user_data, key, value);
 }
 
 /*
@@ -174,8 +174,8 @@ vcd_image_sink_set_arg (VcdImageSink *obj, const char key[],
 			  const char value[])
 {
   vcd_assert (obj != NULL);
-  vcd_assert (obj->op.setarg != NULL);
+  vcd_assert (obj->op.set_arg != NULL);
   vcd_assert (key != NULL);
 
-  return obj->op.setarg (obj->user_data, key, value);
+  return obj->op.set_arg (obj->user_data, key, value);
 }

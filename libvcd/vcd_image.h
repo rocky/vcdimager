@@ -2,6 +2,7 @@
     $Id$
 
     Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
+                  2002 Rocky Bernstein <rocky@panix.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -30,37 +31,120 @@ extern "C" {
 
 /* VcdImageSink ( --> image reader) */
 
-typedef struct _VcdImageSource VcdImageSource;
+/* opaque structure */
+typedef struct _VcdImageSource VcdImageSource; 
 
 typedef struct {
-  int (*read_mode2_sector) (void *user_data, void *buf, uint32_t lsn, bool mode2raw);
-  int (*read_mode2_sectors) (void *user_data, void *buf, uint32_t lsn, bool mode2raw, unsigned nblocks);
-  uint32_t (*stat_size) (void *user_data);
+
+/*!
+  Eject media in CD drive. If successful, as a side effect we 
+  also free obj. Return 0 if success and 1 for failure.
+ */
+  int (*eject_media) (void *user_data);
+
+  /*!
+    Release and free resources associated with cd. 
+  */
   void (*free) (void *user_data);
-  int (*setarg) (void *user_data, const char key[], const char value[]);
+
+  /*!
+    Return a string containing the default VCD device if none is specified.
+  */
+  char * (*get_default_device)(void);
+
+  /*! Return the size in bytes of the track that starts at "track."
+     The first track is 1. 0 is returned on error.
+   */
+  unsigned int (*get_track_count) (void *user_data);
+
+  /*!  
+    Return the starting MSF (minutes/secs/frames) for track number
+    track_num in obj.  Tracks numbers start at 1.
+    The "leadout" track is specified either by
+    using track_num LEADOUT_TRACK or the total tracks+1.
+    1 is returned on error.
+  */
+  uint32_t (*get_track_lba) (void *user_data, unsigned int track_num);
+
+  /*!  
+    Return the starting MSF (minutes/secs/frames) for track number
+    track_num in obj.  Tracks numbers start at 1.
+    The "leadout" track is specified either by
+    using track_num LEADOUT_TRACK or the total tracks+1.
+    1 is returned on error.
+  */
+  int (*get_track_msf) (void *user_data, unsigned int track_num, msf_t *msf);
+
+  /*! Return the size in bytes of the track that starts at "track."
+     The first track is 1.
+   */
+  uint32_t (*get_track_size) (void *user_data, unsigned int track);
+
+  /*!
+    Reads a single mode2 sector from cd device into data starting
+    from lsn. Returns 0 if no error. 
+  */
+  int (*read_mode2_sector) (void *user_data, void *buf, lsn_t lsn, 
+			    bool mode2raw);
+
+  /*!
+    Reads nblocks of mode2 sectors from cd device into data starting
+    from lsn.
+    Returns 0 if no error. 
+  */
+  int (*read_mode2_sectors) (void *user_data, void *buf, lsn_t lsn, 
+			     bool mode2raw, unsigned nblocks);
+
+  /*!
+    Set the arg "key" with "value" in the source device.
+  */
+  int (*set_arg) (void *user_data, const char key[], const char value[]);
+
+  /*!
+    Return the size of the CD in logical block address (LBA) units.
+  */
+  uint32_t (*stat_size) (void *user_data);
+
 } vcd_image_source_funcs;
 
-VcdImageSource *
-vcd_image_source_new (void *user_data, const vcd_image_source_funcs *funcs);
+/*!
+  Eject media in CD drive if there is a routine to do so. 
+  Return 0 if success and 1 for failure, and 2 if no routine.
+ */
+int
+vcd_image_source_eject_media (VcdImageSource *obj);
 
 void
 vcd_image_source_destroy (VcdImageSource *obj);
 
+/*!
+  Return a string containing the default VCD device if none is specified.
+ */
+char *
+vcd_image_source_get_default_device (VcdImageSource *obj);
+
+VcdImageSource *
+vcd_image_source_new (void *user_data, const vcd_image_source_funcs *funcs);
+
+/*!
+   Reads a single mode2 sector from cd device into data starting
+   from lsn. Returns 0 if no error. 
+ */
 int
 vcd_image_source_read_mode2_sector (VcdImageSource *obj, void *buf, 
-				    uint32_t lsn, bool mode2raw);
+				    lsn_t lsn, bool mode2raw);
 
 int
 vcd_image_source_read_mode2_sectors (VcdImageSource *obj, void *buf, 
-				     uint32_t lsn, bool mode2raw, 
+				     lsn_t lsn, bool mode2raw, 
 				     unsigned num_sectors);
-
-uint32_t
-vcd_image_source_stat_size (VcdImageSource *obj);
 
 int
 vcd_image_source_set_arg (VcdImageSource *obj, const char key[],
 			  const char value[]);
+
+uint32_t
+vcd_image_source_stat_size (VcdImageSource *obj);
 
 /* VcdImageSink ( --> image writer) */
 
@@ -79,9 +163,9 @@ typedef struct {
 
 typedef struct {
   int (*set_cuesheet) (void *user_data, const VcdList *vcd_cue_list);
-  int (*write) (void *user_data, const void *buf, uint32_t lsn);
+  int (*write) (void *user_data, const void *buf, lsn_t lsn);
   void (*free) (void *user_data);
-  int (*setarg) (void *user_data, const char key[], const char value[]);
+  int (*set_arg) (void *user_data, const char key[], const char value[]);
 } vcd_image_sink_funcs;
 
 VcdImageSink *
@@ -94,8 +178,11 @@ int
 vcd_image_sink_set_cuesheet (VcdImageSink *obj, const VcdList *vcd_cue_list);
 
 int
-vcd_image_sink_write (VcdImageSink *obj, void *buf, uint32_t lsn);
+vcd_image_sink_write (VcdImageSink *obj, void *buf, lsn_t lsn);
 
+/*!
+  Set the arg "key" with "value" in the target device.
+*/
 int
 vcd_image_sink_set_arg (VcdImageSink *obj, const char key[], 
 			const char value[]);

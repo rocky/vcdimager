@@ -1,6 +1,6 @@
 # $Id$
 
-noinst_LIBRARIES = libvcd.a
+noinst_LIBRARIES = libvcd.a libvcdinfo.a
 
 INCLUDES = -I$(top_srcdir)
 
@@ -69,3 +69,5 @@ libvcd_a_SOURCES = \
 	vcd_util.h \
 	vcd_types.h \
 	vcd_xa.h
+
+libvcdinfo_a_SOURCES = vcdinfo.h vcdinfo.c

@@ -660,7 +660,7 @@ vcd_image_sink_new_nrg (void)
     set_cuesheet: _set_cuesheet,
     write: _write,
     free: _sink_free,
-    setarg: _sink_set_arg
+    set_arg: _sink_set_arg
   };
 
   _data = _vcd_malloc (sizeof (_img_nrg_snk_t));

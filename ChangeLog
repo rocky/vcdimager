@@ -1,3 +1,10 @@
+2003-01-08  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/vcd_image.h: merged enhanced VcdImageSource interface (by
+	Rocky Bernstein)
+
+	* libvcd/vcdinfo.[ch]: added libvcdinfo from Rocky Bernstein
+
 2003-01-06  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_util.h: added _vcd_lsn_to_lba() helper function

@@ -383,7 +383,7 @@ vcd_image_source_new_linuxcd (void)
     read_mode2_sectors: _read_mode2_sectors,
     stat_size: _stat_size,
     free: _source_free,
-    setarg: _source_set_arg
+    set_arg: _source_set_arg
   };
 
   _data = _vcd_malloc (sizeof (_img_linuxcd_src_t));
