@@ -27,22 +27,12 @@
 # include <stdint.h>
 #elif defined(HAVE_INTTYPES_H)
 # include <inttypes.h>
-#elif defined(__CYGWIN__)
+#elif defined(__CYGWIN__) || defined(AMIGA)
 # include <sys/types.h>
 typedef u_int8_t uint8_t;
 typedef u_int16_t uint16_t;
 typedef u_int32_t uint32_t;
 typedef u_int64_t uint64_t;
-#elif defined(AMIGA)
-/* this should create the proper typedefs for the Amiga */
-typedef unsigned char uint8_t;
-typedef signed char int8_t;
-typedef unsigned short uint16_t;
-typedef signed short int16_t;
-typedef unsigned int uint32_t;
-typedef signed int int32_t;
-typedef unsigned long long uint64_t;
-typedef signed long long int64_t;
 #else
 /* warning ISO/IEC 9899:1999 <stdint.h> was missing and even <inttypes.h> */
 /* fixme */

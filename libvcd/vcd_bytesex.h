@@ -18,23 +18,26 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef _BYTESEX_H_
-#define _BYTESEX_H_
+#ifndef __VCD_BYTESEX_H__
+#define __VCD_BYTESEX_H__
 
 #include "vcd_types.h"
 #include "vcd_logging.h"
+#include "vcd_bytesex_asm.h"
 
-#define UINT16_SWAP_LE_BE(val) ((uint16_t) ( \
+/* generic byteswap routines */
+
+#define UINT16_SWAP_LE_BE_C(val) ((uint16_t) ( \
     (((uint16_t) (val) & (uint16_t) 0x00ffU) << 8) | \
     (((uint16_t) (val) & (uint16_t) 0xff00U) >> 8)))
 
-#define UINT32_SWAP_LE_BE(val) ((uint32_t) ( \
+#define UINT32_SWAP_LE_BE_C(val) ((uint32_t) ( \
     (((uint32_t) (val) & (uint32_t) 0x000000ffU) << 24) | \
     (((uint32_t) (val) & (uint32_t) 0x0000ff00U) <<  8) | \
     (((uint32_t) (val) & (uint32_t) 0x00ff0000U) >>  8) | \
     (((uint32_t) (val) & (uint32_t) 0xff000000U) >> 24)))
 
-#define UINT64_SWAP_LE_BE(val) ((uint64_t) ( \
+#define UINT64_SWAP_LE_BE_C(val) ((uint64_t) ( \
     (((uint64_t) (val) & (uint64_t) UINT64_C(0x00000000000000ff)) << 56) | \
     (((uint64_t) (val) & (uint64_t) UINT64_C(0x000000000000ff00)) << 40) | \
     (((uint64_t) (val) & (uint64_t) UINT64_C(0x0000000000ff0000)) << 24) | \
@@ -44,6 +47,17 @@
     (((uint64_t) (val) & (uint64_t) UINT64_C(0x00ff000000000000)) >> 40) | \
     (((uint64_t) (val) & (uint64_t) UINT64_C(0xff00000000000000)) >> 56)))
 
+#ifndef UINT16_SWAP_LE_BE
+# define UINT16_SWAP_LE_BE UINT16_SWAP_LE_BE_C
+#endif
+
+#ifndef UINT32_SWAP_LE_BE
+# define UINT32_SWAP_LE_BE UINT32_SWAP_LE_BE_C
+#endif
+
+#ifndef UINT64_SWAP_LE_BE
+# define UINT64_SWAP_LE_BE UINT64_SWAP_LE_BE_C
+#endif
 
 inline static 
 uint16_t uint16_swap_le_be (const uint16_t val)
@@ -181,7 +195,7 @@ lba_to_msf(uint32_t lba, msf_t *msf);
 uint32_t
 msf_to_lba (const msf_t *msf);
 
-#endif /* _BYTESEX_H_ */
+#endif /* __VCD_BYTESEX_H__ */
 
 
 /* 

@@ -1,5 +1,8 @@
 2001-08-01  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* libvcd/vcd_bytesex.h, libvcd/vcd_bytesex_asm.h, 
+		libvcd/vcd_types.h: improvements for AMIGA
+	
 	* libvcd/vcd_pbc.c (_vcd_pbc_check_unreferenced): 
 		new function for checking unreferenced items
 
