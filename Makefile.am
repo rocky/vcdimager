@@ -17,7 +17,7 @@ tar-dist:
 	ipath="$$here/install-tmp/"; \
 	rm -rf "$$ipath"; \
 	$(MAKE) install-strip prefix="$$ipath/usr/local/"; \
-	$(TAR) -C "$$ipath" -cvzf $(PACKAGE)-$(VERSION)-$(host_alias).tar.gz usr
+	$(AMTAR) -C "$$ipath" -cvzf $(PACKAGE)-$(VERSION)-$(host_triplet).tar.gz usr
 
 if CYGWIN
 cygwin-dist:

@@ -21,7 +21,7 @@ under the terms of the GNU Free Documentation License, Version 1.1 or
 any later version published by the Free Software Foundation; with no
 Invariant Sections, one Front-Cover Text: "GNU VCDImager by Herbert
 Valerio Riedel et al." and one Back-Cover Text: "GNU VCDImager can be
-obtained at @url{http://www.gnu.org/software/vcdimager/}. The author is
+obtained at @uref{http://www.gnu.org/software/vcdimager/}. The author is
 reachable at @email{hvr@@gnu.org}".  A copy of the license is included
 in the section entitled "GNU Free Documentation License".
 @end ifinfo
@@ -49,7 +49,7 @@ under the terms of the GNU Free Documentation License, Version 1.1 or
 any later version published by the Free Software Foundation; with no
 Invariant Sections, one Front-Cover Text: ``GNU VCDImager by Herbert
 Valerio Riedel et al.'' and one Back-Cover Text: ``GNU VCDImager can be
-obtained at @url{http://www.gnu.org/software/vcdimager/}. The author is
+obtained at @uref{http://www.gnu.org/software/vcdimager/}. The author is
 reachable at @email{hvr@@gnu.org}.''.  A copy of the license is included
 in the section entitled ``GNU Free Documentation License''.
 @end titlepage
@@ -127,6 +127,13 @@ streams.
 @item vcdxminfo
 This is a debugging tool for displaying some @acronym{MPEG} properties,
 as conceived by @command{libvcd}.
+
+@item cdxa2mpeg
+@cindex RIFF CDXA files
+Simple tool for converting MPEG streams wrapped in RIFF CDXA files, as
+created by some operating systems, to plain mpeg streams suitable for
+vcdimager input.
+
 @end table
 
 The generated @acronym{CD-ROM} images created are suitable for being

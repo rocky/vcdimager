@@ -1,3 +1,7 @@
+2001-12-25  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* cleaned up automake framework for automake 1.5
+
 2001-12-21  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* frontends/cli/cdxa2mpeg.c: added new tool cdxa2mpeg

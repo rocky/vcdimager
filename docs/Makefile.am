@@ -17,5 +17,4 @@ vcdimager.txt: vcdimager.texi
 
 all-formats: vcdimager.txt vcdimager.html vcdimager.dvi vcdimager.ps vcdimager.pdf
 
-clean-local:
-	-rm -f vcdimager.ps.gz vcdimager.pdf vcdimager.html vcdimager_toc.html vcdimager_foot.html
+MOSTLYCLEANFILES = vcdimager.tgs vcdimager.ps.gz vcdimager.pdf vcdimager.html vcdimager_toc.html vcdimager_foot.html

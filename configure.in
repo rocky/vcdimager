@@ -1,7 +1,7 @@
 AC_REVISION([$Id$])dnl
 AC_INIT(libvcd/vcd.h)
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(vcdimager, 0.7.12pre2)
+AM_INIT_AUTOMAKE(vcdimager, 0.7.12pre3)
 AM_MISSING_PROG(HELP2MAN, help2man, $missing_dir)
 AM_MAINTAINER_MODE
 
@@ -95,7 +95,7 @@ fi
 if test "x$enable_cli_fe" = "xyes" \
 	-a "x$enable_cli_fe_popt" != "xyes"
 then
- AC_MSG_CHECKING([checking whether popt new enough])
+ AC_MSG_CHECKING([checking whether popt is new enough])
  AC_EGREP_HEADER(poptHelpOptions, popt.h, , enable_cli_fe_popt=yes)
 
  if test "x$enable_cli_fe_popt" = "xyes"; then
@@ -177,7 +177,13 @@ AM_CONDITIONAL(BUILD_CLI_FE, test "x$enable_cli_fe" = "xyes")
 AM_CONDITIONAL(BUILD_GNOME_FE, test "x$enable_gnome_fe" = "xyes")
 AM_CONDITIONAL(BUILD_XML_FE, test "x$enable_xml_fe" = "xyes")
 
+if test "x$enable_cli_fe_popt" = "xyes"; then
+  POPT_LIBS='-L$(top_builddir)/frontends/cli/popt/ -lpopt'  
+  POPT_CFLAGS='-I$(top_srcdir)/frontends/cli/popt/'
+fi
+
 AC_SUBST(POPT_LIBS)
+AC_SUBST(POPT_CFLAGS)
 
 LIBVCD_CFLAGS='-I$(top_srcdir)/libvcd/'
 LIBVCD_LIBS='$(top_builddir)/libvcd/libvcd.a'
