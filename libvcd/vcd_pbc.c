@@ -60,6 +60,23 @@ _wtime (int seconds)
   return 254;
 }
 
+static pbc_t *
+_vcd_pbc_byid(const VcdObj *obj, const char item_id[])
+{
+  VcdListNode *node;
+
+  _VCD_LIST_FOREACH (node, obj->pbc_list)
+    {
+      pbc_t *_pbc = _vcd_list_node_data (node);
+
+      if (_pbc->id && !strcmp (item_id, _pbc->id))
+	return _pbc;
+    }
+
+  /* not found */
+  return NULL;
+}
+
 unsigned
 _vcd_pbc_lid_lookup (const VcdObj *obj, const char item_id[])
 {
@@ -297,11 +314,170 @@ _lookup_psd_offset (const VcdObj *obj, const char item_id[], bool extended)
   return PSD_OFS_DISABLED;
 }
 
+static void
+_vcd_pin_mark_id (const VcdObj *obj, const char _id[])
+{
+  mpeg_sequence_t *_seq;
+  mpeg_segment_t *_seg;
+
+  if ((_seq = _vcd_obj_get_sequence_by_id ((VcdObj *) obj, _id)))
+    _seq->referenced = true;
+
+  if ((_seg = _vcd_obj_get_segment_by_id ((VcdObj *) obj, _id)))
+    _seg->referenced = true;
+}
+
+static void
+_vcd_pbc_mark_id (const VcdObj *obj, const char _id[])
+{
+  pbc_t *_pbc;
+
+  vcd_assert (obj != NULL);
+
+  if (!_id)
+    return;
+
+  _pbc = _vcd_pbc_byid (obj, _id);
+
+  if (!_pbc) /* not found */
+    return;
+
+  if (_pbc->referenced) /* already marked */
+    return;
+
+  _pbc->referenced = true;
+
+  switch (_pbc->type)
+    {
+    case PBC_PLAYLIST:
+      {
+	VcdListNode *node;
+	
+	_vcd_pbc_mark_id (obj, _pbc->prev_id);
+	_vcd_pbc_mark_id (obj, _pbc->next_id);
+	_vcd_pbc_mark_id (obj, _pbc->retn_id);
+
+	_VCD_LIST_FOREACH (node, _pbc->item_id_list)
+	  {
+	    const char *_id = _vcd_list_node_data (node);
+
+	    _vcd_pin_mark_id (obj, _id);
+	  }
+      }
+      break;
+
+    case PBC_SELECTION:
+      {
+	VcdListNode *node;
+
+	_vcd_pbc_mark_id (obj, _pbc->prev_id);
+	_vcd_pbc_mark_id (obj, _pbc->next_id);
+	_vcd_pbc_mark_id (obj, _pbc->retn_id);
+	
+	if (_pbc->selection_type == _SEL_NORMAL)
+	  _vcd_pbc_mark_id (obj, _pbc->default_id);
+
+	_vcd_pbc_mark_id (obj, _pbc->timeout_id);
+
+	_vcd_pin_mark_id (obj, _pbc->item_id);
+
+	_VCD_LIST_FOREACH (node, _pbc->select_id_list)
+	  {
+	    const char *_id = _vcd_list_node_data (node);
+
+	    _vcd_pbc_mark_id (obj, _id);
+	  }
+      }      
+      break;
+
+    case PBC_END:
+      _vcd_pin_mark_id (obj, _pbc->image_id);
+      break;
+
+    default:
+      vcd_assert_not_reached ();
+      break;
+    }
+}
+
+void
+_vcd_pbc_check_unreferenced (const VcdObj *obj)
+{
+  VcdListNode *node;
+
+  /* clear all flags */
+
+  _VCD_LIST_FOREACH (node, obj->pbc_list)
+    {
+      pbc_t *_pbc = _vcd_list_node_data (node);
+
+      _pbc->referenced = false;
+    }
+
+  _VCD_LIST_FOREACH (node, obj->mpeg_sequence_list)
+    {
+      mpeg_sequence_t *_sequence = _vcd_list_node_data (node);
+
+      _sequence->referenced = false;
+    }
+
+  _VCD_LIST_FOREACH (node, obj->mpeg_segment_list)
+    {
+      mpeg_segment_t *_segment = _vcd_list_node_data (node);
+
+      _segment->referenced = false;
+    }
+
+  /* start from non-rejected lists */
+
+  _VCD_LIST_FOREACH (node, obj->pbc_list)
+    {
+      pbc_t *_pbc = _vcd_list_node_data (node);
+
+      vcd_assert (_pbc->id != NULL);
+
+      if (_pbc->rejected)
+	continue;
+
+      _vcd_pbc_mark_id (obj, _pbc->id);
+    }
+
+  /* collect flags */
+
+  _VCD_LIST_FOREACH (node, obj->pbc_list)
+    {
+      pbc_t *_pbc = _vcd_list_node_data (node);
+
+      if (!_pbc->referenced)
+	vcd_warn ("PSD item '%s' is unreachable", _pbc->id);
+    }
+
+  _VCD_LIST_FOREACH (node, obj->mpeg_sequence_list)
+    {
+      mpeg_sequence_t *_sequence = _vcd_list_node_data (node);
+
+      if (!_sequence->referenced)
+	vcd_warn ("sequence '%s' is not reachable by PBC", _sequence->id);
+    }
+
+  _VCD_LIST_FOREACH (node, obj->mpeg_segment_list)
+    {
+      mpeg_segment_t *_segment = _vcd_list_node_data (node);
+
+      if (!_segment->referenced)
+	vcd_warn ("segment item '%s' is unreachable", _segment->id);
+    }
+
+}
 
 void
 _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 		     bool extended)
 {
+  vcd_assert (obj != NULL);
+  vcd_assert (_pbc != NULL);
+  vcd_assert (buf != NULL);
+
   if (extended)
     vcd_assert (_vcd_obj_has_cap_p (obj, _CAP_PBC_X));
 

@@ -71,6 +71,9 @@ struct _pbc_t {
 
   bool rejected;
 
+  /* pbc ref check */
+  bool referenced;
+
   /* used for play/selection lists */
   char *prev_id;
   char *next_id;
@@ -158,5 +161,8 @@ _vcd_pbc_max_lid (const VcdObj *obj);
 void
 _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 		     bool extended);
+
+void
+_vcd_pbc_check_unreferenced (const VcdObj *obj);
 
 #endif /* __VCD_PBC_H__ */

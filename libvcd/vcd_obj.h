@@ -49,6 +49,9 @@ typedef struct {
   char *default_entry_id;
   VcdList *entry_list; /* entry_t */
 
+  /* pbc ref check */
+  bool referenced;
+
   /* computed on sector allocation */
   unsigned relative_start_extent; /* relative to iso data end */
 } mpeg_sequence_t;
@@ -63,6 +66,9 @@ typedef struct {
   const struct vcd_mpeg_source_info *info;
 
   VcdList *pause_list; /* pause_t */
+
+  /* pbc ref check */
+  bool referenced;
 
   /* computed through info */
   unsigned segment_count;

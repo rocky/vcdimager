@@ -1744,6 +1744,8 @@ _write_vcd_iso_track (VcdObj *obj)
           set_lot_vcd (obj, _dict_get_bykey (obj, "lot_x")->buf, true);
           set_psd_vcd (obj, _dict_get_bykey (obj, "psd_x")->buf, true);
         }
+
+      _vcd_pbc_check_unreferenced (obj);
   
       set_lot_vcd (obj, _dict_get_bykey (obj, "lot")->buf, false);
       set_psd_vcd (obj, _dict_get_bykey (obj, "psd")->buf, false);
