@@ -1,5 +1,7 @@
 2001-08-30  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* libvcd/vcd_image_bsdicd.c: new driver for BSD/OS CDROM devices
+
 	* frontends/xml/vcd_xml_rip.c (_rip_sequences): read up to 15
 		sectors at once...
 

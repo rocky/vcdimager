@@ -45,7 +45,7 @@
 #include <libvcd/vcd_image.h>
 #include <libvcd/vcd_image_fs.h>
 #include <libvcd/vcd_image_bincue.h>
-#include <libvcd/vcd_image_linuxcd.h>
+#include <libvcd/vcd_image_cd.h>
 #include <libvcd/vcd_data_structures.h>
 #include <libvcd/vcd_xa.h>
 
@@ -1409,10 +1409,8 @@ main (int argc, const char *argv[])
     {"sector-2336", '\0', POPT_ARG_NONE, &gl_sector_2336_flag, 0,
      "use 2336 byte sector mode for image file"},
 
-#ifdef __linux__
     {"cdrom-device", '\0', POPT_ARG_STRING, &gl_source_name, SOURCE_DEVICE,
-     "set CDROM device as source (linux only)", "DEVICE"},
-#endif
+     "set CDROM device as source", "DEVICE"},
 
     {"verbose", 'v', POPT_ARG_NONE, &gl_verbose_flag, 0, 
      "be verbose"},
@@ -1468,7 +1466,7 @@ main (int argc, const char *argv[])
     switch (gl_source_type)
       {
       case SOURCE_DEVICE:
-        img_src = vcd_image_source_new_linuxcd ();
+        img_src = vcd_image_source_new_cd ();
 
         vcd_image_source_set_arg (img_src, "device", gl_source_name);
         break;

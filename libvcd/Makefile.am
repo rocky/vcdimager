@@ -33,6 +33,9 @@ libvcd_a_SOURCES = \
 	vcd_image_cdrdao.h \
 	vcd_image_nrg.c \
 	vcd_image_nrg.h \
+	vcd_image_cd.h \
+	vcd_image_bsdicd.c \
+	vcd_image_bsdicd.h \
 	vcd_image_linuxcd.c \
 	vcd_image_linuxcd.h \
 	vcd_iso9660.c \

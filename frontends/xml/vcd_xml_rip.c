@@ -36,7 +36,7 @@
 #include <libvcd/vcd_files_private.h>
 #include <libvcd/vcd_image_fs.h>
 #include <libvcd/vcd_image_bincue.h>
-#include <libvcd/vcd_image_linuxcd.h>
+#include <libvcd/vcd_image_cd.h>
 #include <libvcd/vcd_image_nrg.h>
 #include <libvcd/vcd_iso9660.h>
 #include <libvcd/vcd_iso9660_private.h>
@@ -1276,7 +1276,7 @@ main (int argc, const char *argv[])
   enum { 
     CL_VERSION = 1,
     CL_BINCUE,
-    CL_LINUXCD,
+    CL_CDROM,
     CL_NRG
   } _img_type = 0;
 
@@ -1304,10 +1304,8 @@ main (int argc, const char *argv[])
       {"sector-2336", '\0', POPT_ARG_NONE, &sector_2336_flag, 0,
        "use 2336 byte sector mode for image file"},
 
-#if defined(__linux__)
-      {"cdrom-device", '\0', POPT_ARG_STRING, &img_fname, CL_LINUXCD,
-       "set CDROM device as source (linux only)", "DEVICE"},
-#endif
+      {"cdrom-device", '\0', POPT_ARG_STRING, &img_fname, CL_CDROM,
+       "set CDROM device as source", "DEVICE"},
 
       {"nrg-file", '\0', POPT_ARG_STRING, &img_fname, CL_NRG,
        "set NRG image file as source",
@@ -1349,7 +1347,7 @@ main (int argc, const char *argv[])
 
 	case CL_NRG:
 	case CL_BINCUE:
-	case CL_LINUXCD:
+	case CL_CDROM:
 	  if (_img_type)
 	    {
 	      vcd_error ("only one image (type) supported at once - try --help");
@@ -1408,8 +1406,8 @@ main (int argc, const char *argv[])
       }
       break;
 
-    case CL_LINUXCD:
-      img_src = vcd_image_source_new_linuxcd ();
+    case CL_CDROM:
+      img_src = vcd_image_source_new_cd ();
 
       vcd_image_source_set_arg (img_src, "device", img_fname);
       break;

@@ -38,15 +38,19 @@ static const char _rcsid[] = "$Id$";
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 #include <linux/cdrom.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <sys/ioctl.h>
 
 /* reader */
 
 typedef struct {
-  FILE *fd;
+  int fd;
+
   int ioctls_debugged; /* for debugging */
 
   enum {
@@ -67,12 +71,12 @@ _source_init (_img_linuxcd_src_t *_obj)
   if (_obj->init)
     return;
 
-  _obj->fd = fopen (_obj->device, "rb");
+  _obj->fd = open (_obj->device, O_RDONLY, 0);
   _obj->access_mode = _AM_READ_CD;
 
-  if (!_obj->fd)
+  if (_obj->fd < 0)
     {
-      vcd_error ("fopen (%s): %s", _obj->device, strerror (errno));
+      vcd_error ("open (%s): %s", _obj->device, strerror (errno));
       return;
     }
 
@@ -87,8 +91,8 @@ _source_free (void *user_data)
 
   free (_obj->device);
 
-  if (_obj->fd)
-    fclose (_obj->fd);
+  if (_obj->fd >= 0)
+    close (_obj->fd);
 
   free (_obj);
 }
@@ -135,8 +139,8 @@ _set_bsize (int fd, unsigned bsize)
 }
 
 static int
-_read_mode2 (int fd, void *buf, uint32_t lba, unsigned nblocks, 
-	     bool _workaround)
+__read_mode2 (int fd, void *buf, uint32_t lba, unsigned nblocks, 
+		 bool _workaround)
 {
   struct cdrom_generic_command cgc;
 
@@ -186,6 +190,30 @@ _read_mode2 (int fd, void *buf, uint32_t lba, unsigned nblocks,
     return ioctl (fd, CDROM_SEND_PACKET, &cgc);
 
   return 0;
+}
+
+static int
+_read_mode2 (int fd, void *buf, uint32_t lba, unsigned nblocks, 
+	     bool _workaround)
+{
+  unsigned l = 0;
+  int retval = 0;
+
+  while (nblocks > 0)
+    {
+      const unsigned nblocks2 = (nblocks > 25) ? 25 : nblocks;
+      void *buf2 = ((char *)buf ) + (l * 2336);
+      
+      retval |= __read_mode2 (fd, buf2, lba + l, nblocks2, _workaround);
+
+      if (retval)
+	break;
+
+      nblocks -= nblocks2;
+      l += nblocks2;
+    }
+
+  return retval;
 }
 
 static int
@@ -241,7 +269,7 @@ _read_mode2_sectors (void *user_data, void *data, uint32_t lsn, bool form2,
 					   lsn + i, form2, 1))
 		    return 1;
 	      }
-	    else if (ioctl (fileno (_obj->fd), CDROMREADMODE2, &buf) == -1)
+	    else if (ioctl (_obj->fd, CDROMREADMODE2, &buf) == -1)
 	      {
 		perror ("ioctl()");
 		return 1;
@@ -253,7 +281,7 @@ _read_mode2_sectors (void *user_data, void *data, uint32_t lsn, bool form2,
 
 	  case _AM_READ_CD:
 	  case _AM_READ_10:
-	    if (_read_mode2 (fileno (_obj->fd), data, lsn, nblocks, 
+	    if (_read_mode2 (_obj->fd, data, lsn, nblocks, 
 			     (_obj->access_mode == _AM_READ_10)))
 	      {
 		perror ("ioctl()");
@@ -289,23 +317,6 @@ _read_mode2_sectors (void *user_data, void *data, uint32_t lsn, bool form2,
 	  memcpy (((char *)data) + (ISO_BLOCKSIZE * i), 
 		  buf + 8, ISO_BLOCKSIZE);
 	}
-
-#if 0
-      if (fseek (_obj->fd, lsn * ISO_BLOCKSIZE, SEEK_SET))
-        {
-          perror ("fseek()");
-          clearerr (_obj->fd);
-          return 1;
-        }
-
-      if (fread (data, ISO_BLOCKSIZE, nblocks, _obj->fd) != 1 
-	  && ferror (_obj->fd))
-        {
-          perror ("fread()");
-          clearerr (_obj->fd);
-          return 1;
-        }
-#endif
     }
 
   return 0;
@@ -323,11 +334,12 @@ _stat_size (void *user_data)
 
   tocent.cdte_track = CDROM_LEADOUT;
   tocent.cdte_format = CDROM_LBA;
-  if (ioctl (fileno (_obj->fd), CDROMREADTOCENTRY, &tocent) == -1)
+  if (ioctl (_obj->fd, CDROMREADTOCENTRY, &tocent) == -1)
     {
       perror ("ioctl(CDROMREADTOCENTRY)");
       exit (EXIT_FAILURE);
     }
+
   size = tocent.cdte_addr.lba;
 
   return size;
@@ -370,6 +382,7 @@ vcd_image_source_new_linuxcd (void)
 
   _data = _vcd_malloc (sizeof (_img_linuxcd_src_t));
   _data->device = strdup ("/dev/cdrom");
+  _data->fd = -1;
 
   return vcd_image_source_new (_data, &_funcs);
 #else 
