@@ -23,9 +23,11 @@
 #endif
 
 #include <string.h>
-#include <libvcd/vcd_assert.h>
 #include <stdlib.h>
+#include <stddef.h>
 #include <math.h>
+
+#include <libvcd/vcd_assert.h>
 
 #include "vcd_files.h"
 #include "vcd_files_private.h"
@@ -720,12 +722,21 @@ get_scandata_dat_size (const VcdObj *obj)
 void
 set_scandata_dat (VcdObj *obj, void *buf)
 {
-  unsigned tracks = _vcd_list_length (obj->mpeg_track_list);
-  VcdListNode *node;
+  const unsigned tracks = _vcd_list_length (obj->mpeg_track_list);
+
   ScandataDat1 *scandata_dat1 = (ScandataDat1 *) buf;
-  ScandataDat2 *scandata_dat2 = (ScandataDat2 *) &(scandata_dat1->cum_playtimes[tracks]);
-  ScandataDat3 *scandata_dat3 = (ScandataDat3 *) &(scandata_dat2->spi_indexes[0]);
-  ScandataDat4 *scandata_dat4 = (ScandataDat4 *) &(scandata_dat3->mpeg_track_offsets[tracks]);
+  ScandataDat2 *scandata_dat2 = 
+    (ScandataDat2 *) &(scandata_dat1->cum_playtimes[tracks]);
+  ScandataDat3 *scandata_dat3 =
+    (ScandataDat3 *) &(scandata_dat2->spi_indexes[0]);
+  ScandataDat4 *scandata_dat4 = 
+    (ScandataDat4 *) &(scandata_dat3->mpeg_track_offsets[tracks]);
+
+  const uint16_t _begin_offset =
+    offsetof (ScandataDat3, mpeg_track_offsets[tracks])
+    - offsetof (ScandataDat3, mpeg_track_offsets);
+
+  VcdListNode *node;
   unsigned n;
   uint16_t _tmp_offset;
 
@@ -759,25 +770,29 @@ set_scandata_dat (VcdObj *obj, void *buf)
       scandata_dat1->cum_playtimes[n].f = to_bcd8 (floor (f * 75.0));
     }
 
-  /* struct 2 -- nothing */
+  /* struct 2 -- nothing yet */
 
   /* struct 3/4 */
 
-  scandata_dat3->mpegtrack_start_index = UINT16_TO_BE (0);
+  vcd_assert ((_begin_offset % sizeof (msf_t) == 0)
+              && _begin_offset > 0);
 
   _tmp_offset = 0;
+
+  scandata_dat3->mpegtrack_start_index = uint16_to_be (_begin_offset);
 
   n = 0;
   _VCD_LIST_FOREACH (node, obj->mpeg_track_list)
     {
       const mpeg_track_t *track = _vcd_list_node_data (node);
       uint32_t *_table;
-      int point, scanpoints = _get_scandata_count (track->info);
-      
+      const unsigned scanpoints = _get_scandata_count (track->info);
+      const unsigned _table_ofs =
+        (_tmp_offset * sizeof (msf_t)) + _begin_offset;
+      unsigned point;
 
       scandata_dat3->mpeg_track_offsets[n].track_num = n + 2;
-      scandata_dat3->mpeg_track_offsets[n].table_offset 
-        = UINT16_TO_BE (_tmp_offset * sizeof (msf_t));
+      scandata_dat3->mpeg_track_offsets[n].table_offset = uint16_to_be (_table_ofs);
 
       _table = _get_scandata_table (track->info);
 

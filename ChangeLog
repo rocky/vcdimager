@@ -1,5 +1,11 @@
 2001-07-31  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* frontends/cli/vcd_debug.c (dump_scandata_dat): 
+		new function for dumping scandata.dat
+
+	* libvcd/vcd_files.c (set_scandata_dat): fixed offsets in 
+		scandata.dat missing an offset ;-)
+
 	* implemented auto-pause handling for segments in XML frontends
 
 	* libvcd/vcd.c (_vcd_obj_get_sequence_by_id): exported function

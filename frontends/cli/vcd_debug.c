@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 
 #include <popt.h>
 
@@ -53,6 +54,9 @@ static const char _rcsid[] = "$Id$";
 static const char DELIM[] = \
 "----------------------------------------" \
 "---------------------------------------\n";
+
+#define PRINTED_POINTS 15
+
 
 #define BUF_COUNT 16
 #define BUF_SIZE 80
@@ -152,6 +156,7 @@ typedef struct {
 
   void *tracks_buf;
   void *search_buf;
+  void *scandata_buf;
 } debug_obj_t;
 
 /******************************************************************************/
@@ -775,7 +780,8 @@ dump_tracks_svd (const debug_obj_t *obj)
           "all available"
         };
 
-      fprintf (stdout, " track[%.2d]: %2.2x:%2.2x:%2.2x, audio: %s, video: %s, OGT stream: %s\n",
+      fprintf (stdout, " track[%.2d]: %2.2x:%2.2x:%2.2x,"
+               " audio: %s, video: %s, OGT stream: %s\n",
                j,
                tracks->playing_time[j].m,
                tracks->playing_time[j].s,
@@ -787,9 +793,120 @@ dump_tracks_svd (const debug_obj_t *obj)
 }
 
 static void
+dump_scandata_dat (const debug_obj_t *obj)
+{
+  const ScandataDat1 *_sd1 = obj->scandata_buf;
+  const uint16_t scandata_count = uint16_from_be (_sd1->scandata_count);
+  const uint16_t track_count = uint16_from_be (_sd1->track_count);
+  const uint16_t spi_count = uint16_from_be (_sd1->spi_count);
+
+  fprintf (stdout, "EXT/SCANDATA.DAT\n");
+  fprintf (stdout, " ID: `%.8s'\n", _sd1->file_id);
+
+  fprintf (stdout, " version: 0x%2.2x\n", _sd1->version);
+  fprintf (stdout, " reserved: 0x%2.2x\n", _sd1->reserved);
+  fprintf (stdout, " scandata_count: %d\n", scandata_count);
+
+  if (_sd1->version == 0x02)
+    {
+      const msf_t *scandata_table = 
+        (const void *) &_sd1->track_count;
+
+      int n;
+
+      for (n = 0; n < scandata_count; n++)
+        {
+          const msf_t *msf = &scandata_table[n];
+
+          if (!gl_verbose_flag 
+              && n > PRINTED_POINTS
+              && n < scandata_count - PRINTED_POINTS)
+            continue;
+
+          fprintf (stdout, "  scanpoint[%.4d]: lsn: %2.2x:%2.2x:%2.2x\n",
+                   n, msf->m, msf->s, msf->f);
+
+          if (!gl_verbose_flag
+              && n == PRINTED_POINTS
+              && scandata_count > (PRINTED_POINTS * 2))
+            fprintf (stdout, " [..skipping...]\n");
+        }
+    }
+  else if (_sd1->version == 0x01)
+    {
+      const ScandataDat2 *_sd2 = 
+        (const void *) &_sd1->cum_playtimes[track_count];
+
+      const ScandataDat3 *_sd3 = 
+        (const void *) &_sd2->spi_indexes[spi_count];
+
+      const ScandataDat4 *_sd4 = 
+        (const void *) &_sd3->mpeg_track_offsets[track_count];
+
+      const int scandata_ofs0 = 
+        offsetof (ScandataDat3, mpeg_track_offsets[track_count])
+        - offsetof (ScandataDat3, mpeg_track_offsets);
+
+      int n;
+
+      fprintf (stdout, " sequence_count: %d\n", track_count);
+      fprintf (stdout, " segment_count: %d\n", spi_count);
+
+      for (n = 0; n < track_count; n++)
+        {
+          const msf_t *msf = &_sd1->cum_playtimes[n];
+
+          fprintf (stdout, "  cumulative_playingtime[%d]: %2.2x:%2.2x:%2.2x\n",
+                   n, msf->m, msf->s, msf->f);
+        }
+ 
+      for (n = 0; n < spi_count; n++)
+        {
+          const int _ofs = uint16_from_be (_sd2->spi_indexes[n]);
+
+          fprintf (stdout, "  segment scandata ofs[n]: %d\n", _ofs);
+        }
+ 
+      fprintf (stdout, " sequence scandata ofs: %d\n",
+               uint16_from_be (_sd3->mpegtrack_start_index));
+
+      for (n = 0; n < track_count; n++)
+        {
+          const int _ofs = 
+            uint16_from_be (_sd3->mpeg_track_offsets[n].table_offset);
+          const int _toc = _sd3->mpeg_track_offsets[n].track_num;
+
+          fprintf (stdout, "  track [%d]: TOC num: %d, sd offset: %d\n",
+                   n, _toc, _ofs);
+        }
+  
+      fprintf (stdout, " (scanpoint[0] offset = %d)\n", scandata_ofs0);
+
+      for (n = 0; n < scandata_count; n++)
+        {
+          const msf_t *msf = &_sd4->scandata_table[n];
+
+          if (!gl_verbose_flag 
+              && n > PRINTED_POINTS
+              && n < scandata_count - PRINTED_POINTS)
+            continue;
+
+          fprintf (stdout, "  scanpoint[%.4d] (ofs:%5d): lsn: %2.2x:%2.2x:%2.2x\n",
+                   n, scandata_ofs0 + (n * 3), msf->m, msf->s, msf->f);
+
+          if (!gl_verbose_flag
+              && n == PRINTED_POINTS
+              && scandata_count > (PRINTED_POINTS * 2))
+            fprintf (stdout, " [..skipping...]\n");
+        }
+    }
+  else
+    fprintf (stdout, "!unsupported version!\n");
+}
+
+static void
 dump_search_dat (const debug_obj_t *obj)
 {
-  const int _printed_points = 15;
   const SearchDat *searchdat = obj->search_buf;
   unsigned m;
   uint32_t scan_points = uint16_from_be (searchdat->scan_points);
@@ -806,7 +923,8 @@ dump_search_dat (const debug_obj_t *obj)
       unsigned hh, mm, ss, ss2;
 
       if (!gl_verbose_flag 
-          && m > _printed_points && m < scan_points - _printed_points)
+          && m > PRINTED_POINTS 
+          && m < (scan_points - PRINTED_POINTS))
         continue;
       
       ss2 = m * searchdat->time_interval;
@@ -823,7 +941,7 @@ dump_search_dat (const debug_obj_t *obj)
                searchdat->points[m].f);
       
       if (!gl_verbose_flag
-          && m == _printed_points && scan_points > (_printed_points * 2))
+          && m == PRINTED_POINTS && scan_points > (PRINTED_POINTS * 2))
         fprintf (stdout, " [..skipping...]\n");
     }
 }
@@ -1034,6 +1152,12 @@ dump_all (debug_obj_t *obj)
       dump_search_dat (obj);
     }
 
+  if (obj->scandata_buf)
+    {
+      fprintf (stdout, DELIM);
+      dump_scandata_dat (obj);
+    }
+
   fprintf (stdout, DELIM);
 }
 
@@ -1169,6 +1293,13 @@ dump (VcdImageSource *img, const char image_fname[])
   if (!vcd_image_source_fs_stat (img, "EXT/SCANDATA.DAT;1", &statbuf))
     {
       vcd_debug ("found /EXT/SCANDATA.DAT at sector %d", statbuf.lsn);
+
+      obj.scandata_buf = _vcd_malloc (ISO_BLOCKSIZE * statbuf.secsize);
+
+      if (vcd_image_source_read_mode2_sectors (img, obj.scandata_buf,
+                                               statbuf.lsn, false,
+                                               statbuf.secsize))
+        exit (EXIT_FAILURE);
     }
 
   if (obj.vcd_type == VCD_TYPE_VCD2)
