@@ -791,7 +791,8 @@ vcdinf_open(/*out*/ VcdImageSource **img, char source_name[],
   default: 
     return false;
   }
-  return true;
+
+  return source_name != NULL;
 }
 
 
