@@ -240,7 +240,7 @@ GVCDImagerApp::onSettings(void)
 void 
 GVCDImagerApp::onHelpHomepage(void)
 {
-  gnome_url_show("http://www.hvrlab.org/~hvr/vcdimager/");
+  gnome_url_show("http://www.gnu.org/software/vcdimager/");
 }
 
 void 

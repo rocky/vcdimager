@@ -18,6 +18,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+/* libvcd main header */
 
 #ifndef __VCD_H__
 #define __VCD_H__
@@ -25,12 +26,10 @@
 #include "vcd_stream.h"
 #include "vcd_mpeg.h"
 
-/* ...opaque data structure */
+/* opaque data structure representing a VideoCD object */
 typedef struct _VcdObj VcdObj;
 
-/* methods... */
-
-/* first you create an VCD object... */
+/* enum defining supported VideoCD types */
 typedef enum {
   VCD_TYPE_INVALID = 0,
   /* VCD_TYPE_VCD1, */
@@ -40,40 +39,35 @@ typedef enum {
   /* VCD_TYPE_HQVCD */
 } vcd_type_t;
 
-VcdObj*
+/* allocates and initializes a new VideoCD object */
+VcdObj *
 vcd_obj_new (vcd_type_t vcd_type);
 
-/* then you can (optionally) set some vcd parameters... */
+/* VideoCD parameters */
 typedef enum {
   VCD_PARM_INVALID = 0,
   VCD_PARM_VOLUME_LABEL,      /* char *  max length 32 */
   VCD_PARM_SEC_TYPE           /* int     (2336/2352)   */
 } vcd_parm_t;
 
+/* sets VideoCD parameter */
 void
 vcd_obj_set_param (VcdObj *obj, vcd_parm_t param, const void *arg);
 
-/* optionally call this for enabling CD-i support 
-   -- fixme make it more generic */
-/* void
- * vcd_obj_set_cdi_input (VcdObj *obj, VcdDataSource *image_file,
- * VcdDataSource *text_file, VcdDataSource *vcd_file);
- */
-
-/* this one is for actually adding mpeg tracks to VCD, returns item
-   id, or a negative value for error.. */
+/* this one is for actually adding mpeg tracks to VCD, returns item a
+   id, or a negative value for error..  */
 int
 vcd_obj_append_mpeg_track (VcdObj *obj, VcdDataSource *mpeg_file);
 
-/* for removing mpeg tracks by item id */
+/* removes mpeg tracks by item id */
 void
 vcd_obj_remove_mpeg_track (VcdObj *obj, int track_id);
 
-/* use this to retrieve a mpeg info structure... */
-const mpeg_info_t*
+/* returns information structure of mpeg track by item id */
+const mpeg_info_t *
 vcd_obj_get_mpeg_info (VcdObj *obj, int track_id);
 
-/* returns image size in sectors of actual compilation */
+/* returns image size in sectors */
 long
 vcd_obj_get_image_size (VcdObj *obj);
 
@@ -82,34 +76,40 @@ vcd_obj_get_image_size (VcdObj *obj);
 long
 vcd_obj_begin_output (VcdObj *obj);
 
-/* call back called every few iterations, if returned TRUE the process
-   gets aborted */
+/* callback hook called every few (>|<) iterations, if it returns a value != 0
+   the writing process gets aborted */
+typedef struct {
+  long sectors_written;
+  long total_sectors;
+  int in_track;
+  int total_tracks;
+} progress_info_t;
 
-typedef int (*progress_callback_t)(long sectors_written, long total_sectors, 
-                                   int in_track, int total_tracks, 
+typedef int (*progress_callback_t)(const progress_info_t *progress_info,
                                    void *user_data);
 
-/* writes the actual bin image file...
-   if return value != 0 -- aborted or other error */
+/* writes the actual bin image file; a return value != 0 means the
+   action was aborted by user or some other error has occured... */
 int
 vcd_obj_write_image (VcdObj *obj, VcdDataSink *bin_file,
                      progress_callback_t callback, void *user_data);
 
-/* spit out cue file */
-void
+/* spit out cue file; return != 0 --> error */
+int
 vcd_obj_write_cuefile (VcdObj *obj, VcdDataSink *cue_file,
                        const char bin_fname[]);
 
-/* call this when finished writing, or aborting loop */
+/* this should be called writing the bin and/or cue file is done---even if 
+   an error occurred */
 void
 vcd_obj_end_output (VcdObj *obj);
 
-/* when done with writing just destroy (almost) every trace... */
+/* destructor for VideoCD objects; call this to destory a VideoCD
+   object created by vcd_obj_new () */
 void 
 vcd_obj_destroy (VcdObj *obj);
 
 #endif /* __VCD_H__ */
-
 
 /* 
  * Local variables:
