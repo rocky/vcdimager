@@ -100,13 +100,55 @@ _init_segments (vcdinfo_obj_t *obj)
 {
   InfoVcd *info = vcdinfo_get_infoVcd(obj);
   segnum_t num_segments = vcdinfo_get_num_segments(obj);
+  VcdListNode *entnode;
+  VcdList *entlist;
   int i;
+  lsn_t last_lsn=0;
   
   obj->first_segment_lsn = cdio_msf_to_lsn(&info->first_seg_addr);
-
   obj->seg_sizes         = _vcd_malloc( num_segments * sizeof(uint32_t *));
-  if (NULL == obj->seg_sizes) return;
 
+  if (NULL == obj->seg_sizes || 0 == num_segments) return;
+
+  entlist = iso9660_fs_readdir(obj->img, "SEGMENT", true);
+
+  i=0;
+  _VCD_LIST_FOREACH (entnode, entlist) {
+    iso9660_stat_t *statbuf = _vcd_list_node_data (entnode);
+
+    if (statbuf->type == _STAT_DIR) continue;
+
+    while(info->spi_contents[i].item_cont) {
+      obj->seg_sizes[i] = VCDINFO_SEGMENT_SECTOR_SIZE;
+      i++;
+    }
+    
+    /* Should have an entry in the ISO 9660 filesystem. Get and save 
+       in statbuf.secsize this size.
+    */
+    obj->seg_sizes[i] = statbuf->secsize;
+
+    if (last_lsn >= statbuf->lsn) 
+      vcd_warn ("Segments if ISO 9660 directory out of order lsn %ul >= %ul", 
+                (unsigned int) last_lsn, (unsigned int) statbuf->lsn);
+    last_lsn = statbuf->lsn;
+
+    i++;
+  }
+
+  while(i < num_segments && info->spi_contents[i].item_cont) {
+    obj->seg_sizes[i] = VCDINFO_SEGMENT_SECTOR_SIZE;
+    i++;
+  }
+
+  if (i != num_segments) 
+    vcd_warn ("Number of segments found %d is not number of segments %d", 
+              i, num_segments);
+
+  _vcd_list_free (entlist, true);
+
+  
+#if 0
   /* Figure all of the segment sector sizes */
   for (i=0; i < num_segments; i++) {
     
@@ -126,6 +168,8 @@ _init_segments (vcdinfo_obj_t *obj)
       }
     }
   }
+#endif
+
 }
 
 /*!
