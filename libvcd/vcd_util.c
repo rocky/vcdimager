@@ -194,6 +194,29 @@ _vcd_strncpy_pad(char dst[], const char src[], size_t len)
   return dst;
 }
 
+int
+_vcd_isdchar (int c)
+{
+  if (!IN (c, 0x30, 0x5f)
+      || IN (c, 0x3a, 0x40)
+      || IN (c, 0x5b, 0x5e))
+    return false;
+
+  return true;
+}
+
+int
+_vcd_isachar (int c)
+{
+  if (!IN (c, 0x20, 0x5f)
+      || IN (c, 0x23, 0x24)
+      || c == 0x40
+      || IN (c, 0x5b, 0x5e))
+    return false;
+
+  return true;
+}
+
 
 /* 
  * Local variables:

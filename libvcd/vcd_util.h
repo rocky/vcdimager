@@ -63,6 +63,12 @@ _vcd_strdup_upper (const char str[]);
 char *
 _vcd_strncpy_pad(char dst[], const char src[], size_t len);
 
+int
+_vcd_isdchar (int c);
+
+int
+_vcd_isachar (int c);
+
 #endif /* __VCD_UTIL_H__ */
 
 
