@@ -65,7 +65,7 @@ vcd_image_source_get_default_device (VcdImageSource *obj)
 {
   vcd_assert (obj != NULL);
 
-  if (obj->op.eject_media) {
+  if (obj->op.get_default_device) {
     return obj->op.get_default_device ();
   } else {
     return NULL;
