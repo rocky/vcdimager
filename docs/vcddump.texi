@@ -449,7 +449,7 @@ conform to.
 
 @item --show-info-all
 @kindex @code{--show-info-all}
-List everything in the PVD section. See @ref{Info, ,Info Section}.
+List everything in the PVD section. See @ref{Info, ,Disc Information}.
 
 @item --show-info @var{suboption}
 @itemx -I @ovar{sub-option}
@@ -462,20 +462,20 @@ prof, psds, res, seg, segn, segs, spec, start, st2, vers, or vol.
 @item album
 A description of the album; it could be an album id. The XML tag for
 this is <album-id>. It is a fixed-length blank-padded string of 16
-characters. See line 5 of the example in @ref{Info, ,Info Section}.
+characters. See line 5 of the example in @ref{Info, ,Disc Information}.
 @item cc
-user data cc. See line 14 of the example in @ref{Info, ,Info Section}.
+user data cc. See line 14 of the example in @ref{Info, ,Disc Information}.
 @item count
 The number of disks in the volume, an integer. The XML tag for this is
-<volume-count>. See line 6 of the example in @ref{Info, ,Info Section}.
+<volume-count>. See line 6 of the example in @ref{Info, ,Disc Information}.
 @item id
 A string representing the VCD format. ``VIDEO_CD'' for VCD 1.0, VCD
 1.1, or VCD 2.0, ``SUPERVCD'' for SVCD, XVCD, CVD, and ``HQ-VCD'' for
 HQVCD. A Maxiumum of 8 characters. See line 2 of the example in
-@ref{Info, ,Info Section}.
+@ref{Info, ,Disc Information}.
 @item ofm
 offset multiplier. Value is given is in hexadecimal. See line 20 of
-the example in @ref{Info, ,Info Section}.
+the example in @ref{Info, ,Disc Information}.
 @item lid2
 start lid #2. A boolean value. The XML tag for this is
 <next-volume-use-lid2>. See line 15 of the example in @ref{Info, ,Info
@@ -485,7 +485,7 @@ Maximum LID number. See line 21 of the example in @ref{Info, ,Info
 Section}.
 @item pal
 bitset of 98 PAL(=set)/NTSC flags. See lines 8--9 of the example in
-@ref{Info, ,Info Section}.
+@ref{Info, ,Disc Information}.
 @item pbc
 Show the field called ``extended pbc'' or ``reserved2'' A boolean
 value. If the image format is SVCD or HQVCD, this will be labled
@@ -493,42 +493,42 @@ value. If the image format is SVCD or HQVCD, this will be labled
 is VCD2.0, checks for for extended playback control files
 (EXT/LOT_X.VCD and EXT_PSD_X.VCD) will be made. If both files exist
 then VCD2.0 extended playback is probably used.  See line 17 of
-@ref{Info, ,Info Section}.
+@ref{Info, ,Disc Information}.
 @item prof
 System profile tag.  Used to define the set of mandatory parts to be
 applied for compatibility. Tag, 0x00 for "SUPERVCD", 0x01 for
 "HQ-VCD", 0x0@emph{n} for VCD@emph{x}.@emph{n}. A hexidecimal number.
-See line 4 of the example in @ref{Info, ,Info Section}.
+See line 4 of the example in @ref{Info, ,Disc Information}.
 @item psds
-PSD size. See line 18 of the example in @ref{Info, ,Info Section}.
+PSD size. See line 18 of the example in @ref{Info, ,Disc Information}.
 @item res 
 Restriction number, e.g. ``unsuitiable for kids''; 0 is unrestricted,
 1 is restricted category 1, 2 is restricted category 2, 3 is
 restricted category 3. The XML tag for this is <restriction>.
 @item seg
 First segment MSF address. See line 19 of the example in
-@ref{Info, ,Info Section}.
+@ref{Info, ,Disc Information}.
 @item segn
-Max segment number. See line 22 of the example in @ref{Info, ,Info Section}.
+Max segment number. See line 22 of the example in @ref{Info, ,Disc Information}.
 @item segs
 The name of file containing segment information. VCD/INFO.VCD or
-SVCD/INFO.SVD. See line 1 of the example in @ref{Info, ,Info Section}.
+SVCD/INFO.SVD. See line 1 of the example in @ref{Info, ,Disc Information}.
 @item spec
 Special info is encoded into the pictures. A boolean value. See line
-13 of the example in @ref{Info, ,Info Section}.
+13 of the example in @ref{Info, ,Disc Information}.
 @item start
 start time offset. Only relevant if SVCD or HQVCD. The XML tag for
 this is <start-time-offset>. 
 @item st2
 start track #2. A boolean value. The XML tag for this is
 <next-volume-use-sequence2>. See line 16 of the example in
-@ref{Info, ,Info Section}.
+@ref{Info, ,Disc Information}.
 @item vers
 0x01 for SVCD and VCD1.@emph{x}; 0x02 -- VCD2.0. A hexadecimal number.
-See line 3 of the example in @ref{Info, ,Info Section}.
+See line 3 of the example in @ref{Info, ,Disc Information}.
 @item vol
 The volume number. The XML tag for this is <volume-number>. See line 7
-of the example in @ref{Info, ,Info Section}.
+of the example in @ref{Info, ,Disc Information}.
 @end ftable
 
 @item --show-lot
@@ -646,7 +646,7 @@ These separate the major logical sections of a VCD
 * PVD::                 Primary Volume Descriptor (PVD) Section
 * Filesystem::          ISO 9660 Information
 * Entries::             Entries Section
-* Info::                Info Section
+* Info::                Disc Information
 * LOT::                 LID Offset Table (LOT) Section
 * PSD::                 Program Segment Descriptors (PSD) Section
 * Tracks::              Tracks 
@@ -816,7 +816,7 @@ sector size.''
 
 
 @node Info
-@section Info Section
+@section Disc Information
 
 Here is part of sample output from a SVCD. (This is not the same
 example as the VCD used before.)
