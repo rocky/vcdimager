@@ -43,7 +43,7 @@
   printf ("checking sizeof (%s) ...", #typnam); \
   if (sizeof (typnam) != (typnam##_SIZEOF)) { \
       printf ("failed!\n==> sizeof (%s) == %d (but should be %d)\n", \
-              #typnam, sizeof(typnam), (typnam##_SIZEOF)); \
+              #typnam, (int)sizeof(typnam), (typnam##_SIZEOF)); \
       fail++; \
   } else { pass++; printf ("ok!\n"); } \
 }
@@ -52,7 +52,7 @@
   printf ("checking sizeof (struct %s) ...", #typnam); \
   if (sizeof (struct typnam) != (struct_##typnam##_SIZEOF)) { \
       printf ("failed!\n==> sizeof (struct %s) == %d (but should be %d)\n", \
-              #typnam, sizeof(struct typnam), (struct_##typnam##_SIZEOF)); \
+              #typnam, (int)sizeof(struct typnam), (struct_##typnam##_SIZEOF)); \
       fail++; \
   } else { pass++; printf ("ok!\n"); } \
 }
