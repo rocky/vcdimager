@@ -11,6 +11,7 @@ version 0.7.13 (unstable/development)
 * removed internal popt and gnome frontend code from distribution
 * added --dump-dtd option to vcdxbuild
 * added testsuite to distribution
+* added vcdinfo library to retrieve VCD information
 * added vcddump tool
 
 version 0.7.12 (unstable/development)
