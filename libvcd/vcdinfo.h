@@ -261,7 +261,8 @@ extern "C" {
     entry number. 
   */
   void
-  vcdinfo_classify_itemid (uint16_t itemid_num, vcdinfo_itemid_t *itemid);
+  vcdinfo_classify_itemid (uint16_t itemid_num, 
+			   /*out*/ vcdinfo_itemid_t *itemid);
   
   /*!
     Return a string containing the VCD album id, or NULL if there is 
@@ -396,8 +397,8 @@ extern "C" {
   /**
      \fn vcdinfo_get_next_from_pld(const PsdPlayListDescriptor *pld); 
      \brief  Get next offset for a given PSD selector descriptor.  
-     \return  VCDINFO_INVALID_OFFSET is returned on error or if pld has no "next"
-     entry or pld is NULL. Otherwise the LID offset is returned.
+     \return  VCDINFO_INVALID_OFFSET is returned on error or if pld has no 
+     "next" entry or pld is NULL. Otherwise the LID offset is returned.
   */
   lid_t
   vcdinfo_get_next_from_pld(const PsdPlayListDescriptor *pld);
@@ -405,8 +406,8 @@ extern "C" {
   /**
      \fn vcdinfo_get_next_from_psd(const PsdSelectionListDescriptor *psd);
      \brief Get next offset for a given PSD selector descriptor. 
-     \return  VCDINFO_INVALID_OFFSET is returned on error or if psd has no "next"
-     entry or psd is NULL. Otherwise the LID offset is returned.
+     \return  VCDINFO_INVALID_OFFSET is returned on error or if psd has no 
+     "next" entry or psd is NULL. Otherwise the LID offset is returned.
   */
   lid_t
   vcdinfo_get_next_from_psd(const PsdSelectionListDescriptor *psd);
@@ -494,7 +495,8 @@ extern "C" {
   /**
      \fn vcdinfo_get_prev_from_psd(const PsdPlayListDescriptor *psd);
      \brief Get prev offset for a given PSD selector descriptor. 
-     \return  VCDINFO_INVALID_OFFSET is returned on error or if psd has no "prev"
+     \return  VCDINFO_INVALID_OFFSET is returned on error or if psd has no 
+     "prev"
      entry or psd is NULL. Otherwise the LID offset is returned.
   */
   lid_t
@@ -620,7 +622,7 @@ vcdinfo_get_seg_size(const vcdinfo_obj_t *obj, const unsigned int seg_num);
     at 1. Note this is one less than the track number reported in vcddump.
     We don't count the track that contains ISO9660 and metadata information.
   */
-  unsigned int
+  track_t
   vcdinfo_get_track(const vcdinfo_obj_t *obj, const unsigned int entry_num);
   
   /*!
@@ -713,150 +715,137 @@ vcdinfo_get_seg_size(const vcdinfo_obj_t *obj, const unsigned int seg_num);
   int
   vcdinfo_get_wait_time (const PsdPlayListDescriptor *d);
   
-/*!
-  Returns a string which interpreting the extended attribute xa_attr. 
-  For example:
-  \verbatim
-  d---1xrxrxr
-  ---2--r-r-r
-  -a--1xrxrxr
-  \endverbatim
-
-  A description of the characters in the string follows
-  The 1st character is either "d" if the entry is a directory, or "-" if not.
-  The 2nd character is either "a" if the entry is CDDA (audio), or "-" if not.
-  The 3rd character is either "i" if the entry is interleaved, or "-" if not.
-  The 4th character is either "2" if the entry is mode2 form2 or "-" if not.
-  The 5th character is either "1" if the entry is mode2 form1 or "-" if not.
-   Note that an entry will either be in mode2 form1 or mode form2. That
-   is you will either see "2-" or "-1" in the 4th & 5th positions.
-
-  The 6th and 7th characters refer to permissions for everyone while the
-  the 8th and 9th characters refer to permissions for a group while, and 
-  the 10th and 11th characters refer to permissions for a user. 
- 
-  In each of these pairs the first character (6, 8, 10) is "x" if the 
-  entry is executable. For a directory this means the directory is
-  allowed to be listed or "searched".
-  The second character of a pair (7, 9, 11) is "r" if the entry is allowed
-  to be read. 
-*/
-const char *
-vcdinfo_get_xa_attr_str (uint16_t xa_attr);
-
-/*!
-  Return true is there is playback control. 
-*/
-bool
-vcdinfo_has_pbc (const vcdinfo_obj_t *obj);
-  
-/*! 
-  Return true if VCD has "extended attributes" (XA). Extended attributes
-  add meta-data attributes to a entries of file describing the file.
-  See also vcdinfo_get_xa_attr_str() which returns a string similar to
-  a string you might get on a Unix filesystem listing ("ls").
-*/
-bool 
-vcdinfo_has_xa(const vcdinfo_obj_t *obj);
-
-/*!
-  Add one to the MSF.
-*/
-void
-vcdinfo_inc_msf (uint8_t *min, uint8_t *sec, int8_t *frame);
-
-/*!
-  Convert minutes, seconds and frame (MSF components) into a
-  logical block address (or LBA). 
-  See also msf_to_lba which uses msf_t as its single parameter.
-*/
-lba_t
-vcdinfo_msf2lba (uint8_t min, uint8_t sec, int8_t frame);
-
-/*!
-  Convert minutes, seconds and frame (MSF components) into a
-  logical sector number (or LSN). 
-*/
-lsn_t
-vcdinfo_msf2lsn (uint8_t min, uint8_t sec, int8_t frame);
-
-/*!
-  Convert minutes, seconds and frame (MSF components) into a
-  logical block address (or LBA). 
-  See also msf_to_lba which uses msf_t as its single parameter.
-*/
-void 
-vcdinfo_lba2msf (lba_t lba, uint8_t *min, uint8_t *sec, uint8_t *frame);
-
-/*!
-  Convert logical block address (LBA), to a logical sector number (LSN).
-*/
-lsn_t
-vcdinfo_lba2lsn(lba_t lba) ;
-
-/*!
-  Convert logical sector number (LSN), to a logical block address (LBA).
-*/
-lba_t
-vcdinfo_lsn2lba(lsn_t lsn);
-
-const char *
-vcdinfo_ofs2str (const vcdinfo_obj_t *obj, unsigned int offset, bool ext);
-
-void
-vcdinfo_visit_lot (vcdinfo_obj_t *obj, bool ext);
-
-bool
-vcdinfo_read_psd (vcdinfo_obj_t *obj);
-
-/*!
-   Change trailing blanks in str to nulls.  Str has a maximum size of
-   n characters.
-*/
-const char *
-vcdinfo_strip_trail (const char str[], size_t n);
-
-/*!
-   Initialize the vcdinfo structure "obj". Should be done before other
-   routines using obj are called.
-*/
-bool 
-vcdinfo_init(vcdinfo_obj_t *obj);
-
-/*!
-   Set up vcdinfo structure "obj" for reading and writing from a
-   particular medium. This should be done before after initialization
-   but before any routines that need to retrieve or write data.
- 
-   source_name is the device or file to use for inspection, and
-   source_type indicates if this is a device or a file.
-   access_mode gives special access options for reading.
+  /*!
+    Returns a string which interpreting the extended attribute xa_attr. 
+    For example:
+    \verbatim
+    d---1xrxrxr
+    ---2--r-r-r
+    -a--1xrxrxr
+    \endverbatim
     
-   VCDINFO_OPEN_VCD is returned if everything went okay; 
-   VCDINFO_OPEN_ERROR if there was an error and VCDINFO_OPEN_OTHER if the
-   medium is something other than a VCD.
- */
-vcdinfo_open_return_t
-vcdinfo_open(vcdinfo_obj_t *obj, char source_name[], 
-             vcdinfo_source_t source_type, const char access_mode[]);
-
-
-/*!
- Dispose of any resources associated with vcdinfo structure "obj".
- Call this when "obj" it isn't needed anymore. 
-
- True is returned is everything went okay, and false if not.
-*/
-bool 
-vcdinfo_close(vcdinfo_obj_t *obj);
-
-/*!
- Return true if offset is "rejected". That is shouldn't be displayed
- in a list of entries.
-*/
-bool
-vcdinfo_is_rejected(uint16_t offset);
-
+    A description of the characters in the string follows
+    The 1st character is either "d" if the entry is a directory, or "-" if not
+    The 2nd character is either "a" if the entry is CDDA (audio), or "-" if not
+    The 3rd character is either "i" if the entry is interleaved, or "-" if not
+    The 4th character is either "2" if the entry is mode2 form2 or "-" if not
+    The 5th character is either "1" if the entry is mode2 form1 or "-" if not
+    Note that an entry will either be in mode2 form1 or mode form2. That
+    is you will either see "2-" or "-1" in the 4th & 5th positions.
+    
+    The 6th and 7th characters refer to permissions for everyone while the
+    the 8th and 9th characters refer to permissions for a group while, and 
+    the 10th and 11th characters refer to permissions for a user. 
+    
+    In each of these pairs the first character (6, 8, 10) is "x" if the 
+    entry is executable. For a directory this means the directory is
+    allowed to be listed or "searched".
+    The second character of a pair (7, 9, 11) is "r" if the entry is allowed
+    to be read. 
+  */
+  const char *
+  vcdinfo_get_xa_attr_str (uint16_t xa_attr);
+  
+  /*!
+    Return true is there is playback control. 
+  */
+  bool vcdinfo_has_pbc (const vcdinfo_obj_t *obj);
+  
+  /*! 
+    Return true if VCD has "extended attributes" (XA). Extended attributes
+    add meta-data attributes to a entries of file describing the file.
+    See also vcdinfo_get_xa_attr_str() which returns a string similar to
+    a string you might get on a Unix filesystem listing ("ls").
+  */
+  bool vcdinfo_has_xa(const vcdinfo_obj_t *obj);
+  
+  /*!
+    Add one to the MSF.
+  */
+  void vcdinfo_inc_msf (uint8_t *min, uint8_t *sec, int8_t *frame);
+  
+  /*!
+    Convert minutes, seconds and frame (MSF components) into a
+    logical block address (or LBA). 
+    See also msf_to_lba which uses msf_t as its single parameter.
+  */
+  lba_t vcdinfo_msf2lba (uint8_t min, uint8_t sec, int8_t frame);
+  
+  /*!
+    Convert minutes, seconds and frame (MSF components) into a
+    logical sector number (or LSN). 
+  */
+  lsn_t vcdinfo_msf2lsn (uint8_t min, uint8_t sec, int8_t frame);
+  
+  /*!
+    Convert minutes, seconds and frame (MSF components) into a
+    logical block address (or LBA). 
+    See also msf_to_lba which uses msf_t as its single parameter.
+  */
+  void 
+  vcdinfo_lba2msf (lba_t lba, uint8_t *min, uint8_t *sec, uint8_t *frame);
+  
+  /*!
+    Convert logical block address (LBA), to a logical sector number (LSN).
+  */
+  lsn_t vcdinfo_lba2lsn(lba_t lba) ;
+  
+  /*!
+    Convert logical sector number (LSN), to a logical block address (LBA).
+  */
+  lba_t vcdinfo_lsn2lba(lsn_t lsn);
+  
+  const char *
+  vcdinfo_ofs2str (const vcdinfo_obj_t *obj, unsigned int offset, bool ext);
+  
+  void vcdinfo_visit_lot (vcdinfo_obj_t *obj, bool ext);
+  
+  bool vcdinfo_read_psd (vcdinfo_obj_t *obj);
+  
+  /*!
+    Change trailing blanks in str to nulls.  Str has a maximum size of
+    n characters.
+  */
+  const char * vcdinfo_strip_trail (const char str[], size_t n);
+  
+  /*!
+    Initialize the vcdinfo structure "obj". Should be done before other
+    routines using obj are called.
+  */
+  bool vcdinfo_init(vcdinfo_obj_t *obj);
+  
+  /*!
+    Set up vcdinfo structure "obj" for reading and writing from a
+    particular medium. This should be done before after initialization
+    but before any routines that need to retrieve or write data.
+    
+    source_name is the device or file to use for inspection, and
+    source_type indicates if this is a device or a file.
+    access_mode gives special access options for reading.
+    
+    VCDINFO_OPEN_VCD is returned if everything went okay; 
+    VCDINFO_OPEN_ERROR if there was an error and VCDINFO_OPEN_OTHER if the
+    medium is something other than a VCD.
+  */
+  vcdinfo_open_return_t
+  vcdinfo_open(vcdinfo_obj_t *obj, char source_name[], 
+	       vcdinfo_source_t source_type, const char access_mode[]);
+  
+  
+  /*!
+    Dispose of any resources associated with vcdinfo structure "obj".
+    Call this when "obj" it isn't needed anymore. 
+    
+    True is returned is everything went okay, and false if not.
+  */
+  bool vcdinfo_close(vcdinfo_obj_t *obj);
+  
+  /*!
+    Return true if offset is "rejected". That is shouldn't be displayed
+    in a list of entries.
+  */
+  bool vcdinfo_is_rejected(uint16_t offset);
+  
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

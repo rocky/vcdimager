@@ -399,10 +399,16 @@ _visit_pbc (vcdinfo_obj_t *obj, unsigned int lid, unsigned int offset,
 
   vcd_assert (psd_size % 8 == 0);
 
-  if (offset == PSD_OFS_DISABLED
-      || offset == PSD_OFS_MULTI_DEF 
-      || offset == PSD_OFS_MULTI_DEF_NO_NUM)
-    return;
+  switch (offset)
+    {
+    case PSD_OFS_DISABLED:
+    case PSD_OFS_MULTI_DEF:
+    case PSD_OFS_MULTI_DEF_NO_NUM:
+      return;
+
+    default:
+      break;
+    }
 
   if (_rofs >= psd_size)
     {
@@ -464,9 +470,9 @@ _visit_pbc (vcdinfo_obj_t *obj, unsigned int lid, unsigned int offset,
             vcd_warn ("LOT entry assigned LID %d, but descriptor has LID %d",
                       ofs->lid, lid);
 
-        _visit_pbc (obj, 0, uint16_from_be (d->prev_ofs), false, ext);
-        _visit_pbc (obj, 0, uint16_from_be (d->next_ofs), false, ext);
-        _visit_pbc (obj, 0, uint16_from_be (d->return_ofs), false, ext);
+        _visit_pbc (obj, 0, vcdinfo_get_prev_from_pld(d), false, ext);
+        _visit_pbc (obj, 0, vcdinfo_get_next_from_pld(d), false, ext);
+        _visit_pbc (obj, 0, vcdinfo_get_return_from_pld(d), false, ext);
       }
       break;
 
@@ -486,9 +492,9 @@ _visit_pbc (vcdinfo_obj_t *obj, unsigned int lid, unsigned int offset,
             vcd_warn ("LOT entry assigned LID %d, but descriptor has LID %d",
                       ofs->lid, uint16_from_be (d->lid) & 0x7fff);
 
-        _visit_pbc (obj, 0, uint16_from_be (d->prev_ofs), false, ext);
-        _visit_pbc (obj, 0, uint16_from_be (d->next_ofs), false, ext);
-        _visit_pbc (obj, 0, uint16_from_be (d->return_ofs), false, ext);
+        _visit_pbc (obj, 0, vcdinfo_get_prev_from_psd(d), false, ext);
+        _visit_pbc (obj, 0, vcdinfo_get_next_from_psd(d), false, ext);
+        _visit_pbc (obj, 0, vcdinfo_get_return_from_psd(d), false, ext);
         _visit_pbc (obj, 0, uint16_from_be (d->default_ofs), false, ext);
         _visit_pbc (obj, 0, uint16_from_be (d->timeout_ofs), false, ext);
 
@@ -517,7 +523,8 @@ _visit_pbc (vcdinfo_obj_t *obj, unsigned int lid, unsigned int offset,
   entry number. 
 */
 void
-vcdinfo_classify_itemid (uint16_t itemid_num, vcdinfo_itemid_t *itemid)
+vcdinfo_classify_itemid (uint16_t itemid_num, 
+                         /*out*/ vcdinfo_itemid_t *itemid)
 {
 
   itemid->num = itemid_num;
@@ -676,7 +683,7 @@ uint32_t
 vcdinfo_get_entry_sect_count (const vcdinfo_obj_t *obj, unsigned int entry_num)
 {
   const EntriesVcd *entries = &obj->entries;
-  const unsigned int entry_count = uint16_from_be (entries->entry_count);
+  const unsigned int entry_count = vcdinf_get_num_entries(entries);
   if (entry_num > entry_count) 
     return 0;
   else {
@@ -695,7 +702,7 @@ vcdinfo_get_entry_sect_count (const vcdinfo_obj_t *obj, unsigned int entry_num)
          *without* a pregap to the leadout track, we try not to use
          that if we can get the entry from the ISO 9660 filesystem.
       */
-      unsigned int track = vcdinfo_get_track(obj, entry_num);
+      track_t track = vcdinfo_get_track(obj, entry_num);
       if (track != VCDINFO_INVALID_TRACK) {
         vcd_image_stat_t statbuf;
         const lsn_t lsn = vcdinfo_lba2lsn(vcdinfo_get_track_lba(obj, track));
@@ -727,10 +734,7 @@ const msf_t *
 vcdinfo_get_entry_msf(const vcdinfo_obj_t *obj, unsigned int entry_num)
 {
   const EntriesVcd *entries = &obj->entries;
-  const unsigned int entry_count = uint16_from_be (entries->entry_count);
-  return entry_num < entry_count ?
-    &(entries->entry[entry_num].msf)
-    : NULL;
+  return vcdinf_get_entry_msf(entries, entry_num);
 }
 
 /*!  Return the starting LBA (logical block address) for sequence
@@ -889,17 +893,18 @@ unsigned int
 vcdinfo_get_num_entries(const vcdinfo_obj_t *obj)
 {
   const EntriesVcd *entries = &obj->entries;
-  return (uint16_from_be (entries->entry_count));
+  return vcdinf_get_num_entries(entries);
 }
 
 /*!
-  Return the number of segments in the VCD. 
+  Return the number of segments in the VCD. Return 0 if there is some
+  problem.
 */
 unsigned int
 vcdinfo_get_num_segments(const vcdinfo_obj_t *obj)
 {
-  const InfoVcd *info = &obj->info;
-  return (uint16_from_be (info->item_count));
+  if (NULL==obj || &obj->info==NULL) return 0;
+  return vcdinf_get_num_segments(&obj->info);
 }
 
 /*!
@@ -1303,15 +1308,14 @@ vcdinfo_get_timeout_time (const PsdSelectionListDescriptor *d)
   at 1. Note this is one less than the track number reported in vcddump.
   (We don't count the header track?)
 */
-unsigned int
+track_t
 vcdinfo_get_track(const vcdinfo_obj_t *obj, const unsigned int entry_num)
 {
   const EntriesVcd *entries = &obj->entries;
-  const unsigned int entry_count = uint16_from_be (entries->entry_count);
+  const unsigned int entry_count = vcdinf_get_num_entries(entries);
   /* Note entry_num is 0 origin. */
   return entry_num < entry_count ?
-    from_bcd8 (entries->entry[entry_num].n)-1:
-    VCDINFO_INVALID_TRACK;
+    vcdinf_get_track(entries, entry_num)-1: VCDINFO_INVALID_TRACK;
 }
 
 /*!
@@ -1612,7 +1616,7 @@ void
 vcdinfo_inc_msf (uint8_t *min, uint8_t *sec, int8_t *frame)
 {
   (*frame)++;
-  if (*frame>=75) {
+  if (*frame>=CD_FRAMES_PER_SECOND) {
     *frame = 0;
     (*sec)++;
     if (*sec>=60) {
@@ -1630,7 +1634,7 @@ vcdinfo_inc_msf (uint8_t *min, uint8_t *sec, int8_t *frame)
 lba_t
 vcdinfo_msf2lba (uint8_t min, uint8_t sec, int8_t frame)
 {
-  return 75*(60*min + sec) + frame;
+  return CD_FRAMES_PER_SECOND*(60*min + sec) + frame;
 }
 
 /*!

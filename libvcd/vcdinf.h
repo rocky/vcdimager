@@ -43,12 +43,36 @@ extern "C" {
   */
   const char * vcdinf_get_application_id(const pvd_t *pvd);
 
+  /*!  Return the starting LBA (logical block address) for sequence
+    entry_num in obj.  VCDINFO_NULL_LBA is returned if there is no entry.
+    The first entry number is 0.
+  */
+  lba_t vcdinf_get_entry_lba(const EntriesVcd *entries, 
+			      unsigned int entry_num);
+  
+  /*!  Return the starting MSF (minutes/secs/frames) for sequence
+    entry_num in obj.  NULL is returned if there is no entry.
+    The first entry number is 0.
+  */
+  const msf_t * vcdinf_get_entry_msf(const EntriesVcd *entries, 
+				     unsigned int entry_num);
+
   const char * vcdinf_get_format_version_str (vcd_type_t vcd_type);
+
+  /*!
+    Return the number of segments in the VCD. 
+  */
+  unsigned int vcdinf_get_num_entries(const EntriesVcd *entries);
 
   /*!
     Return number of LIDs. 
   */
   lid_t vcdinf_get_num_LIDs (const InfoVcd *info);
+
+  /*!
+    Return the number of segments in the VCD. 
+  */
+  unsigned int vcdinf_get_num_segments(const InfoVcd *info);
 
   /*!
     Return a string containing the VCD publisher id with trailing
@@ -73,6 +97,13 @@ extern "C" {
   */
   const char * vcdinf_get_system_id(const pvd_t *pvd);
   
+  /*!
+    Return the track number for entry n in obj. The first track starts
+    at 1. 
+  */
+  track_t vcdinf_get_track(const EntriesVcd *entries, 
+			   const unsigned int entry_num);
+
   /*!
     Return the VCD volume count - the number of CD's in the collection.
   */

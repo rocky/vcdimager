@@ -267,21 +267,21 @@ _parse_info (struct vcdxml_t *obj, VcdImageSource *img)
   obj->info.max_lid = vcdinf_get_num_LIDs(&info);
 
   {
-    unsigned segment_start;
+    lba_t segment_start;
     unsigned max_seg_num;
     int idx, n;
     struct segment_t *_segment = NULL;
 
     segment_start = msf_to_lba (&info.first_seg_addr);
 
-    max_seg_num = uint16_from_be (info.item_count);
+    max_seg_num = vcdinf_get_num_segments(&info);
 
-    if (segment_start < 150)
+    if (segment_start < PREGAP_SECTORS)
       return 0;
 
-    segment_start -= 150;
+    segment_start = vcdinfo_lba2lsn(segment_start);
 
-    vcd_assert (segment_start % 75 == 0);
+    vcd_assert (segment_start % CD_FRAMES_PER_SECOND == 0);
 
     obj->info.segments_start = segment_start;
 
@@ -342,15 +342,15 @@ _parse_entries (struct vcdxml_t *obj, VcdImageSource *img)
     }
 
   ltrack = 0;
-  for (idx = 0; idx < uint16_from_be (entries.entry_count); idx++)
+  for (idx = 0; idx < vcdinf_get_num_entries(&entries); idx++)
     {
-      uint32_t extent = msf_to_lba(&(entries.entry[idx].msf));
-      uint8_t track = from_bcd8 (entries.entry[idx].n);
+      lba_t extent = vcdinf_get_entry_lba(&entries, idx);
+      track_t track = vcdinf_get_track(&entries, idx);
       bool newtrack = (track != ltrack);
       ltrack = track;
       
-      vcd_assert (extent >= 150);
-      extent -= 150;
+      vcd_assert (extent >= PREGAP_SECTORS);
+      extent = vcdinfo_lba2lsn(extent);
 
       vcd_assert (track >= 2);
       track -= 2;
@@ -430,21 +430,26 @@ static const char *
 _pin2id (unsigned pin, const struct _pbc_ctx *_ctx)
 {
   static char buf[80];
+  vcdinfo_itemid_t itemid;
+  
+  vcdinfo_classify_itemid (pin, &itemid);
 
-  if (pin < 2)
+  switch(itemid.type) {
+  case VCDINFO_ITEM_TYPE_NOTFOUND:
     return NULL;
-
-  if (pin < 100)
-    snprintf (buf, sizeof (buf), "sequence-%2.2d", pin - 2);
-  else if (pin < 600)
-    snprintf (buf, sizeof (buf), "entry-%3.3d", pin - 100);
-  else if (pin < 1000)
+  case VCDINFO_ITEM_TYPE_TRACK:
+    snprintf (buf, sizeof (buf), "sequence-%2.2d", itemid.num-1);
+    break;
+  case VCDINFO_ITEM_TYPE_ENTRY:
+    snprintf (buf, sizeof (buf), "entry-%3.3d", itemid.num);
+    break;
+  case VCDINFO_ITEM_TYPE_SEGMENT:
+    snprintf (buf, sizeof (buf), "segment-%4.4d", itemid.num+1);
+    break;
+  case VCDINFO_ITEM_TYPE_SPAREID2:
+  default:
     return NULL;
-  else if (pin < 2980)
-    snprintf (buf, sizeof (buf), "segment-%4.4d", pin - 1000);
-  else 
-    return NULL;
-
+  }
   return buf;
 }
 
@@ -555,9 +560,12 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
       _pbc = vcd_pbc_new (PBC_PLAYLIST);
       {
 	const PsdPlayListDescriptor *d = (const void *) _buf;
-	_pbc->prev_id = _xstrdup (_ofs2id (uint16_from_be (d->prev_ofs), _ctx));
-	_pbc->next_id = _xstrdup (_ofs2id (uint16_from_be (d->next_ofs), _ctx));
-	_pbc->retn_id = _xstrdup (_ofs2id (uint16_from_be (d->return_ofs), _ctx));
+	_pbc->prev_id = _xstrdup (_ofs2id (vcdinfo_get_prev_from_pld(d), 
+					   _ctx));
+	_pbc->next_id = _xstrdup (_ofs2id (vcdinfo_get_next_from_pld(d),
+					   _ctx));
+	_pbc->retn_id = _xstrdup (_ofs2id (vcdinfo_get_return_from_pld(d), 
+					   _ctx));
 	
 	_pbc->playing_time = (double) (uint16_from_be (d->ptime)) / 15.0;
 	_pbc->wait_time = _calc_time (d->wtime);
@@ -577,9 +585,12 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
       {
 	const PsdSelectionListDescriptor *d = (const void *) _buf;
 	_pbc->bsn = d->bsn;
-	_pbc->prev_id = _xstrdup (_ofs2id (uint16_from_be (d->prev_ofs), _ctx));
-	_pbc->next_id = _xstrdup (_ofs2id (uint16_from_be (d->next_ofs), _ctx));
-	_pbc->retn_id = _xstrdup (_ofs2id (uint16_from_be (d->return_ofs), _ctx));
+	_pbc->prev_id = _xstrdup (_ofs2id (vcdinfo_get_prev_from_psd(d), 
+					   _ctx));
+	_pbc->next_id = _xstrdup (_ofs2id (vcdinfo_get_next_from_psd(d), 
+					   _ctx));
+	_pbc->retn_id = _xstrdup (_ofs2id (vcdinfo_get_return_from_psd(d), 
+					   _ctx));
 
 	switch (uint16_from_be (d->default_ofs))
 	  {
@@ -741,9 +752,9 @@ _visit_pbc (struct _pbc_ctx *obj, unsigned lid, unsigned offset, bool in_lot)
             vcd_warn ("LOT entry assigned LID %d, but descriptor has LID %d",
                       ofs->lid, uint16_from_be (d->lid) & 0x7fff);
 
-        _visit_pbc (obj, 0, uint16_from_be (d->prev_ofs), false);
-        _visit_pbc (obj, 0, uint16_from_be (d->next_ofs), false);
-        _visit_pbc (obj, 0, uint16_from_be (d->return_ofs), false);
+        _visit_pbc (obj, 0, vcdinfo_get_prev_from_pld(d), false);
+        _visit_pbc (obj, 0, vcdinfo_get_next_from_pld(d), false);
+        _visit_pbc (obj, 0, vcdinfo_get_return_from_pld(d), false);
       }
       break;
 
@@ -764,9 +775,9 @@ _visit_pbc (struct _pbc_ctx *obj, unsigned lid, unsigned offset, bool in_lot)
             vcd_warn ("LOT entry assigned LID %d, but descriptor has LID %d",
                       ofs->lid, uint16_from_be (d->lid) & 0x7fff);
 
-        _visit_pbc (obj, 0, uint16_from_be (d->prev_ofs), false);
-        _visit_pbc (obj, 0, uint16_from_be (d->next_ofs), false);
-        _visit_pbc (obj, 0, uint16_from_be (d->return_ofs), false);
+        _visit_pbc (obj, 0, vcdinfo_get_prev_from_psd(d), false);
+        _visit_pbc (obj, 0, vcdinfo_get_next_from_psd(d), false);
+        _visit_pbc (obj, 0, vcdinfo_get_return_from_psd(d), false);
         _visit_pbc (obj, 0, uint16_from_be (d->default_ofs), false);
         _visit_pbc (obj, 0, uint16_from_be (d->timeout_ofs), false);
 
@@ -978,7 +989,7 @@ _rip_segments (struct vcdxml_t *obj, VcdImageSource *img)
 
   start_extent = obj->info.segments_start;
 
-  vcd_assert (start_extent % 75 == 0);
+  vcd_assert (start_extent % CD_FRAMES_PER_SECOND == 0);
 
   _VCD_LIST_FOREACH (node, obj->segment_list)
     {

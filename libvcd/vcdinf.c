@@ -83,9 +83,33 @@ vcdinf_get_album_id(const InfoVcd *info)
   Return the VCD ID.
   NULL is returned if there is some problem in getting this. 
 */
-const char * vcdinf_get_application_id(const pvd_t *pvd)
+const char * 
+vcdinf_get_application_id(const pvd_t *pvd)
 {
   return(vcdinfo_strip_trail(pvd->application_id, MAX_APPLICATION_ID));
+}
+
+/*!  Return the starting LBA (logical block address) for sequence
+  entry_num in obj.  VCDINFO_NULL_LBA is returned if there is no entry.
+*/
+lba_t
+vcdinf_get_entry_lba(const EntriesVcd *entries, unsigned int entry_num)
+{
+  const msf_t *msf = vcdinf_get_entry_msf(entries, entry_num);
+  return (msf != NULL) ? msf_to_lba(msf) : VCDINFO_NULL_LBA;
+}
+
+/*!  Return the starting MSF (minutes/secs/frames) for sequence
+  entry_num in obj.  NULL is returned if there is no entry.
+  The first entry number is 0.
+*/
+const msf_t *
+vcdinf_get_entry_msf(const EntriesVcd *entries, unsigned int entry_num)
+{
+  const unsigned int entry_count = vcdinf_get_num_entries(entries);
+  return entry_num < entry_count ?
+    &(entries->entry[entry_num].msf)
+    : NULL;
 }
 
 /*!
@@ -121,6 +145,15 @@ vcdinf_get_format_version_str (vcd_type_t vcd_type)
 }
 
 /*!
+  Return the number of segments in the VCD. 
+*/
+unsigned int
+vcdinf_get_num_entries(const EntriesVcd *entries)
+{
+  return (uint16_from_be (entries->entry_count));
+}
+
+/*!
   Return number of LIDs. 
 */
 lid_t
@@ -128,6 +161,15 @@ vcdinf_get_num_LIDs (const InfoVcd *info)
 {
   /* Should probably use _vcd_pbc_max_lid instead? */
   return uint16_from_be (info->lot_entries);
+}
+
+/*!
+  Return the number of segments in the VCD. 
+*/
+unsigned int
+vcdinf_get_num_segments(const InfoVcd *info)
+{
+  return (uint16_from_be (info->item_count));
 }
 
 /*!
@@ -167,6 +209,19 @@ const char *
 vcdinf_get_system_id(const pvd_t *pvd)
 {
   return(vcdinfo_strip_trail(pvd->system_id, MAX_SYSTEM_ID));
+}
+
+/*!
+  Return the track number for entry n in obj. The first track starts
+  at 1. 
+*/
+track_t
+vcdinf_get_track(const EntriesVcd *entries, const unsigned int entry_num)
+{
+  const unsigned int entry_count = vcdinf_get_num_entries(entries);
+  /* Note entry_num is 0 origin. */
+  return entry_num < entry_count ?
+    from_bcd8 (entries->entry[entry_num].n): VCDINFO_INVALID_TRACK;
 }
 
 /*!
