@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2001,2003,2004 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2001, 2003, 2004 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,12 +21,12 @@
 /* Private includes */
 #include "vcd.h"
 #include "vcd_assert.h"
-#include "bytesex.h"
 #include "image_sink.h"
 #include "stream_stdio.h"
 #include "util.h"
 
 /* Public includes */
+#include <cdio/bytesex.h>
 #include <libvcd/logging.h>
 #include <libvcd/sector.h>
 

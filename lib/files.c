@@ -28,6 +28,7 @@
 #include <math.h>
 
 #include <cdio/cdio.h>
+#include <cdio/bytesex.h>
 #include <cdio/util.h>
 
 /* Public headers */
@@ -40,7 +41,6 @@
 
 /* Private headers */
 #include "vcd_assert.h"
-#include "bytesex.h"
 #include "mpeg_stream.h"
 #include "obj.h"
 #include "pbc.h"

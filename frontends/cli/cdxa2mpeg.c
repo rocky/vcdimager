@@ -34,12 +34,12 @@
 #include <errno.h>
 #include <unistd.h>
 #include <cdio/sector.h>
+#include <cdio/bytesex.h>
 
 #include <popt.h>
 
 /* Private includes */
 #include "vcd_assert.h"
-#include "bytesex.h"
 #include "util.h"
 #include "vcd.h"
 

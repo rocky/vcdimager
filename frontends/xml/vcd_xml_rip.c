@@ -20,7 +20,6 @@
 
 /* Private headers */
 #include "vcd_read.h"
-#include "bytesex.h"
 #include "vcdxml.h"
 #include "vcd_xml_dtd.h"
 #include "vcd_xml_dump.h"
@@ -32,8 +31,9 @@
 
 /* Public headers */
 
-#include <cdio/iso9660.h>
+#include <cdio/bytesex.h>
 #include <cdio/cd_types.h>
+#include <cdio/iso9660.h>
 #include <cdio/logging.h>
 
 #include <libvcd/sector.h>
@@ -201,7 +201,7 @@ _parse_pvd (struct vcdxml_t *obj, CdIo *img)
   memset (&pvd, 0, sizeof (iso9660_pvd_t));
   vcd_assert (sizeof (iso9660_pvd_t) == ISO_BLOCKSIZE);
 
-  if (!iso9660_fs_read_mode2_pvd(img, &pvd, false)) {
+  if (!iso9660_fs_read_pvd(img, &pvd)) {
     return -1;
   }
 
@@ -785,7 +785,7 @@ _parse_pbc (struct vcdxml_t *obj, CdIo *img, bool no_ext_psd)
 
   if (obj->vcd_type == VCD_TYPE_VCD2)
     {
-      statbuf = iso9660_fs_stat (img, "EXT/LOT_X.VCD;1", true);
+      statbuf = iso9660_fs_stat (img, "EXT/LOT_X.VCD;1");
       if (statbuf != NULL) {
 	extended = true;
 	_lot_vcd_sector = statbuf->lsn;
@@ -794,7 +794,7 @@ _parse_pbc (struct vcdxml_t *obj, CdIo *img, bool no_ext_psd)
 
       free(statbuf);
       if (extended &&
-	  NULL != (statbuf = iso9660_fs_stat (img, "EXT/PSD_X.VCD;1", true))) {
+	  NULL != (statbuf = iso9660_fs_stat (img, "EXT/PSD_X.VCD;1"))) {
 	_psd_vcd_sector = statbuf->lsn;
 	_psd_size = statbuf->size;
 	free(statbuf);

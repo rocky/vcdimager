@@ -39,7 +39,7 @@
 #endif
 
 #include <cdio/cdio.h>
-#include <cdio/logging.h>
+#include <cdio/bytesex.h>
 #include <cdio/iso9660.h>
 
 /* Eventually move above libvcd includes but having vcdinfo including. */
@@ -51,7 +51,6 @@
 
 /* Private headers */
 #include "bitvec.h"
-#include "bytesex.h"
 #include "pbc.h"
 
 static const char _rcsid[] = "$Id$";
@@ -207,14 +206,14 @@ _has_vcd2_ext_pbc (const vcdinfo_obj_t *obj)
     return PBC_VCD2_NOPE;
 
   img = vcdinfo_get_cd_image(obj);
-  statbuf = iso9660_fs_stat (img, "EXT/LOT_X.VCD;1", true);
+  statbuf = iso9660_fs_stat (img, "EXT/LOT_X.VCD;1");
   if (NULL == statbuf)
     return PBC_VCD2_NO_LOT_X;
   if (statbuf->size != ISO_BLOCKSIZE * LOT_VCD_SIZE) {
     ret_status = PBC_VCD2_BAD_LOT_SIZE;
   } else {
     free(statbuf);
-    statbuf = iso9660_fs_stat (img, "EXT/PSD_X.VCD;1", true);
+    statbuf = iso9660_fs_stat (img, "EXT/PSD_X.VCD;1");
     if (NULL != statbuf) {
       ret_status = PBC_VCD2_EXT;
     } else {
@@ -1206,8 +1205,7 @@ dump (char *image_fname[])
                                  ((vcdinfo_get_VCD_type(obj) == VCD_TYPE_SVCD 
                              || vcdinfo_get_VCD_type(obj) == VCD_TYPE_HQVCD)
                                   ? "/SVCD/PSD.SVD;1" 
-                                  : "/VCD/PSD.VCD;1"),
-                                 true);
+                                  : "/VCD/PSD.VCD;1"));
       if (NULL == statbuf)
         vcd_warn ("no PSD file entry found in ISO9660 fs");
       else {

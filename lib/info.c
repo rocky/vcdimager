@@ -27,7 +27,6 @@
 /* Private headers */
 #include "info_private.h"
 #include "vcd_assert.h"
-#include "bytesex.h"
 #include "pbc.h"
 #include "util.h"
 #include "vcd_read.h"
@@ -49,6 +48,7 @@
 #endif
 
 #include <cdio/cdio.h>
+#include <cdio/bytesex.h>
 #include <cdio/cd_types.h>
 #include <cdio/util.h>
 
@@ -387,11 +387,11 @@ vcdinfo_get_album_id(const vcdinfo_obj_t *obj)
   Return the VCD ID.
   NULL is returned if there is some problem in getting this. 
 */
-const char *
-vcdinfo_get_application_id(const vcdinfo_obj_t *obj)
+char *
+vcdinfo_get_application_id(vcdinfo_obj_t *p_obj)
 {
-  if ( NULL == obj ) return (NULL);
-  return(iso9660_get_application_id(&obj->pvd));
+  if ( NULL == p_obj ) return (NULL);
+  return iso9660_get_application_id(&p_obj->pvd);
 }
 
 /*!
@@ -1833,7 +1833,7 @@ vcdinfo_open(vcdinfo_obj_t **obj_p, char *source_name[],
   memset (obj, 0, sizeof (vcdinfo_obj_t));
   obj->img = img;  /* Note we do this after the above wipeout! */
 
-  if (!iso9660_fs_read_mode2_pvd(obj->img, &(obj->pvd), false)) {
+  if (!iso9660_fs_read_pvd(obj->img, &(obj->pvd))) {
     return VCDINFO_OPEN_ERROR;
   }
   
@@ -1863,7 +1863,7 @@ vcdinfo_open(vcdinfo_obj_t **obj_p, char *source_name[],
   }
 
   if (obj->vcd_type == VCD_TYPE_SVCD || obj->vcd_type == VCD_TYPE_HQVCD) {
-    statbuf = iso9660_fs_stat (obj->img, "MPEGAV", true);
+    statbuf = iso9660_fs_stat (obj->img, "MPEGAV");
     
     if (NULL != statbuf) {
       vcd_warn ("non compliant /MPEGAV folder detected!");
@@ -1871,7 +1871,7 @@ vcdinfo_open(vcdinfo_obj_t **obj_p, char *source_name[],
     }
     
 
-    statbuf = iso9660_fs_stat (obj->img, "SVCD/TRACKS.SVD;1", true);
+    statbuf = iso9660_fs_stat (obj->img, "SVCD/TRACKS.SVD;1");
     if (NULL != statbuf) {
       lsn_t lsn = statbuf->lsn;
       if (statbuf->size != ISO_BLOCKSIZE)
@@ -1893,7 +1893,7 @@ vcdinfo_open(vcdinfo_obj_t **obj_p, char *source_name[],
        iso9660_fs_readdir(img, "EXT", true) and then scanning for
        the files listed below.
     */
-    statbuf = iso9660_fs_stat (img, "EXT/PSD_X.VCD;1", true);
+    statbuf = iso9660_fs_stat (img, "EXT/PSD_X.VCD;1");
     if (NULL != statbuf) {
       lsn_t lsn        = statbuf->lsn;
       uint32_t secsize = statbuf->secsize;
@@ -1909,7 +1909,7 @@ vcdinfo_open(vcdinfo_obj_t **obj_p, char *source_name[],
         return VCDINFO_OPEN_ERROR;
     }
 
-    statbuf = iso9660_fs_stat (img, "EXT/LOT_X.VCD;1", true);
+    statbuf = iso9660_fs_stat (img, "EXT/LOT_X.VCD;1");
     if (NULL != statbuf) {
       lsn_t lsn        = statbuf->lsn;
       uint32_t secsize = statbuf->secsize;
@@ -1934,13 +1934,13 @@ vcdinfo_open(vcdinfo_obj_t **obj_p, char *source_name[],
        iso9660_fs_readdir(img, "SVCD", true) and then scanning for
        the files listed below.
     */
-    statbuf = iso9660_fs_stat (img, "MPEGAV", true);
+    statbuf = iso9660_fs_stat (img, "MPEGAV");
     if (NULL != statbuf) {
       vcd_warn ("non compliant /MPEGAV folder detected!");
       free(statbuf);
     }
     
-    statbuf = iso9660_fs_stat (img, "SVCD/TRACKS.SVD;1", true);
+    statbuf = iso9660_fs_stat (img, "SVCD/TRACKS.SVD;1");
     if (NULL == statbuf)
       vcd_warn ("mandatory /SVCD/TRACKS.SVD not found!");
     else {
@@ -1949,7 +1949,7 @@ vcdinfo_open(vcdinfo_obj_t **obj_p, char *source_name[],
       free(statbuf);
     }
     
-    statbuf = iso9660_fs_stat (img, "SVCD/SEARCH.DAT;1", true);
+    statbuf = iso9660_fs_stat (img, "SVCD/SEARCH.DAT;1");
     if (NULL == statbuf)
       vcd_warn ("mandatory /SVCD/SEARCH.DAT not found!");
     else {
@@ -1988,7 +1988,7 @@ vcdinfo_open(vcdinfo_obj_t **obj_p, char *source_name[],
     ;
   }
 
-  statbuf = iso9660_fs_stat (img, "EXT/SCANDATA.DAT;1", true);
+  statbuf = iso9660_fs_stat (img, "EXT/SCANDATA.DAT;1");
   if (statbuf != NULL) {
     lsn_t    lsn       = statbuf->lsn;
     uint32_t secsize   = statbuf->secsize;

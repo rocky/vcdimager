@@ -1,7 +1,7 @@
 /*!
    \file info.h
 
-    Copyright (C) 2002,2003 Rocky Bernstein <rocky@panix.com>
+    Copyright (C) 2002, 2003, 2004 Rocky Bernstein <rocky@panix.com>
 
  \verbatim
     This program is free software; you can redistribute it and/or modify
@@ -251,8 +251,8 @@ extern "C" {
     Return the VCD application ID.
     NULL is returned if there is some problem in getting this. 
   */
-  const char *
-  vcdinfo_get_application_id(const vcdinfo_obj_t *obj);
+  char *
+  vcdinfo_get_application_id(vcdinfo_obj_t *obj);
   
   /*!
     Return a pointer to the cdio structure for the CD image opened or

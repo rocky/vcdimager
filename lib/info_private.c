@@ -47,6 +47,7 @@
 #endif
 
 #include <cdio/cdio.h>
+#include <cdio/bytesex.h>
 #include <cdio/util.h>
 
 #include <libvcd/types.h>
@@ -56,7 +57,6 @@
 
 /* Private headers */
 #include "vcd_assert.h"
-#include "bytesex.h"
 #include "data_structures.h"
 #include "info_private.h"
 #include "pbc.h"

@@ -23,10 +23,12 @@ test_vcdxbuild() {
 	return $RC
     fi
 
-    if ${VCDXBUILD} $2 --create-time TESTING --check --file-prefix `dirname $1`/ $1; then
+    cmd="${VCDXBUILD} $2 --create-time TESTING --check --file-prefix `dirname $1`/ $1"
+    if $cmd; then
 	:
     else
-	echo "$0: execution failed"
+	echo "$0 failed running:"
+	echo "$cmd"
 	RC=1
 	return $RC
     fi

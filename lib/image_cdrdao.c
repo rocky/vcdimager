@@ -28,12 +28,12 @@
 
 /* Public headers */
 #include <cdio/iso9660.h>
+#include <cdio/bytesex.h>
 #include <libvcd/sector.h>
 #include <libvcd/logging.h>
 
 /* Private headers */
 #include "vcd_assert.h"
-#include "bytesex.h"
 #include "image_sink.h"
 #include "stream_stdio.h"
 #include "util.h"

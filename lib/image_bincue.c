@@ -27,6 +27,7 @@
 #include <string.h>
 
 #include <cdio/cdio.h>
+#include <cdio/bytesex.h>
 #include <cdio/iso9660.h>
 
 /* Public headers */
@@ -35,7 +36,6 @@
 
 /* Private headers */
 #include "vcd_assert.h"
-#include "bytesex.h"
 #include "image_sink.h"
 #include "stream_stdio.h"
 #include "util.h"

@@ -50,13 +50,13 @@
 #endif
 
 #include <cdio/cdio.h>
+#include <cdio/bytesex.h>
 #include <cdio/util.h>
 
 /* Eventually move above libvcd includes but having vcdinfo including. */
 #include <libvcd/info.h>
 
 /* Private headers */
-#include "bytesex.h"
 #include "info_private.h"
 #include "pbc.h"
 

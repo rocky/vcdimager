@@ -26,12 +26,12 @@
 #include <string.h>
 
 /* Public headers */
+#include <cdio/bytesex.h>
 #include <cdio/iso9660.h>
 #include <libvcd/logging.h>
 
 /* Private headers */
 #include "vcd_assert.h"
-#include "bytesex.h"
 #include "directory.h"
 #include "util.h"
 

@@ -27,9 +27,10 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
+#include <cdio/cdio.h>
+#include <cdio/bytesex.h>
 
 /* Private haeaders */
-#include "bytesex.h"
 #include "mpeg.h"
 #include "mpeg_stream.h"
 #include "stream_stdio.h"

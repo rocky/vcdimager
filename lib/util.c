@@ -26,10 +26,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <cdio/bytesex.h>
 
 /* Private includes */
 #include "vcd_assert.h"
-#include "bytesex.h"
 #include "util.h"
 
 static const char _rcsid[] = "$Id$";

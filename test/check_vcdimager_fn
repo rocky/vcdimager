@@ -26,10 +26,12 @@ test_vcdimager() {
     TZ=CUT
     export TZ
     # I've been told this is important date to celebrate.
-    if ${VCDIMAGER} --create-time TESTING --check $@; then
+    cmd="${VCDIMAGER} --create-time TESTING --check $@"
+    if $cmd; then
 	:
     else
-	echo "$0: execution failed"
+	echo "$0 failed running:"
+	echo "$cmd"
 	RC=1
 	return $RC
     fi

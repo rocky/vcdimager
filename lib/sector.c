@@ -27,6 +27,7 @@
 #include <string.h>
 
 #include <cdio/cdio.h>
+#include <cdio/bytesex.h>
 
 #include <libvcd/types.h>
 
@@ -34,7 +35,6 @@
 
 /* Private includes */
 #include "vcd_assert.h"
-#include "bytesex.h"
 #include "salloc.h"
 #include "sector_private.h"
 

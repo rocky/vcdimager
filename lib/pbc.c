@@ -27,6 +27,7 @@
 #include <math.h>
 
 #include <cdio/cdio.h>
+#include <cdio/bytesex.h>
 
 /* Public headers */
 #include <libvcd/logging.h>
@@ -39,7 +40,6 @@
 
 /* Private headers */
 #include "vcd_assert.h"
-#include "bytesex.h"
 #include "obj.h"
 #include "pbc.h"
 #include "util.h"

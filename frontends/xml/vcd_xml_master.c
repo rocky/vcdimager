@@ -20,7 +20,6 @@
 
 /* Private headers */
 #include "image_sink.h"
-#include "bytesex.h"
 #include "stream_stdio.h"
 #include "vcd.h"
 
@@ -28,6 +27,7 @@
 #include "vcd_xml_common.h"
 
 /* Public headers */
+#include <cdio/bytesex.h>
 #include <libvcd/logging.h>
 
 #ifdef HAVE_STRING_H

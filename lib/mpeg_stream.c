@@ -27,13 +27,13 @@
 #include <stdlib.h>
 
 #include <cdio/cdio.h>
+#include <cdio/bytesex.h>
 
 #include <libvcd/logging.h>
 
 /* Private headers */
 #include "vcd_assert.h"
 #include "mpeg_stream.h"
-#include "bytesex.h"
 #include "data_structures.h"
 #include "mpeg.h"
 #include "util.h"
