@@ -211,12 +211,12 @@ fi
 dnl
 
 dnl system
-PKG_CHECK_MODULES(LIBCDIO, libcdio >= 0.64, [], 
+PKG_CHECK_MODULES(LIBCDIO, libcdio >= 0.65, [], 
 	[AC_MSG_ERROR(required libcdio library not found)])
 AC_SUBST(LIBCDIO_LIBS)
 AC_SUBST(LIBCDIO_CFLAGS)
 
-PKG_CHECK_MODULES(LIBCDIO, libiso9660 >= 0.64, [], 
+PKG_CHECK_MODULES(LIBCDIO, libiso9660 >= 0.65, [], 
 	[AC_MSG_ERROR(required libiso9660 library not found)])
 AC_SUBST(LIBISO9660_CFLAGS)
 AC_SUBST(LIBISO9660_LIBS)

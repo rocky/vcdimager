@@ -101,7 +101,6 @@ _init_segments (vcdinfo_obj_t *obj)
   InfoVcd *info = vcdinfo_get_infoVcd(obj);
   segnum_t num_segments = vcdinfo_get_num_segments(obj);
   int i;
-  iso9660_stat_t statbuf;
   
   obj->first_segment_lsn = cdio_msf_to_lsn(&info->first_seg_addr);
 
@@ -118,8 +117,10 @@ _init_segments (vcdinfo_obj_t *obj)
          in statbuf.secsize this size.
        */
       lsn_t lsn = vcdinfo_get_seg_lsn(obj, i);
-      if (iso9660_find_fs_lsn(obj->img, lsn, &statbuf)) {
-        obj->seg_sizes[i] = statbuf.secsize;
+      iso9660_stat_t *statbuf =iso9660_find_fs_lsn(obj->img, lsn);
+      if (NULL != statbuf) {
+        obj->seg_sizes[i] = statbuf->secsize;
+        free(statbuf);
       } else {
         vcd_warn ("Trouble finding ISO 9660 size for segment %d.", i);
       }
@@ -449,12 +450,15 @@ vcdinfo_get_entry_sect_count (const vcdinfo_obj_t *obj, unsigned int entry_num)
       */
       track_t track = vcdinfo_get_track(obj, entry_num);
       if (track != VCDINFO_INVALID_TRACK) {
-        iso9660_stat_t statbuf;
+        iso9660_stat_t *statbuf;
         const lsn_t lsn = vcdinfo_get_track_lsn(obj, track);
 
         /* Try to get the sector count from the ISO 9660 filesystem */
-        if (iso9660_find_fs_lsn(obj->img, lsn, &statbuf)) {
-          next_lsn = lsn + statbuf.secsize;
+        statbuf = iso9660_find_fs_lsn(obj->img, lsn);
+        
+        if (NULL != statbuf) {
+          next_lsn = lsn + statbuf->secsize;
+          free(statbuf);
         } else {
           /* Failed on ISO 9660 filesystem. Use next track or
              LEADOUT track.  */
@@ -1150,12 +1154,14 @@ vcdinfo_get_track_sect_count(const vcdinfo_obj_t *obj, const track_t track_num)
     return 0;
   
   {
-    iso9660_stat_t statbuf;
+    iso9660_stat_t *statbuf;
     const lsn_t lsn = vcdinfo_get_track_lsn(obj, track_num);
     
     /* Try to get the sector count from the ISO 9660 filesystem */
-    if (obj->has_xa && iso9660_find_fs_lsn(obj->img, lsn, &statbuf)) {
-      return statbuf.secsize;
+    if (obj->has_xa && (statbuf = iso9660_find_fs_lsn(obj->img, lsn))) {
+      unsigned int secsize = statbuf->secsize;
+      free(statbuf);
+      return secsize;
     } else {
       const lsn_t next_lsn=vcdinfo_get_track_lsn(obj, track_num+1);
       /* Failed on ISO 9660 filesystem. Use track information.  */
@@ -1185,7 +1191,7 @@ vcdinfo_get_track_size(const vcdinfo_obj_t *obj, track_t track_num)
     const lsn_t lsn = cdio_lba_to_lsn(vcdinfo_get_track_lba(obj, track_num));
     
     /* Try to get the sector count from the ISO 9660 filesystem */
-    if (obj->has_xa && iso9660_find_fs_lsn(obj->img, lsn, &statbuf)) {
+    if (obj->has_xa && iso9660_find_fs_lsn(obj->img, lsn)) {
       return statbuf.size;
     } 
 #if 0
@@ -1541,8 +1547,8 @@ vcdinfo_open(vcdinfo_obj_t **obj_p, char *source_name[],
              driver_id_t source_type, const char access_mode[])
 {
   CdIo *img;
-  iso9660_stat_t statbuf;
   vcdinfo_obj_t *obj = _vcd_malloc(sizeof(vcdinfo_obj_t));
+  iso9660_stat_t *statbuf;
 
 
   /* If we don't specify a driver_id or a source_name, scan the
@@ -1609,81 +1615,105 @@ vcdinfo_open(vcdinfo_obj_t **obj_p, char *source_name[],
   }
 
   if (obj->vcd_type == VCD_TYPE_SVCD || obj->vcd_type == VCD_TYPE_HQVCD) {
-    if (!iso9660_fs_stat (obj->img, "MPEGAV", &statbuf, true))
-      vcd_warn ("non compliant /MPEGAV folder detected!");
+    statbuf = iso9660_fs_stat (obj->img, "MPEGAV", true);
     
-    if (!iso9660_fs_stat (obj->img, "SVCD/TRACKS.SVD;1", &statbuf, true))
-      {
-        if (statbuf.size != ISO_BLOCKSIZE)
-          vcd_warn ("TRACKS.SVD filesize != %d!", ISO_BLOCKSIZE);
-        
-        obj->tracks_buf = _vcd_malloc (ISO_BLOCKSIZE);
-        
-        if (cdio_read_mode2_sector (obj->img, obj->tracks_buf, statbuf.lsn, 
-                                    false))
-          return VCDINFO_OPEN_ERROR;
-      }
+    if (NULL != statbuf) {
+      vcd_warn ("non compliant /MPEGAV folder detected!");
+      free(statbuf);
+    }
+    
+
+    statbuf = iso9660_fs_stat (obj->img, "SVCD/TRACKS.SVD;1", true);
+    if (NULL != statbuf) {
+      lsn_t lsn = statbuf->lsn;
+      if (statbuf->size != ISO_BLOCKSIZE)
+        vcd_warn ("TRACKS.SVD filesize != %d!", ISO_BLOCKSIZE);
+      
+      obj->tracks_buf = _vcd_malloc (ISO_BLOCKSIZE);
+
+      free(statbuf);
+      if (cdio_read_mode2_sector (obj->img, obj->tracks_buf, lsn, false))
+        return VCDINFO_OPEN_ERROR;
+    }
   }
       
   _init_segments (obj);
 
   switch (obj->vcd_type) {
   case VCD_TYPE_VCD2: {
-    if (!iso9660_fs_stat (img, "EXT/PSD_X.VCD;1", &statbuf, true)) {
+    statbuf = iso9660_fs_stat (img, "EXT/PSD_X.VCD;1", true);
+    if (NULL != statbuf) {
+      lsn_t lsn        = statbuf->lsn;
+      uint32_t secsize = statbuf->secsize;
+
+      obj->psd_x       = _vcd_malloc (ISO_BLOCKSIZE * secsize);
+      obj->psd_x_size  = statbuf->size;
+      
       vcd_debug ("found /EXT/PSD_X.VCD at sector %lu", 
-                 (long unsigned int) statbuf.lsn);
-      
-      obj->psd_x = _vcd_malloc (ISO_BLOCKSIZE * statbuf.secsize);
-      obj->psd_x_size = statbuf.size;
-      
-      if (cdio_read_mode2_sectors (img, obj->psd_x, statbuf.lsn, 
-                                   false, statbuf.secsize))
+                 (long unsigned int) lsn);
+
+      free(statbuf);
+      if (cdio_read_mode2_sectors (img, obj->psd_x, lsn, false, secsize))
         return VCDINFO_OPEN_ERROR;
     }
 
-    if (!iso9660_fs_stat (img, "EXT/LOT_X.VCD;1", &statbuf, true)) {
-      vcd_debug ("found /EXT/LOT_X.VCD at sector %lu", 
-                 (unsigned long int) statbuf.lsn);
-        
-      obj->lot_x = _vcd_malloc (ISO_BLOCKSIZE * statbuf.secsize);
+    statbuf = iso9660_fs_stat (img, "EXT/LOT_X.VCD;1", true);
+    if (NULL != statbuf) {
+      lsn_t lsn        = statbuf->lsn;
+      uint32_t secsize = statbuf->secsize;
+      obj->lot_x       = _vcd_malloc (ISO_BLOCKSIZE * secsize);
       
-      if (cdio_read_mode2_sectors (img, obj->lot_x, statbuf.lsn, false, 
-                                   statbuf.secsize))
+      vcd_debug ("found /EXT/LOT_X.VCD at sector %lu", 
+                 (unsigned long int) lsn);
+        
+      if (statbuf->size != LOT_VCD_SIZE * ISO_BLOCKSIZE)
+        vcd_warn ("LOT_X.VCD size != 65535");
+
+      free(statbuf);
+      if (cdio_read_mode2_sectors (img, obj->lot_x, lsn, false, secsize))
         return VCDINFO_OPEN_ERROR;
       
-      if (statbuf.size != LOT_VCD_SIZE * ISO_BLOCKSIZE)
-        vcd_warn ("LOT_X.VCD size != 65535");
     }
     break;
   }
   case VCD_TYPE_SVCD: 
   case VCD_TYPE_HQVCD: {
-    if (!iso9660_fs_stat (img, "MPEGAV", &statbuf, true))
+    statbuf = iso9660_fs_stat (img, "MPEGAV", true);
+    if (NULL != statbuf) {
       vcd_warn ("non compliant /MPEGAV folder detected!");
+      free(statbuf);
+    }
     
-    if (iso9660_fs_stat (img, "SVCD/TRACKS.SVD;1", &statbuf, true))
+    statbuf = iso9660_fs_stat (img, "SVCD/TRACKS.SVD;1", true);
+    if (NULL == statbuf)
       vcd_warn ("mandatory /SVCD/TRACKS.SVD not found!");
-    else
+    else {
       vcd_debug ("found TRACKS.SVD signature at sector %lu", 
-                 (unsigned long int) statbuf.lsn);
+                 (unsigned long int) statbuf->lsn);
+      free(statbuf);
+    }
     
-    if (iso9660_fs_stat (img, "SVCD/SEARCH.DAT;1", &statbuf, true))
+    statbuf = iso9660_fs_stat (img, "SVCD/SEARCH.DAT;1", true);
+    if (NULL == statbuf)
       vcd_warn ("mandatory /SVCD/SEARCH.DAT not found!");
     else {
+      lsn_t    lsn       = statbuf->lsn;
+      uint32_t secsize   = statbuf->secsize;
+      uint32_t stat_size = statbuf->size;
       uint32_t size;
-      vcd_debug ("found SEARCH.DAT at sector %lu", 
-                 (unsigned long int) statbuf.lsn);
+
+      vcd_debug ("found SEARCH.DAT at sector %lu", (unsigned long int) lsn);
       
-      obj->search_buf = _vcd_malloc (ISO_BLOCKSIZE * statbuf.secsize);
+      obj->search_buf = _vcd_malloc (ISO_BLOCKSIZE * secsize);
       
-      if (cdio_read_mode2_sectors (img, obj->search_buf, statbuf.lsn, 
-                                   false, statbuf.secsize))
+      if (cdio_read_mode2_sectors (img, obj->search_buf, lsn, false, secsize))
         return VCDINFO_OPEN_ERROR;
       
       size = (3 * uint16_from_be (((SearchDat *)obj->search_buf)->scan_points))
         + sizeof (SearchDat);
-      
-      if (size > statbuf.size) {
+
+      free(statbuf);
+      if (size > stat_size) {
         vcd_warn ("number of scanpoints leads to bigger size than "
                   "file size of SEARCH.DAT! -- rereading");
         
@@ -1691,8 +1721,8 @@ vcdinfo_open(vcdinfo_obj_t **obj_p, char *source_name[],
         obj->search_buf = _vcd_malloc (ISO_BLOCKSIZE 
                                        * _vcd_len2blocks(size, ISO_BLOCKSIZE));
         
-        if (cdio_read_mode2_sectors (img, obj->search_buf,statbuf.lsn,
-                                     false, statbuf.secsize))
+        if (cdio_read_mode2_sectors (img, obj->search_buf, lsn, false, 
+                                     secsize))
           return VCDINFO_OPEN_ERROR;
       }
     }
@@ -1702,14 +1732,17 @@ vcdinfo_open(vcdinfo_obj_t **obj_p, char *source_name[],
     ;
   }
 
-  if (!iso9660_fs_stat (img, "EXT/SCANDATA.DAT;1", &statbuf, true)) {
-    vcd_debug ("found /EXT/SCANDATA.DAT at sector %u", 
-               (unsigned int) statbuf.lsn);
+  statbuf = iso9660_fs_stat (img, "EXT/SCANDATA.DAT;1", true);
+  if (statbuf != NULL) {
+    lsn_t    lsn       = statbuf->lsn;
+    uint32_t secsize   = statbuf->secsize;
+
+    vcd_debug ("found /EXT/SCANDATA.DAT at sector %u", (unsigned int) lsn);
     
-    obj->scandata_buf = _vcd_malloc (ISO_BLOCKSIZE * statbuf.secsize);
-    
-    if (cdio_read_mode2_sectors (img, obj->scandata_buf, statbuf.lsn, 
-                                 false, statbuf.secsize))
+    obj->scandata_buf = _vcd_malloc (ISO_BLOCKSIZE * secsize);
+
+    free(statbuf);
+    if (cdio_read_mode2_sectors (img, obj->scandata_buf, lsn, false, secsize))
       return VCDINFO_OPEN_ERROR;
   }
 

@@ -196,8 +196,9 @@ typedef enum {
 static vcd2_ext_pbc_status_t
 _has_vcd2_ext_pbc (const vcdinfo_obj_t *obj)
 {
-  iso9660_stat_t statbuf;
+  iso9660_stat_t *statbuf;
   CdIo *img;
+  vcd2_ext_pbc_status_t ret_status;
   
   if (!vcdinfo_has_pbc(obj))
     return PBC_VCD2_NO_PBC;
@@ -206,17 +207,25 @@ _has_vcd2_ext_pbc (const vcdinfo_obj_t *obj)
     return PBC_VCD2_NOPE;
 
   img = vcdinfo_get_cd_image(obj);
-  if (iso9660_fs_stat (img, "EXT/LOT_X.VCD;1", &statbuf, true))
+  statbuf = iso9660_fs_stat (img, "EXT/LOT_X.VCD;1", true);
+  if (NULL == statbuf)
     return PBC_VCD2_NO_LOT_X;
-
-  if (statbuf.size != ISO_BLOCKSIZE * LOT_VCD_SIZE)
-    return PBC_VCD2_BAD_LOT_SIZE;
-
-  if (!iso9660_fs_stat (img, "EXT/PSD_X.VCD;1", &statbuf, true))
-    return PBC_VCD2_EXT;
-  else 
-    return PBC_VCD2_NO_PSD_X;
+  if (statbuf->size != ISO_BLOCKSIZE * LOT_VCD_SIZE) {
+    ret_status = PBC_VCD2_BAD_LOT_SIZE;
+  } else {
+    free(statbuf);
+    statbuf = iso9660_fs_stat (img, "EXT/PSD_X.VCD;1", true);
+    if (NULL != statbuf) {
+      ret_status = PBC_VCD2_EXT;
+    } else {
+      ret_status = PBC_VCD2_NO_PSD_X;
+    }
+  }
+  free(statbuf);
+  return ret_status;
 }
+
+
 
 static void
 dump_lot (const vcdinfo_obj_t *obj, bool ext)
@@ -882,37 +891,34 @@ _dump_fs_recurse (const vcdinfo_obj_t *obj, const char pathname[])
   
   _VCD_LIST_FOREACH (entnode, entlist)
     {
-      char *_name = _vcd_list_node_data (entnode);
+      iso9660_stat_t *statbuf = _vcd_list_node_data (entnode);
+      char *_name = statbuf->filename;
       char _fullname[4096] = { 0, };
-      iso9660_stat_t statbuf;
 
       snprintf (_fullname, sizeof (_fullname), "%s%s", pathname, _name);
   
-      if (iso9660_fs_stat (cdio, _fullname, &statbuf, true))
-        vcd_assert_not_reached ();
-
       strncat (_fullname, "/", sizeof (_fullname));
 
-      if (statbuf.type == _STAT_DIR
+      if (statbuf->type == _STAT_DIR
           && strcmp (_name, ".") 
           && strcmp (_name, ".."))
         _vcd_list_append (dirlist, strdup (_fullname));
 
       fprintf (stdout, 
                "  %c %s %d %d [fn %.2d] [LSN %6lu] ",
-               (statbuf.type == _STAT_DIR) ? 'd' : '-',
-               iso9660_get_xa_attr_str (statbuf.xa.attributes),
-               uint16_from_be (statbuf.xa.user_id),
-               uint16_from_be (statbuf.xa.group_id),
-               statbuf.xa.filenum,
-               (unsigned long int) statbuf.lsn);
+               (statbuf->type == _STAT_DIR) ? 'd' : '-',
+               iso9660_get_xa_attr_str (statbuf->xa.attributes),
+               uint16_from_be (statbuf->xa.user_id),
+               uint16_from_be (statbuf->xa.group_id),
+               statbuf->xa.filenum,
+               (unsigned long int) statbuf->lsn);
 
-      if (uint16_from_be(statbuf.xa.attributes) & XA_ATTR_MODE2FORM2) {
+      if (uint16_from_be(statbuf->xa.attributes) & XA_ATTR_MODE2FORM2) {
         fprintf (stdout, "%9lu (%9lu)",
-                 (unsigned long int) statbuf.secsize * M2F2_SECTOR_SIZE,
-                 (unsigned long int) statbuf.size);
+                 (unsigned long int) statbuf->secsize * M2F2_SECTOR_SIZE,
+                 (unsigned long int) statbuf->size);
       } else {
-        fprintf (stdout, "%9lu", (unsigned long int) statbuf.size);
+        fprintf (stdout, "%9lu", (unsigned long int) statbuf->size);
       }
       fprintf (stdout, "  %s\n", _name);
 
@@ -1095,7 +1101,7 @@ dump (char image_fname[])
   unsigned size, psd_size;
   vcdinfo_obj_t *obj;
   CdIo *img;
-  iso9660_stat_t statbuf;
+  iso9660_stat_t *statbuf;
   vcdinfo_open_return_t open_rc;
   
   if (!gl.show.no.banner)
@@ -1107,12 +1113,13 @@ dump (char image_fname[])
                "%s\n\n", _rcsid);
     }
 
+  open_rc = vcdinfo_open(&obj, &image_fname, gl.source_type, gl.access_mode);
+
   if (NULL == obj) {
     fprintf (stdout, "error allocating a new VCD object\n");
     exit (EXIT_FAILURE);
   }
 
-  open_rc = vcdinfo_open(&obj, &image_fname, gl.source_type, gl.access_mode);
   img = vcdinfo_get_cd_image(obj);
   if (open_rc==VCDINFO_OPEN_ERROR || img == NULL) {
     vcd_error ("Error determining place to read from");
@@ -1167,20 +1174,21 @@ dump (char image_fname[])
   if (vcdinfo_read_psd (obj))
     {
       /* ISO9660 crosscheck */
-      if (iso9660_fs_stat (img, 
-                           ((vcdinfo_get_VCD_type(obj) == VCD_TYPE_SVCD 
+      statbuf = iso9660_fs_stat (img, 
+                                 ((vcdinfo_get_VCD_type(obj) == VCD_TYPE_SVCD 
                              || vcdinfo_get_VCD_type(obj) == VCD_TYPE_HQVCD)
-                            ? "/SVCD/PSD.SVD;1" 
-                            : "/VCD/PSD.VCD;1"),
-                           &statbuf, true))
+                                  ? "/SVCD/PSD.SVD;1" 
+                                  : "/VCD/PSD.VCD;1"),
+                                 true);
+      if (NULL == statbuf)
         vcd_warn ("no PSD file entry found in ISO9660 fs");
-      else
-        {
-          if (psd_size != statbuf.size)
-            vcd_warn ("ISO9660 psd size != INFO psd size");
-          if (statbuf.lsn != PSD_VCD_SECTOR)
-            vcd_warn ("psd file entry in ISO9660 not at fixed LSN");
-        }
+      else {
+        if (psd_size != statbuf->size)
+          vcd_warn ("ISO9660 psd size != INFO psd size");
+        if (statbuf->lsn != PSD_VCD_SECTOR)
+          vcd_warn ("psd file entry in ISO9660 not at fixed LSN");
+        free(statbuf);
+      }
           
     }
 

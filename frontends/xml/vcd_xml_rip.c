@@ -147,14 +147,14 @@ _parse_isofs_r (struct vcdxml_t *obj, CdIo *img, const char pathname[])
 
   _VCD_LIST_FOREACH (entnode, entlist)
     {
-      char *_name = _vcd_list_node_data (entnode);
+      iso9660_stat_t *statbuf = _vcd_list_node_data (entnode);
       char _fullname[4096] = { 0, };
-      iso9660_stat_t statbuf;
+      char *_name = statbuf->filename;
 
       strncpy (_fullname, pathname, sizeof (_fullname));
       strncat (_fullname, _name, sizeof (_fullname));
 
-      if (iso9660_fs_stat (img, _fullname, &statbuf, true))
+      if (NULL == statbuf)
 	return -1;
       
       if (!strcmp (_name, ".") 
@@ -168,14 +168,14 @@ _parse_isofs_r (struct vcdxml_t *obj, CdIo *img, const char pathname[])
 	  || !strcmp (_name, "CDDA"))
 	continue;
 
-      _register_file (obj, _fullname, &statbuf);
+      _register_file (obj, _fullname, statbuf);
 
-      if (statbuf.type == _STAT_DIR)
-	{
-	  strncat (_fullname, "/", sizeof (_fullname));
-	  if (_parse_isofs_r (obj, img, _fullname))
-	    return -1;
+      if (statbuf->type == _STAT_DIR) {
+	strncat (_fullname, "/", sizeof (_fullname));
+	if (_parse_isofs_r (obj, img, _fullname)) {
+	  return -1;
 	}
+      }
     }
 
   _vcd_list_free (entlist, true);
@@ -771,7 +771,7 @@ _parse_pbc (struct vcdxml_t *obj, CdIo *img, bool no_ext_psd)
   uint32_t _lot_vcd_sector = -1;
   uint32_t _psd_vcd_sector = -1;
   unsigned _psd_size = -1;
-  iso9660_stat_t statbuf;
+  iso9660_stat_t *statbuf;
 
   if (!obj->info.psd_size)
     {
@@ -781,20 +781,20 @@ _parse_pbc (struct vcdxml_t *obj, CdIo *img, bool no_ext_psd)
 
   if (obj->vcd_type == VCD_TYPE_VCD2)
     {
-      if (!iso9660_fs_stat (img, "EXT/LOT_X.VCD;1", &statbuf, true))
-	{
-	  extended = true;
-	  _lot_vcd_sector = statbuf.lsn;
-	  vcd_assert (statbuf.size == ISO_BLOCKSIZE * LOT_VCD_SIZE);
-	}  
+      statbuf = iso9660_fs_stat (img, "EXT/LOT_X.VCD;1", true);
+      if (statbuf != NULL) {
+	extended = true;
+	_lot_vcd_sector = statbuf->lsn;
+	vcd_assert (statbuf->size == ISO_BLOCKSIZE * LOT_VCD_SIZE);
+      }  
 
+      free(statbuf);
       if (extended &&
-	  !iso9660_fs_stat (img, "EXT/PSD_X.VCD;1", &statbuf, true))
-	{
-	  _psd_vcd_sector = statbuf.lsn;
-	  _psd_size = statbuf.size;
-	}
-      else
+	  NULL != (statbuf = iso9660_fs_stat (img, "EXT/PSD_X.VCD;1", true))) {
+	_psd_vcd_sector = statbuf->lsn;
+	_psd_size = statbuf->size;
+	free(statbuf);
+      } else
 	extended = false;
     }
 
@@ -802,17 +802,16 @@ _parse_pbc (struct vcdxml_t *obj, CdIo *img, bool no_ext_psd)
 
   if (extended && !no_ext_psd)
     vcd_info ("detected extended VCD2.0 PBC files");
-  else
-    {
-      if (extended)
-	vcd_info ("ignoring detected extended VCD2.0 PBC files");
-
-      _pctx.extended = false;
-
-      _lot_vcd_sector = LOT_VCD_SECTOR;
-      _psd_vcd_sector = PSD_VCD_SECTOR;
-      _psd_size = obj->info.psd_size;
-    }
+  else {
+    if (extended)
+      vcd_info ("ignoring detected extended VCD2.0 PBC files");
+    
+    _pctx.extended = false;
+    
+    _lot_vcd_sector = LOT_VCD_SECTOR;
+    _psd_vcd_sector = PSD_VCD_SECTOR;
+    _psd_size = obj->info.psd_size;
+  }
 
   _pctx.psd_size = _psd_size;
   _pctx.offset_mult = 8;
