@@ -16,6 +16,10 @@ version 0.7.20 (unstable/development)
 
 * Replace unfree encode_L2_Q with GPL version from cdrtools 1.11a40
 
+* cdxa2mpeg warns if input and output file are the same.
+
+* some bug fixes.
+
 version 0.7.19 (unstable/development)
 =====================================
 * Use VCD CD-drive auto scanning in vcdxrip and vcd-info that is 

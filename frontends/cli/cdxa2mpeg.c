@@ -1,7 +1,7 @@
 /* -*- c -*- 
    $Id$
 
-   Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
+   Copyright (C) 2001, 2004 Herbert Valerio Riedel <hvr@gnu.org>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -330,12 +330,12 @@ main (int argc, const char *argv[])
       vcd_error ("I can't be both, quiet and verbose... either one or another ;-)");
 
     if ((args = poptGetArgs (optCon)) == NULL)
-      vcd_error ("error: need at least an input argument -- try --help");
+      vcd_error ("need at least an input argument -- try --help");
 
     vcd_assert (args[0] != 0);
 
     if (args[1] && args[2])
-      vcd_error ("error: too many arguments -- try --help");
+      vcd_error ("too many arguments -- try --help");
 
     in = fopen (args[0], "rb");
     if (!in)
@@ -345,6 +345,12 @@ main (int argc, const char *argv[])
       }
 
     if (args[1]) {
+      if ( strcmp(args[0], args[1]) == 0 ) 
+        {
+          vcd_error ("input and output can't refer to the same file");
+          exit (EXIT_FAILURE);
+        }
+           
       out = fopen (args[1], "wb");
       if (!out)
         {
