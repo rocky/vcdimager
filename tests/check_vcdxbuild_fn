@@ -1,7 +1,7 @@
 # $Id$
 
 test_vcdxbuild_cleanup() {
-    rm -vf core videocd.bin videocd.cue
+    rm -f core videocd.bin videocd.cue
 }
 
 test_vcdxbuild() {
