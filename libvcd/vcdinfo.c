@@ -114,7 +114,7 @@ _init_fs_segment (const vcdinfo_obj_t *obj, const char pathname[],
         vcd_image_stat_t *segment = _vcd_malloc (sizeof (vcd_image_stat_t));
 
         *segment = statbuf;
-        // memcpy(segment, &statbuf, sizeof(vcd_image_stat_t));
+        /* memcpy(segment, &statbuf, sizeof(vcd_image_stat_t)); */
 
         _vcd_list_append (obj->segment_list, segment);
         
@@ -753,7 +753,7 @@ vcdinfo_get_loop_count (const PsdSelectionListDescriptor *d)
 uint16_t
 vcdinfo_get_num_LIDs (const vcdinfo_obj_t *obj) 
 {
-  // Should probably use _vcd_pbc_max_lid instead? 
+  /* Should probably use _vcd_pbc_max_lid instead? */
   return uint16_from_be (obj->info.lot_entries);
 }
 
@@ -1578,7 +1578,7 @@ vcdinfo_has_xa(const vcdinfo_obj_t *obj)
 int
 vcdinfo_calc_psd_wait_time (uint16_t wtime)
 {
-  // Note: this doesn't agree exactly with _wtime
+  /* Note: this doesn't agree exactly with _wtime */
   if (wtime < 61)
     return wtime;
   else if (wtime < 255)
