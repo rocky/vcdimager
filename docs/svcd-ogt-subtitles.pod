@@ -81,9 +81,10 @@ NT4, (and not that easy to find anymore. dvd.da.ru, doom9.net or
 similar perhaps?), it can create good subtitled SVCDs and just open
 them in your favorite hex editor.
 
-The subs you get from tools like "I-author" are not real SVCD
+The subtitles you get from tools like "I-author" are not real SVCD
 subtitles; they are CVD subtitles. See
-L<http://www.vcdimager.org/documentation.phtml>
+L<http://www.vcdimager.org/pub/vcdimager/manuals/0.7/vcd-subtitles.html>
+for information on CVD subtitles.
 
 
 I<$Id$>

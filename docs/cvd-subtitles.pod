@@ -1,4 +1,4 @@
-=head1 SVCD Subtitle Information - Philips Overlay Graphics Text (OGT)
+=head1 CVD Subtitle Information
 
 The following information is culled from information from 
 Julio Sanchez Fernandez (L<http://subhandler.sourceforge.net>)
@@ -12,8 +12,10 @@ whose correctness is not known and some experimentation.
 Please, if you have any corrections or additions to make, send
 them to rocky@panix.com.
 
-CVD subtitles are different in several ways from SVCD OGT subtitles
-(see see corresponding info on that.)
+CVD subtitles are different in several ways from SVCD OGT subtitles.
+See
+L<http://www.vcdimager.org/pub/vcdimager/manuals/0.7/svcd-ogt-subtitles.html>
+for information on SVCD subtitles.
 
 The image data comes first and meta data is at the end.  So that the
 metadata can be found easily, the subtitle packet starts with two
