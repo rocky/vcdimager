@@ -171,7 +171,7 @@ _vcd_pbc_pin_lookup (const VcdObj *obj, const char item_id[])
 
       _VCD_LIST_FOREACH (node2, _sequence->entry_list)
 	{
-	  entry_t *_entry = _vcd_list_node_data (node);
+	  entry_t *_entry = _vcd_list_node_data (node2);
 
 	  vcd_assert (n < 500);
 

@@ -1,3 +1,13 @@
+2001-05-27  Herbert Valerio Riedel  <hvr@gnu.org>
+
+
+	* libvcd/vcd_pbc.c (_vcd_pbc_pin_lookup): typo preventing entry ids to be resolved fixed
+
+	* frontends/xml/vcd_xml_rip.c: added new option --nrg-file
+
+	* libvcd/vcd_image_nrg.c: added NRG image format reader
+
+
 2001-05-26  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* frontends: s/assert/vcd_assert/g

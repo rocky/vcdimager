@@ -35,6 +35,7 @@
 #include <libvcd/vcd_files_private.h>
 #include <libvcd/vcd_image_bincue.h>
 #include <libvcd/vcd_image_linuxcd.h>
+#include <libvcd/vcd_image_nrg.h>
 #include <libvcd/vcd_iso9660.h>
 #include <libvcd/vcd_iso9660_private.h>
 #include <libvcd/vcd_logging.h>
@@ -778,8 +779,6 @@ _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img)
 {
   VcdListNode *node;
 
-  vcd_warn ("NIY");
-
   _VCD_LIST_FOREACH (node, obj->sequence_list)
     {
       struct sequence_t *_seq = _vcd_list_node_data (node);
@@ -956,16 +955,21 @@ main (int argc, const char *argv[])
   /* cl params */
   char *xml_fname = NULL;
   char *img_fname = NULL;
-  char *img_dname = NULL;
   int norip_flag = 0;
   int sector_2336_flag = 0;
+
+  enum { 
+    CL_VERSION = 1,
+    CL_BINCUE,
+    CL_LINUXCD,
+    CL_NRG
+  } _img_type = 0;
 
   vcd_xml_init (&obj);
 
   obj.comment = vcd_xml_dump_cl_comment (argc, argv);
 
   {
-    enum { CL_VERSION = 1 };
     poptContext optCon = NULL;
     int opt;
 
@@ -974,7 +978,7 @@ main (int argc, const char *argv[])
        "specify xml file for output (default: '" DEFAULT_XML_FNAME "')",
        "FILE"},
 
-      {"bin-file", 'b', POPT_ARG_STRING, &img_fname, 0,
+      {"bin-file", 'b', POPT_ARG_STRING, &img_fname, CL_BINCUE,
        "set image file as source (default: '" DEFAULT_IMG_FNAME "')", 
        "FILE"},
 
@@ -982,9 +986,13 @@ main (int argc, const char *argv[])
        "use 2336 byte sector mode for image file"},
 
 #if defined(__linux__)
-      {"cdrom-device", '\0', POPT_ARG_STRING, &img_dname, 0,
+      {"cdrom-device", '\0', POPT_ARG_STRING, &img_fname, CL_LINUXCD,
        "set CDROM device as source (linux only)", "DEVICE"},
 #endif
+
+      {"nrg-file", '\0', POPT_ARG_STRING, &img_fname, CL_NRG,
+       "set NRG image file as source",
+       "FILE"},
 
       {"norip", '\0', POPT_ARG_NONE, &norip_flag, 0,
        "dont rip mpeg streams"},
@@ -1018,6 +1026,17 @@ main (int argc, const char *argv[])
 	  exit (EXIT_SUCCESS);
 	  break;
 
+	case CL_NRG:
+	case CL_BINCUE:
+	case CL_LINUXCD:
+	  if (_img_type)
+	    {
+	      vcd_error ("only one image (type) supported at once - try --help");
+	      exit (EXIT_FAILURE);
+	    }
+	  _img_type = opt;
+	  break;
+
 	default:
 	  vcd_error ("error while parsing command line - try --help");
 	  exit (EXIT_FAILURE);
@@ -1030,31 +1049,45 @@ main (int argc, const char *argv[])
     if (poptGetArgs (optCon) != NULL)
       vcd_error ("why are you giving me non-option arguments? -- try --help");
 
-    if (img_fname && img_dname)
-      vcd_error ("file name and device name given at the same time...");
-
     poptFreeContext (optCon);
   }
 
   if (!xml_fname)
     xml_fname = strdup (DEFAULT_XML_FNAME);
 
-  if (!img_dname && !img_fname)
-    img_fname = strdup (DEFAULT_IMG_FNAME);
-
-  if (img_fname)
+  switch (_img_type) 
     {
-      VcdDataSource *bin_source;
+    case CL_BINCUE:
+      {
+	VcdDataSource *bin_source;
+	
+	bin_source = vcd_data_source_new_stdio (img_fname);
+	vcd_assert (bin_source != NULL);
 
-      bin_source = vcd_data_source_new_stdio (img_fname);
-      vcd_assert (bin_source != NULL);
+	img_src = vcd_image_source_new_bincue (bin_source, NULL, sector_2336_flag);
+      }
+      break;
 
-      img_src = vcd_image_source_new_bincue (bin_source, NULL, sector_2336_flag);
+    case CL_NRG:
+      {
+	VcdDataSource *bin_source;
+	
+	bin_source = vcd_data_source_new_stdio (img_fname);
+	vcd_assert (bin_source != NULL);
+
+	img_src = vcd_image_source_new_nrg (bin_source);
+      }
+      break;
+
+    case CL_LINUXCD:
+      img_src = vcd_image_source_new_linuxcd (img_fname);
+      break;
+
+    default:
+      vcd_error ("no image given - try --help");
+      exit (EXIT_FAILURE);
+      break;
     }
-  else if (img_dname)
-    img_src = vcd_image_source_new_linuxcd (img_dname);
-  else
-    vcd_assert_not_reached ();
 
   vcd_assert (img_src != NULL);
 

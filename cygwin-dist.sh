@@ -50,7 +50,7 @@ for DOCFILE in BUGS TODO README NEWS ChangeLog THANKS AUTHORS COPYING FAQ
    cp $DOCFILE $TMPDIR/$DOCFILE.txt
  done
 
-(cd frontends/cli/; makeinfo --no-headers -o ../../$TMPDIR/manual.txt vcdimager.texi)
+(cd docs/; makeinfo --no-headers -o ../$TMPDIR/manual.txt vcdimager.texi)
 
 unix2dos $TMPDIR/*.txt
 

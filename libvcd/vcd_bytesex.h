@@ -48,17 +48,26 @@
 # define UINT16_TO_LE(val)     ((uint16_t) UINT16_SWAP_LE_BE(val))
 # define UINT32_TO_BE(val)     ((uint32_t) (val))
 # define UINT32_TO_LE(val)     ((uint32_t) UINT32_SWAP_LE_BE(val))
+
+# define UINT64_TO_BE(val)     ((uint64_t) (val))
+# define UINT64_TO_LE(val)     ((uint64_t) UINT64_SWAP_LE_BE(val))
 #else
 # define UINT16_TO_BE(val)     ((uint16_t) UINT16_SWAP_LE_BE(val))
 # define UINT16_TO_LE(val)     ((uint16_t) (val))
 # define UINT32_TO_BE(val)     ((uint32_t) UINT32_SWAP_LE_BE(val))
 # define UINT32_TO_LE(val)     ((uint32_t) (val))
+
+# define UINT64_TO_BE(val)     ((uint64_t) UINT64_SWAP_LE_BE(val))
+# define UINT64_TO_LE(val)     ((uint64_t) (val))
 #endif
 
 #define UINT16_FROM_BE(val)    (UINT16_TO_BE (val))
 #define UINT16_FROM_LE(val)    (UINT16_TO_LE (val))
 #define UINT32_FROM_BE(val)    (UINT32_TO_BE (val))
 #define UINT32_FROM_LE(val)    (UINT32_TO_LE (val))
+
+#define UINT64_FROM_BE(val)    (UINT64_TO_BE (val))
+#define UINT64_FROM_LE(val)    (UINT64_TO_LE (val))
 
 static inline uint16_t
 uint16_to_be (uint16_t val) 

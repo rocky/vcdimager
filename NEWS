@@ -2,6 +2,16 @@ $Id$
 
 see ChangeLog for more information
 
+version 0.7.1 (unstable/development)
+====================================
+2001-05-..
+
+* fixed broken entry id resolving
+* read support for NRG images added
+* support for rejected PBC items implemented
+* replaced vcdrip by vcddebug
+* added (previously) missing IO error detection for output in vcdxrip
+
 version 0.7.0 (unstable/development)
 ====================================
 2001-05-24

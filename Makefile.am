@@ -1,4 +1,4 @@
-SUBDIRS = libvcd frontends tests
+SUBDIRS = libvcd frontends tests docs
 
 EXTRA_DIST = BUGS FAQ cygwin-dist.sh debian HACKING
 
