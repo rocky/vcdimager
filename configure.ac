@@ -49,6 +49,10 @@ AC_ARG_WITH(xml-frontend,
 	[  --without-xml-frontend  enable XML frontend (enabled by default)], 
 	enable_xml_fe="${withval}", enable_xml_fe=yes)
 
+AC_ARG_WITH(versioned_libs,
+[  --without-versioned-libs build versioned library symbols (enabled by default)],
+enable_versioned_libs="${withval}", enable_versioned_libs=yes)
+
 dnl programs
 
 AC_PROG_CC
@@ -252,9 +256,27 @@ esac
 LIBS="$LIBS -lm"
 CFLAGS="$CFLAGS $WARN_CFLAGS"
 
+# We need either GNU make or --without-versioned-libs
+if test "x$enable_versioned_libs" = "xyes" ; then 
+  if test -n "$MAKE" ; then
+    $MAKE --version 2>/dev/null >/dev/null
+    if test "$?" -ne 0 ; then
+       AC_MSG_ERROR(Either set MAKE variable to GNU make or use 
+   --without-versioned-libs option)
+    fi
+  else 
+    make --version 2>/dev/null >/dev/null
+    if test "$?" -ne 0 ; then
+       AC_MSG_ERROR(Either set MAKE variable to GNU make or use 
+   --without-versioned-libs option)
+    fi
+  fi
+fi
+
 AM_CONDITIONAL(CYGWIN, test "x$CYGWIN" = "xyes")
 AM_CONDITIONAL(BUILD_CLI_FE, test "x$enable_cli_fe" = "xyes")
 AM_CONDITIONAL(BUILD_XML_FE, test "x$enable_xml_fe" = "xyes")
+AM_CONDITIONAL(BUILD_VERSIONED_LIBS, test "x$enable_versioned_libs" = "xyes")
 
 LIBVCD_CFLAGS='-I$(top_srcdir)/include/ -I$(top_srcdir)/lib/'
 LIBVCD_LIBS='$(top_builddir)/lib/libvcd.la'

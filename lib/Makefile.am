@@ -117,6 +117,7 @@ libvcdinfo_la_DEPENDENCIES = libvcd.la
 
 libvcdinfo_la_MAJOR := $(shell expr $(libvcdinfo_la_CURRENT) - $(libvcdinfo_la_AGE))
 
+if BUILD_VERSIONED_LIBS
 libvcdinfo_la_DEPENDENCIES += libvcdinfo.la.ver
 libvcdinfo_la_LDFLAGS += -Wl,--version-script=libvcdinfo.la.ver
 
@@ -127,5 +128,7 @@ libvcdinfo.la.ver: $(libvcdinfo_la_OBJECTS)
 	echo '};' >> $@
 
 MOSTLYCLEANFILES = libvcdinfo.la.ver
+
+endif
 
 # EOF
