@@ -1,3 +1,11 @@
+2002-01-03  Herbert Valerio Riedel  <hvr@gnu.org>
+	
+	* libvcd/vcd.c (_write_segment): minor change to SPI subheader
+		coding
+	
+	* libvcd/vcd.c (vcd_obj_new): set leadout_pregap by default to
+		150, in order to create a post-gap
+
 2001-12-26  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_stream_stdio.c: cache stat()'s st_size result

@@ -287,15 +287,17 @@ vcd_obj_new (vcd_type_t vcd_type)
 
   new_obj->pbc_list = _vcd_list_new ();
 
+  /* gap's defined by IEC-10149 / ECMA-130 */
+  new_obj->track_pregap = 150; /* pre-gap's for tracks but the first one */
+  new_obj->leadout_pregap = 150; /* post-gap after last track */
+
   if (_vcd_obj_has_cap_p (new_obj, _CAP_TRACK_MARGINS))
     {
-      new_obj->track_pregap = 150;
       new_obj->track_front_margin = 30;
       new_obj->track_rear_margin = 45;
     }
   else
     {
-      new_obj->track_pregap = 150;
       new_obj->track_front_margin = 0;
       new_obj->track_rear_margin = 0;
     }
@@ -741,9 +743,12 @@ vcd_obj_set_param_uint (VcdObj *obj, vcd_parm_t param, unsigned arg)
       obj->leadout_pregap = arg;
       if (!IN (obj->leadout_pregap, 0, 300))
         {
-          obj->leadout_pregap = CLAMP (obj->leadout_pregap, 1, 300);
+          obj->leadout_pregap = CLAMP (obj->leadout_pregap, 0, 300);
           vcd_warn ("ledout pregap out of range, clamping to allowed range");
         }
+      if (obj->leadout_pregap < 150)
+        vcd_warn ("track leadout pregap set below 150 sectors; created (s)vcd may be non-working");
+
       vcd_debug ("changed leadout pregap to %u", obj->leadout_pregap);
       break;
 
@@ -1373,13 +1378,7 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
       
       snprintf (avseq_pathname, sizeof (avseq_pathname), fmt, n + 1);
       
-      /*
-      _vcd_directory_mkfile (obj->dir, avseq_pathname, 
-                             extent + obj->track_front_margin,
-                             _sequence->info->packets * ISO_BLOCKSIZE,
-                             true, file_num);
-      */
-
+      /* file entry contains front margin, mpeg stream and rear margin */
       _vcd_directory_mkfile (obj->dir, avseq_pathname, extent,
                              (obj->track_front_margin 
                               + _sequence->info->packets
@@ -1717,8 +1716,8 @@ _write_sequence (VcdObj *obj, int track_idx)
     case PKT_TYPE_EMPTY:
       mpeg_packets.unknown++;
       sm = SM_FORM2|SM_REALT;
-      ci = CI_OTHER;
-      cnum = CN_OTHER;
+      ci = CI_EMPTY;
+      cnum = CN_EMPTY;
       break;
 
     case PKT_TYPE_INVALID:
@@ -1749,7 +1748,7 @@ _write_sequence (VcdObj *obj, int track_idx)
                                       simplified subheader */
       {
         fnum = 1;
-        ci = 0x80;
+        ci = CI_MPEG2;
       }
 
     if (_write_m2_image_sector (obj, buf, lastsect++, fnum, cnum, sm, ci))
@@ -1802,10 +1801,10 @@ _write_segment (VcdObj *obj, mpeg_segment_t *_segment)
           vcd_mpeg_source_get_packet (_segment->source, packet_no,
                                       buf, &pkt_flags, obj->update_scan_offsets);
 
-          sm = SM_FORM2 | SM_REALT;
-          cn = CN_OTHER;
-          ci = CI_OTHER;
           fn = 1;
+          cn = CN_EMPTY;
+          sm = SM_FORM2 | SM_REALT;
+          ci = CI_EMPTY;
   
           while (pause_node)
             {
@@ -1863,8 +1862,8 @@ _write_segment (VcdObj *obj, mpeg_segment_t *_segment)
               break;
 
             case PKT_TYPE_EMPTY:
-              ci = CI_PAD;
-              cn = CN_PAD;
+              ci = CI_EMPTY;
+              cn = CN_EMPTY;
               break;
 
             default:
@@ -1876,7 +1875,7 @@ _write_segment (VcdObj *obj, mpeg_segment_t *_segment)
             {
               cn = 1;
               sm = SM_FORM2 | SM_REALT | SM_VIDEO;
-              ci = 0x80;
+              ci = CI_MPEG2;
             }
 
           if (packet_no + 1 == _segment->info->packets)
@@ -1894,10 +1893,17 @@ _write_segment (VcdObj *obj, mpeg_segment_t *_segment)
         }
       else
         {
-          fn = 0;
-          cn = 0;
-          sm = SM_FORM2;
-          ci = 0x00;
+          fn = 1;
+          cn = CN_EMPTY;
+          sm = SM_FORM2 | SM_REALT;
+          ci = CI_EMPTY;
+
+          if (_vcd_obj_has_cap_p (obj, _CAP_4C_SVCD))
+            {
+              fn = 0;
+              sm = SM_FORM2;
+            }
+
         }
 
       _write_m2_image_sector (obj, buf, n, fn, cn, sm, ci);
@@ -2322,7 +2328,7 @@ vcd_obj_write_image (VcdObj *obj, VcdImageSink *image_sink,
       {
         int n, lastsect = obj->sectors_written;
 
-        vcd_debug ("writting leadout pregap...");
+        vcd_debug ("writting post-gap ('leadout pregap')...");
         
         for (n = 0; n < obj->leadout_pregap; n++)
           _write_m2_image_sector (obj, zero, lastsect++, 0, 0, SM_FORM2, 0);

@@ -16,6 +16,12 @@ if [ ! -f /bin/cygz.dll ]
    exit 2
  fi
 
+if [ ! -f /usr/bin/cygxml2-2.dll ]
+ then
+   echo "no cygxml2-2.dll ?!?"
+   exit 2
+ fi
+
 if [ -z "$1" ]
  then
    echo "no version given"
@@ -58,7 +64,7 @@ if [ -f vcdimager.pdf ]; then
   cp -v vcdimager.pdf $TMPDIR/manual.pdf
 fi
 
-cp -v $EXECUTABLES frontends/xml/videocd.dtd /bin/cygwin1.dll /bin/cygz.dll $TMPDIR/
+cp -v $EXECUTABLES frontends/xml/videocd.dtd /bin/cygwin1.dll /bin/cygz.dll /usr/bin/cygxml2-2.dll $TMPDIR/
 strip -v $TMPDIR/*.exe
 
 rm -fv "$DISTZIP"

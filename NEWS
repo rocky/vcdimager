@@ -4,10 +4,13 @@ see ChangeLog for more information
 
 version 0.7.12 (unstable/development)
 =====================================
-2001-....
+2002-01-..
 
-* improved support for SVCD and CVD-style subtitles
+* improved support for SVCD- and CVD-style subtitles
 * new conversion tool cdxa2mpeg added
+* minor subheader change for SPI area
+* create 150 sector post-gap ("leadout pregap") by default
+* ...
 
 version 0.7.11 (unstable/development)
 =====================================
