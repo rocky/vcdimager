@@ -172,7 +172,8 @@ Full @acronym{PBC} support, including fully customizable play lists,
 Support for segment (play) items (@acronym{SPI}).
 
 @item
-Support for up to 98 sequence items (@acronym{MPEG} tracks) per (Super) Video CD.
+Support for up to 98 sequence items (@acronym{MPEG} tracks) per (Super)
+Video CD.
 
 @item
 Support for additional entry points into sequence items.
@@ -183,8 +184,8 @@ items.
 
 @item
 General facility for adding files as mode 2 form 1 and mixed form
-@acronym{XA} sectors to the @acronym{ISO9660} file-system and setting
-some labels in the @acronym{ISO9660} @acronym{PVD}
+@acronym{XA} sectors to the @acronym{ISO-9660} file-system and setting
+some labels in the @acronym{ISO-9660} @acronym{PVD}
 
 @item
 Supports 99 minute @acronym{CD-R} media@footnote{@dots{}though most devices
@@ -213,7 +214,7 @@ corrections and improvements for this manual to
 * Overview::                    
 * Anatomy of Video CDs::        
 * Known Video CD Flavors::      
-* The ISO9660 Track::           
+* The ISO-9660 Track::           
 * Constraints on MPEG streams::  
 * Play Items::                  
 * Playback Control::            
@@ -237,19 +238,22 @@ multimedia support.
 In general, the layout of a Video CD is as follows:
 
 @itemize @bullet
+@item 
+lead-in area containg the TOC (@code{00:00:00} -- @code{00:01:74}).
+
 @item
-ISO9660 data track. @xref{The ISO9660 Track}.
+ISO-9660 data track. @xref{The ISO-9660 Track}.
 
 @itemize @bullet 
 @item 
-ISO9660 structure at @code{00:02:00} consisting of 16 empty sectors,
+ISO-9660 structure at @code{00:02:00} consisting of 16 empty sectors,
 primary volume descriptor (@dfn{PVD}) and directory records with file
 pointers to information area structures (described below) and external
 pointers to @acronym{MPEG}/@acronym{CD-DA} tracks following the
-ISO9660 data track.
+ISO-9660 data track.
 
 @item
-Optional karaoke area at @code{00:03:00}.
+Optional karaoke area at @code{00:03:00}. (not supported yet by vcdimager)
 
 @item
 Video CD information area at @code{00:04:00}.
@@ -260,17 +264,28 @@ sector segments. There can be up to 1980 segments on a disc.
 
 @item
 Optional program and data file area, for additional files added to the
-ISO9660 track.
+ISO-9660 track.
 
 @end itemize
 
 @item
-Up to 98 @acronym{MPEG} mode 2 form 2 or @acronym{CD-DA} tracks
-embedded in lead-in and lead-out empty sectors.
+Up to 98 @acronym{MPEG} mode 2 form 2 tracks embedded in front and rear
+margin empty sectors, preceded by track pre-gaps.
+
+@item
+Up to 97@footnote{the maximum number of tracks on a Video CD must not
+excede 99 tracks} @acronym{CD-DA} tracks. (not supported yet by
+vcdimager)
+
+@item
+Optional lead-out pregap.
+
+@item
+lead-out area.
 
 @end itemize
 
-@node Known Video CD Flavors, The ISO9660 Track, Anatomy of Video CDs, Video CD Concepts
+@node Known Video CD Flavors, The ISO-9660 Track, Anatomy of Video CDs, Video CD Concepts
 @section Known Video CD Flavors
 @cindex Video CD variants
 
@@ -282,6 +297,7 @@ sections tries to explain the differences amongst them.
 * Video CD 2.0::                
 * Extended Video CD::           
 * Super Video CD 1.0::          
+* HQ Video CD 1.0::             
 * Extended Super Video CD::     
 @end menu
 
@@ -295,7 +311,7 @@ the following characteristics:
 
 @itemize @bullet
 @item
-One mode 2 mixed form ISO9660 track containing file pointers to the
+One mode 2 mixed form ISO-9660 track containing file pointers to the
 information areas.
 
 @item
@@ -399,7 +415,7 @@ standards in order to use the additional performance of the
 @acronym{DVD} decoders and thus achieve better image quality. Such an
 XVCD may be unsupported by many available stand-alone playing devices.
 
-@node Super Video CD 1.0, Extended Super Video CD, Extended Video CD, Known Video CD Flavors
+@node Super Video CD 1.0, HQ Video CD 1.0, Extended Video CD, Known Video CD Flavors
 @subsection Super Video CD 1.0
 
 With the upcoming of the @acronym{DVD-V} media, a new VCD standard had
@@ -445,29 +461,56 @@ high resolutions as defined for Video CD 2.0 apply for Super Video CD's}:
 480 x 576 @@ 25 Hz (@acronym{PAL} 2/3 @acronym{D-2}).
 @end itemize
 
-@node Extended Super Video CD,  , Super Video CD 1.0, Known Video CD Flavors
+@node HQ Video CD 1.0, Extended Super Video CD, Super Video CD 1.0, Known Video CD Flavors
+@subsection HQ Video CD 1.0
+@cindex HQ-VCD
+@cindex HQ Video CD 1.0
+
+This is actually just a minor variation defined in IEC-62107 on the
+Super Video CD 1.0 format for @emph{compatibility with current products
+in the market}. It differs from the Super Video CD 1.0 format in the
+following items:
+
+@itemize @bullet
+@item
+The system profile tag field in @file{/SVCD/INFO.SVD} is set to @samp{1}
+instead of @samp{0}.
+
+@item
+The system identification field value in @file{/SVCD/INFO.SVD} is set to
+@samp{HQ-VCD} instead of @samp{SUPERVCD}.
+
+@item
+@file{/EXT/SCANDATA.DAT} is mandatory instead of being optional.
+
+@item
+@file{/SVCD/SEARCH.DAT} is optional instead of being mandatory.
+
+@end itemize
+
+@node Extended Super Video CD,  , HQ Video CD 1.0, Known Video CD Flavors
 @subsection Extended Super Video CD
 
 Just like the XVCD, and thus also known as @dfn{XSVCD}, this is not an
 official standard and may not work with all playing devices supporting
 SVCD's.
 
-@node The ISO9660 Track, Constraints on MPEG streams, Known Video CD Flavors, Video CD Concepts
-@section The ISO9660 Track
+@node The ISO-9660 Track, Constraints on MPEG streams, Known Video CD Flavors, Video CD Concepts
+@section The ISO-9660 Track
 
 @menu
 * Primary Volume Descriptor::   
 * Directory Structure::         
 @end menu
 
-@node Primary Volume Descriptor, Directory Structure, The ISO9660 Track, The ISO9660 Track
+@node Primary Volume Descriptor, Directory Structure, The ISO-9660 Track, The ISO-9660 Track
 @subsection Primary Volume Descriptor
 
-This ISO9660 sector located at sector @acronym{LSN} 16 contains general
-information about the ISO9660 filesystem, such as volume label, various
+This ISO-9660 sector located at sector @acronym{LSN} 16 contains general
+information about the ISO-9660 filesystem, such as volume label, various
 IDs, filesystem size, pointer to the root directory and so on@dots{}
 
-@node Directory Structure,  , Primary Volume Descriptor, The ISO9660 Track
+@node Directory Structure,  , Primary Volume Descriptor, The ISO-9660 Track
 @subsection Directory Structure
 @cindex Video CD filesystem
 
@@ -525,18 +568,19 @@ characteristics) about each sequence track is recorded.
 @subsubsection @file{/MPEGAV} & @file{/MPEG2} Directory
 
 This file contains file entries pointing to the sequence items contained
-in the tracks after the ISO9660 track.
+in the tracks after the ISO-9660 track.
 
 @node /CDDA Directory, /SEGMENT Directory, /MPEGAV & /MPEG2 Directory, Directory Structure
 @subsubsection @file{/CDDA} Directory
 
 This file contains file entries pointing to optional CDDA tracks after
-the ISO9660 track. This feature is not available for Super Video CD's.
+the ISO-9660 track. This feature is not available for Super Video CD's.
 
 @node /SEGMENT Directory, /EXT Directory, /CDDA Directory, Directory Structure
 @subsubsection @file{/SEGMENT} Directory
 
-This directory contains file entries to segment play items. @xref{Segment Items}.
+This directory contains file entries to segment play
+items. @xref{Segment Items}.
 
 @node /EXT Directory, /CDI Directory, /SEGMENT Directory, Directory Structure
 @subsubsection @file{/EXT} Directory
@@ -566,7 +610,7 @@ Closed caption data file entries.
 This directory is provided for @acronym{CD-i} player applications. (Only
 useful for Video CD's)
 
-@node Constraints on MPEG streams, Play Items, The ISO9660 Track, Video CD Concepts
+@node Constraints on MPEG streams, Play Items, The ISO-9660 Track, Video CD Concepts
 @section Constraints on @acronym{MPEG} streams
 @cindex MPEG input streams
 
@@ -777,7 +821,7 @@ No pre-gaps.
 Only @acronym{PBC} accessible through @acronym{PBC}.
 
 @item
-Segement item size limited by @acronym{SPI} area size.
+Segment item size limited by @acronym{SPI} area size.
 
 @end itemize
 
@@ -872,6 +916,19 @@ selection, while showing a play item.
 Also features such as random selection, default target (@key{DEFAULT}),
 timeout target and looping are supported.
 
+@subsubheading Hotspots
+@cindex Menu selection areas
+@cindex Menu highlighting
+
+The Video CD format allows for so-called hotspots in selection lists,
+which are used to define areas on the screen for selection targets,
+which can be used for pointer device based selection in addition to the
+@key{NUMERIC} input, and/or for highlighting of areas on the screen on
+selection.
+
+Alas, this very useful feature is not widely supported amongst playing
+devices.
+
 @subsubheading Multi Default Selection List
 
 @dfn{Multi default selection lists} are a special variant of selection
@@ -961,7 +1018,7 @@ building the actual image file(s).
 * CD-i Support::                
 @end menu
 
-@node Adding Files to the Video CD , CD-i Support, vcdxgen, vcdxgen
+@node Adding Files to the Video CD, CD-i Support, vcdxgen, vcdxgen
 @subsubsection Adding Files to the Video CD 
 
 Files can be added to the @acronym{ISO} file-system, that is the first
@@ -973,9 +1030,10 @@ mode 2 CD-ROM sectors @footnote{8 bytes for subheader, 2324 bytes
 payload (which contains 276 bytes @acronym{ECC} for form 1) and finally
 4 bytes for @acronym{EDC}}.
 
+@cindex ISO-9660 filename constraints
 The path name given as @var{ISO_FILENAME} determines where to link the
 file in the file-system of the Video CD. The given path name must be a
-valid ISO9660 file name with the following restrictions:
+valid ISO-9660 file name with the following restrictions:
 @itemize @bullet
 @item
 The Character set is restricted to upper case letters, numbers, 
@@ -991,6 +1049,10 @@ is limited to 255 characters.
 File names must contain exactly one dot.@footnote{if no file name
 extension is supposed to exist the dot must be placed as a trailing
 dot.}
+
+@item
+ISO-9660 conformance level 1 restrictions apply, i.e. filenames are
+restricted to 8.3 characters.
 
 @item
 The path-name must not begin or end with a slash nor should it contain
@@ -1319,7 +1381,8 @@ Allowed @code{value} content: @samp{true}, @samp{false}. Default: @samp{false}.
 @item svcd vcd30 tracksvd
 Enables the use of the (deprecated) chinese @file{/SVCD/TRACKS.SVD}
 format which differs from the format defined in the IEC-62107
-specification.
+specification. The differences are most exposed on SVCDs containing more
+than one video track.
 
 Allowed @code{value} content: @samp{true}, @samp{false}. Default: @samp{false}.
 
@@ -1346,10 +1409,27 @@ should be at least 15 sectors long.
 Allowed @code{value} content: [@samp{0}..@samp{150}]. Default: @samp{45}
 for Video CD 1.0/1.1/2.0, otherwise @samp{0}.
 
+@item leadout pregap 
+
+This option allows to set the amount of empty sectors added before the
+lead-out area begins. Some operating systems may encounter I/O errors due
+to read-ahead issues when reading the last mpeg track if this parameter
+is not set to a value around @samp{15}.
+
+Allowed @code{value} content: [@samp{0}..@samp{300}]. Default: @samp{0}.
+
+@item leadout pause
+
+@emph{DEPRECATED}. Use @samp{leadout pregap} instead. This option is
+aequivalent to setting the @samp{leadout pregap} option to the value 
+@samp{150}.
+
+Allowed @code{value} content: @samp{true}, @samp{false}. Default: @samp{false}.
+
 @item relaxed aps
 @cindex Relaxed @acronym{APS} constraints
 This controls whether @acronym{APS} constraints are strict or
-relaxed @xref{Access Point Sectors}. 
+relaxed. @xref{Access Point Sectors}. 
 
 Allowed @code{value} content: @samp{true}, @samp{false}. Default: @samp{false}.
 
@@ -1360,12 +1440,6 @@ the @acronym{MPEG}-2 video streams@footnote{It is required, that the
 stream has already user data groups with scan information data, in order
 for this feature to work}. @xref{Scan Information
 Data}.
-
-Allowed @code{value} content: @samp{true}, @samp{false}. Default: @samp{false}.
-
-@item leadout pause
-Enables adding of 150 empty sectors which are added between tracks after
-the last track as well.
 
 Allowed @code{value} content: @samp{true}, @samp{false}. Default: @samp{false}.
 
@@ -1503,7 +1577,7 @@ of the disc.
 @table @code
 @item <volume-id>
 Volume label of the @acronym{CD-ROM}. Content restricted to upto 32
-d-characters@xref{ISO646 d-Characters}. This is label usually shows up
+d-characters, @xref{ISO646 d-Characters}. This is label usually shows up
 on computer systems as volume label.
 
 @item <system-id>
@@ -1553,12 +1627,13 @@ upto 128 a-characters@xref{ISO646 a-Characters}.
 @end example
 
 This section of the @acronym{XML} description allows for the creation of
-additional folders and files into the ISO9660 filesystem on the Video
-CD.
+additional folders and files into the ISO-9660 filesystem on the Video
+CD. @xref{Adding Files to the Video CD}.
 
 @node <folder> Element/Container, <file> Element/Container, <filesystem> Container, <filesystem> Container
 @subsubsection @code{<folder>} Element/Container
 @tgindex @code{folder}
+@tgindex @code{name}
 
 @example
 @cartouche
@@ -1570,9 +1645,29 @@ CD.
 @end cartouche
 @end example
 
+@table @code
+@item <name>
+Directory name in the ISO-9660 domain. 
+@end table
+
+@smallexample
+@cartouche
+@dots{}
+  <filesystem>
+    <folder>
+      <name>CDI</name>
+      <file src=@dots{}>
+@dots{}
+    </folder>
+  </filesystem>
+@dots{}
+@end cartouche
+@end smallexample
+
 @node <file> Element/Container,  , <folder> Element/Container, <filesystem> Container
 @subsubsection @code{<file>} Element
 @tgindex @code{file}
+@tgindex @code{name}
 
 @example
 @cartouche
@@ -1584,6 +1679,36 @@ CD.
 <!ELEMENT name                          (#PCDATA)>
 @end cartouche
 @end example
+
+@table @code
+@item <name>
+Filename in the ISO-9660 domain. 
+
+@item src
+@tgindex @var{src}
+Source location of the file.
+
+@item format
+@tgindex @var{format}
+Whether file is an ordinary @code{form1} file, or a @code{mixed} form
+realtime file containing the sector information in 2336 byte blocks.
+
+@end table
+
+@smallexample
+@cartouche
+@dots{}
+    <folder>
+      <name>CDI</name>
+      <file src="/usr/share/cdi/cdi_imag.rtf" format="mixed">
+        <name>CDI_IMAG.RTF</name>
+      </file>
+      <file src="/usr/share/cdi/cdi_text.fnt">
+        <name>CDI_TEXT.FNT</name>
+      </file>
+@dots{}
+@end cartouche
+@end smallexample
 
 @node <segment-items> Container, <sequence-items> Container, <filesystem> Container, <videocd> Root
 @subsection @code{<segment-items>} Container
@@ -1734,7 +1859,7 @@ the maximum of 500 entry points} can be present in the whole disc. The
 entry point time is given in seconds from the beginning of the sequence.
 If referenced from @acronym{PBC} the sequence which contains the entry
 point is played from the entry point to the end of the sequence
-(@emph{not} to the next entry point!) @xref{Access Point Sectors}.
+(@emph{not} to the next entry point!). @xref{Access Point Sectors}.
 
 @item id
 Play item ID value referenced in @code{ref} attributes. 
@@ -1824,6 +1949,7 @@ property for but the very first PBC list, in order to make the
 be rejected.
 
 @item x1 y1 x2 y2
+@cindex Hotspot area coordinates
 @tgindex @var{x1}
 @tgindex @var{x2}
 @tgindex @var{y1}
@@ -1832,7 +1958,7 @@ Screen Co-ordinates for selection hotspot areas (only supported for
 @code{<selection>} members), with @samp{0,0} being the upper left and
 @samp{255,255} being the lower right screen point. @code{x1} and
 @code{y1} are required to be less than @code{x2} and @code{y2}
-respectively.
+respectively. @xref{Selection List}.
 
 @item play-item
 @cindex Play nothing item
@@ -2200,7 +2326,7 @@ $ vcdimager --iso-volume-label="MY_TEST_VCD" track1.mpg track2 track3.mpg
    INFO: scanning mpeg sequence item #0 for scanpoints...
    INFO: scanning mpeg sequence item #1 for scanpoints...
    INFO: scanning mpeg sequence item #2 for scanpoints...
-   INFO: writing track 1 (ISO9660)...
+   INFO: writing track 1 (ISO-9660)...
    INFO: writing track 2, MPEG1, NTSC (352x240/30fps), 1 audio stream...
    INFO: writing track 3, MPEG1, PAL (352x288/25fps), 1 audio stream...
    INFO: writing track 4, MPEG1, NTSC (352x240/30fps), 1 audio stream...
@@ -2219,7 +2345,7 @@ $ vcdxbuild videocd.xml
    INFO: scanning mpeg sequence item #0 for scanpoints...
    INFO: scanning mpeg sequence item #1 for scanpoints...
    INFO: scanning mpeg sequence item #2 for scanpoints...
-   INFO: writing track 1 (ISO9660)...
+   INFO: writing track 1 (ISO-9660)...
    INFO: writing track 2, MPEG1, NTSC (352x240/30fps), 1 audio stream...
    INFO: writing track 3, MPEG1, PAL (352x288/25fps), 1 audio stream...
    INFO: writing track 4, MPEG1, NTSC (352x240/30fps), 1 audio stream...
@@ -2275,12 +2401,16 @@ Make sure the @acronym{SVCD} is physically ok (e.g., analyze the disc
 with @command{vcddebug} or try it on some other playing device).
 
 @item
-Try creating the @acronym{SVCD} by enabling the @code{svcd vcd30 mpegav}
-and @code{svcd vcd30 entrysvd} options.
+Try creating the @acronym{SVCD} by enabling the @samp{svcd vcd30 mpegav}
+and @samp{svcd vcd30 entrysvd} options.
 
 @item
 Add an empty @file{/SEGMENT} dir, if it isn't created due to inclusion
 of @acronym{SPI}s.
+
+@item
+If you have confusing time readings for discs with more than one video
+track, you might need to use the @samp{svcd vcd30 tracksvd} option.
 
 @end enumerate
 
@@ -2309,7 +2439,7 @@ up to 100 minute playing times.}
 The @acronym{MPEG}-2 stream does not include the mandatory scan
 information data or when included, it doesn't follow the
 specification@footnote{@code{libvcd} warns if scan information is
-missing or syntactically wrong.} @xref{Scan Information Data}.
+missing or syntactically wrong.}. @xref{Scan Information Data}.
 
 @item
 Some playing devices require a sequence header before each @acronym{GOP}

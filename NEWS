@@ -12,6 +12,7 @@ version 0.7.11 (unstable/development)
 * fixed libxml2 external entity loader
 * fixed minor subheader bug
 * be more tolerant when ripping faulty PBCs
+* new "leadout pregap" option
 * ...
 
 version 0.7.10 (unstable/development)

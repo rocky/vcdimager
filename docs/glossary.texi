@@ -16,7 +16,13 @@ compact disc
 @acronym{CD} read only memory
 
 @item DVD
-digital versatile/video disc
+digital versatile disc 
+
+@item DVD-V
+@acronym{DVD} for video 
+
+@item DVD-A
+@acronym{DVD} for audio
 
 @item FSF
 free software foundation, @uref{http://www.fsf.org/}
