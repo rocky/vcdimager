@@ -10,7 +10,6 @@ config.h.in
 config.log
 config.status
 configure
-libvcd.pc
 libvcdinfo.pc
 ltconfig
 ltmain.sh

@@ -62,6 +62,16 @@ Digital Versatile Disc  @uref{http://www.dvddemystified.com/dvdfaq.html}
 @item DVD-A
 @acronym{DVD} for Audio.
 
+
+@item FourCC
+
+A four character code that uniquely identifies a data stream
+format. Software will look up the FourCC code then look for the codec
+associated to the code for that code.  This idea was used in the IFF
+multimedia format developed by Electronic Arts for the Amiga in the
+early 1980s. This file format was copied by Apple (who called it AIFF)
+and Microsoft (RIFF).  @uref{http://www.fourcc.org/fcccodec.htm}
+
 @item FSF
 Free Software Foundation, @uref{http://www.fsf.org/}
 
@@ -88,9 +98,26 @@ palette entries. Palette color 0 entries can be run-length encoded.
 A more detailed description of this format can be found in the
 documentation directory of VCDimager.
 
+@item LBA
+
+Logical Block Addressing. Mapped integer numbers from CD Red Book
+Addressing MSF.  The starting sector is -150 and ending sector is
+449849, which correlates directly to MSF: 00:00:00 to 99:59:74.
+Because an LBA is a single number it is often easier to work with in
+programming than an MSF.
+
 @item LID
 List ID. A unit of playback control navigation inside a PSD. Numbering
 starts from 1.
+
+@item LSN
+
+Logical Sector Number. Mapped integer numbers from CD Red Book
+Addressing MSF.  The starting sector is 0 and ending sector is 449699,
+which correlates to MSF: 00:00:00 to 99:59:74.  Because an LSN is a
+single number it is often easier to work with in programming than an
+MSF. Because it starts at 0 rather than -150 as is the case of an LBA
+it can be represented as an unsigned value.
 
 @item PAL
 Phase Alternating Line, the dominant television standard in Europe. 

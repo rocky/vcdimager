@@ -101,14 +101,14 @@ whether we are referring to a class of Video Compact Disks or the
 specific older format called VCD @emph{version-number}.
 
 @value{program}'s mission in life is to display the contents of a
-Video CD image. Well, that's not actually true---if given an audio CD
-(CD-DA) or some other kind of CD, @value{program} will try to display
-some information about that, perhaps just a list of the tracks, with
-varying degrees of success; However Video CDs are what @value{program}
-understands best and it will you the most detail about.  The disk
-``image'' does not have to reside on a physical Compact Disk;
-@value{program} understand the BIN/CUE disk-image format used by a
-popular DOS/Window mastering tool.
+Video CD or CD image. Well, that's not actually true---if given an
+audio CD (CD-DA) or some other kind of CD, @value{program} will try to
+display some information about that, perhaps just a list of the
+tracks, with varying degrees of success; However Video CDs are what
+@value{program} understands best and it will you the most detail
+about.  The disk ``image'' does not have to reside on a physical
+Compact Disk; @value{program} understand the BIN/CUE disk-image format
+used by a popular DOS/Window mastering tool.
 
 You might use the information from @value{program} as a diagnostic or
 analytical tool. It may help you understand a particular Video CD that

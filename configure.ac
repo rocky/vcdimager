@@ -265,7 +265,6 @@ AC_SUBST(LIBVCDINFO_LIBS)
 
 AC_CONFIG_FILES([ \
 	Makefile \
-	libvcd.pc \
 	libvcdinfo.pc \
 	amiga/Makefile \
 	include/Makefile \
