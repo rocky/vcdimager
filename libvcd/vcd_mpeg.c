@@ -25,17 +25,15 @@
 #include "vcd_mpeg.h"
 #include "vcd_logging.h"
 
-const static uint8_t mpeg_sync[4] = {
-  0x00, 0x00, 0x01, 0xba 
-};
+#define MPEG_PACK_HEADER_CODE    ((uint32_t) 0x000001ba)
+#define MPEG_SYSTEM_HEADER_CODE  ((uint32_t) 0x000001bb)
+#define MPEG_PROGRAM_END_CODE    ((uint32_t) 0x000001b9)
+#define MPEG_SEQUENCE_CODE       ((uint32_t) 0x000001b3)
+#define MPEG_NULL_CODE           ((uint32_t) 0x000001be) /* what is it really? */
 
-const static uint8_t mpeg_seq_start[4] = {
-  0x00, 0x00, 0x01, 0xb3 
-};
+#define MPEG_VIDEO_CODE          ((uint32_t) 0x000001e0)
+#define MPEG_AUDIO_CODE          ((uint32_t) 0x000001c0)
 
-const static uint8_t mpeg_end[4] = {
-  0x00, 0x00, 0x01, 0xb9 
-};
 
 const static double frame_rates[16] = {
    0.00, 23.976, 24.0, 25.0, 
@@ -50,12 +48,7 @@ const static double aspect_ratios[16] = {
   1.1250, 1.1575, 1.2015, 0.0000
 };
 
-static int
-_bit_set_p (int n, int bit)
-{
-  /* assert (bit >= 0 && bit < (sizeof (int) * 8)); */
-  return (n >> bit) & 0x1;
-}
+#define _BIT_SET_P(n, bit)  (((n) >> (bit)) & 0x1)
 
 static uint32_t 
 _bitvec_get_bits32 (const uint8_t bitvec[], int offset, int bits)
@@ -63,12 +56,12 @@ _bitvec_get_bits32 (const uint8_t bitvec[], int offset, int bits)
   uint32_t result = 0;
   int i;
 
-  assert (bits >= 0 && bits < 32);
+  assert (bits > 0 && bits <= 32);
 
-  for(i = offset; i < (offset + bits); i++)
+  for (i = offset; i < (offset + bits); i++)
     {
       result <<= 1;
-      if (_bit_set_p (bitvec[i / 8], 7 - (i % 8)))
+      if (_BIT_SET_P (bitvec[i / 8], 7 - (i % 8)))
         result |= 0x1;
     }
   
@@ -80,109 +73,180 @@ mpeg_type (const void *mpeg_block)
 {
   const uint8_t *data = mpeg_block;
   int n;
+  uint32_t code;
+  int offset = 0;
 
-  if (!memcmp (data, mpeg_end, sizeof (mpeg_end)))
-    return MPEG_END;
-  
-  if (memcmp(data, mpeg_sync, sizeof (mpeg_sync))) 
+  code = _bitvec_get_bits32 (data, offset, 32);
+
+  offset += 32;
+
+  switch (code)
     {
-      for (n = 0;n < 2324;n++)
+    case MPEG_PROGRAM_END_CODE:
+      return MPEG_END;
+      break;
+
+    case MPEG_PACK_HEADER_CODE:
+      {
+        switch (_bitvec_get_bits32(data, offset, 2))
+          {
+          case 0x0: /* mpeg1 */
+          case 0x1: /* mpeg2 */
+            break;
+          default:
+            vcd_warn ("packet not recognized as mpeg1 or mpeg2 stream (%d)", 
+                      _bitvec_get_bits32(data, offset, 2));
+            /* return MPEG_INVALID; */
+            break;
+          }
+
+        while ((offset + 32) < (2324 * 8))
+          {
+            code = _bitvec_get_bits32 (data, offset, 32);
+            offset += 32;
+
+            switch (code)
+              {
+              case MPEG_NULL_CODE:
+                return MPEG_NULL;
+                break;
+
+              case MPEG_AUDIO_CODE:
+                return MPEG_AUDIO;
+                break;
+       
+              case MPEG_VIDEO_CODE:
+                return MPEG_VIDEO;
+                break;
+                
+              case MPEG_SYSTEM_HEADER_CODE:
+                {
+                  int size = _bitvec_get_bits32 (data, offset, 16); 
+                  /* fixme -- boundary check assert (offset + 16 < 2324 * 8) */
+                  
+                  offset += 16;
+                  offset += size * 8;
+                }
+                break;
+
+              default:
+                offset -= 24; /* jump back 24 of 32 bits... */
+                break;
+              }
+          }
+        /* ?? */
+      }
+      break;
+
+    default:
+      for (n = 0;n < 2324; n++)
         if (data[n])
           return MPEG_INVALID;
 
       return MPEG_NULL;
+      break;
     }
-
-  /* fixme -- detect mpeg verson!!! */
-
-  /*
-   * data from mpeg-1 stream
-   */
-  if ((data[15] == 0xe0) || 
-      (data[15] == 0xbb && data[24] == 0xe0))
-    return MPEG_VIDEO;
-  
-  if ((data[15] == 0xc0) || 
-      (data[15] == 0xbb && data[24] == 0xc0))
-    return MPEG_AUDIO;
-
-  /*
-   * data from mpeg-2 stream
-   */
-  if (data[17] == 0xe0)
-	return MPEG_VIDEO;
-
-  if (data[17] == 0xc0)
-	return MPEG_AUDIO;
 
   return MPEG_UNKNOWN;
 }
 
-/* fixme -- mpeg version needs to be detected too! */
 
 int
-mpeg_analyze_start_seq(const void *packet, mpeg_info_t *info)
+mpeg_analyze_start_seq (const void *packet, mpeg_info_t *info)
 {
-  const uint8_t *pkt = packet;
-  int fixup = -30;
+  const uint8_t *data = packet;
+  int offset = 0;
+  uint32_t code;
 
   assert (info != NULL);
-  assert (sizeof (mpeg_seq_start) == 4);
-
-  if(memcmp(pkt, mpeg_sync, sizeof(mpeg_sync)))
-    return FALSE;
+  assert (packet != NULL);
   
-  /* fixme -- this is just a hack, due to little understanding of mpeg format */
+  code = _bitvec_get_bits32 (data, offset, 32);
+  offset += 32;
+
+  if (code == MPEG_PACK_HEADER_CODE)
+    {
+      mpeg_vers_t mpeg_version;
+
+      switch (_bitvec_get_bits32(data, offset, 2))
+        {
+        case 0x0:
+          mpeg_version = MPEG_VERS_MPEG1;
+          break;
+        case 0x1:
+          mpeg_version = MPEG_VERS_MPEG2;
+          break;
+        default:
+          mpeg_version = MPEG_VERS_INVALID;
+          vcd_warn ("failed to recognize mpeg version");
+          return FALSE;
+          break;
+        }
+
+      while (offset + 32 + 64 < 2324 * 8)
+        {
+          code = _bitvec_get_bits32 (data, offset, 32);
+          offset += 32;
+          
+          if (code == MPEG_SEQUENCE_CODE)
+            {
+              unsigned hsize, vsize, aratio, frate, brate, bufsize, constr;
+
+              hsize = _bitvec_get_bits32 (data, offset, 12);
+              offset += 12;
+
+              vsize = _bitvec_get_bits32 (data, offset, 12);
+              offset += 12;
+
+              aratio = _bitvec_get_bits32 (data, offset, 4);
+              offset += 4;
+
+              frate = _bitvec_get_bits32 (data, offset, 4);
+              offset += 4;
+
+              brate = _bitvec_get_bits32 (data, offset, 18);
+              offset += 18;
+              
+              /* marker bit const == 1 */
+              offset += 1;
+
+              bufsize = _bitvec_get_bits32 (data, offset, 10);
+              offset += 10;
+
+              constr = _bitvec_get_bits32 (data, offset, 1);
+              offset += 1;
+
+              info->hsize = hsize;
+              info->vsize = vsize;
+              info->aratio = aspect_ratios[aratio];
+              info->frate = frame_rates[frate];
+              info->bitrate = 400*brate;
+              info->vbvsize = bufsize * 16 * 1024; 
+              info->constrained_flag = constr;
+
+              info->vers = mpeg_version;
+
+              if (hsize == 352 && vsize == 288 && frate == 3)
+                info->norm = MPEG_NORM_PAL;
+              else if (hsize == 352 && vsize == 240 && frate == 1)
+                info->norm = MPEG_NORM_FILM;
+              else if (hsize == 352 && vsize == 240 && frate == 4)
+                info->norm = MPEG_NORM_NTSC;
+              else if (hsize == 480 && vsize == 576 && frate == 3)
+                info->norm = MPEG_NORM_PAL_S;
+              else if (hsize == 480 && vsize == 480 && frate == 4)
+                info->norm = MPEG_NORM_NTSC_S;
+              else
+                info->norm = MPEG_NORM_OTHER;
+              
+              return TRUE;
+            }
+
+          offset -= 24;
+        }
+    }
   
-  for (fixup = 0;fixup < 8;fixup++, pkt++)
-    if (!memcmp (pkt+30, mpeg_seq_start, sizeof (mpeg_seq_start)))
-      {
-        unsigned hsize, vsize, aratio, frate, brate, bufsize;
-        
-        hsize = pkt[34] << 4;
-        hsize += pkt[35] >> 4;
-
-        vsize = (pkt[35] & 0x0f) << 8;
-        vsize += pkt[36];
-
-        aratio = pkt[37] >> 4;
-        frate = pkt[37] & 0x0f;
-
-        brate = pkt[38] << 10;
-        brate += pkt[39] << 2;
-        brate += pkt[40] >> 6;
-
-        bufsize = (pkt[40] & 0x3f) << 6;
-        bufsize += pkt[41] >> 4;
-    
-        info->hsize = hsize;
-        info->vsize = vsize;
-        info->aratio = aspect_ratios[aratio];
-        info->frate = frame_rates[frate];
-        info->bitrate = 400*brate;
-        info->vbvsize = bufsize;
-
-        if(hsize == 352 && vsize == 288 && frate == 3)
-          info->norm = MPEG_NORM_PAL;
-        else if(hsize == 352 && vsize == 240 && frate == 1)
-          info->norm = MPEG_NORM_FILM;
-        else if(hsize == 352 && vsize == 240 && frate == 4)
-          info->norm = MPEG_NORM_NTSC;
-        else if (hsize == 480 && vsize == 480 && frate == 4)
-          info->norm = MPEG_NORM_NTSC_S;
-        else if (hsize == 480 && vsize == 576 && frate == 3)
-          info->norm = MPEG_NORM_PAL_S;
-        else
-          info->norm = MPEG_NORM_OTHER;
-
-        if(fixup)
-          vcd_debug("fixup of %d bytes was necessary for mpeg format detection...", fixup);
-
-        return TRUE;
-      }
-
   return FALSE;
-
 }
 
 

@@ -42,6 +42,13 @@ typedef enum {
   MPEG_NORM_NTSC_S
 } mpeg_norm_t;
 
+typedef enum {
+  MPEG_VERS_INVALID = 0,
+  MPEG_VERS_MPEG1,
+  MPEG_VERS_MPEG2
+} mpeg_vers_t;
+  
+
 typedef struct {
   unsigned hsize;
   unsigned vsize;
@@ -49,7 +56,9 @@ typedef struct {
   double frate;
   unsigned bitrate;
   unsigned vbvsize;
-
+  int constrained_flag;
+  
+  mpeg_vers_t vers;
   mpeg_norm_t norm;
 } mpeg_info_t;
 

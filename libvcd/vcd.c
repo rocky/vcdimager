@@ -108,6 +108,7 @@ vcd_obj_append_mpeg_track (VcdObj *obj, VcdDataSource *mpeg_file)
 {
   unsigned length;
   int j;
+  struct mpeg_track_t *track;
 
   assert (obj != NULL);
   assert (mpeg_file != NULL);
@@ -117,13 +118,14 @@ vcd_obj_append_mpeg_track (VcdObj *obj, VcdDataSource *mpeg_file)
   if (length % 2324)
     vcd_warn ("track# %d not a multiple 2324...", obj->mpeg_tracks_num);
 
-  obj->mpeg_tracks[obj->mpeg_tracks_num].source = mpeg_file;
-  obj->mpeg_tracks[obj->mpeg_tracks_num].length_sectors = length / 2324;
+  track = &(obj->mpeg_tracks[obj->mpeg_tracks_num]);
+
+  track->source = mpeg_file;
+  track->length_sectors = length / 2324;
 
   obj->relative_end_extent += PRE_TRACK_GAP;
   
-  obj->mpeg_tracks[obj->mpeg_tracks_num].relative_start_extent = 
-    obj->relative_end_extent;
+  track->relative_start_extent = obj->relative_end_extent;
 
   obj->relative_end_extent += PRE_DATA_GAP + length / 2324 + POST_DATA_GAP;
 
@@ -132,8 +134,18 @@ vcd_obj_append_mpeg_track (VcdObj *obj, VcdDataSource *mpeg_file)
 
     vcd_data_source_read (mpeg_file, buf, sizeof (buf), 1);
 
-    if (mpeg_analyze_start_seq (buf, &(obj->mpeg_tracks[obj->mpeg_tracks_num].mpeg_info)))
-      break;
+    if (mpeg_analyze_start_seq (buf, &(track->mpeg_info)))
+      {
+        if (obj->type == VCD_TYPE_SVCD
+            && track->mpeg_info.vers == MPEG_VERS_MPEG1)
+          vcd_warn ("SVCD should not contain MPEG1 tracks!");
+
+        if (obj->type == VCD_TYPE_VCD2
+            && track->mpeg_info.vers == MPEG_VERS_MPEG2)
+          vcd_warn ("VCD should not contain MPEG2 tracks!");
+
+        break;
+      }
 
     if (j > 16) {
       vcd_warn ("could not determine mpeg format -- assuming it is ok nevertheless");

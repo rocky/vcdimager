@@ -40,7 +40,7 @@ struct _VcdObj {
 
   /* input */
   unsigned relative_end_extent; /* last mpeg end extent */
-  struct {
+  struct mpeg_track_t {
     VcdDataSource *source;
     unsigned relative_start_extent; /* relative to iso data end */
     unsigned length_sectors;
