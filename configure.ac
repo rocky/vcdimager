@@ -111,6 +111,9 @@ fi
 AC_PROG_CPP
 AM_PROG_CC_STDC
 AC_PROG_AWK
+dnl AM_PROG_LIBTOOL tests whether we have GNU ld
+dnl this must come before checking --with-versioned-libs
+dnl which requires GNU ld.
 AM_PROG_LIBTOOL
 
 dnl We use a diff in regression testing
@@ -268,6 +271,11 @@ if test "x$enable_versioned_libs" = "xyes" ; then
     if test "$?" -ne 0 ; then
        AC_MSG_ERROR(Either set MAKE variable to GNU make or use 
    --without-versioned-libs option)
+    else 
+      # Do we have GNU ld? We need that too.
+      if test "$with_gnu_ld" != yes; then
+        AC_MSG_ERROR(I don't see GNU ld. Use the --without-versioned-libs option)
+      fi
     fi
   fi
 fi
