@@ -132,6 +132,8 @@ static int gl_quiet_flag = false;
 typedef struct {
   vcd_type_t vcd_type;
 
+  VcdImageSource *img;
+
   struct iso_primary_descriptor pvd;
 
   InfoVcd info;
@@ -797,6 +799,120 @@ _strip_trail (const char str[], size_t n)
   return buf;
 }
 
+typedef struct 
+{
+  uint32_t owner_id      GNUC_PACKED;   /* zero */
+  uint16_t attributes    GNUC_PACKED;   /* XA_... */
+  uint8_t  signature[2]  GNUC_PACKED;   /* { 'X', 'A' } */
+  uint8_t  filenum       GNUC_PACKED;   /* filenum(?) */
+  uint8_t  reserved[5]   GNUC_PACKED;   /* zero */
+} xa_t;
+
+static void
+dump_idr (const debug_obj_t *obj, uint32_t lsn, const char pathname[])
+{
+  struct iso_directory_record *idr = NULL;
+  char *buf = NULL;
+  int pos = 0;
+
+  buf = realloc (buf, ISO_BLOCKSIZE);
+      
+  if (vcd_image_source_read_mode2_sector (obj->img, buf, lsn, false)) 
+    vcd_assert_not_reached ();
+
+  idr = (void *) buf;
+
+  vcd_assert (from_733 (idr->size) == ISO_BLOCKSIZE);
+
+  fprintf (stdout, " %s:\n", pathname);
+
+  while (pos < ISO_BLOCKSIZE)
+    {
+      char namebuf[256] = { 0, };
+      idr = (void *) &buf[pos];
+
+      if (buf[pos])
+        {
+          xa_t *xa_data;
+          int su_len = idr->length - sizeof (struct iso_directory_record);
+          su_len -= idr->name_len;
+
+          if (su_len % 2)
+            su_len--;
+
+          xa_data = &buf[pos + (idr->length - su_len)];
+
+          if (xa_data->signature[0] != 'X' 
+              || xa_data->signature[1] != 'A')
+            vcd_assert_not_reached ();
+
+          if (idr->name[0] == '\0')
+            strcpy (namebuf, ".");
+          else if (idr->name[0] == '\1')
+            strcpy (namebuf, "..");
+          else
+            strncpy (namebuf, idr->name, idr->name_len);
+
+          fprintf (stdout, "  %c (XA: attr 0x%4.4x fnum %.2d) %s %10d %s\n",
+                   (idr->flags & ISO_DIRECTORY) ? 'd' : '-',
+                   UINT16_FROM_BE (xa_data->attributes),
+                   xa_data->filenum,
+                   UINT16_FROM_BE (xa_data->attributes) & 0x1000 ? "form2" : "form1",
+                   from_733 (idr->size),
+                   namebuf);
+
+          pos += idr->length;
+        }
+      else /* skip zeros */
+        pos++;
+    }
+
+  fprintf (stdout, "\n");
+
+  /* play it again sam! */
+  pos = 0;
+  while (pos < ISO_BLOCKSIZE)
+    {
+      char namebuf[1024] = { 0, };
+      idr = (void *) &buf[pos];
+
+      if (buf[pos])
+        {
+          if (idr->name[0] != '\0' 
+              && idr->name[0] != '\1'
+              && idr->flags & ISO_DIRECTORY)
+            {
+              strcat (namebuf, pathname);
+              strncat (namebuf, idr->name, idr->name_len);
+              strcat (namebuf, "/");
+          
+              dump_idr (obj, from_733 (idr->extent), namebuf);
+            }
+
+          pos += idr->length;
+        }
+      else /* skip zeros */
+        pos++;
+    }
+
+  free (buf);
+}
+
+static void
+dump_fs (const debug_obj_t *obj)
+{
+  struct iso_primary_descriptor const *pvd = &obj->pvd;
+  struct iso_directory_record *idr = (void *) pvd->root_directory_record;
+  uint32_t extent;
+
+  extent = from_733 (idr->extent);
+
+  fprintf (stdout, "ISO9660 filesystem dump\n");
+  fprintf (stdout, " root dir at lsn %d\n", extent);
+ 
+  dump_idr (obj, extent, "/");
+}
+
 static void
 dump_pvd (const debug_obj_t *obj)
 {
@@ -841,6 +957,8 @@ dump_all (const debug_obj_t *obj)
 {
   fprintf (stdout, DELIM);
   dump_pvd (obj);
+  fprintf (stdout, DELIM);
+  dump_fs (obj);
   fprintf (stdout, DELIM);
   dump_info (obj);
   fprintf (stdout, DELIM);
@@ -897,6 +1015,8 @@ dump (VcdImageSource *img, const char image_fname[])
   debug_obj_t obj;
 
   memset (&obj, 0, sizeof (debug_obj_t));
+
+  obj.img = img;
 
   size = vcd_image_source_stat_size (img);
   
