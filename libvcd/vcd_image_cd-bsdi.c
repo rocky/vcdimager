@@ -340,7 +340,7 @@ _source_set_arg (void *user_data, const char key[], const char value[])
 #endif /* defined(__bsdi__) */
 
 VcdImageSource *
-vcd_image_source_new_bsdicd (void)
+vcd_image_source_new_cd (void)
 {
 #if defined(__bsdi__)
   _img_bsdicd_src_t *_data;
