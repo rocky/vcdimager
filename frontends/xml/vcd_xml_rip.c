@@ -513,12 +513,17 @@ _ofs2id (unsigned offset, const struct _pbc_ctx *_ctx)
 	  pl_num++;
 	  break;
 
+	case PSD_TYPE_EXT_SELECTION_LIST:
 	case PSD_TYPE_SELECTION_LIST:
 	  sl_num++;
 	  break;
 
 	case PSD_TYPE_END_LIST:
 	  el_num++;
+	  break;
+
+	default:
+	  vcd_assert_not_reached ();
 	  break;
 	}
 
@@ -534,6 +539,7 @@ _ofs2id (unsigned offset, const struct _pbc_ctx *_ctx)
 	  snprintf (buf, sizeof (buf), "playlist-%.2d", pl_num);
 	  break;
 
+	case PSD_TYPE_EXT_SELECTION_LIST:
 	case PSD_TYPE_SELECTION_LIST:
 	  snprintf (buf, sizeof (buf), "selection-%.2d", sl_num);
 	  break;
@@ -609,6 +615,7 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
       }
       break;
 
+    case PSD_TYPE_EXT_SELECTION_LIST:
     case PSD_TYPE_SELECTION_LIST:
       _pbc = vcd_pbc_new (PBC_SELECTION);
       {
@@ -636,6 +643,34 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
 	  {
 	    _vcd_list_append (_pbc->select_id_list, 
 			      _xstrdup (_ofs2id (UINT16_FROM_BE (d->ofs[n]), _ctx)));
+	  }
+
+	if (d->type == PSD_TYPE_EXT_SELECTION_LIST
+	    || d->flags.SelectionAreaFlag)
+	  {
+	    PsdSelectionListDescriptorExtended *d2 = (void *) &d->ofs[d->nos];
+
+	    _pbc->prev_area = _vcd_malloc (sizeof (pbc_area_t));
+	    _pbc->next_area = _vcd_malloc (sizeof (pbc_area_t));
+	    _pbc->return_area = _vcd_malloc (sizeof (pbc_area_t));
+	    _pbc->default_area = _vcd_malloc (sizeof (pbc_area_t));
+
+	    *_pbc->prev_area = d2->prev_area;
+	    *_pbc->next_area = d2->next_area;
+	    *_pbc->return_area = d2->return_area;
+	    *_pbc->default_area = d2->default_area;
+
+	    for (n = 0; n < d->nos; n++)
+	      {
+		pbc_area_t *_area = _vcd_malloc (sizeof (pbc_area_t));
+
+		*_area = d2->area[n];
+
+		_vcd_list_append (_pbc->select_area_list, _area);
+	      }
+
+	    vcd_assert (_vcd_list_length (_pbc->select_area_list) 
+			== _vcd_list_length (_pbc->select_id_list));
 	  }
       }
       break;
@@ -716,6 +751,8 @@ _visit_pbc (struct _pbc_ctx *obj, unsigned lid, unsigned offset, bool in_lot)
       }
       break;
 
+    case PSD_TYPE_EXT_SELECTION_LIST:
+      
     case PSD_TYPE_SELECTION_LIST:
       _vcd_list_append (obj->offset_list, ofs);
       {
@@ -793,6 +830,11 @@ _parse_pbc (struct vcdxml_t *obj, VcdImageSource *img)
   int n;
   struct _pbc_ctx _pctx;
   VcdListNode *node;
+  bool extended = false;
+  uint32_t _lot_vcd_sector = -1;
+  uint32_t _psd_vcd_sector = -1;
+  unsigned _psd_size = -1;
+  vcd_image_stat_t statbuf;
 
   if (!obj->info.psd_size)
     {
@@ -800,23 +842,58 @@ _parse_pbc (struct vcdxml_t *obj, VcdImageSource *img)
       return 0;
     }
 
-  _pctx.psd_size = obj->info.psd_size;
+  if (obj->vcd_type == VCD_TYPE_VCD2)
+    {
+      if (!vcd_image_source_fs_stat (img, "EXT/LOT_X.VCD;1", &statbuf))
+	{
+	  extended = true;
+	  _lot_vcd_sector = statbuf.lsn;
+	  vcd_assert (statbuf.size == ISO_BLOCKSIZE * LOT_VCD_SIZE);
+	}  
+
+      if (extended &&
+	  !vcd_image_source_fs_stat (img, "EXT/PSD_X.VCD;1", &statbuf))
+	{
+	  _psd_vcd_sector = statbuf.lsn;
+	  _psd_size = statbuf.size;
+	}
+      else
+	extended = false;
+    }
+
+  if (extended)
+    vcd_info ("detected extended VCD2.0 PBC files");
+  else
+    {
+      _lot_vcd_sector = LOT_VCD_SECTOR;
+      _psd_vcd_sector = PSD_VCD_SECTOR;
+      _psd_size = obj->info.psd_size;
+    }
+
+  _pctx.psd_size = _psd_size;
   _pctx.offset_mult = 8;
   _pctx.maximum_lid = obj->info.max_lid;
 
   _pctx.offset_list = _vcd_list_new ();
 
+  /* read in LOT */
+  
   _pctx.lot = _vcd_malloc (ISO_BLOCKSIZE * LOT_VCD_SIZE);
   
-  for (n = 0; n < LOT_VCD_SIZE; n++)
-    vcd_image_source_read_mode2_sector (img, ((char *) _pctx.lot) + (n * ISO_BLOCKSIZE),
-					LOT_VCD_SECTOR + n, false);
+  if (vcd_image_source_read_mode2_sectors (img, _pctx.lot, _lot_vcd_sector, false, LOT_VCD_SIZE))
+    return -1;
 
-  _pctx.psd = _vcd_malloc (ISO_BLOCKSIZE * _vcd_len2blocks (obj->info.psd_size, ISO_BLOCKSIZE));
+  /* read in PSD */
 
-  for (n = 0; n < _vcd_len2blocks (obj->info.psd_size, ISO_BLOCKSIZE); n++)
-    vcd_image_source_read_mode2_sector (img, _pctx.psd + (n * ISO_BLOCKSIZE),
-					PSD_VCD_SECTOR + n, false);
+  n = _vcd_len2blocks (_psd_size, ISO_BLOCKSIZE);
+
+  _pctx.psd = _vcd_malloc (ISO_BLOCKSIZE * n);
+
+  if (vcd_image_source_read_mode2_sectors (img, _pctx.psd,
+					   _psd_vcd_sector, false, n))
+    return -1;
+
+  /* traverse it */
 
   _visit_lot (&_pctx);
 
@@ -830,8 +907,6 @@ _parse_pbc (struct vcdxml_t *obj, VcdImageSource *img)
       if ((_pbc = _pbc_node_read (&_pctx, ofs->offset)))
 	_vcd_list_append (obj->pbc_list, _pbc);
     }
-
-  /* fixme -- what about 'rejected' PBC lists... */
 
   return 0;
 }

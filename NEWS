@@ -2,6 +2,16 @@ $Id$
 
 see ChangeLog for more information
 
+version 0.7.4 (unstable/development)
+====================================
+2001-06-..
+
+* create extended PBC including selection areas
+* fixed creation of invalid XML
+* parsing of selection areas in vcdxrip implemented
+* fixed ISO9660 pathtable ordering
+* cleanups/bugfixes
+
 version 0.7.3 (unstable/development)
 ====================================
 2001-06-02
