@@ -437,7 +437,7 @@ typedef struct {
   unsigned lid;
   unsigned offset;
   bool in_lot;
-} offset_t;
+} psd_offset_t;
 
 struct _pbc_ctx {
   unsigned psd_size;
@@ -478,7 +478,7 @@ _ofs2id (unsigned offset, const struct _pbc_ctx *_ctx)
   VcdListNode *node;
   static char buf[80];
   unsigned sl_num = 0, el_num = 0, pl_num = 0;
-  offset_t *ofs = NULL;
+  psd_offset_t *ofs = NULL;
   
   if (offset == PSD_OFS_DISABLED)
     return NULL;
@@ -557,7 +557,7 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
 {
   pbc_t *_pbc = NULL;
   const uint8_t *_buf = &_ctx->psd[offset * _ctx->offset_mult];
-  offset_t *ofs = NULL;
+  psd_offset_t *ofs = NULL;
 
   {
     VcdListNode *node;
@@ -699,7 +699,7 @@ static void
 _visit_pbc (struct _pbc_ctx *obj, unsigned lid, unsigned offset, bool in_lot)
 {
   VcdListNode *node;
-  offset_t *ofs;
+  psd_offset_t *ofs;
   unsigned _rofs = offset * obj->offset_mult;
 
   vcd_assert (obj->psd_size % 8 == 0);
@@ -743,7 +743,7 @@ _visit_pbc (struct _pbc_ctx *obj, unsigned lid, unsigned offset, bool in_lot)
         }
     }
 
-  ofs = _vcd_malloc (sizeof (offset_t));
+  ofs = _vcd_malloc (sizeof (psd_offset_t));
 
   ofs->offset = offset;
   ofs->lid = lid;
@@ -813,7 +813,7 @@ _visit_pbc (struct _pbc_ctx *obj, unsigned lid, unsigned offset, bool in_lot)
 }
 
 static int
-_offset_t_cmp (offset_t *a, offset_t *b)
+_offset_t_cmp (psd_offset_t *a, psd_offset_t *b)
 {
   if (a->lid && b->lid)
     {
@@ -926,7 +926,7 @@ _parse_pbc (struct vcdxml_t *obj, VcdImageSource *img, bool no_ext_psd)
 
   _VCD_LIST_FOREACH (node, _pctx.offset_list)
     {
-      offset_t *ofs = _vcd_list_node_data (node);
+      psd_offset_t *ofs = _vcd_list_node_data (node);
       pbc_t *_pbc;
 
       vcd_assert (ofs->offset != PSD_OFS_DISABLED);
