@@ -42,4 +42,4 @@ TESTS = \
 XFAIL_TESTS = testassert
 
 
-MOSTLYCLEANFILES = *.bin *.cue core.* *.dump
+MOSTLYCLEANFILES = *.bin *.cue core core.* *.dump
