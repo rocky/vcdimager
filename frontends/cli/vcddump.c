@@ -1393,7 +1393,7 @@ main (int argc, const char *argv[])
      "set source and determine if \"bin\" image or device", "FILE"},
 
     {"nrg-file", 'N', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &source_name, 
-     OP_SOURCE_CUE, "set Nero CD-ROM disk image file as source", "FILE"},
+     OP_SOURCE_NRG, "set Nero CD-ROM disk image file as source", "FILE"},
 
     {"sector-2336", '\0', 
      POPT_ARG_NONE, &sector_2336_flag, 
