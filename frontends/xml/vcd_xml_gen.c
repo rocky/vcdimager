@@ -156,7 +156,7 @@ _add_dirtree (struct vcdxml_t *obj, const char pathname[],
 
   if (!dir)
     {
-      perror ("--add-dir: opendir()");
+      perror ("--add-dirtree: opendir()");
       exit (EXIT_FAILURE);
     }
 

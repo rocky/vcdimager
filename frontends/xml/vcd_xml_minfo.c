@@ -137,7 +137,7 @@ main (int argc, const char *argv[])
     }
 
     poptFreeContext (optCon);
-  } // command line processing
+  } /* command line processing */
 
   gl_default_vcd_log_handler = vcd_log_set_handler (_vcd_log_handler);
 

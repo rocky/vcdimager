@@ -15,7 +15,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#if defined(AMIGA_COMPILE)
+#if defined(AMIGA)
 # include <proto/dos.h>
 #endif
 
@@ -276,7 +276,7 @@ execCommand (poptContext con)
 #endif
 #endif
 
-#if defined(AMIGA_COMPILE)
+#if defined(AMIGA)
   printf("Executing: %s\n", argv[0]);
   Execute(argv[0], 0, 0);
 #else

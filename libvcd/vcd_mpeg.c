@@ -473,7 +473,7 @@ _analyze_video_pes (uint8_t streamid, const uint8_t *buf, int len, bool only_pts
       
       marker = vcd_bitvec_read_bits (buf, &pos2, 4);
 
-      //vcd_warn ("%d @%d", marker, _pts_pos);
+      /* vcd_warn ("%d @%d", marker, _pts_pos); */
 
       vcd_assert (marker == 2 || marker == 3);
 

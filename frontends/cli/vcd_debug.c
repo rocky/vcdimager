@@ -22,12 +22,9 @@
 # include "config.h"
 #endif
 
-#include <errno.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
-#include <sys/ioctl.h>
 
 #include <popt.h>
 

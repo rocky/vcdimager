@@ -36,7 +36,7 @@ VcdList *_vcd_list_new (void);
 
 void _vcd_list_free (VcdList *list, int free_data);
 
-unsigned _vcd_list_length (VcdList *list);
+unsigned _vcd_list_length (const VcdList *list);
 
 void _vcd_list_sort (VcdList *list, _vcd_list_cmp_func cmp_func);
 

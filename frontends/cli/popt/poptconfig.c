@@ -165,7 +165,7 @@ poptReadDefaultConfig (poptContext con, int useEnv)
   if (rc)
     return rc;
 
-#if !defined(AMIGA_COMPILE)
+#if !defined(AMIGA)
   if (getuid () != geteuid ())
     return 0;
 #endif

@@ -623,7 +623,7 @@ vcd_image_sink_new_nrg (VcdDataSink *nrg_sink)
   _data = _vcd_malloc (sizeof (_img_nrg_snk_t));
   _data->nrg_snk = nrg_sink;
 
-  vcd_warn ("opening TAO NRG image for writing; TAO (S)VCD are NOT 100% compliant!");
+  vcd_warn ("opening TAO NRG image for writing; TAO (S)VCD are NOT 100%% compliant!");
 
   return vcd_image_sink_new (_data, &_funcs);
 }

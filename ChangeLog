@@ -1,5 +1,8 @@
 2001-07-28  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* frontends/cli/vcdimager.c:
+		(re)implemented --add-dir option
+
 	* frontends/xml/vcd_xml_parse.c (_parse_pbc_selection): set default 
 		for BSN to 1
 

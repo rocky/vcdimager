@@ -22,18 +22,11 @@
 # include "config.h"
 #endif
 
-#include <sys/types.h>
-
-#include <dirent.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <popt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <unistd.h>
+
+#include <popt.h>
 
 #include <libvcd/vcd.h>
 #include <libvcd/vcd_assert.h>
@@ -57,6 +50,13 @@ static const char _rcsid[] = "$Id$";
 
 /* global stuff kept as a singleton makes for less typing effort :-) 
  */
+
+struct add_files_t {
+  char *fname;
+  char *iso_fname;
+  int raw_flag;
+};
+
 static struct
 {
   const char *type;
@@ -64,14 +64,7 @@ static struct
   const char *cue_fname;
   char **track_fnames;
 
-  struct add_files_t {
-    char *fname;
-    char *iso_fname;
-    int raw_flag;
-    struct add_files_t *next;
-  } *add_files;
-
-  char *add_files_path;
+  VcdList *add_files;
 
   const char *volume_label;
   const char *application_id;
@@ -92,18 +85,28 @@ static struct
 }
 gl;                             /* global */
 
+
 static void
 gl_add_file (char *fname, char *iso_fname, int raw_flag)
 {
-  struct add_files_t *tmp = malloc (sizeof (struct add_files_t));
+  struct add_files_t *tmp = _vcd_malloc (sizeof (struct add_files_t));
 
-  tmp->next = gl.add_files;
-  gl.add_files = tmp;
+  if (!gl.add_files)
+    gl.add_files = _vcd_list_new ();
+
+  _vcd_list_append (gl.add_files, tmp);
 
   tmp->fname = fname;
   tmp->iso_fname = iso_fname;
   tmp->raw_flag = raw_flag;
 }
+
+static void
+gl_add_dir (char *iso_fname)
+{
+  gl_add_file (NULL, iso_fname, false);
+}
+
 
 /****************************************************************************/
 
@@ -175,6 +178,7 @@ main (int argc, const char *argv[])
 {
   int n = 0;
   vcd_type_t type_id;
+  VcdListNode *node;
 
   /* g_set_prgname (argv[0]); */
 
@@ -199,6 +203,7 @@ main (int argc, const char *argv[])
 
     enum {
       CL_VERSION = 1,
+      CL_ADD_DIR,
       CL_ADD_FILE,
       CL_ADD_FILE_RAW
     };
@@ -244,6 +249,9 @@ main (int argc, const char *argv[])
         {"sector-2336", '\0', POPT_ARG_NONE, &gl.sector_2336_flag, 0,
          "use 2336 byte sectors for output"},
 
+        {"add-dir", '\0', POPT_ARG_STRING, NULL, CL_ADD_DIR, 
+         "add empty dir to ISO fs", "ISO_DIRNAME"},
+
         {"add-file", '\0', POPT_ARG_STRING, NULL, CL_ADD_FILE, 
          "add single file to ISO fs", "FILE,ISO_FILENAME"},
 
@@ -278,6 +286,15 @@ main (int argc, const char *argv[])
           exit (EXIT_SUCCESS);
           break;
 
+        case CL_ADD_DIR:
+          {
+            const char *arg = poptGetOptArg (optCon);
+
+            vcd_assert (arg != NULL);
+            gl_add_dir (strdup (arg));
+          }
+          break;
+          
         case CL_ADD_FILE:
         case CL_ADD_FILE_RAW:
           {
@@ -314,8 +331,7 @@ main (int argc, const char *argv[])
       vcd_error ("error: maximal number of supported mpeg tracks (%d) reached",
                  CD_MAX_TRACKS - 1);
 
-    gl.track_fnames = malloc (sizeof (char *) * (n + 1));
-    memset (gl.track_fnames, 0, sizeof (char *) * (n + 1));
+    gl.track_fnames = _vcd_malloc (sizeof (char *) * (n + 1));
 
     for (n = 0; args[n]; n++)
       gl.track_fnames[n] = strdup (args[n]);
@@ -377,27 +393,37 @@ main (int argc, const char *argv[])
                               gl.update_scan_offsets);
     }
 
+  _VCD_LIST_FOREACH (node, gl.add_files)
   {
-    struct add_files_t *p = gl.add_files;
+    struct add_files_t *p = _vcd_list_node_data (node);
 
-    while(p)
+    if (p->fname)
       {
         fprintf (stdout, "debug: adding [%s] as [%s] (raw=%d)\n", 
                  p->fname, p->iso_fname, p->raw_flag);
         
-        if(vcd_obj_add_file(gl_vcd_obj, p->iso_fname,
-                            vcd_data_source_new_stdio (p->fname),
-                            p->raw_flag))
+        if (vcd_obj_add_file(gl_vcd_obj, p->iso_fname,
+                             vcd_data_source_new_stdio (p->fname),
+                             p->raw_flag))
           {
             fprintf (stderr, 
                      "error while adding file `%s' as `%s' to (S)VCD\n",
                      p->fname, p->iso_fname);
             exit (EXIT_FAILURE);
           }
-
-        p = p->next;
       }
-  }
+    else
+      {
+        fprintf (stdout, "debug: adding empty dir [%s]\n", p->iso_fname);
+
+        if (vcd_obj_add_dir(gl_vcd_obj, p->iso_fname))
+          {
+            fprintf (stderr, 
+                     "error while adding dir `%s' to (S)VCD\n", p->iso_fname);
+            exit (EXIT_FAILURE);
+          }
+      }
+  } /* _VCD_LIST_FOREACH */
 
   for (n = 0; gl.track_fnames[n] != NULL; n++)
     {

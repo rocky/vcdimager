@@ -10,10 +10,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+
 #ifdef __NeXT
 /* access macros are not declared in non posix mode in unistd.h -
  don't try to use posix on NeXTstep 3.3 ! */
-#include <libc.h>
+# include <libc.h>
 #endif
 
 #if HAVE_ALLOCA_H
@@ -22,8 +23,8 @@
 
 #include "findme.h"
 
-/* for AMIGA_COMPILE */
-#ifndef X_OK
+/* for AMIGA */
+#if !defined(X_OK)
 # define X_OK 1
 #endif
 

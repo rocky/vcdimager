@@ -69,7 +69,7 @@ _vcd_list_free (VcdList *list, int free_data)
 }
 
 unsigned
-_vcd_list_length (VcdList *list)
+_vcd_list_length (const VcdList *list)
 {
   vcd_assert (list != NULL);
 

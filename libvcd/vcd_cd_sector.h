@@ -59,6 +59,7 @@
 #define CDDA_SIZE  2352
 #define M2F1_SIZE  2048
 #define M2F2_SIZE  2324
+#define M2SUB_SIZE 2332
 #define M2RAW_SIZE 2336
 
 #define CD_MAX_TRACKS 99 
