@@ -30,22 +30,35 @@ then
   echo "*** This package has not been tested very well with non GNU compilers"
   echo "*** you should try to use 'gcc' for compiling this package."
 else
-  WARN_CFLAGS="-std=c99 -pedantic -Wall -Wchar-subscripts -Wmissing-prototypes -Wmissing-declarations -Wunused -Wpointer-arith -Wwrite-strings -Wnested-externs -Wsign-promo -Wno-sign-compare"
+  WARN_CFLAGS="-Wall -Wchar-subscripts -Wmissing-prototypes -Wmissing-declarations -Wunused -Wpointer-arith -Wwrite-strings -Wnested-externs -Wsign-promo -Wno-sign-compare"
+
+  warning_flags=""
+
+  WOPT="-std=c99 -pedantic"
+  SAVE_CFLAGS="$CFLAGS"
+  CFLAGS="$CFLAGS $WOPT"
+  AC_MSG_CHECKING([whether $CC understands $WOPT])
+  AC_TRY_COMPILE([], [], 
+    [has_option=yes; warning_flags="$warning_flags $WOPT"], 
+    has_option=no)
+  CFLAGS="$SAVE_CFLAGS"
+  AC_MSG_RESULT($has_option)
 
   for WOPT in $WARN_CFLAGS; do
     SAVE_CFLAGS="$CFLAGS"
     CFLAGS="$CFLAGS $WOPT"
     AC_MSG_CHECKING([whether $CC understands $WOPT])
-    AC_TRY_COMPILE([], [], has_option=yes, has_option=no,)
+    AC_TRY_COMPILE([], [], has_option=yes, has_option=no)
     CFLAGS="$SAVE_CFLAGS"
     AC_MSG_RESULT($has_option)
     if test $has_option = yes; then
-      warning_flags="$warning_flags $option"
+      warning_flags="$warning_flags $WOPT"
     fi
     unset has_option
     unset SAVE_CFLAGS
   done
-  WARNING_FLAGS="$warning_flags"
+  unset WOPT
+  WARN_CFLAGS="$warning_flags"
   unset warning_flags
 fi
 
@@ -86,7 +99,7 @@ AC_C_INLINE
 
 dnl ISOC99_PRAGMA
 AC_MSG_CHECKING([whether $CC supports ISOC99 _Pragma()])
-AC_TRY_COMPILE([],[_Pragma("pack(1)")], [
+AC_TRY_COMPILE([_Pragma("pack(1)")], [], [
   ISOC99_PRAGMA=yes 
   AC_DEFINE(HAVE_ISOC99_PRAGMA, [], [Supports ISO _Pragma() macro])
 ],ISOC99_PRAGMA=no)
