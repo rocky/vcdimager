@@ -5,19 +5,19 @@ see ChangeLog for more information
 version 0.7.21 (unstable/development)
 =====================================
 
+* LSN's match MMC-3 specs better.
+* Fix bug in vcd-info showing sequence number
+* add --without-versioned-libs option
+* make -mno-cygwin work
+* release number is now preprocessor symbol so applications can make use of
+  for compatibility
 * More libcdio things moved into libcdio (e.g. MSF printing, 
   iso9660 PVD handling)
 * use generic list things from libcdio. Eventually everything will
   use glib. But this moves in the right direction by consolidating code 
   a little
-* add --without-versioned-libs option
-* Fix bug in vcd-info showing sequence number
-* make -mno-cygwin work
-* release number is now preprocessor symbol so applications can make use of
-  for compatibility
-* LSN's match MMC-3 specs better.
-* Miscellaneous contributed bug fixes
 * Darwin compilation fixes
+* Miscellaneous contributed bug fixes
 
 version 0.7.20 (unstable/development)
 =====================================
