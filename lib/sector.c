@@ -70,16 +70,22 @@ build_address (void *buf, sectortype_t sectortype, uint32_t address)
   }
 }
 
+/* From cdrtools-1.11a25 */
 static uint32_t
-build_edc (const void *in, unsigned from, unsigned upto)
+build_edc(const uint8_t inout[], int from, int upto)
 {
-  const uint8_t *p = (uint8_t*)in+from;
+  const uint8_t *p = inout+from;
   uint32_t result = 0;
 
-  for (; from <= upto; from++)
+  upto -= from-1;
+  upto /= 4;
+  while (--upto >= 0) {
     result = EDC_crctable[(result ^ *p++) & 0xffL] ^ (result >> 8);
-
-  return result;
+    result = EDC_crctable[(result ^ *p++) & 0xffL] ^ (result >> 8);
+    result = EDC_crctable[(result ^ *p++) & 0xffL] ^ (result >> 8);
+    result = EDC_crctable[(result ^ *p++) & 0xffL] ^ (result >> 8);
+  }
+  return (result);
 }
 
 /* From cdrtools-1.11a40 */
