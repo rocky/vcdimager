@@ -26,6 +26,8 @@
 
 #include <libvcd/vcd_util.h>
 #include <libvcd/vcd_image.h>
+#include <libvcd/vcd_cd_sector.h>
+#include <libvcd/vcd_iso9660.h>
 
 static const char _rcsid[] = "$Id$";
 
@@ -58,6 +60,24 @@ vcd_image_source_destroy (VcdImageSource *obj)
   
   obj->op.free (obj->user_data);
   free (obj);
+}
+
+int
+vcd_image_source_read_mode2_sectors (VcdImageSource *obj, void *buf, 
+				     uint32_t lsn, bool mode2raw, unsigned num_sectors)
+{
+  char *_buf = buf;
+  const int blocksize = mode2raw ? M2RAW_SIZE : ISO_BLOCKSIZE;
+  int n, rc;
+
+  vcd_assert (obj != NULL);
+  vcd_assert (buf != NULL);
+  
+  for (n = 0; n < num_sectors; n++)
+    if ((rc = vcd_image_source_read_mode2_sector (obj, &_buf[n * blocksize], lsn + n, mode2raw)))
+      return rc;
+
+  return 0;
 }
 
 int

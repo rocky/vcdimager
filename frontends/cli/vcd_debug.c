@@ -145,7 +145,12 @@ typedef struct {
   LotVcd *lot;
   uint8_t *psd;
 
+  unsigned psd_x_size;
+  LotVcd *lot_x;
+  uint8_t *psd_x;
+
   VcdList *offset_list;
+  VcdList *offset_x_list;
 
   void *tracks_buf;
   void *search_buf;
@@ -191,9 +196,30 @@ typedef struct {
 } offset_t;
 
 static const char *
-_ofs2str (const debug_obj_t *obj, unsigned offset)
+_area_str (const struct psd_area_t *_area)
+{
+  char *buf;
+
+  if (!_area->x1  
+      && !_area->y1
+      && !_area->x2
+      && !_area->y2)
+    return "disabled";
+
+  buf = _getbuf ();
+
+  snprintf (buf, BUF_SIZE, "[%3d,%3d] - [%3d,%3d]",
+            _area->x1, _area->y1,
+            _area->x2, _area->y2);
+            
+  return buf;
+}
+
+static const char *
+_ofs2str (const debug_obj_t *obj, unsigned offset, bool ext)
 {
   VcdListNode *node;
+  VcdList *offset_list = ext ? obj->offset_x_list : obj->offset_list;
   char *buf;
 
   if (offset == 0xffff)
@@ -201,7 +227,7 @@ _ofs2str (const debug_obj_t *obj, unsigned offset)
 
   buf = _getbuf ();
 
-  _VCD_LIST_FOREACH (node, obj->offset_list)
+  _VCD_LIST_FOREACH (node, offset_list)
     {
       offset_t *ofs = _vcd_list_node_data (node);
 
@@ -222,12 +248,14 @@ _ofs2str (const debug_obj_t *obj, unsigned offset)
 }
 
 static void
-_visit_pbc (debug_obj_t *obj, unsigned lid, unsigned offset, bool in_lot)
+_visit_pbc (debug_obj_t *obj, unsigned lid, unsigned offset, bool in_lot, bool ext)
 {
   VcdListNode *node;
   offset_t *ofs;
   unsigned psd_size = _get_psd_size (obj);
+  const uint8_t *psd = ext ? obj->psd_x : obj->psd;
   unsigned _rofs = offset * obj->info.offset_mult;
+  VcdList *offset_list;
 
   vcd_assert (psd_size % 8 == 0);
 
@@ -239,7 +267,12 @@ _visit_pbc (debug_obj_t *obj, unsigned lid, unsigned offset, bool in_lot)
   if (!obj->offset_list)
     obj->offset_list = _vcd_list_new ();
 
-  _VCD_LIST_FOREACH (node, obj->offset_list)
+  if (!obj->offset_x_list)
+    obj->offset_x_list = _vcd_list_new ();
+
+  offset_list = ext ? obj->offset_x_list : obj->offset_list;
+
+  _VCD_LIST_FOREACH (node, offset_list)
     {
       ofs = _vcd_list_node_data (node);
 
@@ -258,13 +291,13 @@ _visit_pbc (debug_obj_t *obj, unsigned lid, unsigned offset, bool in_lot)
   ofs->lid = lid;
   ofs->in_lot = in_lot;
 
-  switch (obj->psd[_rofs])
+  switch (psd[_rofs])
     {
     case PSD_TYPE_PLAY_LIST:
-      _vcd_list_append (obj->offset_list, ofs);
+      _vcd_list_append (offset_list, ofs);
       {
         const PsdPlayListDescriptor *d = 
-          (const void *) (obj->psd + _rofs);
+          (const void *) (psd + _rofs);
 
         if (!ofs->lid)
           ofs->lid = UINT16_FROM_BE (d->lid) & 0x7fff;
@@ -273,17 +306,18 @@ _visit_pbc (debug_obj_t *obj, unsigned lid, unsigned offset, bool in_lot)
             vcd_warn ("LOT entry assigned LID %d, but descriptor has LID %d",
                       ofs->lid, UINT16_FROM_BE (d->lid) & 0x7fff);
 
-        _visit_pbc (obj, 0, UINT16_FROM_BE (d->prev_ofs), false);
-        _visit_pbc (obj, 0, UINT16_FROM_BE (d->next_ofs), false);
-        _visit_pbc (obj, 0, UINT16_FROM_BE (d->return_ofs), false);
+        _visit_pbc (obj, 0, UINT16_FROM_BE (d->prev_ofs), false, ext);
+        _visit_pbc (obj, 0, UINT16_FROM_BE (d->next_ofs), false, ext);
+        _visit_pbc (obj, 0, UINT16_FROM_BE (d->return_ofs), false, ext);
       }
       break;
 
+    case PSD_TYPE_EXT_SELECTION_LIST:
     case PSD_TYPE_SELECTION_LIST:
-      _vcd_list_append (obj->offset_list, ofs);
+      _vcd_list_append (offset_list, ofs);
       {
         const PsdSelectionListDescriptor *d =
-          (const void *) (obj->psd + _rofs);
+          (const void *) (psd + _rofs);
 
         int idx;
 
@@ -294,20 +328,20 @@ _visit_pbc (debug_obj_t *obj, unsigned lid, unsigned offset, bool in_lot)
             vcd_warn ("LOT entry assigned LID %d, but descriptor has LID %d",
                       ofs->lid, UINT16_FROM_BE (d->lid) & 0x7fff);
 
-        _visit_pbc (obj, 0, UINT16_FROM_BE (d->prev_ofs), false);
-        _visit_pbc (obj, 0, UINT16_FROM_BE (d->next_ofs), false);
-        _visit_pbc (obj, 0, UINT16_FROM_BE (d->return_ofs), false);
-        _visit_pbc (obj, 0, UINT16_FROM_BE (d->default_ofs), false);
-        _visit_pbc (obj, 0, UINT16_FROM_BE (d->timeout_ofs), false);
+        _visit_pbc (obj, 0, UINT16_FROM_BE (d->prev_ofs), false, ext);
+        _visit_pbc (obj, 0, UINT16_FROM_BE (d->next_ofs), false, ext);
+        _visit_pbc (obj, 0, UINT16_FROM_BE (d->return_ofs), false, ext);
+        _visit_pbc (obj, 0, UINT16_FROM_BE (d->default_ofs), false, ext);
+        _visit_pbc (obj, 0, UINT16_FROM_BE (d->timeout_ofs), false, ext);
 
         for (idx = 0; idx < d->nos; idx++)
-          _visit_pbc (obj, 0, UINT16_FROM_BE (d->ofs[idx]), false);
+          _visit_pbc (obj, 0, UINT16_FROM_BE (d->ofs[idx]), false, ext);
         
       }
       break;
 
     case PSD_TYPE_END_LIST:
-      _vcd_list_append (obj->offset_list, ofs);
+      _vcd_list_append (offset_list, ofs);
       break;
 
     default:
@@ -331,25 +365,29 @@ _offset_t_cmp (offset_t *a, offset_t *b)
 }
 
 static void
-_visit_lot (debug_obj_t *obj)
+_visit_lot (debug_obj_t *obj, bool ext)
 {
-  const LotVcd *lot = obj->lot;
+  const LotVcd *lot = ext ? obj->lot_x : obj->lot;
   unsigned n, tmp;
 
-  if (!_get_psd_size (obj))
+  if (!ext && !_get_psd_size (obj))
+    return;
+
+  if (ext && !obj->psd_x_size)
     return;
 
   for (n = 0; n < LOT_VCD_OFFSETS; n++)
     if ((tmp = UINT16_FROM_BE (lot->offset[n])) != 0xFFFF)
-      _visit_pbc (obj, n + 1, tmp, true);
+      _visit_pbc (obj, n + 1, tmp, true, ext);
 
-  _vcd_list_sort (obj->offset_list, (_vcd_list_cmp_func) _offset_t_cmp);
+  _vcd_list_sort (ext ? obj->offset_x_list : obj->offset_list, 
+                  (_vcd_list_cmp_func) _offset_t_cmp);
 }
 
 static void
-dump_lot (const debug_obj_t *obj)
+dump_lot (const debug_obj_t *obj, bool ext)
 {
-  const LotVcd *lot = obj->lot;
+  const LotVcd *lot = ext ? obj->lot_x : obj->lot;
   
   unsigned n, tmp;
   unsigned max_lid = UINT16_FROM_BE (obj->info.lot_entries);
@@ -358,7 +396,7 @@ dump_lot (const debug_obj_t *obj)
   fprintf (stdout, 
            obj->vcd_type == VCD_TYPE_SVCD 
            ? "SVCD/LOT.SVD\n"
-           : "VCD/LOT.VCD\n");
+           : (ext ? "EXT/LOT_X.VCD\n": "VCD/LOT.VCD\n"));
 
   if (lot->reserved)
     fprintf (stdout, " RESERVED = 0x%4.4x (should be 0x0000)\n", UINT16_FROM_BE (lot->reserved));
@@ -381,31 +419,33 @@ dump_lot (const debug_obj_t *obj)
 }
 
 static void
-dump_psd (const debug_obj_t *obj)
+dump_psd (const debug_obj_t *obj, bool ext)
 {
   VcdListNode *node;
   unsigned n = 0;
   unsigned mult = obj->info.offset_mult;
+  const uint8_t *psd = ext ? obj->psd_x : obj->psd;
+  VcdList *offset_list = ext ? obj->offset_x_list : obj->offset_list;
 
   fprintf (stdout, 
            obj->vcd_type == VCD_TYPE_SVCD 
            ? "SVCD/PSD.SVD\n"
-           : "VCD/PSD.VCD\n");
+           : (ext ? "EXT/PSD_X.VCD\n": "VCD/PSD.VCD\n"));
 
-  _VCD_LIST_FOREACH (node, obj->offset_list)
+  _VCD_LIST_FOREACH (node, offset_list)
     {
       offset_t *ofs = _vcd_list_node_data (node);
       unsigned _rofs = ofs->offset * mult;
 
       uint8_t type;
       
-      type = obj->psd[_rofs];
+      type = psd[_rofs];
 
       switch (type)
         {
         case PSD_TYPE_PLAY_LIST:
           {
-            const PsdPlayListDescriptor *d = (const void *) (obj->psd + _rofs);
+            const PsdPlayListDescriptor *d = (const void *) (psd + _rofs);
             int i;
 
             fprintf (stdout,
@@ -413,13 +453,13 @@ dump_psd (const debug_obj_t *obj)
                      "  NOI: %d | LID#: %d (rejected: %s)\n"
                      "  prev: %s | next: %s | return: %s\n"
                      "  ptime: %d/15s | wait: %ds | await: %ds\n",
-                     n, _ofs2str (obj, ofs->offset),
+                     n, _ofs2str (obj, ofs->offset, ext),
                      d->noi,
                      UINT16_FROM_BE (d->lid) & 0x7fff,
                      _vcd_bool_str (UINT16_FROM_BE (d->lid) & 0x8000),
-                     _ofs2str (obj, UINT16_FROM_BE (d->prev_ofs)),
-                     _ofs2str (obj, UINT16_FROM_BE (d->next_ofs)),
-                     _ofs2str (obj, UINT16_FROM_BE (d->return_ofs)),
+                     _ofs2str (obj, UINT16_FROM_BE (d->prev_ofs), ext),
+                     _ofs2str (obj, UINT16_FROM_BE (d->next_ofs), ext),
+                     _ofs2str (obj, UINT16_FROM_BE (d->return_ofs), ext),
                      UINT16_FROM_BE (d->ptime),
                      _calc_psd_wait_time (d->wtime),
                      _calc_psd_wait_time (d->atime));
@@ -432,82 +472,75 @@ dump_psd (const debug_obj_t *obj)
             fprintf (stdout, "\n");
           }
           break;
+
         case PSD_TYPE_END_LIST:
-          fprintf (stdout, " PSD[%.2d] (%s): end list descriptor\n", n, _ofs2str (obj, ofs->offset));
+          fprintf (stdout, " PSD[%.2d] (%s): end list descriptor\n", n, _ofs2str (obj, ofs->offset, ext));
           fprintf (stdout, "\n");
           break;
 
+        case PSD_TYPE_EXT_SELECTION_LIST:
         case PSD_TYPE_SELECTION_LIST:
           {
             const PsdSelectionListDescriptor *d =
-              (const void *) (obj->psd + _rofs);
+              (const void *) (psd + _rofs);
             int i;
 
             fprintf (stdout,
-                     "  PSD[%.2d] (%s): selection list descriptor\n"
-                     "  NOS: %d | BSN: %d | LID: %d (rejected: %s)\n"
+                     "  PSD[%.2d] (%s): %sselection list descriptor\n"
+                     "  Flags: 0x%.2x | NOS: %d | BSN: %d | LID: %d (rejected: %s)\n"
                      "  prev: %s | next: %s | return: %s\n"
                      "  default: %s | timeout: %s\n"
                      "  totime: %ds | loop: %d (delayed: %s)\n"
                      "  item: %s\n",
-                     n, _ofs2str (obj, ofs->offset),
+                     n, _ofs2str (obj, ofs->offset, ext),
+                     (type == PSD_TYPE_EXT_SELECTION_LIST ? "extended " : ""),
+                     *(uint8_t *) &d->flags,
                      d->nos, 
                      d->bsn,
                      UINT16_FROM_BE (d->lid) & 0x7fff,
                      _vcd_bool_str (UINT16_FROM_BE (d->lid) & 0x8000),
-                     _ofs2str (obj, UINT16_FROM_BE (d->prev_ofs)),
-                     _ofs2str (obj, UINT16_FROM_BE (d->next_ofs)),
-                     _ofs2str (obj, UINT16_FROM_BE (d->return_ofs)),
-                     _ofs2str (obj, UINT16_FROM_BE (d->default_ofs)),
-                     _ofs2str (obj, UINT16_FROM_BE (d->timeout_ofs)),
+                     _ofs2str (obj, UINT16_FROM_BE (d->prev_ofs), ext),
+                     _ofs2str (obj, UINT16_FROM_BE (d->next_ofs), ext),
+                     _ofs2str (obj, UINT16_FROM_BE (d->return_ofs), ext),
+                     _ofs2str (obj, UINT16_FROM_BE (d->default_ofs), ext),
+                     _ofs2str (obj, UINT16_FROM_BE (d->timeout_ofs), ext),
                      _calc_psd_wait_time(d->totime),
                      0x7f & d->loop, _vcd_bool_str (0x80 & d->loop),
                      _pin2str (UINT16_FROM_BE (d->itemid)));
 
             for (i = 0; i < d->nos; i++)
               fprintf (stdout, "  ofs[%d]: %s\n", i,
-                       _ofs2str (obj, UINT16_FROM_BE (d->ofs[i])));
+                       _ofs2str (obj, UINT16_FROM_BE (d->ofs[i]), ext));
+
+            if (type == PSD_TYPE_EXT_SELECTION_LIST 
+                || d->flags.SelectionAreaFlag)
+              {
+                const PsdSelectionListDescriptorExtended *d2 =
+                  (const void *) &(d->ofs[d->nos]);
+
+                fprintf (stdout, "  prev_area: %s | next_area: %s\n",
+                         _area_str (&d2->prev_area),
+                         _area_str (&d2->next_area));
 
 
-#if defined(EXTENDED_PSD)
-            /* this is just for documentation... */
+                fprintf (stdout, "  retn_area: %s | default_area: %s\n",
+                         _area_str (&d2->return_area),
+                         _area_str (&d2->default_area));
 
-            {
-              const PsdSelectionListDescriptorExtended *d2 =
-                (const void *) &(d->ofs[d->nos]);
-
-              fprintf (stdout, "  prev_area: (%d,%d) (%d,%d) ",
-                       d2->prev_area.x1, d2->prev_area.y1, 
-                       d2->prev_area.x2, d2->prev_area.y2);
-
-              fprintf (stdout, "| next_area: (%d,%d) (%d,%d)\n",
-                       d2->next_area.x1, d2->next_area.y1, 
-                       d2->next_area.x2, d2->next_area.y2);
-
-              fprintf (stdout, "  return_area: (%d,%d) (%d,%d) ",
-                       d2->return_area.x1, d2->return_area.y1, 
-                       d2->return_area.x2, d2->return_area.y2);
-
-              fprintf (stdout, "| default_area: (%d,%d) (%d,%d)\n",
-                       d2->default_area.x1, d2->default_area.y1, 
-                       d2->default_area.x2, d2->default_area.y2);
-
-              for (i = 0; i < d->nos; i++)
-                fprintf (stdout, "  area[%d]: (%d,%d) (%d,%d)\n", i,
-                         d2->area[i].x1, d2->area[i].y1, 
-                         d2->area[i].x2, d2->area[i].y2);
-            }
-#endif
+                for (i = 0; i < d->nos; i++)
+                  fprintf (stdout, "  area[%d]: %s\n", i,
+                           _area_str (&d2->area[i]));
+              }
 
             fprintf (stdout, "\n");
           }
           break;
         default:
           fprintf (stdout, " PSD[%2d] (%s): unkown descriptor type (0x%2.2x)\n", 
-                   n, _ofs2str (obj, ofs->offset), type);
+                   n, _ofs2str (obj, ofs->offset, ext), type);
 
           fprintf (stdout, "  hexdump: ");
-          _hexdump (&obj->psd[_rofs], 24);
+          _hexdump (&psd[_rofs], 24);
           fprintf (stdout, "\n");
           break;
         }
@@ -890,6 +923,28 @@ dump_idr (const debug_obj_t *obj, uint32_t lsn, const char pathname[])
                    from_733 (idr->size),
                    namebuf);
 
+          if (!strcmp (pathname, "/EXT/"))
+            {
+              if (!strcmp (namebuf, "PSD_X.VCD;1"))
+                {
+                  obj->psd_x_size = from_733 (idr->size);
+                  obj->psd_x = _vcd_malloc (obj->psd_x_size * ISO_BLOCKSIZE);
+                  
+                  if (vcd_image_source_read_mode2_sectors (obj->img, (void *) obj->psd_x, from_733 (idr->extent), false,
+                                                           _vcd_len2blocks (obj->psd_x_size, ISO_BLOCKSIZE)))
+                    exit (EXIT_FAILURE);
+                }
+              else if (!strcmp (namebuf, "LOT_X.VCD;1"))
+                {
+                  vcd_assert (from_733 (idr->size) == LOT_VCD_SIZE * ISO_BLOCKSIZE);
+                  obj->lot_x = _vcd_malloc (LOT_VCD_SIZE * ISO_BLOCKSIZE);
+
+                  if (vcd_image_source_read_mode2_sectors (obj->img, (void *) obj->lot_x, from_733 (idr->extent), false,
+                                                           LOT_VCD_SIZE))
+                    exit (EXIT_FAILURE);
+                }
+            }
+
           pos += idr->length;
         }
       else /* skip zeros */
@@ -994,10 +1049,22 @@ dump_all (const debug_obj_t *obj)
   dump_entries (obj);
   if (_get_psd_size (obj))
     {
+      _visit_lot (obj, false);
+
       fprintf (stdout, DELIM);
-      dump_lot (obj);
+      dump_lot (obj, false);
       fprintf (stdout, DELIM);
-      dump_psd (obj);
+      dump_psd (obj, false);
+    }
+
+  if (obj->psd_x_size)
+    {
+      _visit_lot (obj, true);
+
+      fprintf (stdout, DELIM);
+      dump_lot (obj, true);
+      fprintf (stdout, DELIM);
+      dump_psd (obj, true);
     }
 
   if (obj->tracks_buf)
@@ -1043,11 +1110,19 @@ dump (VcdImageSource *img, const char image_fname[])
   unsigned size, psd_size;
   debug_obj_t obj;
 
+  fprintf (stdout, DELIM);
+
+  fprintf (stdout, "VCDdebug - GNU VCDImager - (Super) Video CD Report\n"
+           "%s\n\n", _rcsid);
+  fprintf (stdout, "Source: image file `%s'\n", image_fname);
+
   memset (&obj, 0, sizeof (debug_obj_t));
 
   obj.img = img;
 
   size = vcd_image_source_stat_size (img);
+
+  fprintf (stdout, "Image size: %d sectors\n", size);
   
   if (vcd_image_source_read_mode2_sector (img, &(obj.pvd), ISO_PVD_SECTOR, false))
     exit (EXIT_FAILURE);
@@ -1068,35 +1143,22 @@ dump (VcdImageSource *img, const char image_fname[])
   
   if (psd_size)
     {
-      uint32_t n;
-
       if (psd_size > 256*1024)
         {
           vcd_error ("weird psd size (%u) -- aborting", psd_size);
           exit (EXIT_FAILURE);
         }
 
-      obj.lot = _vcd_malloc (ISO_BLOCKSIZE * 32);
-      obj.psd = _vcd_malloc (ISO_BLOCKSIZE 
-                             * (((psd_size - 1) / ISO_BLOCKSIZE) + 1));
+      obj.lot = _vcd_malloc (ISO_BLOCKSIZE * LOT_VCD_SIZE);
+      obj.psd = _vcd_malloc (ISO_BLOCKSIZE * _vcd_len2blocks (psd_size, ISO_BLOCKSIZE));
       
-      for (n = LOT_VCD_SECTOR; n < PSD_VCD_SECTOR; n++)
-        {
-          char *p = (char *) obj.lot;
-          p += ISO_BLOCKSIZE * (n - LOT_VCD_SECTOR);
-
-          if (vcd_image_source_read_mode2_sector (img, p, n, false))
-            exit (EXIT_FAILURE);
-        }
-
-      for (n = PSD_VCD_SECTOR;
-           n < PSD_VCD_SECTOR + ((psd_size - 1) / ISO_BLOCKSIZE) + 1; n++)
-        {
-          char *p = obj.psd + (ISO_BLOCKSIZE * (n - PSD_VCD_SECTOR));
-
-          if (vcd_image_source_read_mode2_sector (img, p, n, false))
-            exit (EXIT_FAILURE);
-        }
+      if (vcd_image_source_read_mode2_sectors (img, (void *) obj.lot, LOT_VCD_SECTOR, false,
+                                               LOT_VCD_SIZE))
+        exit (EXIT_FAILURE);
+          
+      if (vcd_image_source_read_mode2_sectors (img, (void *) obj.psd, PSD_VCD_SECTOR, false,
+                                               _vcd_len2blocks (psd_size, ISO_BLOCKSIZE)))
+        exit (EXIT_FAILURE);
     }
 
   {
@@ -1149,18 +1211,8 @@ dump (VcdImageSource *img, const char image_fname[])
       }
     else
       vcd_debug ("no SEARCH.DAT signature found");
-
-    
   }
   
-  fprintf (stdout, DELIM);
-
-  fprintf (stdout, "VCDdebug - GNU VCDImager - (Super) Video CD Report\n"
-           "%s\n\n", _rcsid);
-  fprintf (stdout, "Source: image file `%s'\n", image_fname);
-  fprintf (stdout, "Image size: %d sectors\n", size);
-
-  _visit_lot (&obj);
 
   dump_all (&obj);
 

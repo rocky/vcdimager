@@ -1,5 +1,9 @@
 2001-06-01  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* libvcd/vcd_image.c (vcd_image_source_read_mode2_sectors): new commodity function
+
+	* frontends/cli/vcd_debug.c: implemented dumping of extended selection lists
+
 	* frontends/xml/vcd_xml_rip.c: implemented file extraction
 
 2001-05-31  Herbert Valerio Riedel  <hvr@gnu.org>
