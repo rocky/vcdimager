@@ -139,7 +139,7 @@ vcd_mpeg_source_new (VcdDataSource *mpeg_file);
 /* scan the mpeg file... needed to be called only once */
 typedef struct {
   long current_pack;
-  long current_pos;;
+  long current_pos;
   long length;
 } vcd_mpeg_prog_info_t;
 

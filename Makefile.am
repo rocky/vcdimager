@@ -1,6 +1,6 @@
 SUBDIRS = libvcd frontends tests docs
 
-EXTRA_DIST = BUGS FAQ cygwin-dist.sh debian HACKING
+EXTRA_DIST = BUGS FAQ cygwin-dist.sh debian amiga HACKING
 
 dist-hook: vcdimager.spec
 	cp vcdimager.spec $(distdir)

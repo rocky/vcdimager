@@ -206,8 +206,8 @@ VideoCD XML Description
 
 @code{<filesystem>} Container
 
-* @code{<folder>} Element/Containter::  
-* @code{<file>} Element/Containter::  
+* @code{<folder>} Element/Container::  
+* @code{<file>} Element/Container::  
 
 @code{<segment-items>} Container
 
@@ -783,7 +783,7 @@ points.
 @section Play Items
 
 @dfn{Play items} are the @acronym{MPEG} payload on (Super) Video
-CD's. Sequences are usefull for seamless play of larger video sections,
+CD's. Sequences are useful for seamless play of larger video sections,
 whereas segments are better for smaller items in interactive
 applications.
 
@@ -804,7 +804,7 @@ stream is required, with optionally up to 2 audio streams.
 @end menu
 
 @node Advantages, Disadvantages, Sequence Items, Sequence Items
-@subsubsection Advantages
+@subsubheading Advantages
 
 @itemize @bullet
 @item 
@@ -819,7 +819,7 @@ Auto pause points.
 @end itemize
 
 @node Disadvantages,  , Advantages, Sequence Items
-@subsubsection Disadvantages
+@subsubheading Disadvantages
 
 @itemize @bullet
 @item
@@ -855,7 +855,7 @@ A segment item can be
 @end menu
 
 @node Advantages2, Disadvantages2, Segment Items, Segment Items
-@subsubsection Advantages
+@subsubheading Advantages
 
 @itemize @bullet
 @item
@@ -870,7 +870,7 @@ No pre-gaps.
 @end itemize
 
 @node Disadvantages2,  , Advantages2, Segment Items
-@subsubsection Disadvantages
+@subsubheading Disadvantages
 
 @itemize @bullet
 @item
@@ -963,6 +963,14 @@ selection, while showing a play item.
 Also features such as random selection, default target (@key{DEFAULT}),
 timeout target and looping are supported.
 
+@subsubheading Multi Default Selection List
+
+@dfn{Multi default selection lists} are a special variant of selection
+lists which allow for defining different @key{DEFAULT} key targets,
+depending on which section of the play item the playback is currently
+in. The various sections are defined by using entry points which mark
+the boundaries.
+
 @node End List, Command List, Selection List, PBC Lists
 @subsubsection End List
 
@@ -1050,10 +1058,11 @@ building the actual image file(s).
 Files can be added to the @acronym{ISO} file-system, that is the first
 track of the Video CD, by making use of the command-line options
 @option{--add-file=@var{FILE},@var{ISO_FILENAME}} and
-@option{--add-file-2336=@var{FILE},@var{ISO_FILENAME}}.
-The latter option allows you to include files containing the complete
-user data of mode 2 CD-ROM sectors @footnote{8 bytes for subheader,
-2324 bytes payload and finally 4 bytes for @acronym{EDC}}.
+@option{--add-file-2336=@var{FILE},@var{ISO_FILENAME}}.  The latter
+option allows you to include files containing the complete user data of
+mode 2 CD-ROM sectors @footnote{8 bytes for subheader, 2324 bytes
+payload (which contains 276 bytes @acronym{ECC} for form 1) and finally
+4 bytes for @acronym{EDC}}.
 
 The path name given as @var{ISO_FILENAME} determines where to link the
 file in the file-system of the Video CD. The given path name must be a
@@ -1061,7 +1070,8 @@ valid ISO9660 file name with the following restrictions:
 @itemize @bullet
 @item
 The Character set is restricted to upper case letters, numbers, 
-underscore @samp{_}, dot @samp{.} and slash @samp{/}.
+underscore @samp{_}, dot @samp{.} and slash @samp{/}. 
+@xref{ISO646 d-Characters}
 
 @item
 The maximum file name length is restricted to 31 characters, the
@@ -1182,17 +1192,27 @@ Element names are case sensitive: @samp{<videocd>} and @samp{<VideoCD>}
 are two different entities.
 @end itemize
 
-@section DTD Notation
+@section DTD Notation Reference
+
+Each section of the description of the VideoCD XML format begins with a
+fragment from the VideoCD DTD. The following table gives a simplified
+(and incomplete) reference for the notational syntax.
 
 @table @code
+@item #PCDATA
+parsed character data, i.e. only text without sub-elements allowed
+
+@item EMPTY
+empty, i.e. no sub-element allowed
+
 @item ()
-grouping expressions
+grouping 
 
 @item A?
 A or nothing (A is optional, but at most one A)
 
 @item A+
-one or more A?s (at least one)
+one or more A's (at least one)
 
 @item A*
 zero or more A's (A optional, but could be several A's)
@@ -1208,7 +1228,7 @@ both A and B, in any order
 
 @end table
 
-@section Common VideoCD XML Rules
+@section VideoCD XML Conventions
 
 All time related entries@footnote{@code{<wait>}, @code{<autowait>},
 @code{<playtime>}, @code{<time-offset>}} are given in seconds.
@@ -1233,6 +1253,7 @@ entry point into sequence item, @code{<entry>}.
 segment play item, @code{<segment-item>}.
 @end itemize
 
+@noindent
 Whereas a @emph{PSD item} is required to be one of:
 
 @itemize @bullet
@@ -1260,6 +1281,7 @@ end list, @code{<endlist>}.
 @end menu
 
 @example
+@cartouche
 <!ELEMENT videocd                       (option*,
                                          info,
                                          pvd,
@@ -1274,10 +1296,14 @@ end list, @code{<endlist>}.
 >
 
 <!ENTITY % URI "CDATA">
+@end cartouche
 @end example
 
-Supported combinations of @var{class} and @var{version} are listed below:
+@table @code
+@item class
+@itemx version
 
+Supported combinations of @var{class} and @var{version} are listed below:
 @multitable @columnfractions .10 .10 .80
 @item @var{class} @tab @var{version} @tab Description
 @item @samp{vcd}  @tab @samp{1.1}
@@ -1288,17 +1314,21 @@ Supported combinations of @var{class} and @var{version} are listed below:
 @tab SuperVideoCD 1.0 (IEC-62107)
 @end multitable
 
+@item xmlns
 The @code{xmlns} attribute defines the @acronym{XML} namespace.
+@end table
 
 @node @code{<option>} Element, @code{<info>} Container, @code{<videocd>} Root, @code{<videocd>} Root
 @subsection @code{<option>} Element
 
 @example
+@cartouche
 <!ELEMENT option                        EMPTY>
 <!ATTLIST option 
   name         CDATA  #REQUIRED
   value        CDATA  #IMPLIED
 >
+@end cartouche
 @end example
 
 The following option @var{name} are recognized.  At the moment only
@@ -1331,6 +1361,7 @@ Data}.
 @subsection @code{<info>} Container
 
 @example
+@cartouche
 <!ELEMENT info                          (album-id?,
                                          volume-count?,
                                          volume-number?,
@@ -1346,6 +1377,7 @@ Data}.
 <!ELEMENT next-volume-use-lid2          EMPTY>
 <!ELEMENT restriction                   (#PCDATA)>
 <!ELEMENT start-time-offset             (#PCDATA)>
+@end cartouche
 @end example
 
 The @code{<info>} section allows to customize the information contained
@@ -1390,6 +1422,7 @@ an album. @emph{not implemented yet}
 @subsection @code{<pvd>} Container
 
 @example
+@cartouche
 <!ELEMENT pvd                           (volume-id?,
                                          system-id?,
                                          application-id?,
@@ -1401,6 +1434,7 @@ an album. @emph{not implemented yet}
 <!ELEMENT application-id                (#PCDATA)>
 <!ELEMENT preparer-id                   (#PCDATA)>
 <!ELEMENT publisher-id                  (#PCDATA)>
+@end cartouche
 @end example
 
 This part of the XML structure describes the primary volume descriptor
@@ -1432,40 +1466,46 @@ regardless of the content given in the XML description.
 @subsection @code{<filesystem>} Container
 
 @menu
-* @code{<folder>} Element/Containter::  
-* @code{<file>} Element/Containter::  
+* @code{<folder>} Element/Container::  
+* @code{<file>} Element/Container::  
 @end menu
 
 @example
+@cartouche
 <!ELEMENT filesystem                    (folder*,
                                          file*)>
+@end cartouche
 @end example
 
 This section of the @acronym{XML} description allows for the creation of
 additional folders and files into the ISO9660 filesystem on the Video
 CD.
 
-@node @code{<folder>} Element/Containter, @code{<file>} Element/Containter, @code{<filesystem>} Container, @code{<filesystem>} Container
-@subsubsection @code{<folder>} Element/Containter
+@node @code{<folder>} Element/Container, @code{<file>} Element/Container, @code{<filesystem>} Container, @code{<filesystem>} Container
+@subsubsection @code{<folder>} Element/Container
 
 @example
+@cartouche
 <!ELEMENT folder                        (name,
                                          folder*,
                                          file*)>
 
 <!ELEMENT name                          (#PCDATA)>
+@end cartouche
 @end example
 
-@node @code{<file>} Element/Containter,  , @code{<folder>} Element/Containter, @code{<filesystem>} Container
+@node @code{<file>} Element/Container,  , @code{<folder>} Element/Container, @code{<filesystem>} Container
 @subsubsection @code{<file>} Element
 
 @example
+@cartouche
 <!ELEMENT file                          (name)>
 <!ATTLIST file 
   src          %URI;  #REQUIRED
   format       (form1|mixed) "form1"
 >
 <!ELEMENT name                          (#PCDATA)>
+@end cartouche
 @end example
 
 @node @code{<segment-items>} Container, @code{<sequence-items>} Container, @code{<filesystem>} Container, @code{<videocd>} Root
@@ -1476,18 +1516,24 @@ CD.
 @end menu
 
 @example
+@cartouche
 <!ELEMENT segment-items                 (segment-item)+>
+@end cartouche
 @end example
 
 @node @code{<segment-item>} Element,  , @code{<segment-items>} Container, @code{<segment-items>} Container
 @subsubsection @code{<segment-item>} Element
 
 @example
-<!ELEMENT segment-item                  EMPTY>
+@cartouche
+<!ELEMENT segment-item                  (auto-pause)*>
 <!ATTLIST segment-item 
   id           ID     #REQUIRED
   src          %URI;  #REQUIRED
 >
+
+<!ELEMENT auto-pause                    (#PCDATA)>
+@end cartouche
 @end example
 
 @table @code
@@ -1503,6 +1549,10 @@ ID value referenced in @code{ref} attributes.
 This attribute specifies the external file name of the item,
 i.e. @acronym{MPEG} stream, to be included.
 
+@item <auto-pause>
+See description in @code{<sequence-item>}. @emph{not implemented yet for
+segment items}
+
 @end table
 
 @node @code{<sequence-items>} Container, @code{<pbc>} Container, @code{<segment-items>} Container, @code{<videocd>} Root
@@ -1513,13 +1563,16 @@ i.e. @acronym{MPEG} stream, to be included.
 @end menu
 
 @example
+@cartouche
 <!ELEMENT sequence-items                (sequence-item)+>
+@end cartouche
 @end example
 
 @node @code{<sequence-item>} Element,  , @code{<sequence-items>} Container, @code{<sequence-items>} Container
 @subsubsection @code{<sequence-item>} Element
 
 @example
+@cartouche
 <!ELEMENT sequence-item                 (default-entry?,
                                          entry*,
                                          auto-pause*)>
@@ -1539,6 +1592,7 @@ i.e. @acronym{MPEG} stream, to be included.
 <!ATTLIST entry
   id           ID     #IMPLIED
 >
+@end cartouche
 @end example
 
 @table @code
@@ -1589,6 +1643,7 @@ Play item ID value referenced in @code{ref} attributes.
 @end menu
 
 @example
+@cartouche
 <!ELEMENT pbc                           (selection|
                                          playlist|
                                          endlist)+>
@@ -1612,6 +1667,7 @@ Play item ID value referenced in @code{ref} attributes.
 <!ATTLIST play-item
   ref          IDREF  #IMPLIED
 >
+@end cartouche
 @end example
 
 @table @code
@@ -1642,6 +1698,7 @@ referenced.
 @subsubsection @code{<selection>} Element
 
 @example
+@cartouche
 <!ELEMENT selection                     (bsn?,
                                          prev?,
                                          next?,
@@ -1677,6 +1734,7 @@ referenced.
 
 <!ELEMENT      play-item                EMPTY>
 <!ELEMENT      select                   EMPTY>
+@end cartouche
 @end example
 
 @table @code
@@ -1746,6 +1804,7 @@ up to 99 select choices. The sum of @code{<bsn>} and the number of
 @subsubsection @code{<playlist>} Element
 
 @example
+@cartouche
 <!ELEMENT playlist                      (prev?,
                                          next?,
                                          return?,
@@ -1764,6 +1823,7 @@ up to 99 select choices. The sum of @code{<bsn>} and the number of
 <!ELEMENT      wait                     (#PCDATA)>
 <!ELEMENT      autowait                 (#PCDATA)>
 <!ELEMENT      play-item                EMPTY>
+@end cartouche
 @end example
 
 @table @code
@@ -1798,6 +1858,7 @@ elements may be defined per @code{<playlist>}.
 @subsubsection @code{<endlist>} Element
 
 @example
+@cartouche
 <!ELEMENT endlist                       (next-volume?,
                                          play-item?)>
 <!ATTLIST endlist
@@ -1805,6 +1866,7 @@ elements may be defined per @code{<playlist>}.
 >
 
 <!ELEMENT next-volume                   (#PCDATA)>
+@end cartouche
 @end example
 
 @table @code
