@@ -34,9 +34,12 @@ dnl now check whether the installed libpopt is usable
 int
 main(int argc, const char *argv[])
 {
+  char *s;
   const struct poptOption options[] = {
     POPT_AUTOHELP
-    { NULL, 0, 0, NULL, 0 }
+    { NULL, 0, 0, NULL, 0, NULL, NULL },
+    {"foo", 'f', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &s, NULL, 
+     "test doc", "FILE"},
   };
 
   poptContext context = poptGetContext("popt-test", argc, argv, options, 0);
@@ -54,7 +57,7 @@ dnl handle test result
     AC_MSG_RESULT(yes)
     ifelse([$1], , :, [$1])
   else
-    AC_MSG_RESULT(no)
+    AC_MSG_RESULT(no or not new enough - need libpopt 1.7 or greater)
     LIBPOPT_CFLAGS=""
     LIBPOPT_LIBS=""
     ifelse([$2], , :, [$2])
