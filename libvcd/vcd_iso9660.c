@@ -383,7 +383,7 @@ pathtable_m_add_entry (void *pt,
 }
 
 static int
-is_isochar (char c)
+is_isochar (int c)
 {
   return isupper (c)
     || isdigit (c)

@@ -27,6 +27,7 @@ AM_PROG_CC_STDC
 AC_PROG_RANLIB
 
 dnl libs
+AC_CHECK_FUNCS(snprintf vsnprintf, , [AC_MSG_ERROR(required function not found)])
 
 if test "x$enable_cli_fe" = "xyes"; then
  AC_CHECK_LIB(popt, poptGetContext, POPT_LIBS="-lpopt", enable_cli_fe=no)
@@ -51,7 +52,19 @@ dnl headers
 AC_DEFINE(_GNU_SOURCE)
 AC_STDC_HEADERS
 AC_HAVE_HEADERS(stdint.h)
+AC_HAVE_HEADERS(inttypes.h)
 AC_HAVE_HEADERS(stdbool.h)
+
+if test "x$ac_cv_header_stdint_h" != "xyes" \
+ 	-a "x$ac_cv_header_inttypes_h" != "xyes"
+ then
+dnl ...we check for sizes but we dont actually use this information yet
+   AC_CHECK_SIZEOF(char, 1)
+   AC_CHECK_SIZEOF(short int, 2)
+   AC_CHECK_SIZEOF(int, 4)
+   AC_CHECK_SIZEOF(long, 4)
+   AC_CHECK_SIZEOF(long long, 8)
+fi
 
 if test "x$enable_cli_fe" = "xyes"; then
  AC_CHECK_HEADER(popt.h,, enable_cli_fe=no)
@@ -71,8 +84,33 @@ AC_C_BIGENDIAN
 AC_C_CONST
 AC_C_INLINE
 
+dnl empty_array_size
+AC_MSG_CHECKING([how to create empty arrays])
+
+empty_array_size="xxx"
+AC_TRY_COMPILE(,[struct { int foo; int bar[]; } doo;], empty_array_size="")
+
+if test "x$empty_array_size" = "xxxx";then
+ AC_TRY_COMPILE(,[struct { int foo; int bar[0]; } doo;], empty_array_size="0")
+fi
+
+if test "x$empty_array_size" = "xxxx"
+then
+  AC_MSG_ERROR([compiler is unable to creaty empty arrays])
+else
+  AC_DEFINE_UNQUOTED(EMPTY_ARRAY_SIZE, $empty_array_size)
+  changequote(`,')
+  msg="[${empty_array_size}]"
+  changequote([,])
+  AC_MSG_RESULT($msg)
+fi
+dnl empty_array_size
+
 dnl system
-WARN_CFLAGS="-Wall -Wmissing-prototypes -Wunused -Wpointer-arith -Wwrite-strings"
+if test "x$GCC" = "xyes"
+then
+ WARN_CFLAGS="-Wall -Wmissing-prototypes -Wunused -Wpointer-arith -Wwrite-strings"
+fi
 LIBS="$LIBS -lm"
 CFLAGS="$CFLAGS $WARN_CFLAGS"
 
@@ -103,5 +141,33 @@ Setup:
   Build CLI FE:		$enable_cli_fe
   Build Gnome FE:	$enable_gnome_fe
 "
+
+if test "x$enable_gnome_fe" = "xyes"
+then
+  cat <<EOM
+****************************************************************************
+****************************************************************************
+***                                                                      ***
+***       WARNING: THE GNOME FRONTEND IS NOT USABLE YET                  ***
+***                                                                      ***
+****************************************************************************
+****************************************************************************
+EOM
+fi
+
+if test "x$enable_cli_fe" != "xyes" \
+ 	-a "x$enable_gnome_fe" != "xyes"
+then
+  cat <<EOF
+****************************************************************************
+****************************************************************************
+***                                                                      ***
+***         WARNING: BUILDING ONLY LIBVCD W/O ANY FRONTENDS              ***
+***              (maybe you are missing some library?)                   ***
+***                                                                      ***
+****************************************************************************
+****************************************************************************
+EOF
+fi
 
 dnl EOF

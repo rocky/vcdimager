@@ -82,7 +82,7 @@ struct iso_path_table {
   uint8_t  xa_len                      GNUC_PACKED; /* 711 */
   uint32_t extent                      GNUC_PACKED; /* 731/732 */
   uint16_t parent                      GNUC_PACKED; /* 721/722 */
-  char     name[0]                     GNUC_PACKED;
+  char     name[EMPTY_ARRAY_SIZE]      GNUC_PACKED;
 };
 
 struct iso_directory_record {
@@ -96,7 +96,7 @@ struct iso_directory_record {
   uint8_t  interleave                  GNUC_PACKED; /* 711 */
   uint32_t volume_sequence_number      GNUC_PACKED; /* 723 */
   uint8_t  name_len                    GNUC_PACKED; /* 711 */
-  char     name[0]                     GNUC_PACKED;
+  char     name[EMPTY_ARRAY_SIZE]      GNUC_PACKED;
 };
 
 #ifdef __MWERKS__

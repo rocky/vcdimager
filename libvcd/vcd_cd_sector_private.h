@@ -43,7 +43,7 @@ typedef struct {
   uint8_t sync[SYNC_LEN];
   msf_t msf;
   uint8_t mode;
-  uint8_t user_data[0];
+  uint8_t user_data[EMPTY_ARRAY_SIZE];
 } raw_cd_sector_t;
 
 typedef struct {

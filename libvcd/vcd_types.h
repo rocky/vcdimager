@@ -21,13 +21,11 @@
 #ifndef __VCD_TYPES_H__
 #define __VCD_TYPES_H__
 
-#ifdef HAVE_STDINT_H
-#include <stdint.h>
-#else /* HAVE_STDINT_H */
-# ifndef __CYGWIN__
-# warning ISO/IEC 9899:1999 <stdint.h> missing
-# else  /* __CYGWIN__ */
-
+#if defined(HAVE_STDINT_H)
+# include <stdint.h>
+#elif defined(HAVE_INTTYPES_H)
+# include <inttypes.h>
+#elif defined(__CYGWIN__)
 # include <sys/types.h>
 typedef u_int8_t uint8_t;
 typedef u_int16_t uint16_t;
@@ -41,14 +39,27 @@ typedef u_int64_t uint64_t;
 # define UINT16_C(c)   c ## U
 # define UINT32_C(c)   c ## U
 # define UINT64_C(c)   c ## ULL
-
-# endif /* __CYGWIN__ */
+#else
+/* warning ISO/IEC 9899:1999 <stdint.h> was missing and even <inttypes.h> */
+/* fixme */
 #endif /* HAVE_STDINT_H */
 
-#ifdef HAVE_STDBOOL_H
+#if defined(HAVE_STDBOOL_H)
 #include <stdbool.h>
 #else
-#warning ISO/IEC 9899:1999 <stdbool.h> missing
+/* ISO/IEC 9899:1999 <stdbool.h> missing -- enabling workaround */
+
+# ifndef __cplusplus
+typedef enum
+  {
+    false = 0,
+    true = 1
+  } _Bool;
+
+#  define false   false
+#  define true    true
+#  define bool _Bool
+# endif
 #endif
 
 #if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)

@@ -265,7 +265,7 @@ typedef struct {
   uint8_t wtime              GNUC_PACKED;
   uint8_t loop               GNUC_PACKED;
   uint16_t itemid            GNUC_PACKED;
-  uint16_t ofs[0]            GNUC_PACKED; /* variable length */
+  uint16_t ofs[EMPTY_ARRAY_SIZE] GNUC_PACKED; /* variable length */
   /* PsdSelectionListDescriptorExtended */
 } PsdSelectionListDescriptor;
 
@@ -274,7 +274,7 @@ typedef struct {
   struct psd_area_t next_area      GNUC_PACKED;
   struct psd_area_t return_area    GNUC_PACKED;
   struct psd_area_t default_area   GNUC_PACKED;
-  struct psd_area_t area[0]        GNUC_PACKED; /* variable length */
+  struct psd_area_t area[EMPTY_ARRAY_SIZE] GNUC_PACKED; /* variable length */
 } PsdSelectionListDescriptorExtended;
 
 typedef struct {
@@ -302,7 +302,7 @@ typedef struct {
                                              calculated same as wtime, used
                                              for each item in list if the auto
                                              pause flag in a sector is true */
-  uint16_t itemid[0]         GNUC_PACKED; /* item number
+  uint16_t itemid[EMPTY_ARRAY_SIZE] GNUC_PACKED; /* item number
                                                 0 <= n <= 1      - play nothing
                                                 2 <= n <= 99     - play track n
                                               100 <= n <= 599    - play entry
@@ -381,7 +381,7 @@ typedef struct {
   uint8_t time_interval       GNUC_PACKED; /* The interval of time in
                                               between scan points, in units
                                               of 0.5 seconds, must be 0x01 */
-  msf_t points[0]             GNUC_PACKED; /* The series of scan points */
+  msf_t points[EMPTY_ARRAY_SIZE] GNUC_PACKED; /* The series of scan points */
 } SearchDat;
 
 /* SPICONTX.SVD 
@@ -411,7 +411,7 @@ typedef struct {
   uint8_t version             GNUC_PACKED; /* = 0x02 */
   uint8_t reserved            GNUC_PACKED; /* Reserved, must be zero */
   uint16_t scan_points        GNUC_PACKED; /* the number of scan points */
-  msf_t points[0]             GNUC_PACKED; /* actual scan points 
+  msf_t points[EMPTY_ARRAY_SIZE] GNUC_PACKED; /* actual scan points 
                                               points[time(iframe)/0.5] */
 } ScandataDat_v2;
 
