@@ -303,7 +303,7 @@ Support for Video CD 1.1 and 2.0 disc format.
 
 @item
 Support for Super Video CD 1.0@footnote{based on the @acronym{IEC}62107
-specification with some extensions defined in the socalled `4C SVCD
+specification with some extensions defined in the so-called `4C SVCD
 System Specification 1.0'. Some support for the @emph{deprecated}
 Chinese SVCD format is available through switches.} disc format.
 
@@ -1306,12 +1306,16 @@ end list, @code{<endlist>}.
 Supported combinations of @var{class} and @var{version} are listed below:
 @multitable @columnfractions .10 .10 .80
 @item @var{class} @tab @var{version} @tab Description
+@item @samp{vcd}  @tab @samp{1.0}
+@tab VideoCD 1.0 @emph{experimental}
 @item @samp{vcd}  @tab @samp{1.1}
 @tab VideoCD 1.1
 @item @samp{vcd}  @tab @samp{2.0}
 @tab VideoCD 2.0
 @item @samp{svcd}  @tab @samp{1.0}
 @tab SuperVideoCD 1.0 (IEC-62107)
+@item @samp{hqvcd}  @tab @samp{1.0}
+@tab HQ VideoCD 1.0 (IEC-62107)
 @end multitable
 
 @item xmlns
@@ -1354,6 +1358,10 @@ the @acronym{MPEG}-2 video streams@footnote{It is required, that the
 stream has already user data groups with scan information data, in order
 for this feature to work}. Default: @samp{false}. @xref{Scan Information
 Data}.
+
+@item leadout pause
+Enables adding of 150 empty sectors which are added between tracks after
+the last track as well. Default: @samp{false}.
 
 @end table
 
@@ -1550,8 +1558,7 @@ This attribute specifies the external file name of the item,
 i.e. @acronym{MPEG} stream, to be included.
 
 @item <auto-pause>
-See description in @code{<sequence-item>}. @emph{not implemented yet for
-segment items}
+See description in @code{<sequence-item>}.
 
 @end table
 

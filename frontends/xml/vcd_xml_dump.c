@@ -281,13 +281,22 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 	{
 	  struct segment_t *_segment =  _vcd_list_node_data (node);
 	  xmlNodePtr seg_node;
+	  VcdListNode *node2;
 	  
 	  seg_node = xmlNewChild (section, ns, "segment-item", NULL);
 	  xmlSetProp (seg_node, "src", _segment->src);
 	  xmlSetProp (seg_node, "id", _segment->id);
+
+	  _VCD_LIST_FOREACH (node2, _segment->autopause_list)
+	    {
+	      double *_ap_ts = _vcd_list_node_data (node2);
+	      char buf[80];
+
+	      snprintf (buf, sizeof (buf), "%f", *_ap_ts);
+	      xmlNewChild (seg_node, ns, "auto-pause", buf);
+	    }
 	}
     }
-
 
   /* sequences */
     

@@ -2,6 +2,18 @@ $Id$
 
 see ChangeLog for more information
 
+version 0.7.9 (unstable/development)
+====================================
+2001-...
+
+* fixed assertion bug in vcdimager cli frontend
+* added support for HQ-VCD and VCD 1.0 formats
+* fixed bug in vcdxgen which created a PBC section for VCD 1.x by
+  default
+* new "leadout pause" option
+* implemented <auto-pause> points for segment play items
+* ...
+
 version 0.7.8 (unstable/development)
 ====================================
 2001-07-28

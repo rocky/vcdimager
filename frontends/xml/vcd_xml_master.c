@@ -136,16 +136,24 @@ bool vcd_xml_master (const struct vcdxml_t *obj, const char cue_fname[],
   idx = 0;
   _VCD_LIST_FOREACH (node, obj->segment_list)
     {
-      struct segment_t *item = _vcd_list_node_data (node);
-      VcdDataSource *_source = vcd_data_source_new_stdio (item->src);
+      struct segment_t *segment = _vcd_list_node_data (node);
+      VcdDataSource *_source = vcd_data_source_new_stdio (segment->src);
+      VcdListNode *node2;
 
-      vcd_debug ("adding item #%d, %s", idx, item->src);
+      vcd_debug ("adding segment #%d, %s", idx, segment->src);
 
       vcd_assert (_source != NULL);
 
       vcd_obj_append_segment_play_item (_vcd,
 					vcd_mpeg_source_new (_source),
-					item->id);
+					segment->id);
+      
+      _VCD_LIST_FOREACH (node2, segment->autopause_list)
+	{
+	  double *_ap_ts = _vcd_list_node_data (node2);
+
+	  vcd_obj_add_segment_pause (_vcd, segment->id, *_ap_ts, NULL);
+	}
 
       idx++;
     }

@@ -1,8 +1,11 @@
 2001-07-31  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* implemented auto-pause handling for segments in XML frontends
+
 	* libvcd/vcd.c (_vcd_obj_get_sequence_by_id): exported function
 	(_vcd_obj_get_segment_by_id): new function
 	(vcd_obj_add_segment_pause): new function
+	(_write_segment): implemented auto pause setting
 
 2001-07-30  Herbert Valerio Riedel  <hvr@gnu.org>
 

@@ -193,6 +193,42 @@ _parse_pvd (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
  */
 
 static bool
+_parse_mpeg_segment (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+{
+  struct segment_t *segment;
+  xmlNodePtr cur;
+
+  segment = _vcd_malloc (sizeof (struct segment_t));
+
+  _vcd_list_append (obj->segment_list, segment);
+
+  GET_PROP_STR (segment->id, "id", doc, node, ns);
+  GET_PROP_STR (segment->src, "src", doc, node, ns);
+
+  segment->autopause_list = _vcd_list_new ();
+
+  FOR_EACH (cur, node)
+    {
+      if (cur->ns != ns)
+	continue;
+
+      if (!xmlStrcmp (cur->name, "auto-pause"))
+	{
+	  double *_ap_ts = _vcd_malloc (sizeof (double));
+	  *_ap_ts = 0;
+	  
+	  GET_ELEM_DOUBLE (*_ap_ts, "auto-pause", doc, cur, ns);
+
+	  _vcd_list_append (segment->autopause_list, _ap_ts);
+	}
+      else
+	vcd_assert_not_reached ();
+    }
+
+  return false;
+}
+
+static bool
 _parse_segments (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
   xmlNodePtr cur;
@@ -205,21 +241,13 @@ _parse_segments (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr 
 	continue;
 
       if (!xmlStrcmp (cur->name, "segment-item")) 
-	{
-	  struct segment_t *_item = _vcd_malloc (sizeof (struct segment_t));
-	  
-	  GET_PROP_STR (_item->id, "id", doc, cur, ns);
-	  GET_PROP_STR (_item->src, "src", doc, cur, ns);
-
-	  _vcd_list_append (obj->segment_list, _item);
-	}
+	rc = _parse_mpeg_segment (obj, doc, cur, ns);
       else
 	vcd_assert_not_reached ();
 
       if (rc)
 	return rc;
-      
-    }  
+    }
 
   return false;
 }

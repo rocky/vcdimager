@@ -325,6 +325,8 @@ _parse_info (struct vcdxml_t *obj, VcdImageSource *img)
 	    snprintf (buf, sizeof (buf), "item%4.4d.mpg", idx + 1);
 	    _segment->src = strdup (buf);
 
+	    _segment->autopause_list = _vcd_list_new ();
+
 	    _vcd_list_append (obj->segment_list, _segment);
 	    n++;
 	  }
@@ -986,8 +988,12 @@ _rip_segments (struct vcdxml_t *obj, VcdImageSource *img)
       struct segment_t *_seg = _vcd_list_node_data (node);
       uint32_t n;
       FILE *outfd = NULL;
+      VcdMpegStreamCtx mpeg_ctx;
+      double last_pts = 0;
 
       vcd_assert (_seg->segments_count > 0);
+
+      memset (&mpeg_ctx, 0, sizeof (VcdMpegStreamCtx));
 
       vcd_info ("extracting %s... (start lsn %d, %d segments)",
 		_seg->src, start_extent, _seg->segments_count);
@@ -1018,6 +1024,28 @@ _rip_segments (struct vcdxml_t *obj, VcdImageSource *img)
               vcd_warn ("no EOF seen, but stream ended");
               break;
             }
+
+	  vcd_mpeg_parse_packet (buf.data, 2324, false, &mpeg_ctx);
+
+	  if (mpeg_ctx.packet.has_pts)
+	    {
+	      last_pts = mpeg_ctx.packet.pts;
+	      if (mpeg_ctx.stream.seen_pts)
+		last_pts -= mpeg_ctx.stream.min_pts;
+	      if (last_pts < 0)
+		last_pts = 0;
+	      /* vcd_debug ("pts %f @%d", mpeg_ctx.packet.pts, n); */
+	    }
+
+	  if (buf.subheader[2] & SM_TRIG)
+	    {
+	      double *_ap_ts = _vcd_malloc (sizeof (double));
+	      
+	      vcd_debug ("autopause @%d (%f)", n, last_pts);
+	      *_ap_ts = last_pts;
+
+	      _vcd_list_append (_seg->autopause_list, _ap_ts);
+	    }
 
 	  fwrite (buf.data, 2324, 1, outfd);
 

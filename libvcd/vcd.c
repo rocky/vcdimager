@@ -1128,7 +1128,6 @@ _finalize_vcd_iso_track_filesystem (VcdObj *obj)
         default:
           vcd_assert_not_reached ();
         }
-
       
       snprintf (segment_pathname, sizeof (segment_pathname), fmt, n);
         
@@ -1395,235 +1394,7 @@ _write_source_mode2_form1 (VcdObj *obj, VcdDataSource *source, uint32_t extent)
 }
 
 static int
-_write_vcd_iso_track (VcdObj *obj)
-{
-  VcdListNode *node;
-  int n;
-
-  /* generate dir sectors */
-  
-  _vcd_directory_dump_entries (obj->dir, 
-                               _dict_get_bykey (obj, "dir")->buf, 
-                               _dict_get_bykey (obj, "dir")->sector);
-
-  _vcd_directory_dump_pathtables (obj->dir, 
-                                  _dict_get_bykey (obj, "ptl")->buf, 
-                                  _dict_get_bykey (obj, "ptm")->buf);
-      
-  /* generate PVD and EVD at last... */
-  set_iso_pvd (_dict_get_bykey (obj, "pvd")->buf,
-               obj->iso_volume_label, 
-               obj->iso_application_id, 
-               obj->iso_size, 
-               _dict_get_bykey (obj, "dir")->buf, 
-               _dict_get_bykey (obj, "ptl")->sector,
-               _dict_get_bykey (obj, "ptm")->sector,
-               pathtable_get_size (_dict_get_bykey (obj, "ptm")->buf));
-    
-  set_iso_evd (_dict_get_bykey (obj, "evd")->buf);
-
-  /* fill VCD relevant files with data */
-
-  set_info_vcd (obj, _dict_get_bykey (obj, "info")->buf);
-  set_entries_vcd (obj, _dict_get_bykey (obj, "entries")->buf);
-
-  if (_vcd_pbc_available (obj))
-    {
-      if (_vcd_obj_has_cap_p (obj, _CAP_PBC_X))
-        {
-          set_lot_vcd (obj, _dict_get_bykey (obj, "lot_x")->buf, true);
-          set_psd_vcd (obj, _dict_get_bykey (obj, "psd_x")->buf, true);
-        }
-  
-      set_lot_vcd (obj, _dict_get_bykey (obj, "lot")->buf, false);
-      set_psd_vcd (obj, _dict_get_bykey (obj, "psd")->buf, false);
-    }
-
-  if (_vcd_obj_has_cap_p (obj, _CAP_4C_SVCD))
-    {
-      set_tracks_svd (obj, _dict_get_bykey (obj, "tracks")->buf);
-      set_search_dat (obj, _dict_get_bykey (obj, "search")->buf);
-      set_scandata_dat (obj, _dict_get_bykey (obj, "scandata")->buf);
-    }
-
-  /* start actually writing stuff */
-
-  vcd_info ("writing track 1 (ISO9660)...");
-
-  /* 00:02:00 -> 00:04:74 */
-  for (n = 0;n < obj->mpeg_segment_start_extent; n++)
-    {
-      const void *content = NULL;
-      uint8_t flags = SM_DATA;
-
-      content = _dict_get_sector (obj, n);
-      flags |= _dict_get_sector_flags (obj, n);
-      
-      if (content == NULL)
-        content = zero;
-
-      _write_m2_image_sector (obj, content, n, 0, 0, flags, 0);
-    }
-
-  /* SEGMENTS */
-
-  vcd_assert (n == obj->mpeg_segment_start_extent);
-
-  _VCD_LIST_FOREACH (node, obj->mpeg_segment_list)
-    {
-      mpeg_segment_t *_segment = _vcd_list_node_data (node);
-      unsigned packet_no;
-
-      vcd_assert (_segment->start_extent == n);
-
-      for (packet_no = 0;packet_no < (_segment->segment_count * 150);packet_no++)
-        {
-          uint8_t buf[M2F2_SIZE] = { 0, };
-          uint8_t fn, cn, sm, ci;
-
-          if (packet_no < _segment->info->packets)
-            {
-              struct vcd_mpeg_packet_flags pkt_flags;
-              bool _need_eor = false;
-
-              vcd_mpeg_source_get_packet (_segment->source, packet_no,
-                                          buf, &pkt_flags, false);
-
-              sm = SM_FORM2 | SM_REALT;
-              cn = CN_OTHER;
-              ci = CI_OTHER;
-              fn = 1;
-              
-              switch (pkt_flags.type) 
-                {
-                case PKT_TYPE_VIDEO:
-                  sm = SM_FORM2 | SM_REALT | SM_VIDEO;
-
-                  ci = CI_VIDEO;
-                  cn = CN_VIDEO;
-
-                  if (pkt_flags.video_e1)
-                    ci = CI_STILL, cn = CN_STILL;
-
-                  if (pkt_flags.video_e2)
-                    ci = CI_STILL2, cn = CN_STILL2;
-
-                  if (pkt_flags.video_e1 || pkt_flags.video_e2)
-                    { /* search for endcode -- hack */
-                      int idx;
-                
-                      for (idx = 0; idx <= 2320; idx++)
-                        if (buf[idx] == 0x00
-                            && buf[idx + 1] == 0x00
-                            && buf[idx + 2] == 0x01
-                            && buf[idx + 3] == 0xb7)
-                          {
-                            _need_eor = true;
-                            break;
-                          }
-                    }
-
-
-                  break;
-
-                case PKT_TYPE_AUDIO:
-                  sm = SM_FORM2 | SM_REALT | SM_AUDIO;
-                  
-                  ci = CI_AUDIO;
-                  cn = CN_AUDIO;
-                  break;
-
-                case PKT_TYPE_EMPTY:
-                  ci = CI_PAD;
-                  cn = CN_PAD;
-                  break;
-
-                default:
-                  /* fixme -- check.... */
-                  break;
-                }
-
-              if (_vcd_obj_has_cap_p (obj, _CAP_4C_SVCD))
-                {
-                  cn = 1;
-                  sm = SM_FORM2 | SM_REALT | SM_VIDEO;
-                  ci = 0x80;
-                }
-
-              if (packet_no + 1 == _segment->info->packets)
-                sm |= SM_EOF;
-
-              if (_need_eor)
-                {
-                  vcd_debug ("setting EOR for SeqEnd at packet# %d ('%s')", 
-                             packet_no, _segment->id);
-                  sm |= SM_EOR;
-                }
-            }
-          else
-            {
-              fn = 0;
-              cn = 0;
-              sm = SM_FORM2;
-              ci = 0x00;
-            }
-
-          _write_m2_image_sector (obj, buf, n, fn, cn, sm, ci);
-          
-          n++;
-        }
-
-      vcd_mpeg_source_close (_segment->source);
-    }
-
-  /* EXT stuff */
-
-  vcd_assert (n == obj->ext_file_start_extent);
-
-  for (;n < obj->custom_file_start_extent; n++)
-    {
-      const void *content = NULL;
-      uint8_t flags = SM_DATA;
-      uint8_t fileno = _vcd_obj_has_cap_p (obj, _CAP_4C_SVCD) ? 0 : 1;
-
-      content = _dict_get_sector (obj, n);
-      flags |= _dict_get_sector_flags (obj, n);
-      
-      if (content == NULL)
-        {
-          vcd_debug ("unexpected empty EXT sector");
-          content = zero;
-        }
-      
-      _write_m2_image_sector (obj, content, n, fileno, 0, flags, 0);
-    }
-
-  /* write custom files */
-
-  vcd_assert (n == obj->custom_file_start_extent);
-    
-  _VCD_LIST_FOREACH (node, obj->custom_file_list)
-    {
-      custom_file_t *p = _vcd_list_node_data (node);
-        
-      vcd_info ("writing file `%s' (%d bytes%s)", 
-                p->iso_pathname, p->size, 
-                p->raw_flag ? ", raw sectors file": "");
-      if (p->raw_flag)
-        _write_source_mode2_raw (obj, p->file, p->start_extent);
-      else
-        _write_source_mode2_form1 (obj, p->file, p->start_extent);
-    }
-  
-  /* blank unalloced tracks */
-  while ((n = _vcd_salloc (obj->iso_bitmap, SECTOR_NIL, 1)) < obj->iso_size)
-    _write_m2_image_sector (obj, zero, n, 0, 0, SM_DATA, 0);
-
-  return 0;
-}
-
-static int
-_write_sectors (VcdObj *obj, int track_idx)
+_write_sequence (VcdObj *obj, int track_idx)
 {
   mpeg_sequence_t *track = 
     _vcd_list_node_data (_vcd_list_at (obj->mpeg_sequence_list, track_idx));
@@ -1798,6 +1569,271 @@ _write_sectors (VcdObj *obj, int track_idx)
 
   return 0;
 }
+
+static int
+_write_segment (VcdObj *obj, mpeg_segment_t *_segment)
+{
+  VcdListNode *pause_node;
+  unsigned packet_no;
+  int n = obj->sectors_written;
+
+  vcd_assert (_segment->start_extent == n);
+
+  pause_node = _vcd_list_begin (_segment->pause_list);
+
+  for (packet_no = 0;packet_no < (_segment->segment_count * 150);packet_no++)
+    {
+      uint8_t buf[M2F2_SIZE] = { 0, };
+      uint8_t fn, cn, sm, ci;
+
+      if (packet_no < _segment->info->packets)
+        {
+          struct vcd_mpeg_packet_flags pkt_flags;
+          bool set_trigger = false;
+          bool _need_eor = false;
+
+          vcd_mpeg_source_get_packet (_segment->source, packet_no,
+                                      buf, &pkt_flags, obj->update_scan_offsets);
+
+          sm = SM_FORM2 | SM_REALT;
+          cn = CN_OTHER;
+          ci = CI_OTHER;
+          fn = 1;
+  
+          while (pause_node)
+            {
+              pause_t *_pause = _vcd_list_node_data (pause_node);
+
+              if (!pkt_flags.has_pts)
+                break; /* no pts */
+
+              if (pkt_flags.pts < _pause->time)
+                break; /* our time has not come yet */
+
+              /* seems it's time to trigger! */
+              set_trigger = true;
+
+              vcd_debug ("setting auto pause trigger for time %f (pts %f) @%d", 
+                         _pause->time, pkt_flags.pts, n);
+
+              pause_node = _vcd_list_node_next (pause_node);
+            }
+            
+          switch (pkt_flags.type) 
+            {
+            case PKT_TYPE_VIDEO:
+              sm = SM_FORM2 | SM_REALT | SM_VIDEO;
+
+              ci = CI_VIDEO;
+              cn = CN_VIDEO;
+
+              if (pkt_flags.video_e1)
+                ci = CI_STILL, cn = CN_STILL;
+
+              if (pkt_flags.video_e2)
+                ci = CI_STILL2, cn = CN_STILL2;
+
+              if (pkt_flags.video_e1 || pkt_flags.video_e2)
+                { /* search for endcode -- hack */
+                  int idx;
+                
+                  for (idx = 0; idx <= 2320; idx++)
+                    if (buf[idx] == 0x00
+                        && buf[idx + 1] == 0x00
+                        && buf[idx + 2] == 0x01
+                        && buf[idx + 3] == 0xb7)
+                      {
+                        _need_eor = true;
+                        break;
+                      }
+                }
+              break;
+
+            case PKT_TYPE_AUDIO:
+              sm = SM_FORM2 | SM_REALT | SM_AUDIO;
+                  
+              ci = CI_AUDIO;
+              cn = CN_AUDIO;
+              break;
+
+            case PKT_TYPE_EMPTY:
+              ci = CI_PAD;
+              cn = CN_PAD;
+              break;
+
+            default:
+              /* fixme -- check.... */
+              break;
+            }
+
+          if (_vcd_obj_has_cap_p (obj, _CAP_4C_SVCD))
+            {
+              cn = 1;
+              sm = SM_FORM2 | SM_REALT | SM_VIDEO;
+              ci = 0x80;
+            }
+
+          if (packet_no + 1 == _segment->info->packets)
+            sm |= SM_EOF;
+
+          if (set_trigger)
+            sm |= SM_TRIG;
+
+          if (_need_eor)
+            {
+              vcd_debug ("setting EOR for SeqEnd at packet# %d ('%s')", 
+                         packet_no, _segment->id);
+              sm |= SM_EOR;
+            }
+        }
+      else
+        {
+          fn = 0;
+          cn = 0;
+          sm = SM_FORM2;
+          ci = 0x00;
+        }
+
+      _write_m2_image_sector (obj, buf, n, fn, cn, sm, ci);
+          
+      n++;
+    }
+
+  vcd_mpeg_source_close (_segment->source);
+
+  return 0;
+}
+
+static int
+_write_vcd_iso_track (VcdObj *obj)
+{
+  VcdListNode *node;
+  int n;
+
+  /* generate dir sectors */
+  
+  _vcd_directory_dump_entries (obj->dir, 
+                               _dict_get_bykey (obj, "dir")->buf, 
+                               _dict_get_bykey (obj, "dir")->sector);
+
+  _vcd_directory_dump_pathtables (obj->dir, 
+                                  _dict_get_bykey (obj, "ptl")->buf, 
+                                  _dict_get_bykey (obj, "ptm")->buf);
+      
+  /* generate PVD and EVD at last... */
+  set_iso_pvd (_dict_get_bykey (obj, "pvd")->buf,
+               obj->iso_volume_label, 
+               obj->iso_application_id, 
+               obj->iso_size, 
+               _dict_get_bykey (obj, "dir")->buf, 
+               _dict_get_bykey (obj, "ptl")->sector,
+               _dict_get_bykey (obj, "ptm")->sector,
+               pathtable_get_size (_dict_get_bykey (obj, "ptm")->buf));
+    
+  set_iso_evd (_dict_get_bykey (obj, "evd")->buf);
+
+  /* fill VCD relevant files with data */
+
+  set_info_vcd (obj, _dict_get_bykey (obj, "info")->buf);
+  set_entries_vcd (obj, _dict_get_bykey (obj, "entries")->buf);
+
+  if (_vcd_pbc_available (obj))
+    {
+      if (_vcd_obj_has_cap_p (obj, _CAP_PBC_X))
+        {
+          set_lot_vcd (obj, _dict_get_bykey (obj, "lot_x")->buf, true);
+          set_psd_vcd (obj, _dict_get_bykey (obj, "psd_x")->buf, true);
+        }
+  
+      set_lot_vcd (obj, _dict_get_bykey (obj, "lot")->buf, false);
+      set_psd_vcd (obj, _dict_get_bykey (obj, "psd")->buf, false);
+    }
+
+  if (_vcd_obj_has_cap_p (obj, _CAP_4C_SVCD))
+    {
+      set_tracks_svd (obj, _dict_get_bykey (obj, "tracks")->buf);
+      set_search_dat (obj, _dict_get_bykey (obj, "search")->buf);
+      set_scandata_dat (obj, _dict_get_bykey (obj, "scandata")->buf);
+    }
+
+  /* start actually writing stuff */
+
+  vcd_info ("writing track 1 (ISO9660)...");
+
+  /* 00:02:00 -> 00:04:74 */
+  for (n = 0;n < obj->mpeg_segment_start_extent; n++)
+    {
+      const void *content = NULL;
+      uint8_t flags = SM_DATA;
+
+      content = _dict_get_sector (obj, n);
+      flags |= _dict_get_sector_flags (obj, n);
+      
+      if (content == NULL)
+        content = zero;
+
+      _write_m2_image_sector (obj, content, n, 0, 0, flags, 0);
+    }
+
+  /* SEGMENTS */
+
+  vcd_assert (n == obj->mpeg_segment_start_extent);
+
+  _VCD_LIST_FOREACH (node, obj->mpeg_segment_list)
+    {
+      mpeg_segment_t *_segment = _vcd_list_node_data (node);
+
+      _write_segment (obj, _segment);
+    }
+
+  n = obj->sectors_written;
+
+  /* EXT stuff */
+
+  vcd_assert (n == obj->ext_file_start_extent);
+
+  for (;n < obj->custom_file_start_extent; n++)
+    {
+      const void *content = NULL;
+      uint8_t flags = SM_DATA;
+      uint8_t fileno = _vcd_obj_has_cap_p (obj, _CAP_4C_SVCD) ? 0 : 1;
+
+      content = _dict_get_sector (obj, n);
+      flags |= _dict_get_sector_flags (obj, n);
+      
+      if (content == NULL)
+        {
+          vcd_debug ("unexpected empty EXT sector");
+          content = zero;
+        }
+      
+      _write_m2_image_sector (obj, content, n, fileno, 0, flags, 0);
+    }
+
+  /* write custom files */
+
+  vcd_assert (n == obj->custom_file_start_extent);
+    
+  _VCD_LIST_FOREACH (node, obj->custom_file_list)
+    {
+      custom_file_t *p = _vcd_list_node_data (node);
+        
+      vcd_info ("writing file `%s' (%d bytes%s)", 
+                p->iso_pathname, p->size, 
+                p->raw_flag ? ", raw sectors file": "");
+      if (p->raw_flag)
+        _write_source_mode2_raw (obj, p->file, p->start_extent);
+      else
+        _write_source_mode2_form1 (obj, p->file, p->start_extent);
+    }
+  
+  /* blank unalloced tracks */
+  while ((n = _vcd_salloc (obj->iso_bitmap, SECTOR_NIL, 1)) < obj->iso_size)
+    _write_m2_image_sector (obj, zero, n, 0, 0, SM_DATA, 0);
+
+  return 0;
+}
+
 
 long
 vcd_obj_get_image_size (VcdObj *obj)
@@ -1989,7 +2025,7 @@ vcd_obj_write_image (VcdObj *obj, VcdImageSink *image_sink,
         if (_callback_wrapper (obj, true))
           return 1;
 
-        if (_write_sectors (obj, track))
+        if (_write_sequence (obj, track))
           return 1;
       }
 
