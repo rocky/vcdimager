@@ -31,8 +31,8 @@
   xmlns     %URI;                    #FIXED 'http://www.gnu.org/software/vcdimager/1.0/'
 >
 
-<!ELEMENT info (album-description?,volume-count?,volume-number?,restriction?,time-offset?)>
-<!ELEMENT album-description (#PCDATA)>
+<!ELEMENT info (album-id?,volume-count?,volume-number?,restriction?,time-offset?)>
+<!ELEMENT album-id (#PCDATA)>
 <!ELEMENT volume-count (#PCDATA)>
 <!ELEMENT volume-number (#PCDATA)>
 <!ELEMENT restriction (#PCDATA)>
