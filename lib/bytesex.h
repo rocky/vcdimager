@@ -128,64 +128,10 @@ CVT_TO_FUNC(64)
 
 #undef CVT_TO_FUNC
 
-#define uint8_from_be(val)     (uint8_to_be (val))
-#define uint8_from_le(val)     (uint8_to_le (val))
 #define uint16_from_be(val)    (uint16_to_be (val))
 #define uint16_from_le(val)    (uint16_to_le (val))
 #define uint32_from_be(val)    (uint32_to_be (val))
 #define uint32_from_le(val)    (uint32_to_le (val))
-#define uint64_from_be(val)    (uint64_to_be (val))
-#define uint64_from_le(val)    (uint64_to_le (val))
-
-/* ISO9660 related stuff */
-
-#define to_711(i)   uint8_to_le(i)
-#define from_711(i) uint8_from_le(i)
-
-#define to_721(i)   uint16_to_le(i)
-#define from_721(i) uint16_from_le(i)
-
-#define to_721(i)   uint16_to_le(i)
-#define from_721(i) uint16_from_le(i)
-
-#define to_722(i)   uint16_to_be(i)
-#define from_722(i) uint16_from_be(i)
-
-static inline uint32_t
-to_723(uint16_t i)
-{
-  return uint32_swap_le_be(i) | i;
-}
-
-static inline uint16_t 
-from_723 (uint32_t p)
-{
-  if (uint32_swap_le_be (p) != p)
-    vcd_warn ("from_723: broken byte order");
-
-  return (0xFFFF & p);
-}
-
-#define to_731(i)   uint32_to_le(i)
-#define from_731(i) uint32_from_le(i)
-
-#define to_732(i)   uint32_to_be(i)
-#define from_732(i) uint32_from_be(i)
-
-static inline uint64_t
-to_733(uint32_t i)
-{
-  return uint64_swap_le_be(i) | i;
-}
-
-static inline uint32_t 
-from_733 (uint64_t p)
-{
-  if (uint64_swap_le_be (p) != p)
-    vcd_warn ("from_733: broken byte order");
-    
-  return (UINT32_C(0xFFFFFFFF) & p);
-}
 
 #endif /* __VCD_BYTESEX_H__ */
 
