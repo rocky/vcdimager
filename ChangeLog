@@ -1,3 +1,7 @@
+2001-09-20  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* libvcd/: starting to merge in arnd's modifications
+
 2001-09-10  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_mpeg.c (vcd_mpeg_packet_get_type): PKT_TYPE_OGT was
