@@ -6,7 +6,7 @@
 @setchapternewpage on
 @c %**end of header
 
-@include version.texi
+@include version-vcddump.texi
 @ifinfo
 This file documents GNU Video CD Dump Program.
 
