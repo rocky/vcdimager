@@ -83,7 +83,7 @@ them in your favorite hex editor.
 
 The subtitles you get from tools like "I-author" are not real SVCD
 subtitles; they are CVD subtitles. See
-L<http://www.vcdimager.org/pub/vcdimager/manuals/0.7/vcd-subtitles.html>
+L<http://www.vcdimager.org/pub/vcdimager/manuals/0.7/cvd-subtitles.html>
 for information on CVD subtitles.
 
 
