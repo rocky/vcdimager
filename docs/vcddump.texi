@@ -416,8 +416,13 @@ The number of entries. A number. See line 5 of the example in
 A complete list of the entries. See lines 6--9. of the example in
 @ref{Entries, ,Entries Section}.
 @item id
-An 8 characters name, probably ``ENTRYVCD''. See line 2 of the example
-in @ref{Entries, ,Entries Section}.
+An 8 characters name, probably ``ENTRYVCD''. The name may also be
+``ENTRYSVD'' but this is depricated. Some DVD players may require one
+or the other to play SVCDs. See line 2 of the example in @ref{Entries,
+,Entries Section}. The XML tag for this is <option name="svcd vcd30
+entrysvd" value="true"/> or <option name="svcd vcd30 mpegav"
+value="true"/> or the tag can be left out in which case you'll get
+ENTRYVCD.
 @item prof
 System profile tag. See line 4 of the example in @ref{Entries, ,Entries
 Section}. If the format is HQSVCD the value will be 1. If the format
