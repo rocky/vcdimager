@@ -196,27 +196,36 @@ it only makes sense to read from one place, these options are mutually
 exclusive; use only one option from this set.
 
 @menu
-* BIN or CUE file::     Reading from a file containing a CD disk image
-* CD-ROM Device::       Reading from a CD-ROM device
-* Intelligent Input::   Reading from whereever
+* BIN/CUE or NRG file::  Reading from a file containing a CD disk image
+* CD-ROM Device::         Reading from a CD-ROM device
+* Intelligent Input::     Reading from whereever
 @end menu
 
-@node BIN or CUE file
+@node BIN/CUE or NRG file
 @subsection Reading from a file containing a CD disk image
-@cindex Reading, BIN or CUE file
+@cindex Reading, BIN, CUE or NRG CD-ROM disk image
 
 The option @kbd{--bin-file} and @kbd{--cue-file} (the short forms for
 these are @kbd{-b} and @kbd{-c} respectively) indicate to read from a
 file containing an image what might be burned onto Compact Disk. The
 format is expected to be in the BIN/CUE format that cdrdao uses and is
-used by a popular DOS/Windows CD mastering tool. If you use the
-@kbd{--bin-file} option, the file read is expected to be the ``.BIN''
-part---this is the bulk of the data.  If you use @kbd{--cue-file} the
-file read is a ``cue sheet'' a funny sort of TOC (Table of Contents)
-file. The corresponding BIN file (which again contains the bulk of the
-data) is not taken from the FILE statement inside the CUE file, but it
-is constructed from the CUE file name by replacing ".cue" by ".bin".
-The CUE file must have exactly one FILE statement.
+used by a popular DOS/Windows CD mastering tool. 
+
+If you use the @kbd{--bin-file} option, the file read is expected to
+be the ``.BIN'' part---this is the bulk of the data.  If you use
+@kbd{--cue-file} the file read is a ``cue sheet'' a funny sort of TOC
+(Table of Contents) file. The corresponding BIN file (which again
+contains the bulk of the data) is not taken from the FILE statement
+inside the CUE file, but it is constructed from the CUE file name by
+replacing ".cue" by ".bin".  The CUE file must have exactly one FILE
+statement.
+
+If you use the @kbd{--nrg-file} option (short form @kbd{-N}), the file
+read is expected to be a CD-ROM disk image using a proprietary and
+unpublished format used by the Nero burning software. Because this is
+proprietary and not published, this code has been reverse engineered
+and we really can't do as good a job as we can with a cue-sheet file.
+It's better not to work with such things when possible.
 
 If you do not specify a file name after @kbd{--bin-file}, a default
 name is used ``videocd.bin'' is probably used; likewise if you do not
@@ -314,11 +323,19 @@ type @kbd{-\?}.
 @kindex @code{--usage}
 This option shows an abbreviated usage message
 
+@item --access-mode
+@kindex @code{--access-mode}
+This option probably makes sense only if you are reading from a
+CD-ROM.  This overrides the default way that we read from the
+CD-ROM. The possible values allowed depend on the CD-ROM driver. Some
+values which work on some drivers are ``IOCTL'', ``READ_10,'' and
+``READ_CD.''
+
 @item --sector-2336
 @kindex @code{--2336}
 @kindex @code{--sector-2336}
 This option only makes sense if you are reading from a file CD-image.
-This indicated to @value{program} to assume a 2336-byte sector mode
+This indicates to @value{program} to assume a 2336-byte sector mode
 for image file.
 
 @item --verbose
@@ -368,8 +385,8 @@ controlling where to read from}.
 @item --bin-file @ovar{filename}
 @itemx -b @ovar{filename}
 @kindex @code{--bin-file}
-Specifies a BIN file to read from. See @ref{BIN or CUE file, ,Reading
-from a file containing a CD disk image}.
+Specifies a BIN CD-ROM disk image to read from. See @ref{BIN/CUE or NRG
+file, ,Reading from a file containing a CD disk image}.
 
 
 @item --cdrom-device @ovar{device-name}
@@ -382,8 +399,15 @@ Device, ,Reading from CD-ROM Device}.
 @itemx -c @ovar{filename}
 @kindex @code{--cue-file}
 Specifies a CUE file to read from. Preferred over a BIN file if
-available. See @ref{BIN or CUE file, ,Reading from a file containing a
-CD disk image}.
+available. See @ref{BIN/CUE or NRG file, ,Reading from a file
+containing a CD disk image}.
+
+@item --nrg-file @ovar{filename}
+@itemx -N @ovar{filename}
+@kindex @code{--nrg-file}
+Specifies a Nero NRG-format CD-ROM disk image to read from. See
+@ref{BIN/CUE or NRG file, ,Reading from a file containing a CD disk
+image}.
 
 @item --input @ovar{file or device name}
 @itemx -i @ovar{file or device name}
