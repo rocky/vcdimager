@@ -1270,7 +1270,7 @@ main (int argc, const char *argv[])
     CL_SOURCE_CDROM = VCDINFO_SOURCE_DEVICE,
     CL_SOURCE_NRG   = VCDINFO_SOURCE_NRG,
     CL_VERSION      = 20
-  } _img_type = 0;
+  } _img_type = CL_SOURCE_UNDEF;
 
   vcd_xml_progname = "vcdxrip";
 
@@ -1400,8 +1400,11 @@ main (int argc, const char *argv[])
   if (!xml_fname)
     xml_fname = strdup (DEFAULT_XML_FNAME);
 
+  if (CL_SOURCE_UNDEF == _img_type) 
+    _img_type = CL_SOURCE_AUTO;
+
   if (!vcdinf_open(&img_src, img_fname, _img_type, NULL)) 
-    return VCDINFO_OPEN_ERROR;
+    exit(1);
     
   vcd_assert (img_src != NULL);
 
@@ -1418,8 +1421,8 @@ main (int argc, const char *argv[])
   _parse_pbc (&obj, img_src, no_ext_psd_flag);
 
   if (norip_flag)
-    vcd_warn ("FYI, entry point and auto pause locations cannot be "
-	      "determined without mpeg extraction -- hope that's ok");
+    vcd_warn ("Entry point and auto pause locations cannot be "
+	      "determined without MPEG extraction -- hope that's ok.");
   else
     {
       if (!nofile_flag)
@@ -1432,7 +1435,7 @@ main (int argc, const char *argv[])
 	_rip_sequences (&obj, img_src);
     }
 
-  vcd_info ("writing XML description to `%s'...", xml_fname);
+  vcd_info ("Writing XML description to `%s'...", xml_fname);
   vcd_xml_dump (&obj, xml_fname);
 
   vcd_image_source_destroy (img_src);
