@@ -27,6 +27,9 @@
 
 * Rainer Johanni, for creating mkvcdfs, from which I stole a few ideas
 
+* Nicolas Boullis, for build issues, library symbol versioning, Debian
+  packaging and issues
+
 ...and finally to all those people who helped with testing and
 improving GNU VCDImager!
 
