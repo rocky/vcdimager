@@ -43,24 +43,6 @@ extern "C" {
 /*! \def Max # characters in an album id. */
 #define MAX_ALBUM_LEN 16   
 
-/*! \def Max # characters in an application id. */
-#define MAX_APPLICATION_ID 128
-
-/*! \def Max # characters in an perparer id. */
-#define MAX_PREPARER_ID 128
-
-/*! \def Max # characters in an publisher id. */
-#define MAX_PUBLISHER_ID 128
-
-/*! \def Max # characters in an system id. */
-#define MAX_SYSTEM_ID 32
-
-/*! \def Max # characters in an volume id. */
-#define MAX_VOLUME_ID 32
-
-/*! \def Max # characters in an volumeset id. */
-#define MAX_VOLUMESET_ID 128
-
 /*! \def Max # of selections allowed in a PBC selection list. */
 #define MAX_PBC_SELECTIONS 99
 

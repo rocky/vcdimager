@@ -201,15 +201,15 @@ _parse_pvd (struct vcdxml_t *obj, CdIo *img)
   memset (&pvd, 0, sizeof (iso9660_pvd_t));
   vcd_assert (sizeof (iso9660_pvd_t) == ISO_BLOCKSIZE);
 
-  if (!read_pvd(img, &pvd)) {
+  if (!iso9660_fs_read_mode2_pvd(img, &pvd, false)) {
     return -1;
   }
 
-  obj->pvd.volume_id      = strdup (vcdinf_get_volume_id(&pvd));
-  obj->pvd.system_id      = strdup (vcdinf_get_system_id(&pvd));
-  obj->pvd.publisher_id   = strdup (vcdinf_get_publisher_id(&pvd));
-  obj->pvd.preparer_id    = strdup (vcdinf_get_preparer_id(&pvd));
-  obj->pvd.application_id = strdup (vcdinf_get_application_id(&pvd));
+  obj->pvd.volume_id      = strdup (iso9660_get_volume_id(&pvd));
+  obj->pvd.system_id      = strdup (iso9660_get_system_id(&pvd));
+  obj->pvd.publisher_id   = strdup (iso9660_get_publisher_id(&pvd));
+  obj->pvd.preparer_id    = strdup (iso9660_get_preparer_id(&pvd));
+  obj->pvd.application_id = strdup (iso9660_get_application_id(&pvd));
 
   return 0;
 }

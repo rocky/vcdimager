@@ -1,7 +1,7 @@
 /*!
    \file inf.h
 
-    Copyright (C) 2002,2003 Rocky Bernstein <rocky@panix.com>
+    Copyright (C) 2002, 2003, 2004 Rocky Bernstein <rocky@panix.com>
 
  \verbatim
     This program is free software; you can redistribute it and/or modify
@@ -29,7 +29,6 @@
 #ifndef _VCD_INF_H
 #define _VCD_INF_H
 
-#include <cdio/iso9660.h>
 #include <libvcd/info.h>
   
   const char * vcdinf_area_str (const struct psd_area_t *_area);
@@ -38,12 +37,6 @@
     Return a string containing the VCD album id.
   */
   const char * vcdinf_get_album_id(const InfoVcd_t *info);
-
-  /*!
-    Return the VCD application ID.
-    NULL is returned if there is some problem in getting this. 
-  */
-  const char * vcdinf_get_application_id(const iso9660_pvd_t *pvd);
 
   /*!
     Get autowait time value for PsdPlayListDescriptor *d.
@@ -77,24 +70,10 @@
   uint16_t vcdinf_get_lot_offset (const LotVcd_t *lot, unsigned int n);
 
   /*!
-    Return a string containing the VCD preparer id with trailing
-    blanks removed.
-    NULL is returned if there is some problem in getting this. 
-  */
-  const char * vcdinf_get_preparer_id(const iso9660_pvd_t *pvd);
-
-  /*!
     Return number of bytes in PSD. 
   */
   uint32_t vcdinf_get_psd_size (const InfoVcd_t *info);
        
-  /*!
-    Return a string containing the VCD publisher id with trailing
-    blanks removed.
-    NULL is returned if there is some problem in getting this. 
-  */
-  const char * vcdinf_get_publisher_id(const iso9660_pvd_t *pvd);
-    
   /*!
     Return the number of segments in the VCD. 
   */
@@ -120,13 +99,6 @@
     Time is in 1/15-second units.
   */
   uint16_t vcdinf_get_play_time (const PsdPlayListDescriptor_t *d);
-  
-  /*!
-    Return a string containing the VCD system id with trailing
-    blanks removed.
-    NULL is returned if there is some problem in getting this. 
-  */
-  const char * vcdinf_get_system_id(const iso9660_pvd_t *pvd);
   
   /*!
     Get timeout offset for PsdPlayListDescriptor *d. Return 
@@ -158,18 +130,6 @@
     Return the VCD volume count - the number of CD's in the collection.
   */
   unsigned int vcdinf_get_volume_count(const InfoVcd_t *info);
-
-  /*!
-    Return the VCD ID.
-    NULL is returned if there is some problem in getting this. 
-  */
-  const char * vcdinf_get_volume_id(const iso9660_pvd_t *pvd);
-
-  /*!
-    Return the VCD volumeset ID.
-    NULL is returned if there is some problem in getting this. 
-  */
-  const char * vcdinf_get_volumeset_id(const iso9660_pvd_t *pvd);
 
   /*!
     Get wait time value for PsdPlayListDescriptor *d.

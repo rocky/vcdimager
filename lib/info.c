@@ -391,7 +391,7 @@ const char *
 vcdinfo_get_application_id(const vcdinfo_obj_t *obj)
 {
   if ( NULL == obj ) return (NULL);
-  return(vcdinf_get_application_id(&obj->pvd));
+  return(iso9660_get_application_id(&obj->pvd));
 }
 
 /*!
@@ -993,7 +993,7 @@ const char *
 vcdinfo_get_preparer_id(const vcdinfo_obj_t *obj)
 {
   if ( NULL == obj ) return (NULL);
-  return vcdinf_get_preparer_id(&obj->pvd);
+  return iso9660_get_preparer_id(&obj->pvd);
 }
 
 /*!
@@ -1044,7 +1044,7 @@ const char *
 vcdinfo_get_publisher_id(const vcdinfo_obj_t *obj)
 {
   if ( NULL == obj ) return (NULL);
-  return vcdinf_get_publisher_id(&obj->pvd);
+  return iso9660_get_publisher_id(&obj->pvd);
 }
 
 /*!
@@ -1235,7 +1235,7 @@ const char *
 vcdinfo_get_system_id(const vcdinfo_obj_t *obj)
 {
   if ( NULL == obj || NULL == &obj->pvd ) return (NULL);
-  return(vcdinf_get_system_id(&obj->pvd));
+  return(iso9660_get_system_id(&obj->pvd));
 }
 
 /*!
@@ -1481,7 +1481,7 @@ const char *
 vcdinfo_get_volume_id(const vcdinfo_obj_t *obj)
 {
   if ( NULL == obj || NULL == &obj->pvd ) return (NULL);
-  return(vcdinf_get_volume_id(&obj->pvd));
+  return(iso9660_get_volume_id(&obj->pvd));
 }
 
 /*!
@@ -1492,7 +1492,7 @@ const char *
 vcdinfo_get_volumeset_id(const vcdinfo_obj_t *obj)
 {
   if ( NULL == obj || NULL == &obj->pvd ) return (NULL);
-  return(vcdinfo_strip_trail(obj->pvd.volume_set_id, MAX_VOLUMESET_ID));
+  return(vcdinfo_strip_trail(obj->pvd.volume_set_id, ISO_MAX_VOLUMESET_ID));
 }
 
 /*!
@@ -1833,7 +1833,7 @@ vcdinfo_open(vcdinfo_obj_t **obj_p, char *source_name[],
   memset (obj, 0, sizeof (vcdinfo_obj_t));
   obj->img = img;  /* Note we do this after the above wipeout! */
 
-  if (!read_pvd(obj->img, &(obj->pvd))) {
+  if (!iso9660_fs_read_mode2_pvd(obj->img, &(obj->pvd), false)) {
     return VCDINFO_OPEN_ERROR;
   }
   

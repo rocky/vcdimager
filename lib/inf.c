@@ -112,17 +112,6 @@ vcdinf_get_album_id(const InfoVcd_t *info)
 }
 
 /*!
-  Return the VCD application ID.
-  NULL is returned if there is some problem in getting this. 
-*/
-const char * 
-vcdinf_get_application_id(const iso9660_pvd_t *pvd)
-{
-  if (NULL==pvd) return NULL;
-  return(vcdinfo_strip_trail(pvd->application_id, MAX_APPLICATION_ID));
-}
-
-/*!
   Get autowait time value for PsdPlayListDescriptor *d.
   Time is in seconds unless it is -1 (unlimited).
 */
@@ -245,28 +234,6 @@ vcdinf_get_play_time (const PsdPlayListDescriptor_t *d)
 }
 
 /*!
-   Return a string containing the VCD preparer id with trailing
-   blanks removed.
-*/
-const char *
-vcdinf_get_preparer_id(const iso9660_pvd_t *pvd)
-{
-  if (NULL==pvd) return NULL;
-  return(vcdinfo_strip_trail(pvd->preparer_id, MAX_PREPARER_ID));
-}
-
-/*!
-   Return a string containing the VCD publisher id with trailing
-   blanks removed.
-*/
-const char *
-vcdinf_get_publisher_id(const iso9660_pvd_t *pvd)
-{
-  if (NULL==pvd) return NULL;
-  return(vcdinfo_strip_trail(pvd->publisher_id, MAX_PUBLISHER_ID));
-}
-
-/*!
   Return number of bytes in PSD. 
 */
 uint32_t
@@ -274,17 +241,6 @@ vcdinf_get_psd_size (const InfoVcd_t *info)
 {
   if (NULL==info) return 0;
   return uint32_from_be (info->psd_size);
-}
-
-/*!
-   Return a string containing the VCD system id with trailing
-   blanks removed.
-*/
-const char *
-vcdinf_get_system_id(const iso9660_pvd_t *pvd)
-{
-  if (NULL==pvd) return NULL;
-  return(vcdinfo_strip_trail(pvd->system_id, MAX_SYSTEM_ID));
 }
 
 /*!
@@ -335,16 +291,6 @@ vcdinf_get_volume_count(const InfoVcd_t *info)
 }
 
 /*!
-  Return the VCD ID.
-*/
-const char *
-vcdinf_get_volume_id(const iso9660_pvd_t *pvd) 
-{
-  if (NULL == pvd) return NULL;
-  return(vcdinfo_strip_trail(pvd->volume_id, MAX_VOLUME_ID));
-}
-
-/*!
   Return the VCD volume num - the number of the CD in the collection.
   This is a number between 1 and the volume count.
 */
@@ -353,17 +299,6 @@ vcdinf_get_volume_num(const InfoVcd_t *info)
 {
   if (NULL == info) return 0;
   return uint16_from_be(info->vol_id);
-}
-
-/*!
-  Return the VCD volumeset ID.
-  NULL is returned if there is some problem in getting this. 
-*/
-const char *
-vcdinf_get_volumeset_id(const iso9660_pvd_t *pvd)
-{
-  if ( NULL == pvd ) return NULL;
-  return vcdinfo_strip_trail(pvd->volume_set_id, MAX_VOLUMESET_ID);
 }
 
 /*!
