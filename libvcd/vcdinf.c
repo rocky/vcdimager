@@ -106,7 +106,7 @@ vcdinf_get_entry_lba(const EntriesVcd *entries, unsigned int entry_num)
 const msf_t *
 vcdinf_get_entry_msf(const EntriesVcd *entries, unsigned int entry_num)
 {
-  const unsigned int entry_count = vcdinf_get_num_entries(entries);
+  const unsigned int entry_count = uint16_from_be (entries->entry_count);
   return entry_num < entry_count ?
     &(entries->entry[entry_num].msf)
     : NULL;
@@ -145,12 +145,21 @@ vcdinf_get_format_version_str (vcd_type_t vcd_type)
 }
 
 /*!
-  Return the number of segments in the VCD. 
+  Return the number of entries in the VCD.
 */
 unsigned int
 vcdinf_get_num_entries(const EntriesVcd *entries)
 {
   return (uint16_from_be (entries->entry_count));
+}
+
+/*!
+  Return the number of segments in the VCD. 
+*/
+unsigned int
+vcdinf_get_num_segments(const InfoVcd *info)
+{
+  return (uint16_from_be (info->item_count));
 }
 
 /*!
@@ -161,15 +170,6 @@ vcdinf_get_num_LIDs (const InfoVcd *info)
 {
   /* Should probably use _vcd_pbc_max_lid instead? */
   return uint16_from_be (info->lot_entries);
-}
-
-/*!
-  Return the number of segments in the VCD. 
-*/
-unsigned int
-vcdinf_get_num_segments(const InfoVcd *info)
-{
-  return (uint16_from_be (info->item_count));
 }
 
 /*!
@@ -213,15 +213,17 @@ vcdinf_get_system_id(const pvd_t *pvd)
 
 /*!
   Return the track number for entry n in obj. The first track starts
-  at 1. 
+  at 1. Note this is one less than the track number reported in vcddump.
+  (We don't count the header track?)
 */
 track_t
 vcdinf_get_track(const EntriesVcd *entries, const unsigned int entry_num)
 {
-  const unsigned int entry_count = vcdinf_get_num_entries(entries);
+  const unsigned int entry_count = uint16_from_be (entries->entry_count);
   /* Note entry_num is 0 origin. */
   return entry_num < entry_count ?
-    from_bcd8 (entries->entry[entry_num].n): VCDINFO_INVALID_TRACK;
+    from_bcd8 (entries->entry[entry_num].n):
+    VCDINFO_INVALID_TRACK;
 }
 
 /*!
