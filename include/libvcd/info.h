@@ -29,6 +29,7 @@
 #ifndef _VCD_INFO_H
 #define _VCD_INFO_H
 
+#include <libvcd/version.h>
 #include <libvcd/types.h>
 #include <libvcd/files.h>
 #include <cdio/cdio.h>
