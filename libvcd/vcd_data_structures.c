@@ -19,6 +19,7 @@
 */
 
 #include "vcd_data_structures.h"
+#include "vcd_util.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -43,41 +44,40 @@ struct _VcdListNode
 
 /* impl */
 
-VcdList *_vcd_list_new (void)
+VcdList *
+_vcd_list_new (void)
 {
-  VcdList *new_obj = malloc (sizeof (VcdList));
-
-  assert (new_obj != NULL);
-
-  memset (new_obj, 0, sizeof (VcdList));
+  VcdList *new_obj = _vcd_malloc (sizeof (VcdList));
 
   return new_obj;
 }
 
-void _vcd_list_free (VcdList *list, int free_data)
+void
+_vcd_list_free (VcdList *list, int free_data)
 {
-  free (list);
+  while (_vcd_list_length (list))
+    _vcd_list_node_free (_vcd_list_begin (list), free_data);
 
-  assert (!free_data);
-  /* fixme */
+  free (list);
 }
 
-unsigned _vcd_list_length (VcdList *list)
+unsigned
+_vcd_list_length (VcdList *list)
 {
   assert (list != NULL);
 
   return list->length;
 }
 
-void _vcd_list_prepend (VcdList *list, void *data)
+void
+_vcd_list_prepend (VcdList *list, void *data)
 {
   VcdListNode *new_node;
 
   assert (list != NULL);
 
-  new_node = malloc (sizeof (VcdListNode));
-  assert (new_node != NULL);
-
+  new_node = _vcd_malloc (sizeof (VcdListNode));
+  
   new_node->list = list;
   new_node->next = list->begin;
   new_node->data = data;
@@ -89,7 +89,8 @@ void _vcd_list_prepend (VcdList *list, void *data)
   list->length++;
 }
 
-void _vcd_list_append (VcdList *list, void *data)
+void
+_vcd_list_append (VcdList *list, void *data)
 {
   assert (list != NULL);
 
@@ -99,7 +100,7 @@ void _vcd_list_append (VcdList *list, void *data)
     }
   else
     {
-      VcdListNode *new_node = malloc (sizeof (VcdListNode));
+      VcdListNode *new_node = _vcd_malloc (sizeof (VcdListNode));
       
       new_node->list = list;
       new_node->next = NULL;
@@ -112,17 +113,41 @@ void _vcd_list_append (VcdList *list, void *data)
     }
 }
 
-void _vcd_list_foreach (VcdList *list, _vcd_list_iterfunc *func, void *user_data)
+void 
+_vcd_list_foreach (VcdList *list, _vcd_list_iterfunc func, void *user_data)
 {
-  assert (list != NULL);
+  VcdListNode *node;
 
-  assert (0);
-  /* fixme */
+  assert (list != NULL);
+  assert (func != 0);
+  
+  for (node = _vcd_list_begin (list);
+       node != NULL;
+       node = _vcd_list_node_next (node))
+    func (_vcd_list_node_data (node), user_data);
+}
+
+VcdListNode *
+_vcd_list_find (VcdList *list, _vcd_list_iterfunc cmp_func, void *user_data)
+{
+  VcdListNode *node;
+
+  assert (list != NULL);
+  assert (cmp_func != 0);
+  
+  for (node = _vcd_list_begin (list);
+       node != NULL;
+       node = _vcd_list_node_next (node))
+    if (cmp_func (_vcd_list_node_data (node), user_data))
+      break;
+
+  return node;
 }
 
 /* node ops */
 
-VcdListNode *_vcd_list_at (VcdList *list, int idx)
+VcdListNode *
+_vcd_list_at (VcdList *list, int idx)
 {
   VcdListNode *node = _vcd_list_begin (list);
 
@@ -140,14 +165,16 @@ VcdListNode *_vcd_list_at (VcdList *list, int idx)
   return node;
 }
 
-VcdListNode *_vcd_list_begin (VcdList *list)
+VcdListNode *
+_vcd_list_begin (VcdList *list)
 {
   assert (list != NULL);
 
   return list->begin;
 }
 
-VcdListNode *_vcd_list_node_next (VcdListNode *node)
+VcdListNode *
+_vcd_list_node_next (VcdListNode *node)
 {
   if (node)
     return node->next;
@@ -155,13 +182,59 @@ VcdListNode *_vcd_list_node_next (VcdListNode *node)
   return NULL;
 }
 
-void _vcd_list_node_free (VcdListNode *node, int free_data)
+void 
+_vcd_list_node_free (VcdListNode *node, int free_data)
 {
-  assert (0);
-  /* fixme */
+  VcdList *list;
+  VcdListNode *prev_node;
+
+  assert (node != NULL);
+  
+  list = node->list;
+
+  assert (_vcd_list_length (list) > 0);
+
+  if (free_data)
+    free (_vcd_list_node_data (node));
+
+  if (_vcd_list_length (list) == 1)
+    {
+      assert (list->begin == list->end);
+
+      list->end = list->begin = NULL;
+      list->length = 0;
+      free (node);
+      return;
+    }
+
+  assert (list->begin != list->end);
+
+  if (list->begin == node)
+    {
+      list->begin = node->next;
+      free (node);
+      list->length--;
+      return;
+    }
+
+  for (prev_node = list->begin; prev_node->next; prev_node = prev_node->next)
+    if (prev_node->next == node)
+      break;
+
+  assert (prev_node->next != NULL);
+
+  if (list->end == node)
+    list->end = prev_node;
+
+  prev_node->next = node->next;
+
+  list->length--;
+
+  free (node);
 }
 
-void *_vcd_list_node_data (VcdListNode *node)
+void *
+_vcd_list_node_data (VcdListNode *node)
 {
   if (node)
     return node->data;

@@ -21,6 +21,8 @@
 #ifndef __VCD_UTIL_H__
 #define __VCD_UTIL_H__
 
+#include <stdlib.h>
+
 #undef  MAX
 #define MAX(a, b)  (((a) > (b)) ? (a) : (b))
 
@@ -35,6 +37,9 @@ _strsplit(const char str[], char delim);
 
 void
 _strfreev(char **strv);
+
+void *
+_vcd_malloc (size_t size);
 
 #endif /* __VCD_UTIL_H__ */
 

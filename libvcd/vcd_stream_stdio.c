@@ -20,6 +20,7 @@
 
 #include "vcd_stream_stdio.h"
 #include "vcd_logging.h"
+#include "vcd_util.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -131,8 +132,7 @@ vcd_data_source_new_stdio(const char pathname[])
   }
 
 
-  ud = malloc(sizeof(_UserData));
-  memset(ud, 0, sizeof(_UserData));
+  ud = _vcd_malloc (sizeof (_UserData));
 
   memset(&funcs, 0, sizeof(funcs));
 
@@ -159,8 +159,7 @@ vcd_data_sink_new_stdio(const char pathname[])
   vcd_data_sink_io_functions funcs;
   _UserData *ud = NULL;
 
-  ud = malloc(sizeof(_UserData));
-  memset(ud, 0, sizeof(_UserData));
+  ud = _vcd_malloc (sizeof (_UserData));
 
   memset(&funcs, 0, sizeof(funcs));
 

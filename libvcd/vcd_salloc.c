@@ -24,6 +24,7 @@
 
 #include "vcd_salloc.h"
 #include "vcd_logging.h"
+#include "vcd_util.h"
 
 #define VCD_SALLOC_CHUNK_SIZE 16
 
@@ -157,8 +158,7 @@ _vcd_salloc_free (VcdSalloc *bitmap, uint32_t sec, uint32_t size)
 VcdSalloc *
 _vcd_salloc_new (void)
 {
-  VcdSalloc *newobj = malloc (sizeof (VcdSalloc));
-  memset (newobj, 0, sizeof (VcdSalloc));
+  VcdSalloc *newobj = _vcd_malloc (sizeof (VcdSalloc));
   return newobj;
 }
 

@@ -27,6 +27,7 @@
 #include "vcd_bytesex.h"
 #include "vcd_obj.h"
 #include "vcd_logging.h"
+#include "vcd_util.h"
 
 void
 set_entries_vcd(VcdObj *obj, void *buf)
@@ -111,9 +112,7 @@ set_psd_vcd (VcdObj *obj, void *buf)
     {
       const int noi = 1;
       int descriptor_size = sizeof (PsdPlayListDescriptor) + (noi * sizeof (uint16_t));
-      PsdPlayListDescriptor *_md = malloc (descriptor_size);
-
-      memset(_md, 0, descriptor_size);
+      PsdPlayListDescriptor *_md = _vcd_malloc (descriptor_size);
 
       _md->type = PSD_TYPE_PLAY_LIST;
       _md->noi = noi;
@@ -147,7 +146,7 @@ set_lot_vcd(VcdObj *obj, void *buf)
   LotVcd *lot_vcd = NULL;
   int n;
 
-  lot_vcd = malloc(sizeof(LotVcd));
+  lot_vcd = _vcd_malloc (sizeof (LotVcd));
   memset(lot_vcd, 0xff, sizeof(LotVcd));
 
   lot_vcd->reserved = 0x0000;

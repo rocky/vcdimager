@@ -114,11 +114,9 @@ _node_traverse (VcdDirNode *root, _node_traversal_func_t travfunc, void *user_da
 static VcdDirNode*
 _node_new(void)
 {
-  VcdDirNode *newnode = NULL;
+  VcdDirNode *newnode;
   
-  newnode = malloc(sizeof(VcdDirNode));
-  assert(newnode != NULL);
-  memset(newnode, 0, sizeof(VcdDirNode));
+  newnode = _vcd_malloc(sizeof(VcdDirNode));
 
   return newnode;
 }
@@ -278,7 +276,7 @@ _memdup (const void *mem, size_t count)
   void *new_mem = NULL;
 
   if (mem) {
-    new_mem = malloc(count);
+    new_mem = _vcd_malloc (count);
     memcpy (new_mem, mem, count);
   }
 
@@ -295,8 +293,7 @@ _vcd_directory_new (void)
 
   assert(sizeof(xa_t) == 14);
 
-  dir = malloc(sizeof(VcdDirectory));
-  assert(dir != NULL);
+  dir = _vcd_malloc (sizeof (VcdDirectory));
 
   dir->root = _node_new();
   data = &(dir->root->data);

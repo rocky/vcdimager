@@ -71,8 +71,7 @@ _strsplit(const char str[], char delim)
     if(*(p++) == delim)
       n++;
 
-  strv = malloc(sizeof(char*)*(n+1));
-  memset(strv, 0, sizeof(char*)*(n+1));
+  strv = _vcd_malloc (sizeof (char *) * (n+1));
   
   n = 0;
   while((p = strtok(n ? NULL : _str, _delim)) != NULL) 
@@ -81,6 +80,18 @@ _strsplit(const char str[], char delim)
   free(_str);
 
   return strv;
+}
+
+void *
+_vcd_malloc (size_t size)
+{
+  void *new_mem = malloc (size);
+
+  assert (new_mem != NULL);
+
+  memset (new_mem, 0, size);
+
+  return new_mem;
 }
 
 

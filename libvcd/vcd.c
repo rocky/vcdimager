@@ -69,8 +69,6 @@ struct _dict_t
   uint32_t length;
   void *buf;
   int flags;
-
-  struct _dict_t *next;
 };
 
 static void
@@ -85,32 +83,49 @@ _dict_insert (VcdObj *obj, const char key[], uint32_t sector, uint32_t length, i
   if (_vcd_salloc (obj->iso_bitmap, sector, length) == SECTOR_NIL)
     assert (0);
 
-  _new_node = malloc (sizeof (struct _dict_t));
+  _new_node = _vcd_malloc (sizeof (struct _dict_t));
 
   _new_node->key = strdup (key);
   _new_node->sector = sector;
   _new_node->length = length;
-  _new_node->buf = malloc (length * ISO_BLOCKSIZE);
+  _new_node->buf = _vcd_malloc (length * ISO_BLOCKSIZE);
   _new_node->flags = end_flags;
 
-  _new_node->next = obj->buf_dict;
-  obj->buf_dict = _new_node;
+  _vcd_list_prepend (obj->buffer_dict_list, _new_node);
+}
+
+static 
+int _dict_key_cmp (struct _dict_t *a, char *b)
+{
+  assert (a != NULL);
+  assert (b != NULL);
+
+  return !strcmp (a->key, b);
+}
+
+static 
+int _dict_sector_cmp (struct _dict_t *a, uint32_t *b)
+{
+  assert (a != NULL);
+  assert (b != NULL);
+
+  return (a->sector <= *b && (*b - a->sector) < a->length);
 }
 
 static const struct _dict_t *
 _dict_get_bykey (VcdObj *obj, const char key[])
 {
-  struct _dict_t *p = obj->buf_dict;
+  VcdListNode *node;
 
+  assert (obj != NULL);
   assert (key != NULL);
 
-  while (p)
-    {
-      if (!strcmp (p->key, key))
-        return p;
+  node = _vcd_list_find (obj->buffer_dict_list,
+                         (_vcd_list_iterfunc) _dict_key_cmp,
+                         (char *) key);
 
-      p = p->next;
-    }
+  if (node)
+    return _vcd_list_node_data (node);
 
   return NULL;
 }
@@ -118,17 +133,17 @@ _dict_get_bykey (VcdObj *obj, const char key[])
 static const struct _dict_t *
 _dict_get_bysector (VcdObj *obj, uint32_t sector)
 {
-  struct _dict_t *p = obj->buf_dict;
+  VcdListNode *node;
 
+  assert (obj != NULL);
   assert (sector != SECTOR_NIL);
 
-  while (p)
-    {
-      if (p->sector <= sector && (sector - p->sector) < p->length)
-        return p;
+  node = _vcd_list_find (obj->buffer_dict_list, 
+                         (_vcd_list_iterfunc) _dict_sector_cmp, 
+                         &sector);
 
-      p = p->next;
-    }
+  if (node)
+    return _vcd_list_node_data (node);
 
   return NULL;
 }
@@ -165,21 +180,19 @@ _dict_get_sector (VcdObj *obj, uint32_t sector)
 }
 
 static void
-_dict_destroy (VcdObj *obj)
+_dict_clean (VcdObj *obj)
 {
-  struct _dict_t *p = obj->buf_dict;
+  VcdListNode *node;
 
-  while (p)
+  while ((node = _vcd_list_begin (obj->buffer_dict_list)))
     {
-      struct _dict_t *tmp = p;
-      p = p->next;
+      struct _dict_t *p = _vcd_list_node_data (node);
 
-      free (tmp->buf);
-      free (tmp->key);
-      free (tmp);
+      free (p->key);
+      free (p->buf);
+
+      _vcd_list_node_free (node, TRUE);
     }
-
-  obj->buf_dict = NULL;
 }
 
 
@@ -203,8 +216,7 @@ vcd_obj_new (vcd_type_t vcd_type)
       break;
     }
 
-  new_obj = malloc (sizeof (VcdObj));
-  memset (new_obj, 0, sizeof (VcdObj));
+  new_obj = _vcd_malloc (sizeof (VcdObj));
 
   new_obj->custom_file_list = _vcd_list_new ();
 
@@ -283,9 +295,7 @@ vcd_obj_append_mpeg_track (VcdObj *obj, VcdDataSource *mpeg_file)
     vcd_warn ("track# %d not a multiple of 2324 bytes", 
               _vcd_list_length (obj->mpeg_track_list));
 
-  track = malloc (sizeof (mpeg_track_t));
-  assert (track != NULL);
-  memset (track, 0, sizeof (mpeg_track_t));
+  track = _vcd_malloc (sizeof (mpeg_track_t));
 
   track->source = mpeg_file;
   track->length_sectors = length / 2324;
@@ -385,6 +395,7 @@ vcd_obj_destroy (VcdObj *obj)
   VcdListNode *node;
 
   assert (obj != NULL);
+  assert (!obj->in_output);
 
   for(node = _vcd_list_begin (obj->custom_file_list);
       node;
@@ -437,6 +448,7 @@ vcd_obj_write_cuefile (VcdObj *obj, VcdDataSink *cue_file,
   VcdListNode *node;
 
   assert (obj != NULL);
+  assert (obj->in_output);
 
   cue_start (cue_file, bin_fname);
   cue_track (cue_file, obj->bin_file_2336_flag, 1, 0); /* ISO9660 track */
@@ -519,8 +531,7 @@ vcd_obj_add_file (VcdObj *obj, const char iso_pathname[],
         return 1;
       }
 
-    p = malloc (sizeof (struct _cust_file_t));
-    memset (p, 0, sizeof (struct _cust_file_t));
+    p = _vcd_malloc (sizeof (struct _cust_file_t));
     
     p->file = file;
     p->iso_pathname = _iso_pathname;
@@ -543,7 +554,7 @@ _finalize_vcd_iso_track (VcdObj *obj)
 
   uint32_t dir_secs = SECTOR_NIL;
 
-  _dict_destroy (obj);
+  _dict_clean (obj);
 
   /* pre-alloc 16 blocks of ISO9660 required silence */
   if (_vcd_salloc (obj->iso_bitmap, 0, 16) == SECTOR_NIL)
@@ -1055,6 +1066,8 @@ vcd_obj_get_image_size (VcdObj *obj)
 {
   long size_sectors = -1;
 
+  assert (!obj->in_output);
+
   if (_vcd_list_length (obj->mpeg_track_list) > 0) {
     /* fixme -- make this efficient */
     size_sectors = vcd_obj_begin_output (obj);
@@ -1070,12 +1083,17 @@ vcd_obj_begin_output (VcdObj *obj)
   assert (obj != NULL);
   assert (_vcd_list_length (obj->mpeg_track_list) > 0);
 
+  assert (!obj->in_output);
+  obj->in_output = TRUE;
+
   obj->in_track = 1;
   obj->sectors_written = 0;
 
   obj->iso_bitmap = _vcd_salloc_new ();
 
   obj->dir = _vcd_directory_new ();
+
+  obj->buffer_dict_list = _vcd_list_new ();
 
   _finalize_vcd_iso_track (obj);
 
@@ -1091,6 +1109,8 @@ vcd_obj_write_image (VcdObj *obj, VcdDataSink *bin_file,
   assert (obj != NULL);
   assert (sectors >= 0);
   assert (obj->sectors_written == 0);
+
+  assert (obj->in_output);
 
   obj->progress_callback = callback;
   obj->callback_user_data = user_data;
@@ -1123,10 +1143,14 @@ vcd_obj_end_output (VcdObj *obj)
 {
   assert (obj != NULL);
 
+  assert (obj->in_output);
+  obj->in_output = FALSE;
+
   _vcd_directory_destroy (obj->dir);
   _vcd_salloc_destroy (obj->iso_bitmap);
 
-  _dict_destroy (obj);
+  _dict_clean (obj);
+  _vcd_list_free (obj->buffer_dict_list, TRUE);
 
   if (obj->bin_file)
     vcd_data_sink_destroy (obj->bin_file); /* fixme -- try moving it to

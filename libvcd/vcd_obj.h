@@ -56,7 +56,7 @@ struct _VcdObj {
   VcdList *custom_file_list;
 
   /* dictionary */
-  struct _dict_t *buf_dict;
+  VcdList *buffer_dict_list;
 
   /* aggregates */
   VcdSalloc *iso_bitmap;
@@ -64,6 +64,8 @@ struct _VcdObj {
   VcdDirectory *dir;
 
   /* state info */
+  int in_output;
+
   unsigned sectors_written;
   unsigned in_track;
 

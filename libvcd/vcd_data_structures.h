@@ -38,7 +38,9 @@ void _vcd_list_prepend (VcdList *list, void *data);
 
 void _vcd_list_append (VcdList *list, void *data);
 
-void _vcd_list_foreach (VcdList *list, _vcd_list_iterfunc *func, void *user_data);
+void _vcd_list_foreach (VcdList *list, _vcd_list_iterfunc func, void *user_data);
+
+VcdListNode *_vcd_list_find (VcdList *list, _vcd_list_iterfunc cmp_func, void *user_data);
 
 /* node ops */
 

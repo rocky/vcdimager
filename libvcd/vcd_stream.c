@@ -25,6 +25,7 @@
 
 #include "vcd_stream.h"
 #include "vcd_logging.h"
+#include "vcd_util.h"
 
 /* 
  * DataSource implementations
@@ -55,8 +56,7 @@ vcd_data_sink_new(void *user_data, const vcd_data_sink_io_functions *funcs)
 {
   VcdDataSink *new_obj;
 
-  new_obj = malloc(sizeof(VcdDataSink));
-  memset(new_obj, 0, sizeof(VcdDataSink));
+  new_obj = _vcd_malloc(sizeof(VcdDataSink));
 
   new_obj->user_data = user_data;
   memcpy(&(new_obj->op), funcs, sizeof(vcd_data_sink_io_functions));
@@ -152,8 +152,7 @@ vcd_data_source_new(void *user_data, const vcd_data_source_io_functions *funcs)
 {
   VcdDataSource *new_obj;
 
-  new_obj = malloc(sizeof(VcdDataSource));
-  memset(new_obj, 0, sizeof(VcdDataSource));
+  new_obj = _vcd_malloc (sizeof (VcdDataSource));
 
   new_obj->user_data = user_data;
   memcpy(&(new_obj->op), funcs, sizeof(vcd_data_source_io_functions));

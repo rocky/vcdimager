@@ -1,5 +1,11 @@
 2000-12-18  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* replaced almost every malloc with _vcd_malloc
+
+	* libvcd/vcd_util.c (_vcd_malloc): new function
+
+	* libvcd/vcd.c: made buf dict list into VcdList
+
 	* libvcd/vcd.c: made cust_file_t list into VcdList
 
 	* libvcd/vcd_data_structures.c: new VcdList object and methods
