@@ -538,7 +538,13 @@ vcdinfo_get_entry_sect_count (const vcdinfo_obj_t *obj, unsigned int entry_num)
     const lba_t this_lba = vcdinfo_get_entry_lba(obj, entry_num);
     lba_t next_lba;
     if (entry_num < entry_count-1) {
-       next_lba = vcdinfo_get_entry_lba(obj, entry_num+1);
+      track_t track=vcdinfo_get_track(obj, entry_num);
+      track_t next_track=vcdinfo_get_track(obj, entry_num+1);
+      next_lba = vcdinfo_get_entry_lba(obj, entry_num+1);
+      /* If we've changed tracks, don't include pregap sector between 
+         tracks.
+       */
+      if (track != next_track) next_lba -= PREGAP_SECTORS;
     } else {
       /* entry_num == entry_count -1. Or the last entry.
          This is really really ugly. There's probably a better
@@ -560,7 +566,8 @@ vcdinfo_get_entry_sect_count (const vcdinfo_obj_t *obj, unsigned int entry_num)
           const lsn_t next_lsn=lsn + statbuf.secsize;
           next_lba = vcdinfo_lsn2lba(next_lsn);
         } else {
-          /* Failed on ISO 9660 filesystem. Use LEADOUT track.  */
+          /* Failed on ISO 9660 filesystem. Use next track or
+             LEADOUT track.  */
           next_lba = vcdinfo_get_track_lba(obj, track+1);
         }
         if (next_lba == VCDINFO_NULL_LBA)
@@ -1077,7 +1084,7 @@ vcdinfo_get_track(const vcdinfo_obj_t *obj, const unsigned int entry_num)
    Note: track 1 is usually the first track.
 */
 unsigned int
-vcdinfo_get_track_audio_type(const vcdinfo_obj_t *obj, unsigned int track_num)
+vcdinfo_get_track_audio_type(const vcdinfo_obj_t *obj, track_t track_num)
 {
   TracksSVD *tracks;
   TracksSVD2 *tracks2;
@@ -1114,7 +1121,7 @@ vcdinfo_get_num_tracks(const vcdinfo_obj_t *obj)
   VCDINFO_NULL_LBA is returned on failure.
 */
 lba_t 
-vcdinfo_get_track_lba(const vcdinfo_obj_t *obj, unsigned int track_num)
+vcdinfo_get_track_lba(const vcdinfo_obj_t *obj, track_t track_num)
 {
   if (NULL == obj || NULL == obj->img)
     return VCDINFO_NULL_LBA;
@@ -1137,7 +1144,7 @@ vcdinfo_get_track_lba(const vcdinfo_obj_t *obj, unsigned int track_num)
   O is returned on success; 1 is returned on error.
 */
 int
-vcdinfo_get_track_msf(const vcdinfo_obj_t *obj, unsigned int track_num,
+vcdinfo_get_track_msf(const vcdinfo_obj_t *obj, track_t track_num,
                       uint8_t *min, uint8_t *sec, uint8_t *frame)
 {
   if (NULL == obj || NULL == obj->img)
@@ -1165,11 +1172,17 @@ vcdinfo_get_track_msf(const vcdinfo_obj_t *obj, unsigned int track_num,
 }
 
 /*!
-  Return the size in sectors for track n. The first track is 1.
+  Return the size in sectors for track n. 
+
+  The IS0-9660 filesystem track has number 0. Tracks associated
+  with playable entries numbers start at 1.
+
+  FIXME: Whether we count the track pregap sectors is a bit haphazard.
+  We should add a parameter to indicate whether this is wanted or not.
+
 */
 unsigned int
-vcdinfo_get_track_sect_count(const vcdinfo_obj_t *obj, 
-                             const unsigned int track_num)
+vcdinfo_get_track_sect_count(const vcdinfo_obj_t *obj, const track_t track_num)
 {
   if (NULL == obj || VCDINFO_INVALID_TRACK == track_num) 
     return 0;
@@ -1180,7 +1193,7 @@ vcdinfo_get_track_sect_count(const vcdinfo_obj_t *obj,
     const lsn_t lsn = vcdinfo_lba2lsn(lba);
     
     /* Try to get the sector count from the ISO 9660 filesystem */
-    if (_vcdinfo_find_fs_lsn(obj, &statbuf, lsn)) {
+    if (obj->has_xa && _vcdinfo_find_fs_lsn(obj, &statbuf, lsn)) {
       return statbuf.secsize;
     } else {
       const lba_t next_lba=vcdinfo_get_track_lba(obj, track_num+1);
@@ -1192,7 +1205,13 @@ vcdinfo_get_track_sect_count(const vcdinfo_obj_t *obj,
 }
 
 /*!
-  Return the size in bytes for track n. The first track is 1.
+  Return size in bytes for track number for entry n in obj.
+
+  The IS0-9660 filesystem track has number 0. Tracks associated
+  with playable entries numbers start at 1.
+
+  FIXME: Whether we count the track pregap sectors is a bit haphazard.
+  We should add a parameter to indicate whether this is wanted or not.
 */
 unsigned int
 vcdinfo_get_track_size(const vcdinfo_obj_t *obj, const unsigned int track_num)
