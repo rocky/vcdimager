@@ -1,0 +1,69 @@
+-------------------------------------------------------------------------------
+VCD/ENTRIES.VCD
+ system profile tag: 0x00
+-------------------------------------------------------------------------------
+VCD/PSD.VCD
+  PSD[00] (LID[1] @0x0000): selection list descriptor
+  Flags: 0x00 | NOS: 3 | BSN: 1 | LID: 1 (rejected: no)
+  prev: disabled | next: PSD[?] @0x000a | return: PSD[?] @0x000a
+  default: disabled | timeout: disabled
+  timeout time: 5 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[1] (0x03e8)
+  ofs[0]: LID[2] @0x0004
+  ofs[1]: LID[3] @0x0007
+  ofs[2]: PSD[?] @0x000a
+
+ PSD[01] (LID[2] @0x0004): play list descriptor
+  NOI: 3 | LID#: 2 (rejected: no)
+  prev: disabled | next: LID[3] @0x0007 | return: PSD[?] @0x000a
+  playtime: 0/15s | wait: 5s | autowait: 0s
+  play-item[0]: SEQUENCE[1] (0x0002)
+  play-item[1]: SEQUENCE[2] (0x0003)
+  play-item[2]: SEGMENT[2] (0x03e9)
+
+ PSD[02] (LID[3] @0x0007): play list descriptor
+  NOI: 3 | LID#: 3 (rejected: no)
+  prev: disabled | next: PSD[?] @0x000a | return: PSD[?] @0x000a
+  playtime: 0/15s | wait: 5s | autowait: 0s
+  play-item[0]: SEQUENCE[3] (0x0004)
+  play-item[1]: SEQUENCE[4] (0x0005)
+  play-item[2]: SEGMENT[3] (0x03ea)
+
+ PSD[03] (PSD[?] @0x000a): end list descriptor
+
+-------------------------------------------------------------------------------
+EXT/PSD_X.VCD
+  PSD[00] (LID[1] @0x0000): extended selection list descriptor
+  Flags: 0x00 | NOS: 3 | BSN: 1 | LID: 1 (rejected: no)
+  prev: disabled | next: PSD[?] @0x000d | return: PSD[?] @0x000d
+  default: disabled | timeout: disabled
+  timeout time: 5 secs | loop: 1 (delayed: no)
+  play-item: SEGMENT[1] (0x03e8)
+  ofs[0]: LID[2] @0x0007
+  ofs[1]: LID[3] @0x000a
+  ofs[2]: PSD[?] @0x000d
+  prev_area: disabled | next_area: disabled
+  retn_area: disabled | default_area: disabled
+  area[0]: disabled
+  area[1]: disabled
+  area[2]: disabled
+
+ PSD[01] (LID[2] @0x0007): play list descriptor
+  NOI: 3 | LID#: 2 (rejected: no)
+  prev: disabled | next: LID[3] @0x000a | return: PSD[?] @0x000d
+  playtime: 0/15s | wait: 5s | autowait: 0s
+  play-item[0]: SEQUENCE[1] (0x0002)
+  play-item[1]: SEQUENCE[2] (0x0003)
+  play-item[2]: SEGMENT[2] (0x03e9)
+
+ PSD[02] (LID[3] @0x000a): play list descriptor
+  NOI: 3 | LID#: 3 (rejected: no)
+  prev: disabled | next: PSD[?] @0x000d | return: PSD[?] @0x000d
+  playtime: 0/15s | wait: 5s | autowait: 0s
+  play-item[0]: SEQUENCE[3] (0x0004)
+  play-item[1]: SEQUENCE[4] (0x0005)
+  play-item[2]: SEGMENT[3] (0x03ea)
+
+ PSD[03] (PSD[?] @0x000d): end list descriptor
+
+-------------------------------------------------------------------------------

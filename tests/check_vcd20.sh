@@ -1,6 +1,9 @@
 #!/bin/sh
 
 #echo ${srcdir}
+
+. ${srcdir}/check_vcddump_fn
+
 VCDXBUILD="../frontends/xml/vcdxbuild"
 
 if ! md5sum < /dev/null > /dev/null; then
@@ -24,8 +27,23 @@ if md5sum -c <<EOF
 cc0d5303f3e58ef1ef708e705bb50559 *videocd.cue
 EOF
  then
-    rm -vf core videocd.{bin,cue}
     echo "$0: md5sum checksum matched :-)"
+
+    if ! test_vcddump '-B -i videocd.bin -p --show-entries prof ' \
+      vcd20_test1.dump vcd20_test1.right ; then 
+      echo "$0: vcddump test 1 failed "
+      rm -vf core videocd.{bin,cue}
+      exit 1
+    fi
+    
+    if ! test_vcddump '-B --bin-file videocd.bin -v -f -L -S --show-pvd vol' \
+      vcd20_test2.dump vcd20_test2.right ; then 
+      echo "$0: vcddump test 2 failed "
+      rm -vf core videocd.{bin,cue}
+      exit 1
+    fi
+    
+    rm -vf core videocd.{bin,cue}
     exit 0
 fi
 

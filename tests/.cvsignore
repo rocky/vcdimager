@@ -1,3 +1,11 @@
 Makefile.in
 Makefile
 .deps
+check_bitfield
+check_sizeof
+check_vcddump_fn
+mpegscan
+mpegscan2
+testassert
+testimage
+testischar
