@@ -1464,7 +1464,7 @@ vcdinfo_get_track_size(const vcdinfo_obj_t *obj, const unsigned int track_num)
     const lsn_t lsn = vcdinfo_lba2lsn(vcdinfo_get_track_lba(obj, track_num));
     
     /* Try to get the sector count from the ISO 9660 filesystem */
-    if (_vcdinfo_find_fs_lsn(obj, &statbuf, lsn)) {
+    if (obj->has_xa && _vcdinfo_find_fs_lsn(obj, &statbuf, lsn)) {
       return statbuf.size;
     } else {
       /* Failed on ISO 9660 filesystem. Use track information.  */
