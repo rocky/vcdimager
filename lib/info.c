@@ -452,8 +452,9 @@ lid_t vcdinfo_selection_get_lid(const vcdinfo_obj_t *obj, lid_t lid,
   Return the LID offset associated with a the selection number of the
   passed-in LID parameter. 
 
-  \return VCDINFO_INVALID_OFFSET is returned if obj on error or obj
-  is NULL. Otherwise the LID offset is returned.
+  \return VCDINFO_INVALID_OFFSET is returned if error, obj is NULL or
+  the lid is not some type of selection list. Otherwise the LID offset
+  is returned.
 */
 uint16_t vcdinfo_selection_get_offset(const vcdinfo_obj_t *obj, lid_t lid,
                                       unsigned int selection) 
@@ -462,6 +463,14 @@ uint16_t vcdinfo_selection_get_offset(const vcdinfo_obj_t *obj, lid_t lid,
 
   PsdListDescriptor pxd;
   vcdinfo_lid_get_pxd(obj, &pxd, lid);
+  if (pxd.descriptor_type != PSD_TYPE_SELECTION_LIST &&
+      pxd.descriptor_type != PSD_TYPE_EXT_SELECTION_LIST) {
+    vcd_warn( "Requesting selection of LID %i which not a selection list -"
+              " type is 0x%x", 
+              lid, pxd.descriptor_type );
+    return VCDINFO_INVALID_OFFSET;
+  }
+  
   bsn=vcdinf_get_bsn(pxd.psd);
 
   if ( (selection - bsn + 1) > 0) {
