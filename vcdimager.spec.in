@@ -46,13 +46,15 @@ cdxa2mpeg   Simple tool for converting RIFF CDXA file to plain mpeg.
 %build
 %configure
 make all
-make -C docs/ vcdimager.ps.gz vcddump.ps.gz
+make -C docs/ vcdimager.ps.gz vcddump.ps.gz vcdxrip.ps.gz
 
 %post
 /sbin/install-info \
         --info-dir=%{_infodir} %{_infodir}/vcdimager.info
 /sbin/install-info \
         --info-dir=%{_infodir} %{_infodir}/vcddump.info
+/sbin/install-info \
+        --info-dir=%{_infodir} %{_infodir}/vcdxrip.info
 
 %preun
 if [ $1 = 0 ]; then
@@ -60,6 +62,8 @@ if [ $1 = 0 ]; then
 	--info-dir=%{_infodir} %{_infodir}/vcdimager.info
     /sbin/install-info --delete \
         --info-dir=%{_infodir} %{_infodir}/vcddump.info
+    /sbin/install-info --delete \
+        --info-dir=%{_infodir} %{_infodir}/vcdxrip.info
 fi
 
 %install
@@ -72,7 +76,7 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-, root, root)
-%doc AUTHORS BUGS FAQ TODO COPYING ChangeLog INSTALL NEWS README THANKS docs/vcdimager.ps.gz frontends/xml/videocd.dtd
+%doc AUTHORS BUGS FAQ TODO COPYING ChangeLog INSTALL NEWS README THANKS docs/vcdimager.ps.gz docs/vcdxrip.ps.gz docs/vcddump.ps.gz frontends/xml/videocd.dtd
 %{_bindir}/vcd*
 %{_bindir}/cdxa2mpeg
 %{_infodir}/vcd*.info*
