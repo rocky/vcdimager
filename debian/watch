@@ -11,6 +11,7 @@ version=2
 #ftp://ftp.gnu.org/pub/gnu/vcdimager/vcdimager-(.*)\.tar\.gz debian uupdate
 
 #unstable releases
-ftp://ftp.vcdimager.org/pub/vcdimager/vcdimager-0.7_UNSTABLE/vcdimager-(.*)\.tar\.gz debian uupdate
+ftp://ftp.vcdimager.org/pub/vcdimager/vcdimager-0.7_UNSTABLE/vcdimager-([^-]*)\.tar\.gz debian uupdate
+#ftp://alpha.gnu.org/pub/gnu/vcdimager/vcdimager-(.*)\.tar\.gz debian uupdate
 
 #EOF
