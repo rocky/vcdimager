@@ -408,7 +408,9 @@ _parse_entries (struct vcdxml_t *obj, VcdImageSource *img)
       if (newtrack)
 	{
 	  char buf[80];
-	  struct sequence_t *_new_sequence = _vcd_malloc (sizeof (struct sequence_t));
+	  struct sequence_t *_new_sequence;
+
+	  _new_sequence = _vcd_malloc (sizeof (struct sequence_t));
 
 	  snprintf (buf, sizeof (buf), "sequence-%2.2d", track);
 	  _new_sequence->id = strdup (buf);
@@ -420,6 +422,9 @@ _parse_entries (struct vcdxml_t *obj, VcdImageSource *img)
 	  _new_sequence->autopause_list = _vcd_list_new ();
 	  _new_sequence->start_extent = extent;
 
+	  snprintf (buf, sizeof (buf), "entry-%3.3d", idx);
+	  _new_sequence->default_entry_id = strdup (buf);
+	  
 	  _vcd_list_append (obj->sequence_list, _new_sequence);
 	}
       else
@@ -1307,11 +1312,8 @@ main (int argc, const char *argv[])
       switch (opt)
 	{
 	case CL_VERSION:
-	  fprintf (stdout, "GNU VCDImager " VERSION " [" HOST_ARCH "]\n\n"
-		   "Copyright (c) 2001 Herbert Valerio Riedel <hvr@gnu.org>\n\n"         
-		   "GNU VCDImager may be distributed under the terms of the GNU General Public\n"
-		   "Licence; For details, see the file `COPYING', which is included in the GNU\n"
-		   "VCDImager distribution. There is no warranty, to the extent permitted by law.\n");
+	  fputs (vcd_version_string (true), stdout);
+	  fflush (stdout);
 	  exit (EXIT_SUCCESS);
 	  break;
 

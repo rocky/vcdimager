@@ -287,6 +287,7 @@ _parse_pbc_selection (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlN
   pbc_t *_pbc;
 
   _pbc = vcd_pbc_new (PBC_SELECTION);
+  _pbc->bsn = 1;
 
   _parse_common_pbcattrs (_pbc, doc, node, ns);
 
@@ -496,7 +497,11 @@ _parse_mpeg_sequence (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlN
       if (cur->ns != ns)
 	continue;
 
-      if (!xmlStrcmp (cur->name, "entry"))
+      if (!xmlStrcmp (cur->name, "default-entry"))
+	{
+	  GET_PROP_STR (sequence->default_entry_id, "id", doc, cur, ns);
+	}
+      else if (!xmlStrcmp (cur->name, "entry"))
 	{
 	  struct entry_point_t *entry = _vcd_malloc (sizeof (struct entry_point_t));
 	  

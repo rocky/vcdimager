@@ -290,6 +290,14 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
       xmlSetProp (seq_node, "src", _sequence->src);
       xmlSetProp (seq_node, "id", _sequence->id);
 
+      if (_sequence->default_entry_id)
+	{
+	  xmlNodePtr ent_node;
+
+	  ent_node = xmlNewChild (seq_node, ns, "default-entry", NULL);
+	  xmlSetProp (ent_node, "id", _sequence->default_entry_id);
+	}
+
       _VCD_LIST_FOREACH (node2, _sequence->entry_point_list)
 	{
 	  struct entry_point_t *_entry = _vcd_list_node_data (node2);
@@ -370,7 +378,8 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 	      switch (_pbc->selection_type)
 		{
 		case _SEL_NORMAL:
-		  _ref_area_helper (pl, ns, "default", _pbc->retn_id, _pbc->return_area);
+		  _ref_area_helper (pl, ns, "default",
+				    _pbc->default_id, _pbc->default_area);
 		  break;
 
 		case _SEL_MULTI_DEF:

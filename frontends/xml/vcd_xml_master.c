@@ -164,7 +164,8 @@ bool vcd_xml_master (const struct vcdxml_t *obj, const char cue_fname[],
 
       vcd_obj_append_sequence_play_item (_vcd,
 					 vcd_mpeg_source_new (data_source),
-					 sequence->id);
+					 sequence->id, 
+					 sequence->default_entry_id);
 
       _VCD_LIST_FOREACH (node2, sequence->entry_point_list)
 	{

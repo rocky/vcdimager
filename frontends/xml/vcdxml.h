@@ -79,6 +79,8 @@ struct option_t {
 struct sequence_t {
   char *id;
   char *src;
+
+  char *default_entry_id;
   VcdList *entry_point_list; /* entry_point_t */
   VcdList *autopause_list; /* double * */
 
@@ -99,6 +101,8 @@ struct segment_t
   char *id;
   char *src;
   
+  VcdList *autopause_list; /* double * */
+
   /* used for restoring vcds */
   unsigned segments_count;
 };
