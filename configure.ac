@@ -16,10 +16,14 @@ dnl along with this program; if not, write to the Free Software
 dnl Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 dnl 02111-1307, USA.
 
+define(RELEASE_NUM, 21)
+define(LIBVCD_VERSION_STR, 0.7.$1cvs)
+
 AC_PREREQ(2.52)
 AC_REVISION([$Id$])dnl
 
-AC_INIT([GNU VCDimager],0.7.21cvs, [bugs-vcdimager@gnu.org], [vcdimager])
+AC_INIT([GNU VCDimager],LIBVCD_VERSION_STR(RELEASE_NUM), 
+	[bugs-vcdimager@gnu.org], [vcdimager])
 AC_CONFIG_SRCDIR([lib/vcd.c])
 AM_INIT_AUTOMAKE(1.6.0)
 
@@ -29,6 +33,9 @@ AC_SUBST(SPEC_VERSION)
 dnl AM_ACLOCAL_INCLUDE(.)
 dnl AM_CONFIG_HEADER(include/libvcd/acconfig.h)
 AM_CONFIG_HEADER(config.h)
+
+LIBVCD_VERSION_NUM=RELEASE_NUM
+AC_SUBST(LIBVCD_VERSION_NUM)
 
 AM_MISSING_PROG(HELP2MAN, help2man, $missing_dir)
 AM_MISSING_PROG(CVS2CL, cvs2cl, $missing_dir)
