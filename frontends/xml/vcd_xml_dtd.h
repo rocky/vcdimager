@@ -25,7 +25,7 @@
 #define VIDEOCD_DTD_SYSID "http://www.gnu.org/software/vcdimager/videocd.dtd"
 #define VIDEOCD_DTD_XMLNS "http://www.gnu.org/software/vcdimager/1.0/"
 
-extern char videocd_dtd[];
+extern const char videocd_dtd[];
 
 extern int vcd_xml_dtd_loaded;
 
