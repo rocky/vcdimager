@@ -50,6 +50,31 @@ const static double aspect_ratios[16] = {
   1.1250, 1.1575, 1.2015, 0.0000
 };
 
+static int
+_bit_set_p (int n, int bit)
+{
+  /* assert (bit >= 0 && bit < (sizeof (int) * 8)); */
+  return (n >> bit) & 0x1;
+}
+
+static uint32_t 
+_bitvec_get_bits32 (const uint8_t bitvec[], int offset, int bits)
+{
+  uint32_t result = 0;
+  int i;
+
+  assert (bits >= 0 && bits < 32);
+
+  for(i = offset; i < (offset + bits); i++)
+    {
+      result <<= 1;
+      if (_bit_set_p (bitvec[i / 8], 7 - (i % 8)))
+        result |= 0x1;
+    }
+  
+  return result;
+}
+
 mpeg_type_t 
 mpeg_type (const void *mpeg_block)
 {
