@@ -168,7 +168,7 @@ extern "C" {
     VCDINFO_ITEM_TYPE_SEGMENT,
     VCDINFO_ITEM_TYPE_LID,
     VCDINFO_ITEM_TYPE_SPAREID2,
-    VCDINFO_ITEM_TYPE_NOTFOUND,
+    VCDINFO_ITEM_TYPE_NOTFOUND
   } vcdinfo_item_enum_t;
   
   typedef struct {
@@ -179,7 +179,7 @@ extern "C" {
   typedef enum {
     VCDINFO_OPEN_ERROR,          /* Error */
     VCDINFO_OPEN_VCD,            /* Is VCD of some sort */
-    VCDINFO_OPEN_OTHER,          /* Is not VCD but something else */
+    VCDINFO_OPEN_OTHER           /* Is not VCD but something else */
   } vcdinfo_open_return_t;
   
   typedef struct 

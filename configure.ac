@@ -62,7 +62,19 @@ else
   warning_flags=""
 
   if test "x$enable_maintainer_mode" = "xyes"; then
-    WOPT="-std=c99 -pedantic"
+
+    case $host_os in
+     solaris*)
+        # Something with -std=c99 in libcdio messes up the uint64_t decls
+        # There is probably a better fix around somewhere.
+	WOPT="-pedantic"
+	;;
+     *)
+	WOPT="-std=c99 -pedantic"
+        ;;
+    esac
+    
+    WOPT="std=c99 -pedantic"
     SAVE_CFLAGS="$CFLAGS"
     CFLAGS="$CFLAGS $WOPT"
     AC_MSG_CHECKING([whether $CC accepts $WOPT])
