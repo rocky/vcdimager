@@ -4,14 +4,14 @@ see ChangeLog for more information
 
 version 0.5.9alpha3
 ===================
-2001-0.-..
+2001-01-06
 
 * improved ISO9660 file addition facility
 * minor ISO9660 file entry ordering fix
 * minor documentation improvements
-* big endian fix
+* big endian fix for struct bitsets
 * new option '--quiet' for vcdimager cli fe
-* ...
+* fixed --add-file-2336 bug
 
 version 0.5.9alpha2
 ===================

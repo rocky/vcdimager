@@ -37,6 +37,7 @@
 #include "vcd_files.h"
 #include "vcd_files_private.h"
 #include "vcd_iso9660.h"
+#include "vcd_iso9660_private.h"
 #include "vcd_logging.h"
 #include "vcd_util.h"
 #include "vcd_salloc.h"
@@ -46,6 +47,15 @@ static const char _rcsid[] = "$Id$";
 static const char DELIM[] = \
 "----------------------------------------" \
 "---------------------------------------\n";
+
+static const char *
+bool_str (bool b)
+{
+  if (b)
+    return "yes";
+  else
+    return "no";
+}
 
 static int
 (*gl_read_mode2_sector) (FILE *fd, void *buf, uint32_t lba, bool form2);
@@ -315,7 +325,6 @@ dump_info_vcd (const void *data)
 {
   InfoVcd info;
   int n;
-  const char *bool_str[] = { "no", "yes" };
 
   memcpy (&info, data, 2048);
 
@@ -391,10 +400,10 @@ dump_info_vcd (const void *data)
 
   fprintf (stdout, " flags:\n");
   fprintf (stdout, "  restriction: %d\n", info.flags.restriction);
-  fprintf (stdout, "  special info: %s\n", bool_str[info.flags.special_info]);
-  fprintf (stdout, "  user data cc: %s\n", bool_str[info.flags.user_data_cc]);
-  fprintf (stdout, "  start lid#1: %s\n", bool_str[info.flags.use_lid1]);
-  fprintf (stdout, "  start track#3: %s\n", bool_str[info.flags.use_track3]);
+  fprintf (stdout, "  special info: %s\n", bool_str (info.flags.special_info));
+  fprintf (stdout, "  user data cc: %s\n", bool_str (info.flags.user_data_cc));
+  fprintf (stdout, "  start lid#1: %s\n", bool_str (info.flags.use_lid1));
+  fprintf (stdout, "  start track#3: %s\n", bool_str (info.flags.use_track3));
 
   fprintf (stdout, " psd size: %d\n", UINT32_FROM_BE (info.psd_size));
   fprintf (stdout, " first segment addr: %2.2x:%2.2x:%2.2x\n",
@@ -436,7 +445,7 @@ dump_info_vcd (const void *data)
                n,
                audio_types[info.spi_contents[n].audio_type],
                video_types[info.spi_contents[n].video_type],
-               bool_str[info.spi_contents[n].item_cont]);
+               bool_str (info.spi_contents[n].item_cont));
     }
 }
 
@@ -559,11 +568,75 @@ dump_search_dat (const void *data)
     }
 }
 
+static const char *
+_strip_trail (const char str[], size_t n)
+{
+  static char buf[1024];
+  int j;
+
+  assert (n < 1024);
+
+  strncpy (buf, str, n);
+  buf[n] = '\0';
+
+  for (j = strlen (buf) - 1; j >= 0; j--)
+    {
+      if (buf[j] != ' ')
+        break;
+
+      buf[j] = '\0';
+    }
+
+  return buf;
+}
+
 static void
-dump_all (const void *info_p, const void *entries_p,
+dump_pvd (const void *data)
+{
+  struct iso_primary_descriptor const *pvd = data;
+
+  fprintf (stdout, "ISO9660 primary volume descriptor\n");
+
+  if (pvd->type != ISO_VD_PRIMARY)
+    vcd_warn ("unexcected descriptor type");
+
+  if (strncmp (pvd->id, ISO_STANDARD_ID, strlen (ISO_STANDARD_ID)))
+    vcd_warn ("unexpected ID encountered (expected `" ISO_STANDARD_ID "'");
+  
+  fprintf (stdout, " ID: `%.5s'\n", pvd->id);
+  fprintf (stdout, " version: %d\n", pvd->version);
+  fprintf (stdout, " system id: `%s'\n",
+           _strip_trail (pvd->system_id, 32));
+  fprintf (stdout, " volume id: `%s'\n",
+           _strip_trail (pvd->volume_id, 32));
+
+  fprintf (stdout, " volumeset id: `%s'\n", 
+           _strip_trail (pvd->volume_set_id, 128));
+  fprintf (stdout, " publisher id: `%s'\n", 
+           _strip_trail (pvd->publisher_id, 128));
+  fprintf (stdout, " preparer id: `%s'\n", 
+           _strip_trail (pvd->preparer_id, 128));
+  fprintf (stdout, " application id: `%s'\n", 
+           _strip_trail (pvd->application_id, 128));
+  
+  fprintf (stdout, " ISO size: %d blocks (logical blocksize: %d bytes)\n", 
+           from_733 (pvd->volume_space_size),
+           from_723 (pvd->logical_block_size));
+  
+  fprintf (stdout, " XA marker present: %s\n", 
+           bool_str (!strncmp (data + ISO_XA_MARKER_OFFSET, 
+                               ISO_XA_MARKER_STRING, 
+                               strlen (ISO_XA_MARKER_STRING))));
+}
+
+static void
+dump_all (const void *pvd_p,
+          const void *info_p, const void *entries_p,
           const void *lot_p, const void *psd_p,
           const void *tracks_buf, const void *search_buf)
 {
+  fprintf (stdout, DELIM);
+  dump_pvd (pvd_p);
   fprintf (stdout, DELIM);
   dump_info_vcd (info_p);
   fprintf (stdout, DELIM);
@@ -615,6 +688,7 @@ dump (const char image_fname[])
   FILE *fd = fopen (image_fname, "rb");
   char info_buf[ISO_BLOCKSIZE] = { 0, };
   char entries_buf[ISO_BLOCKSIZE] = { 0, };
+  char pvd_buf[ISO_BLOCKSIZE] = { 0, };
   char *lot_buf = NULL, *psd_buf = NULL;
   char *search_buf = NULL, *tracks_buf = NULL;
   uint32_t size, psd_size;
@@ -626,6 +700,8 @@ dump (const char image_fname[])
     }
 
   size = gl_get_image_size (fd);
+
+  gl_read_mode2_sector (fd, pvd_buf, ISO_PVD_SECTOR, false);
 
   gl_read_mode2_sector (fd, info_buf, INFO_VCD_SECTOR, false);
 
@@ -716,7 +792,8 @@ dump (const char image_fname[])
   fprintf (stdout, "Source: image file `%s'\n", image_fname);
   fprintf (stdout, "Image size: %d sectors\n", size);
 
-  dump_all (info_buf, entries_buf, lot_buf, psd_buf, tracks_buf, search_buf);
+  dump_all (pvd_buf, info_buf, entries_buf, lot_buf,
+            psd_buf, tracks_buf, search_buf);
 
   free (lot_buf);
   free (psd_buf);

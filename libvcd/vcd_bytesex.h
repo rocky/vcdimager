@@ -70,6 +70,7 @@ uint32_t to_732(uint32_t i);
 uint64_t to_733(uint32_t i);
 
 #define  from_711(val)  ((uint8_t) (val))
+uint16_t from_723(uint32_t p);
 uint32_t from_733(uint64_t p);
 
 uint8_t  to_bcd8(uint8_t n);

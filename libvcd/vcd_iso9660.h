@@ -37,6 +37,9 @@
 #define ISO_FILE        0       
 #define ISO_DIRECTORY   2
 
+#define ISO_PVD_SECTOR  16
+#define ISO_EVD_SECTOR  17
+
 /* file/dirname's */
 bool
 _vcd_iso_pathname_valid_p (const char pathname[]);

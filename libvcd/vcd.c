@@ -638,16 +638,19 @@ vcd_obj_add_file (VcdObj *obj, const char iso_pathname[],
 
   size = vcd_data_source_stat(file);
 
-  sectors = size / (raw_flag ? M2RAW_SIZE : M2F1_SIZE);
-
-  if (raw_flag && (size % M2RAW_SIZE))
+  if (raw_flag)
     {
-      vcd_error("raw mode2 file must have size multiple of %d \n", M2RAW_SIZE);
-      return 1;
-    }
+      sectors = size / M2RAW_SIZE;
 
-  if (size % M2F1_SIZE)
-    sectors++;
+      if (size % M2RAW_SIZE)
+        {
+          vcd_error("raw mode2 file must have size multiple of %d \n", 
+                    M2RAW_SIZE);
+          return 1;
+        }
+    }
+  else
+    sectors = _vcd_len2blocks (size, M2F1_SIZE);
 
   {
     struct _cust_file_t *p;
@@ -693,13 +696,15 @@ _finalize_vcd_iso_track (VcdObj *obj)
   if (_vcd_salloc (obj->iso_bitmap, 75, 75) == SECTOR_NIL) 
     assert (0);
 
-  _dict_insert (obj, "pvd", 16, 1, SM_EOR);        /* pre-alloc descriptors, PVD */  /* EOR */
-  _dict_insert (obj, "evd", 17, 1, SM_EOR|SM_EOF); /* EVD */                         /* EOR+EOF */
+  /* pre-alloc descriptors, PVD */
+  _dict_insert (obj, "pvd", ISO_PVD_SECTOR, 1, SM_EOR);           /* EOR */
+  /* EVD */
+  _dict_insert (obj, "evd", ISO_EVD_SECTOR, 1, SM_EOR|SM_EOF);    /* EOR+EOF */
 
   /* reserve for iso directory */
   dir_secs = _vcd_salloc (obj->iso_bitmap, 18, 75-18);
 
-  /* ... */
+  /* VCD information area */
   
   _dict_insert (obj, "info", INFO_VCD_SECTOR, 1, SM_EOF);              /* INFO.VCD */           /* EOF */
   _dict_insert (obj, "entries", ENTRIES_VCD_SECTOR, 1, SM_EOF);        /* ENTRIES.VCD */        /* EOF */

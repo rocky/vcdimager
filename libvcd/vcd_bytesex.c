@@ -64,14 +64,20 @@ to_733(uint32_t i)
 
 /* reverse path... */
 
-uint32_t
-from_733(uint64_t p)
+uint16_t 
+from_723 (uint32_t p)
+{
+  return (0xFFFF & p);
+}
+
+uint32_t 
+from_733 (uint64_t p)
 {
   return (UINT32_C(0xFFFFFFFF) & p);
 }
 
 uint8_t
-to_bcd8(uint8_t n)
+to_bcd8 (uint8_t n)
 {
   assert(n < 100);
 

@@ -1,5 +1,15 @@
 2001-01-06  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* configure.in: bumped version up to 0.5.9alpha2
+	
+	* frontends/cli/vcdrip.c (dump_pvd): new function for dumping
+		some content of the primary volume descriptor
+	
+	* libvcd/vcd.c (vcd_obj_add_file): fixed size calculation
+		bug for raw files
+
+	* libvcd/vcd_bytesex.c (from_723): new function
+
 	* libvcd/vcd_files_private.h: added SPICONTX.SVD struct
 
 	* frontends/cli/vcdrip.c (dump_tracks_svd): added
