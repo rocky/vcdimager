@@ -1,5 +1,7 @@
 2001-06-07  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* frontends/xml/vcd_xml_rip.c: make use of vcd_image_fs api
+
 	* libvcd/vcd_bytesex.h (from_723): make more use of inline functions 
 		instead of macros
 

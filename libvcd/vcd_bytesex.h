@@ -145,6 +145,8 @@ from_733 (uint64_t p)
   return (UINT32_C(0xFFFFFFFF) & p);
 }
 
+/* BCD/MSF */
+
 uint8_t  to_bcd8(uint8_t n);
 uint8_t  from_bcd8(uint8_t p);
 
