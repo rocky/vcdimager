@@ -1,0 +1,290 @@
+\input texinfo @c -*-texinfo-*-
+
+@c %**start of header
+@setfilename vcddump.info
+@settitle The GNU Video CD Dump Program (vcddump)
+@setchapternewpage on
+@c %**end of header
+
+@include version.texi
+@ifinfo
+This file documents GNU Video CD Dump Program.
+
+Copyright (C) Rocky Bernstein @email{<rocky@@panix.com>}
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.1 or
+any later version published by the Free Software Foundation; with the
+Invariant Sections being ``Free Software'' and ``Free Software Needs
+Free Documentation'', with the Front-Cover Texts being ``A GNU Manual,''
+and with the Back-Cover Texts as in (a) below.
+
+(a) The Free Software Foundation's Back-Cover Text is: ``You have
+freedom to copy and modify this GNU Manual, like GNU software.  Copies
+published by the Free Software Foundation raise funds for GNU
+development.''
+@end ifinfo
+
+@titlepage
+@title GNU Video CD Dump Program
+@subtitle $Id$
+@subtitle The GNU Video CD Authoring Tools.
+@subtitle for version @value{VERSION}, @value{UPDATED}
+@author Rocky Bernstein et al.
+@page
+
+@vskip 0pt plus 1filll
+
+Copyright @copyright{} 2003 Rocky Bernstein @email{<rocky@@panix.com>}
+@sp 1
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.1 or
+any later version published by the Free Software Foundation; with the
+Invariant Sections being ``Free Software'' and ``Free Software Needs
+Free Documentation'', with the Front-Cover Texts being ``A GNU Manual,''
+and with the Back-Cover Texts as in (a) below.
+
+(a) The Free Software Foundation's Back-Cover Text is: ``You have
+freedom to copy and modify this GNU Manual, like GNU software.  Copies
+published by the Free Software Foundation raise funds for GNU
+development.''
+@end titlepage
+@page
+
+@ifnottex
+@node Top, Introduction, (dir), (dir)
+
+@top The GNU Video CD Dump Program (vcddump)
+
+This file documents GNU Video CD Dump Program.
+
+Copyright (C) 2003 Rocky Bernstein
+
+@dircategory Miscellaneous
+@menu
+* Introduction::        What is the program and why would I use it? 
+* Command Options::     How do I get this to do anything? 
+* Output Sections::     How do interpret the output? 
+@end menu
+@end ifnottex
+
+@contents
+
+@node Introduction
+@chapter Introduction
+
+Note in the guide, we use the term VCD to mean some sort of Video
+Compact Disk. There are various formats of Video Compact Disks, the
+oldest format of which is called VCD followed by a version number:
+1.0, 1.1 or 2.0. Hopefully by context it should be clear whether we
+are referring to a class of Video Compact Disks or the specific older
+format called VCD @emph{version-number}.
+
+vcddump's mission in life is to display the contents of a VCD
+image. Well, that's not actually true---if given an audio CD (CD-DA)
+or some other kind of CD, vcddump will try to display some information
+about that that with varying degress of success; However VCDs are what
+vcddump understands best and it will you the most detail about.  The
+disk ``image'' does not have to reside on a physical Compact Disk;
+vcddump understand the BIN/CUE disk-image format used by a popular
+DOS/Window mastering tool. 
+
+You might use the information from vcddump as a diagnostic or
+analytical tool. It may help you understand a particular VCD that you
+have. Or it might be useful in conjunction with or in debugging a VCD
+you are creating (``authoring''). But debugging is probably best left
+for another tool; vcddump will only let you display information, you
+can't modify anything with this tool.
+
+Although I imagine most of the time this is how you will use vcddump,
+there are some subsidiary uses. 
+
+vcddump shows information about a VCD and as such the information
+shown reflects, sort of, the way the information is stored. So in a
+sense vcddump can teach you a little bit about how a VCD is layed out.
+
+In writing an VCD input plugin for a media player, I wanted to
+get bits of information about the VCD to display in the media player,
+such as the VCD format used or the volume name. Before writing a C
+library for such purposes, a lower-tech, and more loosely-coupled way
+to do this was used. The program ran vcddump with the specific
+information request and parsed the output. For example, to get just
+the format that the VCD on the``default'' CD-ROM device is in you
+might run:
+
+@smallexample
+  vcddump --no-banner --show-format
+@end smallexample 
+
+To get the album information you might run:
+
+@smallexample
+  vcddump --no-banner --show-info album
+@end smallexample 
+
+After doing this for a while and seeing this was useful, I then wrote
+a VCD ``info'' libarary. A library is much faster and furthermore much
+of the information is saved away in memory reducing the amount of disk
+I/O. Later it turned out that I could shift the I/O completely from my
+program and use vcdinfo's I/O, but that's a different story. What's
+relevant is that after creating this library, I then modified vcddump
+to use this library. The vcddump code then got shorter (as some of it
+getting moved inside the vcdinfo library), and this program served as
+a test bed for the library. (It so happens that the input plugin was
+much harder and slower to debug since it is a ``shared object'')
+
+So the last thing that vcddump may be of useful for is if you want to
+see how to use the vcdinfo library; you can consult the source program
+and see how vcddump gets its information via vcdinfo.
+
+@node Command Options
+@chapter Command Options
+
+To get a list of options type @kbd{--help}. There are a number of
+miscellaneous options, but there are two broad categories of
+options. There is a set of options for specifying what to dump, these
+all start @kbd{--show-} and another set of options which specify where
+the CD-ROM or CD-ROM disk-image is.
+
+@subsection ``Where'' options
+
+--bin-cue-
+
+Options controlling where the CD-ROM or CD disk image are
+@kbd{--bin-file} (@kbd{-b}), @kbd{--cue-file} (@kbd{-c}),
+@kbd{--cdrom-device} and the ``intelligent'' option
+@kbd{--input}. These options are mutually exclusive, use only one
+option from this set.
+
+The option @kbd{--bin-file} and @kbd{--cue-file} indicatate to read from a file
+containing an image what might be burned onto Compact Disk. The format
+is expected to be in the BIN/CUE format that cdrdao uses and is used
+by a popular DOS/Windows CD mastering tool. If you use the --bin-file
+option, the file read is expected to be the ``.BIN'' part---this is
+the bulk of the data.  If you use @kbd{--cue-file} the file read is a funny
+sort of TOC (Table of Contents) file. The corresponding BIN file
+(which again contains the bulk of the data) is not taken from the FILE
+statement inside the CUE file, but it is constructed from the CUE file
+name by replacing ".cue" by ".bin".  The CUE file must have exactly
+one FILE statement.
+
+If you do not specify a file name after @kbd{--bin-file}, a default name is
+used ``VIDEOCD.BIN'' is probably used; likewise if you do not specify
+a filename after --cue-file a default name is used, probably
+``VIDEOCD.CUE.'' These names I believe are the default output file
+names used when you use vcdimager or vcdxbuild.
+
+It is preferable to specify a CUE file over a BIN file since this will
+give vcddump TOC and, in particular, track information that it cannot
+get otherwise. 
+
+--cdrom-device-
+
+The option @kbd{--cdrom-device} is used when you want to read from a Compact
+Disk. The name given would be the device name. If you don't specify a
+device, a default will be selected based on the Operating System or
+information that can be gleaned from the OS. For example on Linux, the
+default device may be @kbd{/dev/cdrom}, while on Solaris it might be
+@kbd{/vol/dev/aliases/cdrom0}.
+
+--input-
+
+The kind of where option tries to be intelligent by trying to figure
+out whether the thing you are referring to is a device or a bin/cue 
+disk image of a CD.
+
+Currently the algorithm it uses is pretty simple. If the thing
+referred to is what in Unix is called a ``block'' or ``character''
+device, then it assumes a device name. When you do ``long listing''
+(``ls -l'') of the name and track down possible symbolic links
+you will see a ``b'' or ``c'' in the first colum if the file is a
+block or character devcies.
+
+If the thing referred to in an @kbd{--input} option is a ``regular''
+file then it is assumed you have a file image of a CD. If the filename
+ends (i.e. the extension is) ``.bin'' or ``.BIN'' then we assume a
+``BIN file'' and if the filename ends ``.cue'' or ``.CUE'' then we
+assume a CUE file. 
+
+Althought this algorithm is subject to change and there may be more
+sophisticated or alternative methods, in practice I think this does
+pretty much what's expected. 
+
+@subsection ``What'' options
+
+--OTHER MISCELLANEOUS OPTIONS
+
+  -?, --help                  Show this help message
+  --usage                     Display brief usage message
+
+  --sector-2336
+
+This option only makes sense if you are reading from a file CD-image.
+This assumes somruse 2336 byte sector mode for image file.
+
+  -v, --verbose               
+
+verbose output
+
+  -t, --terse                 
+
+same as --no-header --no-banner --no-delimiter
+
+  -B, --no-banner 
+
+  -D, --no-delimiter          do not show delimiter lines around various
+                              sections of output
+
+  -q, --quiet                 show only critical messages
+  -V, --version               display version and copyright information and
+                              exit
+
+
+do not show program banner header and RCS. This can be useful if
+this program is getting called for information from another program
+and you don't want to have
+
+
+
+@node Output Sections
+@chapter Output Sections
+
+When you run vcddump to display the contents of an entire disk,
+unless you use the option @kbd{--no-delimiter} (@kbd{-D}) you'll notice large
+sections of output separated by a string of dashes like this:
+
+@smallexample
+-------------------------------------------------------------------------------
+@end smallexample 
+
+These separate the major logical sections of a VCD
+
+@c @menu
+@c * Source Information::  Overall disk information
+@c * Filesystem::          ISO 9660 Information
+@c * Entries::             Entries Section
+@c * Info::                Info Section
+@c * LOT::                 List of Tracks (LOT) Section
+@c * PSD::                 Program Segment Descriptors (PSD) Section
+@c * PVD::                 Primary Volume Descriptor (PVD) Section
+@c * Output Sections::     How do interpret the output? 
+@c @end menu
+
+
+@tex
+% I think something like @colophon should be in texinfo.  In the
+% meantime:
+\long\def\colophon{\hbox to0pt{}\vfill
+\centerline{The body of this manual is set in}
+\centerline{\fontname\tenrm,}
+\centerline{with headings in {\bf\fontname\tenbf}}
+\centerline{and examples in {\tt\fontname\tentt}.}
+\centerline{{\it\fontname\tenit\/},}
+\centerline{{\bf\fontname\tenbf}, and}
+\centerline{{\sl\fontname\tensl\/}}
+\centerline{are used for emphasis.}\vfill}
+\page\colophon
+% Blame: doc@cygnus.com, 1991.
+@end tex
+
+@bye
