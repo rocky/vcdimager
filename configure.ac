@@ -94,7 +94,7 @@ fi
 AC_PROG_CPP
 AM_PROG_CC_STDC
 AC_PROG_AWK
-AC_PROG_LIBTOOL
+AM_PROG_LIBTOOL
 
 dnl We use a diff in regression testing
 AC_PATH_PROG(DIFF, diff, no)
