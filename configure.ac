@@ -145,6 +145,15 @@ AC_SUBST(LIBVCDINFO_LIBS)
 case $host in
      *-linux*)
         AC_CHECK_HEADERS(linux/version.h)
+        AC_CHECK_HEADERS(linux/cdrom.h, [have_linux_cdrom_h="yes"])
+	if test "x$have_linux_cdrom_h" = "xyes" ; then
+	   AC_TRY_COMPILE(,[
+#include <linux/cdrom.h>
+struct cdrom_generic_command test;
+int has_timeout=sizeof(test.timeout);],
+            [AC_DEFINE([HAVE_LINUX_CDROM_TIMEOUT], [1], 
+               [Define 1 if timeout is in cdrom_generic_command struct])])
+	fi
 	LIBVCD_SYSDEP='vcd_image_cd-linux.$(OBJEXT)' 
 	;;
      *-bsdi*)
@@ -158,6 +167,7 @@ case $host in
 	LIBVCD_SYSDEP='vcd_image_cd-generic.$(OBJEXT)' 
 	;;
 esac
+AC_SUBST(LINUX_CDROM_TIMEOUT)
 AC_SUBST(LIBVCD_SYSDEP)
 
 AC_OUTPUT([ \

@@ -42,7 +42,7 @@ static const char _rcsid[] = "$Id$";
 # endif
 #endif
 
-#if defined(__VCD_IMAGE_LINUXCD_BUILD)
+#if defined(__VCD_IMAGE_LINUXCD_BUILD) && defined(HAVE_LINUX_CDROM_H)
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -205,7 +205,9 @@ __read_mode2 (int fd, void *buf, lba_t lba, unsigned nblocks,
   cgc.buflen = 2336 * nblocks;
   cgc.buffer = buf;
 
+#ifdef HAVE_LINUX_CDROM_TIMEOUT
   cgc.timeout = 500;
+#endif
   cgc.data_direction = CGC_DATA_READ;
 
   if (_workaround)
@@ -467,12 +469,12 @@ _vcd_get_default_device()
   return strdup(DEFAULT_VCD_DEVICE);
 }
 
-#endif /* defined(__VCD_IMAGE_LINUXCD_BUILD) */
+#endif /* __VCD_IMAGE_LINUXCD_BUILD) && defined(HAVE_LINUX_CDROM_H)) */
 
 VcdImageSource *
 vcd_image_source_new_cd (void)
 {
-#if defined(__VCD_IMAGE_LINUXCD_BUILD)
+#if defined(__VCD_IMAGE_LINUXCD_BUILD) && defined(HAVE_LINUX_CDROM_H)
   _img_cd_src_t *_data = _vcd_malloc (sizeof *_data);
 
   vcd_image_source_funcs _funcs = {
@@ -492,10 +494,14 @@ vcd_image_source_new_cd (void)
   return vcd_image_source_new (_data, &_funcs);
 
 #elif defined(__linux__)
-  vcd_error ("linux cd image source driver was not enabled in build due to old or missing linux kernel headers at compile time.");
+#if !defined(HAVE_LINUX_CDROM_H)
+  vcd_error ("GNU/Linux CDd image source driver was not enabled in build due to old or missing linux/cdrom.h header at compile time.");
+#else   
+  vcd_error ("GNU/Linux cd image source driver was not enabled in build due to old or missing GNU/Linux kernel headers at compile time.");
+#endif
   return NULL;
 #else
-# error linux cd image source only supported under linux
+# error GNU/Linux CD image source only supported under GNU/Linux
   vcd_assert_not_reached ();
   return NULL;
 #endif

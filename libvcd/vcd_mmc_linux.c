@@ -34,7 +34,7 @@
 # endif
 #endif
 
-#if defined(__VCD_MMC_LINUX_BUILD)
+#if defined(__VCD_IMAGE_LINUXCD_BUILD) && defined(HAVE_LINUX_CDROM_H)
 #include <libvcd/vcd_util.h>
 
 #include <string.h>
@@ -96,8 +96,11 @@ _vcd_mmc_linux_generic_packet (void *device, _vcd_mmc_command_t * cmd)
     .stat = 0,
     .sense = &sense,
     .data_direction = CGC_DATA_UNKNOWN,
+#ifdef HAVE_LINUX_CDROM_TIMEOUT
+    /* Some linux/cdrom.h's doen't have these fields: */
     .quiet = 0,
     .timeout = cmd->timeout,
+#endif
   };
 
   memcpy (&cgc.cmd, &cmd->cdb, 12);
@@ -197,11 +200,11 @@ _vcd_mmc_linux_destroy_device (void *user_data)
 }
 
 
-#else /* !defined (__linux__) */
+#else /* GNU/Linux Packet interface not available. */
 int
 _vcd_mmc_linux_generic_packet (void *device, _vcd_mmc_command_t * cmd)
 {
-  vcd_error ("Tried to access linux packed interface on non-linux system.");
+  vcd_error ("Tried to access GNU/Linux packet interface when not available.");
   vcd_assert_not_reached ();
   return -1;
 };
@@ -209,14 +212,14 @@ _vcd_mmc_linux_generic_packet (void *device, _vcd_mmc_command_t * cmd)
 void *
 _vcd_mmc_linux_new_device (const char *device)
 {
-  vcd_info ("Generic packet interface only supported on linux.");
+  vcd_info ("GNU/Linux packet interface was not built in.");
   return NULL;
 }
 
 void
 _vcd_mmc_linux_destroy_device (void *user_data)
 {
-  vcd_error ("Tried to access linux packed interface on non-linux system.");
+  vcd_error ("Tried to access GNU/Linux packet interface when not available.");
   vcd_assert_not_reached ();
 }
 
