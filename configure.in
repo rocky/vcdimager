@@ -45,7 +45,7 @@ if test "x$enable_cli_fe" = "xyes"; then
 fi
 
 if test "x$enable_xml_fe" = "xyes"; then
-  AM_PATH_XML2(2.3.0, , enable_xml_fe=no)
+  AM_PATH_XML2(2.3.8, , enable_xml_fe=no)
 fi
 
 if test "x$enable_gnome_fe" = "xyes"; then

@@ -33,45 +33,13 @@
 #include <libxml/xmlmemory.h>
 #include <libxml/xmlerror.h>
 
-#include "videocd_dtd.h"
 
 #include "vcd_types.h"
 
 #include "vcdxml.h"
 #include "vcd_xml_parse.h"
 #include "vcd_xml_master.h"
-
-#define VIDEOCD_DTD_PUBID "-//GNU//DTD VideoCD//EN"
-#define VIDEOCD_DTD_SYSID "http://www.gnu.org/software/vcdimager/videocd.dtd"
-#define VIDEOCD_DTD_XMLNS "http://www.gnu.org/software/vcdimager/1.0/"
-
-/* static xmlExternalEntityLoader _xmlExternalEntityLoaderDefault = 0; */
-static bool videocd_dtd_loaded = false;
-
-static xmlParserInputPtr 
-_xmlExternalEntityLoader (const char *URL, const char *ID, xmlParserCtxtPtr context)
-{
-
-  videocd_dtd_loaded = true;
-
-  if (ID && !strcmp (ID, VIDEOCD_DTD_PUBID))
-    {
-      xmlParserInputBufferPtr _input_buf;
-
-      _input_buf = xmlParserInputBufferCreateMem (videocd_dtd, 
-						  strlen (videocd_dtd),
-						  XML_CHAR_ENCODING_8859_1);
-
-      return xmlNewIOInputStream (context, _input_buf, 
-				  XML_CHAR_ENCODING_8859_1);
-    }
-
-  printf ("%s (\"%s\", \"%s\", %p);\n", __PRETTY_FUNCTION__, URL, ID, context);
-  printf ("unsupported doctype encountered\n");
-  exit (EXIT_FAILURE);
-  
-  /* return _xmlExternalEntityLoaderDefault (URL, ID, context); */
-}
+#include "vcd_xml_dtd.h"
 
 static void
 _init_xml (void)
@@ -84,8 +52,7 @@ _init_xml (void)
   xmlKeepBlanksDefaultValue = false;
   xmlIndentTreeOutput = true; 
 
-  /* _xmlExternalEntityLoaderDefault = xmlGetExternalEntityLoader (); */
-  xmlSetExternalEntityLoader (_xmlExternalEntityLoader);
+  vcd_xml_dtd_init ();
 }
 
 static xmlDocPtr
@@ -148,12 +115,11 @@ main (int argc, const char *argv[])
       return EXIT_FAILURE;
     }
 
-  if (!videocd_dtd_loaded)
+  if (vcd_xml_dtd_loaded < 1)
     {
       printf ("doctype declaration missing\n");
       return EXIT_FAILURE;
     }
-    
 
   do {
     xmlNodePtr root;

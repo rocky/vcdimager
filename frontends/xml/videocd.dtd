@@ -45,7 +45,7 @@
 <!ELEMENT next-volume-use-sequence2 EMPTY>
 <!ELEMENT next-volume-use-lid2 EMPTY>
 
-<!ELEMENT pvd (volume-id?,system-id?,application-id?,preparer-id?,publisher-id)>
+<!ELEMENT pvd (volume-id?,system-id?,application-id?,preparer-id?,publisher-id?)>
 <!ELEMENT volume-id (#PCDATA)>
 <!ELEMENT system-id (#PCDATA)>
 <!ELEMENT application-id (#PCDATA)>

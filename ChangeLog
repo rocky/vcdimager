@@ -1,3 +1,10 @@
+2001-05-17  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* frontends/xml/vcd_xml_gen.c: wrote compatibility tool, resembling
+		classic vcdimager's cli interface
+
+	* frontends/xml/vcd_xml_dtd.c: put dtd stuff here...
+
 2001-05-15  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd/vcd_image_bincue.c (vcd_image_sink_new_bincue): implemented

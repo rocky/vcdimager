@@ -1,6 +1,6 @@
 POPT_LIBS = -lpopt
 
-bin_PROGRAMS = vcdxml 
+bin_PROGRAMS = vcdxbuild vcdxgen
 #vcdrestore
 
 INCLUDES = -I$(top_srcdir) $(POPT_INCLUDES) $(LIBVCD_CFLAGS) $(XML_CFLAGS)
@@ -8,25 +8,32 @@ INCLUDES = -I$(top_srcdir) $(POPT_INCLUDES) $(LIBVCD_CFLAGS) $(XML_CFLAGS)
 VCD_LIBS = $(top_builddir)/libvcd/libvcd.a
 
 EXTRA_DIST = videocd.dtd
-BUILT_SOURCES = videocd_dtd.h
-#DISTCLEANFILES = videocd_dtd.h
+BUILT_SOURCES = videocd_dtd.inc
+MOSTLYCLEANFILES = videocd_dtd.inc
 
-vcdxml_LDADD = $(XML_LIBS) $(VCD_LIBS) $(POPT_LIBS)
-vcdxml_SOURCES = \
-	vcdxml.c \
+vcdxbuild_LDADD = $(XML_LIBS) $(VCD_LIBS) $(POPT_LIBS)
+vcdxbuild_SOURCES = \
 	vcdxml.h \
+	vcd_xml_build.c \
 	vcd_xml_parse.h \
 	vcd_xml_parse.c \
 	vcd_xml_master.c \
-	vcd_xml_master.h
+	vcd_xml_master.h \
+	vcd_xml_dtd.h \
+	vcd_xml_dtd.c
 
-#vcdrestore_LDADD = $(XML_LIBS) $(VCD_LIBS) $(POPT_LIBS)
-#vcdrestore_SOURCES = \
+#vcdxrestore_LDADD = $(XML_LIBS) $(VCD_LIBS) $(POPT_LIBS)
+#vcdxrestore_SOURCES = \
 #	vcdrestore.c \
 #	vcdxml.h 
 
-videocd_dtd.h: $(srcdir)/videocd.dtd
-	(sed 's/\"/\\"/g' | $(AWK) 'BEGIN { print "static char videocd_dtd[] = \\" } { print " \"" $$0 "\\n\" \\" } END { print ";" }') < $< > $@
+vcdxgen_LDADD = $(XML_LIBS) $(POPT_LIBS) $(VCD_LIBS)
+vcdxgen_SOURCES = \
+	vcd_xml_gen.c \
+	vcd_xml_dtd.h 
+
+videocd_dtd.inc: $(srcdir)/videocd.dtd
+	(sed 's/\"/\\"/g' | $(AWK) 'BEGIN { print "char videocd_dtd[] = \\" } { print " \"" $$0 "\\n\" \\" } END { print ";" }') < $< >> $@
 
 clean-local:
 	-rm -f *.ps
