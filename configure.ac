@@ -23,7 +23,7 @@ AC_INIT([GNU VCDimager],0.7.21cvs, [bugs-vcdimager@gnu.org], [vcdimager])
 AC_CONFIG_SRCDIR([lib/vcd.c])
 AM_INIT_AUTOMAKE(1.6.0)
 
-SPEC_VERSION=0.7.20
+SPEC_VERSION=0.7.21cvs
 AC_SUBST(SPEC_VERSION)
 
 dnl AM_ACLOCAL_INCLUDE(.)
@@ -151,7 +151,7 @@ dnl headers
 AC_DEFINE(_DEVELOPMENT_, [], enable warnings about being development release)
 AC_DEFINE(_GNU_SOURCE, [], enable GNU libc extension)
 AC_STDC_HEADERS
-AC_CHECK_HEADERS(sys/stat.h stdint.h inttypes.h stdbool.h)
+AC_CHECK_HEADERS(sys/stat.h stdint.h inttypes.h stdbool.h sys/mman.h)
 
 if test "x$ac_cv_header_stdint_h" != "xyes" 
  then

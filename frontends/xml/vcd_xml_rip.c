@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2001,2003 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2001, 2003, 2004 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -39,6 +39,10 @@
 #include <libvcd/sector.h>
 #include <libvcd/files.h>
 #include <libvcd/info.h>
+
+#if defined ( WIN32 )
+#define ftruncate chsize
+#endif
 
 #include <stdio.h>
 #include <errno.h>
