@@ -23,6 +23,9 @@
 #endif
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include <libvcd/vcd_util.h>
 #include <libvcd/vcd_assert.h>
 
@@ -34,23 +37,68 @@
 int
 main (int argc, const char *argv[])
 {
-  VcdImageSource *img;
-  VcdDataSource *src;
+  VcdImageSource *img = NULL;
+  uint32_t lsn = 0;
 
-  src = vcd_data_source_new_stdio (argv[1]);
+  vcd_assert (argc == 4);
 
-  vcd_assert (src != NULL);
+  if (!strcmp ("nrg", argv[1]))
+    {
+      VcdDataSource *src = vcd_data_source_new_stdio (argv[2]);
+      vcd_assert (src != NULL);
 
-  img = vcd_image_source_new_nrg (src);
+      img = vcd_image_source_new_nrg (src); 
+    }
+  else if (!strcmp ("bincue", argv[1]))
+    {
+      VcdDataSource *src = vcd_data_source_new_stdio (argv[2]);
+      vcd_assert (src != NULL);
+
+      img = vcd_image_source_new_bincue (src, NULL, false); 
+    }
+  else if (!strcmp ("linuxcd", argv[1]))
+    img = vcd_image_source_new_linuxcd (argv[2]);
+  else 
+    vcd_error ("unrecognized img type");
+
+  vcd_assert (img != NULL);
 
   {
     uint32_t n = vcd_image_source_stat_size (img);
     char buf[2336];
+    lsn = atoi (argv[3]);
 
     vcd_debug ("size = %d", n);
 
-    while (n > 0)
-      vcd_image_source_read_mode2_sector (img, buf, --n, true);
+    vcd_debug ("reading sector %d to testimage.out", lsn);
+    
+    if (!vcd_image_source_read_mode2_sector (img, buf, lsn, true))
+      {
+	struct m2f2sector
+	{
+	  uint8_t subheader[8];
+	  uint8_t data[2324];
+	  uint8_t spare[4];
+	}
+	*_sect = (void *) buf;
+	FILE *fd;
+
+	vcd_debug ("fn = %d, cn = %d, sm = 0x%x, ci = 0x%x",
+		   _sect->subheader[0],
+		   _sect->subheader[1],
+		   _sect->subheader[2],
+		   _sect->subheader[3]);
+
+	fd = fopen ("testimage.out", "wb");
+	fwrite (buf, sizeof (buf), 1, fd);
+	fclose (fd);
+
+	/* vcd_assert_not_reached (); */
+      }
+    else
+      vcd_error ("failed...");
+
+    
   }
 
   return 0;

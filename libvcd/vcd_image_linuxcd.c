@@ -44,6 +44,7 @@
 
 typedef struct {
   FILE *fd;
+  int ioctls_debugged; /* for debugging */
 } _img_linuxcd_src_t;
 
 static void
@@ -73,10 +74,20 @@ _read_mode2_sector (void *user_data, void *data, uint32_t lsn, bool form2)
       msf->cdmsf_sec0 = from_bcd8(_msf.s);
       msf->cdmsf_frame0 = from_bcd8(_msf.f);
 
-      /* if (!msf->cdmsf_frame0) */
-      vcd_debug ("reading %2.2d:%2.2d:%2.2d",
-		 msf->cdmsf_min0, msf->cdmsf_sec0, msf->cdmsf_frame0);
-      
+      if (_obj->ioctls_debugged == 75)
+	vcd_debug ("only displaying every 75th ioctl from now on");
+
+      if (_obj->ioctls_debugged == 30 * 75)
+	vcd_debug ("only displaying every 30*75th ioctl from now on");
+
+      if (_obj->ioctls_debugged < 75 
+	  || (_obj->ioctls_debugged < (30 * 75)  && _obj->ioctls_debugged % 75 == 0)
+	  || _obj->ioctls_debugged % (30 * 75) == 0)
+	vcd_debug ("reading %2.2d:%2.2d:%2.2d",
+		   msf->cdmsf_min0, msf->cdmsf_sec0, msf->cdmsf_frame0);
+     
+      _obj->ioctls_debugged++;
+ 
       if (ioctl (fileno (_obj->fd), CDROMREADMODE2, &buf) == -1)
         {
           perror ("ioctl()");

@@ -850,7 +850,7 @@ _rip_sequences (struct vcdxml_t *obj, VcdImageSource *img)
 	    }
 
 
-#ifdef DEBUG	 
+#if defined(DEBUG)
 	  if (!in_data)
 	    vcd_debug ("%2.2x %2.2x %2.2x %2.2x",
 		       buf.subheader[0],

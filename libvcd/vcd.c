@@ -1252,15 +1252,58 @@ _write_vcd_iso_track (VcdObj *obj)
 
           if (packet_no < _segment->info->packets)
             {
+              struct vcd_mpeg_packet_flags pkt_flags;
+
+              vcd_mpeg_source_get_packet (_segment->source, packet_no,
+                                          buf, &pkt_flags);
+
+              sm = SM_FORM2 | SM_REALT;
+              cn = CN_OTHER;
+              ci = CI_OTHER;
               fn = 1;
-              cn = 1;
-              sm = SM_FORM2 | SM_REALT | SM_VIDEO;
-              ci = 0x80; /* fixme -- different for VCD2.0 */
+              
+              switch (pkt_flags.type) 
+                {
+                case PKT_TYPE_VIDEO:
+                  sm = SM_FORM2 | SM_REALT | SM_VIDEO;
+
+                  ci = CI_VIDEO;
+                  cn = CN_VIDEO;
+
+                  if (pkt_flags.video_e1)
+                    ci = CI_STILL, cn = CN_STILL;
+
+                  if (pkt_flags.video_e2)
+                    ci = CI_STILL2, cn = CN_STILL2;
+                  break;
+
+                case PKT_TYPE_AUDIO:
+                  sm = SM_FORM2 | SM_REALT | SM_AUDIO;
+                  
+                  ci = CI_AUDIO;
+                  cn = CN_AUDIO;
+                  break;
+
+                case PKT_TYPE_EMPTY:
+                  ci = CI_PAD;
+                  cn = CN_PAD;
+                  break;
+
+                default:
+                  /* fixme -- check.... */
+                  break;
+                }
+
+              if (obj->type == VCD_TYPE_SVCD)
+                {
+                  cn = 1;
+                  sm = SM_FORM2 | SM_REALT | SM_VIDEO;
+                  ci = 0x80;
+                }
 
               if (packet_no + 1 == _segment->info->packets)
                 sm |= SM_EOF;
 
-              vcd_mpeg_source_get_packet (_segment->source, packet_no, buf, NULL);
             }
           else
             {

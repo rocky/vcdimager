@@ -330,6 +330,9 @@ _visit_lot (debug_obj_t *obj)
   const LotVcd *lot = obj->lot;
   unsigned n, tmp;
 
+  if (!_get_psd_size (obj))
+    return;
+
   for (n = 0; n < LOT_VCD_OFFSETS; n++)
     if ((tmp = UINT16_FROM_BE (lot->offset[n])) != 0xFFFF)
       _visit_pbc (obj, n + 1, tmp, true);
@@ -841,7 +844,7 @@ dump_all (const debug_obj_t *obj)
   dump_info (obj);
   fprintf (stdout, DELIM);
   dump_entries (obj);
-  if (_get_psd_size (obj));
+  if (_get_psd_size (obj))
     {
       fprintf (stdout, DELIM);
       dump_lot (obj);
