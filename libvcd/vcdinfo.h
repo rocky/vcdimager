@@ -209,14 +209,8 @@ typedef enum {
   VCDINFO_OPEN_OTHER,          /* Is not VCD but something else */
 } vcdinfo_open_return_t;
 
-/*!
-  \brief Classify itemid_num into the kind of item it is: track #, entry #, 
-  segment #. 
-  \param itemid is set to contain this classifcation an the converted 
-  entry number. 
-*/
-void
-vcdinfo_classify_itemid (uint16_t itemid_num, vcdinfo_itemid_t *itemid);
+const char *
+vcdinfo_area_str (const struct psd_area_t *_area);
 
 /*!
    Return the number of audio channels implied by "audio_type".
@@ -239,7 +233,6 @@ const char * vcdinfo_audio_type2str(const vcdinfo_obj_t *obj,
 const char * 
 vcdinfo_ogt2str(const vcdinfo_obj_t *obj, unsigned int seg_num);
 
-
 /*!
   Note first seg_num is 0!
 */
@@ -248,6 +241,18 @@ vcdinfo_video_type2str(const vcdinfo_obj_t *obj, unsigned int seg_num);
 
 const char *
 vcdinfo_pin2str (uint16_t itemid);
+
+int
+vcdinfo_calc_psd_wait_time (uint16_t wtime);
+
+/*!
+  \brief Classify itemid_num into the kind of item it is: track #, entry #, 
+  segment #. 
+  \param itemid is set to contain this classifcation an the converted 
+  entry number. 
+*/
+void
+vcdinfo_classify_itemid (uint16_t itemid_num, vcdinfo_itemid_t *itemid);
 
 /*!
   Return a string containing the VCD album id, or NULL if there is 
@@ -374,22 +379,22 @@ uint16_t
 vcdinfo_get_num_LIDs (const vcdinfo_obj_t *obj);
 
 /**
- * \fn vcdinfo_get_next_from_pld(const PsdPlayListDescriptor *pld);
- * \brief Get next offset for a given PSD selector descriptor. 
- * \return VCDINFO_INVALID_OFFSET is returned if pld on error or pld is
- * NULL. Otherwise the LID offset is returned.
+ \fn vcdinfo_get_next_from_pld(const PsdPlayListDescriptor *pld); 
+ \brief  Get next offset for a given PSD selector descriptor.  
+ \return  VCDINFO_INVALID_OFFSET is returned on error or if pld has no "next"
+ entry or pld is NULL. Otherwise the LID offset is returned.
  */
 uint16_t
 vcdinfo_get_next_from_pld(const PsdPlayListDescriptor *pld);
 
 /**
- * \fn vcdinfo_get_next_from_psd(const PsdSelectionListDescriptor *d);
- * \brief Get next offset for a given PSD selector descriptor. 
- * \return VCDINFO_INVALID_OFFSET is returned if d on error or d is
- * NULL. Otherwise the LID offset is returned.
+ \fn vcdinfo_get_next_from_psd(const PsdSelectionListDescriptor *psd);
+ \brief Get next offset for a given PSD selector descriptor. 
+ \return  VCDINFO_INVALID_OFFSET is returned on error or if psd has no "next"
+ entry or psd is NULL. Otherwise the LID offset is returned.
  */
 uint16_t
-vcdinfo_get_next_from_psd(const PsdSelectionListDescriptor *pld);
+vcdinfo_get_next_from_psd(const PsdSelectionListDescriptor *psd);
 
 /*!
   Return the number of entries in the VCD.
@@ -435,6 +440,9 @@ vcdinfo_get_offset_from_psd(const PsdSelectionListDescriptor *d,
 			    unsigned int entry_num);
 
 
+/*! 
+  NULL is returned on error. 
+*/
 vcdinfo_offset_t *
 vcdinfo_get_offset_t (const vcdinfo_obj_t *obj, unsigned int offset, bool ext);
 
@@ -453,19 +461,19 @@ const char *
 vcdinfo_get_preparer_id(const vcdinfo_obj_t *obj);
 
 /**
- * \fn vcdinfo_get_prev_from_psd(const PsdSelectionListDescriptor *pld);
- * \brief Get prev offset for a given PSD selector descriptor. 
- * \return VCDINFO_INVALID_OFFSET is returned if d on error or pld is
- * NULL. Otherwise the LID offset is returned.
+ \fn vcdinfo_get_prev_from_psd(const PsdSelectionListDescriptor *pld);
+ \brief Get prev offset for a given PSD selector descriptor. 
+ \return  VCDINFO_INVALID_OFFSET is returned on error or if pld has no "prev"
+ entry or pld is NULL. Otherwise the LID offset is returned.
  */
 uint16_t
 vcdinfo_get_prev_from_pld(const PsdPlayListDescriptor *pld);
 
 /**
- * \fn vcdinfo_get_prev_from_psd(const PsdPlayListDescriptor *psd);
- * \brief Get prev offset for a given PSD selector descriptor. 
- * \return VCDINFO_INVALID_OFFSET is returned if psd on error or psd is
- * NULL. Otherwise the LID offset is returned.
+ \fn vcdinfo_get_prev_from_psd(const PsdPlayListDescriptor *psd);
+ \brief Get prev offset for a given PSD selector descriptor. 
+ \return  VCDINFO_INVALID_OFFSET is returned on error or if psd has no "prev"
+ entry or psd is NULL. Otherwise the LID offset is returned.
  */
 uint16_t
 vcdinfo_get_prev_from_psd(const PsdSelectionListDescriptor *psd);
@@ -492,16 +500,16 @@ vcdinfo_get_pxd_from_lid(const vcdinfo_obj_t *obj, PsdListDescriptor *pxd,
 			 uint16_t lid, bool ext);
 /*!
   \brief Get return offset for a given PSD selector descriptor. 
-  \return VCDINFO_INVALID_OFFSET is returned if d on error or d is
-  NULL. Otherwise the LID offset is returned.
+  \return  VCDINFO_INVALID_OFFSET is returned on error or if pld has 
+  no "return"  entry or pld is NULL. Otherwise the LID offset is returned.
 */
 uint16_t
 vcdinfo_get_return_from_pld(const PsdPlayListDescriptor *pld);
 
 /*!
   \brief Get return offset for a given PSD selector descriptor. 
-  \return VCDINFO_INVALID_OFFSET is returned if pld on error or pld is
-  NULL. Otherwise the LID offset is returned.
+  \return  VCDINFO_INVALID_OFFSET is returned on error or if psd has 
+  no "return" entry or psd is NULL. Otherwise the LID offset is returned.
 */
 uint16_t
 vcdinfo_get_return_from_psd(const PsdSelectionListDescriptor *psd);
@@ -703,11 +711,21 @@ vcdinfo_get_wait_time (const PsdPlayListDescriptor *d);
 */
 const char *
 vcdinfo_get_xa_attr_str (uint16_t xa_attr);
-int
-vcdinfo_calc_psd_wait_time (uint16_t wtime);
 
-const char *
-vcdinfo_area_str (const struct psd_area_t *_area);
+/*!
+  Return true is there is playback control. 
+*/
+bool
+vcdinfo_has_pbc (const vcdinfo_obj_t *obj);
+  
+/*! 
+  Return true if VCD has "extended attributes" (XA). Extended attributes
+  add meta-data attributes to a entries of file describing the file.
+  See also vcdinfo_get_xa_attr_str() which returns a string similar to
+  a string you might get on a Unix filesystem listing ("ls").
+*/
+bool 
+vcdinfo_has_xa(const vcdinfo_obj_t *obj);
 
 /*!
   Add one to the MSF.
@@ -805,14 +823,6 @@ vcdinfo_close(vcdinfo_obj_t *obj);
 */
 bool
 vcdinfo_is_rejected(uint16_t offset);
-
-/*! 
-  Return true if VCD has "extended attributes" (XA). Extended attributes
-  add meta-data attributes to a entries of file describing the file.
-  See also vcdinfo_get_xa_attr_str() which returns a string similar to
-  a string you might get on a Unix filesystem listing ("ls").
-*/
-bool vcdinfo_has_xa(const vcdinfo_obj_t *obj);
 
 #ifdef __cplusplus
 }

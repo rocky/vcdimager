@@ -197,7 +197,7 @@ _hexdump (const void *data, unsigned len)
 }
 
 typedef enum {
-  PBC_VCD2_NO_INFO,     /* NO PBC INFO info->psd_size == 0 */
+  PBC_VCD2_NO_PBC,      /* NO PBC */
   PBC_VCD2_EXT,         /* Has extended PBC for VCD 2.0 */
   PBC_VCD2_NOPE,        /* Is not VCD 2.0 */
   PBC_VCD2_NO_LOT_X,    /* EXT/LOT_X.VCD doesn't exist */
@@ -209,10 +209,8 @@ static vcd2_ext_pbc_status_t
 _has_vcd2_ext_pbc (const vcdinfo_obj_t *obj)
 {
   vcd_image_stat_t statbuf;
-  const InfoVcd *info = &obj->info;
-
-  if (!info->psd_size)
-    return PBC_VCD2_NO_INFO;
+  if (!vcdinfo_has_pbc(obj))
+    return PBC_VCD2_NO_PBC;
 
   if (obj->vcd_type != VCD_TYPE_VCD2)
     return PBC_VCD2_NOPE;
@@ -474,7 +472,7 @@ dump_info (const vcdinfo_obj_t *obj)
              _vcd_bool_str (info->flags.pbc_x));
     switch (_has_vcd2_ext_pbc(obj))
       {
-      case PBC_VCD2_NO_INFO:
+      case PBC_VCD2_NO_PBC:
         fprintf(stdout, " No PBC info.\n");
         break;
       case PBC_VCD2_NO_LOT_X:
