@@ -12,6 +12,8 @@ testischar_LDADD = $(LIBVCD_LIBS)
 
 testimage_LDADD = $(LIBVCD_LIBS)
 
+check_sizeof_LDADD = $(LIBVCD_LIBS)
+
 # make check targets
 
 check_PROGRAMS = check_sizeof check_bitfield
