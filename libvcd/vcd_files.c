@@ -51,16 +51,19 @@ set_entries_vcd (VcdObj *obj, void *buf)
     case VCD_TYPE_VCD11:
       strncpy(entries_vcd.ID, ENTRIES_ID_VCD, 8);
       entries_vcd.version = ENTRIES_VERSION_VCD11;
+      entries_vcd.sys_prof_tag = ENTRIES_SPTAG_VCD11;
       break;
 
     case VCD_TYPE_VCD2:
       strncpy(entries_vcd.ID, ENTRIES_ID_VCD, 8);
       entries_vcd.version = ENTRIES_VERSION_VCD2;
+      entries_vcd.sys_prof_tag = ENTRIES_SPTAG_VCD2;
       break;
 
     case VCD_TYPE_SVCD:
       strncpy(entries_vcd.ID, ENTRIES_ID_SVCD, 8);
       entries_vcd.version = ENTRIES_VERSION_SVCD;
+      entries_vcd.sys_prof_tag = ENTRIES_SPTAG_SVCD;
       break;
       
     default:
@@ -129,7 +132,7 @@ set_psd_vcd (VcdObj *obj, void *buf)
       _md->lid = UINT16_TO_BE (n+1);
       _md->prev_ofs = UINT16_TO_BE (n ? (n - 1) << 1 : 0xffff);
       _md->next_ofs = UINT16_TO_BE ((n + 1) << 1);
-      _md->retn_ofs = UINT16_TO_BE ((get_psd_size (obj) - 8) >> 3);
+      _md->return_ofs = UINT16_TO_BE ((get_psd_size (obj) - 8) >> 3);
       _md->ptime = UINT16_TO_BE (0x0000);
       _md->wtime = 0x05;
       _md->atime = 0x00;
@@ -209,32 +212,35 @@ set_info_vcd(VcdObj *obj, void *buf)
     }
   
   strncpy(info_vcd.album_desc, 
-          "by GNU VCDImager",
+          "BY_GNU_VCDIMAGER",
           sizeof(info_vcd.album_desc));
 
   info_vcd.vol_count = UINT16_TO_BE(0x0001);
   info_vcd.vol_id = UINT16_TO_BE(0x0001);
 
-  for (n = 0, node = _vcd_list_begin (obj->mpeg_track_list);
-       node != NULL;
-       n++, node = _vcd_list_node_next (node))
-    {
-      mpeg_track_t *track = _vcd_list_node_data (node);
-
-      if(track->mpeg_info.norm == MPEG_NORM_PAL 
-         || track->mpeg_info.norm == MPEG_NORM_PAL_S)
-        _set_bit(info_vcd.pal_flags, n);
-    }
-
   switch (obj->type)
     {
     case VCD_TYPE_VCD2:
     case VCD_TYPE_SVCD:
+      /* NTSC/PAL bitset */
+
+      for (n = 0, node = _vcd_list_begin (obj->mpeg_track_list);
+           node != NULL;
+           n++, node = _vcd_list_node_next (node))
+        {
+          mpeg_track_t *track = _vcd_list_node_data (node);
+          
+          if(track->mpeg_info.norm == MPEG_NORM_PAL 
+             || track->mpeg_info.norm == MPEG_NORM_PAL_S)
+            _set_bit(info_vcd.pal_flags, n);
+        }
+      
       info_vcd.psd_size = UINT32_TO_BE(get_psd_size (obj));
       info_vcd.offset_mult = INFO_OFFSET_MULT;
-      info_vcd.last_psd_ofs = UINT16_TO_BE((_vcd_list_length (obj->mpeg_track_list))<<1);
-      
-      /* info_vcd.item_count = UINT16_TO_BE(0x0000); no items in /SEGMENT supported yet */
+      info_vcd.last_psd_ofs = 
+        UINT16_TO_BE((_vcd_list_length (obj->mpeg_track_list))<<1);
+      info_vcd.item_count = UINT16_TO_BE(0x0000); /* no items in /SEGMENT
+                                                     supported yet */
       break;
 
     case VCD_TYPE_VCD11:

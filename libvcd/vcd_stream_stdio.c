@@ -108,16 +108,28 @@ static long
 _stdio_read(void *user_data, void *buf, long count)
 {
   _UserData *ud = user_data;
+  long read;
 
-  return fread(buf, 1, count, ud->fd);
+  read = fread(buf, 1, count, ud->fd);
+
+  if (read != count) /* fixme -- ferror/feof */
+    vcd_error ("fread (): %s", strerror (errno));
+
+  return read;
 }
 
 static long
 _stdio_write(void *user_data, const void *buf, long count)
 {
   _UserData *ud = user_data;
+  long written;
 
-  return fwrite(buf, 1, count, ud->fd);
+  written = fwrite(buf, 1, count, ud->fd);
+  
+  if (written != count)
+    vcd_error ("fwrite (): %s", strerror (errno));
+
+  return written;
 }
 
 VcdDataSource*

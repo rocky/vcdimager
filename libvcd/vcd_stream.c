@@ -83,12 +83,14 @@ vcd_data_sink_seek(VcdDataSink* obj, long offset)
 long
 vcd_data_sink_write(VcdDataSink* obj, const void *ptr, long size, long nmemb)
 {
+  long written;
+  
   _vcd_data_sink_open_if_necessary(obj);
 
-  obj->op.write(obj->user_data, ptr, size*nmemb);
-  obj->position += size*nmemb;
+  written = obj->op.write(obj->user_data, ptr, size*nmemb);
+  obj->position += written;
 
-  return nmemb;
+  return written;
 }
 
 void
@@ -167,9 +169,7 @@ vcd_data_source_read(VcdDataSource* obj, void *ptr, long size, long nmemb)
 {
   _vcd_data_source_open_if_necessary(obj);
 
-  obj->op.read(obj->user_data, ptr, size*nmemb);
-
-  return nmemb;
+  return obj->op.read(obj->user_data, ptr, size*nmemb);
 }
 
 long

@@ -31,8 +31,13 @@
 #define ENTRIES_ID_SVCD "ENTRYVCD" /* not ENTRYSVD! */
 
 #define ENTRIES_VERSION_VCD11 0x01
+#define ENTRIES_SPTAG_VCD11   0x01   
+
 #define ENTRIES_VERSION_VCD2  0x02
+#define ENTRIES_SPTAG_VCD2    0x00
+
 #define ENTRIES_VERSION_SVCD  0x01
+#define ENTRIES_SPTAG_SVCD    0x00
 
 #ifdef __MWERKS__
 #pragma options align=packed
@@ -44,10 +49,11 @@ typedef struct {
                                              0x01 --- SVCD, should be
                                              same as version in
                                              INFO.SVD */
-  uint8_t reserved1          GNUC_PACKED; /* RESERVED, must be 0x00 */
+  uint8_t sys_prof_tag       GNUC_PACKED; /* 0x01 if VCD1.1
+                                             0x00 else */
   uint16_t tracks            GNUC_PACKED; /* 1 <= tracks <= 500 */
   struct { /* all fields are BCD */
-    uint8_t n                GNUC_PACKED;
+    uint8_t n                GNUC_PACKED; /* cd track no 2 <= n <= 99 */
     msf_t msf                GNUC_PACKED;
   } entry[500]               GNUC_PACKED;
   uint8_t reserved2[36]      GNUC_PACKED; /* RESERVED, must be 0x00 */
@@ -251,22 +257,22 @@ typedef struct {
   uint16_t lid               GNUC_PACKED;
   uint16_t prev_ofs          GNUC_PACKED;
   uint16_t next_ofs          GNUC_PACKED;
-  uint16_t retn_ofs          GNUC_PACKED;
-  uint16_t unk1_ofs          GNUC_PACKED; /* unknown */
-  uint16_t unk2_ofs          GNUC_PACKED; /* unknown */
-  uint8_t unknown3           GNUC_PACKED;
-  uint8_t unknown4           GNUC_PACKED;
+  uint16_t return_ofs        GNUC_PACKED;
+  uint16_t default_ofs       GNUC_PACKED;
+  uint16_t timeout_ofs       GNUC_PACKED;
+  uint8_t wtime              GNUC_PACKED;
+  uint8_t loop               GNUC_PACKED;
   uint16_t itemid            GNUC_PACKED;
-  uint16_t bsn_ofs[0]        GNUC_PACKED; /* variable length */
+  uint16_t ofs[0]            GNUC_PACKED; /* variable length */
   /* PsdSelectionListDescriptor2 */
 } PsdSelectionListDescriptor;
 
 typedef struct {
-  struct psd_area_t prev_area;
-  struct psd_area_t next_area;
-  struct psd_area_t retn_area;
-  struct psd_area_t unk1_area;
-  struct psd_area_t bsn_area[0]; /* variable length */
+  struct psd_area_t prev_area      GNUC_PACKED;
+  struct psd_area_t next_area      GNUC_PACKED;
+  struct psd_area_t return_area    GNUC_PACKED;
+  struct psd_area_t default_area   GNUC_PACKED;
+  struct psd_area_t area[0]        GNUC_PACKED; /* variable length */
 } PsdSelectionListDescriptor2;
 
 
@@ -280,7 +286,7 @@ typedef struct {
                                              (0xffff disables) */
   uint16_t next_ofs          GNUC_PACKED; /* next list offset
                                              (0xffff disables) */
-  uint16_t retn_ofs          GNUC_PACKED; /* return list offset
+  uint16_t return_ofs          GNUC_PACKED; /* return list offset
                                              (0xffff disables) */
   uint16_t ptime             GNUC_PACKED; /* play time in 1/15 s,
                                              0x000 meaning full item */

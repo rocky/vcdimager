@@ -57,6 +57,42 @@ bool_str (bool b)
     return "no";
 }
 
+#define _BIT_SET_P(n, bit)  (((n) >> (bit)) & 0x1)
+
+static bool
+_bitset_get_bit (const uint8_t bitvec[], int bit)
+{
+  bool result = false;
+  
+  if (_BIT_SET_P (bitvec[bit / 8], (bit % 8)))
+    result = true;
+
+  return result;
+}
+
+static const char *
+itemid2str (uint16_t itemid)
+{
+  static char buf[1024];
+
+  strcpy (buf, "??");
+
+  if (itemid < 2) 
+    snprintf (buf, sizeof (buf), "no item (0x%4.4x)", itemid);
+  else if (itemid < 100)
+    snprintf (buf, sizeof (buf), "cd track# %d (0x%4.4x)", itemid, itemid);
+  else if (itemid < 600)
+    snprintf (buf, sizeof (buf), "ENTRIES[%d] (0x%4.4x)", itemid-100, itemid);
+  else if (itemid < 1000)
+    snprintf (buf, sizeof (buf), "spare id (0x%4.4x)", itemid);
+  else if (itemid < 2980)
+    snprintf (buf, sizeof (buf), "ITEM[%d] (0x%4.4x)", itemid-1000, itemid);
+  else 
+    snprintf (buf, sizeof (buf), "spare id (0x%4.4x)", itemid);
+
+  return buf;
+}
+
 static int
 (*gl_read_mode2_sector) (FILE *fd, void *buf, uint32_t lba, bool form2);
 
@@ -230,6 +266,19 @@ _hexdump (const void *data, unsigned len)
 
 static vcd_type_t gl_vcd_type = VCD_TYPE_INVALID;
 
+static int
+_ofs2idx (const void *data, uint16_t ofs)
+{
+  const LotVcd *lot = data;
+  uint16_t n;
+  
+  for (n = 0; n < 32768-1;n++)
+    if (UINT16_FROM_BE (lot->offset[n]) == ofs)
+      return n;
+
+  return -1;
+}
+
 static void
 dump_lot_and_psd_vcd (const void *data, const void *data2,
                       uint32_t psd_size)
@@ -245,7 +294,8 @@ dump_lot_and_psd_vcd (const void *data, const void *data2,
 
   n = 0;
   while ((tmp = UINT16_FROM_BE (lot->offset[n])) != 0xFFFF)
-    fprintf (stdout, " offset[%d]: 0x%4.4x (real offset = %d)\n", n++, tmp, tmp << 3);
+    fprintf (stdout, " offset[%d]: 0x%4.4x (real offset = %d)\n", 
+             n++, tmp, tmp << 3);
 
   fprintf (stdout, DELIM);
 
@@ -275,81 +325,93 @@ dump_lot_and_psd_vcd (const void *data, const void *data2,
             const PsdPlayListDescriptor *d = (const void *) (psd_data + tmp);
             int i;
 
-            fprintf (stdout, " [%2d]: play list descriptor ( NOI: %d | LID#: %d "
-                     "| prev: %4.4x | next: %4.4x | retn: %4.4x | ptime: %d "
-                     "| wait: %d | await: %d",
+            fprintf (stdout,
+                     " [%.2d]: play list descriptor\n"
+                     "  NOI: %d | LID#: %d\n"
+                     "  prev: PSD[%d] (0x%4.4x) | next: PSD[%d] (0x%4.4x) | retn: PSD[%d] (0x%4.4x)\n"
+                     "  ptime: %d | wait: %d | await: %d\n",
                      n - 1,
                      d->noi,
                      UINT16_FROM_BE (d->lid),
+                     _ofs2idx (lot, UINT16_FROM_BE (d->prev_ofs)),
                      UINT16_FROM_BE (d->prev_ofs),
+                     _ofs2idx (lot, UINT16_FROM_BE (d->next_ofs)),
                      UINT16_FROM_BE (d->next_ofs),
-                     UINT16_FROM_BE (d->retn_ofs),
+                     _ofs2idx (lot, UINT16_FROM_BE (d->return_ofs)),
+                     UINT16_FROM_BE (d->return_ofs),
                      UINT16_FROM_BE (d->ptime), d->wtime, d->atime);
 
             for (i = 0; i < d->noi; i++)
-              fprintf (stdout, " | itemid[%d]: %d",
-                       i, UINT16_FROM_BE (d->itemid[i]));
-            fprintf (stdout, ")\n");
+              {
+                fprintf (stdout, "  itemid[%d]: %s\n",
+                         i, itemid2str (UINT16_FROM_BE (d->itemid[i])));
+              }
+            fprintf (stdout, "\n");
           }
           break;
         case PSD_TYPE_END_OF_LIST:
-          {
-            const PsdEndOfListDescriptor *d =
-              (const void *) (psd_data + tmp);
-            fprintf (stdout, " [%2d]: end of list descriptor (", n - 1);
-            _hexdump (d->reserved, 7);
-            fprintf (stdout, ")\n");
-          }
+          fprintf (stdout, " [%.2d]: end of list descriptor\n", n - 1);
+          fprintf (stdout, "\n");
           break;
         case PSD_TYPE_SELECTION_LIST:
           {
             const PsdSelectionListDescriptor *d =
               (const void *) (psd_data + tmp);
             const PsdSelectionListDescriptor2 *d2 =
-              (const void *) &(d->bsn_ofs[d->nos]);
+              (const void *) &(d->ofs[d->nos]);
             int i;
-            fprintf (stdout, " [%2d]: selection list descriptor (", n -1);
-            fprintf (stdout, " NOS: %d | BSN: %d | LID: %d | prev: %4.4x "
-                     "| next: %4.4x | retn: %4.4x | unk1: %4.4x | unk2: %4.4x "
-                     "| u3: %d | u4: %d | itemid: %d ",
+            fprintf (stdout,
+                     " [%.2d]: selection list descriptor\n"
+                     "  NOS: %d | BSN: %d | LID: %d\n"
+                     "  prev: PSD[%d] (0x%4.4x) | next: PSD[%d] (0x%4.4x) | return: PSD[%d] (0x%4.4x)\n"
+                     "  default: PSD[%d] (0x%4.4x) | timeout: PSD[%d] (0x%4.4x)\n"
+                     "  wtime: %d | loop: %d\n"
+                     "  itemid: %s\n",
+                     n - 1,
                      d->nos, 
                      d->bsn,
                      UINT16_FROM_BE (d->lid),
+                     _ofs2idx (lot, UINT16_FROM_BE (d->prev_ofs)),
                      UINT16_FROM_BE (d->prev_ofs),
+                     _ofs2idx (lot, UINT16_FROM_BE (d->next_ofs)),
                      UINT16_FROM_BE (d->next_ofs),
-                     UINT16_FROM_BE (d->retn_ofs),
-                     UINT16_FROM_BE (d->unk1_ofs),
-                     UINT16_FROM_BE (d->unk2_ofs),
-                     d->unknown3,
-                     d->unknown4,
-                     UINT16_FROM_BE (d->itemid));
+                     _ofs2idx (lot, UINT16_FROM_BE (d->return_ofs)),
+                     UINT16_FROM_BE (d->return_ofs),
+                     _ofs2idx (lot, UINT16_FROM_BE (d->default_ofs)),
+                     UINT16_FROM_BE (d->default_ofs),
+                     _ofs2idx (lot, UINT16_FROM_BE (d->timeout_ofs)),
+                     UINT16_FROM_BE (d->timeout_ofs),
+                     d->wtime,
+                     d->loop,
+                     itemid2str (UINT16_FROM_BE (d->itemid)));
 
             for (i = 0; i < d->nos; i++)
-              fprintf (stdout, "| bsn_ofs[%d]: %4.4x ", i,
-                       UINT16_FROM_BE (d->bsn_ofs[i]));
+              fprintf (stdout, "  ofs[%d]: PSD[%d] (0x%4.4x)\n", i,
+                       _ofs2idx (lot, UINT16_FROM_BE (d->ofs[i])),
+                       UINT16_FROM_BE (d->ofs[i]));
 
-            fprintf (stdout, "| prev_area: (%d,%d) (%d,%d) ",
+            fprintf (stdout, "  prev_area: (%d,%d) (%d,%d) ",
                      d2->prev_area.x1, d2->prev_area.y1, 
                      d2->prev_area.x2, d2->prev_area.y2);
 
-            fprintf (stdout, "| next_area: (%d,%d) (%d,%d) ",
+            fprintf (stdout, "| next_area: (%d,%d) (%d,%d)\n",
                      d2->next_area.x1, d2->next_area.y1, 
                      d2->next_area.x2, d2->next_area.y2);
 
-            fprintf (stdout, "| retn_area: (%d,%d) (%d,%d) ",
-                     d2->retn_area.x1, d2->retn_area.y1, 
-                     d2->retn_area.x2, d2->retn_area.y2);
+            fprintf (stdout, "  return_area: (%d,%d) (%d,%d) ",
+                     d2->return_area.x1, d2->return_area.y1, 
+                     d2->return_area.x2, d2->return_area.y2);
 
-            fprintf (stdout, "| unk1_area: (%d,%d) (%d,%d) ",
-                     d2->unk1_area.x1, d2->unk1_area.y1, 
-                     d2->unk1_area.x2, d2->unk1_area.y2);
+            fprintf (stdout, "| default_area: (%d,%d) (%d,%d)\n",
+                     d2->default_area.x1, d2->default_area.y1, 
+                     d2->default_area.x2, d2->default_area.y2);
 
             for (i = 0; i < d->nos; i++)
-              fprintf (stdout, "| bsn_area[%d]: (%d,%d) (%d,%d) ", i,
-                       d2->bsn_area[i].x1, d2->bsn_area[i].y1, 
-                       d2->bsn_area[i].x2, d2->bsn_area[i].y2);
+              fprintf (stdout, "  area[%d]: (%d,%d) (%d,%d)\n", i,
+                       d2->area[i].x1, d2->area[i].y1, 
+                       d2->area[i].x2, d2->area[i].y2);
 
-            fprintf (stdout, ")\n");
+            fprintf (stdout, "\n");
           }
           break;
         default:
@@ -439,9 +501,14 @@ dump_info_vcd (const void *data)
   fprintf (stdout, " volume count: %d\n", UINT16_FROM_BE (info.vol_count));
   fprintf (stdout, " volume number: %d\n", UINT16_FROM_BE (info.vol_id));
 
-  fprintf (stdout, " pal flags: 0x");
-  for (n = 0; n < sizeof (info.pal_flags); n++)
-    fprintf (stdout, "%2.2x ", info.pal_flags[n]);
+  fprintf (stdout, " pal flags:");
+  for (n = 0; n < 98; n++)
+    {
+      if (n == 48)
+        fprintf (stdout, "\n           ");
+      fprintf (stdout, n % 8 ? "%d" : " %d",
+               _bitset_get_bit (info.pal_flags, n));
+    }
   fprintf (stdout, "\n");
 
   fprintf (stdout, " flags:\n");
@@ -512,6 +579,7 @@ dump_entries_vcd (const void *data)
 
   fprintf (stdout, " ID: `%.8s'\n", entries.ID);
   fprintf (stdout, " version: 0x%2.2x\n", entries.version);
+  fprintf (stdout, " system profile tag: 0x%2.2x\n", entries.sys_prof_tag);
 
   fprintf (stdout, " entries: %d\n", ntracks);
 

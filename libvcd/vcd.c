@@ -470,6 +470,11 @@ vcd_obj_append_mpeg_track (VcdObj *obj, VcdDataSource *mpeg_file)
       
       if (vcd_mpeg_get_info (buf, &(track->mpeg_info)))
         {
+          if (obj->type == VCD_TYPE_VCD11
+              && track->mpeg_info.norm != MPEG_NORM_FILM
+              && track->mpeg_info.norm != MPEG_NORM_NTSC)
+            vcd_warn ("VCD 1.x should contain only NTSC/FILM video");
+
           if (obj->type == VCD_TYPE_SVCD
               && track->mpeg_info.version == MPEG_VERS_MPEG1)
             vcd_warn ("SVCD should not contain MPEG1 tracks!");
@@ -991,7 +996,10 @@ _write_source_mode2_form1 (VcdObj *obj, VcdDataSource *source, uint32_t extent)
   for (n = 0;n < sectors;n++) {
     char buf[M2F1_SIZE] = { 0, };
 
-    vcd_data_source_read (source, buf, M2F1_SIZE, 1);
+    vcd_data_source_read (source, buf, 
+                          ((n + 1 == sectors) 
+                           ? size % M2F1_SIZE 
+                           : M2F1_SIZE), 1);
 
     if (_write_m2_image_sector (obj, buf, extent+n, 1, 0, 
                                 ((n+1 < sectors) 
