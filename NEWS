@@ -2,6 +2,16 @@ $Id$
 
 see ChangeLog for more information
 
+version 0.7.7 (unstable/development)
+====================================
+2001-06-30
+
+* be more tolerant about ISO9660 fs, when disassembling images
+* implemented cdrdao style split image file writer
+* fixed item____.mpg enumeration bug exposed on multisegment SPIs
+* implemented/added (untested) auto play flag/xml tag
+* match enumeration of ISO9660 entries for ripped mpeg streams files
+
 version 0.7.6 (unstable/development)
 ====================================
 2001-06-16

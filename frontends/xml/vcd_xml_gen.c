@@ -230,6 +230,7 @@ main (int argc, const char *argv[])
   
   obj.info.volume_count = 1;
   obj.info.volume_number = 1;
+  obj.info.autoplay = 0;
 
   {
     const char **args = NULL;
@@ -269,6 +270,9 @@ main (int argc, const char *argv[])
 
         {"volume-number", '\0', POPT_ARG_INT, &obj.info.volume_number, 0,
          "specify album set sequence number (< volume-count)", "NUMBER"},
+
+        {"autoplay", 'a', POPT_ARG_NONE, &obj.info.autoplay, 0,
+         "enable auto play on insertion flag"},
 
         {"broken-svcd-mode", '\0', POPT_ARG_NONE, &broken_svcd_mode_flag, 0,
          "enable non-compliant compatibility mode for broken devices"},

@@ -22,6 +22,11 @@
 
 #include "findme.h"
 
+/* for AMIGA_COMPILE */
+#ifndef X_OK
+# define X_OK 1
+#endif
+
 const char *
 findProgramPath (const char *argv0)
 {

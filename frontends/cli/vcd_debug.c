@@ -639,11 +639,16 @@ dump_info (const debug_obj_t *obj)
   fprintf (stdout, "\n");
 
   fprintf (stdout, " flags:\n");
+  if (info->flags.reserved1)
+    fprintf (stdout, "  reserved1: %s (please report if not false!)\n",
+             _vcd_bool_str (info->flags.reserved1));
+
   fprintf (stdout, "  restriction: %d\n", info->flags.restriction);
   fprintf (stdout, "  special info: %s\n", _vcd_bool_str (info->flags.special_info));
   fprintf (stdout, "  user data cc: %s\n", _vcd_bool_str (info->flags.user_data_cc));
   fprintf (stdout, "  start lid #2: %s\n", _vcd_bool_str (info->flags.use_lid2));
   fprintf (stdout, "  start track #2: %s\n", _vcd_bool_str (info->flags.use_track3));
+  fprintf (stdout, "  autoplay (?): %s\n", _vcd_bool_str (info->flags.autoplay));
 
   fprintf (stdout, " psd size: %d\n", UINT32_FROM_BE (info->psd_size));
   fprintf (stdout, " first segment addr: %2.2x:%2.2x:%2.2x\n",

@@ -1,3 +1,15 @@
+2001-06-30  Herbert Valerio Riedel  <hvr@gnu.org>
+
+	* frontends/xml/videocd.dtd: added <autoplay> tag
+
+	* frontends/cli/vcd_debug.c (dump_info): added autoplay and reserved1
+		flag dumps of INFO file
+
+	* implemented autoplay flag
+
+	* merged in some stuff from
+	   Steffen Haeuser <SteffenH@hyperion-software.de> for AmigaOS port
+
 2001-06-25  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* frontends/cli/vcd_debug.c: let match segment no. counting

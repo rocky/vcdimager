@@ -61,6 +61,7 @@ typedef enum
   VCD_PARM_RESTRICTION,         /* unsigned        [0..3]         */
   VCD_PARM_NEXT_VOL_LID2,       /* bool */
   VCD_PARM_NEXT_VOL_SEQ2,       /* bool */
+  VCD_PARM_AUTOPLAY,            /* bool */
   VCD_PARM_APPLICATION_ID,      /* char *          max length 128 */
   VCD_PARM_SEC_TYPE,            /* unsigned        [2336, 2352]   */
   VCD_PARM_SVCD_VCD3_MPEGAV,    /* bool */

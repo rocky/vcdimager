@@ -35,14 +35,15 @@
   value 	CDATA   #IMPLIED
 >
 
-<!ELEMENT info (album-id?,volume-count?,volume-number?,next-volume-use-sequence2?,next-volume-use-lid2?,restriction?,time-offset?)>
+<!ELEMENT info (album-id?,volume-count?,volume-number?,next-volume-use-sequence2?,next-volume-use-lid2?,autoplay?,restriction?,time-offset?)>
 <!ELEMENT album-id (#PCDATA)>
 <!ELEMENT volume-count (#PCDATA)>
 <!ELEMENT volume-number (#PCDATA)>
-<!ELEMENT restriction (#PCDATA)>
-<!ELEMENT time-offset (#PCDATA)>
 <!ELEMENT next-volume-use-sequence2 EMPTY>
 <!ELEMENT next-volume-use-lid2 EMPTY>
+<!ELEMENT autoplay EMPTY>
+<!ELEMENT restriction (#PCDATA)>
+<!ELEMENT time-offset (#PCDATA)>
 
 <!ELEMENT pvd (volume-id?,system-id?,application-id?,preparer-id?,publisher-id?)>
 <!ELEMENT volume-id (#PCDATA)>

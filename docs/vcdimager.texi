@@ -845,7 +845,7 @@ A segment item can be
 @acronym{MPEG} audio.
 
 @item
-@acronym{MPEG} audio only.
+@acronym{MPEG} audio only.@footnote{which allows for several hours of audio play back}
 @end itemize
 
 @menu
@@ -1278,16 +1278,18 @@ Data}.
                                          volume-number?,
                                          next-volume-use-sequence2?,
                                          next-volume-use-lid2?,
+                                         autoplay?,
                                          restriction?,
                                          time-offset?)>
 
 <!ELEMENT album-id                      (#PCDATA)>
 <!ELEMENT volume-count                  (#PCDATA)>
 <!ELEMENT volume-number                 (#PCDATA)>
-<!ELEMENT restriction                   (#PCDATA)>
-<!ELEMENT time-offset                   (#PCDATA)>
 <!ELEMENT next-volume-use-sequence2     EMPTY>
 <!ELEMENT next-volume-use-lid2          EMPTY>
+<!ELEMENT autoplay                      EMPTY>
+<!ELEMENT restriction                   (#PCDATA)>
+<!ELEMENT time-offset                   (#PCDATA)>
 @end example
 
 @node @code{<pvd>} Container, @code{<filesystem>} Container, @code{<info>} Container, @code{<videocd>} Root

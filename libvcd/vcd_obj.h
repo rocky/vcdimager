@@ -102,6 +102,7 @@ struct _VcdObj {
   unsigned info_restriction;
   bool info_use_seq2;
   bool info_use_lid2;
+  bool info_autoplay;
 
   /* input */
   unsigned mpeg_segment_start_extent;

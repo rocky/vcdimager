@@ -41,6 +41,7 @@ struct vcdxml_t {
     unsigned restriction;
     bool use_sequence2;
     bool use_lid2;
+    bool autoplay;
     double time_offset;
 
     /* used for restoring vcd */

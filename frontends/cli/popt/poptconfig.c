@@ -164,8 +164,11 @@ poptReadDefaultConfig (poptContext con, int useEnv)
   rc = poptReadConfigFile (con, "/etc/popt");
   if (rc)
     return rc;
+
+#if !defined(AMIGA_COMPILE)
   if (getuid () != geteuid ())
     return 0;
+#endif
 
   if ((home = getenv ("HOME")))
     {

@@ -314,6 +314,7 @@ _parse_info (struct vcdxml_t *obj, VcdImageSource *img)
   obj->info.restriction = info.flags.restriction;
   obj->info.use_lid2 = info.flags.use_lid2;
   obj->info.use_sequence2 = info.flags.use_track3;
+  obj->info.autoplay = info.flags.autoplay;
 
   obj->info.psd_size = UINT32_FROM_BE (info.psd_size);
   obj->info.max_lid = UINT16_FROM_BE (info.lot_entries);
@@ -351,7 +352,7 @@ _parse_info (struct vcdxml_t *obj, VcdImageSource *img)
 	    snprintf (buf, sizeof (buf), "segment-%4.4d", idx);
 	    _segment->id = strdup (buf);
 
-	    snprintf (buf, sizeof (buf), "item%4.4d.mpg", n);
+	    snprintf (buf, sizeof (buf), "item%4.4d.mpg", idx + 1);
 	    _segment->src = strdup (buf);
 
 	    _vcd_list_append (obj->segment_list, _segment);
@@ -413,7 +414,7 @@ _parse_entries (struct vcdxml_t *obj, VcdImageSource *img)
 	  snprintf (buf, sizeof (buf), "sequence-%2.2d", track);
 	  _new_sequence->id = strdup (buf);
 
-	  snprintf (buf, sizeof (buf), "avseq%2.2d.mpg", track);
+	  snprintf (buf, sizeof (buf), "avseq%2.2d.mpg", track + 1);
 	  _new_sequence->src = strdup (buf);
 
 	  _new_sequence->entry_point_list = _vcd_list_new ();

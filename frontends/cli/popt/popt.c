@@ -15,6 +15,10 @@
 #include <string.h>
 #include <unistd.h>
 
+#if defined(AMIGA_COMPILE)
+# include <proto/dos.h>
+#endif
+
 #if HAVE_ALLOCA_H
 # include <alloca.h>
 #endif
@@ -272,7 +276,12 @@ execCommand (poptContext con)
 #endif
 #endif
 
+#if defined(AMIGA_COMPILE)
+  printf("Executing: %s\n", argv[0]);
+  Execute(argv[0], 0, 0);
+#else
   execvp (argv[0], (char *const *) argv);
+#endif
 }
 
 static const struct poptOption *
