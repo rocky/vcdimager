@@ -60,8 +60,16 @@ _vcd_memdup (const void *mem, size_t count);
 char *
 _vcd_strdup_upper (const char str[]);
 
+enum strncpy_pad_check {
+  VCD_NOCHECK = 0,
+  VCD_7BIT,
+  VCD_ACHARS,
+  VCD_DCHARS
+};
+
 char *
-_vcd_strncpy_pad(char dst[], const char src[], size_t len);
+_vcd_strncpy_pad(char dst[], const char src[], size_t len, 
+                 enum strncpy_pad_check _check);
 
 int
 _vcd_isdchar (int c);

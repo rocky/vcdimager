@@ -179,7 +179,8 @@ _vcd_strdup_upper (const char str[])
 }
 
 char *
-_vcd_strncpy_pad(char dst[], const char src[], size_t len)
+_vcd_strncpy_pad(char dst[], const char src[], size_t len,
+                 enum strncpy_pad_check _check)
 {
   size_t rlen;
 
@@ -187,7 +188,52 @@ _vcd_strncpy_pad(char dst[], const char src[], size_t len)
   vcd_assert (src != NULL);
   vcd_assert (len > 0);
 
-  rlen = strlen(src);
+  switch (_check)
+    {
+      int idx;
+    case VCD_NOCHECK:
+      break;
+
+    case VCD_7BIT:
+      for (idx = 0; src[idx]; idx++)
+        if (src[idx] < 0)
+          {
+            vcd_warn ("string '%s' fails 7bit constraint (pos = %d)", 
+                      src, idx);
+            break;
+          }
+      break;
+
+    case VCD_ACHARS:
+      for (idx = 0; src[idx]; idx++)
+        if (!_vcd_isachar (src[idx]))
+          {
+            vcd_warn ("string '%s' fails a-character constraint (pos = %d)",
+                      src, idx);
+            break;
+          }
+      break;
+
+    case VCD_DCHARS:
+      for (idx = 0; src[idx]; idx++)
+        if (!_vcd_isdchar (src[idx]))
+          {
+            vcd_warn ("string '%s' fails d-character constraint (pos = %d)",
+                      src, idx);
+            break;
+          }
+      break;
+
+    default:
+      vcd_assert_not_reached ();
+      break;
+    }
+
+  rlen = strlen (src);
+
+  if (rlen > len)
+    vcd_warn ("string '%s' is getting truncated to %d characters",  src, len);
+
   strncpy (dst, src, len);
   if (rlen < len)
     memset(dst+rlen, ' ', len-rlen);

@@ -48,7 +48,7 @@ static const char _rcsid[] = "$Id$";
 /* defaults */
 #define DEFAULT_CUE_FILE       "videocd.cue"
 #define DEFAULT_BIN_FILE       "videocd.bin"
-#define DEFAULT_VOLUME_ID      "VideoCD"
+#define DEFAULT_VOLUME_ID      "VIDEOCD"
 #define DEFAULT_APPLICATION_ID ""
 #define DEFAULT_ALBUM_ID       ""
 #define DEFAULT_TYPE           "vcd2"

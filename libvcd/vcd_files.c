@@ -269,7 +269,8 @@ set_info_vcd(VcdObj *obj, void *buf)
   
   _vcd_strncpy_pad (info_vcd.album_desc, 
                     obj->info_album_id,
-                    sizeof(info_vcd.album_desc));
+                    sizeof(info_vcd.album_desc), VCD_DCHARS); 
+  /* fixme, maybe it's VCD_ACHARS? */
 
   info_vcd.vol_count = UINT16_TO_BE (obj->info_volume_count);
   info_vcd.vol_id = UINT16_TO_BE (obj->info_volume_number);

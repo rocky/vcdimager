@@ -39,8 +39,8 @@ static const char _rcsid[] = "$Id$";
 #define SYSTEM_ID         "CD-RTOS CD-BRIDGE"
 
 #define VOLUME_SET_ID     ""
-#define PREPARER_ID       "GNU VCDImager " VERSION " " HOST_ARCH
 #define PUBLISHER_ID      ""
+#define PREPARER_ID       "GNU VCDImager " VERSION " " HOST_ARCH
 
 static void
 pathtable_get_size_and_entries(const void *pt, unsigned *size, 
@@ -58,7 +58,7 @@ set_iso_evd(void *pd)
   memset(&ied, 0, sizeof(ied));
 
   ied.type = to_711(ISO_VD_END);
-  _vcd_strncpy_pad (ied.id, ISO_STANDARD_ID, sizeof(ied.id));
+  _vcd_strncpy_pad (ied.id, ISO_STANDARD_ID, sizeof(ied.id), VCD_DCHARS);
   ied.version = to_711(ISO_VERSION);
 
   memcpy(pd, &ied, sizeof(ied));
@@ -88,11 +88,11 @@ set_iso_pvd(void *pd,
   strcpy(((char*)&ipd)+ISO_XA_MARKER_OFFSET, ISO_XA_MARKER_STRING);
 
   ipd.type = to_711(ISO_VD_PRIMARY);
-  _vcd_strncpy_pad (ipd.id, ISO_STANDARD_ID, 5);
+  _vcd_strncpy_pad (ipd.id, ISO_STANDARD_ID, 5, VCD_DCHARS);
   ipd.version = to_711(ISO_VERSION);
 
-  _vcd_strncpy_pad (ipd.system_id, SYSTEM_ID, 32);
-  _vcd_strncpy_pad (ipd.volume_id, volume_id, 32);
+  _vcd_strncpy_pad (ipd.system_id, SYSTEM_ID, 32, VCD_ACHARS);
+  _vcd_strncpy_pad (ipd.volume_id, volume_id, 32, VCD_DCHARS);
 
   ipd.volume_space_size = to_733(iso_size);
 
@@ -108,14 +108,19 @@ set_iso_pvd(void *pd,
   memcpy(ipd.root_directory_record, root_dir, sizeof(ipd.root_directory_record));
   ipd.root_directory_record[0] = 34;
 
-  _vcd_strncpy_pad (ipd.volume_set_id, VOLUME_SET_ID, 128);
-  _vcd_strncpy_pad (ipd.publisher_id, PUBLISHER_ID, 128);
-  _vcd_strncpy_pad (ipd.preparer_id, PREPARER_ID, 128);
-  _vcd_strncpy_pad (ipd.application_id, application_id, 128); 
+  _vcd_strncpy_pad (ipd.volume_set_id, VOLUME_SET_ID, 128, VCD_DCHARS);
 
-  _vcd_strncpy_pad (ipd.copyright_file_id    , "", 37);
-  _vcd_strncpy_pad (ipd.abstract_file_id     , "", 37);
-  _vcd_strncpy_pad (ipd.bibliographic_file_id, "", 37);
+  _vcd_strncpy_pad (ipd.publisher_id, PUBLISHER_ID, 128, VCD_ACHARS);
+  {
+    char *_tmpstr = _vcd_strdup_upper (PREPARER_ID);
+    _vcd_strncpy_pad (ipd.preparer_id, _tmpstr, 128, VCD_ACHARS);
+    free (_tmpstr);
+  }
+  _vcd_strncpy_pad (ipd.application_id, application_id, 128, VCD_ACHARS); 
+
+  _vcd_strncpy_pad (ipd.copyright_file_id    , "", 37, VCD_DCHARS);
+  _vcd_strncpy_pad (ipd.abstract_file_id     , "", 37, VCD_DCHARS);
+  _vcd_strncpy_pad (ipd.bibliographic_file_id, "", 37, VCD_DCHARS);
 
   {
     char iso_time[17];

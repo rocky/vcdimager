@@ -1,3 +1,7 @@
+2001-05-23  Herbert Valerio Riedel  <hvr@hvrlab.dhs.org>
+
+	* implemented warning if strings in PVD break charset constraints
+
 2001-05-22  Herbert Valerio Riedel  <hvr@gnu.org>
 
 	* libvcd: implemented new assertion macros, and replaced system asserts
