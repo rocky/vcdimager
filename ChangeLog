@@ -1,5 +1,8 @@
 2000-12-23  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* frontends/cli/vcdrip.c: fixed msf conversion, removed 
+		directory source option, #ifdef'ed linux specific stuff
+
 	* libvcd/vcd.c (_write_vcd_iso_track): fixed set_lot/psd for svcd
 
 2000-12-22  Herbert Valerio Riedel  <hvr@gnu.org>

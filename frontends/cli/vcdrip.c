@@ -81,6 +81,7 @@ _read_mode2_sector_file (FILE *fd, void *data, uint32_t lba, bool form2)
   return 0;
 }
 
+
 static uint32_t 
 _get_image_size_file (FILE *fd)
 {
@@ -106,24 +107,29 @@ _get_image_size_file (FILE *fd)
   return size;
 }
 
+
 /* device */
 
 static int
 _read_mode2_sector_device (FILE *fd, void *data, uint32_t lba, bool form2)
 {
+#ifdef __linux__
   assert (fd != NULL);
 
   if (form2)
     {
       char buf[M2RAW_SIZE] = { 0, };
       struct cdrom_msf *msf = (struct cdrom_msf *) &buf;
+      msf_t _msf;
+      
+      lba_to_msf (lba + 150, &_msf);
 
-      msf->cdmsf_min0 = lba / (60 * 75);
-      msf->cdmsf_sec0 = ((lba / 75) % 60 + 2);
-      msf->cdmsf_frame0 = lba % 75;
+      msf->cdmsf_min0 = _msf.m;
+      msf->cdmsf_sec0 = _msf.s;
+      msf->cdmsf_frame0 = _msf.f;
 
       if (!msf->cdmsf_frame0)
-        fprintf (stdout, "debug: %2.2d:%2.2d:%2.2d\n",
+        fprintf (stdout, "debug: %2.2d:%2.2d:%2.2d\r",
                  msf->cdmsf_min0, msf->cdmsf_sec0, msf->cdmsf_frame0);
 
       if (ioctl (fileno (fd), CDROMREADMODE2, &buf) == -1)
@@ -137,13 +143,16 @@ _read_mode2_sector_device (FILE *fd, void *data, uint32_t lba, bool form2)
       fseek (fd, lba * ISO_BLOCKSIZE, SEEK_SET);
       fread (data, ISO_BLOCKSIZE, 1, fd);
     }
-
+#else
+  assert (0);
+#endif
   return 0;
 }
 
 static uint32_t 
 _get_image_size_device (FILE *fd)
 {
+#ifdef __linux__
   struct cdrom_tocentry tocent;
   uint32_t size;
 
@@ -157,7 +166,12 @@ _get_image_size_device (FILE *fd)
   size = tocent.cdte_addr.lba;
 
   return size;
+#else
+  assert (0);
+  return 0;
+#endif
 }
+
 
 /******************************************************************************/
 
@@ -599,9 +613,6 @@ main (int argc, const char *argv[])
 
     {"bin-file", '\0', POPT_ARG_STRING, &gl_source_name, SOURCE_FILE,
      "set image file as source", "FILE"},
-
-    {"vcd-dir", '\0', POPT_ARG_STRING, &gl_source_name, SOURCE_DIRECTORY,
-     "set VCD directory as source (only dump)", "DIR"},
 
 #ifdef __linux__
     {"cdrom-device", '\0', POPT_ARG_STRING, &gl_source_name, SOURCE_DEVICE,
