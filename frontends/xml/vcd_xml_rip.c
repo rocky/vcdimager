@@ -612,7 +612,7 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
 	_pbc->loop_count = vcdinf_get_loop_count(d);
 	_pbc->item_id = _xstrdup (_pin2id (uint16_from_be (d->itemid), _ctx));
 
-	for (n = 0; n < d->nos; n++)
+	for (n = 0; n < vcdinf_get_num_selections(d); n++)
 	  {
 	    _vcd_list_append (_pbc->select_id_list, 
 			      _xstrdup (_ofs2id (uint16_from_be (d->ofs[n]), _ctx)));
@@ -633,7 +633,7 @@ _pbc_node_read (const struct _pbc_ctx *_ctx, unsigned offset)
 	    *_pbc->return_area = d2->return_area;
 	    *_pbc->default_area = d2->default_area;
 
-	    for (n = 0; n < d->nos; n++)
+	    for (n = 0; n < vcdinf_get_num_selections(d); n++)
 	      {
 		pbc_area_t *_area = _vcd_malloc (sizeof (pbc_area_t));
 
@@ -771,7 +771,7 @@ _visit_pbc (struct _pbc_ctx *obj, unsigned lid, unsigned offset, bool in_lot)
         _visit_pbc (obj, 0, vcdinf_get_default_from_psd(d), false);
         _visit_pbc (obj, 0, uint16_from_be (d->timeout_ofs), false);
 
-        for (idx = 0; idx < d->nos; idx++)
+        for (idx = 0; idx < vcdinf_get_num_selections(d); idx++)
           _visit_pbc (obj, 0, uint16_from_be (d->ofs[idx]), false);
         
       }

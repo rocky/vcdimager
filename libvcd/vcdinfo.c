@@ -638,7 +638,7 @@ vcdinfo_get_itemid_from_lid(const vcdinfo_obj_t *obj, lid_t lid)
   case PSD_TYPE_SELECTION_LIST:
   case PSD_TYPE_EXT_SELECTION_LIST:
     if (pxd.psd == NULL) return VCDINFO_REJECTED_MASK;
-    return vcdinfo_get_itemid_from_psd(pxd.psd);
+    return vcdinf_get_itemid_from_psd(pxd.psd);
     break;
   case PSD_TYPE_PLAY_LIST:
     /* FIXME: There is an array of items */
@@ -649,51 +649,6 @@ vcdinfo_get_itemid_from_lid(const vcdinfo_obj_t *obj, lid_t lid)
 
   return VCDINFO_REJECTED_MASK;
 
-}
-
-/*!
-  Get the item id for a given PSD selector descriptor. 
-  VCDINFO_REJECTED_MASK is returned on error or if d is NULL. 
-*/
-uint16_t
-vcdinfo_get_itemid_from_psd(const PsdSelectionListDescriptor *psd)
-{
-  return (psd != NULL) ? uint16_from_be(psd->itemid) : VCDINFO_REJECTED_MASK;
-}
-
-/* Get the LID from a given PSD selector descriptor. 
-   VCDINFO_REJECTED_MASK is returned d on error or d is NULL. 
-*/
-lid_t
-vcdinfo_get_lid_from_pld(const PsdPlayListDescriptor *d)
-{
-  return (d != NULL) 
-    ? uint16_from_be (d->lid) & VCDINFO_LID_MASK
-    : VCDINFO_REJECTED_MASK;
-}
-
-/*!
-  Get the LID from a given PSD play-list descriptor. 
-  VCDINFO_REJECTED_MASK is returned d on error or d is NULL. 
-*/
-lid_t
-vcdinfo_get_lid_from_psd(const PsdSelectionListDescriptor *d)
-{
-  return (d != NULL) 
-    ? uint16_from_be (d->lid) & VCDINFO_LID_MASK
-    : VCDINFO_REJECTED_MASK;
-}
-
-/*!
-  Get the LID rejected status for a given PSD selector descriptor. 
-  true is also returned d is NULL. 
-*/
-bool
-vcdinfo_get_lid_rejected_from_psd(const PsdSelectionListDescriptor *d)
-{
-  return (d != NULL) 
-    ? vcdinfo_is_rejected(uint16_from_be(d->lid)) 
-    : true;
 }
 
 /*!
@@ -726,51 +681,6 @@ vcdinfo_get_num_segments(const vcdinfo_obj_t *obj)
 {
   if (NULL==obj) return 0;
   return vcdinf_get_num_segments(&obj->info);
-}
-
-/*!
-  \fn vcdinfo_get_offset_from_lid(const vcdinfo_obj_t *obj, unsigned int entry_num);
-  \brief Get offset entry_num for a given LID. 
-  \return VCDINFO_INVALID_OFFSET is returned if obj on error or obj
-  is NULL. Otherwise the LID offset is returned.
-*/
-uint16_t
-vcdinfo_get_offset_from_lid(const vcdinfo_obj_t *obj, lid_t lid,
-			    unsigned int entry_num) 
-{
-  PsdListDescriptor pxd;
-
-  if (obj == NULL) return VCDINFO_INVALID_OFFSET;
-  vcdinfo_get_pxd_from_lid(obj, &pxd, lid);
-
-  switch (pxd.descriptor_type) {
-  case PSD_TYPE_SELECTION_LIST:
-  case PSD_TYPE_EXT_SELECTION_LIST:
-    if (pxd.psd == NULL) return VCDINFO_INVALID_OFFSET;
-    return vcdinfo_get_offset_from_psd(pxd.psd, entry_num-1);
-    break;
-  case PSD_TYPE_PLAY_LIST:
-    /* FIXME: There is an array of items */
-  case PSD_TYPE_END_LIST:
-  case PSD_TYPE_COMMAND_LIST:
-    return VCDINFO_INVALID_OFFSET;
-  }
-  return VCDINFO_INVALID_OFFSET;
-
-}
-
-/**
- * \fn vcdinfo_get_offset_from_psd(const PsdSelectionListDescriptor *d, unsigned int entry_num);
- * \brief Get offset entry_num for a given PSD selector descriptor. 
- * \return VCDINFO_INVALID_OFFSET is returned if d on error or d is
- * NULL. Otherwise the LID offset is returned.
- */
-uint16_t
-vcdinfo_get_offset_from_psd(const PsdSelectionListDescriptor *d, 
-			    unsigned int entry_num) 
-{
-  return (d != NULL || entry_num < d->nos) 
-    ? uint16_from_be (d->ofs[entry_num]) : VCDINFO_INVALID_OFFSET;
 }
 
 /*! 
@@ -871,7 +781,7 @@ _vcdinfo_get_pxd_from_lid(const vcdinfo_obj_t *obj, PsdListDescriptor *pxd,
         case PSD_TYPE_PLAY_LIST:
           {
             pxd->pld = (PsdPlayListDescriptor *) (psd + _rofs);
-            if (vcdinfo_get_lid_from_pld(pxd->pld) == lid) {
+            if (vcdinf_get_lid_from_pld(pxd->pld) == lid) {
               return true;
             }
             break;
@@ -881,7 +791,7 @@ _vcdinfo_get_pxd_from_lid(const vcdinfo_obj_t *obj, PsdListDescriptor *pxd,
         case PSD_TYPE_SELECTION_LIST: 
           {
             pxd->psd = (PsdSelectionListDescriptor *) (psd + _rofs);
-            if (vcdinfo_get_lid_from_psd(pxd->psd) == lid) {
+            if (vcdinf_get_lid_from_psd(pxd->psd) == lid) {
               return true;
             }
             break;

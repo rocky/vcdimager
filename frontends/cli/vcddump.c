@@ -297,7 +297,7 @@ dump_psd (const vcdinfo_obj_t *obj, bool ext)
             const PsdPlayListDescriptor *pld = (const void *) (psd + _rofs);
             
             int i;
-            uint16_t lid = vcdinfo_get_lid_from_pld(pld);
+            uint16_t lid = vcdinf_get_lid_from_pld(pld);
 
             fprintf (stdout,
                      " PSD[%.2d] (%s): play list descriptor\n"
@@ -341,7 +341,7 @@ dump_psd (const vcdinfo_obj_t *obj, bool ext)
             const PsdSelectionListDescriptor *d =
               (const void *) (psd + _rofs);
             int i;
-            const unsigned int lid=vcdinfo_get_lid_from_psd(d);
+            const unsigned int lid=vcdinf_get_lid_from_psd(d);
 
             fprintf (stdout,
                      "  PSD[%.2d] (%s): %sselection list descriptor\n"
@@ -353,10 +353,10 @@ dump_psd (const vcdinfo_obj_t *obj, bool ext)
                      n, vcdinfo_ofs2str (obj, ofs->offset, ext),
                      (type == PSD_TYPE_EXT_SELECTION_LIST ? "extended " : ""),
                      *(uint8_t *) &d->flags,
-                     d->nos, 
+                     vcdinf_get_num_selections(d),
                      vcdinf_get_bsn(d),
                      lid, 
-                     _vcd_bool_str (vcdinfo_get_lid_rejected_from_psd(d)),
+                     _vcd_bool_str (vcdinf_get_lid_rejected_from_psd(d)),
                      vcdinfo_ofs2str(obj, vcdinf_get_prev_from_psd(d), ext),
                      vcdinfo_ofs2str(obj, vcdinf_get_next_from_psd(d), ext),
                      vcdinfo_ofs2str(obj, vcdinf_get_return_from_psd(d),ext),
@@ -365,12 +365,12 @@ dump_psd (const vcdinfo_obj_t *obj, bool ext)
                      vcdinfo_get_timeout_time(d),
                      vcdinf_get_loop_count(d), 
                      _vcd_bool_str (vcdinf_has_jump_delay(d)),
-                     vcdinfo_pin2str (vcdinfo_get_itemid_from_psd(d)));
+                     vcdinfo_pin2str (vcdinf_get_itemid_from_psd(d)));
 
-            for (i = 0; i < d->nos; i++)
+            for (i = 0; i < vcdinf_get_num_selections(d); i++)
               fprintf (stdout, "  ofs[%d]: %s\n", i,
                        vcdinfo_ofs2str (obj, 
-                                        vcdinfo_get_offset_from_psd(d, i), 
+                                        vcdinf_get_offset_from_psd(d, i), 
                                         ext));
 
             if (type == PSD_TYPE_EXT_SELECTION_LIST 
@@ -388,7 +388,7 @@ dump_psd (const vcdinfo_obj_t *obj, bool ext)
                          vcdinfo_area_str (&d2->return_area),
                          vcdinfo_area_str (&d2->default_area));
 
-                for (i = 0; i < d->nos; i++)
+                for (i = 0; i < vcdinf_get_num_selections(d); i++)
                   fprintf (stdout, "  area[%d]: %s\n", i,
                            vcdinfo_area_str (&d2->area[i]));
               }
@@ -1100,7 +1100,6 @@ dump (char image_fname[])
     vcd_error ("Error determining place to read from");
     exit (EXIT_FAILURE);
   }
-  
 
   vcd_assert (obj.img != NULL);
 

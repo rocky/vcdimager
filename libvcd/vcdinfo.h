@@ -247,7 +247,7 @@ extern "C" {
     Return a string describing an audio type.
   */
   const char * vcdinfo_audio_type2str(const vcdinfo_obj_t *obj,
-				    unsigned int audio_type);
+				      unsigned int audio_type);
   
   /*!
     Note first seg_num is 0!
@@ -361,34 +361,6 @@ extern "C" {
   vcdinfo_get_itemid_from_lid(const vcdinfo_obj_t *obj, lid_t lid);
   
   /*!
-    Get the item id for a given PSD selector descriptor. 
-    VCDINFO_REJECTED_MASK is returned on error or if d is NULL. 
-  */
-  uint16_t
-  vcdinfo_get_itemid_from_psd(const PsdSelectionListDescriptor *d);
-
-  /*!
-    Get the LID from a given PSD play-list descriptor. 
-    VCDINFO_REJECTED_MASK is returned d on error or d is NULL. 
-  */
-  uint16_t
-  vcdinfo_get_lid_from_pld(const PsdPlayListDescriptor *d);
-  
-  /*!
-    Get the LID from a given PSD selector descriptor. 
-    VCDINFO_REJECTED_MASK is returned d on error or d is NULL. 
-  */
-  uint16_t
-  vcdinfo_get_lid_from_psd(const PsdSelectionListDescriptor *d);
-  
-  /*!
-    Get the LID rejected status for a given PSD selector descriptor. 
-  true is also returned d is NULL. 
-  */
-  bool
-  vcdinfo_get_lid_rejected_from_psd(const PsdSelectionListDescriptor *d);
-  
-  /*!
     Return Number of LIDs. 
   */
   lid_t
@@ -421,29 +393,6 @@ extern "C" {
   unsigned int
   vcdinfo_get_num_tracks(const vcdinfo_obj_t *obj);
   
-  /*!
-    \fn vcdinfo_get_offset_from_lid(const vcdinfo_obj_t *obj, 
-                                    unsigned int entry_num);
-    \brief Get offset entry_num for a given LID. 
-    \return VCDINFO_INVALID_OFFSET is returned if obj on error or obj
-    is NULL. Otherwise the LID offset is returned.
-  */
-  uint16_t
-  vcdinfo_get_offset_from_lid(const vcdinfo_obj_t *obj, lid_t lid,
-			      unsigned int entry_num);
-  
-  /*!
-    \brief Get offset entry_num for a given PSD selector descriptor. 
-    \param d PSD selector containing the entry_num we query
-    \param entry_num entry number that we want the LID offset for.
-    \return VCDINFO_INVALID_OFFSET is returned if d on error or d is
-  NULL. Otherwise the LID offset is returned.
-  */
-  uint16_t
-  vcdinfo_get_offset_from_psd(const PsdSelectionListDescriptor *d, 
-			      unsigned int entry_num);
-  
-  
   /*! 
     Get entry in offset list for the item that has offset. This entry 
     has for example the LID. NULL is returned on error. 
@@ -461,23 +410,20 @@ extern "C" {
   /*!
     Return number of bytes in PSD.
   */
-  uint32_t
-  vcdinfo_get_psd_size (const vcdinfo_obj_t *obj);
+  uint32_t vcdinfo_get_psd_size (const vcdinfo_obj_t *obj);
   
   /*!
     Return a string containing the VCD publisher id with trailing
     blanks removed, or NULL if there is some problem in getting this.
   */
-  const char *
-  vcdinfo_get_publisher_id(const vcdinfo_obj_t *obj);
+  const char * vcdinfo_get_publisher_id(const vcdinfo_obj_t *obj);
   
   /*!
     Get the PSD Selection List Descriptor for a given lid.
     False is returned if not found.
   */
-  bool
-  vcdinfo_get_pxd_from_lid(const vcdinfo_obj_t *obj, 
-			   PsdListDescriptor *pxd, uint16_t lid);
+  bool vcdinfo_get_pxd_from_lid(const vcdinfo_obj_t *obj, 
+				PsdListDescriptor *pxd, uint16_t lid);
   
   /*!
     \brief Get return offset. 
