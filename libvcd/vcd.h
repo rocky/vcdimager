@@ -55,6 +55,7 @@ typedef enum {
   VCD_PARM_INVALID = 0,
   VCD_PARM_VOLUME_ID,           /* char *          max length 32  */
   VCD_PARM_PUBLISHER_ID,        /* char *          max length 128 */
+  VCD_PARM_PREPARER_ID,         /* char *          max length 128 */
   VCD_PARM_ALBUM_ID,            /* char *          max length 16  */
   VCD_PARM_VOLUME_COUNT,        /* unsigned        [1..65535]     */
   VCD_PARM_VOLUME_NUMBER,       /* unsigned        [0..65535]     */

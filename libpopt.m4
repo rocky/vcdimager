@@ -40,6 +40,7 @@ main(int argc, const char *argv[])
   };
 
   poptContext context = poptGetContext("popt-test", argc, argv, options, 0);
+  poptSetOtherOptionHelp (optCon, "[OPTION...] <argument...>");
   poptGetNextOpt(context);
 
   return 0;

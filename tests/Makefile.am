@@ -14,9 +14,8 @@ testimage_LDADD = $(LIBVCD_LIBS)
 
 # make check targets
 
-check_PROGRAMS = check_sizeof
-
-check_sizeof_LDADD = $(LIBVCD_LIBS)
+check_PROGRAMS = check_sizeof check_bitfield
 
 TESTS = \
-	check_sizeof
+	check_sizeof \
+	check_bitfield

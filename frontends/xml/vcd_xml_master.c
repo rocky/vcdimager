@@ -49,6 +49,10 @@ bool vcd_xml_master (const struct vcdxml_t *obj, VcdImageSink *image_sink)
 
   _vcd = vcd_obj_new (obj->vcd_type);
 
+  if (vcd_xml_check_mode)
+    vcd_obj_set_param_str (_vcd, VCD_PARM_PREPARER_ID, 
+			   "GNU VCDIMAGER CHECK MODE");
+
   if (obj->info.album_id)
     vcd_obj_set_param_str (_vcd, VCD_PARM_ALBUM_ID, obj->info.album_id);
 

@@ -40,6 +40,8 @@ log_level_t vcd_xml_verbosity = LOG_INFO;
 
 bool vcd_xml_show_progress = false;
 
+bool vcd_xml_check_mode = false;
+
 static vcd_log_handler_t __default_vcd_log_handler = 0;
 
 static void 

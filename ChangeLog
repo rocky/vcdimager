@@ -1,5 +1,10 @@
 2002-12-25  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* frontends/cli/vcdimager.c, frontends/xml/vcd_xml_build.c: added
+	poptSetOtherOptionHelp for non-option argument(s)
+
+        * made ISO_PREPARER_ID customizable in libvcd
+
 	* libvcd/vcd_iso9660_private.h, libvcd/vcd_xa.h, 
 	libvcd/vcd_files_private.h: improved __attribute__((packed)) usage
 

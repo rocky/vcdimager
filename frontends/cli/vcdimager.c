@@ -79,6 +79,7 @@ static struct
 
   int verbose_flag;
   int quiet_flag;
+  int check_flag;
 
   vcd_log_handler_t default_vcd_log_handler;
 }
@@ -248,6 +249,9 @@ main (int argc, const char *argv[])
         {"progress", 'p', POPT_ARG_NONE | POPT_ARGFLAG_DOC_HIDDEN,
          NULL, 0, "show progress"},
 
+        {"check", '\0', POPT_ARG_NONE | POPT_ARGFLAG_DOC_HIDDEN, 
+         &gl.check_flag, 0, "enabled check mode"},
+
         {"verbose", 'v', POPT_ARG_NONE, &gl.verbose_flag, 0, "be verbose"},
 
         {"quiet", 'q', POPT_ARG_NONE, &gl.quiet_flag, 0, 
@@ -262,6 +266,7 @@ main (int argc, const char *argv[])
       };
     
     poptContext optCon = poptGetContext ("vcdimager", argc, argv, optionsTable, 0);
+    poptSetOtherOptionHelp (optCon, "[OPTION...] <mpeg-tracks...>");
 
     if (poptReadDefaultConfig (optCon, 0)) 
       fprintf (stderr, "warning, reading popt configuration failed\n"); 
@@ -364,6 +369,9 @@ main (int argc, const char *argv[])
               " -- cue file may get overwritten by bin file!");
 
   gl_vcd_obj = vcd_obj_new (type_id);
+
+  if (gl.check_flag)
+    vcd_obj_set_param_str (gl_vcd_obj, VCD_PARM_PREPARER_ID, "GNU VCDIMAGER CHECK MODE");
 
   vcd_obj_set_param_str (gl_vcd_obj, VCD_PARM_VOLUME_ID, gl.volume_label);
   vcd_obj_set_param_str (gl_vcd_obj, VCD_PARM_APPLICATION_ID, 

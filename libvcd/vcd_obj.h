@@ -114,6 +114,7 @@ struct _VcdObj {
   char *iso_volume_label;
   char *iso_publisher_id;
   char *iso_application_id;
+  char *iso_preparer_id;
 
   char *info_album_id;
   unsigned info_volume_count;

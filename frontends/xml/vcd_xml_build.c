@@ -137,6 +137,7 @@ static struct {
   char *xml_fname;
 
   int verbose_flag;
+  int check_flag;
   int quiet_flag;
   int progress_flag;
   int gui_flag;
@@ -205,8 +206,13 @@ _do_cl (int argc, const char *argv[])
       {"sector-2336", '\0', POPT_ARG_NONE, NULL, CL_2336_FLAG,
        "use 2336 byte sectors for output"},
 
+      
+
       {"progress", 'p', POPT_ARG_NONE, &gl.progress_flag, 0,  
        "show progress"}, 
+
+      {"check", '\0', POPT_ARG_NONE | POPT_ARGFLAG_DOC_HIDDEN, 
+       &gl.check_flag, 0, "enable check mode"},
 
       {"verbose", 'v', POPT_ARG_NONE, &gl.verbose_flag, 0, 
        "be verbose"},
@@ -225,7 +231,8 @@ _do_cl (int argc, const char *argv[])
     };
 
   optCon = poptGetContext ("vcdimager", argc, argv, optionsTable, 0);
-  
+  poptSetOtherOptionHelp (optCon, "[OPTION...] <xml-control-file>");
+
   if (poptReadDefaultConfig (optCon, 0)) 
     fprintf (stderr, "warning, reading popt configuration failed\n"); 
 
@@ -391,6 +398,9 @@ main (int argc, const char *argv[])
 
   if (gl.progress_flag)
     vcd_xml_show_progress = true;
+
+  if (gl.check_flag)
+    vcd_xml_check_mode = true;
 
   errno = 0;
   if (!(vcd_doc = _xmlParseFile (gl.xml_fname)))

@@ -50,6 +50,8 @@ static const char _rcsid[] = "$Id$";
 
 static const char zero[CDDA_SIZE] = { 0, };
 
+#define DEFAULT_ISO_PREPARER_ID       "GNU VCDImager " VERSION " " HOST_ARCH
+
 /* exported private functions
  */
 
@@ -273,6 +275,7 @@ vcd_obj_new (vcd_type_t vcd_type)
   new_obj->iso_volume_label = strdup ("");
   new_obj->iso_publisher_id = strdup ("");
   new_obj->iso_application_id = strdup ("");
+  new_obj->iso_preparer_id = _vcd_strdup_upper (DEFAULT_ISO_PREPARER_ID);
   new_obj->info_album_id = strdup ("");
   new_obj->info_volume_count = 1;
   new_obj->info_volume_number = 1;
@@ -825,10 +828,21 @@ vcd_obj_set_param_str (VcdObj *obj, vcd_parm_t param, const char *arg)
       obj->iso_publisher_id = strdup (arg);
       if (strlen (obj->iso_publisher_id) > 128)
         {
-          obj->iso_volume_label[128] = '\0';
+          obj->iso_publisher_id[128] = '\0';
           vcd_warn ("Publisher ID too long, will be truncated");
         }
       vcd_debug ("changed publisher id to `%s'", obj->iso_publisher_id);
+      break;
+
+    case VCD_PARM_PREPARER_ID:
+      free (obj->iso_preparer_id);
+      obj->iso_preparer_id = strdup (arg);
+      if (strlen (obj->iso_preparer_id) > 128)
+        {
+          obj->iso_preparer_id[128] = '\0';
+          vcd_warn ("Preparer ID too long, will be truncated");
+        }
+      vcd_debug ("changed preparer id to `%s'", obj->iso_preparer_id);
       break;
 
     case VCD_PARM_APPLICATION_ID:
@@ -2001,6 +2015,7 @@ _write_vcd_iso_track (VcdObj *obj)
   set_iso_pvd (_dict_get_bykey (obj, "pvd")->buf,
                obj->iso_volume_label, 
                obj->iso_publisher_id,
+               obj->iso_preparer_id,
                obj->iso_application_id, 
                obj->iso_size, 
                _dict_get_bykey (obj, "dir")->buf, 

@@ -2,7 +2,7 @@ AC_REVISION([$Id$])dnl
 AC_INIT(libvcd/vcd.h)
 dnl AM_ACLOCAL_INCLUDE(.)
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(vcdimager, 0.7.12)
+AM_INIT_AUTOMAKE(vcdimager, 0.7.13)
 AM_MISSING_PROG(HELP2MAN, help2man, $missing_dir)
 AM_MAINTAINER_MODE
 
@@ -165,7 +165,7 @@ then
 ****************************************************************************
 ***                                                                      ***
 ***         WARNING: BUILDING ONLY LIBVCD W/O ANY FRONTENDS              ***
-***              (maybe you are missing some library?)                   ***
+***      (maybe you are missing some library (libpopt, libxml2)?         ***
 ***                                                                      ***
 ****************************************************************************
 ****************************************************************************
