@@ -26,12 +26,63 @@
 #ifndef _VCDINF_H
 #define _VCDINF_H
 
-#include <libvcd/vcd_iso9660.h>
+#include "vcd_iso9660.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
+  /* Move somewhere else? */
+  typedef struct iso_primary_descriptor pvd_t;
+  
+  struct _VcdInfo {
+    vcd_type_t vcd_type;
+    
+    VcdImageSource *img;
+    
+    struct iso_primary_descriptor pvd;
+    
+    InfoVcd info;
+    EntriesVcd entries;
+    
+    VcdList *offset_list;
+    VcdList *offset_x_list;
+    VcdList *segment_list; /* list data entry is a vcd_image_stat_t */
+    
+    LotVcd *lot;
+    LotVcd *lot_x;
+    uint8_t *psd;
+    uint8_t *psd_x;
+    unsigned int psd_x_size;
+    bool extended;
+
+    bool has_xa;           /* True if has extended attributes (XA) */
+    
+    void *tracks_buf;
+    void *search_buf;
+    void *scandata_buf;
+    
+    char *source_name; /* VCD device or file currently open */
+    
+  };
+  
+  typedef struct 
+  {
+    
+    psd_descriptor_types descriptor_type;
+    /* Only one of pld or psd is used below. Not all
+       C compiler accept the anonymous unions commented out below. */
+    /* union  { */
+    PsdPlayListDescriptor *pld;
+    PsdSelectionListDescriptor *psd;
+    /* }; */
+    
+  } PsdListDescriptor;
+  
+  
+  const char *
+  vcdinf_area_str (const struct psd_area_t *_area);
+  
   /*!
     Comparison routine used in sorting. We compare LIDs and if those are 
     equal, use the offset.
@@ -107,6 +158,11 @@ extern "C" {
   bool
   vcdinf_get_lid_rejected_from_psd(const PsdSelectionListDescriptor *psd);
   
+  /*!
+    Return LOT offset
+  */
+  uint16_t vcdinf_get_lot_offset (const LotVcd *lot, unsigned int n);
+
   /*!
     Return loop count. 0 is infinite loop.
   */
@@ -217,6 +273,13 @@ extern "C" {
   uint32_t vcdinf_get_psd_size (const InfoVcd *info);
        
 
+  /*!
+    Get the PSD Selection List Descriptor for a given lid.
+    False is returned if not found.
+  */
+  bool vcdinf_get_pxd_from_lid(const vcdinfo_obj_t *obj, 
+			       PsdListDescriptor *pxd, uint16_t lid);
+  
   /**
      \fn vcdinf_get_return_from_pld(const PsdPlayListDescriptor *pld);
      \brief Get return offset for a given PLD selector descriptor. 

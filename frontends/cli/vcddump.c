@@ -384,17 +384,17 @@ dump_psd (const vcdinfo_obj_t *obj, bool ext)
                   (const void *) &(d->ofs[d->nos]);
 
                 fprintf (stdout, "  prev_area: %s | next_area: %s\n",
-                         vcdinfo_area_str (&d2->prev_area),
-                         vcdinfo_area_str (&d2->next_area));
+                         vcdinf_area_str (&d2->prev_area),
+                         vcdinf_area_str (&d2->next_area));
 
 
                 fprintf (stdout, "  retn_area: %s | default_area: %s\n",
-                         vcdinfo_area_str (&d2->return_area),
-                         vcdinfo_area_str (&d2->default_area));
+                         vcdinf_area_str (&d2->return_area),
+                         vcdinf_area_str (&d2->default_area));
 
                 for (i = 0; i < vcdinf_get_num_selections(d); i++)
                   fprintf (stdout, "  area[%d]: %s\n", i,
-                           vcdinfo_area_str (&d2->area[i]));
+                           vcdinf_area_str (&d2->area[i]));
               }
 
             fprintf (stdout, "\n");

@@ -69,6 +69,44 @@
 
 static const char _rcsid[] = "$Id$";
 
+#define BUF_COUNT 16
+#define BUF_SIZE 80
+
+/* Return a pointer to a internal free buffer */
+static char *
+_getbuf (void)
+{
+  static char _buf[BUF_COUNT][BUF_SIZE];
+  static int _num = -1;
+  
+  _num++;
+  _num %= BUF_COUNT;
+
+  memset (_buf[_num], 0, BUF_SIZE);
+
+  return _buf[_num];
+}
+
+const char *
+vcdinf_area_str (const struct psd_area_t *_area)
+{
+  char *buf;
+
+  if (!_area->x1  
+      && !_area->y1
+      && !_area->x2
+      && !_area->y2)
+    return "disabled";
+
+  buf = _getbuf ();
+
+  snprintf (buf, BUF_SIZE, "[%3d,%3d] - [%3d,%3d]",
+            _area->x1, _area->y1,
+            _area->x2, _area->y2);
+            
+  return buf;
+}
+
 /*! 
   Comparison routine used in sorting. We compare LIDs and if those are 
   equal, use the offset.
@@ -165,7 +203,7 @@ vcdinf_visit_lot (struct _vcdinf_pbc_ctx *obj)
   } else if (!obj->psd_size) return;
 
   for (n = 0; n < LOT_VCD_OFFSETS; n++)
-    if ((tmp = uint16_from_be (lot->offset[n])) != PSD_OFS_DISABLED)
+    if ((tmp = vcdinf_get_lot_offset(lot, n)) != PSD_OFS_DISABLED)
       vcdinf_visit_pbc (obj, n + 1, tmp, true);
 
   _vcd_list_sort (obj->extended ? obj->offset_x_list : obj->offset_list, 
@@ -468,6 +506,15 @@ vcdinf_get_lid_rejected_from_psd(const PsdSelectionListDescriptor *psd)
 }
 
 /*!
+  Return LOT offset
+*/
+uint16_t
+vcdinf_get_lot_offset (const LotVcd *lot, unsigned int n) 
+{
+  return uint16_from_be (lot->offset[n]);
+}
+
+/*!
   Return loop count. 0 is infinite loop.
 */
 uint16_t
@@ -555,7 +602,7 @@ vcdinf_get_offset_from_lid(const vcdinfo_obj_t *obj, lid_t lid,
   PsdListDescriptor pxd;
 
   if (obj == NULL) return VCDINFO_INVALID_OFFSET;
-  vcdinfo_get_pxd_from_lid(obj, &pxd, lid);
+  vcdinf_get_pxd_from_lid(obj, &pxd, lid);
 
   switch (pxd.descriptor_type) {
   case PSD_TYPE_SELECTION_LIST:
@@ -664,6 +711,67 @@ vcdinf_get_publisher_id(const pvd_t *pvd)
 {
   if (NULL==pvd) return NULL;
   return(vcdinfo_strip_trail(pvd->publisher_id, MAX_PUBLISHER_ID));
+}
+
+/*!
+  Get the PSD Selection List Descriptor for a given lid.
+  NULL is returned if error or not found.
+*/
+static bool
+_vcdinf_get_pxd_from_lid(const vcdinfo_obj_t *obj, PsdListDescriptor *pxd,
+                         uint16_t lid, bool ext) 
+{
+  VcdListNode *node;
+  unsigned mult = obj->info.offset_mult;
+  const uint8_t *psd = ext ? obj->psd_x : obj->psd;
+  VcdList *offset_list = ext ? obj->offset_x_list : obj->offset_list;
+
+  if (offset_list == NULL) return false;
+  
+  _VCD_LIST_FOREACH (node, offset_list)
+    {
+      vcdinfo_offset_t *ofs = _vcd_list_node_data (node);
+      unsigned _rofs = ofs->offset * mult;
+
+      pxd->descriptor_type = psd[_rofs];
+
+      switch (pxd->descriptor_type)
+        {
+        case PSD_TYPE_PLAY_LIST:
+          {
+            pxd->pld = (PsdPlayListDescriptor *) (psd + _rofs);
+            if (vcdinf_get_lid_from_pld(pxd->pld) == lid) {
+              return true;
+            }
+            break;
+          }
+
+        case PSD_TYPE_EXT_SELECTION_LIST:
+        case PSD_TYPE_SELECTION_LIST: 
+          {
+            pxd->psd = (PsdSelectionListDescriptor *) (psd + _rofs);
+            if (vcdinf_get_lid_from_psd(pxd->psd) == lid) {
+              return true;
+            }
+            break;
+          }
+        default: ;
+        }
+    }
+  return false;
+}
+
+/*!
+  Get the PSD Selection List Descriptor for a given lid.
+  False is returned if not found.
+*/
+bool
+vcdinf_get_pxd_from_lid(const vcdinfo_obj_t *obj, PsdListDescriptor *pxd,
+                         uint16_t lid)
+{
+  if (_vcdinf_get_pxd_from_lid(obj, pxd, lid, true))
+    return true;
+  return _vcdinf_get_pxd_from_lid(obj, pxd, lid, false);
 }
 
 /**

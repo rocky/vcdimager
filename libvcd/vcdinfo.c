@@ -42,22 +42,22 @@
 #include <unistd.h>
 #endif
 
-#include <libvcd/vcd_assert.h>
-#include <libvcd/vcd_types.h>
-#include <libvcd/vcd_files.h>
-#include <libvcd/vcd_files_private.h>
-#include <libvcd/vcd_iso9660.h>
-#include <libvcd/vcd_iso9660_private.h>
-#include <libvcd/vcd_logging.h>
-#include <libvcd/vcd_util.h>
-#include <libvcd/vcd_salloc.h>
-#include <libvcd/vcd_stream_stdio.h>
-#include <libvcd/vcd_image_bincue.h>
-#include <libvcd/vcd_image_nrg.h>
-#include <libvcd/vcd_image_cd.h>
-#include <libvcd/vcd_image_fs.h>
-#include <libvcd/vcd_xa.h>
-#include <libvcd/vcd_cd_sector.h>
+#include "vcd_assert.h"
+#include "vcd_types.h"
+#include "vcd_files.h"
+#include "vcd_files_private.h"
+#include "vcd_iso9660.h"
+#include "vcd_iso9660_private.h"
+#include "vcd_logging.h"
+#include "vcd_util.h"
+#include "vcd_salloc.h"
+#include "vcd_stream_stdio.h"
+#include "vcd_image_bincue.h"
+#include "vcd_image_nrg.h"
+#include "vcd_image_cd.h"
+#include "vcd_image_fs.h"
+#include "vcd_xa.h"
+#include "vcd_cd_sector.h"
 
 /* Eventually move above libvcd includes but having vcdinfo including. */
 #include "vcdinfo.h"
@@ -481,7 +481,7 @@ vcdinfo_get_default(const vcdinfo_obj_t *obj, unsigned int lid)
     
     PsdListDescriptor pxd;
 
-    vcdinfo_get_pxd_from_lid(obj, &pxd, lid);
+    vcdinf_get_pxd_from_lid(obj, &pxd, lid);
     
     switch (pxd.descriptor_type) {
     case PSD_TYPE_EXT_SELECTION_LIST:
@@ -501,7 +501,7 @@ vcdinfo_get_default(const vcdinfo_obj_t *obj, unsigned int lid)
 
 /*!
   Return a string containing the default VCD device if none is specified.
-  Return "" if we can't get this information.
+  Return NULL we can't get this information.
 */
 char *
 vcdinfo_get_default_device (const vcdinfo_obj_t *obj)
@@ -633,7 +633,7 @@ vcdinfo_get_itemid_from_lid(const vcdinfo_obj_t *obj, lid_t lid)
   PsdListDescriptor pxd;
 
   if (obj == NULL) return VCDINFO_REJECTED_MASK;
-  vcdinfo_get_pxd_from_lid(obj, &pxd, lid);
+  vcdinf_get_pxd_from_lid(obj, &pxd, lid);
   switch (pxd.descriptor_type) {
   case PSD_TYPE_SELECTION_LIST:
   case PSD_TYPE_EXT_SELECTION_LIST:
@@ -754,67 +754,6 @@ vcdinfo_get_publisher_id(const vcdinfo_obj_t *obj)
   return vcdinf_get_publisher_id(&obj->pvd);
 }
 
-/*!
-  Get the PSD Selection List Descriptor for a given lid.
-  NULL is returned if error or not found.
-*/
-static bool
-_vcdinfo_get_pxd_from_lid(const vcdinfo_obj_t *obj, PsdListDescriptor *pxd,
-                          uint16_t lid, bool ext) 
-{
-  VcdListNode *node;
-  unsigned mult = obj->info.offset_mult;
-  const uint8_t *psd = ext ? obj->psd_x : obj->psd;
-  VcdList *offset_list = ext ? obj->offset_x_list : obj->offset_list;
-
-  if (offset_list == NULL) return false;
-  
-  _VCD_LIST_FOREACH (node, offset_list)
-    {
-      vcdinfo_offset_t *ofs = _vcd_list_node_data (node);
-      unsigned _rofs = ofs->offset * mult;
-
-      pxd->descriptor_type = psd[_rofs];
-
-      switch (pxd->descriptor_type)
-        {
-        case PSD_TYPE_PLAY_LIST:
-          {
-            pxd->pld = (PsdPlayListDescriptor *) (psd + _rofs);
-            if (vcdinf_get_lid_from_pld(pxd->pld) == lid) {
-              return true;
-            }
-            break;
-          }
-
-        case PSD_TYPE_EXT_SELECTION_LIST:
-        case PSD_TYPE_SELECTION_LIST: 
-          {
-            pxd->psd = (PsdSelectionListDescriptor *) (psd + _rofs);
-            if (vcdinf_get_lid_from_psd(pxd->psd) == lid) {
-              return true;
-            }
-            break;
-          }
-        default: ;
-        }
-    }
-  return false;
-}
-
-/*!
-  Get the PSD Selection List Descriptor for a given lid.
-  False is returned if not found.
-*/
-bool
-vcdinfo_get_pxd_from_lid(const vcdinfo_obj_t *obj, PsdListDescriptor *pxd,
-                         uint16_t lid)
-{
-  if (_vcdinfo_get_pxd_from_lid(obj, pxd, lid, true))
-    return true;
-  return _vcdinfo_get_pxd_from_lid(obj, pxd, lid, false);
-}
-
 /**
  \fn vcdinfo_get_return(const vcdinfo_obj_t *obj);
  \brief Get return offset for a given PLD selector descriptor. 
@@ -828,7 +767,7 @@ vcdinfo_get_return(const vcdinfo_obj_t *obj, unsigned int lid)
 
     PsdListDescriptor pxd;
 
-    vcdinfo_get_pxd_from_lid(obj, &pxd, lid);
+    vcdinf_get_pxd_from_lid(obj, &pxd, lid);
     
     switch (pxd.descriptor_type) {
     case PSD_TYPE_PLAY_LIST:
@@ -1008,6 +947,7 @@ vcdinfo_get_track_audio_type(const vcdinfo_obj_t *obj, track_t track_num)
 
 /*!
   Return the number of tracks in the current medium.
+  O is returned on error.
 */
 unsigned int
 vcdinfo_get_num_tracks(const vcdinfo_obj_t *obj)
@@ -1117,8 +1057,8 @@ vcdinfo_get_track_sect_count(const vcdinfo_obj_t *obj, const track_t track_num)
 /*!
   Return size in bytes for track number for entry n in obj.
 
-  The IS0-9660 filesystem track has number 0. Tracks associated
-  with playable entries numbers start at 1.
+  The IS0-9660 filesystem track has number 1. Tracks associated
+  with playable entries numbers start at 2.
 
   FIXME: Whether we count the track pregap sectors is a bit haphazard.
   We should add a parameter to indicate whether this is wanted or not.
@@ -1477,26 +1417,6 @@ bool
 vcdinfo_is_rejected(uint16_t offset)
 {
   return (offset & VCDINFO_REJECTED_MASK) != 0;
-}
-
-const char *
-vcdinfo_area_str (const struct psd_area_t *_area)
-{
-  char *buf;
-
-  if (!_area->x1  
-      && !_area->y1
-      && !_area->x2
-      && !_area->y2)
-    return "disabled";
-
-  buf = _getbuf ();
-
-  snprintf (buf, BUF_SIZE, "[%3d,%3d] - [%3d,%3d]",
-            _area->x1, _area->y1,
-            _area->x2, _area->y2);
-            
-  return buf;
 }
 
 /*!

@@ -23,6 +23,8 @@
 #ifndef _VCDINFO_H
 #define _VCDINFO_H
 
+#include "vcd_types.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -118,6 +120,9 @@ extern "C" {
 */
 #define VCDINFO_INVALID_BSN  200
 
+  /* Opague type used in most routines below. */
+  typedef struct _VcdInfo vcdinfo_obj_t;
+
   /* See enum in vcd_files_private.h */
   typedef enum {
     VCDINFO_FILES_VIDEO_NOSTREAM = 0,   
@@ -139,54 +144,6 @@ extern "C" {
     VCDINFO_SOURCE_DEVICE,         /* a device like /dev/cdrom */
     VCDINFO_SOURCE_SECTOR_2336,    /* bin file emulating 2336 bytes/sector */
   } vcdinfo_source_t;
-  
-  typedef struct 
-  {
-    
-    psd_descriptor_types descriptor_type;
-    /* Only one of pld or psd is used below. Not all
-       C compiler accept the anonymous unions commented out below. */
-    /* union  { */
-    PsdPlayListDescriptor *pld;
-    PsdSelectionListDescriptor *psd;
-    /* }; */
-    
-  } PsdListDescriptor;
-  
-  
-  /* Move somewhere else? */
-  typedef struct iso_primary_descriptor pvd_t;
-  
-  typedef struct {
-    vcd_type_t vcd_type;
-    
-    VcdImageSource *img;
-    
-    struct iso_primary_descriptor pvd;
-    
-    InfoVcd info;
-    EntriesVcd entries;
-    
-    VcdList *offset_list;
-    VcdList *offset_x_list;
-    VcdList *segment_list; /* list data entry is a vcd_image_stat_t */
-    
-    LotVcd *lot;
-    LotVcd *lot_x;
-    uint8_t *psd;
-    uint8_t *psd_x;
-    unsigned int psd_x_size;
-    bool extended;
-
-    bool has_xa;           /* True if has extended attributes (XA) */
-    
-    void *tracks_buf;
-    void *search_buf;
-    void *scandata_buf;
-    
-    char *source_name; /* VCD device or file currently open */
-    
-  } vcdinfo_obj_t;
   
   /*
    * VcdImageSource 
@@ -232,9 +189,6 @@ extern "C" {
     VCDINFO_OPEN_OTHER,          /* Is not VCD but something else */
   } vcdinfo_open_return_t;
   
-  const char *
-  vcdinfo_area_str (const struct psd_area_t *_area);
-  
   /*!
     Return the number of audio channels implied by "audio_type".
     0 is returned on error.
@@ -263,8 +217,6 @@ extern "C" {
   
   const char *
   vcdinfo_pin2str (uint16_t itemid);
-  
-  int vcdinf_get_wait_time (uint16_t wtime);
   
   /*!
     \brief Classify itemid_num into the kind of item it is: track #, entry #, 
@@ -303,7 +255,7 @@ extern "C" {
     "/vol/dev/aliases/cdrom0" on Solaris,  or maybe "VIDEOCD.CUE" for 
     if bin/cue I/O routines are in effect. 
     
-    Return "" if we can't get this information.
+    Return NULL we can't get this information.
   */
   char *
   vcdinfo_get_default_device (const vcdinfo_obj_t *obj);
@@ -419,13 +371,6 @@ extern "C" {
   const char * vcdinfo_get_publisher_id(const vcdinfo_obj_t *obj);
   
   /*!
-    Get the PSD Selection List Descriptor for a given lid.
-    False is returned if not found.
-  */
-  bool vcdinfo_get_pxd_from_lid(const vcdinfo_obj_t *obj, 
-				PsdListDescriptor *pxd, uint16_t lid);
-  
-  /*!
     \brief Get return offset. 
     \return  VCDINFO_INVALID_OFFSET is returned on error or if
     no "return"  entry. Otherwise the LID offset is returned.
@@ -456,21 +401,21 @@ extern "C" {
   const msf_t *
   vcdinfo_get_seg_msf(const vcdinfo_obj_t *obj, const unsigned int seg_num);
   
-/*!  Return the size in bytes for segment for entry_num n obj ASSUMING
-  THE SIZE OF A SECTOR IS ISO_BLOCKSIZE. This could be the case (but
-  doesn't have to be) if you mount a CD, have the OS list sizes and
-  its blocksize is ISO_BLOCKSIZE.
+  /*!  Return the size in bytes for segment for entry_num n obj ASSUMING
+    THE SIZE OF A SECTOR IS ISO_BLOCKSIZE. This could be the case (but
+    doesn't have to be) if you mount a CD, have the OS list sizes and
+    its blocksize is ISO_BLOCKSIZE.
 
-  In contrast, if you are issuing mode2/format2 reads which give 2324
-  bytes per sector and want to know how many of these to read to get
-  the entire segment, this is probably not the way to do do
-  that. Instead, multiply vcdinfo_get_seg_sector_count() by the number
-  of bytes per sector.
+    In contrast, if you are issuing mode2/format2 reads which give 2324
+    bytes per sector and want to know how many of these to read to get
+    the entire segment, this is probably not the way to do do
+    that. Instead, multiply vcdinfo_get_seg_sector_count() by the number
+    of bytes per sector.
 
-  NULL is returned if there is no entry.
-*/
-uint32_t
-vcdinfo_get_seg_size(const vcdinfo_obj_t *obj, const unsigned int seg_num);
+    NULL is returned if there is no entry.
+  */
+  uint32_t 
+  vcdinfo_get_seg_size(const vcdinfo_obj_t *obj, const unsigned int seg_num);
 
   /*!  
     Return the number of sectors for segment
@@ -548,8 +493,8 @@ vcdinfo_get_seg_size(const vcdinfo_obj_t *obj, const unsigned int seg_num);
   /*!
     Return the size in sectors for track n. 
 
-    The IS0-9660 filesystem track has number 0. Tracks associated
-    with playable entries numbers start at 1.
+    The IS0-9660 filesystem track has number 1. Tracks associated
+    with playable entries numbers start at 2.
     
     FIXME: Whether we count the track pregap sectors is a bit haphazard.
     We should add a parameter to indicate whether this is wanted or not.
