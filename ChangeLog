@@ -1,5 +1,11 @@
 2001-05-29  Herbert Valerio Riedel  <hvr@gnu.org>
 
+	* libvcd/vcd_mpeg.c (vcd_mpeg_parse_packet): warn instead of 
+		error on buffer overruns
+
+	* libvcd/vcd_mpeg_stream.c (vcd_mpeg_source_scan): if bad packet
+		arrives, just warn and ignore end of stream...
+
 	* changed broken svcd mode operation
 
 	* configure.in: check whether popt is new enough

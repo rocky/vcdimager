@@ -142,6 +142,16 @@ vcd_mpeg_source_scan (VcdMpegSource *obj)
 
       pkt_len = vcd_mpeg_parse_packet (buf, read_len, true, &state);
 
+      if (!pkt_len)
+        {
+          vcd_warn ("bad packet at packet #%d (stream byte offset %d)"
+                    " -- remaining %d bytes of stream will be ignored",
+                    pno, pos, length - pos);
+
+          pos = length; /* don't fall into assert... */
+          break;
+        }
+
       if (state.packet.aps)
 	{
 	  struct aps_data *_data = _vcd_malloc (sizeof (struct aps_data));
@@ -303,6 +313,8 @@ vcd_mpeg_source_get_packet (VcdMpegSource *obj, unsigned long packet_no,
       vcd_data_source_read (obj->data_source, buf, read_len, 1);
 
       pkt_len = vcd_mpeg_parse_packet (buf, read_len, false, &state);
+
+      vcd_assert (pkt_len > 0);
 
       if (pno == packet_no)
 	{

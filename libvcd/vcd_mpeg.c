@@ -579,7 +579,8 @@ vcd_mpeg_parse_packet (const void *_buf, unsigned buflen, bool parse_pes,
 	  switch (vcd_bitvec_peek_bits(buf, pos << 3, 2))
 	    {
 	    default:
-	      vcd_warn ("packet not recognized as either version 1 or 2 (%d) -- assuming v1", 
+	      vcd_warn ("packet not recognized as either version 1 or 2 (%d)" 
+                        " -- assuming v1", 
 			vcd_bitvec_peek_bits(buf, pos << 3, 2));
 	    case 0x0: /* %00 mpeg1 */
 	      if (!ctx->stream.version)
@@ -616,7 +617,10 @@ vcd_mpeg_parse_packet (const void *_buf, unsigned buflen, bool parse_pes,
 	  
 	  if (pos + size > buflen)	  
             {
-              vcd_error ("packet length beyond buffer...");
+              vcd_warn ("packet length beyond buffer" 
+                        " (pos = %d + size = %d > buflen = %d) "
+                        "-- stream may be truncated or packet length > 2324 bytes!",
+                        pos, size, buflen);
               return 0;
             }
 
