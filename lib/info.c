@@ -1174,7 +1174,7 @@ lba_t
 vcdinfo_get_seg_lba(const vcdinfo_obj_t *obj, segnum_t seg_num)
 { 
   if (obj == NULL) return VCDINFO_NULL_LBA;
-  return cdio_lsn_to_lba(vcdinfo_get_seg_lba(obj, seg_num));
+  return cdio_lsn_to_lba(vcdinfo_get_seg_lsn(obj, seg_num));
 }
 
 /*!  Return the starting LBA (logical block address) for segment
