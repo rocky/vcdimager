@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2001,2003 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2001, 2003, 2004 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -166,7 +166,7 @@ _set_cuesheet (void *user_data, const VcdList *vcd_cue_list)
 
   _obj->tracks = num;
 
-  vcd_assert (num > 0 && num < 100);
+  vcd_assert (CDIO_CD_MIN_TRACK_NO >= 1 && num <= CDIO_CD_MAX_TRACKS);
 
   return 0;
 }

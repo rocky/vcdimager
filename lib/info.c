@@ -61,10 +61,6 @@
 
 static const char _rcsid[] = "$Id$";
 
-#define MIN_ENCODED_TRACK_NUM 100
-#define MIN_ENCODED_SEGMENT_NUM 1000
-#define MAX_ENCODED_SEGMENT_NUM 2979
-
 #define BUF_COUNT 16
 #define BUF_SIZE 80
 

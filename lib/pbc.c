@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2000, 2004 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@
 #include <libvcd/logging.h>
 #include <libvcd/files.h>
 #include <libvcd/types.h>
+#include <libvcd/info.h>
 
 /* FIXME! Make this really private. */
 #include <libvcd/files_private.h>
@@ -143,11 +144,11 @@ _vcd_pbc_lookup (const VcdObj *obj, const char item_id[])
     {
       if (id < 2)
 	return ITEM_TYPE_NOTFOUND;
-      else if (id < 100)
+      else if (id < MIN_ENCODED_TRACK_NUM)
 	return ITEM_TYPE_TRACK;
       else if (id < 600)
 	return ITEM_TYPE_ENTRY;
-      else if (id < 2980)
+      else if (id <= MAX_ENCODED_SEGMENT_NUM)
 	return ITEM_TYPE_SEGMENT;
       else 
 	vcd_assert_not_reached ();
@@ -222,7 +223,7 @@ _vcd_pbc_pin_lookup (const VcdObj *obj, const char item_id[])
       vcd_assert (n < 1980);
 
       if (_segment->id && !strcmp (item_id, _segment->id))
-	return n + 1000;
+	return n + MIN_ENCODED_SEGMENT_NUM;
 
       n += _segment->segment_count;
     }
@@ -555,13 +556,13 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
 	else
 	  _md->type = PSD_TYPE_SELECTION_LIST;
 
-	if (!IN (_pbc->bsn, 1, 99))
-	  vcd_error ("selection '%s': BSN (%d) not in range [1..99]",
-		     _pbc->id, _pbc->bsn);
+	if (!IN (_pbc->bsn, 1, MAX_PBC_SELECTIONS))
+	  vcd_error ("selection '%s': BSN (%d) not in range [1..%d]",
+		     _pbc->id, _pbc->bsn, MAX_PBC_SELECTIONS);
 
-	if (!IN (_nos, 0, 99))
-	  vcd_error ("selection '%s': too many selections (%d > 99)",
-		     _pbc->id, _nos);
+	if (!IN (_nos, 0, MAX_PBC_SELECTIONS))
+	  vcd_error ("selection '%s': too many selections (%d > %d)",
+		     _pbc->id, _nos, MAX_PBC_SELECTIONS);
 
 	if (_nos + _pbc->bsn > 100)
 	  vcd_error ("selection '%s': BSN + NOS (%d + %d) > 100",
