@@ -96,14 +96,18 @@ extern "C" {
   /*!
      Calls recursive routine to populate obj->offset_list or obj->offset_x_list
      by going through LOT.
+
+     Returns false if there was some error.
   */
-  void vcdinf_visit_lot (struct _vcdinf_pbc_ctx *obj);
+  bool vcdinf_visit_lot (struct _vcdinf_pbc_ctx *obj);
   
   /*! 
      Recursive routine to populate obj->offset_list or obj->offset_x_list
      by reading playback control entries referred to via lid.
+
+     Returns false if there was some error.
   */
-  void vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, 
+  bool vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, 
 			 unsigned int offset, bool in_lot);
 
 #ifdef __cplusplus

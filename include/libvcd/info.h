@@ -701,7 +701,13 @@ extern "C" {
   const char *
   vcdinfo_ofs2str (const vcdinfo_obj_t *obj, unsigned int offset, bool ext);
   
-  void vcdinfo_visit_lot (vcdinfo_obj_t *obj, bool extended);
+  /*!
+    Calls recursive routine to populate obj->offset_list or obj->offset_x_list
+    by going through LOT.
+    
+    Returns false if there was some error.
+  */
+  bool vcdinfo_visit_lot (vcdinfo_obj_t *obj, bool extended);
   
   bool vcdinfo_read_psd (vcdinfo_obj_t *obj);
   

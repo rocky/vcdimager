@@ -118,20 +118,23 @@ vcdinf_update_offset_list(struct _vcdinf_pbc_ctx *obj, bool extended)
 /*!
    Calls recursive routine to populate obj->offset_list or obj->offset_x_list
    by going through LOT.
+
+   Returns false if there was some error.
 */
-void
+bool
 vcdinf_visit_lot (struct _vcdinf_pbc_ctx *obj)
 {
   const LotVcd *lot = obj->extended ? obj->lot_x : obj->lot;
   unsigned int n, tmp;
+  bool ret=true;
 
   if (obj->extended) {
-    if (!obj->psd_x_size) return;
-  } else if (!obj->psd_size) return;
+    if (!obj->psd_x_size) return false;
+  } else if (!obj->psd_size) return false;
 
   for (n = 0; n < LOT_VCD_OFFSETS; n++)
     if ((tmp = vcdinf_get_lot_offset(lot, n)) != PSD_OFS_DISABLED)
-      vcdinf_visit_pbc (obj, n + 1, tmp, true);
+      ret &= vcdinf_visit_pbc (obj, n + 1, tmp, true);
 
   _vcd_list_sort (obj->extended ? obj->offset_x_list : obj->offset_list, 
                   (_vcd_list_cmp_func) vcdinf_lid_t_cmp);
@@ -140,13 +143,16 @@ vcdinf_visit_lot (struct _vcdinf_pbc_ctx *obj)
      might obviate the need for vcdinf_visit_pbc() or some of it which is
      more complex. */
   vcdinf_update_offset_list(obj, obj->extended);
+  return ret;
 }
 
 /*!
    Recursive routine to populate obj->offset_list or obj->offset_x_list
    by reading playback control entries referred to via lid.
+
+   Returns false if there was some error.
 */
-void
+bool
 vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, unsigned int offset, 
                   bool in_lot)
 {
@@ -156,6 +162,7 @@ vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, unsigned int offset,
   const uint8_t *psd = obj->extended ? obj->psd_x : obj->psd;
   unsigned int _rofs = offset * obj->offset_mult;
   VcdList *offset_list;
+  bool ret=true;
 
   vcd_assert (psd_size % 8 == 0);
 
@@ -164,7 +171,7 @@ vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, unsigned int offset,
     case PSD_OFS_DISABLED:
     case PSD_OFS_MULTI_DEF:
     case PSD_OFS_MULTI_DEF_NO_NUM:
-      return;
+      return true;
 
     default:
       break;
@@ -177,7 +184,7 @@ vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, unsigned int offset,
 		   _rofs, psd_size);
       else
         vcd_warn ("psd offset out of range (%d >= %d)", _rofs, psd_size);
-      return;
+      return false;
     }
 
   if (!obj->offset_list)
@@ -210,7 +217,7 @@ vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, unsigned int offset,
           
           ofs->ext = obj->extended;
 
-          return; /* already been there... */
+          return true; /* already been there... */
         }
     }
 
@@ -237,9 +244,10 @@ vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, unsigned int offset,
             vcd_warn ("LOT entry assigned LID %d, but descriptor has LID %d",
                       ofs->lid, lid);
 
-        vcdinf_visit_pbc (obj, 0, vcdinf_pld_get_prev_offset(d), false);
-        vcdinf_visit_pbc (obj, 0, vcdinf_pld_get_next_offset(d), false);
-        vcdinf_visit_pbc (obj, 0, vcdinf_pld_get_return_offset(d), false);
+        ret &= vcdinf_visit_pbc (obj, 0, vcdinf_pld_get_prev_offset(d), false);
+        ret &= vcdinf_visit_pbc (obj, 0, vcdinf_pld_get_next_offset(d), false);
+        ret &= vcdinf_visit_pbc (obj, 0, vcdinf_pld_get_return_offset(d), 
+                                 false);
       }
       break;
 
@@ -259,15 +267,18 @@ vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, unsigned int offset,
             vcd_warn ("LOT entry assigned LID %d, but descriptor has LID %d",
                       ofs->lid, uint16_from_be (d->lid) & 0x7fff);
 
-        vcdinf_visit_pbc (obj, 0, vcdinf_psd_get_prev_offset(d), false);
-        vcdinf_visit_pbc (obj, 0, vcdinf_psd_get_next_offset(d), false);
-        vcdinf_visit_pbc (obj, 0, vcdinf_psd_get_return_offset(d), false);
-        vcdinf_visit_pbc (obj, 0, vcdinf_psd_get_default_offset(d), false);
-        vcdinf_visit_pbc (obj, 0, uint16_from_be (d->timeout_ofs), false);
+        ret &= vcdinf_visit_pbc (obj, 0, vcdinf_psd_get_prev_offset(d), false);
+        ret &= vcdinf_visit_pbc (obj, 0, vcdinf_psd_get_next_offset(d), false);
+        ret &= vcdinf_visit_pbc (obj, 0, vcdinf_psd_get_return_offset(d), 
+                                 false);
+        ret &= vcdinf_visit_pbc (obj, 0, vcdinf_psd_get_default_offset(d), 
+                                 false);
+        ret &= vcdinf_visit_pbc (obj, 0, uint16_from_be (d->timeout_ofs), 
+                                 false);
 
         for (idx = 0; idx < vcdinf_get_num_selections(d); idx++)
-          vcdinf_visit_pbc (obj, 0, vcdinf_psd_get_offset(d, idx), 
-                            false);
+          ret &= vcdinf_visit_pbc (obj, 0, vcdinf_psd_get_offset(d, idx), 
+                                   false);
       }
       break;
 
@@ -278,9 +289,10 @@ vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, unsigned int offset,
     default:
       vcd_warn ("corrupt PSD???????");
       free (ofs);
-      return;
+      return false;
       break;
     }
+  return ret;
 }
 
 /*!  Return the starting LBA (logical block address) for sequence

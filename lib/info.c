@@ -1476,10 +1476,17 @@ vcdinfo_read_psd (vcdinfo_obj_t *obj)
   return true;
 }
 
-void
+/*!
+   Calls recursive routine to populate obj->offset_list or obj->offset_x_list
+   by going through LOT.
+
+   Returns false if there was some error.
+*/
+bool
 vcdinfo_visit_lot (vcdinfo_obj_t *obj, bool extended)
 {
   struct _vcdinf_pbc_ctx pbc_ctx;
+  bool ret;
 
   pbc_ctx.psd_size      = vcdinfo_get_psd_size (obj);
   pbc_ctx.psd_x_size    = obj->psd_x_size;
@@ -1493,13 +1500,14 @@ vcdinfo_visit_lot (vcdinfo_obj_t *obj, bool extended)
   pbc_ctx.lot_x         = obj->lot_x;
   pbc_ctx.extended      = extended;
 
-  vcdinf_visit_lot(&pbc_ctx);
+  ret = vcdinf_visit_lot(&pbc_ctx);
   if (NULL != obj->offset_x_list) 
     _vcd_list_free(obj->offset_x_list, true);
   obj->offset_x_list = pbc_ctx.offset_x_list;
   if (NULL != obj->offset_list) 
     _vcd_list_free(obj->offset_list, true);
   obj->offset_list   = pbc_ctx.offset_list;
+  return ret;
 }
 
 /*!
@@ -1685,6 +1693,10 @@ vcdinfo_open(vcdinfo_obj_t **obj_p, char *source_name[],
 
   switch (obj->vcd_type) {
   case VCD_TYPE_VCD2: {
+    /* FIXME: Can reduce CD reads by using 
+       iso9660_fs_readdir(img, "EXT", true) and then scanning for
+       the files listed below.
+    */
     statbuf = iso9660_fs_stat (img, "EXT/PSD_X.VCD;1", true);
     if (NULL != statbuf) {
       lsn_t lsn        = statbuf->lsn;
@@ -1722,6 +1734,10 @@ vcdinfo_open(vcdinfo_obj_t **obj_p, char *source_name[],
   }
   case VCD_TYPE_SVCD: 
   case VCD_TYPE_HQVCD: {
+    /* FIXME: Can reduce CD reads by using 
+       iso9660_fs_readdir(img, "SVCD", true) and then scanning for
+       the files listed below.
+    */
     statbuf = iso9660_fs_stat (img, "MPEGAV", true);
     if (NULL != statbuf) {
       vcd_warn ("non compliant /MPEGAV folder detected!");
