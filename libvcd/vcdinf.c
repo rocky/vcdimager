@@ -178,9 +178,10 @@ vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, unsigned int offset,
   if (!obj->offset_list)
     obj->offset_list = _vcd_list_new ();
 
+  if (!obj->offset_x_list)
+    obj->offset_x_list = _vcd_list_new ();
+
   if (obj->extended) {
-    if (!obj->offset_x_list)
-      obj->offset_x_list = _vcd_list_new ();
     offset_list = obj->offset_x_list;
   } else 
     offset_list = obj->offset_list;
