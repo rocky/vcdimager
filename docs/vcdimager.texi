@@ -66,7 +66,6 @@ in the section entitled ``GNU Free Documentation License''.
 * vcdxminfo: (vcdimager)vcdxminfo.              Display MPEG stream properties
 * vcdxgen: (vcdimager)vcdxgen.                  Video CD XML template generator
 * vcdxbuild: (vcdimager)vcdxbuild.              Video CD XML formatter
-* vcdxrip: (vcdimager)vcdxrip.                  Video CD XML dis-assembler
 @end direntry
 
 @node Top, Introduction, (dir), (dir)
