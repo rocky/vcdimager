@@ -213,7 +213,12 @@ _parse_pvd (struct vcdxml_t *obj, VcdImageSource *img)
   memset (&pvd, 0, sizeof (struct iso_primary_descriptor));
   vcd_assert (sizeof (struct iso_primary_descriptor) == ISO_BLOCKSIZE);
 
-  vcd_image_source_read_mode2_sector (img, &pvd, ISO_PVD_SECTOR, false);
+  if (vcd_image_source_read_mode2_sector (img, &pvd, ISO_PVD_SECTOR, false) != 0) 
+    {
+      vcd_error ("error reading PVD sector (%d)", ISO_PVD_SECTOR);
+      return -1;
+    }
+  
 
   if (pvd.type != ISO_VD_PRIMARY)
     {
@@ -1440,14 +1445,8 @@ main (int argc, const char *argv[])
       break;
 
     case CL_NRG:
-      {
-	VcdDataSource *bin_source;
-	
-	bin_source = vcd_data_source_new_stdio (img_fname);
-	vcd_assert (bin_source != NULL);
-
-	img_src = vcd_image_source_new_nrg (bin_source);
-      }
+      img_src = vcd_image_source_new_nrg ();
+      vcd_image_source_set_arg (img_src, "nrg", img_fname);
       break;
 
     case CL_CDROM:
