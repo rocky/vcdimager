@@ -65,6 +65,12 @@ _init_xml (void)
   vcd_xml_dtd_init ();
 }
 
+static void
+_dummy_error (void *ctx, const char *msg, ...)
+{
+  fputs (msg, stdout);
+}
+
 static xmlDocPtr
 _xmlParseFile(const char *filename)
 {
@@ -74,7 +80,7 @@ _xmlParseFile(const char *filename)
 
   /* assert (_init_done == true); */
 
-  ctxt = xmlCreateFileParserCtxt(filename);
+  ctxt = xmlCreateFileParserCtxt (filename);
   
   if (!ctxt)
     return NULL;
@@ -82,9 +88,17 @@ _xmlParseFile(const char *filename)
   /* ctxt->keepBlanks = false; */
   ctxt->pedantic = true; 
   ctxt->validate = true;
-  ctxt->vctxt.nodeMax = 0;
+
+  if (ctxt->sax)
+    {
+      ctxt->sax->error = ctxt->sax->fatalError = xmlParserError;
+      ctxt->sax->warning = xmlParserWarning;
+    }
+
   ctxt->vctxt.error = xmlParserValidityError;
   ctxt->vctxt.warning = xmlParserValidityWarning;
+
+  ctxt->vctxt.nodeMax = 0;
 
   if (!ctxt->directory 
       && (directory = xmlParserGetDirectory(filename)))

@@ -45,6 +45,8 @@ _xmlExternalEntityLoader (const char *sysid, const char *pubid,
 {
   vcd_assert (vcd_xml_dtd_loaded >= 0);
 
+  vcd_debug ("EEL sysid=[%s] pubid=[%s]", sysid, pubid);
+
   if ((pubid && !strcmp (pubid, VIDEOCD_DTD_PUBID))
       || (sysid && !strcmp (sysid, VIDEOCD_DTD_SYSID)))
     {
@@ -59,13 +61,13 @@ _xmlExternalEntityLoader (const char *sysid, const char *pubid,
       return xmlNewIOInputStream (context, _input_buf, 
 				  XML_CHAR_ENCODING_8859_1);
     }
+  
+  /*   fprintf (stderr, "unsupported doctype (pubid: %s, sysid: %s) encountered\n", */
+  /* 	   pubid, sysid); */
+  
+  /* exit (EXIT_FAILURE); */
 
-  fprintf (stderr, "unsupported doctype (pubid: %s, sysid: %s) encountered\n",
-	   pubid, sysid);
-  
-  exit (EXIT_FAILURE);
-  
-  return _xmlExternalEntityLoaderDefault (pubid, sysid, context); 
+  return _xmlExternalEntityLoaderDefault (sysid, pubid, context); 
 }
 
 void 
