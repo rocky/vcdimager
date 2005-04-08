@@ -2,7 +2,7 @@
     $Id$
 
     Copyright (C) 2001, 2002 Herbert Valerio Riedel <hvr@gnu.org>
-    Copyright (C) 2002, 2003, 2004 Rocky Bernstein <rocky@panix.com>
+    Copyright (C) 2002, 2003, 2004, 2005 Rocky Bernstein <rocky@panix.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -196,7 +196,7 @@ static vcd2_ext_pbc_status_t
 _has_vcd2_ext_pbc (const vcdinfo_obj_t *obj)
 {
   iso9660_stat_t *statbuf;
-  CdIo *img;
+  CdIo_t *img;
   vcd2_ext_pbc_status_t ret_status;
   
   if (!vcdinfo_has_pbc(obj))
@@ -685,7 +685,7 @@ dump_tracks_svd (vcdinfo_obj_t *obj)
    TRACKS.SVCD to exist on the medium.
 */
 static void
-dump_tracks (const CdIo *cdio)
+dump_tracks (const CdIo_t *cdio)
 {
   track_t i;
   track_t num_tracks = cdio_get_num_tracks(cdio);
@@ -899,7 +899,7 @@ _dump_fs_recurse (const vcdinfo_obj_t *obj, const char pathname[])
   CdioList_t *entlist;
   CdioList_t *dirlist =  _cdio_list_new ();
   CdioListNode_t *entnode;
-  CdIo *cdio = vcdinfo_get_cd_image(obj);
+  CdIo_t *cdio = vcdinfo_get_cd_image(obj);
 
   entlist = iso9660_fs_readdir (cdio, pathname, true);
     
@@ -1027,7 +1027,7 @@ dump_pvd (vcdinfo_obj_t *obj)
 static void
 dump_all (vcdinfo_obj_t *obj)
 {
-  CdIo *cdio = vcdinfo_get_cd_image(obj);
+  CdIo_t *cdio = vcdinfo_get_cd_image(obj);
 
   if (gl.show.pvd.any) 
     {
@@ -1120,7 +1120,7 @@ dump (char *image_fname[])
 {
   unsigned size, psd_size;
   vcdinfo_obj_t *obj;
-  CdIo *img;
+  CdIo_t *img;
   iso9660_stat_t *statbuf;
   vcdinfo_open_return_t open_rc;
   

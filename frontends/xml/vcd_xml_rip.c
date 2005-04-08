@@ -141,7 +141,7 @@ _register_file (struct vcdxml_t *obj, const char *pathname,
 }
 
 static int
-_parse_isofs_r (struct vcdxml_t *obj, CdIo *img, const char pathname[])
+_parse_isofs_r (struct vcdxml_t *obj, CdIo_t *img, const char pathname[])
 { 
   CdioList_t *entlist = iso9660_fs_readdir (img, pathname, true);
   CdioListNode_t *entnode;
@@ -188,13 +188,13 @@ _parse_isofs_r (struct vcdxml_t *obj, CdIo *img, const char pathname[])
 }
 
 static int
-_parse_isofs (struct vcdxml_t *obj, CdIo *img)
+_parse_isofs (struct vcdxml_t *obj, CdIo_t *img)
 {
   return _parse_isofs_r (obj, img, "/");
 }
 
 static int
-_parse_pvd (struct vcdxml_t *obj, CdIo *img)
+_parse_pvd (struct vcdxml_t *obj, CdIo_t *img)
 {
   iso9660_pvd_t pvd;
 
@@ -215,7 +215,7 @@ _parse_pvd (struct vcdxml_t *obj, CdIo *img)
 }
 
 static int
-_parse_info (struct vcdxml_t *obj, CdIo *img)
+_parse_info (struct vcdxml_t *obj, CdIo_t *img)
 {
   InfoVcd_t info;
 
@@ -291,7 +291,7 @@ _parse_info (struct vcdxml_t *obj, CdIo *img)
 }
 
 static int
-_parse_entries (struct vcdxml_t *obj, CdIo *img)
+_parse_entries (struct vcdxml_t *obj, CdIo_t *img)
 {
   EntriesVcd_t entries;
   int idx;
@@ -766,7 +766,7 @@ _visit_lot (struct _pbc_ctx *obj)
 }
 
 static int
-_parse_pbc (struct vcdxml_t *obj, CdIo *img, bool no_ext_psd)
+_parse_pbc (struct vcdxml_t *obj, CdIo_t *img, bool no_ext_psd)
 {
   int n;
   struct _pbc_ctx _pctx;
@@ -859,7 +859,7 @@ _parse_pbc (struct vcdxml_t *obj, CdIo *img, bool no_ext_psd)
 }
 
 static int
-_rip_isofs (struct vcdxml_t *obj, CdIo *img)
+_rip_isofs (struct vcdxml_t *obj, CdIo_t *img)
 {
   CdioListNode_t *node;
   
@@ -915,7 +915,7 @@ _rip_isofs (struct vcdxml_t *obj, CdIo *img)
 }
 
 static int
-_rip_segments (struct vcdxml_t *obj, CdIo *img)
+_rip_segments (struct vcdxml_t *obj, CdIo_t *img)
 {
   CdioListNode_t *node;
   lsn_t start_extent;
@@ -1010,7 +1010,7 @@ _rip_segments (struct vcdxml_t *obj, CdIo *img)
 }
 
 static int
-_rip_sequences (struct vcdxml_t *obj, CdIo *img, int tracknum)
+_rip_sequences (struct vcdxml_t *obj, CdIo_t *img, int tracknum)
 {
   CdioListNode_t *node;
   int counter=1;
@@ -1234,7 +1234,7 @@ _vcd_log_handler (vcd_log_level_t level, const char message[])
 int
 main (int argc, const char *argv[])
 {
-  CdIo *img_src = NULL;
+  CdIo_t *img_src = NULL;
   struct vcdxml_t obj;
 
   /* cl params */

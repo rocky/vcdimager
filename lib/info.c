@@ -398,7 +398,7 @@ vcdinfo_get_application_id(vcdinfo_obj_t *p_obj)
   Return a pointer to the cdio structure for the CD image opened or
   NULL if error.
 */
-CdIo *
+CdIo_t *
 vcdinfo_get_cd_image (const vcdinfo_obj_t *p_vcd_obj) 
 {
   if ( !p_vcd_obj ) return NULL;
