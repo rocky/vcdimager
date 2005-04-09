@@ -1498,8 +1498,10 @@ vcdinfo_get_volume_id(const vcdinfo_obj_t *p_obj)
 const char *
 vcdinfo_get_volumeset_id(const vcdinfo_obj_t *p_obj)
 {
+  static char volume_set_id[ISO_MAX_VOLUMESET_ID+1] = {'\0'};
   if ( NULL == p_obj || NULL == &p_obj->pvd ) return (NULL);
-  return(vcdinfo_strip_trail(p_obj->pvd.volume_set_id, ISO_MAX_VOLUMESET_ID));
+  strncpy(volume_set_id, p_obj->pvd.volume_set_id, ISO_MAX_VOLUMESET_ID);
+  return vcdinfo_strip_trail(volume_set_id, ISO_MAX_VOLUMESET_ID);
 }
 
 /*!
