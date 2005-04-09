@@ -1487,8 +1487,13 @@ vcdinfo_get_volume_count(const vcdinfo_obj_t *p_obj)
 const char *
 vcdinfo_get_volume_id(const vcdinfo_obj_t *p_obj)
 {
+  static char psz_vol_id[ISO_MAX_VOLUME_ID+1] = {'\0'};;
+  char *psz_vol_id2;
   if ( NULL == p_obj || NULL == &p_obj->pvd ) return (NULL);
-  return(iso9660_get_volume_id(&p_obj->pvd));
+  psz_vol_id2 = iso9660_get_volume_id(&p_obj->pvd);
+  strncpy(psz_vol_id, psz_vol_id2, ISO_MAX_VOLUMESET_ID);
+  free(psz_vol_id2);
+  return psz_vol_id;
 }
 
 /*!
@@ -1640,7 +1645,9 @@ vcdinfo_read_psd (vcdinfo_obj_t *p_obj)
           return false;
         }
 
+      free(p_obj->lot);
       p_obj->lot = calloc(1, ISO_BLOCKSIZE * LOT_VCD_SIZE);
+      free(p_obj->psd);
       p_obj->psd = calloc(1, ISO_BLOCKSIZE * _vcd_len2blocks (psd_size, 
                                                                ISO_BLOCKSIZE));
       
@@ -1700,7 +1707,7 @@ vcdinfo_visit_lot (vcdinfo_obj_t *p_obj, bool extended)
   p_obj->offset_x_list = pbc_ctx.offset_x_list;
   if (NULL != p_obj->offset_list) 
     _cdio_list_free(p_obj->offset_list, true);
-  p_obj->offset_list   = pbc_ctx.offset_list;
+  p_obj->offset_list = pbc_ctx.offset_list;
   return ret;
 }
 
