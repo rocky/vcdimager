@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2003 Rocky Bernstein <rocky@gnu.org>
+    Copyright (C) 2003, 2005 Rocky Bernstein <rocky@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,9 +28,9 @@
 /* FIXME: make this really private: */
 #include <libvcd/files_private.h>
 
-bool read_pvd(CdIo *cdio, iso9660_pvd_t *pvd);
-bool read_entries(CdIo *cdio, EntriesVcd_t *entries);
-bool read_info(CdIo *cdio, InfoVcd_t *info, vcd_type_t *vcd_type);
+bool read_pvd(CdIo_t *p_cdio, iso9660_pvd_t *pvd);
+bool read_entries(CdIo_t *p_cdio, EntriesVcd_t *entries);
+bool read_info(CdIo_t *p_cdio, InfoVcd_t *info, vcd_type_t *vcd_type);
 
 
 

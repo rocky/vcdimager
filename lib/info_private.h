@@ -43,15 +43,15 @@ extern "C" {
   struct _VcdInfo {
     vcd_type_t vcd_type;
     
-    CdIo *img;
+    CdIo_t *img;
     
     iso9660_pvd_t pvd;
     
     InfoVcd_t info;
     EntriesVcd_t entries;
     
-    CdioList *offset_list;
-    CdioList *offset_x_list;
+    CdioList_t *offset_list;
+    CdioList_t *offset_x_list;
     uint32_t *seg_sizes; 
     lsn_t   first_segment_lsn;
     
@@ -83,8 +83,8 @@ extern "C" {
     unsigned int psd_size;
     lid_t maximum_lid;
     unsigned offset_mult;
-    CdioList *offset_x_list;
-    CdioList *offset_list;
+    CdioList_t *offset_x_list;
+    CdioList_t *offset_list;
     
     LotVcd_t *lot;
     LotVcd_t *lot_x;

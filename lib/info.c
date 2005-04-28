@@ -1571,36 +1571,6 @@ vcdinfo_inc_msf (uint8_t *p_min, uint8_t *p_sec, int8_t *p_frame)
   }
 }
 
-/*!
-  Convert minutes, seconds and frame (MSF components) into a
-  logical block address (or LBA). 
-  See also cdio_msf_to_lba which uses msf_t as its single parameter.
-*/
-void 
-vcdinfo_lba2msf (lba_t lba, uint8_t *p_min, uint8_t *p_sec, uint8_t *p_frame) 
-{
-  *p_min = lba / (CDIO_CD_SECS_PER_MIN*CDIO_CD_FRAMES_PER_SEC);
-  lba %= (CDIO_CD_SECS_PER_MIN*CDIO_CD_FRAMES_PER_SEC);
-  *p_sec = lba / CDIO_CD_FRAMES_PER_SEC; 
-  *p_frame = lba % CDIO_CD_FRAMES_PER_SEC; 
-}
-
-/*!
-  Convert minutes, seconds and frame (MSF components) into a
-  logical sector number (or LSN). 
-*/
-lsn_t
-vcdinfo_msf2lsn (uint8_t min, uint8_t sec, int8_t frame)
-{
-  lba_t lba=CDIO_CD_FRAMES_PER_SEC*(CDIO_CD_SECS_PER_MIN*min + sec) + frame;
-  if (lba < CDIO_PREGAP_SECTORS) {
-    vcd_error ("lba (%u) less than pregap sector (%u)", 
-               (unsigned int) lba, CDIO_PREGAP_SECTORS);
-    return lba;
-  }
-  return lba - CDIO_PREGAP_SECTORS;
-}
-
 const char *
 vcdinfo_ofs2str (const vcdinfo_obj_t *p_obj, unsigned int offset, bool ext)
 {

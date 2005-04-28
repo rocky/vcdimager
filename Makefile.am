@@ -18,7 +18,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 # 02111-1307, USA.
 
-SUBDIRS = include lib frontends test amiga docs
+SUBDIRS = include lib frontends test amiga docs example
 
 # pkg-config(1) related rules
 pkgconfigdir = $(libdir)/pkgconfig
