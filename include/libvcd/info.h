@@ -125,7 +125,7 @@ extern "C" {
 */
 #define VCDINFO_INVALID_BSN  200
 
-/* The number of sectors allocated in a Video CD segment is a fixed: 150.
+/*! The number of sectors allocated in a Video CD segment is a fixed: 150.
    
    NOTE: The actual number of sectors used is often less and can sometimes
    be gleaned by looking at the correspoinding ISO 9660 file entry (or
@@ -135,19 +135,19 @@ extern "C" {
 */
 #define VCDINFO_SEGMENT_SECTOR_SIZE 150
 
-  /* Opaque type used in most routines below. */
+  /*! Opaque type used in most routines below. */
   typedef struct _VcdInfo vcdinfo_obj_t;
 
   /* See enum in vcd_files_private.h */
   typedef enum {
-    VCDINFO_FILES_VIDEO_NOSTREAM = 0,   
-    VCDINFO_FILES_VIDEO_NTSC_STILL = 1,   
+    VCDINFO_FILES_VIDEO_NOSTREAM    = 0,   
+    VCDINFO_FILES_VIDEO_NTSC_STILL  = 1,   
     VCDINFO_FILES_VIDEO_NTSC_STILL2 = 2,  /* lo+hires*/
     VCDINFO_FILES_VIDEO_NTSC_MOTION = 3,
-    VCDINFO_FILES_VIDEO_PAL_STILL = 5,    
-    VCDINFO_FILES_VIDEO_PAL_STILL2 = 6,   /* lo+hires*/
-    VCDINFO_FILES_VIDEO_PAL_MOTION = 7,
-    VCDINFO_FILES_VIDEO_INVALID = 8
+    VCDINFO_FILES_VIDEO_PAL_STILL   = 5,    
+    VCDINFO_FILES_VIDEO_PAL_STILL2  = 6,   /* lo+hires*/
+    VCDINFO_FILES_VIDEO_PAL_MOTION  = 7,
+    VCDINFO_FILES_VIDEO_INVALID     = 8
   } vcdinfo_video_segment_type_t;
   
   /*!
@@ -157,14 +157,14 @@ extern "C" {
     uint8_t type;
     lid_t lid;
     uint16_t offset;
-    bool in_lot;   /* Is listed in LOT. */
-    bool ext;      /* True if entry comes from offset_x_list. */
+    bool in_lot;   /**< Is listed in LOT. */
+    bool ext;      /**< True if entry comes from offset_x_list. */
   } vcdinfo_offset_t;
   
   /*!
     The kind of entry associated with an selection-item id 
   */
-  /* See corresponding enum in vcd_pbc.h. */
+  /* See corresponding enum item_type_t in lib/pbc.h. */
   typedef enum {
     VCDINFO_ITEM_TYPE_TRACK,
     VCDINFO_ITEM_TYPE_ENTRY,
@@ -180,9 +180,9 @@ extern "C" {
   } vcdinfo_itemid_t;
   
   typedef enum {
-    VCDINFO_OPEN_ERROR,          /* Error */
-    VCDINFO_OPEN_VCD,            /* Is VCD of some sort */
-    VCDINFO_OPEN_OTHER           /* Is not VCD but something else */
+    VCDINFO_OPEN_ERROR,          /**< Error */
+    VCDINFO_OPEN_VCD,            /**< Is VCD of some sort */
+    VCDINFO_OPEN_OTHER           /**< Is not VCD but something else */
   } vcdinfo_open_return_t;
   
   typedef struct 
@@ -206,60 +206,60 @@ extern "C" {
     0 is returned on error.
   */
   unsigned int
-  vcdinfo_audio_type_num_channels(const vcdinfo_obj_t *obj, 
+  vcdinfo_audio_type_num_channels(const vcdinfo_obj_t *p_vcdinfo, 
 				  unsigned int audio_type);
   
   /*!
     Return a string describing an audio type.
   */
-  const char * vcdinfo_audio_type2str(const vcdinfo_obj_t *obj,
+  const char * vcdinfo_audio_type2str(const vcdinfo_obj_t *p_vcdinfo,
 				      unsigned int audio_type);
   
   /*!
-    Note first seg_num is 0!
+    Note first i_seg is 0!
   */
   const char * 
-  vcdinfo_ogt2str(const vcdinfo_obj_t *obj, segnum_t seg_num);
+  vcdinfo_ogt2str(const vcdinfo_obj_t *p_vcdinfo, segnum_t i_seg);
   
   /*!
-    Note first seg_num is 0!
+    Note first i_seg is 0!
   */
   const char * 
-  vcdinfo_video_type2str(const vcdinfo_obj_t *obj, segnum_t seg_num);
+  vcdinfo_video_type2str(const vcdinfo_obj_t *p_vcdinfo, segnum_t i_seg);
   
   const char *
   vcdinfo_pin2str (uint16_t itemid);
   
   /*!
-    \brief Classify itemid_num into the kind of item it is: track #, entry #, 
+    \brief Classify i_itemid into the kind of item it is: track #, entry #, 
     segment #. 
     \param itemid is set to contain this classifcation an the converted 
     entry number. 
   */
   void
-  vcdinfo_classify_itemid (uint16_t itemid_num, 
-			   /*out*/ vcdinfo_itemid_t *itemid);
+  vcdinfo_classify_itemid (uint16_t i_itemid, 
+			   /*out*/ vcdinfo_itemid_t *p_itemid);
   
   /*!
     Return a string containing the VCD album id, or NULL if there is 
     some problem in getting this. 
   */
   const char *
-  vcdinfo_get_album_id(const vcdinfo_obj_t *obj);
+  vcdinfo_get_album_id(const vcdinfo_obj_t *p_vcdinfo);
   
   /*!
     Return the VCD application ID.
     NULL is returned if there is some problem in getting this. 
   */
   char *
-  vcdinfo_get_application_id(vcdinfo_obj_t *obj);
+  vcdinfo_get_application_id(vcdinfo_obj_t *p_vcdinfo);
   
   /*!
     Return a pointer to the cdio structure for the CD image opened or
     NULL if error.
   */
   CdIo *
-  vcdinfo_get_cd_image (const vcdinfo_obj_t *vcd_obj);
+  vcdinfo_get_cd_image (const vcdinfo_obj_t *p_vcdinfo);
   
   /*!
     Return a string containing the default VCD device if none is specified.
@@ -270,7 +270,7 @@ extern "C" {
     Return NULL we can't get this information.
   */
   char *
-  vcdinfo_get_default_device (const vcdinfo_obj_t *vcd_obj);
+  vcdinfo_get_default_device (const vcdinfo_obj_t *p_vcdinfo);
   
   /*!
     \brief Get default LID offset. 
@@ -284,36 +284,36 @@ extern "C" {
     offset is returned.
   */
   uint16_t
-  vcdinfo_get_default_offset(const vcdinfo_obj_t *obj, lid_t lid);
+  vcdinfo_get_default_offset(const vcdinfo_obj_t *p_vcdinfo, lid_t lid);
   
   /*!
     Return number of sector units in of an entry. 0 is returned if
-    entry_num is invalid.
+    i_entry is invalid.
   */
   uint32_t
-  vcdinfo_get_entry_sect_count (const vcdinfo_obj_t *obj, 
-				unsigned int entry_num);
+  vcdinfo_get_entry_sect_count (const vcdinfo_obj_t *p_vcdinfo, 
+				unsigned int i_entry);
   
   /*!  Return the starting LBA (logical block address) for sequence
-    entry_num in obj.  VCDINFO_NULL_LBA is returned if there is no entry.
+    i_entry in obj.  VCDINFO_NULL_LBA is returned if there is no entry.
     The first entry number is 0.
   */
   lba_t
-  vcdinfo_get_entry_lba(const vcdinfo_obj_t *obj, unsigned int entry_num);
+  vcdinfo_get_entry_lba(const vcdinfo_obj_t *p_vcdinfo, unsigned int i_entry);
   
   /*!  Return the starting LSN (logical sector number) for sequence
-    entry_num in obj.  VCDINFO_NULL_LSN is returned if there is no entry.
+    i_entry in obj.  VCDINFO_NULL_LSN is returned if there is no entry.
     The first entry number is 0.
   */
   lsn_t
-  vcdinfo_get_entry_lsn(const vcdinfo_obj_t *obj, unsigned int entry_num);
+  vcdinfo_get_entry_lsn(const vcdinfo_obj_t *p_vcdinfo, unsigned int i_entry);
   
   /*!  Return the starting MSF (minutes/secs/frames) for sequence
-    entry_num in obj.  NULL is returned if there is no entry.
+    i_entry in obj.  NULL is returned if there is no entry.
     The first entry number is 0.
   */
   const msf_t *
-  vcdinfo_get_entry_msf(const vcdinfo_obj_t *obj, unsigned int entry_num);
+  vcdinfo_get_entry_msf(const vcdinfo_obj_t *p_vcdinfo, unsigned int i_entry);
 
   /*!
     Get the VCD format (VCD 1.0 VCD 1.1, SVCD, ... for this object.
@@ -321,18 +321,18 @@ extern "C" {
     The first entry number is 0.
   */
   vcd_type_t 
-  vcdinfo_get_format_version (vcdinfo_obj_t *obj);
+  vcdinfo_get_format_version (vcdinfo_obj_t *p_vcdinfo);
   
   /*!
     Return a string giving VCD format (VCD 1.0 VCD 1.1, SVCD, ... 
     for this object.
   */
   const char * 
-  vcdinfo_get_format_version_str (const vcdinfo_obj_t *obj);
+  vcdinfo_get_format_version_str (const vcdinfo_obj_t *p_vcdinfo);
   
-  EntriesVcd_t * vcdinfo_get_entriesVcd (vcdinfo_obj_t *obj);
+  EntriesVcd_t * vcdinfo_get_entriesVcd (vcdinfo_obj_t *p_vcdinfo);
   
-  InfoVcd_t    * vcdinfo_get_infoVcd (vcdinfo_obj_t *obj);
+  InfoVcd_t    * vcdinfo_get_infoVcd (vcdinfo_obj_t *p_vcdinfo);
 
   /*!
     \brief Get default or multi-default LID. 
@@ -340,17 +340,17 @@ extern "C" {
     Return the LID offset associated with a the "default" entry of the
     passed-in LID parameter. Note "default" entries are associated
     with PSDs that are (extended) selection lists. If the "default"
-    is a multi-default, we use entry_num to find the proper
+    is a multi-default, we use i_entry to find the proper
     "default" LID. Otherwise this routine is exactly like
     vcdinfo_get_default_offset with the exception of requiring an
-    additional "entry_num" parameter.
+    additional "i_entry" parameter.
 
     \return VCDINFO_INVALID_LID is returned on error, or if the LID
     is not a selection list or no "default" entry. Otherwise the LID
     offset is returned.
   */
   lid_t
-  vcdinfo_get_multi_default_lid(const vcdinfo_obj_t *obj, lid_t lid,
+  vcdinfo_get_multi_default_lid(const vcdinfo_obj_t *p_vcdinfo, lid_t lid,
 				lsn_t lsn);
   
   /*!
@@ -359,44 +359,44 @@ extern "C" {
     Return the LID offset associated with a the "default" entry of the
     passed-in LID parameter. Note "default" entries are associated
     with PSDs that are (extended) selection lists. If the "default"
-    is a multi-default, we use entry_num to find the proper
+    is a multi-default, we use i_entry to find the proper
     "default" offset. Otherwise this routine is exactly like
     vcdinfo_get_default_offset with the exception of requiring an
-    additional "entry_num" parameter.
+    additional "i_entry" parameter.
 
     \return VCDINFO_INVALID_OFFSET is returned on error, or if the LID
     is not a selection list or no "default" entry. Otherwise the LID
     offset is returned.
   */
   uint16_t
-  vcdinfo_get_multi_default_offset(const vcdinfo_obj_t *obj, lid_t lid,
+  vcdinfo_get_multi_default_offset(const vcdinfo_obj_t *p_vcdinfo, lid_t lid,
 				   unsigned int selection);
   
-  void * vcdinfo_get_pvd (vcdinfo_obj_t *obj);
+  void * vcdinfo_get_pvd (vcdinfo_obj_t *p_vcdinfo);
   
-  void * vcdinfo_get_scandata (vcdinfo_obj_t *obj);
+  void * vcdinfo_get_scandata (vcdinfo_obj_t *p_vcdinfo);
 
-  void * vcdinfo_get_searchDat (vcdinfo_obj_t *obj);
+  void * vcdinfo_get_searchDat (vcdinfo_obj_t *p_vcdinfo);
   
-  void * vcdinfo_get_tracksSVD (vcdinfo_obj_t *obj);
+  void * vcdinfo_get_tracksSVD (vcdinfo_obj_t *p_vcdinfo);
   
   /*!
     Get the LOT pointer. 
   */
   LotVcd_t *
-  vcdinfo_get_lot(const vcdinfo_obj_t *obj);
+  vcdinfo_get_lot(const vcdinfo_obj_t *p_vcdinfo);
   
   /*!
     Get the extended LOT pointer. 
   */
   LotVcd_t *
-  vcdinfo_get_lot_x(const vcdinfo_obj_t *obj);
+  vcdinfo_get_lot_x(const vcdinfo_obj_t *p_vcdinfo);
 
   /*!
     Return Number of LIDs. 
   */
   lid_t
-  vcdinfo_get_num_LIDs (const vcdinfo_obj_t *obj);
+  vcdinfo_get_num_LIDs (const vcdinfo_obj_t *p_vcdinfo);
   
   /*!
     Return the audio type for a given track. 
@@ -409,13 +409,13 @@ extern "C" {
     Return the number of entries in the VCD.
   */
   unsigned int
-  vcdinfo_get_num_entries(const vcdinfo_obj_t *obj);
+  vcdinfo_get_num_entries(const vcdinfo_obj_t *p_vcdinfo);
   
   /*!
     Return the number of segments in the VCD. 
   */
   segnum_t
-  vcdinfo_get_num_segments(const vcdinfo_obj_t *obj);
+  vcdinfo_get_num_segments(const vcdinfo_obj_t *p_vcdinfo);
   
   /*!  
     Return the highest track number in the current medium. 
@@ -427,112 +427,113 @@ extern "C" {
     If there are no tracks, we return -1.
   */
   unsigned int
-  vcdinfo_get_num_tracks(const vcdinfo_obj_t *obj);
+  vcdinfo_get_num_tracks(const vcdinfo_obj_t *p_vcdinfo);
   
   /*!
     Get the VCD info list.
   */
-  CdioList *vcdinfo_get_offset_list(const vcdinfo_obj_t *obj);
+  CdioList *vcdinfo_get_offset_list(const vcdinfo_obj_t *p_vcdinfo);
 
   /*!
     Get the VCD info extended offset list.
   */
-  CdioList *vcdinfo_get_offset_x_list(const vcdinfo_obj_t *obj);
+  CdioList *vcdinfo_get_offset_x_list(const vcdinfo_obj_t *p_vcdinfo);
 
   /*!
     Get the VCD info offset multiplier.
   */
-  unsigned int vcdinfo_get_offset_mult(const vcdinfo_obj_t *obj);
+  unsigned int vcdinfo_get_offset_mult(const vcdinfo_obj_t *p_vcdinfo);
 
   /*! 
     Get entry in offset list for the item that has offset. This entry 
     has for example the LID. NULL is returned on error. 
   */
   vcdinfo_offset_t *
-  vcdinfo_get_offset_t (const vcdinfo_obj_t *obj, unsigned int offset);
+  vcdinfo_get_offset_t (const vcdinfo_obj_t *p_vcdinfo, unsigned int offset);
   
   /*!
     Return a string containing the VCD preparer id with trailing
     blanks removed, or NULL if there is some problem in getting this.
   */
   const char *
-  vcdinfo_get_preparer_id(const vcdinfo_obj_t *obj);
+  vcdinfo_get_preparer_id(const vcdinfo_obj_t *p_vcdinfo);
   
   /*!
     Get the PSD.
   */
-  uint8_t *vcdinfo_get_psd(const vcdinfo_obj_t *obj);
+  uint8_t *vcdinfo_get_psd(const vcdinfo_obj_t *p_vcdinfo);
 
   /*!
     Get the extended PSD.
   */
-  uint8_t *vcdinfo_get_psd_x(const vcdinfo_obj_t *obj);
+  uint8_t *vcdinfo_get_psd_x(const vcdinfo_obj_t *p_vcdinfo);
 
   /*!
     Return number of bytes in PSD.
   */
-  uint32_t vcdinfo_get_psd_size (const vcdinfo_obj_t *obj);
+  uint32_t vcdinfo_get_psd_size (const vcdinfo_obj_t *p_vcdinfo);
   
   /*!
     Return number of bytes in the extended PSD.
   */
-  uint32_t vcdinfo_get_psd_x_size (const vcdinfo_obj_t *obj);
+  uint32_t vcdinfo_get_psd_x_size (const vcdinfo_obj_t *p_vcdinfo);
   
   /*!
     Return a string containing the VCD publisher id with trailing
     blanks removed, or NULL if there is some problem in getting this.
   */
-  const char * vcdinfo_get_publisher_id(const vcdinfo_obj_t *obj);
+  const char * vcdinfo_get_publisher_id(const vcdinfo_obj_t *p_vcdinfo);
   
   /**
-   \fn vcdinfo_get_return_offset(const vcdinfo_obj_t *obj);
+   \fn vcdinfo_get_return_offset(const vcdinfo_obj_t *p_vcdinfo);
    \brief Get return offset for a given LID. 
    \return  VCDINFO_INVALID_OFFSET is returned on error or if LID has no 
    "return" entry. Otherwise the LID offset is returned.
    */
   lid_t
-  vcdinfo_get_return_offset(const vcdinfo_obj_t *obj, lid_t lid);
+  vcdinfo_get_return_offset(const vcdinfo_obj_t *p_vcdinfo, lid_t lid);
   
   /*!
     Return the audio type for a given segment. 
     VCDINFO_INVALID_AUDIO_TYPE is returned on error.
   */
   unsigned int 
-  vcdinfo_get_seg_audio_type(const vcdinfo_obj_t *obj, segnum_t seg_num);
+  vcdinfo_get_seg_audio_type(const vcdinfo_obj_t *p_vcdinfo, segnum_t i_seg);
   
   /*!
     Return true if this segment is supposed to continue to the next one,
     (is part of an "item" or listing in the ISO 9660 filesystem).
   */
-  bool vcdinfo_get_seg_continue(const vcdinfo_obj_t *obj, segnum_t seg_num);
+  bool vcdinfo_get_seg_continue(const vcdinfo_obj_t *p_vcdinfo, 
+				segnum_t i_seg);
 
   /*!  Return the starting LBA (logical block address) for segment
-    entry_num in obj.  VCDINFO_NULL_LBA is returned if there is no entry.
+    i_entry in obj.  VCDINFO_NULL_LBA is returned if there is no entry.
     
-    Note first seg_num is 0.
+    Note first i_seg is 0.
   */
   lba_t
-  vcdinfo_get_seg_lba(const vcdinfo_obj_t *obj, segnum_t seg_num);
+  vcdinfo_get_seg_lba(const vcdinfo_obj_t *p_vcdinfo, segnum_t i_seg);
   
   /*!  Return the starting LSN (logical sector number) for segment
-    entry_num in obj.  VCDINFO_NULL_LBA is returned if there is no entry.
+    i_entry in obj.  VCDINFO_NULL_LBA is returned if there is no entry.
     
-    Note first seg_num is 0.
+    Note first i_seg is 0.
   */
   lsn_t
-  vcdinfo_get_seg_lsn(const vcdinfo_obj_t *obj, segnum_t seg_num);
+  vcdinfo_get_seg_lsn(const vcdinfo_obj_t *p_vcdinfo, segnum_t i_seg);
   
   /*!  Return the starting MSF (minutes/secs/frames) for segment
-    entry_num in obj.  NULL is returned if there is no entry.
+    i_entry in obj.  NULL is returned if there is no entry.
     
-    Note first seg_num is 0.
+    Note first i_seg is 0.
   */
   const msf_t *
-  vcdinfo_get_seg_msf(const vcdinfo_obj_t *obj, segnum_t seg_num);
+  vcdinfo_get_seg_msf(const vcdinfo_obj_t *p_vcdinfo, segnum_t i_seg);
   
   /*!  
     Return the number of sectors for segment
-    entry_num in obj.  0 is returned if there is no entry.
+    i_entry in obj.  0 is returned if there is no entry.
     
     Use this routine to figure out the actual number of bytes a physical
     region of a disk or CD takes up for a segment.
@@ -542,14 +543,14 @@ extern "C" {
     remaining ones. We may revisit this decision later. 
   */
   uint32_t
-  vcdinfo_get_seg_sector_count(const vcdinfo_obj_t *obj, segnum_t seg_num);
+  vcdinfo_get_seg_sector_count(const vcdinfo_obj_t *p_vcdinfo, segnum_t i_seg);
   
   /*!
     Return a string containing the VCD system id with trailing
     blanks removed, or NULL if there is some problem in getting this.
   */
   const char *
-  vcdinfo_get_system_id(const vcdinfo_obj_t *obj);
+  vcdinfo_get_system_id(const vcdinfo_obj_t *p_vcdinfo);
   
   /*!
     Return the track number for entry n in obj. 
@@ -559,7 +560,8 @@ extern "C" {
     1 is the first track the first complete MPEG track generally.
   */
   track_t
-  vcdinfo_get_track(const vcdinfo_obj_t *obj, const unsigned int entry_num);
+  vcdinfo_get_track(const vcdinfo_obj_t *p_vcdinfo, 
+		    const unsigned int i_entry);
   
   /*!
     Return the audio type for a given track. 
@@ -568,49 +570,50 @@ extern "C" {
     Note: track 1 is usually the first track.
   */
   unsigned int
-  vcdinfo_get_track_audio_type(const vcdinfo_obj_t *obj, track_t track_num);
+  vcdinfo_get_track_audio_type(const vcdinfo_obj_t *p_vcdinfo, 
+			       track_t i_track);
   
   /*!  
     Return the starting LBA (logical block address) for track number
-    track_num in obj.  
+    i_track in obj.  
     
     The IS0-9660 filesystem track has number 0. Tracks associated
     with playable entries numbers start at 1.
     
     The "leadout" track is specified either by
-    using track_num LEADOUT_TRACK or the total tracks+1.
+    using i_track LEADOUT_TRACK or the total tracks+1.
     VCDINFO_NULL_LBA is returned on failure.
   */
   lba_t
-  vcdinfo_get_track_lba(const vcdinfo_obj_t *obj, track_t track_num);
+  vcdinfo_get_track_lba(const vcdinfo_obj_t *p_vcdinfo, track_t i_track);
   
   /*!  
     Return the starting LSN (logical sector number) for track number
-    track_num in obj.  
+    i_track in obj.  
     
     The IS0-9660 filesystem track has number 0. Tracks associated
     with playable entries numbers start at 1.
     
     The "leadout" track is specified either by
-    using track_num LEADOUT_TRACK or the total tracks+1.
+    using i_track LEADOUT_TRACK or the total tracks+1.
     VCDINFO_NULL_LBA is returned on failure.
   */
   lsn_t
-  vcdinfo_get_track_lsn(const vcdinfo_obj_t *obj, track_t track_num);
+  vcdinfo_get_track_lsn(const vcdinfo_obj_t *p_vcdinfo, track_t i_track);
   
   /*!  
     Return the starting MSF (minutes/secs/frames) for track number
-    track_num in obj.  
+    i_track in obj.  
     
     The IS0-9660 filesystem track has number 0. Tracks associated
     with playable entries numbers start at 1.
     
     The "leadout" track is specified either by
-    using track_num LEADOUT_TRACK or the total tracks+1.
+    using i_track LEADOUT_TRACK or the total tracks+1.
     VCDINFO_NULL_LBA is returned on failure.
   */
   int
-  vcdinfo_get_track_msf(const vcdinfo_obj_t *obj, track_t track_num,
+  vcdinfo_get_track_msf(const vcdinfo_obj_t *p_vcdinfo, track_t i_track,
 			uint8_t *min, uint8_t *sec, uint8_t *frame);
   
   /*!
@@ -623,8 +626,8 @@ extern "C" {
     We should add a parameter to indicate whether this is wanted or not.
   */
   unsigned int
-  vcdinfo_get_track_sect_count(const vcdinfo_obj_t *obj, 
-			       const track_t track_num);
+  vcdinfo_get_track_sect_count(const vcdinfo_obj_t *p_vcdinfo, 
+			       const track_t i_track);
   
   /*!
     Return size in bytes for track number for entry n in obj.
@@ -636,44 +639,44 @@ extern "C" {
     We should add a parameter to indicate whether this is wanted or not.
   */
   unsigned int
-  vcdinfo_get_track_size(const vcdinfo_obj_t *obj, track_t track_num);
+  vcdinfo_get_track_size(const vcdinfo_obj_t *p_vcdinfo, track_t i_track);
   
   /*!
-    \brief Get the kind of video stream segment of segment seg_num in obj.
-    \return VCDINFO_FILES_VIDEO_INVALID is returned if  on error or obj is
-    null. Otherwise the enumeration type.
+    \brief Get the kind of video stream segment of segment i_seg in obj.
+    \return VCDINFO_FILES_VIDEO_INVALID is returned if on error or 
+    p_vcdinfo_obj is null. Otherwise the enumeration type.
     
-    Note first seg_num is 0!
+    Note first i_seg is 0!
   */
   vcdinfo_video_segment_type_t
-  vcdinfo_get_video_type(const vcdinfo_obj_t *obj, segnum_t seg_num);
+  vcdinfo_get_video_type(const vcdinfo_obj_t *p_vcdinfo, segnum_t i_seg);
   
   /*!
     \brief Get the kind of VCD that obj refers to.
   */
   vcd_type_t
-  vcdinfo_get_VCD_type(const vcdinfo_obj_t *obj);
+  vcdinfo_get_VCD_type(const vcdinfo_obj_t *p_vcdinfo);
   
   /*!
     Return the VCD volume count - the number of CD's in the collection.
     O is returned if there is some problem in getting this. 
   */
   unsigned int
-  vcdinfo_get_volume_count(const vcdinfo_obj_t *obj);
+  vcdinfo_get_volume_count(const vcdinfo_obj_t *p_vcdinfo);
   
   /*!
     Return the VCD ID.
     NULL is returned if there is some problem in getting this. 
   */
   const char *
-  vcdinfo_get_volume_id(const vcdinfo_obj_t *obj);
+  vcdinfo_get_volume_id(const vcdinfo_obj_t *p_vcdinfo);
   
   /*!
     Return the VCD volumeset ID.
     NULL is returned if there is some problem in getting this. 
   */
   const char *
-  vcdinfo_get_volumeset_id(const vcdinfo_obj_t *obj);
+  vcdinfo_get_volumeset_id(const vcdinfo_obj_t *p_vcdinfo);
   
   /*!
     Return the VCD volume num - the number of the CD in the collection.
@@ -681,14 +684,14 @@ extern "C" {
     O is returned if there is some problem in getting this. 
   */
   unsigned int
-  vcdinfo_get_volume_num(const vcdinfo_obj_t *obj);
+  vcdinfo_get_volume_num(const vcdinfo_obj_t *p_vcdinfo);
   
   int vcdinfo_get_wait_time (uint16_t wtime);
 
   /*!
     Return true if there is playback control. 
   */
-  bool vcdinfo_has_pbc (const vcdinfo_obj_t *obj);
+  bool vcdinfo_has_pbc (const vcdinfo_obj_t *p_vcdinfo);
   
   /*! 
     Return true if VCD has "extended attributes" (XA). Extended attributes
@@ -696,7 +699,7 @@ extern "C" {
     See also cdio_get_xa_attr_str() which returns a string similar to
     a string you might get on a Unix filesystem listing ("ls").
   */
-  bool vcdinfo_has_xa(const vcdinfo_obj_t *obj);
+  bool vcdinfo_has_xa(const vcdinfo_obj_t *p_vcdinfo);
   
   /*!
     Add one to the MSF.
@@ -716,29 +719,29 @@ extern "C" {
     VCDINFO_REJECTED_MASK is returned on error or if obj is NULL. 
   */
   uint16_t
-  vcdinfo_lid_get_itemid(const vcdinfo_obj_t *obj, lid_t lid);
+  vcdinfo_lid_get_itemid(const vcdinfo_obj_t *p_vcdinfo, lid_t lid);
   
   /*!
-    \fn vcdinfo_lid_get_offset(const vcdinfo_obj_t *obj, 
-                                    unsigned int entry_num);
-    \brief Get offset entry_num for a given LID. 
+    \fn vcdinfo_lid_get_offset(const vcdinfo_obj_t *p_vcdinfo, 
+                                    unsigned int i_entry);
+    \brief Get offset i_entry for a given LID. 
     \return VCDINFO_INVALID_OFFSET is returned if obj on error or obj
     is NULL. Otherwise the LID offset is returned.
   */
-  uint16_t vcdinfo_lid_get_offset(const vcdinfo_obj_t *obj, lid_t lid,
-				  unsigned int entry_num);
+  uint16_t vcdinfo_lid_get_offset(const vcdinfo_obj_t *p_vcdinfo, lid_t lid,
+				  unsigned int i_entry);
   
   /*!
     Get the PSD Selection List Descriptor for a given lid.
     False is returned if not found.
   */
-  bool vcdinfo_lid_get_pxd(const vcdinfo_obj_t *obj, PsdListDescriptor_t *pxd,
-			   uint16_t lid);
+  bool vcdinfo_lid_get_pxd(const vcdinfo_obj_t *p_vcdinfo, 
+			   PsdListDescriptor_t *pxd, uint16_t lid);
   
   /*!  Return the entry number closest and before the given LSN.
   */
   unsigned int 
-  vcdinfo_lsn_get_entry(const vcdinfo_obj_t *obj, lsn_t lsn);
+  vcdinfo_lsn_get_entry(const vcdinfo_obj_t *p_vcdinfo, lsn_t lsn);
   
   /*!
     Convert minutes, seconds and frame (MSF components) into a
@@ -747,7 +750,8 @@ extern "C" {
   lsn_t vcdinfo_msf2lsn (uint8_t min, uint8_t sec, int8_t frame);
   
   const char *
-  vcdinfo_ofs2str (const vcdinfo_obj_t *obj, unsigned int offset, bool ext);
+  vcdinfo_ofs2str (const vcdinfo_obj_t *p_vcdinfo, unsigned int offset, 
+		   bool ext);
   
   /*!
     Calls recursive routine to populate obj->offset_list or obj->offset_x_list
@@ -755,12 +759,12 @@ extern "C" {
     
     Returns false if there was some error.
   */
-  bool vcdinfo_visit_lot (vcdinfo_obj_t *obj, bool extended);
+  bool vcdinfo_visit_lot (vcdinfo_obj_t *p_vcdinfo, bool extended);
   
-  bool vcdinfo_read_psd (vcdinfo_obj_t *obj);
+  bool vcdinfo_read_psd (vcdinfo_obj_t *p_vcdinfo);
   
   /*!
-    \fn vcdinfo_selection_get_lid(const vcdinfo_obj_t *obj, lid_t lid,
+    \fn vcdinfo_selection_get_lid(const vcdinfo_obj_t *p_vcdinfo, lid_t lid,
                                      unsigned int selection);
     \brief Get the "default" lid of a selection for a given lid. 
 
@@ -770,11 +774,11 @@ extern "C" {
     \return VCDINFO_INVALID_LID is returned if obj on error or obj
     is NULL. Otherwise the LID offset is returned.
   */
-  lid_t vcdinfo_selection_get_lid(const vcdinfo_obj_t *obj, lid_t lid,
+  lid_t vcdinfo_selection_get_lid(const vcdinfo_obj_t *p_vcdinfo, lid_t lid,
 				  unsigned int selection);
   
   /*!
-    \fn vcdinfo_selection_get_offset(const vcdinfo_obj_t *obj, lid_t lid,
+    \fn vcdinfo_selection_get_offset(const vcdinfo_obj_t *p_vcdinfo, lid_t lid,
                                      unsigned int selection);
     \brief Get offset of a selection for a given LID. 
 
@@ -784,8 +788,8 @@ extern "C" {
     \return VCDINFO_INVALID_OFFSET is returned if obj on error or obj
     is NULL. Otherwise the LID offset is returned.
   */
-  uint16_t vcdinfo_selection_get_offset(const vcdinfo_obj_t *obj, lid_t lid,
-					unsigned int selection);
+  uint16_t vcdinfo_selection_get_offset(const vcdinfo_obj_t *p_vcdinfo, 
+					lid_t lid, unsigned int selection);
   
   /*!
     Change trailing blanks in str to nulls.  Str has a maximum size of
@@ -796,13 +800,13 @@ extern "C" {
   /*!  Return the entry number for the given track.
   */
   unsigned int 
-  vcdinfo_track_get_entry(const vcdinfo_obj_t *obj, track_t track);
+  vcdinfo_track_get_entry(const vcdinfo_obj_t *p_vcdinfo, track_t i_track);
   
   /*!
     Initialize the vcdinfo structure "obj". Should be done before other
     routines using obj are called.
   */
-  bool vcdinfo_init(vcdinfo_obj_t *obj);
+  bool vcdinfo_init(vcdinfo_obj_t *p_vcdinfo);
   
   /*!
     Set up vcdinfo structure "obj" for reading from a particular
@@ -830,12 +834,12 @@ extern "C" {
   
   
   /*!
-    Dispose of any resources associated with vcdinfo structure "obj".
-    Call this when "obj" it isn't needed anymore. 
+    Dispose of any resources associated with the vcdinfo structure.
+    Call this when "p_vcdinfo" it isn't needed anymore. 
     
     True is returned is everything went okay, and false if not.
   */
-  bool vcdinfo_close(vcdinfo_obj_t *obj);
+  bool vcdinfo_close(vcdinfo_obj_t *p_vcdinfo);
   
   /*!
     Return true if offset is "rejected". That is shouldn't be displayed
