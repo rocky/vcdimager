@@ -2,6 +2,7 @@
     $Id$
 
     Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -130,17 +131,67 @@ struct filesystem_t
 };
 
 static inline void
-vcd_xml_init (struct vcdxml_t *obj)
+vcd_xml_init (struct vcdxml_t *p_vcdxml)
 {
-  vcd_assert (obj != NULL);
+  vcd_assert (p_vcdxml != NULL);
 
-  memset (obj, 0, sizeof (struct vcdxml_t));
+  memset (p_vcdxml, 0, sizeof (struct vcdxml_t));
 
-  obj->option_list = _cdio_list_new ();
-  obj->segment_list = _cdio_list_new ();
-  obj->filesystem = _cdio_list_new ();
-  obj->sequence_list = _cdio_list_new ();
-  obj->pbc_list = _cdio_list_new ();
+  p_vcdxml->option_list = _cdio_list_new ();
+  p_vcdxml->segment_list = _cdio_list_new ();
+  p_vcdxml->filesystem = _cdio_list_new ();
+  p_vcdxml->sequence_list = _cdio_list_new ();
+  p_vcdxml->pbc_list = _cdio_list_new ();
+}
+
+static inline void
+vcd_xml_destroy (struct vcdxml_t *p_vcdxml)
+{
+  vcd_assert (p_vcdxml != NULL);
+  CdioListNode_t *p_node;
+
+  _cdio_list_free (p_vcdxml->option_list,   true);
+  _cdio_list_free (p_vcdxml->segment_list,  true);
+
+  _CDIO_LIST_FOREACH (p_node, p_vcdxml->pbc_list)
+    {
+      pbc_t *p_pbc = _cdio_list_node_data(p_node);
+      vcd_pbc_destroy(p_pbc);
+    }
+  
+  _CDIO_LIST_FOREACH (p_node, p_vcdxml->sequence_list)
+    {
+      struct sequence_t *p_sequence = _cdio_list_node_data(p_node);
+      CdioListNode_t *p_node2;
+      free(p_sequence->src);
+      free(p_sequence->id);
+      free(p_sequence->default_entry_id);
+      _CDIO_LIST_FOREACH (p_node2, p_sequence->entry_point_list)
+	{
+	  struct entry_point_t *p_entry = _cdio_list_node_data(p_node2);
+	  free(p_entry->id);
+	}
+      _cdio_list_free (p_sequence->entry_point_list, true);
+      _cdio_list_free (p_sequence->autopause_list, true);
+    }
+  
+  _CDIO_LIST_FOREACH (p_node, p_vcdxml->filesystem)
+    {
+      struct filesystem_t *p_fs = _cdio_list_node_data(p_node);
+      free(p_fs->name);
+      free(p_fs->file_src);
+    }
+
+  _cdio_list_free (p_vcdxml->filesystem,    true);
+  _cdio_list_free (p_vcdxml->pbc_list, true);
+  _cdio_list_free (p_vcdxml->sequence_list, true);
+  free (p_vcdxml->comment);
+  free (p_vcdxml->info.album_id);
+  free (p_vcdxml->pvd.volume_id);
+  free (p_vcdxml->pvd.system_id);
+  free (p_vcdxml->pvd.publisher_id);
+  free (p_vcdxml->pvd.application_id);
+  free (p_vcdxml->pvd.preparer_id);
 }
 
 #endif /* __VCDXML_H__ */

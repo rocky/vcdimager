@@ -2,6 +2,7 @@
     $Id$
 
     Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2005 Rocky Bernstein <rocky@panix.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -262,9 +263,11 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 	  
 	  if (p->file_src)
 	    { /* file */
+	      char *psz_fname_utf8 = vcd_xml_filename_to_utf8 (p->file_src);
 	      xmlNodePtr filenode = _get_node_pathname (doc, section, ns, p->name, false);
 
-	      xmlSetProp (filenode, (const xmlChar *) "src", vcd_xml_filename_to_utf8 (p->file_src));
+	      xmlSetProp (filenode, (const xmlChar *) "src", psz_fname_utf8);
+	      free(psz_fname_utf8);
 
 	      if (p->file_raw)
 		xmlSetProp (filenode, (const xmlChar *) "format", (const xmlChar *) "mixed");
@@ -307,40 +310,50 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 
   _CDIO_LIST_FOREACH (node, obj->sequence_list)
     {
-      struct sequence_t *_sequence =  _cdio_list_node_data (node);
+      struct sequence_t *p_sequence =  _cdio_list_node_data (node);
       xmlNodePtr seq_node;
       CdioListNode_t *node2;
+      char *psz_xml_fname_utf8 = vcd_xml_filename_to_utf8 (p_sequence->src);
 
-      seq_node = xmlNewChild (section, ns, (const xmlChar *) "sequence-item", NULL);
-      xmlSetProp (seq_node, (const xmlChar *) "src", vcd_xml_filename_to_utf8 (_sequence->src));
-      xmlSetProp (seq_node, (const xmlChar *) "id", (const xmlChar *) _sequence->id);
+      seq_node = xmlNewChild (section, ns, (const xmlChar *) "sequence-item", 
+			      NULL);
+      xmlSetProp (seq_node, (const xmlChar *) "src", psz_xml_fname_utf8);
+      free(psz_xml_fname_utf8);
+      
+      xmlSetProp (seq_node, (const xmlChar *) "id", 
+		  (const xmlChar *) p_sequence->id);
 
-      if (_sequence->default_entry_id)
+      if (p_sequence->default_entry_id)
 	{
 	  xmlNodePtr ent_node;
 
-	  ent_node = xmlNewChild (seq_node, ns, (const xmlChar *) "default-entry", NULL);
-	  xmlSetProp (ent_node, (const xmlChar *) "id", (const xmlChar *) _sequence->default_entry_id);
+	  ent_node = xmlNewChild (seq_node, ns, 
+				  (const xmlChar *) "default-entry", NULL);
+	  xmlSetProp (ent_node, (const xmlChar *) "id", 
+		      (const xmlChar *) p_sequence->default_entry_id);
 	}
 
-      _CDIO_LIST_FOREACH (node2, _sequence->entry_point_list)
+      _CDIO_LIST_FOREACH (node2, p_sequence->entry_point_list)
 	{
-	  struct entry_point_t *_entry = _cdio_list_node_data (node2);
+	  struct entry_point_t *p_entry = _cdio_list_node_data (node2);
 	  xmlNodePtr ent_node;
 	  char buf[80];
 
-	  snprintf (buf, sizeof (buf), "%f", _entry->timestamp);
-	  ent_node = xmlNewChild (seq_node, ns, (const xmlChar *) "entry", (const xmlChar *) buf);
-	  xmlSetProp (ent_node, (const xmlChar *) "id", (const xmlChar *) _entry->id);
+	  snprintf (buf, sizeof (buf), "%f", p_entry->timestamp);
+	  ent_node = xmlNewChild (seq_node, ns, (const xmlChar *) "entry", 
+				  (const xmlChar *) buf);
+	  xmlSetProp (ent_node, (const xmlChar *) "id", 
+		      (const xmlChar *) p_entry->id);
 	}
 
-      _CDIO_LIST_FOREACH (node2, _sequence->autopause_list)
+      _CDIO_LIST_FOREACH (node2, p_sequence->autopause_list)
 	{
 	  double *_ap_ts = _cdio_list_node_data (node2);
 	  char buf[80];
 
 	  snprintf (buf, sizeof (buf), "%f", *_ap_ts);
-	  xmlNewChild (seq_node, ns, (const xmlChar *) "auto-pause", (const xmlChar *) buf);
+	  xmlNewChild (seq_node, ns, (const xmlChar *) "auto-pause", 
+		       (const xmlChar *) buf);
 	}
     }
 
