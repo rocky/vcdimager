@@ -711,6 +711,7 @@ dump_tracks (const CdIo_t *cdio)
       printf("%3d: %s  %06u  leadout\n",
              (int) i, psz_msf,
              (unsigned int) cdio_msf_to_lsn(&msf));
+      free(psz_msf);
       break;
       } else {
       printf("%3d: %s  %06u  %s\n",
@@ -828,8 +829,11 @@ dump_scandata_dat (vcdinfo_obj_t *obj)
 
           if (!gl.debug_level >= 1
               && n > PRINTED_POINTS
-              && n < scandata_count - PRINTED_POINTS)
+              && n < scandata_count - PRINTED_POINTS) {
+            free(psz_msf);
             continue;
+          }
+          
 
           fprintf (stdout, 
                    "  scanpoint[%.4d] (ofs:%5d): LSN %lu (MSF %s)\n",
@@ -974,9 +978,9 @@ dump_fs (vcdinfo_obj_t *obj)
 }
 
 static void
-dump_pvd (vcdinfo_obj_t *obj)
+dump_pvd (vcdinfo_obj_t *p_vcdinfo)
 {
-  const iso9660_pvd_t *pvd = vcdinfo_get_pvd(obj);
+  const iso9660_pvd_t *pvd = vcdinfo_get_pvd(p_vcdinfo);
 
   if (!gl.show.no.header)
     fprintf (stdout, "ISO9660 primary volume descriptor\n");
@@ -995,24 +999,38 @@ dump_pvd (vcdinfo_obj_t *obj)
   if (gl.show.pvd.vers)
     fprintf (stdout, " version: %d\n", iso9660_get_pvd_version(pvd));
 
-  if (gl.show.pvd.sys)
-    fprintf (stdout, " system id: `%s'\n",    vcdinfo_get_system_id(obj));
+  if (gl.show.pvd.sys) {
+    char *psz = vcdinfo_get_system_id(p_vcdinfo);
+    fprintf (stdout, " system id: `%s'\n",    psz);
+    free(psz);
+  }
+  
 
   if (gl.show.pvd.vol)
-    fprintf (stdout, " volume id: `%s'\n",    vcdinfo_get_volume_id(obj));
+    fprintf (stdout, " volume id: `%s'\n",
+             vcdinfo_get_volume_id(p_vcdinfo));
 
   if (gl.show.pvd.volset)
-    fprintf (stdout, " volumeset id: `%s'\n", vcdinfo_get_volumeset_id(obj));
+    fprintf (stdout, " volumeset id: `%s'\n",
+             vcdinfo_get_volumeset_id(p_vcdinfo));
 
-  if (gl.show.pvd.pub)
-    fprintf (stdout, " publisher id: `%s'\n", vcdinfo_get_publisher_id(obj));
+  if (gl.show.pvd.pub) {
+    char *psz = vcdinfo_get_publisher_id(p_vcdinfo);
+    fprintf (stdout, " publisher id: `%s'\n", psz);
+    free(psz);
+  }
 
-  if (gl.show.pvd.prep)
-    fprintf (stdout, " preparer id: `%s'\n",  vcdinfo_get_preparer_id(obj));
+  if (gl.show.pvd.prep) {
+    char *psz = vcdinfo_get_preparer_id(p_vcdinfo);
+    fprintf (stdout, " preparer id: `%s'\n",  psz);
+    free(psz);
+  }
 
-  if (gl.show.pvd.app)
-    fprintf (stdout, " application id: `%s'\n", 
-             vcdinfo_get_application_id(obj));
+  if (gl.show.pvd.app) {
+    char *psz = vcdinfo_get_application_id(p_vcdinfo);
+    fprintf (stdout, " application id: `%s'\n", psz);
+    free(psz);
+  }
   
   if (gl.show.pvd.iso)
     fprintf (stdout, " ISO size: %d blocks (logical blocksize: %d bytes)\n", 
@@ -1021,7 +1039,7 @@ dump_pvd (vcdinfo_obj_t *obj)
 
   if (gl.show.pvd.xa) 
     fprintf (stdout, " XA marker present: %s\n", 
-             _vcd_bool_str (vcdinfo_has_xa(obj)));
+             _vcd_bool_str (vcdinfo_has_xa(p_vcdinfo)));
 }
 
 static void
