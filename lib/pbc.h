@@ -121,10 +121,10 @@ pbc_t *
 vcd_pbc_new (enum pbc_type_t type);
 
 pbc_t *
-_vcd_pbc_init (pbc_t *_pbc);
+_vcd_pbc_init (pbc_t *p_pbc);
 
 void
-vcd_pbc_destroy (pbc_t *obj);
+vcd_pbc_destroy (pbc_t *p_pbc);
 
 unsigned
 _vcd_pbc_lid_lookup (const VcdObj *obj, const char item_id[]);
