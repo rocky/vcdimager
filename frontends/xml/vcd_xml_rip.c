@@ -1036,8 +1036,13 @@ _rip_sequences (struct vcdxml_t *obj, CdIo_t *img, int tracknum)
       }
       buf[15];
 
-      if (tracknum && tracknum!=counter++) {
+      if (tracknum > 0 && tracknum!=counter++) {
 	vcd_info("Track %d selected, skipping track %d", tracknum,counter-1);
+	continue;
+      }
+	  
+      if (tracknum < 0 && -tracknum==counter++) {
+	vcd_info("Skipping track %d", -tracknum);
 	continue;
       }
 	  
@@ -1250,6 +1255,7 @@ main (int argc, const char *argv[])
   int _progress_flag = 0;
   int _gui_flag = 0;
   int _track_flag=0;
+  int _x_track_flag=0;
 
   enum { 
     CL_SOURCE_UNDEF = DRIVER_UNKNOWN, 
@@ -1324,6 +1330,9 @@ main (int argc, const char *argv[])
 
       { "track", 't', POPT_ARG_INT, &_track_flag, 0,
 	"rip only this track"},
+      
+      { "notrack", 'T', POPT_ARG_INT, &_x_track_flag, 0,
+	"do not rip this track"},
       
       { "filename-encoding", '\0', POPT_ARG_STRING, &vcd_xml_filename_charset, 0,
         "use given charset encoding for filenames instead of UTF8" },
@@ -1441,6 +1450,8 @@ main (int argc, const char *argv[])
   /* needs to be parsed last! */
   _parse_pbc (&obj, img_src, no_ext_psd_flag);
 
+  if (_x_track_flag) _track_flag = - _x_track_flag;
+  
   if (norip_flag || noseq_flag || noseg_flag || _track_flag) {
     vcd_warn ("Entry offsets inside sequence-items may incorrect...");
     vcd_warn ("and auto-pause locations might not be checked.");
