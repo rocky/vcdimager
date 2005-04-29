@@ -455,7 +455,7 @@ extern "C" {
     Return a string containing the VCD preparer id with trailing
     blanks removed, or NULL if there is some problem in getting this.
   */
-  const char *
+  char *
   vcdinfo_get_preparer_id(const vcdinfo_obj_t *p_vcdinfo);
   
   /*!
@@ -482,7 +482,7 @@ extern "C" {
     Return a string containing the VCD publisher id with trailing
     blanks removed, or NULL if there is some problem in getting this.
   */
-  const char * vcdinfo_get_publisher_id(const vcdinfo_obj_t *p_vcdinfo);
+  char * vcdinfo_get_publisher_id(const vcdinfo_obj_t *p_vcdinfo);
   
   /**
    \fn vcdinfo_get_return_offset(const vcdinfo_obj_t *p_vcdinfo);
@@ -549,7 +549,7 @@ extern "C" {
     Return a string containing the VCD system id with trailing
     blanks removed, or NULL if there is some problem in getting this.
   */
-  const char *
+  char *
   vcdinfo_get_system_id(const vcdinfo_obj_t *p_vcdinfo);
   
   /*!

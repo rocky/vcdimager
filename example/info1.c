@@ -19,17 +19,28 @@
 */
 /* Simple example of using the libvcdinfo library. */
 
+
+#include <stdio.h>
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+#ifdef HAVE_STRING_H
+# include <string.h>
+#endif
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
+#endif
+
 #include <libvcd/info.h>
 #include <libvcd/logging.h>
 #include <cdio/iso9660.h>
-#include <stdio.h>
-#include <string.h>
+
 int
 main (int argc, const char *argv[])
 {
   vcdinfo_obj_t *p_vcdinfo;
-  char source[100];
-  char *psz_source = source;
+  char *psz_source = NULL;
+  char *psz = NULL;
 
   /* Set to give only errors on open, not warnings. */
   vcd_loglevel_default = VCD_LOG_ERROR; 
@@ -48,10 +59,23 @@ main (int argc, const char *argv[])
   printf ("Volume Set id: `%s'\n",  vcdinfo_get_volumeset_id(p_vcdinfo));
   printf ("Volume %d of %d\n",      vcdinfo_get_volume_num(p_vcdinfo),
 	                            vcdinfo_get_volume_count(p_vcdinfo));
-  printf ("Preparer id: `%s'\n",    vcdinfo_get_preparer_id(p_vcdinfo));
-  printf ("Publisher id: `%s'\n",   vcdinfo_get_publisher_id(p_vcdinfo));
-  printf ("System id: `%s'\n",      vcdinfo_get_system_id(p_vcdinfo));
-  printf ("Application id: `%s'\n", vcdinfo_get_application_id(p_vcdinfo));
+
+  psz = vcdinfo_get_preparer_id(p_vcdinfo);
+  printf ("Preparer id: `%s'\n",    psz);
+  free(psz);
+  
+  psz = vcdinfo_get_publisher_id(p_vcdinfo);
+  printf ("Publisher id: `%s'\n",  psz);
+  free(psz);
+
+  psz = vcdinfo_get_system_id(p_vcdinfo);
+  printf ("System id: `%s'\n",      psz);
+  free(psz);
+
+  psz = vcdinfo_get_application_id(p_vcdinfo);
+  printf ("Application id: `%s'\n", psz);
+  free(psz);
+  
   { 
     const iso9660_pvd_t *p_pvd = vcdinfo_get_pvd(p_vcdinfo);
 
@@ -65,7 +89,8 @@ main (int argc, const char *argv[])
     printf("PVD ID: `%.5s'\n",  iso9660_get_pvd_id(p_pvd));
     printf("PVD version: %d\n", iso9660_get_pvd_version(p_pvd));
   }
-  
+
+  free(psz_source);
   vcdinfo_close(p_vcdinfo);
   return 0;
 }

@@ -993,7 +993,7 @@ vcdinfo_get_offset_t (const vcdinfo_obj_t *p_obj, unsigned int offset)
    Return a string containing the VCD publisher id with trailing
    blanks removed, or NULL if there is some problem in getting this.
 */
-const char *
+char *
 vcdinfo_get_preparer_id(const vcdinfo_obj_t *p_obj)
 {
   if ( !p_obj ) return (NULL);
@@ -1044,7 +1044,7 @@ vcdinfo_get_psd_x_size (const vcdinfo_obj_t *p_obj)
    Return a string containing the VCD publisher id with trailing
    blanks removed, or NULL if there is some problem in getting this.
 */
-const char *
+char *
 vcdinfo_get_publisher_id(const vcdinfo_obj_t *p_obj)
 {
   if ( !p_obj ) return (NULL);
@@ -1235,7 +1235,7 @@ vcdinfo_get_seg_sector_count(const vcdinfo_obj_t *p_obj, segnum_t i_seg)
    Return a string containing the VCD system id with trailing
    blanks removed, or NULL if there is some problem in getting this.
 */
-const char *
+char *
 vcdinfo_get_system_id(const vcdinfo_obj_t *p_obj)
 {
   if ( !p_obj || !&(p_obj->pvd) ) return NULL;
