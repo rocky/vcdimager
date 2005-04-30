@@ -374,7 +374,7 @@ _xstrdup(const char *s)
   return NULL;
 }
 
-struct _pbc_ctx {
+typedef struct _pbc_ctx {
   unsigned psd_size;
   unsigned maximum_lid;
   unsigned offset_mult;
@@ -775,7 +775,7 @@ static int
 _parse_pbc (struct vcdxml_t *p_vcdxml, CdIo_t *p_cdio, bool no_ext_psd)
 {
   int n;
-  pbc_ctx_t p_pbc_ctx;
+  pbc_ctx_t _pbc_ctx;
   CdioListNode_t *node;
   bool extended = false;
   uint32_t _lot_vcd_sector = -1;
@@ -809,7 +809,7 @@ _parse_pbc (struct vcdxml_t *p_vcdxml, CdIo_t *p_cdio, bool no_ext_psd)
 	extended = false;
     }
 
-  _pctx.extended = extended;
+  _pbc_ctx.extended = extended;
 
   if (extended && !no_ext_psd)
     vcd_info ("detected extended VCD2.0 PBC files");
@@ -817,27 +817,27 @@ _parse_pbc (struct vcdxml_t *p_vcdxml, CdIo_t *p_cdio, bool no_ext_psd)
     if (extended)
       vcd_info ("ignoring detected extended VCD2.0 PBC files");
     
-    _pctx.extended = false;
+    _pbc_ctx.extended = false;
     
     _lot_vcd_sector = LOT_VCD_SECTOR;
     _psd_vcd_sector = PSD_VCD_SECTOR;
     _psd_size = p_vcdxml->info.psd_size;
   }
 
-  _pctx.psd_size = _psd_size;
-  _pctx.offset_mult = 8;
-  _pctx.maximum_lid = p_vcdxml->info.max_lid;
+  _pbc_ctx.psd_size = _psd_size;
+  _pbc_ctx.offset_mult = 8;
+  _pbc_ctx.maximum_lid = p_vcdxml->info.max_lid;
 
-  _pctx.offset_list = _cdio_list_new ();
+  _pbc_ctx.offset_list = _cdio_list_new ();
 
   /* read in LOT */
   
-  _pctx.lot = calloc(1, ISO_BLOCKSIZE * LOT_VCD_SIZE);
+  _pbc_ctx.lot = calloc(1, ISO_BLOCKSIZE * LOT_VCD_SIZE);
   
-  if (cdio_read_mode2_sectors (p_cdio, _pctx.lot, _lot_vcd_sector, false, 
+  if (cdio_read_mode2_sectors (p_cdio, _pbc_ctx.lot, _lot_vcd_sector, false, 
 			       LOT_VCD_SIZE)) {
-    _cdio_list_free (_pctx.offset_list, true);
-    free(_pctx.lot);
+    _cdio_list_free (_pbc_ctx.offset_list, true);
+    free(_pbc_ctx.lot);
     return -1;
   }
   
@@ -846,9 +846,9 @@ _parse_pbc (struct vcdxml_t *p_vcdxml, CdIo_t *p_cdio, bool no_ext_psd)
 
   n = _vcd_len2blocks (_psd_size, ISO_BLOCKSIZE);
 
-  _pctx.psd = calloc(1, ISO_BLOCKSIZE * n);
+  _pbc_ctx.psd = calloc(1, ISO_BLOCKSIZE * n);
 
-  if (cdio_read_mode2_sectors (p_cdio, _pctx.psd,_psd_vcd_sector, false, n)) {
+  if (cdio_read_mode2_sectors (p_cdio, _pbc_ctx.psd,_psd_vcd_sector, false, n)) {
     rc = -1;
     goto free_and_return;
   }
@@ -856,23 +856,23 @@ _parse_pbc (struct vcdxml_t *p_vcdxml, CdIo_t *p_cdio, bool no_ext_psd)
 
   /* traverse it */
 
-  _visit_lot (&_pctx);
+  _visit_lot (&_pbc_ctx);
 
-  _CDIO_LIST_FOREACH (node, _pctx.offset_list)
+  _CDIO_LIST_FOREACH (node, _pbc_ctx.offset_list)
     {
       vcdinfo_offset_t *ofs = _cdio_list_node_data (node);
       pbc_t *_pbc;
 
       vcd_assert (ofs->offset != PSD_OFS_DISABLED);
       
-      if ((_pbc = _pbc_node_read (&_pctx, ofs->offset)))
+      if ((_pbc = _pbc_node_read (&_pbc_ctx, ofs->offset)))
 	_cdio_list_append (p_vcdxml->pbc_list, _pbc);
     }
 
  free_and_return:
-  _cdio_list_free (_pctx.offset_list, true);
-  free(_pctx.lot);
-  free(_pctx.psd);
+  _cdio_list_free (_pbc_ctx.offset_list, true);
+  free(_pbc_ctx.lot);
+  free(_pbc_ctx.psd);
   return 0;
 }
 
