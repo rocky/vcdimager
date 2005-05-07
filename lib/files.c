@@ -151,37 +151,37 @@ set_entries_vcd (VcdObj *obj, void *buf)
   switch (obj->type)
     {
     case VCD_TYPE_VCD:
-      strncpy(entries_vcd.ID, ENTRIES_ID_VCD, 8);
+      strncpy(entries_vcd.ID, ENTRIES_ID_VCD, sizeof(entries_vcd.ID));
       entries_vcd.version = ENTRIES_VERSION_VCD;
       entries_vcd.sys_prof_tag = ENTRIES_SPTAG_VCD;
       break;
 
     case VCD_TYPE_VCD11:
-      strncpy(entries_vcd.ID, ENTRIES_ID_VCD, 8);
+      strncpy(entries_vcd.ID, ENTRIES_ID_VCD, sizeof(entries_vcd.ID));
       entries_vcd.version = ENTRIES_VERSION_VCD11;
       entries_vcd.sys_prof_tag = ENTRIES_SPTAG_VCD11;
       break;
 
     case VCD_TYPE_VCD2:
-      strncpy(entries_vcd.ID, ENTRIES_ID_VCD, 8);
+      strncpy(entries_vcd.ID, ENTRIES_ID_VCD, sizeof(entries_vcd.ID));
       entries_vcd.version = ENTRIES_VERSION_VCD2;
       entries_vcd.sys_prof_tag = ENTRIES_SPTAG_VCD2;
       break;
 
     case VCD_TYPE_SVCD:
       if (!obj->svcd_vcd3_entrysvd)
-        strncpy(entries_vcd.ID, ENTRIES_ID_SVCD, 8);
+        strncpy(entries_vcd.ID, ENTRIES_ID_SVCD, sizeof(entries_vcd.ID));
       else
         {
           vcd_warn ("setting ENTRYSVD signature for *DEPRECATED* VCD 3.0 type SVCD");
-          strncpy(entries_vcd.ID, ENTRIES_ID_VCD3, 8);
+          strncpy(entries_vcd.ID, ENTRIES_ID_VCD3, sizeof(entries_vcd.ID));
         }
       entries_vcd.version = ENTRIES_VERSION_SVCD;
       entries_vcd.sys_prof_tag = ENTRIES_SPTAG_SVCD;
       break;
 
     case VCD_TYPE_HQVCD:
-      strncpy(entries_vcd.ID, ENTRIES_ID_SVCD, 8);
+      strncpy(entries_vcd.ID, ENTRIES_ID_SVCD, sizeof(entries_vcd.ID));
       entries_vcd.version = ENTRIES_VERSION_HQVCD;
       entries_vcd.sys_prof_tag = ENTRIES_SPTAG_HQVCD;
       break;
@@ -470,7 +470,7 @@ set_tracks_svd_v30 (VcdObj *obj, void *buf)
   int n;
 
   strncpy (tracks_svd->file_id, TRACKS_SVD_FILE_ID, 
-           sizeof (TRACKS_SVD_FILE_ID));
+           sizeof (TRACKS_SVD_FILE_ID)-1);
   tracks_svd->version = TRACKS_SVD_VERSION;
   tracks_svd->tracks = _cdio_list_length (obj->mpeg_track_list);
 
@@ -531,7 +531,8 @@ set_tracks_svd (VcdObj *obj, void *buf)
 
   vcd_assert (sizeof (SVDTrackContent) == 1);
 
-  strncpy (tracks_svd1->file_id, TRACKS_SVD_FILE_ID, sizeof (TRACKS_SVD_FILE_ID));
+  strncpy (tracks_svd1->file_id, TRACKS_SVD_FILE_ID, 
+           sizeof (TRACKS_SVD_FILE_ID)-1);
   tracks_svd1->version = TRACKS_SVD_VERSION;
 
   tracks_svd1->tracks = _cdio_list_length (obj->mpeg_track_list);
@@ -720,7 +721,7 @@ set_search_dat (VcdObj *obj, void *buf)
 
   memset (&search_dat, 0, sizeof (search_dat));
 
-  strncpy (search_dat.file_id, SEARCH_FILE_ID, sizeof (SEARCH_FILE_ID));
+  strncpy (search_dat.file_id, SEARCH_FILE_ID, sizeof(search_dat.file_id));
   
   search_dat.version = SEARCH_VERSION;
   search_dat.scan_points = uint16_to_be (_get_scanpoint_count (obj));
@@ -855,7 +856,8 @@ set_scandata_dat (VcdObj *obj, void *buf)
   /* memset (buf, 0, get_scandata_dat_size (obj)); */
 
   /* struct 1 */
-  strncpy (scandata_dat1->file_id, SCANDATA_FILE_ID, sizeof (SCANDATA_FILE_ID));
+  strncpy (scandata_dat1->file_id, SCANDATA_FILE_ID, 
+           sizeof (SCANDATA_FILE_ID)-1);
   
   scandata_dat1->version = SCANDATA_VERSION_SVCD;
   scandata_dat1->reserved = 0x00;

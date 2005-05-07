@@ -3,6 +3,7 @@
 
     Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
               (C) 2000 Jens B. Jorgensen <jbj1@ultraemail.net>
+              (C) 2005 Rocky Bernstein <rocky@panix.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -50,14 +51,14 @@
 PRAGMA_BEGIN_PACKED
 
 typedef struct _EntriesVcd_tag {
-  char ID[8];                             /* "ENTRYVCD" */
-  uint8_t version;                        /* 0x02 --- VCD2.0
-                                             0x01 --- SVCD, should be
-                                             same as version in
-                                             INFO.SVD */
-  uint8_t sys_prof_tag;                   /* 0x01 if VCD1.1
-                                             0x00 else */
-  uint16_t entry_count;                   /* 1 <= tracks <= 500 */
+  char ID[8];                             /**< "ENTRYVCD" or "ENTRYSVD" */
+  uint8_t version;                        /**< 0x02 --- VCD2.0
+                                               0x01 --- SVCD, should be
+                                               same as version in
+                                               INFO.SVD */
+  uint8_t sys_prof_tag;                   /**< 0x01 if VCD1.1
+                                                0x00 else */
+  uint16_t entry_count;                   /**< 1 <= tracks <= 500 */
   struct {     /* all fields are BCD */
     track_t n; /* cd track no 2 <= n <= 99 */
     msf_t msf;
@@ -219,7 +220,7 @@ typedef struct _InfoVcd_tag {
 
 #define InfoVcd_t_SIZEOF ISO_BLOCKSIZE
 
-/* LOT.VCD
+/** LOT.VCD
    This optional file is only necessary if the PSD size is not zero.
    This List ID Offset Table allows you to start playing the PSD from
    lists other than the default List ID number. This table has a fixed length
@@ -237,7 +238,7 @@ typedef struct _LotVcd_tag {
 
 #define LotVcd_t_SIZEOF (32*ISO_BLOCKSIZE)
 
-/* PSD.VCD
+/** PSD.VCD
    The PSD controls the "user interaction" mode which can be used to make
    menus, etc. The PSD contains a set of Lists. Each List defines a set of
    Items which are played in sequence. An Item can be an mpeg track (in whole
@@ -326,21 +327,21 @@ typedef struct {
 
 typedef struct  _PsdPlayListDescriptor_tag {
   uint8_t type;
-  uint8_t noi;  /* number of items */
-  uint16_t lid; /* list id: high-bit means this list is rejected in
-                   the LOT (also, can't use 0) */
-  uint16_t prev_ofs; /* previous list offset (0xffff disables) */
-  uint16_t next_ofs; /* next list offset (0xffff disables) */
-  uint16_t return_ofs; /* return list offset (0xffff disables) */
-  uint16_t ptime; /* play time in 1/15 s, 0x0000 meaning full item */
-  uint8_t  wtime; /* delay after, in seconds, if 1 <= wtime <= 60 wait
-                     is wtime else if 61 <= wtime <= 254 wait is
-                     (wtime-60) * 10 + 60 else wtime == 255 wait is
-                     infinite  */
-  uint8_t  atime; /* auto pause wait time calculated same as wtime,
-                     used for each item in list if the auto pause flag
-                     in a sector is true */
-  uint16_t itemid[EMPTY_ARRAY_SIZE]; /* item number
+  uint8_t noi;  /**< number of items */
+  uint16_t lid; /**< list id: high-bit means this list is rejected in
+                     the LOT (also, can't use 0) */
+  uint16_t prev_ofs; /**< previous list offset (0xffff disables) */
+  uint16_t next_ofs; /**< next list offset (0xffff disables) */
+  uint16_t return_ofs; /**< return list offset (0xffff disables) */
+  uint16_t ptime; /**< play time in 1/15 s, 0x0000 meaning full item */
+  uint8_t  wtime; /**< delay after, in seconds, if 1 <= wtime <= 60 wait
+                       is wtime else if 61 <= wtime <= 254 wait is
+                       (wtime-60) * 10 + 60 else wtime == 255 wait is
+                       infinite  */
+  uint8_t  atime; /**< auto pause wait time calculated same as wtime,
+                       used for each item in list if the auto pause flag
+                       in a sector is true */
+  uint16_t itemid[EMPTY_ARRAY_SIZE]; /**< item number
                                            0 <= n <= 1      - play nothing
                                            2 <= n <= 99     - play track n
                                          100 <= n <= 599    - play entry
@@ -366,19 +367,19 @@ typedef struct  _PsdPlayListDescriptor_tag {
 
 typedef struct {
 #if defined(BITFIELD_LSBF)
-  bitfield_t audio : 2;                      /* Audio Content
+  bitfield_t audio : 2;                      /**< Audio Content
                                              0x00 : No MPEG audio stream
                                              0x01 : One MPEG{1|2} audio stream
                                              0x02 : Two MPEG{1|2} streams
                                              0x03 : One MPEG2 multi-channel
                                                     audio stream with
                                                     extension */
-  bitfield_t video : 3;                      /* Video Content
+  bitfield_t video : 3;                      /**< Video Content
                                              0x00 : No MPEG video
                                              0x03 : NTSC video
                                              0x07 : PAL video */
-  bool       reserved1 : 1;                  /* Reserved, must be zero */
-  bitfield_t ogt : 2;                        /* 0x0 - no OGT substream 
+  bool       reserved1 : 1;                  /**< Reserved, must be zero */
+  bitfield_t ogt : 2;                        /**< 0x0 - no OGT substream 
                                              0x1 - sub-stream 0 available
                                              0x2 - sub-stream 0 & 1 available
                                              0x3 - all OGT sub-substreams 
@@ -393,41 +394,42 @@ typedef struct {
 
 #define SVDTrackContent_SIZEOF 1
 
-/* The file contains a series of structures, one for each
-   track, which indicates the track's playing time (in sectors, not actually
-   real time) and contents. */
+/** The TRACKS.SVD file contains a series of structures, one for each
+   track, which indicates the track's playing time (in sectors, not
+   actually real time) and contents. */
 
 #define TRACKS_SVD_FILE_ID  "TRACKSVD"
 #define TRACKS_SVD_VERSION  0x01
 
 typedef struct {
-  char file_id[8];  /* == "TRACKSVD" */
-  uint8_t version;  /* == 0x01 */
-  uint8_t reserved; /* Reserved, must be zero */
-  uint8_t tracks; /* number of MPEG tracks */
-  msf_t playing_time[EMPTY_ARRAY_SIZE]; /* per track, BCD coded
-                                           mm:ss:ff */
+  char file_id[sizeof(TRACKS_SVD_FILE_ID)-1];  /**< == "TRACKSVD" with out 
+                                                    final NULL byte */
+  uint8_t version;  /**< == 0x01 */
+  uint8_t reserved; /**< Reserved, must be zero */
+  uint8_t tracks;   /**< number of MPEG tracks */
+  msf_t playing_time[EMPTY_ARRAY_SIZE]; /**< per track, BCD coded
+                                             mm:ss:ff */
 } GNUC_PACKED TracksSVD;
 
 #define TracksSVD_SIZEOF 11
 
 typedef struct {
   /* TracksSVD tracks_svd; */
-  SVDTrackContent contents[1]; /* should be [], but C99 doesn't allow it
-                                  indicates track contents */
+  SVDTrackContent contents[1]; /**< should be [], but C99 doesn't allow it
+                                    indicates track contents */
 } GNUC_PACKED TracksSVD2;
 
 #define TracksSVD2_SIZEOF SVDTrackContent_SIZEOF
 
-/* VCD30 tracks svd */
+/** VCD30 TRACKS.SVD file. */
 
 typedef struct {
-  char file_id[8]; /* == "TRACKSVD" */
-  uint8_t version; /* == 0x01 */
-  uint8_t reserved; /* Reserved, must be zero */
-  uint8_t tracks; /* number of MPEG tracks */
+  char file_id[8];          /**< == "TRACKSVD" */
+  uint8_t version;          /**< == 0x01 */
+  uint8_t reserved;         /**< Reserved, must be zero */
+  uint8_t tracks;           /**< number of MPEG tracks */
   struct {
-    msf_t cum_playing_time; /* BCD coded mm:ss:ff */
+    msf_t cum_playing_time; /**< BCD coded mm:ss:ff */
     uint8_t ogt_info;
     uint8_t audio_info;
   } GNUC_PACKED track[EMPTY_ARRAY_SIZE];
@@ -435,7 +437,7 @@ typedef struct {
 
 #define TracksSVD_v30_SIZEOF 11
 
-/* SEARCH.DAT
+/** SVCD/SEARCH.DAT
    This file defines where the scan points are. It covers all mpeg tracks
    together. A scan point at time T is the nearest I-picture in the MPEG
    stream to the given time T. Scan points are given at every half-second
@@ -446,14 +448,15 @@ typedef struct {
 #define SEARCH_TIME_INTERVAL  0x01
 
 typedef struct {
-  char file_id[8]; /* = "SEARCHSV" */
-  uint8_t version; /* = 0x01 */
-  uint8_t reserved; /* Reserved, must be zero */
-  uint16_t scan_points; /* the number of scan points */
-  uint8_t time_interval; /* The interval of time in
-                            between scan points, in units
-                            of 0.5 seconds, must be 0x01 */
-  msf_t points[EMPTY_ARRAY_SIZE]; /* The series of scan points */
+  char file_id[sizeof(SEARCH_FILE_ID)-1]; /**< == "SEARCHSV" without final 
+                                               NULL byte */
+  uint8_t version;  /**< = 0x01 */
+  uint8_t reserved; /**< Reserved, must be zero */
+  uint16_t scan_points; /**< the number of scan points */
+  uint8_t time_interval; /**< The interval of time in
+                              between scan points, in units
+                              of 0.5 seconds, must be 0x01 */
+  msf_t points[EMPTY_ARRAY_SIZE]; /**< The series of scan points */
 } GNUC_PACKED SearchDat;
 
 #define SearchDat_SIZEOF 13
@@ -465,36 +468,38 @@ typedef struct {
 #define SPICONTX_VERSION      0x01
 
 typedef struct {
-  char file_id[8]; /* = "SPICONSV" */
-  uint8_t version; /* = 0x01 */
-  uint8_t reserved; /* Reserved, must be zero */
+  char file_id[sizeof(SPICONTX_FILE_ID)-1]; /**< = "SPICONSV" without final
+                                             NULL byte */
+  uint8_t version;  /**< = 0x01 */
+  uint8_t reserved; /**< Reserved, must be zero */
   struct {
     uint8_t ogt_info;
     uint8_t audio_info;
   } GNUC_PACKED spi[MAX_SEGMENTS];
-  uint8_t reserved2[126]; /* 0x00 */
+  uint8_t reserved2[126]; /**< 0x00 */
 } GNUC_PACKED SpicontxSvd;
 
 #define SpicontxSvd_SIZEOF (2*ISO_BLOCKSIZE)
 
-/* SCANDATA.DAT for VCD 2.0 */
+/** SCANDATA.DAT for VCD 2.0 */
 
 #define SCANDATA_FILE_ID "SCAN_VCD"
 #define SCANDATA_VERSION_VCD2 0x02
 #define SCANDATA_VERSION_SVCD 0x01
 
 typedef struct {
-  char file_id[8]; /* = "SCAN_VCD" */
-  uint8_t version; /* = 0x02 */
-  uint8_t reserved; /* Reserved, must be zero */
-  uint16_t scan_points; /* the number of scan points */
-  msf_t points[EMPTY_ARRAY_SIZE]; /* actual scan points 
-                                              points[time(iframe)/0.5] */
+  char file_id[sizeof(SCANDATA_FILE_ID)-1]; /**< == "SCAN_VCD" without final
+                                                 NULL byte */
+  uint8_t version;                          /**< = 0x02 */
+  uint8_t reserved;                         /**< Reserved, must be zero */
+  uint16_t scan_points;                     /**< the number of scan points */
+  msf_t points[EMPTY_ARRAY_SIZE];           /**< actual scan points 
+                                               points[time(iframe)/0.5] */
 } GNUC_PACKED ScandataDat_v2;
 
 #define ScandataDat_v2_SIZEOF 12
 
-/* SCANDATA.DAT for SVCD
+/** SCANDATA.DAT for SVCD
    This file fulfills much the same purpose of the SEARCH.DAT file except
    that this file is mandatory only if the System Profile Tag of the
    INFO.SVD file is 0x01 (HQ-VCD) and also that it contains sector addresses
@@ -502,20 +507,22 @@ typedef struct {
    tracks. */
 
 typedef struct {
-  char file_id[8]; /* = "SCAN_VCD" */
-  uint8_t version; /* = 0x01 */
-  uint8_t reserved; /* Reserved, must be zero */
-  uint16_t scandata_count; /* number of 3-byte entries in
-                                              the table */
-  uint16_t track_count; /* number of mpeg tracks on disc */
-  uint16_t spi_count; /* number of consecutively recorded
-                                              play item segments (as opposed
-                                              to the number of segment play
-                                              items). */
-  msf_t cum_playtimes[EMPTY_ARRAY_SIZE]; /* cumulative playing
-                                              time up to track
-                                              N. Track time just wraps
-                                              at 99:59:74 */
+  char file_id[sizeof(SCANDATA_FILE_ID)-1]; /**< == "SCAN_VCD" without final
+                                                NULL byte */
+  uint8_t version;                          /**<  = 0x01 */
+  uint8_t reserved;                         /**< Reserved, must be zero */
+  uint16_t scandata_count;                  /**< number of 3-byte entries in
+                                                 the table */
+  uint16_t track_count;                     /**< number of MPEG tracks on 
+                                               disc */
+  uint16_t spi_count;                       /**<  number of consecutively 
+                                               recorded play item segments 
+                                               (as opposed to the number of 
+                                               segment play items). */
+  msf_t cum_playtimes[EMPTY_ARRAY_SIZE];    /**<  cumulative playing
+                                               time up to track
+                                               N. Track time just wraps
+                                               at 99:59:74 */
 } GNUC_PACKED ScandataDat1;
 
 #define ScandataDat1_SIZEOF 16
