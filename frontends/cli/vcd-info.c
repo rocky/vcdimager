@@ -151,6 +151,8 @@ static struct gl_t
 }
 gl;                             /* global variables */
 
+poptContext optCon;
+
 /* end of vars */
 
 
@@ -1148,7 +1150,7 @@ dump (char *image_fname[])
   unsigned size, psd_size;
   vcdinfo_obj_t *obj = NULL;
   CdIo_t *p_cdio;
-  iso9660_stat_t *statbuf;
+  iso9660_stat_t *p_statbuf;
   vcdinfo_open_return_t open_rc;
   
   if (!gl.show.no.banner)
@@ -1171,14 +1173,14 @@ dump (char *image_fname[])
       fprintf (stdout, "Perhaps this is not a Video CD\n");
       free(*image_fname);
     }
-    exit (EXIT_FAILURE);
+    goto err_exit;
   }
 
   p_cdio = vcdinfo_get_cd_image(obj);
   if (open_rc==VCDINFO_OPEN_ERROR || p_cdio == NULL) {
     vcd_error ("Error determining place to read from");
     free(*image_fname);
-    exit (EXIT_FAILURE);
+    goto err_exit;
   }
 
   size = cdio_stat_size (p_cdio);
@@ -1213,12 +1215,12 @@ dump (char *image_fname[])
       if (!gl.show.no.delimiter) fprintf (stdout, DELIM);
       dump_tracks (p_cdio);
     }
-    exit (EXIT_FAILURE);
+    goto err_exit;
   }
 
   if (vcdinfo_get_format_version (obj) == VCD_TYPE_INVALID) {
     vcd_error ("VCD detection failed - aborting");
-    exit (EXIT_FAILURE);
+    goto err_exit;
   } else if (gl.show.format) {
     fprintf (stdout, "%s detected\n", vcdinfo_get_format_version_str(obj));
   }
@@ -1228,28 +1230,33 @@ dump (char *image_fname[])
   if (vcdinfo_read_psd (obj))
     {
       /* ISO9660 crosscheck */
-      statbuf = iso9660_fs_stat (p_cdio, 
+      p_statbuf = iso9660_fs_stat (p_cdio, 
                                  ((vcdinfo_get_VCD_type(obj) == VCD_TYPE_SVCD 
                              || vcdinfo_get_VCD_type(obj) == VCD_TYPE_HQVCD)
                                   ? "/SVCD/PSD.SVD;1" 
                                   : "/VCD/PSD.VCD;1"));
-      if (NULL == statbuf)
+      if (!p_statbuf)
         vcd_warn ("no PSD file entry found in ISO9660 fs");
       else {
-        if (psd_size != statbuf->size)
+        if (psd_size != p_statbuf->size)
           vcd_warn ("ISO9660 psd size != INFO psd size");
-        if (statbuf->lsn != PSD_VCD_SECTOR)
+        if (p_statbuf->lsn != PSD_VCD_SECTOR)
           vcd_warn ("psd file entry in ISO9660 not at fixed LSN");
-        free(statbuf);
+        free(p_statbuf);
       }
           
     }
 
   dump_all (obj);
   vcdinfo_close(obj);
+  return;
+  
+ err_exit:
+  poptFreeContext(optCon);
+  exit (EXIT_FAILURE);
 }
 
-static vcd_log_handler_t  gl_default_vcd_log_handler = NULL;
+static vcd_log_handler_t  gl_default_vcd_log_handler  = NULL;
 static cdio_log_handler_t gl_default_cdio_log_handler = NULL;
 
 static void 
@@ -1516,7 +1523,7 @@ main (int argc, const char *argv[])
     {"xa",    &gl.show.pvd.xa},
   };
 
-  poptContext optCon = poptGetContext (NULL, argc, argv, optionsTable, 0);
+  optCon = poptGetContext (NULL, argc, argv, optionsTable, 0);
 
   init();
 
