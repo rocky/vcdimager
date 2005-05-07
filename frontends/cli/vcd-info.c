@@ -195,27 +195,27 @@ typedef enum {
 } vcd2_ext_pbc_status_t;
 
 static vcd2_ext_pbc_status_t
-_has_vcd2_ext_pbc (const vcdinfo_obj_t *obj)
+_has_vcd2_ext_pbc (const vcdinfo_obj_t *p_vcdinfo)
 {
   iso9660_stat_t *statbuf;
-  CdIo_t *img;
+  CdIo_t *p_cdio;
   vcd2_ext_pbc_status_t ret_status;
   
-  if (!vcdinfo_has_pbc(obj))
+  if (!vcdinfo_has_pbc(p_vcdinfo))
     return PBC_VCD2_NO_PBC;
 
-  if (vcdinfo_get_VCD_type(obj) != VCD_TYPE_VCD2)
+  if (vcdinfo_get_VCD_type(p_vcdinfo) != VCD_TYPE_VCD2)
     return PBC_VCD2_NOPE;
 
-  img = vcdinfo_get_cd_image(obj);
-  statbuf = iso9660_fs_stat (img, "EXT/LOT_X.VCD;1");
+  p_cdio = vcdinfo_get_cd_image(p_vcdinfo);
+  statbuf = iso9660_fs_stat (p_cdio, "EXT/LOT_X.VCD;1");
   if (NULL == statbuf)
     return PBC_VCD2_NO_LOT_X;
   if (statbuf->size != ISO_BLOCKSIZE * LOT_VCD_SIZE) {
     ret_status = PBC_VCD2_BAD_LOT_SIZE;
   } else {
     free(statbuf);
-    statbuf = iso9660_fs_stat (img, "EXT/PSD_X.VCD;1");
+    statbuf = iso9660_fs_stat (p_cdio, "EXT/PSD_X.VCD;1");
     if (NULL != statbuf) {
       ret_status = PBC_VCD2_EXT;
     } else {
@@ -229,23 +229,25 @@ _has_vcd2_ext_pbc (const vcdinfo_obj_t *obj)
 
 
 static void
-dump_lot (const vcdinfo_obj_t *obj, bool ext)
+dump_lot (const vcdinfo_obj_t *p_vcdinfo, bool ext)
 {
-  const LotVcd_t *lot = ext ? vcdinfo_get_lot_x(obj) : vcdinfo_get_lot(obj);
+  const LotVcd_t *lot = ext 
+    ? vcdinfo_get_lot_x(p_vcdinfo) : vcdinfo_get_lot(p_vcdinfo);
   
   unsigned n, tmp;
-  const uint16_t max_lid = vcdinfo_get_num_LIDs(obj);
-  unsigned int mult = vcdinfo_get_offset_mult(obj);
+  const uint16_t max_lid = vcdinfo_get_num_LIDs(p_vcdinfo);
+  unsigned int mult = vcdinfo_get_offset_mult(p_vcdinfo);
 
   if (!gl.show.no.header)
     fprintf (stdout, 
-             (vcdinfo_get_VCD_type(obj) == VCD_TYPE_SVCD 
-              || vcdinfo_get_VCD_type(obj) == VCD_TYPE_HQVCD)
+             (vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_SVCD 
+              || vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_HQVCD)
              ? "SVCD/LOT.SVD\n"
              : (ext ? "EXT/LOT_X.VCD\n": "VCD/LOT.VCD\n"));
 
   if (lot->reserved)
-    fprintf (stdout, " RESERVED = 0x%4.4x (should be 0x0000)\n", uint16_from_be (lot->reserved));
+    fprintf (stdout, " RESERVED = 0x%4.4x (should be 0x0000)\n", 
+             uint16_from_be (lot->reserved));
 
   for (n = 0; n < LOT_VCD_OFFSETS; n++)
     {
@@ -255,7 +257,8 @@ dump_lot (const vcdinfo_obj_t *obj, bool ext)
             fprintf (stdout, "warning, LID[1] should have offset = 0!\n");
 
           if (n >= max_lid)
-            fprintf (stdout, "warning, the following entry is greater than the maximum lid field in info\n");
+            fprintf (stdout, 
+                     "warning, the following entry is greater than the maximum lid field in info\n");
           fprintf (stdout, " LID[%d]: offset = %d (0x%4.4x)\n", 
                    n + 1, tmp * mult, tmp);
         }
@@ -265,7 +268,7 @@ dump_lot (const vcdinfo_obj_t *obj, bool ext)
 }
 
 static void
-dump_psd (const vcdinfo_obj_t *obj, bool ext)
+dump_psd (const vcdinfo_obj_t *p_vcdinfo, bool ext)
 {
   CdioListNode_t *node;
   unsigned n = 0;
@@ -273,16 +276,17 @@ dump_psd (const vcdinfo_obj_t *obj, bool ext)
   uint8_t *psd;
   CdioList_t *offset_list;
 
-  if (!obj) return;
+  if (!p_vcdinfo) return;
   
-  mult = vcdinfo_get_offset_mult(obj);
-  psd  = ext ? vcdinfo_get_psd_x(obj) : vcdinfo_get_psd(obj);
+  mult = vcdinfo_get_offset_mult(p_vcdinfo);
+  psd  = ext ? vcdinfo_get_psd_x(p_vcdinfo) : vcdinfo_get_psd(p_vcdinfo);
   offset_list = ext 
-    ? vcdinfo_get_offset_x_list(obj) : vcdinfo_get_offset_list(obj);
+    ? vcdinfo_get_offset_x_list(p_vcdinfo) 
+    : vcdinfo_get_offset_list(p_vcdinfo);
 
   fprintf (stdout, 
-           (vcdinfo_get_VCD_type(obj) == VCD_TYPE_SVCD 
-            || vcdinfo_get_VCD_type(obj) == VCD_TYPE_HQVCD)
+           (vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_SVCD 
+            || vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_HQVCD)
            ? "SVCD/PSD.SVD\n"
            : (ext ? "EXT/PSD_X.VCD\n": "VCD/PSD.VCD\n"));
 
@@ -309,14 +313,14 @@ dump_psd (const vcdinfo_obj_t *obj, bool ext)
                      "  NOI: %d | LID#: %d (rejected: %s)\n"
                      "  prev: %s | next: %s | return: %s\n"
                      "  playtime: %d/15s | wait: %ds | autowait: %ds\n",
-                     n, vcdinfo_ofs2str (obj, ofs->offset, ext),
+                     n, vcdinfo_ofs2str (p_vcdinfo, ofs->offset, ext),
                      pld->noi, lid, 
                      _vcd_bool_str(vcdinfo_is_rejected(uint16_from_be(pld->lid))),
-                     vcdinfo_ofs2str(obj, 
+                     vcdinfo_ofs2str(p_vcdinfo, 
                                      vcdinf_pld_get_prev_offset(pld), ext),
-                     vcdinfo_ofs2str(obj, 
+                     vcdinfo_ofs2str(p_vcdinfo, 
                                      vcdinf_pld_get_next_offset(pld), ext),
-                     vcdinfo_ofs2str(obj, 
+                     vcdinfo_ofs2str(p_vcdinfo, 
                                      vcdinf_pld_get_return_offset(pld),
                                      ext),
                      vcdinf_get_play_time(pld), vcdinf_get_wait_time (pld),
@@ -333,11 +337,16 @@ dump_psd (const vcdinfo_obj_t *obj, bool ext)
         case PSD_TYPE_END_LIST:
           {
             const PsdEndListDescriptor_t *d = (const void *) (psd + _rofs);
-            fprintf (stdout, " PSD[%.2d] (%s): end list descriptor\n", n, vcdinfo_ofs2str (obj, ofs->offset, ext));
-            if (vcdinfo_get_VCD_type(obj) != VCD_TYPE_VCD2)
+            fprintf (stdout, " PSD[%.2d] (%s): end list descriptor\n", n, 
+                     vcdinfo_ofs2str (p_vcdinfo, ofs->offset, ext));
+            if (vcdinfo_get_VCD_type(p_vcdinfo) != VCD_TYPE_VCD2)
               {
-                fprintf (stdout, "  next disc number: %d (if 0 stop PBC handling)\n", d->next_disc);
-                fprintf (stdout, "  change picture item: %s\n", vcdinfo_pin2str (uint16_from_be (d->change_pic)));
+                fprintf (stdout, 
+                         "  next disc number: %d (if 0 stop PBC handling)\n", 
+                         d->next_disc);
+                fprintf (stdout, 
+                         "  change picture item: %s\n", 
+                         vcdinfo_pin2str (uint16_from_be (d->change_pic)));
               }
             fprintf (stdout, "\n");
           }
@@ -358,19 +367,23 @@ dump_psd (const vcdinfo_obj_t *obj, bool ext)
                      "  default: %s | timeout: %s\n"
                      "  wait: %d secs | loop: %d (delayed: %s)\n"
                      "  play-item: %s\n",
-                     n, vcdinfo_ofs2str (obj, ofs->offset, ext),
+                     n, vcdinfo_ofs2str (p_vcdinfo, ofs->offset, ext),
                      (type == PSD_TYPE_EXT_SELECTION_LIST ? "extended " : ""),
                      *(uint8_t *) &d->flags,
                      vcdinf_get_num_selections(d),
                      vcdinf_get_bsn(d),
                      lid, 
                      _vcd_bool_str (vcdinf_psd_get_lid_rejected(d)),
-                     vcdinfo_ofs2str(obj, vcdinf_psd_get_prev_offset(d), ext),
-                     vcdinfo_ofs2str(obj, vcdinf_psd_get_next_offset(d), ext),
-                     vcdinfo_ofs2str(obj, vcdinf_psd_get_return_offset(d),ext),
-                     vcdinfo_ofs2str(obj, 
+                     vcdinfo_ofs2str(p_vcdinfo, 
+                                     vcdinf_psd_get_prev_offset(d),   ext),
+                     vcdinfo_ofs2str(p_vcdinfo, 
+                                     vcdinf_psd_get_next_offset(d),   ext),
+                     vcdinfo_ofs2str(p_vcdinfo, 
+                                     vcdinf_psd_get_return_offset(d), ext),
+                     vcdinfo_ofs2str(p_vcdinfo, 
                                      vcdinf_psd_get_default_offset(d),ext),
-                     vcdinfo_ofs2str(obj, vcdinf_get_timeout_offset(d), ext),
+                     vcdinfo_ofs2str(p_vcdinfo, vcdinf_get_timeout_offset(d),
+                                     ext),
                      vcdinf_get_timeout_time(d),
                      vcdinf_get_loop_count(d), 
                      _vcd_bool_str (vcdinf_has_jump_delay(d)),
@@ -378,7 +391,7 @@ dump_psd (const vcdinfo_obj_t *obj, bool ext)
 
             for (i = 0; i < vcdinf_get_num_selections(d); i++)
               fprintf (stdout, "  ofs[%d]: %s\n", i,
-                       vcdinfo_ofs2str (obj, 
+                       vcdinfo_ofs2str (p_vcdinfo, 
                                         vcdinf_psd_get_offset(d, i), 
                                         ext));
 
@@ -407,7 +420,7 @@ dump_psd (const vcdinfo_obj_t *obj, bool ext)
           break;
         default:
           fprintf (stdout, " PSD[%2d] (%s): unkown descriptor type (0x%2.2x)\n", 
-                   n, vcdinfo_ofs2str (obj, ofs->offset, ext), type);
+                   n, vcdinfo_ofs2str (p_vcdinfo, ofs->offset, ext), type);
 
           fprintf (stdout, "  hexdump: ");
           _hexdump (&psd[_rofs], 24);
@@ -420,16 +433,16 @@ dump_psd (const vcdinfo_obj_t *obj, bool ext)
 }
 
 static void
-dump_info (vcdinfo_obj_t *obj)
+dump_info (vcdinfo_obj_t *p_vcdinfo)
 {
-  const InfoVcd_t *info = vcdinfo_get_infoVcd(obj);
-  segnum_t num_segments = vcdinfo_get_num_segments(obj);
+  const InfoVcd_t *info = vcdinfo_get_infoVcd(p_vcdinfo);
+  segnum_t num_segments = vcdinfo_get_num_segments(p_vcdinfo);
   int n;
 
   if (!gl.show.no.header)
     fprintf (stdout, 
-             (vcdinfo_get_VCD_type(obj) == VCD_TYPE_SVCD 
-              || vcdinfo_get_VCD_type(obj) == VCD_TYPE_HQVCD)
+             (vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_SVCD 
+              || vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_HQVCD)
              ? "SVCD/INFO.SVD\n" 
              : "VCD/INFO.VCD\n");
 
@@ -440,11 +453,13 @@ dump_info (vcdinfo_obj_t *obj)
   if (gl.show.info.prof)
     fprintf (stdout, " system profile tag: 0x%2.2x\n", info->sys_prof_tag);
   if (gl.show.info.album)
-    fprintf (stdout, " album id: `%.16s'\n", vcdinfo_get_album_id(obj));
+    fprintf (stdout, " album id: `%.16s'\n", vcdinfo_get_album_id(p_vcdinfo));
   if (gl.show.info.count)
-    fprintf (stdout, " volume count: %d\n", vcdinfo_get_volume_count(obj));
+    fprintf (stdout, " volume count: %d\n", 
+             vcdinfo_get_volume_count(p_vcdinfo));
   if (gl.show.info.vol)
-    fprintf (stdout, " volume number: %d\n", vcdinfo_get_volume_num(obj));
+    fprintf (stdout, " volume number: %d\n", 
+             vcdinfo_get_volume_num(p_vcdinfo));
 
   if (gl.show.info.pal)
     {
@@ -461,8 +476,8 @@ dump_info (vcdinfo_obj_t *obj)
       
       fprintf (stdout, " flags:\n");
       fprintf (stdout, 
-               ((vcdinfo_get_VCD_type(obj) == VCD_TYPE_SVCD 
-                 || vcdinfo_get_VCD_type(obj) == VCD_TYPE_HQVCD) 
+               ((vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_SVCD 
+                 || vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_HQVCD) 
                 ? "  reserved1: %s\n"
                 : "  karaoke area: %s\n"),
                _vcd_bool_str (info->flags.reserved1));
@@ -480,12 +495,12 @@ dump_info (vcdinfo_obj_t *obj)
     fprintf (stdout, "  start track #2: %s\n", _vcd_bool_str (info->flags.use_track3));
   if (gl.show.info.pbc) {
     fprintf (stdout, 
-             ((vcdinfo_get_VCD_type(obj) == VCD_TYPE_SVCD 
-               || vcdinfo_get_VCD_type(obj) == VCD_TYPE_HQVCD) 
+             ((vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_SVCD 
+               || vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_HQVCD) 
               ? "  reserved2: %s\n"
               : "  extended pbc: %s\n"),
              _vcd_bool_str (info->flags.pbc_x));
-    switch (_has_vcd2_ext_pbc(obj))
+    switch (_has_vcd2_ext_pbc(p_vcdinfo))
       {
       case PBC_VCD2_NO_PBC:
         fprintf(stdout, " No PBC info.\n");
@@ -521,7 +536,7 @@ dump_info (vcdinfo_obj_t *obj)
     
   if (gl.show.info.ofm)
     fprintf (stdout, " offset multiplier: 0x%2.2x\n", 
-             vcdinfo_get_offset_mult(obj));
+             vcdinfo_get_offset_mult(p_vcdinfo));
 
   if (gl.show.info.lidn)
     fprintf (stdout, " maximum lid: %d\n",
@@ -533,7 +548,7 @@ dump_info (vcdinfo_obj_t *obj)
   if (gl.show.info.segs)
     for (n = 0; n < num_segments; n++)
       {
-        const lsn_t  lsn = vcdinfo_get_seg_lsn(obj, n);
+        const lsn_t  lsn = vcdinfo_get_seg_lsn(p_vcdinfo, n);
         msf_t  msf;
         char *psz_msf;
 
@@ -542,23 +557,23 @@ dump_info (vcdinfo_obj_t *obj)
         fprintf (stdout, " SEGMENT[%4.4d]: track# 0, LSN %6u "
                  "(MSF %s), %2u sectors\n",
                  n, (unsigned int) lsn, psz_msf, 
-                 (unsigned int) vcdinfo_get_seg_sector_count(obj, n));
+                 (unsigned int) vcdinfo_get_seg_sector_count(p_vcdinfo, n));
         free(psz_msf);
 
         fprintf (stdout, "   audio: %s, video: %s, continuation %s%s %s\n",
-                 vcdinfo_audio_type2str(obj,
-                                        vcdinfo_get_seg_audio_type(obj, n)),
-                 vcdinfo_video_type2str(obj, n),
+                 vcdinfo_audio_type2str(p_vcdinfo,
+                                        vcdinfo_get_seg_audio_type(p_vcdinfo, n)),
+                 vcdinfo_video_type2str(p_vcdinfo, n),
                  _vcd_bool_str (info->spi_contents[n].item_cont),
-                 (vcdinfo_get_VCD_type(obj) == VCD_TYPE_VCD2) 
+                 (vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_VCD2) 
                    ? "" : ",\n   SVCD subtitle (OGT) substream:",
-                 (vcdinfo_get_VCD_type(obj) == VCD_TYPE_VCD2) 
-                   ? "" : vcdinfo_ogt2str(obj, n));
+                 (vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_VCD2) 
+                   ? "" : vcdinfo_ogt2str(p_vcdinfo, n));
       }
   
   if (gl.show.info.start)
-    if (vcdinfo_get_VCD_type(obj) == VCD_TYPE_SVCD
-        || vcdinfo_get_VCD_type(obj) == VCD_TYPE_HQVCD)
+    if (vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_SVCD
+        || vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_HQVCD)
       for (n = 0; n < 5; n++)
         fprintf (stdout, " volume start time[%d]: %d secs\n", 
                  n, uint16_from_be (info->playing_time[n]));
