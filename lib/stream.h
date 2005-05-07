@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2000, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -92,8 +92,12 @@ typedef struct {
 VcdDataSource*
 vcd_data_source_new(void *user_data, const vcd_data_source_io_functions *funcs);
 
+/** 
+    read size*nmemb bytes from obj into ptr 
+*/
 long
-vcd_data_source_read(VcdDataSource* obj, void *ptr, long size, long nmemb);
+vcd_data_source_read(VcdDataSource* obj, /*out*/ void *ptr, long size, 
+                     long nmemb);
 
 long
 vcd_data_source_seek(VcdDataSource* obj, long offset);

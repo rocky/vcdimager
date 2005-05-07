@@ -32,7 +32,7 @@
 #include "data_structures.h"
 #include "pbc.h"
 
-struct vcdxml_t {
+typedef struct vcdxml_tag {
   char *comment; /* just a xml comment... */
 
   char *file_prefix;
@@ -70,7 +70,7 @@ struct vcdxml_t {
   CdioList_t *segment_list;
 
   CdioList_t *filesystem;
-};
+} vcdxml_t;
 
 #define OPT_LEADOUT_PREGAP          "leadout pregap"
 #define OPT_LEADOUT_PAUSE           "leadout pause"
@@ -131,11 +131,11 @@ struct filesystem_t
 };
 
 static inline void
-vcd_xml_init (struct vcdxml_t *p_vcdxml)
+vcd_xml_init (vcdxml_t *p_vcdxml)
 {
   vcd_assert (p_vcdxml != NULL);
 
-  memset (p_vcdxml, 0, sizeof (struct vcdxml_t));
+  memset (p_vcdxml, 0, sizeof (vcdxml_t));
 
   p_vcdxml->option_list = _cdio_list_new ();
   p_vcdxml->segment_list = _cdio_list_new ();
@@ -145,7 +145,7 @@ vcd_xml_init (struct vcdxml_t *p_vcdxml)
 }
 
 static inline void
-vcd_xml_destroy (struct vcdxml_t *p_vcdxml)
+vcd_xml_destroy (vcdxml_t *p_vcdxml)
 {
   vcd_assert (p_vcdxml != NULL);
   CdioListNode_t *p_node;

@@ -395,6 +395,8 @@ main (int argc, const char *argv[])
   time_t create_time;
   xmlDocPtr vcd_doc;
 
+  memset(&gl, 0, sizeof(gl));
+  
   vcd_xml_progname = "vcdxbuild";
 
   _init_xml ();
@@ -405,7 +407,7 @@ main (int argc, const char *argv[])
   gl.create_timestr = NULL;
 
   if (_do_cl (argc, argv))
-    return EXIT_FAILURE;
+    goto err_exit;
 
   if (gl.quiet_flag)
     vcd_xml_verbosity = VCD_LOG_WARN;
@@ -427,26 +429,26 @@ main (int argc, const char *argv[])
   if (!(vcd_doc = _xmlParseFile (gl.xml_fname)))
     {
       if (errno)
-	vcd_error ("error while parsing file `%s': %s",
+	vcd_warn ("error while parsing file `%s': %s",
 		   gl.xml_fname, strerror (errno));
       else
-	vcd_error ("parsing file `%s' failed", gl.xml_fname);
-      return EXIT_FAILURE;
+	vcd_warn ("parsing file `%s' failed", gl.xml_fname);
+      goto err_exit;
     }
 
   if (vcd_xml_dtd_loaded < 1)
     {
       vcd_error ("doctype declaration missing in `%s'", gl.xml_fname);
-      return EXIT_FAILURE;
+      goto err_exit;
     }
 
   {
     xmlNodePtr root;
     xmlNsPtr ns;
-    struct vcdxml_t obj;
+    vcdxml_t vcdxml;
     VcdImageSink *image_sink;
 
-    vcd_xml_init (&obj);
+    vcd_xml_init (&vcdxml);
     
     if (!(root = xmlDocGetRootElement (vcd_doc)))
       vcd_error ("XML document seems to be empty (no root node found)");
@@ -454,16 +456,16 @@ main (int argc, const char *argv[])
     if (!(ns = xmlSearchNsByHref (vcd_doc, root, (const xmlChar *) VIDEOCD_DTD_XMLNS)))
       vcd_error ("Namespace not found in document");
     
-    if (vcd_xml_parse (&obj, vcd_doc, root, ns))
+    if (vcd_xml_parse (&vcdxml, vcd_doc, root, ns))
       vcd_error ("parsing tree failed");
 
     if (!(image_sink = _create_sink (/* gl */)))
       {
         vcd_error ("failed to create image object");
-        exit (EXIT_FAILURE);
+        goto err_exit;
       }
 
-    obj.file_prefix = gl.file_prefix;
+    vcdxml.file_prefix = gl.file_prefix;
     
     create_time = time(NULL);
     if (gl.create_timestr != NULL) {
@@ -486,11 +488,21 @@ main (int argc, const char *argv[])
       }
     }
   
-    if (vcd_xml_master (&obj, image_sink, &create_time))
-      vcd_error ("building videocd failed");
+    if (vcd_xml_master (&vcdxml, image_sink, &create_time)) {
+      vcd_warn ("building videocd failed");
+      goto err_exit;
+    }
+    
+    
+    vcd_xml_destroy(&vcdxml);
   } 
 
   xmlFreeDoc (vcd_doc);
-
+  free(gl.xml_fname);
+  _cdio_list_free (gl.img_options, true);
   return EXIT_SUCCESS;
+ err_exit: 
+  free(gl.xml_fname);
+  _cdio_list_free (gl.img_options, true);
+  return EXIT_FAILURE;
 }

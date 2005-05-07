@@ -125,7 +125,7 @@ _get_elem_double (const char id[], xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
  */
 
 static bool
-_parse_option (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+_parse_option (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
   if (!xmlStrcmp (node->name, (const xmlChar *) "option")) 
     {
@@ -147,7 +147,7 @@ _parse_option (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns
  */
 
 static bool
-_parse_info (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+_parse_info (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
   xmlNodePtr cur;
 
@@ -176,7 +176,7 @@ _parse_info (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
  */
 
 static bool
-_parse_pvd (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+_parse_pvd (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
   xmlNodePtr cur;
 
@@ -201,7 +201,7 @@ _parse_pvd (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
  */
 
 static bool
-_parse_mpeg_segment (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+_parse_mpeg_segment (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
   struct segment_t *segment;
   xmlNodePtr cur;
@@ -239,7 +239,7 @@ _parse_mpeg_segment (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNs
 }
 
 static bool
-_parse_segments (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+_parse_segments (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
   xmlNodePtr cur;
 
@@ -317,7 +317,7 @@ _get_area_props (pbc_area_t **_area,
 }
 
 static bool
-_parse_pbc_selection (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+_parse_pbc_selection (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
   xmlNodePtr cur;
   pbc_t *_pbc;
@@ -410,7 +410,7 @@ _parse_pbc_selection (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlN
 }
 
 static bool
-_parse_pbc_playlist (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+_parse_pbc_playlist (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
   xmlNodePtr cur;
   pbc_t *_pbc;
@@ -454,7 +454,7 @@ _parse_pbc_playlist (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNs
 }
 
 static bool
-_parse_pbc_endlist (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+_parse_pbc_endlist (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
   xmlNodePtr cur;
   pbc_t *_pbc;
@@ -482,7 +482,7 @@ _parse_pbc_endlist (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsP
 }
 
 static bool
-_parse_pbc (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+_parse_pbc (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
   xmlNodePtr cur;
 
@@ -514,7 +514,7 @@ _parse_pbc (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
  */
 
 static bool
-_parse_mpeg_sequence (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+_parse_mpeg_sequence (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
   struct sequence_t *sequence;
   xmlNodePtr cur;
@@ -566,7 +566,7 @@ _parse_mpeg_sequence (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlN
 }
 
 static bool
-_parse_sequences (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+_parse_sequences (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
   xmlNodePtr cur;
 
@@ -595,7 +595,7 @@ _parse_sequences (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr
  */
 
 static bool
-_parse_file (struct vcdxml_t *obj, const char path[], xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+_parse_file (vcdxml_t *obj, const char path[], xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
   xmlNodePtr cur;
   char *_name = NULL;
@@ -645,7 +645,7 @@ _parse_file (struct vcdxml_t *obj, const char path[], xmlDocPtr doc, xmlNodePtr 
 }
 
 static bool
-_parse_folder (struct vcdxml_t *obj, const char path[], xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+_parse_folder (vcdxml_t *obj, const char path[], xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
   xmlNodePtr cur;
   char *new_path = NULL;
@@ -685,7 +685,7 @@ _parse_folder (struct vcdxml_t *obj, const char path[], xmlDocPtr doc, xmlNodePt
 	  
 
 	  strcat (new_path, "/");
-    
+	  
 	  rc = false;
 	  
 	  /* fixme, free _tmp?? */
@@ -700,15 +700,19 @@ _parse_folder (struct vcdxml_t *obj, const char path[], xmlDocPtr doc, xmlNodePt
       if (new_path == NULL)
 	rc = true;
 
-      if (rc)
+      if (rc) {
+	free(new_path);
 	return rc;
+      }
+      
     }
 
+  free(new_path);
   return false;
 }
 
 static bool
-_parse_filesystem (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+_parse_filesystem (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
   xmlNodePtr cur;
 
@@ -766,7 +770,7 @@ _type_id_by_str (const char class[], const char version[])
 }
 
 static bool
-_parse_videocd (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+_parse_videocd (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
   xmlNodePtr cur;
   char *_class = NULL;
@@ -817,7 +821,7 @@ _parse_videocd (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr n
  */
 
 bool
-vcd_xml_parse (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+vcd_xml_parse (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
   vcd_assert (obj != NULL);
   vcd_assert (node != NULL);

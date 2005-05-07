@@ -24,7 +24,7 @@
 #include "vcdxml.h"
 #include <libxml/tree.h>
 
-bool vcd_xml_parse (struct vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns);
+bool vcd_xml_parse (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns);
 
 #endif /* __VCD_XML_PARSE_H__ */
 

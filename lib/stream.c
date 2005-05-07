@@ -216,6 +216,9 @@ vcd_data_source_new(void *user_data, const vcd_data_source_io_functions *funcs)
   return new_obj;
 }
 
+/** 
+    read size*nmemb bytes from obj into ptr 
+*/
 long
 vcd_data_source_read(VcdDataSource* obj, void *ptr, long size, long nmemb)
 {

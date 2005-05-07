@@ -340,7 +340,7 @@ _vcd_obj_remove_mpeg_track (VcdObj *obj, int track_id)
 
   vcd_mpeg_source_destroy (track->source, true);
 
-  length = track->info->packets;
+  length = track->info ? track->info->packets : 0;
   length += obj->track_pregap + obj->track_front_margin + 0 + obj->track_rear_margin;
 
   /* fixup offsets */

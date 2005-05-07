@@ -134,7 +134,7 @@ _parse_file_arg (const char *arg, char **fname1, char **fname2)
 }
 
 static void
-_add_dir (struct vcdxml_t *obj, const char pathname[])
+_add_dir (vcdxml_t *obj, const char pathname[])
 {
   vcd_assert (pathname != NULL);
 
@@ -150,7 +150,7 @@ _add_dir (struct vcdxml_t *obj, const char pathname[])
 }
 
 static void
-_add_dirtree (struct vcdxml_t *obj, const char pathname[], 
+_add_dirtree (vcdxml_t *obj, const char pathname[], 
           const char iso_pathname[])
 {
   DIR *dir = NULL;
@@ -233,7 +233,7 @@ _sequence_str (int n)
 int
 main (int argc, const char *argv[])
 {
-  struct vcdxml_t obj;
+  vcdxml_t obj;
   int n;
   
   char *xml_fname = strdup (DEFAULT_XML_FNAME);

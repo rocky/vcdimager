@@ -69,7 +69,7 @@ static int _verbose_flag = 0;
 static int _quiet_flag = 0;
 
 static void
-_register_file (struct vcdxml_t *p_vcdxml, const char *pathname,
+_register_file (vcdxml_t *p_vcdxml, const char *pathname,
 		iso9660_stat_t const *statbuf)
 {
   uint16_t xa_attr = uint16_from_be (statbuf->xa.attributes);
@@ -142,7 +142,7 @@ _register_file (struct vcdxml_t *p_vcdxml, const char *pathname,
 }
 
 static int
-_parse_isofs_r (struct vcdxml_t *p_vcdxml, CdIo_t *p_cdio, 
+_parse_isofs_r (vcdxml_t *p_vcdxml, CdIo_t *p_cdio, 
 		const char pathname[])
 { 
   CdioList_t *entlist = iso9660_fs_readdir (p_cdio, pathname, true);
@@ -190,13 +190,13 @@ _parse_isofs_r (struct vcdxml_t *p_vcdxml, CdIo_t *p_cdio,
 }
 
 static int
-_parse_isofs (struct vcdxml_t *p_vcdxml, CdIo_t *p_cdio)
+_parse_isofs (vcdxml_t *p_vcdxml, CdIo_t *p_cdio)
 {
   return _parse_isofs_r (p_vcdxml, p_cdio, "/");
 }
 
 static int
-_parse_pvd (struct vcdxml_t *p_vcdxml, CdIo_t *p_cdio)
+_parse_pvd (vcdxml_t *p_vcdxml, CdIo_t *p_cdio)
 {
   iso9660_pvd_t pvd;
 
@@ -217,7 +217,7 @@ _parse_pvd (struct vcdxml_t *p_vcdxml, CdIo_t *p_cdio)
 }
 
 static int
-_parse_info (struct vcdxml_t *p_vcdxml, CdIo_t *p_cdio)
+_parse_info (vcdxml_t *p_vcdxml, CdIo_t *p_cdio)
 {
   InfoVcd_t info;
 
@@ -293,7 +293,7 @@ _parse_info (struct vcdxml_t *p_vcdxml, CdIo_t *p_cdio)
 }
 
 static int
-_parse_entries (struct vcdxml_t *p_vcdxml, CdIo_t *p_cdio)
+_parse_entries (vcdxml_t *p_vcdxml, CdIo_t *p_cdio)
 {
   EntriesVcd_t entries;
   int idx;
@@ -773,7 +773,7 @@ _visit_lot (pbc_ctx_t *p_pbc_ctx)
 }
 
 static int
-_parse_pbc (struct vcdxml_t *p_vcdxml, CdIo_t *p_cdio, bool no_ext_psd)
+_parse_pbc (vcdxml_t *p_vcdxml, CdIo_t *p_cdio, bool no_ext_psd)
 {
   int n;
   pbc_ctx_t _pbc_ctx;
@@ -878,7 +878,7 @@ _parse_pbc (struct vcdxml_t *p_vcdxml, CdIo_t *p_cdio, bool no_ext_psd)
 }
 
 static int
-_rip_isofs (struct vcdxml_t *p_vcdxml, CdIo_t *p_cdio)
+_rip_isofs (vcdxml_t *p_vcdxml, CdIo_t *p_cdio)
 {
   CdioListNode_t *node;
   
@@ -934,7 +934,7 @@ _rip_isofs (struct vcdxml_t *p_vcdxml, CdIo_t *p_cdio)
 }
 
 static int
-_rip_segments (struct vcdxml_t *p_vcdxml, CdIo_t *p_cdio)
+_rip_segments (vcdxml_t *p_vcdxml, CdIo_t *p_cdio)
 {
   CdioListNode_t *node;
   lsn_t start_extent;
@@ -1030,7 +1030,7 @@ _rip_segments (struct vcdxml_t *p_vcdxml, CdIo_t *p_cdio)
 }
 
 static int
-_rip_sequences (struct vcdxml_t *p_vcdxml, CdIo_t *p_cdio, int i_track)
+_rip_sequences (vcdxml_t *p_vcdxml, CdIo_t *p_cdio, int i_track)
 {
   CdioListNode_t *node;
   int counter=1;
@@ -1260,7 +1260,7 @@ int
 main (int argc, const char *argv[])
 {
   CdIo_t *img_src = NULL;
-  struct vcdxml_t vcdxml;
+  vcdxml_t vcdxml;
 
   /* cl params */
   char *xml_fname = NULL;

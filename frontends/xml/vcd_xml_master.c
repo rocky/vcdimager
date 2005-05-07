@@ -63,8 +63,9 @@ mk_dsource (const char prefix[], const char pathname[])
   return vcd_data_source_new_stdio (pathname);
 }
 
-bool vcd_xml_master (const struct vcdxml_t *obj, VcdImageSink *image_sink,
-		     time_t *create_time)
+bool 
+vcd_xml_master (const vcdxml_t *p_vcdxml, VcdImageSink *image_sink, 
+		time_t *create_time)
 {
   VcdObj *_vcd;
   CdioListNode_t *node;
@@ -72,33 +73,33 @@ bool vcd_xml_master (const struct vcdxml_t *obj, VcdImageSink *image_sink,
   bool _relaxed_aps = false;
   bool _update_scan_offsets = false;
 
-  vcd_assert (obj != NULL);
+  vcd_assert (p_vcdxml != NULL);
 
-  _vcd = vcd_obj_new (obj->vcd_type);
+  _vcd = vcd_obj_new (p_vcdxml->vcd_type);
 
   if (vcd_xml_check_mode)
     vcd_obj_set_param_str (_vcd, VCD_PARM_PREPARER_ID, 
 			   "GNU VCDIMAGER CHECK MODE");
 
-  if (obj->info.album_id)
-    vcd_obj_set_param_str (_vcd, VCD_PARM_ALBUM_ID, obj->info.album_id);
+  if (p_vcdxml->info.album_id)
+    vcd_obj_set_param_str (_vcd, VCD_PARM_ALBUM_ID, p_vcdxml->info.album_id);
 
-  vcd_obj_set_param_uint (_vcd, VCD_PARM_VOLUME_NUMBER, obj->info.volume_number);
-  vcd_obj_set_param_uint (_vcd, VCD_PARM_VOLUME_COUNT, obj->info.volume_count);
-  vcd_obj_set_param_uint (_vcd, VCD_PARM_RESTRICTION, obj->info.restriction);
-  vcd_obj_set_param_bool (_vcd, VCD_PARM_NEXT_VOL_SEQ2, obj->info.use_sequence2);
-  vcd_obj_set_param_bool (_vcd, VCD_PARM_NEXT_VOL_LID2, obj->info.use_lid2);
+  vcd_obj_set_param_uint (_vcd, VCD_PARM_VOLUME_NUMBER, p_vcdxml->info.volume_number);
+  vcd_obj_set_param_uint (_vcd, VCD_PARM_VOLUME_COUNT, p_vcdxml->info.volume_count);
+  vcd_obj_set_param_uint (_vcd, VCD_PARM_RESTRICTION, p_vcdxml->info.restriction);
+  vcd_obj_set_param_bool (_vcd, VCD_PARM_NEXT_VOL_SEQ2, p_vcdxml->info.use_sequence2);
+  vcd_obj_set_param_bool (_vcd, VCD_PARM_NEXT_VOL_LID2, p_vcdxml->info.use_lid2);
 
-  if (obj->pvd.volume_id)
-    vcd_obj_set_param_str (_vcd, VCD_PARM_VOLUME_ID, obj->pvd.volume_id);
+  if (p_vcdxml->pvd.volume_id)
+    vcd_obj_set_param_str (_vcd, VCD_PARM_VOLUME_ID, p_vcdxml->pvd.volume_id);
 
-  if (obj->pvd.publisher_id)
-    vcd_obj_set_param_str (_vcd, VCD_PARM_PUBLISHER_ID, obj->pvd.publisher_id);
+  if (p_vcdxml->pvd.publisher_id)
+    vcd_obj_set_param_str (_vcd, VCD_PARM_PUBLISHER_ID, p_vcdxml->pvd.publisher_id);
 
-  if (obj->pvd.application_id)
-    vcd_obj_set_param_str (_vcd, VCD_PARM_APPLICATION_ID, obj->pvd.application_id);
+  if (p_vcdxml->pvd.application_id)
+    vcd_obj_set_param_str (_vcd, VCD_PARM_APPLICATION_ID, p_vcdxml->pvd.application_id);
 
-  _CDIO_LIST_FOREACH (node, obj->option_list)
+  _CDIO_LIST_FOREACH (node, p_vcdxml->option_list)
     {
       const struct option_t *_option = _cdio_list_node_data (node);
 
@@ -194,7 +195,7 @@ bool vcd_xml_master (const struct vcdxml_t *obj, VcdImageSink *image_sink,
 	}
     }  
 
-  _CDIO_LIST_FOREACH (node, obj->pbc_list)
+  _CDIO_LIST_FOREACH (node, p_vcdxml->pbc_list)
     {
       pbc_t *_pbc = _cdio_list_node_data (node);
 
@@ -203,13 +204,14 @@ bool vcd_xml_master (const struct vcdxml_t *obj, VcdImageSink *image_sink,
       vcd_obj_append_pbc_node (_vcd, _pbc);
     }
 
-  _CDIO_LIST_FOREACH (node, obj->filesystem)
+  _CDIO_LIST_FOREACH (node, p_vcdxml->filesystem)
     {
       struct filesystem_t *dentry = _cdio_list_node_data (node);
       
       if (dentry->file_src) 
 	{
-	  VcdDataSource *_source = mk_dsource (obj->file_prefix, dentry->file_src);
+	  VcdDataSource *_source = mk_dsource (p_vcdxml->file_prefix, 
+					       dentry->file_src);
 	  
 	  vcd_assert (_source != NULL);
 
@@ -221,39 +223,41 @@ bool vcd_xml_master (const struct vcdxml_t *obj, VcdImageSink *image_sink,
     }
 
   idx = 0;
-  _CDIO_LIST_FOREACH (node, obj->segment_list)
+  _CDIO_LIST_FOREACH (node, p_vcdxml->segment_list)
     {
-      struct segment_t *segment = _cdio_list_node_data (node);
-      VcdDataSource *_source = mk_dsource (obj->file_prefix, segment->src);
-      CdioListNode_t *node2;
+      struct segment_t *p_segment = _cdio_list_node_data (node);
+      VcdDataSource *_source = mk_dsource (p_vcdxml->file_prefix, 
+					   p_segment->src);
+      CdioListNode_t *p_node2;
       VcdMpegSource *_mpeg_src;
 
-      vcd_debug ("adding segment #%d, %s", idx, segment->src);
+      vcd_debug ("adding segment #%d, %s", idx, p_segment->src);
 
       vcd_assert (_source != NULL);
 
       _mpeg_src = vcd_mpeg_source_new (_source);
 
       vcd_mpeg_source_scan (_mpeg_src, !_relaxed_aps, _update_scan_offsets,
-			    vcd_xml_show_progress ? vcd_xml_scan_progress_cb : NULL,
-			    segment->id);
+			    vcd_xml_show_progress 
+			    ? vcd_xml_scan_progress_cb : NULL,
+			    p_segment->id);
 
-      vcd_obj_append_segment_play_item (_vcd, _mpeg_src, segment->id);
+      vcd_obj_append_segment_play_item (_vcd, _mpeg_src, p_segment->id);
       
-      _CDIO_LIST_FOREACH (node2, segment->autopause_list)
+      _CDIO_LIST_FOREACH (p_node2, p_segment->autopause_list)
 	{
-	  double *_ap_ts = _cdio_list_node_data (node2);
+	  double *_ap_ts = _cdio_list_node_data (p_node2);
 
-	  vcd_obj_add_segment_pause (_vcd, segment->id, *_ap_ts, NULL);
+	  vcd_obj_add_segment_pause (_vcd, p_segment->id, *_ap_ts, NULL);
 	}
 
       idx++;
     }
 
-  vcd_debug ("sequence count %d", _cdio_list_length (obj->sequence_list));
+  vcd_debug ("sequence count %d", _cdio_list_length (p_vcdxml->sequence_list));
   
   idx = 0;
-  _CDIO_LIST_FOREACH (node, obj->sequence_list)
+  _CDIO_LIST_FOREACH (node, p_vcdxml->sequence_list)
     {
       struct sequence_t *sequence = _cdio_list_node_data (node);
       VcdDataSource *data_source;
@@ -262,23 +266,25 @@ bool vcd_xml_master (const struct vcdxml_t *obj, VcdImageSink *image_sink,
 
       vcd_debug ("adding sequence #%d, %s", idx, sequence->src);
 
-      data_source = mk_dsource (obj->file_prefix, sequence->src);
+      data_source = mk_dsource (p_vcdxml->file_prefix, sequence->src);
       vcd_assert (data_source != NULL);
 
       _mpeg_src = vcd_mpeg_source_new (data_source);
 
       vcd_mpeg_source_scan (_mpeg_src, !_relaxed_aps, _update_scan_offsets,
-			    vcd_xml_show_progress ? vcd_xml_scan_progress_cb : NULL,
+			    (vcd_xml_show_progress)
+			    ? vcd_xml_scan_progress_cb : NULL,
 			    sequence->id);
 
-      vcd_obj_append_sequence_play_item (_vcd, _mpeg_src,
-					 sequence->id, sequence->default_entry_id);
+      vcd_obj_append_sequence_play_item (_vcd, _mpeg_src, sequence->id, 
+					 sequence->default_entry_id);
 
       _CDIO_LIST_FOREACH (node2, sequence->entry_point_list)
 	{
 	  struct entry_point_t *entry = _cdio_list_node_data (node2);
 
-	  vcd_obj_add_sequence_entry (_vcd, sequence->id, entry->timestamp, entry->id);
+	  vcd_obj_add_sequence_entry (_vcd, sequence->id, entry->timestamp, 
+				      entry->id);
 	}
 
       _CDIO_LIST_FOREACH (node2, sequence->autopause_list)
@@ -299,8 +305,8 @@ bool vcd_xml_master (const struct vcdxml_t *obj, VcdImageSink *image_sink,
 
     sectors = vcd_obj_begin_output (_vcd);
 
-    vcd_obj_write_image (_vcd, image_sink, 
-			 vcd_xml_show_progress ? vcd_xml_write_progress_cb : NULL, 
+    vcd_obj_write_image (_vcd, image_sink, vcd_xml_show_progress 
+			 ? vcd_xml_write_progress_cb : NULL, 
 			 NULL, &_vcd_time);
 
     vcd_obj_end_output (_vcd);

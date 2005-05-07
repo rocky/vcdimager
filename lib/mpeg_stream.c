@@ -152,7 +152,7 @@ vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps, bool fix_scan_info,
       int read_len = MIN (sizeof (buf), (length - pos));
       int pkt_len;
 
-      vcd_data_source_read (obj->data_source, buf, read_len, 1);
+      read_len = vcd_data_source_read (obj->data_source, buf, read_len, 1);
 
       pkt_len = vcd_mpeg_parse_packet (buf, read_len, true, &state);
 

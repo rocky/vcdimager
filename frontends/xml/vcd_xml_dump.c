@@ -150,7 +150,7 @@ _ref_area_helper (xmlNodePtr cur, xmlNsPtr ns, const char tag_id[], const char p
 }
 
 static void
-_make_xml (struct vcdxml_t *obj, const char xml_fname[])
+_make_xml (vcdxml_t *obj, const char xml_fname[])
 {
   xmlDtdPtr dtd;
   xmlDocPtr doc;
@@ -500,7 +500,7 @@ _make_xml (struct vcdxml_t *obj, const char xml_fname[])
 }
 
 int
-vcd_xml_dump (struct vcdxml_t *obj, const char xml_fname[])
+vcd_xml_dump (vcdxml_t *obj, const char xml_fname[])
 {
   _make_xml (obj, xml_fname);
   

@@ -23,7 +23,7 @@
 
 #include "vcdxml.h"
 
-int vcd_xml_dump (struct vcdxml_t *obj, const char xml_fname[]);
+int vcd_xml_dump (vcdxml_t *obj, const char xml_fname[]);
 
 /*!
    Print command line used as a XML comment. Start is either 0 or 
