@@ -857,7 +857,7 @@ set_scandata_dat (VcdObj *obj, void *buf)
 
   /* struct 1 */
   strncpy (scandata_dat1->file_id, SCANDATA_FILE_ID, 
-           sizeof (SCANDATA_FILE_ID)-1);
+           sizeof (scandata_dat1->file_id));
   
   scandata_dat1->version = SCANDATA_VERSION_SVCD;
   scandata_dat1->reserved = 0x00;
