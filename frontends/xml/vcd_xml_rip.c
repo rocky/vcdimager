@@ -579,7 +579,8 @@ _pbc_node_read (const pbc_ctx_t *_ctx, unsigned offset)
 	if (d->type == PSD_TYPE_EXT_SELECTION_LIST
 	    || d->flags.SelectionAreaFlag)
 	  {
-	    PsdSelectionListDescriptorExtended *d2 = (void *) &d->ofs[d->nos];
+	    PsdSelectionListDescriptorExtended_t *d2 = 
+	      (void *) &d->ofs[d->nos];
 
 	    p_pbc->prev_area = calloc(1, sizeof (pbc_area_t));
 	    p_pbc->next_area = calloc(1, sizeof (pbc_area_t));
@@ -609,7 +610,7 @@ _pbc_node_read (const pbc_ctx_t *_ctx, unsigned offset)
     case PSD_TYPE_END_LIST:
       p_pbc = vcd_pbc_new (PBC_END);
       {
-	const PsdEndListDescriptor *d = (const void *) _buf;
+	const PsdEndListDescriptor_t *d = (const void *) _buf;
 	
 	p_pbc->next_disc = d->next_disc;
 	p_pbc->image_id = _xstrdup (_pin2id (uint16_from_be (d->change_pic)));

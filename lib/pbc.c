@@ -284,11 +284,11 @@ _vcd_pbc_node_length (const VcdObj *obj, const pbc_t *p_pbc, bool extended)
       retval = __cd_offsetof (PsdSelectionListDescriptor_t, ofs[n]);
 
       if (extended || _vcd_obj_has_cap_p (obj, _CAP_4C_SVCD))
-	retval += __cd_offsetof (PsdSelectionListDescriptorExtended, area[n]);
+	retval += __cd_offsetof (PsdSelectionListDescriptorExtended_t, area[n]);
       break;
       
     case PBC_END:
-      retval = sizeof (PsdEndListDescriptor);
+      retval = sizeof (PsdEndListDescriptor_t);
       break;
 
     default:
@@ -572,7 +572,7 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *p_pbc, void *buf,
 	_md->bsn = p_pbc->bsn;
 	_md->nos = _nos;
 
-	vcd_assert (sizeof (PsdSelectionListFlags) == 1);
+	vcd_assert (sizeof (PsdSelectionListFlags_t) == 1);
 
 	/* selection flags */
 	if (_vcd_obj_has_cap_p (obj, _CAP_4C_SVCD))
@@ -719,7 +719,7 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *p_pbc, void *buf,
 
 	if (extended || _vcd_obj_has_cap_p (obj, _CAP_4C_SVCD))
 	  {
-	    PsdSelectionListDescriptorExtended *_md2;
+	    PsdSelectionListDescriptorExtended_t *_md2;
 	    CdioListNode_t *node;
 	    int n;
 	    
@@ -751,7 +751,7 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *p_pbc, void *buf,
       
     case PBC_END:
       {
-	PsdEndListDescriptor *_md = buf;
+	PsdEndListDescriptor_t *_md = buf;
 
 	_md->type = PSD_TYPE_END_LIST;
 

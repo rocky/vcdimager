@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2001, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -73,28 +73,28 @@ int main (int argc, const char *argv[])
 
   /* vcd_files_private.h */
   CHECK_SIZEOF(EntriesVcd_t);
-  CHECK_SIZEOF(InfoStatusFlags);
-  CHECK_SIZEOF(InfoSpiContents);
+  CHECK_SIZEOF(InfoStatusFlags_t);
+  CHECK_SIZEOF(InfoSpiContents_t);
   CHECK_SIZEOF(InfoVcd_t);
   CHECK_SIZEOF(LotVcd_t);
 
-  CHECK_SIZEOF(PsdEndListDescriptor);
-  CHECK_SIZEOF(PsdSelectionListFlags);
+  CHECK_SIZEOF(PsdEndListDescriptor_t);
+  CHECK_SIZEOF(PsdSelectionListFlags_t);
   CHECK_SIZEOF(PsdSelectionListDescriptor_t);
-  CHECK_SIZEOF(PsdSelectionListDescriptorExtended);
-  CHECK_SIZEOF(PsdCommandListDescriptor);
+  CHECK_SIZEOF(PsdSelectionListDescriptorExtended_t);
+  CHECK_SIZEOF(PsdCommandListDescriptor_t);
   CHECK_SIZEOF(PsdPlayListDescriptor_t);
-  CHECK_SIZEOF(SVDTrackContent);
-  CHECK_SIZEOF(TracksSVD);
-  CHECK_SIZEOF(TracksSVD2);
-  CHECK_SIZEOF(TracksSVD_v30);
-  CHECK_SIZEOF(SearchDat);
-  CHECK_SIZEOF(SpicontxSvd);
-  CHECK_SIZEOF(ScandataDat_v2);
-  CHECK_SIZEOF(ScandataDat1);
-  CHECK_SIZEOF(ScandataDat2);
-  CHECK_SIZEOF(ScandataDat3);
-  CHECK_SIZEOF(ScandataDat4);
+  CHECK_SIZEOF(SVDTrackContent_t);
+  CHECK_SIZEOF(TracksSVD_t);
+  CHECK_SIZEOF(TracksSVD2_t);
+  CHECK_SIZEOF(TracksSVD_v30_t);
+  CHECK_SIZEOF(SearchDat_t);
+  CHECK_SIZEOF(SpicontxSvd_t);
+  CHECK_SIZEOF(ScandataDat_v2_t);
+  CHECK_SIZEOF(ScandataDat1_t);
+  CHECK_SIZEOF(ScandataDat2_t);
+  CHECK_SIZEOF(ScandataDat3_t);
+  CHECK_SIZEOF(ScandataDat4_t);
 
   /* vcd_cd_sector_private.h */
   CHECK_SIZEOF(raw_cd_sector_t);

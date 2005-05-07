@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2001, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
 #include <libvcd/files_private.h>
 
 const static struct {
-  InfoSpiContents bitfield;
+  InfoSpiContents_t bitfield;
   uint8_t intval;
 } InfoSpiContents_table[256] = {
   { { .audio_type = 0, .video_type = 0, .item_cont = 0, .ogt = 0 }, 0x00 },
@@ -298,7 +298,7 @@ main (int argc, const char *argv[])
   for (i = 0; i < 256; ++i)
     {
       const union {
-	InfoSpiContents bf;
+	InfoSpiContents_t bf;
 	uint8_t byte;
       } *u = (void *) &InfoSpiContents_table[i].bitfield;
 

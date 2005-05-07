@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2000, 2004 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2000, 2004, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -36,6 +36,12 @@
 #include <libvcd/types.h>
 #include <libvcd/logging.h>
 
+const char TRACKS_SVD_FILE_ID[] = {'T', 'R', 'A', 'C', 'K', 'S', 'V', 'D'};
+const char SCANDATA_FILE_ID[] = {'S', 'C', 'A', 'N', '_', 'V', 'C', 'D'};
+const char SEARCH_FILE_ID[] = {'S', 'E', 'A', 'R', 'C', 'H', 'S', 'V'};
+const char SPICONTX_FILE_ID[] = {'S', 'P', 'I', 'C', 'O', 'N', 'S', 'V'};
+
+
 /* FIXME! Make this local */
 #include <libvcd/files_private.h>
 
@@ -47,6 +53,7 @@
 #include "util.h"
 
 static const char _rcsid[] = "$Id$";
+
 
 inline static bool
 _pal_p (const struct vcd_mpeg_stream_vid_info *_info)
@@ -418,8 +425,8 @@ set_info_vcd(VcdObj *obj, void *buf)
           _CDIO_LIST_FOREACH (node, obj->mpeg_segment_list)
             {
               mpeg_segment_t *segment = _cdio_list_node_data (node);
-              unsigned idx;
-              InfoSpiContents contents = { 0, };
+              unsigned int idx;
+              InfoSpiContents_t contents = { 0, };
 
               contents.video_type = 
                 _derive_vid_type (segment->info,
@@ -464,7 +471,7 @@ static void
 set_tracks_svd_v30 (VcdObj *obj, void *buf)
 {
   char tracks_svd_buf[ISO_BLOCKSIZE] = { 0, };
-  TracksSVD_v30 *tracks_svd = (void *) tracks_svd_buf;
+  TracksSVD_v30_t *tracks_svd = (void *) tracks_svd_buf;
   CdioListNode_t *node;
   double playtime;
   int n;
@@ -516,8 +523,8 @@ void
 set_tracks_svd (VcdObj *obj, void *buf)
 {
   char tracks_svd[ISO_BLOCKSIZE] = { 0, };
-  TracksSVD *tracks_svd1 = (void *) tracks_svd;
-  TracksSVD2 *tracks_svd2;
+  TracksSVD_t    *tracks_svd1 = (void *) tracks_svd;
+  TracksSVD2_t   *tracks_svd2;
   CdioListNode_t *node;
   int n;
 
@@ -529,7 +536,7 @@ set_tracks_svd (VcdObj *obj, void *buf)
       return;
     }
 
-  vcd_assert (sizeof (SVDTrackContent) == 1);
+  vcd_assert (sizeof (SVDTrackContent_t) == 1);
 
   strncpy (tracks_svd1->file_id, TRACKS_SVD_FILE_ID, 
            sizeof (TRACKS_SVD_FILE_ID)-1);
@@ -621,7 +628,7 @@ _get_scanpoint_count (const VcdObj *obj)
 uint32_t 
 get_search_dat_size (const VcdObj *obj)
 {
-  return sizeof (SearchDat) 
+  return sizeof (SearchDat_t) 
     + (_get_scanpoint_count (obj) * sizeof (msf_t));
 }
 
@@ -713,7 +720,7 @@ set_search_dat (VcdObj *obj, void *buf)
 {
   CdioList_t *scantable;
   CdioListNode_t *node;
-  SearchDat search_dat;
+  SearchDat_t search_dat;
   unsigned n;
 
   vcd_assert (_vcd_obj_has_cap_p (obj, _CAP_4C_SVCD));
@@ -734,7 +741,7 @@ set_search_dat (VcdObj *obj, void *buf)
   n = 0;
   _CDIO_LIST_FOREACH (node, scantable)
     {
-      SearchDat *search_dat2 = buf;
+      SearchDat_t *search_dat2 = buf;
       uint32_t sect = *(uint32_t *) _cdio_list_node_data (node);
           
       cdio_lba_to_msf(cdio_lsn_to_lba(sect), &(search_dat2->points[n]));
@@ -802,7 +809,7 @@ get_scandata_dat_size (const VcdObj *obj)
   uint32_t retval = 0;
 
   /* struct 1 */
-  retval += sizeof (ScandataDat1);
+  retval += sizeof (ScandataDat1_t);
   retval += sizeof (msf_t) * _cdio_list_length (obj->mpeg_track_list);
 
   /* struct 2 */
@@ -811,7 +818,7 @@ get_scandata_dat_size (const VcdObj *obj)
   retval += sizeof (uint16_t) * 0;
 
   /* struct 3 */
-  retval += sizeof (ScandataDat3);
+  retval += sizeof (ScandataDat3_t);
   retval += (sizeof (uint8_t) + sizeof (uint16_t)) * _cdio_list_length (obj->mpeg_track_list);
 
   /* struct 4 */
@@ -835,17 +842,17 @@ set_scandata_dat (VcdObj *obj, void *buf)
 {
   const unsigned tracks = _cdio_list_length (obj->mpeg_track_list);
 
-  ScandataDat1 *scandata_dat1 = (ScandataDat1 *) buf;
-  ScandataDat2 *scandata_dat2 = 
-    (ScandataDat2 *) &(scandata_dat1->cum_playtimes[tracks]);
-  ScandataDat3 *scandata_dat3 =
-    (ScandataDat3 *) &(scandata_dat2->spi_indexes[0]);
-  ScandataDat4 *scandata_dat4 = 
-    (ScandataDat4 *) &(scandata_dat3->mpeg_track_offsets[tracks]);
+  ScandataDat1_t *scandata_dat1 = (ScandataDat1_t *) buf;
+  ScandataDat2_t *scandata_dat2 = 
+    (ScandataDat2_t *) &(scandata_dat1->cum_playtimes[tracks]);
+  ScandataDat3_t *scandata_dat3 =
+    (ScandataDat3_t *) &(scandata_dat2->spi_indexes[0]);
+  ScandataDat4_t *scandata_dat4 = 
+    (ScandataDat4_t *) &(scandata_dat3->mpeg_track_offsets[tracks]);
 
   const uint16_t _begin_offset =
-    __cd_offsetof (ScandataDat3, mpeg_track_offsets[tracks])
-    - __cd_offsetof (ScandataDat3, mpeg_track_offsets);
+    __cd_offsetof (ScandataDat3_t, mpeg_track_offsets[tracks])
+    - __cd_offsetof (ScandataDat3_t, mpeg_track_offsets);
 
   CdioListNode_t *node;
   unsigned n;

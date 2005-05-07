@@ -1268,13 +1268,13 @@ vcdinfo_get_track(const vcdinfo_obj_t *p_obj, const unsigned int entry_num)
 unsigned int
 vcdinfo_get_track_audio_type(const vcdinfo_obj_t *p_obj, track_t i_track)
 {
-  TracksSVD *tracks;
-  TracksSVD2 *tracks2;
+  TracksSVD_t *tracks;
+  TracksSVD2_t *tracks2;
   if ( !p_obj || !&(p_obj->info) ) return VCDINFO_INVALID_AUDIO_TYPE;
   tracks = p_obj->tracks_buf;
 
   if ( NULL == tracks ) return 0;
-  tracks2 = (TracksSVD2 *) &(tracks->playing_time[tracks->tracks]);
+  tracks2 = (TracksSVD2_t *) &(tracks->playing_time[tracks->tracks]);
   return(tracks2->contents[i_track-1].audio);
 }
 
@@ -1769,7 +1769,7 @@ vcdinfo_open_return_t
 vcdinfo_open(vcdinfo_obj_t **pp_obj, char *source_name[], 
              driver_id_t source_type, const char access_mode[])
 {
-  CdIo_t *img;
+  CdIo_t *p_cdio;
   vcdinfo_obj_t *p_obj = calloc(1, sizeof(vcdinfo_obj_t));
   iso9660_stat_t *statbuf;
 
@@ -1784,32 +1784,34 @@ vcdinfo_open(vcdinfo_obj_t **pp_obj, char *source_name[],
                 |CDIO_FS_UNKNOWN),
                                               true, &source_type);
     if ( NULL == cd_drives || NULL == cd_drives[0] ) {
-      return VCDINFO_OPEN_ERROR;
+      goto err_return;
     }
     *source_name = strdup(cd_drives[0]);
     cdio_free_device_list(cd_drives);
   }
 
-  img = cdio_open(*source_name, source_type);
-  if (NULL == img) {
-    return VCDINFO_OPEN_ERROR;
+  p_cdio = cdio_open(*source_name, source_type);
+  if (NULL == p_cdio) {
+    goto err_return;
   }
 
   *pp_obj = p_obj;
   
   if (access_mode != NULL) 
-    cdio_set_arg (img, "access-mode", access_mode);
+    cdio_set_arg (p_cdio, "access-mode", access_mode);
 
   if (NULL == *source_name) {
-    *source_name = cdio_get_default_device(img);
-    if (NULL == *source_name) return VCDINFO_OPEN_ERROR;
+    *source_name = cdio_get_default_device(p_cdio);
+    if (NULL == *source_name) {
+      goto err_return;
+    }
   }
     
   memset (p_obj, 0, sizeof (vcdinfo_obj_t));
-  p_obj->img = img;  /* Note we do this after the above wipeout! */
+  p_obj->img = p_cdio;  /* Note we do this after the above wipeout! */
 
   if (!iso9660_fs_read_pvd(p_obj->img, &(p_obj->pvd))) {
-    return VCDINFO_OPEN_ERROR;
+    goto err_return;
   }
   
   /* Determine if VCD has XA attributes. */
@@ -1823,13 +1825,13 @@ vcdinfo_open(vcdinfo_obj_t **pp_obj, char *source_name[],
   }
     
   if (!read_info(p_obj->img, &(p_obj->info), &(p_obj->vcd_type)))
-    return VCDINFO_OPEN_OTHER;
+    goto other_return;
 
   if (vcdinfo_get_format_version (p_obj) == VCD_TYPE_INVALID)
-    return VCDINFO_OPEN_OTHER;
+    goto other_return;
 
   if (!read_entries(p_obj->img, &(p_obj->entries)))
-    return VCDINFO_OPEN_OTHER;
+    goto other_return;
   
   {
     size_t len = strlen(*source_name)+1;
@@ -1856,7 +1858,7 @@ vcdinfo_open(vcdinfo_obj_t **pp_obj, char *source_name[],
 
       free(statbuf);
       if (cdio_read_mode2_sector (p_obj->img, p_obj->tracks_buf, lsn, false))
-        return VCDINFO_OPEN_ERROR;
+        goto err_return;
     }
   }
       
@@ -1868,7 +1870,7 @@ vcdinfo_open(vcdinfo_obj_t **pp_obj, char *source_name[],
        iso9660_fs_readdir(img, "EXT", true) and then scanning for
        the files listed below.
     */
-    statbuf = iso9660_fs_stat (img, "EXT/PSD_X.VCD;1");
+    statbuf = iso9660_fs_stat (p_cdio, "EXT/PSD_X.VCD;1");
     if (NULL != statbuf) {
       lsn_t lsn        = statbuf->lsn;
       uint32_t secsize = statbuf->secsize;
@@ -1880,11 +1882,11 @@ vcdinfo_open(vcdinfo_obj_t **pp_obj, char *source_name[],
                  (long unsigned int) lsn);
 
       free(statbuf);
-      if (cdio_read_mode2_sectors (img, p_obj->psd_x, lsn, false, secsize))
-        return VCDINFO_OPEN_ERROR;
+      if (cdio_read_mode2_sectors (p_cdio, p_obj->psd_x, lsn, false, secsize))
+        goto err_return;
     }
 
-    statbuf = iso9660_fs_stat (img, "EXT/LOT_X.VCD;1");
+    statbuf = iso9660_fs_stat (p_cdio, "EXT/LOT_X.VCD;1");
     if (NULL != statbuf) {
       lsn_t lsn        = statbuf->lsn;
       uint32_t secsize = statbuf->secsize;
@@ -1897,8 +1899,8 @@ vcdinfo_open(vcdinfo_obj_t **pp_obj, char *source_name[],
         vcd_warn ("LOT_X.VCD size != 65535");
 
       free(statbuf);
-      if (cdio_read_mode2_sectors (img, p_obj->lot_x, lsn, false, secsize))
-        return VCDINFO_OPEN_ERROR;
+      if (cdio_read_mode2_sectors (p_cdio, p_obj->lot_x, lsn, false, secsize))
+        goto err_return;
       
     }
     break;
@@ -1906,16 +1908,16 @@ vcdinfo_open(vcdinfo_obj_t **pp_obj, char *source_name[],
   case VCD_TYPE_SVCD: 
   case VCD_TYPE_HQVCD: {
     /* FIXME: Can reduce CD reads by using 
-       iso9660_fs_readdir(img, "SVCD", true) and then scanning for
+       iso9660_fs_readdir(p_cdio, "SVCD", true) and then scanning for
        the files listed below.
     */
-    statbuf = iso9660_fs_stat (img, "MPEGAV");
+    statbuf = iso9660_fs_stat (p_cdio, "MPEGAV");
     if (NULL != statbuf) {
       vcd_warn ("non compliant /MPEGAV folder detected!");
       free(statbuf);
     }
     
-    statbuf = iso9660_fs_stat (img, "SVCD/TRACKS.SVD;1");
+    statbuf = iso9660_fs_stat (p_cdio, "SVCD/TRACKS.SVD;1");
     if (NULL == statbuf)
       vcd_warn ("mandatory /SVCD/TRACKS.SVD not found!");
     else {
@@ -1924,7 +1926,7 @@ vcdinfo_open(vcdinfo_obj_t **pp_obj, char *source_name[],
       free(statbuf);
     }
     
-    statbuf = iso9660_fs_stat (img, "SVCD/SEARCH.DAT;1");
+    statbuf = iso9660_fs_stat (p_cdio, "SVCD/SEARCH.DAT;1");
     if (NULL == statbuf)
       vcd_warn ("mandatory /SVCD/SEARCH.DAT not found!");
     else {
@@ -1937,11 +1939,11 @@ vcdinfo_open(vcdinfo_obj_t **pp_obj, char *source_name[],
       
       p_obj->search_buf = calloc(1, ISO_BLOCKSIZE * secsize);
       
-      if (cdio_read_mode2_sectors (img, p_obj->search_buf, lsn, false, secsize))
-        return VCDINFO_OPEN_ERROR;
+      if (cdio_read_mode2_sectors (p_cdio, p_obj->search_buf, lsn, false, secsize))
+        goto err_return;
       
-      size = (3 * uint16_from_be (((SearchDat *)p_obj->search_buf)->scan_points))
-        + sizeof (SearchDat);
+      size = (3 * uint16_from_be (((SearchDat_t *)p_obj->search_buf)->scan_points))
+        + sizeof (SearchDat_t);
 
       free(statbuf);
       if (size > stat_size) {
@@ -1952,9 +1954,9 @@ vcdinfo_open(vcdinfo_obj_t **pp_obj, char *source_name[],
         p_obj->search_buf = calloc(1, ISO_BLOCKSIZE 
                                        * _vcd_len2blocks(size, ISO_BLOCKSIZE));
         
-        if (cdio_read_mode2_sectors (img, p_obj->search_buf, lsn, false, 
+        if (cdio_read_mode2_sectors (p_cdio, p_obj->search_buf, lsn, false, 
                                      secsize))
-          return VCDINFO_OPEN_ERROR;
+          goto err_return;
       }
     }
     break;
@@ -1963,7 +1965,7 @@ vcdinfo_open(vcdinfo_obj_t **pp_obj, char *source_name[],
     ;
   }
 
-  statbuf = iso9660_fs_stat (img, "EXT/SCANDATA.DAT;1");
+  statbuf = iso9660_fs_stat (p_cdio, "EXT/SCANDATA.DAT;1");
   if (statbuf != NULL) {
     lsn_t    lsn       = statbuf->lsn;
     uint32_t secsize   = statbuf->secsize;
@@ -1973,11 +1975,21 @@ vcdinfo_open(vcdinfo_obj_t **pp_obj, char *source_name[],
     p_obj->scandata_buf = calloc(1, ISO_BLOCKSIZE * secsize);
 
     free(statbuf);
-    if (cdio_read_mode2_sectors (img, p_obj->scandata_buf, lsn, false, secsize))
+    if (cdio_read_mode2_sectors (p_cdio, p_obj->scandata_buf, lsn, false, 
+                                 secsize))
       return VCDINFO_OPEN_ERROR;
   }
 
   return VCDINFO_OPEN_VCD;
+
+ other_return:
+  free(p_obj);
+  return VCDINFO_OPEN_OTHER;
+
+ err_return:
+  free(p_obj);
+  return VCDINFO_OPEN_ERROR;
+
   
 }
 

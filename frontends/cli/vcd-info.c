@@ -267,10 +267,15 @@ dump_psd (const vcdinfo_obj_t *obj, bool ext)
 {
   CdioListNode_t *node;
   unsigned n = 0;
-  unsigned int mult = vcdinfo_get_offset_mult(obj);
-  const uint8_t *psd = ext 
-    ? vcdinfo_get_psd_x(obj) : vcdinfo_get_psd(obj);
-  CdioList_t *offset_list = ext 
+  unsigned int mult;
+  uint8_t *psd;
+  CdioList_t *offset_list;
+
+  if (!obj) return;
+  
+  mult = vcdinfo_get_offset_mult(obj);
+  psd  = ext ? vcdinfo_get_psd_x(obj) : vcdinfo_get_psd(obj);
+  offset_list = ext 
     ? vcdinfo_get_offset_x_list(obj) : vcdinfo_get_offset_list(obj);
 
   fprintf (stdout, 
@@ -325,7 +330,7 @@ dump_psd (const vcdinfo_obj_t *obj, bool ext)
 
         case PSD_TYPE_END_LIST:
           {
-            const PsdEndListDescriptor *d = (const void *) (psd + _rofs);
+            const PsdEndListDescriptor_t *d = (const void *) (psd + _rofs);
             fprintf (stdout, " PSD[%.2d] (%s): end list descriptor\n", n, vcdinfo_ofs2str (obj, ofs->offset, ext));
             if (vcdinfo_get_VCD_type(obj) != VCD_TYPE_VCD2)
               {
@@ -378,7 +383,7 @@ dump_psd (const vcdinfo_obj_t *obj, bool ext)
             if (type == PSD_TYPE_EXT_SELECTION_LIST 
                 || d->flags.SelectionAreaFlag)
               {
-                const PsdSelectionListDescriptorExtended *d2 =
+                const PsdSelectionListDescriptorExtended_t *d2 =
                   (const void *) &(d->ofs[d->nos]);
 
                 fprintf (stdout, "  prev_area: %s | next_area: %s\n",
@@ -615,9 +620,9 @@ dump_entries (vcdinfo_obj_t *obj)
 static void
 dump_tracks_svd (vcdinfo_obj_t *obj)
 {
-  const TracksSVD *tracks = vcdinfo_get_tracksSVD(obj);
-  const TracksSVD2 *tracks2 = (const void *) &(tracks->playing_time[tracks->tracks]);
-  const TracksSVD_v30 *tracks_v30 = (TracksSVD_v30 *) tracks;
+  const TracksSVD_t     *tracks = vcdinfo_get_tracksSVD(obj);
+  const TracksSVD2_t    *tracks2 = (const void *) &(tracks->playing_time[tracks->tracks]);
+  const TracksSVD_v30_t *tracks_v30 = (TracksSVD_v30_t *) tracks;
 
   unsigned j;
 
@@ -729,7 +734,7 @@ dump_tracks (const CdIo_t *cdio)
 static void
 dump_scandata_dat (vcdinfo_obj_t *obj)
 {
-  const ScandataDat1 *_sd1 = vcdinfo_get_scandata(obj);
+  const ScandataDat1_t *_sd1 = vcdinfo_get_scandata(obj);
   const uint16_t scandata_count = uint16_from_be (_sd1->scandata_count);
   const uint16_t track_count = uint16_from_be (_sd1->track_count);
   const uint16_t spi_count = uint16_from_be (_sd1->spi_count);
@@ -743,7 +748,7 @@ dump_scandata_dat (vcdinfo_obj_t *obj)
 
   if (_sd1->version == SCANDATA_VERSION_VCD2)
     {
-      const ScandataDat_v2 *_sd_v2 = (ScandataDat_v2 *) _sd1;
+      const ScandataDat_v2_t *_sd_v2 = (ScandataDat_v2_t *) _sd1;
 
       int n;
 
@@ -772,18 +777,18 @@ dump_scandata_dat (vcdinfo_obj_t *obj)
     }
   else if (_sd1->version == SCANDATA_VERSION_SVCD)
     {
-      const ScandataDat2 *_sd2 = 
+      const ScandataDat2_t *_sd2 = 
         (const void *) &_sd1->cum_playtimes[track_count];
 
-      const ScandataDat3 *_sd3 = 
+      const ScandataDat3_t *_sd3 = 
         (const void *) &_sd2->spi_indexes[spi_count];
 
-      const ScandataDat4 *_sd4 = 
+      const ScandataDat4_t *_sd4 = 
         (const void *) &_sd3->mpeg_track_offsets[track_count];
 
       const int scandata_ofs0 = 
-        __cd_offsetof (ScandataDat3, mpeg_track_offsets[track_count])
-        - __cd_offsetof (ScandataDat3, mpeg_track_offsets);
+        __cd_offsetof (ScandataDat3_t, mpeg_track_offsets[track_count])
+        - __cd_offsetof (ScandataDat3_t, mpeg_track_offsets);
 
       int n;
 
@@ -854,7 +859,7 @@ dump_scandata_dat (vcdinfo_obj_t *obj)
 static void
 dump_search_dat (vcdinfo_obj_t *obj)
 {
-  const SearchDat *searchdat = vcdinfo_get_searchDat(obj);
+  const SearchDat_t *searchdat = vcdinfo_get_searchDat(obj);
   unsigned m;
   uint32_t scan_points = uint16_from_be (searchdat->scan_points);
 
@@ -1043,89 +1048,93 @@ dump_pvd (vcdinfo_obj_t *p_vcdinfo)
 }
 
 static void
-dump_all (vcdinfo_obj_t *obj)
+dump_all (vcdinfo_obj_t *p_vcdinfo)
 {
-  CdIo_t *cdio = vcdinfo_get_cd_image(obj);
+  CdIo_t *p_cdio;
+
+  if (!p_vcdinfo) return;
+  
+  p_cdio = vcdinfo_get_cd_image(p_vcdinfo);
 
   if (gl.show.pvd.any) 
     {
       if (!gl.show.no.delimiter) fprintf (stdout, DELIM);
-      dump_pvd (obj);
+      dump_pvd (p_vcdinfo);
     }
   
   if (gl.show.fs) 
     {
       if (!gl.show.no.delimiter) fprintf (stdout, DELIM);
-      dump_fs (obj);
+      dump_fs (p_vcdinfo);
     }
 
   if (gl.show.info.any) 
     {
       if (!gl.show.no.delimiter) fprintf (stdout, DELIM);
-      dump_info (obj);
+      dump_info (p_vcdinfo);
     }
   
   if (gl.show.entries.any) 
     {
       if (!gl.show.no.delimiter) fprintf (stdout, DELIM);
-      dump_entries (obj);
+      dump_entries (p_vcdinfo);
     }
 
   if (gl.show.psd) 
     {
-      if (vcdinfo_get_psd_size (obj))
+      if (vcdinfo_get_psd_size (p_vcdinfo))
         {
-          vcdinfo_visit_lot (obj, false);
+          vcdinfo_visit_lot (p_vcdinfo, false);
           if (gl.show.lot)
             {
               if (!gl.show.no.delimiter) fprintf (stdout, DELIM);
-              dump_lot (obj, false);
+              dump_lot (p_vcdinfo, false);
             }
           
           if (!gl.show.no.delimiter) fprintf (stdout, DELIM);
-          dump_psd (obj, false);
+          dump_psd (p_vcdinfo, false);
         }
       
-      if (vcdinfo_get_psd_x_size(obj) && ! gl.no_ext_psd_flag )
+      if (vcdinfo_get_psd_x_size(p_vcdinfo) && ! gl.no_ext_psd_flag )
         {
-          vcdinfo_visit_lot (obj, true);
+          vcdinfo_visit_lot (p_vcdinfo, true);
           if (gl.show.lot) 
             {
               if (!gl.show.no.delimiter) fprintf (stdout, DELIM);
-              dump_lot (obj, true);
+              dump_lot (p_vcdinfo, true);
             }
           if (!gl.show.no.delimiter) fprintf (stdout, DELIM);
-          dump_psd (obj, true);
+          dump_psd (p_vcdinfo, true);
         }
     }
 
   if (gl.show.tracks) 
     {
-      if (vcdinfo_get_tracksSVD(obj))
+      if (vcdinfo_get_tracksSVD(p_vcdinfo))
         {
           if (!gl.show.no.delimiter) fprintf (stdout, DELIM);
-          dump_tracks_svd (obj);
+          dump_tracks_svd (p_vcdinfo);
         } 
       if (!gl.show.no.delimiter) fprintf (stdout, DELIM);
-      dump_tracks (cdio);
+      dump_tracks (p_cdio);
     }
   
   if (gl.show.search) 
     {
-      if (vcdinfo_get_searchDat(obj))
+      if (vcdinfo_get_searchDat(p_vcdinfo))
         {
           if (!gl.show.no.delimiter) fprintf (stdout, DELIM);
-          dump_search_dat (obj);
+          dump_search_dat (p_vcdinfo);
         }
     }
   
 
   if (gl.show.scandata) 
     {
-      if (vcdinfo_get_scandata(obj))
+      if (vcdinfo_get_scandata(p_vcdinfo))
         {
           if (!gl.show.no.delimiter) fprintf (stdout, DELIM);
-          dump_scandata_dat (obj);
+          dump_scandata_dat (p_vcdinfo);
         }
       
     }
@@ -1137,8 +1146,8 @@ static void
 dump (char *image_fname[])
 {
   unsigned size, psd_size;
-  vcdinfo_obj_t *obj;
-  CdIo_t *img;
+  vcdinfo_obj_t *obj = NULL;
+  CdIo_t *p_cdio;
   iso9660_stat_t *statbuf;
   vcdinfo_open_return_t open_rc;
   
@@ -1159,20 +1168,20 @@ dump (char *image_fname[])
     } else {
       fprintf (stdout, "Error opening requested Video CD object %s\n",
                *image_fname);
-      fprintf (stdout, "Perhaps this is not a Video CD.n");
+      fprintf (stdout, "Perhaps this is not a Video CD\n");
       free(*image_fname);
     }
     exit (EXIT_FAILURE);
   }
 
-  img = vcdinfo_get_cd_image(obj);
-  if (open_rc==VCDINFO_OPEN_ERROR || img == NULL) {
+  p_cdio = vcdinfo_get_cd_image(obj);
+  if (open_rc==VCDINFO_OPEN_ERROR || p_cdio == NULL) {
     vcd_error ("Error determining place to read from");
     free(*image_fname);
     exit (EXIT_FAILURE);
   }
 
-  size = cdio_stat_size (img);
+  size = cdio_stat_size (p_cdio);
 
   if (gl.show.source) 
     {
@@ -1202,7 +1211,7 @@ dump (char *image_fname[])
 
     if (gl.show.tracks) {
       if (!gl.show.no.delimiter) fprintf (stdout, DELIM);
-      dump_tracks (img);
+      dump_tracks (p_cdio);
     }
     exit (EXIT_FAILURE);
   }
@@ -1219,7 +1228,7 @@ dump (char *image_fname[])
   if (vcdinfo_read_psd (obj))
     {
       /* ISO9660 crosscheck */
-      statbuf = iso9660_fs_stat (img, 
+      statbuf = iso9660_fs_stat (p_cdio, 
                                  ((vcdinfo_get_VCD_type(obj) == VCD_TYPE_SVCD 
                              || vcdinfo_get_VCD_type(obj) == VCD_TYPE_HQVCD)
                                   ? "/SVCD/PSD.SVD;1" 
