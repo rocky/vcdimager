@@ -1353,6 +1353,7 @@ main (int argc, const char *argv[])
   int terse_flag       = false;
   int sector_2336_flag = 0;
   char *source_name    = NULL;
+  const char **args    = NULL;
 
   int opt;
   char *opt_arg;
@@ -1603,11 +1604,23 @@ main (int argc, const char *argv[])
         exit (EXIT_FAILURE);
       }
 
-  if (poptGetArgs (optCon) != NULL)
+  if ((args = poptGetArgs (optCon)) != NULL)
     {
-      fprintf (stderr, "error - no arguments expected! - try --help\n");
-      poptFreeContext(optCon);
-      exit (EXIT_FAILURE);
+      if (args[1]) {
+        fprintf ( stderr, "too many arguments - try --help");
+        poptFreeContext(optCon);
+        exit (EXIT_FAILURE);
+      }
+
+      if (source_name) {
+        fprintf ( stderr, 
+                  "source file specified as an option without - try --help\n");
+        poptFreeContext(optCon);
+        exit (EXIT_FAILURE);
+      }
+      
+      source_name    = strdup(args[0]);
+      gl.source_type = OP_SOURCE_UNDEF;
     }
 
   if (gl.debug_level == 3) {
