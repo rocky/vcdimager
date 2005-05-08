@@ -147,8 +147,9 @@ vcd_xml_init (vcdxml_t *p_vcdxml)
 static inline void
 vcd_xml_destroy (vcdxml_t *p_vcdxml)
 {
-  vcd_assert (p_vcdxml != NULL);
   CdioListNode_t *p_node;
+
+  vcd_assert (p_vcdxml != NULL);
 
   _cdio_list_free (p_vcdxml->option_list,   true);
   _cdio_list_free (p_vcdxml->segment_list,  true);
