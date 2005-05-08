@@ -40,50 +40,51 @@
 int 
 main (int argc, const char *argv[])
 {
-  VcdMpegSource_t *src;
-  CdioListNode_t *n;
+  VcdMpegSource_t *p_src;
+  CdioListNode_t *p_n;
   double t = 0;
 
   if (argc != 2)
     return 1;
 
-  src = vcd_mpeg_source_new (vcd_data_source_new_stdio (argv[1]));
+  p_src = vcd_mpeg_source_new (vcd_data_source_new_stdio (argv[1]));
 
-  vcd_mpeg_source_scan (src, true, false, NULL, NULL);
+  vcd_mpeg_source_scan (p_src, true, false, NULL, NULL);
 
-  printf ("packets: %d\n", vcd_mpeg_source_get_info (src)->packets);
+  printf ("packets: %d\n", vcd_mpeg_source_get_info (p_src)->packets);
 
-  _CDIO_LIST_FOREACH (n, vcd_mpeg_source_get_info (src)->shdr[0].aps_list)
+  _CDIO_LIST_FOREACH (p_n, vcd_mpeg_source_get_info (p_src)->shdr[0].aps_list)
     {
-      struct aps_data *_data = _cdio_list_node_data (n);
+      struct aps_data *p_data = _cdio_list_node_data (p_n);
       
-      printf ("aps: %u %f\n", _data->packet_no, _data->timestamp);
+      printf ("aps: %u %f\n", (unsigned int) p_data->packet_no, 
+	      p_data->timestamp);
     }
 
   {
     CdioListNode_t *aps_node = 
-      _cdio_list_begin (vcd_mpeg_source_get_info (src)->shdr[0].aps_list);
-    struct aps_data *_data;
+      _cdio_list_begin (vcd_mpeg_source_get_info (p_src)->shdr[0].aps_list);
+    struct aps_data *p_data;
     double aps_time;
     int aps_packet;
 
-    _data = _cdio_list_node_data (aps_node);
-    aps_time = _data->timestamp;
-    aps_packet = _data->packet_no;
+    p_data = _cdio_list_node_data (aps_node);
+    aps_time = p_data->timestamp;
+    aps_packet = p_data->packet_no;
 
 
-    for (t = 0; t <= vcd_mpeg_source_get_info (src)->playing_time; t += 0.5)
+    for (t = 0; t <= vcd_mpeg_source_get_info (p_src)->playing_time; t += 0.5)
       {
-        for(n = _cdio_list_node_next (aps_node); n; 
-	    n = _cdio_list_node_next (n))
+        for(p_n = _cdio_list_node_next (aps_node); p_n; 
+	    p_n = _cdio_list_node_next (p_n))
           {
-            _data = _cdio_list_node_data (n);
+            p_data = _cdio_list_node_data (p_n);
 
-            if (fabs (_data->timestamp - t) < fabs (aps_time - t))
+            if (fabs (p_data->timestamp - t) < fabs (aps_time - t))
               {
-                aps_node = n;
-                aps_time = _data->timestamp;
-                aps_packet = _data->packet_no;
+                aps_node = p_n;
+                aps_time = p_data->timestamp;
+                aps_packet = p_data->packet_no;
               }
             else 
               break;
@@ -95,14 +96,16 @@ main (int argc, const char *argv[])
   }
 
   {
-    const struct vcd_mpeg_stream_info *_info = vcd_mpeg_source_get_info (src);
+    const struct vcd_mpeg_stream_info *p_info = 
+      vcd_mpeg_source_get_info (p_src);
     printf ("mpeg info\n");
   
-    printf (" %d x %d (%f:1) @%f v%d\n", _info->shdr[0].hsize, _info->shdr[0].vsize,
-	    _info->shdr[0].aratio, _info->shdr[0].frate, _info->version);
+    printf (" %d x %d (%f:1) @%f v%d\n", p_info->shdr[0].hsize, 
+	    p_info->shdr[0].vsize, p_info->shdr[0].aratio, 
+	    p_info->shdr[0].frate, p_info->version);
   }
 
-  vcd_mpeg_source_destroy (src, true);
+  vcd_mpeg_source_destroy (p_src, true);
 
 
   return 0;
