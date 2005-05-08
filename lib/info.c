@@ -1487,7 +1487,7 @@ vcdinfo_get_volume_count(const vcdinfo_obj_t *p_obj)
 const char *
 vcdinfo_get_volume_id(const vcdinfo_obj_t *p_obj)
 {
-  static char psz_vol_id[ISO_MAX_VOLUME_ID+1] = {'\0'};;
+  static char psz_vol_id[ISO_MAX_VOLUME_ID+1] = {'\0'};
   char *psz_vol_id2;
   if ( NULL == p_obj || NULL == &p_obj->pvd ) return (NULL);
   psz_vol_id2 = iso9660_get_volume_id(&p_obj->pvd);
