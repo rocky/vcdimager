@@ -1645,7 +1645,8 @@ main (int argc, const char *argv[])
 
       if (source_name) {
         fprintf ( stderr, 
-                  "source file specified as an option without - try --help\n");
+                  "source file specified as an option and without "
+                  " - try --help\n");
         poptFreeContext(optCon);
         exit (EXIT_FAILURE);
       }

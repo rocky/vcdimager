@@ -404,8 +404,6 @@ typedef struct {
    track, which indicates the track's playing time (in sectors, not
    actually real time) and contents. */
 
-const char TRACKS_SVD_FILE_ID[sizeof("TRACKSVD")-1]; /* useful in debugging */
-
 #define TRACKS_SVD_FILE_ID  "TRACKSVD"
 #define TRACKS_SVD_VERSION  0x01
 
@@ -451,8 +449,6 @@ typedef struct {
    stream to the given time T. Scan points are given at every half-second
    for the entire duration of the disc. */
 
-const char SEARCH_FILE_ID[sizeof("SEARCHSV")-1]; /* useful in debugging */
-
 #define SEARCH_FILE_ID        "SEARCHSV"
 #define SEARCH_VERSION        0x01
 #define SEARCH_TIME_INTERVAL  0x01
@@ -474,8 +470,6 @@ typedef struct {
 /* SPICONTX.SVD 
  */
 
-const char SPICONTX_FILE_ID[sizeof("SPICONSV")-1]; /* useful in debugging */
-
 #define SPICONTX_FILE_ID      "SPICONSV"
 #define SPICONTX_VERSION      0x01
 
@@ -495,7 +489,6 @@ typedef struct {
 
 /** SCANDATA.DAT for VCD 2.0 */
 
-const char SCANDATA_FILE_ID[sizeof("SCAN_VCD")-1]; /* useful in debugging */
 #define SCANDATA_FILE_ID "SCAN_VCD"
 #define SCANDATA_VERSION_VCD2 0x02
 #define SCANDATA_VERSION_SVCD 0x01
