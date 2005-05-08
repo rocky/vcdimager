@@ -2,6 +2,15 @@ $Id$
 
 see ChangeLog for more information
 
+version 0.7.22 (development)
+=====================================
+
+* vcdxrip: add option "notrack" to skip ripping of a specific track
+* vcd-info: single argument acts like -i option
+* some stylistic coding changes (e.g. add _t suffix and p_ prefix)
+* fix clobbering a version number via strncpy
+* Memory leaks and errors reduced
+
 version 0.7.21 (development)
 =====================================
 
