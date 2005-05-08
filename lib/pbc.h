@@ -127,31 +127,31 @@ void
 vcd_pbc_destroy (pbc_t *p_pbc);
 
 unsigned
-_vcd_pbc_lid_lookup (const VcdObj *obj, const char item_id[]);
+_vcd_pbc_lid_lookup (const VcdObj_t *obj, const char item_id[]);
 
 enum item_type_t
-_vcd_pbc_lookup (const VcdObj *obj, const char item_id[]);
+_vcd_pbc_lookup (const VcdObj_t *obj, const char item_id[]);
 
 uint16_t
-_vcd_pbc_pin_lookup (const VcdObj *obj, const char item_id[]);
+_vcd_pbc_pin_lookup (const VcdObj_t *obj, const char item_id[]);
 
 unsigned 
 _vcd_pbc_list_calc_size (const pbc_t *_pbc, bool extended);
 
 bool
-_vcd_pbc_finalize (VcdObj *obj);
+_vcd_pbc_finalize (VcdObj_t *obj);
 
 bool
-_vcd_pbc_available (const VcdObj *obj);
+_vcd_pbc_available (const VcdObj_t *obj);
 
 uint16_t
-_vcd_pbc_max_lid (const VcdObj *obj);
+_vcd_pbc_max_lid (const VcdObj_t *obj);
 
 void
-_vcd_pbc_node_write (const VcdObj *obj, const pbc_t *_pbc, void *buf,
+_vcd_pbc_node_write (const VcdObj_t *obj, const pbc_t *_pbc, void *buf,
 		     bool extended);
 
 void
-_vcd_pbc_check_unreferenced (const VcdObj *obj);
+_vcd_pbc_check_unreferenced (const VcdObj_t *obj);
 
 #endif /* __VCD_PBC_H__ */

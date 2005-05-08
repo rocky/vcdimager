@@ -56,34 +56,34 @@ typedef enum {
 #define SCANDATA_VERSION_SVCD 0x01
 
 void
-set_entries_vcd(VcdObj *obj, void *buf);
+set_entries_vcd(VcdObj_t *p_vcdobj, void *p_buf);
 
 void 
-set_info_vcd (VcdObj *obj, void *buf);
+set_info_vcd (VcdObj_t *p_vcdobj, void *p_buf);
 
 uint32_t
-get_psd_size (VcdObj *obj, bool extended);
+get_psd_size (VcdObj_t *p_vcdobj, bool extended);
 
 void
-set_lot_vcd (VcdObj *obj, void *buf, bool extended);
+set_lot_vcd (VcdObj_t *p_vcdobj, void *p_buf, bool extended);
 
 void
-set_psd_vcd (VcdObj *obj, void *buf, bool extended);
+set_psd_vcd (VcdObj_t *p_vcdobj, void *p_buf, bool extended);
 
 void
-set_tracks_svd (VcdObj *obj, void *buf);
+set_tracks_svd (VcdObj_t *p_vcdobj, void *p_buf);
 
 uint32_t 
-get_search_dat_size (const VcdObj *obj);
+get_search_dat_size (const VcdObj_t *p_vcdobj);
 
 void
-set_search_dat (VcdObj *obj, void *buf);
+set_search_dat (VcdObj_t *p_vcdobj, void *p_buf);
 
 uint32_t 
-get_scandata_dat_size (const VcdObj *obj);
+get_scandata_dat_size (const VcdObj_t *p_vcdobj);
 
 void
-set_scandata_dat (VcdObj *obj, void *buf);
+set_scandata_dat (VcdObj_t *p_vcdobj, void *p_buf);
 
 
 vcd_type_t

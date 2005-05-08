@@ -74,7 +74,7 @@ _wtime (int seconds)
 }
 
 static pbc_t *
-_vcd_pbc_byid(const VcdObj *obj, const char item_id[])
+_vcd_pbc_byid(const VcdObj_t *obj, const char item_id[])
 {
   CdioListNode_t *p_node;
 
@@ -91,7 +91,7 @@ _vcd_pbc_byid(const VcdObj *obj, const char item_id[])
 }
 
 unsigned
-_vcd_pbc_lid_lookup (const VcdObj *obj, const char item_id[])
+_vcd_pbc_lid_lookup (const VcdObj_t *obj, const char item_id[])
 {
   CdioListNode_t *p_node;
   unsigned n = 1;
@@ -135,7 +135,7 @@ _set_area_helper (pbc_area_t *dest, const pbc_area_t *src, const char sel_id[])
 }
 
 enum item_type_t
-_vcd_pbc_lookup (const VcdObj *obj, const char item_id[])
+_vcd_pbc_lookup (const VcdObj_t *obj, const char item_id[])
 {
   unsigned id;
 
@@ -161,7 +161,7 @@ _vcd_pbc_lookup (const VcdObj *obj, const char item_id[])
 }
 
 uint16_t
-_vcd_pbc_pin_lookup (const VcdObj *obj, const char item_id[])
+_vcd_pbc_pin_lookup (const VcdObj_t *obj, const char item_id[])
 {
   int n;
   CdioListNode_t *p_node;
@@ -233,7 +233,7 @@ _vcd_pbc_pin_lookup (const VcdObj *obj, const char item_id[])
 }
 
 bool
-_vcd_pbc_available (const VcdObj *obj)
+_vcd_pbc_available (const VcdObj_t *obj)
 {
   vcd_assert (obj != NULL);
   vcd_assert (obj->pbc_list != NULL);
@@ -251,7 +251,7 @@ _vcd_pbc_available (const VcdObj *obj)
 }
 
 uint16_t
-_vcd_pbc_max_lid (const VcdObj *obj)
+_vcd_pbc_max_lid (const VcdObj_t *obj)
 {
   uint16_t retval = 0;
   
@@ -262,7 +262,7 @@ _vcd_pbc_max_lid (const VcdObj *obj)
 }
 
 static size_t
-_vcd_pbc_node_length (const VcdObj *obj, const pbc_t *p_pbc, bool extended)
+_vcd_pbc_node_length (const VcdObj_t *obj, const pbc_t *p_pbc, bool extended)
 {
   size_t retval = 0;
 
@@ -300,7 +300,7 @@ _vcd_pbc_node_length (const VcdObj *obj, const pbc_t *p_pbc, bool extended)
 }
 
 static uint16_t 
-_lookup_psd_offset (const VcdObj *obj, const char item_id[], bool extended)
+_lookup_psd_offset (const VcdObj_t *obj, const char item_id[], bool extended)
 {
   CdioListNode_t *node;
 
@@ -328,7 +328,7 @@ _lookup_psd_offset (const VcdObj *obj, const char item_id[], bool extended)
 }
 
 static void
-_vcd_pin_mark_id (const VcdObj *obj, const char _id[])
+_vcd_pin_mark_id (const VcdObj_t *obj, const char _id[])
 {
   mpeg_sequence_t *_seq;
   mpeg_segment_t *_seg;
@@ -338,15 +338,15 @@ _vcd_pin_mark_id (const VcdObj *obj, const char _id[])
   if (!_id)
     return;
 
-  if ((_seq = _vcd_obj_get_sequence_by_id ((VcdObj *) obj, _id)))
+  if ((_seq = _vcd_obj_get_sequence_by_id ((VcdObj_t *) obj, _id)))
     _seq->referenced = true;
 
-  if ((_seg = _vcd_obj_get_segment_by_id ((VcdObj *) obj, _id)))
+  if ((_seg = _vcd_obj_get_segment_by_id ((VcdObj_t *) obj, _id)))
     _seg->referenced = true;
 }
 
 static void
-_vcd_pbc_mark_id (const VcdObj *obj, const char _id[])
+_vcd_pbc_mark_id (const VcdObj_t *obj, const char _id[])
 {
   pbc_t *p_pbc;
 
@@ -419,7 +419,7 @@ _vcd_pbc_mark_id (const VcdObj *obj, const char _id[])
 }
 
 void
-_vcd_pbc_check_unreferenced (const VcdObj *p_VcdObj)
+_vcd_pbc_check_unreferenced (const VcdObj_t *p_VcdObj)
 {
   CdioListNode_t *node;
 
@@ -489,7 +489,7 @@ _vcd_pbc_check_unreferenced (const VcdObj *p_VcdObj)
 }
 
 void
-_vcd_pbc_node_write (const VcdObj *obj, const pbc_t *p_pbc, void *buf,
+_vcd_pbc_node_write (const VcdObj_t *obj, const pbc_t *p_pbc, void *buf,
 		     bool extended)
 {
   vcd_assert (obj != NULL);
@@ -675,8 +675,8 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *p_pbc, void *buf,
 	    {
 	      mpeg_sequence_t *_seq;
 
-	      if ((_seq = _vcd_obj_get_sequence_by_id ((VcdObj *) obj, p_pbc->item_id))
-		  || (_seq = _vcd_obj_get_sequence_by_entry_id ((VcdObj *) obj, p_pbc->item_id)))
+	      if ((_seq = _vcd_obj_get_sequence_by_id ((VcdObj_t *) obj, p_pbc->item_id))
+		  || (_seq = _vcd_obj_get_sequence_by_entry_id ((VcdObj_t *) obj, p_pbc->item_id)))
 		{
 		  const unsigned _entries = 
 		    _cdio_list_length (_seq->entry_list) + 1;
@@ -776,7 +776,7 @@ _vcd_pbc_node_write (const VcdObj *obj, const pbc_t *p_pbc, void *buf,
 
 		/* sanity checks */
 
-		_segment = _vcd_obj_get_segment_by_id ((VcdObj *) obj,
+		_segment = _vcd_obj_get_segment_by_id ((VcdObj_t *) obj,
 						       p_pbc->image_id);
 
 		if (!_segment)
@@ -869,7 +869,7 @@ vcd_pbc_destroy (pbc_t *p_pbc)
  */
 
 bool
-_vcd_pbc_finalize (VcdObj *obj)
+_vcd_pbc_finalize (VcdObj_t *obj)
 {
   CdioListNode_t *node;
   unsigned offset = 0, offset_ext = 0;

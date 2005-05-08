@@ -39,7 +39,7 @@ struct _dict_t
 };
 
 static void
-_dict_insert (VcdObj *obj, const char key[], uint32_t sector, uint32_t length, 
+_dict_insert (VcdObj_t *obj, const char key[], uint32_t sector, uint32_t length, 
               uint8_t end_flags)
 {
   struct _dict_t *_new_node;
@@ -80,7 +80,7 @@ int _dict_sector_cmp (struct _dict_t *a, uint32_t *b)
 }
 
 static const struct _dict_t *
-_dict_get_bykey (VcdObj *obj, const char key[])
+_dict_get_bykey (VcdObj_t *obj, const char key[])
 {
   CdioListNode_t *node;
 
@@ -98,7 +98,7 @@ _dict_get_bykey (VcdObj *obj, const char key[])
 }
 
 static const struct _dict_t *
-_dict_get_bysector (VcdObj *obj, uint32_t sector)
+_dict_get_bysector (VcdObj_t *obj, uint32_t sector)
 {
   CdioListNode_t *node;
 
@@ -116,7 +116,7 @@ _dict_get_bysector (VcdObj *obj, uint32_t sector)
 }
 
 static uint8_t
-_dict_get_sector_flags (VcdObj *obj, uint32_t sector)
+_dict_get_sector_flags (VcdObj_t *obj, uint32_t sector)
 {
   const struct _dict_t *p;
 
@@ -132,7 +132,7 @@ _dict_get_sector_flags (VcdObj *obj, uint32_t sector)
 }
 
 static void *
-_dict_get_sector (VcdObj *obj, uint32_t sector)
+_dict_get_sector (VcdObj_t *obj, uint32_t sector)
 {
   const struct _dict_t *p;
 
@@ -147,7 +147,7 @@ _dict_get_sector (VcdObj *obj, uint32_t sector)
 }
 
 static void
-_dict_clean (VcdObj *obj)
+_dict_clean (VcdObj_t *obj)
 {
   CdioListNode_t *node;
 

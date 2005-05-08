@@ -141,7 +141,7 @@ _derive_aud_type (const struct vcd_mpeg_stream_info *_info, bool svcd)
 }
 
 void
-set_entries_vcd (VcdObj *obj, void *buf)
+set_entries_vcd (VcdObj_t *obj, void *buf)
 {
   CdioListNode_t *node = NULL;
   int idx = 0;
@@ -247,7 +247,7 @@ _set_bit (uint8_t bitset[], unsigned bitnum)
 }
 
 uint32_t 
-get_psd_size (VcdObj *obj, bool extended)
+get_psd_size (VcdObj_t *obj, bool extended)
 {
   if (extended)
     vcd_assert (_vcd_obj_has_cap_p (obj, _CAP_PBC_X));
@@ -262,7 +262,7 @@ get_psd_size (VcdObj *obj, bool extended)
 }
 
 void
-set_psd_vcd (VcdObj *obj, void *buf, bool extended)
+set_psd_vcd (VcdObj_t *obj, void *buf, bool extended)
 {
   CdioListNode_t *node;
 
@@ -284,7 +284,7 @@ set_psd_vcd (VcdObj *obj, void *buf, bool extended)
 }
 
 void
-set_lot_vcd(VcdObj *obj, void *buf, bool extended)
+set_lot_vcd(VcdObj_t *obj, void *buf, bool extended)
 {
   LotVcd_t *lot_vcd = NULL;
   CdioListNode_t *node;
@@ -319,7 +319,7 @@ set_lot_vcd(VcdObj *obj, void *buf, bool extended)
 }
 
 void
-set_info_vcd(VcdObj *obj, void *buf)
+set_info_vcd(VcdObj_t *obj, void *buf)
 {
   InfoVcd_t info_vcd;
   CdioListNode_t *node = NULL;
@@ -468,7 +468,7 @@ set_info_vcd(VcdObj *obj, void *buf)
 }
 
 static void
-set_tracks_svd_v30 (VcdObj *obj, void *buf)
+set_tracks_svd_v30 (VcdObj_t *obj, void *buf)
 {
   char tracks_svd_buf[ISO_BLOCKSIZE] = { 0, };
   TracksSVD_v30_t *tracks_svd = (void *) tracks_svd_buf;
@@ -520,7 +520,7 @@ set_tracks_svd_v30 (VcdObj *obj, void *buf)
 }
 
 void
-set_tracks_svd (VcdObj *obj, void *buf)
+set_tracks_svd (VcdObj_t *obj, void *buf)
 {
   char tracks_svd[ISO_BLOCKSIZE] = { 0, };
   TracksSVD_t    *tracks_svd1 = (void *) tracks_svd;
@@ -593,7 +593,7 @@ set_tracks_svd (VcdObj *obj, void *buf)
 }
 
 static double
-_get_cumulative_playing_time (const VcdObj *obj, unsigned up_to_track_no)
+_get_cumulative_playing_time (const VcdObj_t *obj, unsigned up_to_track_no)
 {
   double result = 0;
   CdioListNode_t *node;
@@ -616,7 +616,7 @@ _get_cumulative_playing_time (const VcdObj *obj, unsigned up_to_track_no)
 }
 
 static unsigned 
-_get_scanpoint_count (const VcdObj *obj)
+_get_scanpoint_count (const VcdObj_t *obj)
 {
   double total_playing_time;
 
@@ -626,14 +626,14 @@ _get_scanpoint_count (const VcdObj *obj)
 }
 
 uint32_t 
-get_search_dat_size (const VcdObj *obj)
+get_search_dat_size (const VcdObj_t *obj)
 {
   return sizeof (SearchDat_t) 
     + (_get_scanpoint_count (obj) * sizeof (msf_t));
 }
 
 static CdioList *
-_make_track_scantable (const VcdObj *obj)
+_make_track_scantable (const VcdObj_t *obj)
 {
   CdioList_t *all_aps = _cdio_list_new ();
   CdioList_t *scantable = _cdio_list_new ();
@@ -716,7 +716,7 @@ _make_track_scantable (const VcdObj *obj)
 }
 
 void
-set_search_dat (VcdObj *obj, void *buf)
+set_search_dat (VcdObj_t *obj, void *buf)
 {
   CdioList_t *scantable;
   CdioListNode_t *node;
@@ -804,7 +804,7 @@ _get_scandata_table (const struct vcd_mpeg_stream_info *info)
 }
 
 uint32_t 
-get_scandata_dat_size (const VcdObj *obj)
+get_scandata_dat_size (const VcdObj_t *obj)
 {
   uint32_t retval = 0;
 
@@ -838,7 +838,7 @@ get_scandata_dat_size (const VcdObj *obj)
 }
 
 void
-set_scandata_dat (VcdObj *obj, void *buf)
+set_scandata_dat (VcdObj_t *obj, void *buf)
 {
   const unsigned tracks = _cdio_list_length (obj->mpeg_track_list);
 

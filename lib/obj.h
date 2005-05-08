@@ -44,7 +44,7 @@ typedef struct {
 } pause_t;
 
 typedef struct {
-  VcdMpegSource *source;
+  VcdMpegSource_t *source;
   char *id;
   const struct vcd_mpeg_stream_info *info;
 
@@ -65,7 +65,7 @@ typedef struct {
 #define mpeg_track_list mpeg_sequence_list 
 
 typedef struct {
-  VcdMpegSource *source;
+  VcdMpegSource_t *source;
   char *id;
   const struct vcd_mpeg_stream_info *info;
 
@@ -168,13 +168,13 @@ struct _VcdObj {
 /* private functions */
 
 mpeg_sequence_t *
-_vcd_obj_get_sequence_by_id (VcdObj *obj, const char sequence_id[]);
+_vcd_obj_get_sequence_by_id (VcdObj_t *obj, const char sequence_id[]);
 
 mpeg_sequence_t *
-_vcd_obj_get_sequence_by_entry_id (VcdObj *obj, const char entry_id[]);
+_vcd_obj_get_sequence_by_entry_id (VcdObj_t *obj, const char entry_id[]);
 
 mpeg_segment_t *
-_vcd_obj_get_segment_by_id (VcdObj *obj, const char segment_id[]);
+_vcd_obj_get_segment_by_id (VcdObj_t *obj, const char segment_id[]);
 
 enum vcd_capability_t {
   _CAP_VALID,
@@ -188,7 +188,7 @@ enum vcd_capability_t {
 };
 
 bool
-_vcd_obj_has_cap_p (const VcdObj *obj, enum vcd_capability_t capability);
+_vcd_obj_has_cap_p (const VcdObj_t *obj, enum vcd_capability_t capability);
 
 #endif /* __VCD_OBJ_H__ */
 

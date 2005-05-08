@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2001, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ void _dump_msf (const msf_t *__msf)
 int 
 main (int argc, const char *argv[])
 {
-  VcdMpegSource *src;
+  VcdMpegSource_t *src;
   unsigned packets, packet_no;
   VcdMpegStreamCtx ctx;
 

@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2000, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 
 #define MPEG_PACKET_SIZE 2324
 
-typedef struct _VcdMpegSource VcdMpegSource;
+typedef struct _VcdMpegSource VcdMpegSource_t;
 
 /* used in APS list */
 
@@ -70,7 +70,7 @@ struct vcd_mpeg_packet_info;
 
 /* access functions */
 
-VcdMpegSource *
+VcdMpegSource_t *
 vcd_mpeg_source_new (VcdDataSource *mpeg_file);
 
 /* scan the mpeg file... needed to be called only once */
@@ -84,26 +84,28 @@ typedef int (*vcd_mpeg_prog_cb_t) (const vcd_mpeg_prog_info_t *progress_info,
                                    void *user_data);
 
 void
-vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps, bool fix_scan_info,
-                      vcd_mpeg_prog_cb_t callback, void *user_data);
+vcd_mpeg_source_scan (VcdMpegSource_t *obj, bool strict_aps, 
+                      bool fix_scan_info, vcd_mpeg_prog_cb_t callback, 
+                      void *user_data);
 
 /* gets the packet at given position */
 int
-vcd_mpeg_source_get_packet (VcdMpegSource *obj, unsigned long packet_no,
-			    void *packet_buf, struct vcd_mpeg_packet_info *flags,
+vcd_mpeg_source_get_packet (VcdMpegSource_t *obj, unsigned long packet_no,
+			    void *packet_buf, 
+                            struct vcd_mpeg_packet_info *flags,
                             bool fix_scan_info);
 
 void
-vcd_mpeg_source_close (VcdMpegSource *obj);
+vcd_mpeg_source_close (VcdMpegSource_t *obj);
 
 const struct vcd_mpeg_stream_info *
-vcd_mpeg_source_get_info (VcdMpegSource *obj);
+vcd_mpeg_source_get_info (VcdMpegSource_t *obj);
 
 long
-vcd_mpeg_source_stat (VcdMpegSource *obj);
+vcd_mpeg_source_stat (VcdMpegSource_t *obj);
 
 void
-vcd_mpeg_source_destroy (VcdMpegSource *obj, bool destroy_file_obj);
+vcd_mpeg_source_destroy (VcdMpegSource_t *obj, bool destroy_file_obj);
 
 #endif /* __VCD_MPEG_STREAM__ */
 

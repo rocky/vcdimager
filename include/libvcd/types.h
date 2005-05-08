@@ -44,7 +44,7 @@ extern "C" {
   /* Overall data structure representing a VideoCD object.
      Defined fully in info_private.h. 
    */
-  typedef struct _VcdObj VcdObj;
+  typedef struct _VcdObj VcdObj_t;
   
   /* enum defining supported VideoCD types */
   typedef enum

@@ -1,7 +1,7 @@
 # $Id$
 #   $Id$
 #
-#    Copyright (C) 2004 Rocky Bernstein <rocky@panix.com>
+#    Copyright (C) 2004, 2005 Rocky Bernstein <rocky@panix.com>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@
 #     incompatibility with previous versions.
 
 libvcdinfo_la_CURRENT := 1
-libvcdinfo_la_REVISION := 0
+libvcdinfo_la_REVISION := 1
 libvcdinfo_la_AGE := 1
 
 noinst_LTLIBRARIES = libvcd.la

@@ -67,7 +67,7 @@ bool
 vcd_xml_master (const vcdxml_t *p_vcdxml, VcdImageSink *image_sink, 
 		time_t *create_time)
 {
-  VcdObj *_vcd;
+  VcdObj_t *_vcd;
   CdioListNode_t *node;
   int idx;
   bool _relaxed_aps = false;
@@ -84,20 +84,28 @@ vcd_xml_master (const vcdxml_t *p_vcdxml, VcdImageSink *image_sink,
   if (p_vcdxml->info.album_id)
     vcd_obj_set_param_str (_vcd, VCD_PARM_ALBUM_ID, p_vcdxml->info.album_id);
 
-  vcd_obj_set_param_uint (_vcd, VCD_PARM_VOLUME_NUMBER, p_vcdxml->info.volume_number);
-  vcd_obj_set_param_uint (_vcd, VCD_PARM_VOLUME_COUNT, p_vcdxml->info.volume_count);
-  vcd_obj_set_param_uint (_vcd, VCD_PARM_RESTRICTION, p_vcdxml->info.restriction);
-  vcd_obj_set_param_bool (_vcd, VCD_PARM_NEXT_VOL_SEQ2, p_vcdxml->info.use_sequence2);
-  vcd_obj_set_param_bool (_vcd, VCD_PARM_NEXT_VOL_LID2, p_vcdxml->info.use_lid2);
+  vcd_obj_set_param_uint (_vcd, VCD_PARM_VOLUME_NUMBER, 
+			  p_vcdxml->info.volume_number);
+  vcd_obj_set_param_uint (_vcd, VCD_PARM_VOLUME_COUNT, 
+			  p_vcdxml->info.volume_count);
+  vcd_obj_set_param_uint (_vcd, VCD_PARM_RESTRICTION, 
+			  p_vcdxml->info.restriction);
+  vcd_obj_set_param_bool (_vcd, VCD_PARM_NEXT_VOL_SEQ2, 
+			  p_vcdxml->info.use_sequence2);
+  vcd_obj_set_param_bool (_vcd, VCD_PARM_NEXT_VOL_LID2, 
+			  p_vcdxml->info.use_lid2);
 
   if (p_vcdxml->pvd.volume_id)
-    vcd_obj_set_param_str (_vcd, VCD_PARM_VOLUME_ID, p_vcdxml->pvd.volume_id);
+    vcd_obj_set_param_str (_vcd, VCD_PARM_VOLUME_ID, 
+			   p_vcdxml->pvd.volume_id);
 
   if (p_vcdxml->pvd.publisher_id)
-    vcd_obj_set_param_str (_vcd, VCD_PARM_PUBLISHER_ID, p_vcdxml->pvd.publisher_id);
+    vcd_obj_set_param_str (_vcd, VCD_PARM_PUBLISHER_ID, 
+			   p_vcdxml->pvd.publisher_id);
 
   if (p_vcdxml->pvd.application_id)
-    vcd_obj_set_param_str (_vcd, VCD_PARM_APPLICATION_ID, p_vcdxml->pvd.application_id);
+    vcd_obj_set_param_str (_vcd, VCD_PARM_APPLICATION_ID, 
+			   p_vcdxml->pvd.application_id);
 
   _CDIO_LIST_FOREACH (node, p_vcdxml->option_list)
     {
@@ -159,7 +167,8 @@ vcd_xml_master (const vcdxml_t *p_vcdxml, VcdImageSink *image_sink,
 	      _value = false;
 	    else
 	      {
-		vcd_error ("option value '%s' invalid (use 'true' or 'false')", _option->value);
+		vcd_error ("option value '%s' invalid (use 'true' or 'false')",
+			   _option->value);
 		continue;
 	      }
 
@@ -181,7 +190,8 @@ vcd_xml_master (const vcdxml_t *p_vcdxml, VcdImageSink *image_sink,
 	    
 	    if (*endptr)
 	      {
-		vcd_error ("error while converting string '%s' to integer", _option->value);
+		vcd_error ("error while converting string '%s' to integer", 
+			   _option->value);
 		_value = 0;
 	      }
 	   
@@ -229,7 +239,7 @@ vcd_xml_master (const vcdxml_t *p_vcdxml, VcdImageSink *image_sink,
       VcdDataSource *_source = mk_dsource (p_vcdxml->file_prefix, 
 					   p_segment->src);
       CdioListNode_t *p_node2;
-      VcdMpegSource *_mpeg_src;
+      VcdMpegSource_t *_mpeg_src;
 
       vcd_debug ("adding segment #%d, %s", idx, p_segment->src);
 
@@ -262,7 +272,7 @@ vcd_xml_master (const vcdxml_t *p_vcdxml, VcdImageSink *image_sink,
       struct sequence_t *sequence = _cdio_list_node_data (node);
       VcdDataSource *data_source;
       CdioListNode_t *node2;
-      VcdMpegSource *_mpeg_src;
+      VcdMpegSource_t *_mpeg_src;
 
       vcd_debug ("adding sequence #%d, %s", idx, sequence->src);
 

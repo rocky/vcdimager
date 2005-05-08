@@ -58,14 +58,14 @@ struct _VcdMpegSource
  * access functions
  */
 
-VcdMpegSource *
+VcdMpegSource_t *
 vcd_mpeg_source_new (VcdDataSource *mpeg_file)
 {
-  VcdMpegSource *new_obj;
+  VcdMpegSource_t *new_obj;
   
   vcd_assert (mpeg_file != NULL);
 
-  new_obj = calloc(1, sizeof (VcdMpegSource));
+  new_obj = calloc(1, sizeof (VcdMpegSource_t));
 
   new_obj->data_source = mpeg_file;
   new_obj->scanned = false;
@@ -74,7 +74,7 @@ vcd_mpeg_source_new (VcdDataSource *mpeg_file)
 }
 
 void
-vcd_mpeg_source_destroy (VcdMpegSource *obj, bool destroy_file_obj)
+vcd_mpeg_source_destroy (VcdMpegSource_t *obj, bool destroy_file_obj)
 {
   int i;
   vcd_assert (obj != NULL);
@@ -90,7 +90,7 @@ vcd_mpeg_source_destroy (VcdMpegSource *obj, bool destroy_file_obj)
 }
 
 const struct vcd_mpeg_stream_info *
-vcd_mpeg_source_get_info (VcdMpegSource *obj)
+vcd_mpeg_source_get_info (VcdMpegSource_t *obj)
 {
   vcd_assert (obj != NULL);
 
@@ -100,7 +100,7 @@ vcd_mpeg_source_get_info (VcdMpegSource *obj)
 }
 
 long
-vcd_mpeg_source_stat (VcdMpegSource *obj)
+vcd_mpeg_source_stat (VcdMpegSource_t *obj)
 {
   vcd_assert (obj != NULL);
   vcd_assert (!obj->scanned);
@@ -109,7 +109,7 @@ vcd_mpeg_source_stat (VcdMpegSource *obj)
 }
 
 void
-vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps, bool fix_scan_info,
+vcd_mpeg_source_scan (VcdMpegSource_t *obj, bool strict_aps, bool fix_scan_info,
                       vcd_mpeg_prog_cb_t callback, void *user_data)
 {
   unsigned length = 0;
@@ -195,7 +195,8 @@ vcd_mpeg_source_scan (VcdMpegSource *obj, bool strict_aps, bool fix_scan_info,
             _data->timestamp = state.packet.aps_pts;
 
             if (!state.stream.shdr[state.packet.aps_idx].aps_list)
-              state.stream.shdr[state.packet.aps_idx].aps_list = _cdio_list_new ();
+              state.stream.shdr[state.packet.aps_idx].aps_list = 
+                _cdio_list_new ();
             
             _cdio_list_append (state.stream.shdr[state.packet.aps_idx].aps_list, _data);
           }
@@ -364,8 +365,9 @@ _fix_scan_info (struct vcd_mpeg_scan_data_t *scan_data_ptr,
 }
 
 int
-vcd_mpeg_source_get_packet (VcdMpegSource *obj, unsigned long packet_no,
-			    void *packet_buf, struct vcd_mpeg_packet_info *flags,
+vcd_mpeg_source_get_packet (VcdMpegSource_t *obj, unsigned long packet_no,
+			    void *packet_buf, 
+                            struct vcd_mpeg_packet_info *flags,
                             bool fix_scan_info)
 {
   unsigned length;
@@ -438,7 +440,8 @@ vcd_mpeg_source_get_packet (VcdMpegSource *obj, unsigned long packet_no,
               if (state.packet.has_pts)
                 _pts = state.packet.pts - obj->info.min_pts;
               else
-                _pts = _approx_pts (obj->info.shdr[vid_idx].aps_list, packet_no);
+                _pts = _approx_pts (obj->info.shdr[vid_idx].aps_list, 
+                                    packet_no);
 
               _fix_scan_info (state.packet.scan_data_ptr, packet_no, 
                               _pts, obj->info.shdr[vid_idx].aps_list);
@@ -471,11 +474,11 @@ vcd_mpeg_source_get_packet (VcdMpegSource *obj, unsigned long packet_no,
 }
 
 void
-vcd_mpeg_source_close (VcdMpegSource *obj)
+vcd_mpeg_source_close (VcdMpegSource_t *p_vcdmpegsource)
 {
-  vcd_assert (obj != NULL);
+  vcd_assert (p_vcdmpegsource != NULL);
 
-  vcd_data_source_close (obj->data_source);
+  vcd_data_source_close (p_vcdmpegsource->data_source);
 }
 
 

@@ -109,7 +109,7 @@ gl_add_dir (char *iso_fname)
 
 /****************************************************************************/
 
-static VcdObj *gl_vcd_obj = NULL;
+static VcdObj_t *gl_vcd_obj = NULL;
 
 static void 
 _vcd_log_handler (vcd_log_level_t level, const char message[])
