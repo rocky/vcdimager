@@ -4,15 +4,18 @@ see ChangeLog for more information
 
 version 0.7.22 (development)
 =====================================
+2005-05-14
 
 * vcdxrip: add option "notrack" to skip ripping of a specific track
 * vcd-info: single argument acts like -i option
 * some stylistic coding changes (e.g. add _t suffix and p_ prefix)
 * fix clobbering a version number via strncpy
+* Add libvcdinfo example program
 * Memory leaks and errors reduced
 
 version 0.7.21 (development)
 =====================================
+2004-12-08
 
 * LSN's match MMC-3 specs better.
 * Fix bug in vcd-info showing sequence number
