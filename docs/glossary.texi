@@ -62,6 +62,20 @@ Digital Versatile Disc  @uref{http://www.dvddemystified.com/dvdfaq.html}
 @item DVD-A
 @acronym{DVD} for Audio.
 
+@item Entry Point
+A starting point within an MPEG track including the beginning of the
+track.  Video CD's can have multiple entry points inside a
+track. Logically this corresponds to a ``Chapter'' or ``Scene'' of a
+larger uninterruptable unit.
+
+One might think a CD MPEG ``track'' could serve this purpose with a
+collection of tracks making up a work or movie. Alas, the CD
+specification requires a ``track pregap'' space of 150 sectors before
+a track. These often appear as a time gaps when hardware players go
+between tracks; this doesn't happen switching between entries in a
+track because there in fact is no gap.
+
+Physically on the CD an entry is stored as an INDEX inside a track.
 
 @item FourCC
 
