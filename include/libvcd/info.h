@@ -41,10 +41,10 @@ extern "C" {
 
 /*========== Move somewhere else? ================*/
 
-/*! \def Max # characters in an album id. */
+/*! maximum # characters in an album id. */
 #define MAX_ALBUM_LEN 16   
 
-/*! \def Max # of selections allowed in a PBC selection list. */
+/*! maximum # of selections allowed in a PBC selection list. */
 #define MAX_PBC_SELECTIONS 99
 
 #define MIN_ENCODED_TRACK_NUM 100
@@ -233,8 +233,9 @@ extern "C" {
   /*!
     \brief Classify i_itemid into the kind of item it is: track #, entry #, 
     segment #. 
-    \param itemid is set to contain this classifcation an the converted 
+    \param i_itemid is set to contain this classifcation an the converted 
     entry number. 
+    \param p_itemid returned value.
   */
   void
   vcdinfo_classify_itemid (uint16_t i_itemid, 
@@ -485,7 +486,6 @@ extern "C" {
   char * vcdinfo_get_publisher_id(const vcdinfo_obj_t *p_vcdinfo);
   
   /**
-   \fn vcdinfo_get_return_offset(const vcdinfo_obj_t *p_vcdinfo);
    \brief Get return offset for a given LID. 
    \return  VCDINFO_INVALID_OFFSET is returned on error or if LID has no 
    "return" entry. Otherwise the LID offset is returned.
@@ -722,8 +722,6 @@ extern "C" {
   vcdinfo_lid_get_itemid(const vcdinfo_obj_t *p_vcdinfo, lid_t lid);
   
   /*!
-    \fn vcdinfo_lid_get_offset(const vcdinfo_obj_t *p_vcdinfo, 
-                                    unsigned int i_entry);
     \brief Get offset i_entry for a given LID. 
     \return VCDINFO_INVALID_OFFSET is returned if obj on error or obj
     is NULL. Otherwise the LID offset is returned.

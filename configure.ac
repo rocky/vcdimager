@@ -348,6 +348,7 @@ AC_CONFIG_FILES([ \
 	frontends/xml/Makefile \
 	frontends/cli/Makefile \
 	docs/Makefile \
+        docs/doxygen/Doxyfile \
 	example/Makefile \
 	test/check_common_fn \
 	test/Makefile \

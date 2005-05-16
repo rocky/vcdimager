@@ -152,7 +152,6 @@
   int vcdinf_lid_t_cmp (vcdinfo_offset_t *a, vcdinfo_offset_t *b);
 
   /**
-     \fn vcdinf_pld_get_next_offset(const PsdPlayListDescriptor *pld); 
      \brief  Get next offset for a given PSD selector descriptor.  
      \return  VCDINFO_INVALID_OFFSET is returned on error or if pld has no 
      "next" entry or pld is NULL. Otherwise the LID offset is returned.
@@ -172,7 +171,6 @@
 				    unsigned int i);
 
   /**
-     \fn vcdinf_pld_get_prev_offset(const PsdSelectionListDescriptor *pld);
      \brief Get prev offset for a given PSD selector descriptor. 
      \return  VCDINFO_INVALID_OFFSET is returned on error or if pld has no 
      "prev" entry or pld is NULL. Otherwise the LID offset is returned.
@@ -180,7 +178,6 @@
   uint16_t vcdinf_pld_get_prev_offset(const PsdPlayListDescriptor_t *pld);
   
   /**
-     \fn vcdinf_pld_get_return_offset(const PsdPlayListDescriptor *pld);
      \brief Get return offset for a given PLD selector descriptor. 
      \return  VCDINFO_INVALID_OFFSET is returned on error or if pld has no 
      "return" entry or pld is NULL. Otherwise the LID offset is returned.
@@ -193,7 +190,6 @@
   int vcdinf_pld_get_noi (const PsdPlayListDescriptor_t *pld);
   
   /**
-   * \fn vcdinfo_psd_get_default_offset(const PsdSelectionListDescriptor *psd);
    * \brief Get next offset for a given PSD selector descriptor. 
    * \return VCDINFO_INVALID_OFFSET is returned on error or if psd is
    * NULL. Otherwise the LID offset is returned.
@@ -220,7 +216,6 @@
   vcdinf_psd_get_lid_rejected(const PsdSelectionListDescriptor_t *psd);
   
   /**
-     \fn vcdinf_psd_get_next_offset(const PsdSelectionListDescriptor *psd);
      \brief Get "next" offset for a given PSD selector descriptor. 
      \return  VCDINFO_INVALID_OFFSET is returned on error or if psd has no 
      "next" entry or psd is NULL. Otherwise the LID offset is returned.
@@ -237,7 +232,6 @@
   uint16_t vcdinf_psd_get_offset(const PsdSelectionListDescriptor_t *d, 
 				 unsigned int entry_num);
   /**
-     \fn vcdinf_psd_get_prev_offset(const PsdPlayListDescriptor *psd);
      \brief Get "prev" offset for a given PSD selector descriptor. 
      \return  VCDINFO_INVALID_OFFSET is returned on error or if psd has no 
      "prev"
@@ -246,8 +240,7 @@
   uint16_t vcdinf_psd_get_prev_offset(const PsdSelectionListDescriptor_t *psd);
   
   /**
-   * \fn vcdinf_psd_get_return_offset(const PsdSelectionListDescriptor *psd);
-   * \brief Get "return" offset for a given PSD selector descriptor. 
+   \brief Get "return" offset for a given PSD selector descriptor. 
    \return  VCDINFO_INVALID_OFFSET is returned on error or if psd has no 
    "return" entry or psd is NULL. Otherwise the LID offset is returned.
   */
