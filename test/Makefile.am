@@ -1,4 +1,4 @@
-noinst_PROGRAMS = mpegscan mpegscan2 testimage testassert
+noinst_PROGRAMS = mpegscan mpegscan2 testimage testassert testvcd
 
 INCLUDES = -I$(top_srcdir) $(POPT_CFLAGS) $(LIBVCD_CFLAGS) $(LIBCDIO_CFLAGS)
 
@@ -8,6 +8,7 @@ testimage_LDADD = $(LIBVCD_LIBS) $(LIBISO9660_LIBS)
 check_sizeof_LDADD = $(LIBVCD_LIBS) $(LIBISO9660_LIBS)
 check_bitfield_LDADD = $(LIBVCD_LIBS) $(LIBISO9660_LIBS)
 testassert_LDADD = $(LIBVCD_LIBS) $(LIBISO9660_LIBS)
+testvcd_LDADD = $(LIBISO9660_LIBS) $(LIBVCDINFO_LIBS) $(LIBVCD_LIBS)
 
 # make check targets
 
@@ -37,9 +38,10 @@ TESTS = \
 	check_vcd11.sh \
 	check_vcd20.sh \
 	check_svcd1.sh \
-	testassert
+	testassert     \
+	testvcd
 
 XFAIL_TESTS = testassert
 
 
-MOSTLYCLEANFILES = *.bin *.cue core core.* *.dump
+MOSTLYCLEANFILES = *.bin *.cue videocd.xml core core.* *.dump
