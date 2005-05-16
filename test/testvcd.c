@@ -80,9 +80,12 @@ main(int argc, const char *argv[])
     printf("Unable to find vcdxrip program; skipping test\n");
     if (SKIP_TEST_RC == i_rc) return SKIP_TEST_RC;
   } else {
+    int i_rc2;
     snprintf(cmd, sizeof(cmd), 
 	     "../frontends/xml/vcdxrip --norip --input=%s", psz_source);
-    i_rc = system(cmd);
+    i_rc2 = system(cmd);
+    if (i_rc2 && SKIP_TEST_RC != i_rc && !i_rc) 
+      i_rc = i_rc2;
   }
   
   return i_rc;
