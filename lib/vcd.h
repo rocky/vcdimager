@@ -80,7 +80,7 @@ extern "C" {
       byte blocksize */
   int
   vcd_obj_add_file (VcdObj_t *p_vcdobj, const char iso_pathname[],
-                    VcdDataSource *p_file, bool raw_flag);
+                    VcdDataSource_t *p_file, bool raw_flag);
   
   int
   vcd_obj_add_dir (VcdObj_t *p_vcdobj, const char iso_pathname[]);

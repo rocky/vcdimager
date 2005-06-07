@@ -84,7 +84,7 @@ typedef struct {
 
 typedef struct {
   char *iso_pathname;
-  VcdDataSource *file;
+  VcdDataSource_t *file;
   bool raw_flag;
   
   uint32_t size;

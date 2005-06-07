@@ -43,7 +43,7 @@ static const char _rcsid[] = "$Id$";
 
 struct _VcdMpegSource
 {
-  VcdDataSource *data_source;
+  VcdDataSource_t *data_source;
 
   bool scanned;
   
@@ -59,7 +59,7 @@ struct _VcdMpegSource
  */
 
 VcdMpegSource_t *
-vcd_mpeg_source_new (VcdDataSource *mpeg_file)
+vcd_mpeg_source_new (VcdDataSource_t *mpeg_file)
 {
   VcdMpegSource_t *new_obj;
   

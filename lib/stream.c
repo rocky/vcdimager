@@ -168,7 +168,7 @@ struct _VcdDataSource {
 };
 
 static void
-_vcd_data_source_open_if_necessary(VcdDataSource *obj)
+_vcd_data_source_open_if_necessary(VcdDataSource_t *obj)
 {
   vcd_assert (obj != NULL);
 
@@ -186,31 +186,33 @@ _vcd_data_source_open_if_necessary(VcdDataSource *obj)
 }
 
 long
-vcd_data_source_seek(VcdDataSource* obj, long offset)
+vcd_data_source_seek(VcdDataSource_t* p_obj, long offset)
 {
-  vcd_assert (obj != NULL);
+  vcd_assert (p_obj != NULL);
 
-  _vcd_data_source_open_if_necessary(obj);
+  _vcd_data_source_open_if_necessary(p_obj);
 
-  if (obj->position != offset) {
+  if (p_obj->position != offset) {
 #ifdef STREAM_DEBUG
-    vcd_warn("had to reposition DataSource from %ld to %ld!", obj->position, offset);
+    vcd_warn("had to reposition DataSource from %ld to %ld!", p_obj->position, 
+             offset);
 #endif
-    obj->position = offset;
-    return obj->op.seek(obj->user_data, offset);
+    p_obj->position = offset;
+    return p_obj->op.seek(p_obj->user_data, offset);
   }
 
   return 0;
 }
 
-VcdDataSource*
-vcd_data_source_new(void *user_data, const vcd_data_source_io_functions *funcs)
+VcdDataSource_t *
+vcd_data_source_new(void *p_user_data, 
+                    const vcd_data_source_io_functions *funcs)
 {
-  VcdDataSource *new_obj;
+  VcdDataSource_t *new_obj;
 
-  new_obj = calloc(1, sizeof (VcdDataSource));
+  new_obj = calloc(1, sizeof (VcdDataSource_t));
 
-  new_obj->user_data = user_data;
+  new_obj->user_data = p_user_data;
   memcpy(&(new_obj->op), funcs, sizeof(vcd_data_source_io_functions));
 
   return new_obj;
@@ -220,7 +222,7 @@ vcd_data_source_new(void *user_data, const vcd_data_source_io_functions *funcs)
     read size*nmemb bytes from obj into ptr 
 */
 long
-vcd_data_source_read(VcdDataSource* obj, void *ptr, long size, long nmemb)
+vcd_data_source_read(VcdDataSource_t* obj, void *ptr, long size, long nmemb)
 {
   long read_bytes;
 
@@ -235,38 +237,38 @@ vcd_data_source_read(VcdDataSource* obj, void *ptr, long size, long nmemb)
 }
 
 long
-vcd_data_source_stat(VcdDataSource* obj)
+vcd_data_source_stat(VcdDataSource_t *p_obj)
 {
-  vcd_assert (obj != NULL);
+  vcd_assert (p_obj != NULL);
 
-  _vcd_data_source_open_if_necessary(obj);
+  _vcd_data_source_open_if_necessary(p_obj);
 
-  return obj->op.stat(obj->user_data);
+  return p_obj->op.stat(p_obj->user_data);
 }
 
 void
-vcd_data_source_close(VcdDataSource* obj)
+vcd_data_source_close(VcdDataSource_t *p_obj)
 {
-  vcd_assert (obj != NULL);
+  vcd_assert (p_obj != NULL);
 
-  if (obj->is_open) {
+  if (p_obj->is_open) {
 #ifdef STREAM_DEBUG
     vcd_debug ("closed source...");
 #endif
-    obj->op.close(obj->user_data);
-    obj->is_open = 0;
-    obj->position = 0;
+    p_obj->op.close(p_obj->user_data);
+    p_obj->is_open = 0;
+    p_obj->position = 0;
   }
 }
 
 void
-vcd_data_source_destroy(VcdDataSource* obj)
+vcd_data_source_destroy(VcdDataSource_t *p_obj)
 {
-  vcd_assert (obj != NULL);
+  vcd_assert (p_obj != NULL);
 
-  vcd_data_source_close(obj);
+  vcd_data_source_close(p_obj);
 
-  obj->op.free(obj->user_data);
+  p_obj->op.free(p_obj->user_data);
 }
 
 

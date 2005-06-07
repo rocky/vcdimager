@@ -71,7 +71,7 @@ struct vcd_mpeg_packet_info;
 /* access functions */
 
 VcdMpegSource_t *
-vcd_mpeg_source_new (VcdDataSource *mpeg_file);
+vcd_mpeg_source_new (VcdDataSource_t *mpeg_file);
 
 /* scan the mpeg file... needed to be called only once */
 typedef struct {

@@ -1001,7 +1001,7 @@ vcd_obj_add_dir (VcdObj_t *obj, const char iso_pathname[])
 
 int
 vcd_obj_add_file (VcdObj_t *obj, const char iso_pathname[],
-                  VcdDataSource *file, bool raw_flag)
+                  VcdDataSource_t *file, bool raw_flag)
 {
   uint32_t size = 0, sectors = 0;
  
@@ -1528,7 +1528,8 @@ _write_m2_raw_image_sector (VcdObj_t *obj, const void *data, uint32_t extent)
 }
 
 static void
-_write_source_mode2_raw (VcdObj_t *obj, VcdDataSource *source, uint32_t extent)
+_write_source_mode2_raw (VcdObj_t *obj, VcdDataSource_t *source, 
+                         uint32_t extent)
 {
   int n;
   uint32_t sectors;
@@ -1550,7 +1551,8 @@ _write_source_mode2_raw (VcdObj_t *obj, VcdDataSource *source, uint32_t extent)
 }
 
 static void
-_write_source_mode2_form1 (VcdObj_t *obj, VcdDataSource *source, uint32_t extent)
+_write_source_mode2_form1 (VcdObj_t *obj, VcdDataSource_t *source, 
+                           uint32_t extent)
 {
   int n;
   uint32_t sectors, size, last_block_size;
@@ -1650,6 +1652,7 @@ _write_sequence (VcdObj_t *obj, int track_idx)
     {
       char buf[1024] = { 0, }, buf2[1024] = { 0, };
       int i;
+      int i_buf2 = 0;
 
       for (i = 0; i < 3; i++)
         if (track->info->ahdr[i].seen)
@@ -1663,14 +1666,16 @@ _write_sequence (VcdObj_t *obj, int track_idx)
               0
             };
 
-            snprintf (buf, sizeof (buf), "audio[%d]: l%d/%2.1fkHz/%dkbps/%s ", 
-                      i,
-                      track->info->ahdr[i].layer,
-                      track->info->ahdr[i].sampfreq / 1000.0,
-                      track->info->ahdr[i].bitrate / 1024,
-                      _mode_str[track->info->ahdr[i].mode]);
+            int i_buf = snprintf (buf, sizeof (buf), 
+                                  "audio[%d]: l%d/%2.1fkHz/%dkbps/%s ", 
+                                  i,
+                                  track->info->ahdr[i].layer,
+                                  track->info->ahdr[i].sampfreq / 1000.0,
+                                  track->info->ahdr[i].bitrate / 1024,
+                                  _mode_str[track->info->ahdr[i].mode]);
                     
-            strncat (buf2, buf, sizeof(buf));
+            strncat (buf2, buf, sizeof(buf2)-i_buf2);
+            i_buf2 += i_buf;
           }      
 
       vcd_info ("writing track %d, %s, %s, %s...", track_idx + 2,

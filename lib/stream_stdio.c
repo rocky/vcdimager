@@ -166,10 +166,10 @@ _stdio_write(void *user_data, const void *buf, long count)
   return written;
 }
 
-VcdDataSource*
+VcdDataSource_t *
 vcd_data_source_new_stdio(const char pathname[])
 {
-  VcdDataSource *new_obj = NULL;
+  VcdDataSource_t *new_obj = NULL;
   vcd_data_source_io_functions funcs = { 0, };
   _UserData *ud = NULL;
   struct stat statbuf;

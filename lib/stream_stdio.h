@@ -28,7 +28,7 @@
 VcdDataSink*
 vcd_data_sink_new_stdio(const char pathname[]);
 
-VcdDataSource*
+VcdDataSource_t *
 vcd_data_source_new_stdio(const char pathname[]);
 
 #endif /* __VCD_STREAM_STDIO_H__ */
