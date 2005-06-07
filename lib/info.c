@@ -1491,7 +1491,7 @@ vcdinfo_get_volume_id(const vcdinfo_obj_t *p_obj)
   char *psz_vol_id2;
   if ( NULL == p_obj || NULL == &p_obj->pvd ) return (NULL);
   psz_vol_id2 = iso9660_get_volume_id(&p_obj->pvd);
-  strncpy(psz_vol_id, psz_vol_id2, ISO_MAX_VOLUMESET_ID);
+  strncpy(psz_vol_id, psz_vol_id2, ISO_MAX_VOLUME_ID);
   free(psz_vol_id2);
   return psz_vol_id;
 }
