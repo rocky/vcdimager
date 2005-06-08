@@ -138,14 +138,15 @@ extern "C" {
   /*! Opaque type used in most routines below. */
   typedef struct _VcdInfo vcdinfo_obj_t;
 
-  /* See enum in vcd_files_private.h */
+  /** A list of all the different kinds of things a segment can represent.
+      See enum in vcd_files_private.h */
   typedef enum {
     VCDINFO_FILES_VIDEO_NOSTREAM    = 0,   
     VCDINFO_FILES_VIDEO_NTSC_STILL  = 1,   
-    VCDINFO_FILES_VIDEO_NTSC_STILL2 = 2,  /* lo+hires*/
+    VCDINFO_FILES_VIDEO_NTSC_STILL2 = 2,   /**< NTCS lo+hires*/
     VCDINFO_FILES_VIDEO_NTSC_MOTION = 3,
     VCDINFO_FILES_VIDEO_PAL_STILL   = 5,    
-    VCDINFO_FILES_VIDEO_PAL_STILL2  = 6,   /* lo+hires*/
+    VCDINFO_FILES_VIDEO_PAL_STILL2  = 6,   /**< PAL lo+hires*/
     VCDINFO_FILES_VIDEO_PAL_MOTION  = 7,
     VCDINFO_FILES_VIDEO_INVALID     = 8
   } vcdinfo_video_segment_type_t;
@@ -157,14 +158,13 @@ extern "C" {
     uint8_t type;
     lid_t lid;
     uint16_t offset;
-    bool in_lot;   /**< Is listed in LOT. */
+    bool in_lot;   /**< This offset is listed in LOT. */
     bool ext;      /**< True if entry comes from offset_x_list. */
   } vcdinfo_offset_t;
   
   /*!
     The kind of entry associated with an selection-item id 
-  */
-  /* See corresponding enum item_type_t in lib/pbc.h. */
+    See corresponding enum item_type_t in lib/pbc.h. */
   typedef enum {
     VCDINFO_ITEM_TYPE_TRACK,
     VCDINFO_ITEM_TYPE_ENTRY,
@@ -181,8 +181,8 @@ extern "C" {
   
   typedef enum {
     VCDINFO_OPEN_ERROR,          /**< Error */
-    VCDINFO_OPEN_VCD,            /**< Is VCD of some sort */
-    VCDINFO_OPEN_OTHER           /**< Is not VCD but something else */
+    VCDINFO_OPEN_VCD,            /**< Is a VCD of some sort */
+    VCDINFO_OPEN_OTHER           /**< Is not VCD, but something else */
   } vcdinfo_open_return_t;
   
   typedef struct 
@@ -259,7 +259,7 @@ extern "C" {
     Return a pointer to the cdio structure for the CD image opened or
     NULL if error.
   */
-  CdIo *
+  CdIo_t *
   vcdinfo_get_cd_image (const vcdinfo_obj_t *p_vcdinfo);
   
   /*!

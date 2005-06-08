@@ -457,7 +457,7 @@ main (int argc, const char *argv[])
 
   for (n = 0; gl.track_fnames[n] != NULL; n++)
     {
-      VcdDataSource *data_source;
+      VcdDataSource_t *data_source;
       
       data_source = vcd_data_source_new_stdio (gl.track_fnames[n]);
 

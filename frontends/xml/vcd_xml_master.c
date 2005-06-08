@@ -44,14 +44,14 @@ static const char _rcsid[] = "$Id$";
    -- until user customization is implemented... */
 static const time_t _vcd_time = 269222400L;
 
-static VcdDataSource *
+static VcdDataSource_t *
 mk_dsource (const char prefix[], const char pathname[])
 {
   vcd_assert (pathname != 0);
 
   if (prefix) 
     {
-      VcdDataSource *retval = 0;
+      VcdDataSource_t *retval = 0;
       char *tmp = calloc(1, strlen (prefix) + strlen (pathname) + 1);
       strcpy (tmp, prefix);
       strcat (tmp, pathname);
@@ -220,7 +220,7 @@ vcd_xml_master (const vcdxml_t *p_vcdxml, VcdImageSink *image_sink,
       
       if (dentry->file_src) 
 	{
-	  VcdDataSource *_source = mk_dsource (p_vcdxml->file_prefix, 
+	  VcdDataSource_t *_source = mk_dsource (p_vcdxml->file_prefix, 
 					       dentry->file_src);
 	  
 	  vcd_assert (_source != NULL);
@@ -236,7 +236,7 @@ vcd_xml_master (const vcdxml_t *p_vcdxml, VcdImageSink *image_sink,
   _CDIO_LIST_FOREACH (node, p_vcdxml->segment_list)
     {
       struct segment_t *p_segment = _cdio_list_node_data (node);
-      VcdDataSource *_source = mk_dsource (p_vcdxml->file_prefix, 
+      VcdDataSource_t *_source = mk_dsource (p_vcdxml->file_prefix, 
 					   p_segment->src);
       CdioListNode_t *p_node2;
       VcdMpegSource_t *_mpeg_src;
@@ -270,7 +270,7 @@ vcd_xml_master (const vcdxml_t *p_vcdxml, VcdImageSink *image_sink,
   _CDIO_LIST_FOREACH (node, p_vcdxml->sequence_list)
     {
       struct sequence_t *sequence = _cdio_list_node_data (node);
-      VcdDataSource *data_source;
+      VcdDataSource_t *data_source;
       CdioListNode_t *node2;
       VcdMpegSource_t *_mpeg_src;
 
