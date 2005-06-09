@@ -64,7 +64,7 @@ mk_dsource (const char prefix[], const char pathname[])
 }
 
 bool 
-vcd_xml_master (const vcdxml_t *p_vcdxml, VcdImageSink *image_sink, 
+vcd_xml_master (const vcdxml_t *p_vcdxml, VcdImageSink_t *p_image_sink, 
 		time_t *create_time)
 {
   VcdObj_t *_vcd;
@@ -315,7 +315,7 @@ vcd_xml_master (const vcdxml_t *p_vcdxml, VcdImageSink *image_sink,
 
     sectors = vcd_obj_begin_output (_vcd);
 
-    vcd_obj_write_image (_vcd, image_sink, vcd_xml_show_progress 
+    vcd_obj_write_image (_vcd, p_image_sink, vcd_xml_show_progress 
 			 ? vcd_xml_write_progress_cb : NULL, 
 			 NULL, &_vcd_time);
 

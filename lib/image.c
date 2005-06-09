@@ -2,7 +2,7 @@
     $Id$
 
     Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
-                  2002 Rocky Bernstein <rocky@panix.com>
+                  2002, 2005 Rocky Bernstein <rocky@panix.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -45,42 +45,43 @@ struct _VcdImageSink {
   vcd_image_sink_funcs op;
 };
 
-VcdImageSink *
-vcd_image_sink_new (void *user_data, const vcd_image_sink_funcs *funcs)
+VcdImageSink_t *
+vcd_image_sink_new (void *p_user_data, const vcd_image_sink_funcs *funcs)
 {
-  VcdImageSink *new_obj;
+  VcdImageSink_t *new_obj;
 
-  new_obj = calloc(1, sizeof (VcdImageSink));
+  new_obj = calloc(1, sizeof (VcdImageSink_t));
 
-  new_obj->user_data = user_data;
+  new_obj->user_data = p_user_data;
   new_obj->op = *funcs;
 
   return new_obj;
 }
 
 void
-vcd_image_sink_destroy (VcdImageSink *obj)
+vcd_image_sink_destroy (VcdImageSink_t *p_obj)
 {
-  vcd_assert (obj != NULL);
+  vcd_assert (p_obj != NULL);
   
-  obj->op.free (obj->user_data);
-  free (obj);
+  p_obj->op.free (p_obj->user_data);
+  free (p_obj);
 }
 
 int
-vcd_image_sink_set_cuesheet (VcdImageSink *obj, const CdioList_t *vcd_cue_list)
+vcd_image_sink_set_cuesheet (VcdImageSink_t *p_obj, 
+                             const CdioList_t *vcd_cue_list)
 {
-  vcd_assert (obj != NULL);
+  vcd_assert (p_obj != NULL);
 
-  return obj->op.set_cuesheet (obj->user_data, vcd_cue_list);
+  return p_obj->op.set_cuesheet (p_obj->user_data, vcd_cue_list);
 }
 
 int
-vcd_image_sink_write (VcdImageSink *obj, void *buf, lsn_t lsn)
+vcd_image_sink_write (VcdImageSink_t *p_obj, void *p_buf, lsn_t lsn)
 {
-  vcd_assert (obj != NULL);
+  vcd_assert (p_obj != NULL);
 
-  return obj->op.write (obj->user_data, buf, lsn);
+  return p_obj->op.write (p_obj->user_data, p_buf, lsn);
 }
 
 /*!
@@ -88,7 +89,7 @@ vcd_image_sink_write (VcdImageSink *obj, void *buf, lsn_t lsn)
 */
 
 int
-vcd_image_sink_set_arg (VcdImageSink *obj, const char key[],
+vcd_image_sink_set_arg (VcdImageSink_t *obj, const char key[],
 			const char value[])
 {
   vcd_assert (obj != NULL);

@@ -25,7 +25,7 @@
 #include <time.h>
 
 bool vcd_xml_master (const vcdxml_t *p_vcdxml, 
-		     VcdImageSink *image_sink, time_t *create_time);
+		     VcdImageSink_t *p_image_sink, time_t *p_create_time);
 
 #endif /* __VCD_XML_MASTER_H__ */
 

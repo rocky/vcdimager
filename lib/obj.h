@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2000, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -110,7 +110,7 @@ struct _VcdObj {
   unsigned track_rear_margin;
 
   /* output */
-  VcdImageSink *image_sink;
+  VcdImageSink_t *image_sink;
 
   /* ... */
   unsigned iso_size;

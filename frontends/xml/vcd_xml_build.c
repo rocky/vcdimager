@@ -353,10 +353,10 @@ _do_cl (int argc, const char *argv[])
   return 0;
 }
 
-static VcdImageSink *
+static VcdImageSink_t *
 _create_sink (void)
 {
-  VcdImageSink *image_sink = NULL;
+  VcdImageSink_t *image_sink = NULL;
   CdioListNode_t *node;
 
   switch (gl.img_type)
@@ -446,7 +446,7 @@ main (int argc, const char *argv[])
     xmlNodePtr root;
     xmlNsPtr ns;
     vcdxml_t vcdxml;
-    VcdImageSink *image_sink;
+    VcdImageSink_t *image_sink;
 
     vcd_xml_init (&vcdxml);
     

@@ -237,7 +237,7 @@ _sink_set_arg (void *user_data, const char key[], const char value[])
   return 0;
 }
 
-VcdImageSink *
+VcdImageSink_t *
 vcd_image_sink_new_bincue (void)
 {
   _img_bincue_snk_t *_data;

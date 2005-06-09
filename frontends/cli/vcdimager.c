@@ -471,16 +471,16 @@ main (int argc, const char *argv[])
 
   {
     unsigned sectors;
-    VcdImageSink *image_sink;
+    VcdImageSink_t *p_image_sink;
 
-    image_sink = vcd_image_sink_new_bincue ();
+    p_image_sink = vcd_image_sink_new_bincue ();
 
-    vcd_image_sink_set_arg (image_sink, "bin", gl.image_fname);
-    vcd_image_sink_set_arg (image_sink, "cue", gl.cue_fname);
-    vcd_image_sink_set_arg (image_sink, "sector", 
+    vcd_image_sink_set_arg (p_image_sink, "bin", gl.image_fname);
+    vcd_image_sink_set_arg (p_image_sink, "cue", gl.cue_fname);
+    vcd_image_sink_set_arg (p_image_sink, "sector", 
                             gl.sector_2336_flag ? "2336" : "2352");
     
-    if (!image_sink)
+    if (!p_image_sink)
       {
         vcd_error ("failed to create image object");
         exit (EXIT_FAILURE);
@@ -488,12 +488,13 @@ main (int argc, const char *argv[])
 
     sectors = vcd_obj_begin_output (gl_vcd_obj);
 
-    vcd_obj_write_image (gl_vcd_obj, image_sink, NULL, NULL, &create_time);
+    vcd_obj_write_image (gl_vcd_obj, p_image_sink, NULL, NULL, &create_time);
 
     vcd_obj_end_output (gl_vcd_obj);
 
     {
-      unsigned _bytes = sectors * (gl.sector_2336_flag ? M2RAW_SECTOR_SIZE : CDIO_CD_FRAMESIZE_RAW);
+      unsigned _bytes = sectors * 
+        (gl.sector_2336_flag ? M2RAW_SECTOR_SIZE : CDIO_CD_FRAMESIZE_RAW);
       char *_msfstr = cdio_lba_to_msf_str (sectors);
 
       fprintf (stdout, 

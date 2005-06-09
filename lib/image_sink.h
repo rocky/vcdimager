@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2001, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@
 
 /* VcdImageSink ( --> image writer) */
 
-typedef struct _VcdImageSink VcdImageSink;
+typedef struct _VcdImageSink VcdImageSink_t;
 
 typedef struct {
   uint32_t lsn;
@@ -48,33 +48,34 @@ typedef struct {
 } vcd_cue_t;
 
 typedef struct {
-  int (*set_cuesheet) (void *user_data, const CdioList *vcd_cue_list);
-  int (*write) (void *user_data, const void *buf, lsn_t lsn);
-  void (*free) (void *user_data);
-  int (*set_arg) (void *user_data, const char key[], const char value[]);
+  int (*set_cuesheet) (void *user_data, const CdioList_t *p_vcd_cue_list);
+  int (*write) (void *p_user_data, const void *buf, lsn_t lsn);
+  void (*free) (void *p_user_data);
+  int (*set_arg) (void *p_user_data, const char key[], const char value[]);
 } vcd_image_sink_funcs;
 
-VcdImageSink *
+VcdImageSink_t *
 vcd_image_sink_new (void *user_data, const vcd_image_sink_funcs *funcs);
 
 void
-vcd_image_sink_destroy (VcdImageSink *obj);
+vcd_image_sink_destroy (VcdImageSink_t *p_obj);
 
 int
-vcd_image_sink_set_cuesheet (VcdImageSink *obj, const CdioList *vcd_cue_list);
+vcd_image_sink_set_cuesheet (VcdImageSink_t *p_obj, 
+			     const CdioList_t *p_vcd_cue_list);
 
 int
-vcd_image_sink_write (VcdImageSink *obj, void *buf, lsn_t lsn);
+vcd_image_sink_write (VcdImageSink_t *p_obj, void *buf, lsn_t lsn);
 
 /*!
   Set the arg "key" with "value" in the target device.
 */
 int
-vcd_image_sink_set_arg (VcdImageSink *obj, const char key[], 
+vcd_image_sink_set_arg (VcdImageSink_t *p_obj, const char key[], 
 			const char value[]);
 
-VcdImageSink * vcd_image_sink_new_nrg (void);
-VcdImageSink * vcd_image_sink_new_bincue (void);
-VcdImageSink * vcd_image_sink_new_cdrdao (void);
+VcdImageSink_t * vcd_image_sink_new_nrg (void);
+VcdImageSink_t * vcd_image_sink_new_bincue (void);
+VcdImageSink_t * vcd_image_sink_new_cdrdao (void);
 
 #endif /* __VCD_IMAGE_SINK_H__ */

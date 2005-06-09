@@ -2264,16 +2264,16 @@ vcd_obj_append_pbc_node (VcdObj_t *obj, struct _pbc_t *_pbc)
 }
 
 int
-vcd_obj_write_image (VcdObj_t *obj, VcdImageSink *image_sink,
+vcd_obj_write_image (VcdObj_t *p_obj, VcdImageSink_t *p_image_sink,
                      progress_callback_t callback, void *user_data,
                      const time_t *create_time)
 {
   CdioListNode_t *node;
 
-  vcd_assert (obj != NULL);
-  vcd_assert (obj->in_output);
+  vcd_assert (p_obj != NULL);
+  vcd_assert (p_obj->in_output);
 
-  if (!image_sink)
+  if (!p_image_sink)
     return -1;
 
   /* start with meta info */
@@ -2289,7 +2289,7 @@ vcd_obj_write_image (VcdObj_t *obj, VcdImageSink *image_sink,
     _cue->lsn = 0;
     _cue->type = VCD_CUE_TRACK_START;
 
-    _CDIO_LIST_FOREACH (node, obj->mpeg_sequence_list)
+    _CDIO_LIST_FOREACH (node, p_obj->mpeg_sequence_list)
       {
         mpeg_sequence_t *track = _cdio_list_node_data (node);
         CdioListNode_t *entry_node;
@@ -2297,14 +2297,14 @@ vcd_obj_write_image (VcdObj_t *obj, VcdImageSink *image_sink,
         _cdio_list_append (cue_list, 
                            (_cue = calloc(1, sizeof (vcd_cue_t))));
         
-        _cue->lsn = track->relative_start_extent + obj->iso_size;
-        _cue->lsn -= obj->track_pregap;
+        _cue->lsn = track->relative_start_extent + p_obj->iso_size;
+        _cue->lsn -= p_obj->track_pregap;
         _cue->type = VCD_CUE_PREGAP_START;
 
         _cdio_list_append (cue_list, 
                            (_cue = calloc(1, sizeof (vcd_cue_t))));
 
-        _cue->lsn = track->relative_start_extent + obj->iso_size;
+        _cue->lsn = track->relative_start_extent + p_obj->iso_size;
         _cue->type = VCD_CUE_TRACK_START;
 
         _CDIO_LIST_FOREACH (entry_node, track->entry_list)
@@ -2314,9 +2314,9 @@ vcd_obj_write_image (VcdObj_t *obj, VcdImageSink *image_sink,
             _cdio_list_append (cue_list, 
                                (_cue = calloc(1, sizeof (vcd_cue_t))));
             
-            _cue->lsn = obj->iso_size;
+            _cue->lsn = p_obj->iso_size;
             _cue->lsn += track->relative_start_extent;
-            _cue->lsn += obj->track_front_margin;
+            _cue->lsn += p_obj->track_front_margin;
             _cue->lsn += _entry->aps.packet_no;
 
             _cue->type = VCD_CUE_SUBINDEX;
@@ -2327,15 +2327,15 @@ vcd_obj_write_image (VcdObj_t *obj, VcdImageSink *image_sink,
 
     _cdio_list_append (cue_list, (_cue = calloc(1, sizeof (vcd_cue_t))));
 
-    _cue->lsn = obj->relative_end_extent + obj->iso_size;
+    _cue->lsn = p_obj->relative_end_extent + p_obj->iso_size;
 
-    _cue->lsn += obj->leadout_pregap;
+    _cue->lsn += p_obj->leadout_pregap;
 
     _cue->type = VCD_CUE_END;
 
     /* send it to image object */
 
-    vcd_image_sink_set_cuesheet (image_sink, cue_list);
+    vcd_image_sink_set_cuesheet (p_image_sink, cue_list);
 
     _cdio_list_free (cue_list, true);
   }
@@ -2345,51 +2345,53 @@ vcd_obj_write_image (VcdObj_t *obj, VcdImageSink *image_sink,
   {
     unsigned track;
 
-    vcd_assert (obj != NULL);
-    vcd_assert (obj->sectors_written == 0);
+    vcd_assert (p_obj != NULL);
+    vcd_assert (p_obj->sectors_written == 0);
 
-    vcd_assert (obj->in_output);
+    vcd_assert (p_obj->in_output);
 
-    obj->progress_callback = callback;
-    obj->callback_user_data = user_data;
-    obj->image_sink = image_sink;
+    p_obj->progress_callback = callback;
+    p_obj->callback_user_data = user_data;
+    p_obj->image_sink = p_image_sink;
   
-    if (_callback_wrapper (obj, true))
+    if (_callback_wrapper (p_obj, true))
       return 1;
 
-    if (_write_vcd_iso_track (obj, create_time))
+    if (_write_vcd_iso_track (p_obj, create_time))
       return 1;
 
-    if (obj->update_scan_offsets)
+    if (p_obj->update_scan_offsets)
       vcd_info ("'update scan offsets' option enabled for the following tracks!");
 
-    for (track = 0;track < _cdio_list_length (obj->mpeg_sequence_list);track++)
+    for (track = 0;
+         track < _cdio_list_length (p_obj->mpeg_sequence_list);
+         track++)
       {
-        obj->in_track++;
+        p_obj->in_track++;
 
-        if (_callback_wrapper (obj, true))
+        if (_callback_wrapper (p_obj, true))
           return 1;
 
-        if (_write_sequence (obj, track))
+        if (_write_sequence (p_obj, track))
           return 1;
       }
 
-    if (obj->leadout_pregap)
+    if (p_obj->leadout_pregap)
       {
-        int n, lastsect = obj->sectors_written;
+        int n, lastsect = p_obj->sectors_written;
 
         vcd_debug ("writting post-gap ('leadout pregap')...");
         
-        for (n = 0; n < obj->leadout_pregap; n++)
-          _write_m2_image_sector (obj, zero, lastsect++, 0, 0, SM_FORM2, 0);
+        for (n = 0; n < p_obj->leadout_pregap; n++)
+          _write_m2_image_sector (p_obj, zero, lastsect++, 0, 0, SM_FORM2, 0);
       }
 
-    if (_callback_wrapper (obj, true))
+    if (_callback_wrapper (p_obj, true))
       return 1;
 
-    obj->image_sink = NULL;
+    p_obj->image_sink = NULL;
   
-    vcd_image_sink_destroy (image_sink);
+    vcd_image_sink_destroy (p_image_sink);
 
     return 0; /* ok */
   }

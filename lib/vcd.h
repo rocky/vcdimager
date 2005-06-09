@@ -148,7 +148,7 @@ extern "C" {
   /** writes the actual bin image file; a return value != 0 means the
       action was aborted by user or some other error has occured... */
   int
-  vcd_obj_write_image (VcdObj_t *p_vcdobj, VcdImageSink *p_image_sink,
+  vcd_obj_write_image (VcdObj_t *p_vcdobj, VcdImageSink_t *p_image_sink,
                        progress_callback_t callback, void *p_user_data,
                        const time_t *p_create_time);
   

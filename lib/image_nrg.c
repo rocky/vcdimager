@@ -329,7 +329,7 @@ _sink_set_arg (void *user_data, const char key[], const char value[])
   return 0;
 }
 
-VcdImageSink *
+VcdImageSink_t *
 vcd_image_sink_new_nrg (void)
 {
   _img_nrg_snk_t *_data;
