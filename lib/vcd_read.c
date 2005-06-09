@@ -43,7 +43,7 @@ read_pvd(CdIo_t *cdio, iso9660_pvd_t *pvd)
     return false;
   }
   
-  if (strncmp (pvd->id, ISO_STANDARD_ID, strlen (ISO_STANDARD_ID)))
+  if (memcmp (pvd->id, ISO_STANDARD_ID, sizeof (ISO_STANDARD_ID)))
     {
       vcd_error ("unexpected ID encountered (expected `"
 		ISO_STANDARD_ID "', got `%.5s'", pvd->id);
