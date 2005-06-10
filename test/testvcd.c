@@ -48,6 +48,8 @@
 
 #define SKIP_TEST_RC 77
 
+#define FRONTEND_DIR "../frontends/"
+
 int
 main(int argc, const char *argv[])
 {
@@ -68,25 +70,25 @@ main(int argc, const char *argv[])
   vcd_loglevel_default = VCD_LOG_WARN;
   vcdinfo_close(p_vcdinfo);
 
-  if (0 != stat("../frontends/cli/vcd-info", &statbuf)) {
+  if (0 != stat(FRONTEND_DIR "cli/vcd-info", &statbuf)) {
     printf("Unable to find vcd-info program; skipping test\n");
     i_rc = SKIP_TEST_RC;
   } else {
-    snprintf(cmd, sizeof(cmd), "../frontends/cli/vcd-info -i %s", psz_source);
+    snprintf(cmd, sizeof(cmd), FRONTEND_DIR "cli/vcd-info -i %s", psz_source);
     i_rc = system(cmd);
   }
   
-  if (0 != stat("../frontends/xml/vcdxrip", &statbuf)) {
+  if (0 != stat(FRONTEND_DIR "xml/vcdxrip", &statbuf)) {
     printf("Unable to find vcdxrip program; skipping test\n");
-    if (SKIP_TEST_RC == i_rc) return SKIP_TEST_RC;
   } else {
     int i_rc2;
     snprintf(cmd, sizeof(cmd), 
-	     "../frontends/xml/vcdxrip --norip --input=%s", psz_source);
+	     FRONTEND_DIR "xml/vcdxrip --norip --input=%s", psz_source);
     i_rc2 = system(cmd);
     if (i_rc2 && SKIP_TEST_RC != i_rc && !i_rc) 
       i_rc = i_rc2;
   }
   
+  free(psz_source);
   return i_rc;
 }
