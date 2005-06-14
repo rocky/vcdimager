@@ -1256,6 +1256,8 @@ _vcd_log_handler (vcd_log_level_t level, const char message[])
 #define DEFAULT_XML_FNAME      "videocd.xml"
 #define DEFAULT_IMG_FNAME      "videocd.bin"
 
+poptContext optCon;
+
 int
 main (int argc, const char *argv[])
 {
@@ -1264,7 +1266,7 @@ main (int argc, const char *argv[])
 
   /* cl params */
   char *xml_fname = NULL;
-  char *img_fname = NULL;
+  char *source_name = NULL;
   int norip_flag = 0;
   int nocommand_comment_flag = 0;
   int nofile_flag = 0;
@@ -1276,17 +1278,15 @@ main (int argc, const char *argv[])
   int _gui_flag = 0;
   int _track_flag=0;
   int _x_track_flag=0;
-  bool b_free_xml_fname = false;
-  bool b_free_img_fname = false;
 
   enum { 
-    CL_SOURCE_UNDEF = DRIVER_UNKNOWN, 
-    CL_SOURCE_BINCUE= DRIVER_BINCUE,
-    CL_SOURCE_NRG   = DRIVER_NRG,
-    CL_SOURCE_CDRDAO= DRIVER_CDRDAO,
-    CL_SOURCE_CDROM = DRIVER_DEVICE,
-    CL_VERSION      = 20
-  } _img_type = CL_SOURCE_UNDEF;
+    OP_SOURCE_UNDEF = DRIVER_UNKNOWN, 
+    OP_SOURCE_BINCUE= DRIVER_BINCUE,
+    OP_SOURCE_NRG   = DRIVER_NRG,
+    OP_SOURCE_CDRDAO= DRIVER_CDRDAO,
+    OP_SOURCE_CDROM = DRIVER_DEVICE,
+    OP_VERSION      = 20
+  } source_type = OP_SOURCE_UNDEF;
 
   vcd_xml_progname = "vcdxrip";
 
@@ -1297,7 +1297,6 @@ main (int argc, const char *argv[])
     cdio_log_set_handler ( (cdio_log_handler_t) _vcd_log_handler);
 
   {
-    poptContext optCon = NULL;
     int opt;
 
     struct poptOption optionsTable[] = {
@@ -1305,28 +1304,28 @@ main (int argc, const char *argv[])
        "specify xml file for output (default: '" DEFAULT_XML_FNAME "')",
        "FILE"},
 
-      {"bin-file", 'b', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &img_fname, 
-       CL_SOURCE_BINCUE,
+      {"bin-file", 'b', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &source_name, 
+       OP_SOURCE_BINCUE,
        "set image file as source (default: '" DEFAULT_IMG_FNAME "')", 
        "FILE"},
 
-      {"cue-file", 'c', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &img_fname, 
-       CL_SOURCE_BINCUE, "set \"cue\" CD-ROM disk image file as source", "FILE"},
+      {"cue-file", 'c', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &source_name, 
+       OP_SOURCE_BINCUE, "set \"cue\" CD-ROM disk image file as source", "FILE"},
 
-      {"nrg-file", 'N', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &img_fname, 
-       CL_SOURCE_NRG, "set Nero CD-ROM disk image image file as source",
+      {"nrg-file", 'N', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &source_name, 
+       OP_SOURCE_NRG, "set Nero CD-ROM disk image image file as source",
        "FILE"},
 
-      {"toc-file", '\0', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &img_fname, 
-       CL_SOURCE_CDRDAO, "set \"toc\" CD-ROM disk image file as source", "FILE"},
-      {"cdrom-device", 'C', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &img_fname,
-       CL_SOURCE_CDROM,"set CDROM device as source", "DEVICE"},
+      {"toc-file", '\0', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &source_name, 
+       OP_SOURCE_CDRDAO, "set \"toc\" CD-ROM disk image file as source", "FILE"},
+      {"cdrom-device", 'C', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &source_name,
+       OP_SOURCE_CDROM,"set CDROM device as source", "DEVICE"},
 
       {"sector-2336", '\0', POPT_ARG_NONE, &sector_2336_flag, 0,
        "use 2336 byte sector mode for image file"},
 
-      {"input", 'i', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &img_fname, 
-       CL_SOURCE_UNDEF, 
+      {"input", 'i', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &source_name, 
+       OP_SOURCE_UNDEF, 
        "set source and determine if \"bin\" image or device", "FILE"},
 
       {"no-ext-psd", '\0', POPT_ARG_NONE, &no_ext_psd_flag, 0,
@@ -1367,43 +1366,43 @@ main (int argc, const char *argv[])
 
       {"gui", '\0', POPT_ARG_NONE, &_gui_flag, 0, "enable GUI mode"},
 
-      {"version", 'V', POPT_ARG_NONE, NULL, CL_VERSION,
+      {"version", 'V', POPT_ARG_NONE, NULL, OP_VERSION,
        "display version and copyright information and exit"},
 	   
       POPT_AUTOHELP {NULL, 0, 0, NULL, 0}
     };
 
-    optCon = poptGetContext ("vcdimager", argc, argv, optionsTable, 0);
+    optCon = poptGetContext (NULL, argc, argv, optionsTable, 0);
 
-    if (poptReadDefaultConfig (optCon, 0)) 
-      vcd_warn ("reading popt configuration failed"); 
-
-    while ((opt = poptGetNextOpt (optCon)) != -1)
+    while ((opt = poptGetNextOpt (optCon)) >= 0)
       switch (opt)
 	{
-	case CL_VERSION:
+	case OP_VERSION:
           vcd_xml_gui_mode = _gui_flag;
           vcd_xml_print_version ();
+	  poptFreeContext(optCon);
 	  exit (EXIT_SUCCESS);
 	  break;
 
-	case CL_SOURCE_NRG:
-	case CL_SOURCE_CDRDAO:
-	case CL_SOURCE_BINCUE:
-	case CL_SOURCE_CDROM:
-	  if (_img_type)
+	case OP_SOURCE_UNDEF:
+	case OP_SOURCE_BINCUE:
+	case OP_SOURCE_CDRDAO:
+	case OP_SOURCE_NRG:
+	case OP_SOURCE_CDROM:
+	  if (OP_SOURCE_UNDEF != source_type && !source_name)
 	    {
 	      vcd_error ("Only one image (type) supported at once - try --help");
 	      exit (EXIT_FAILURE);
 	    }
-	  _img_type = opt;
+	  source_type = opt;
 	  break;
-
+	
 	default:
 	  fprintf (stderr, "%s: %s\n", 
 		   poptBadOption(optCon, POPT_BADOPTION_NOALIAS),
 		   poptStrerror(opt));
 	  fprintf (stderr, "error while parsing command line - try --help\n");
+	  poptFreeContext(optCon);
 	  exit (EXIT_FAILURE);
 	  break;
       }
@@ -1414,7 +1413,6 @@ main (int argc, const char *argv[])
     if (poptGetArgs (optCon) != NULL)
       vcd_error ("Why are you giving me non-option arguments? -- try --help");
 
-    poptFreeContext (optCon);
   }
 
   if (_quiet_flag)
@@ -1432,13 +1430,12 @@ main (int argc, const char *argv[])
 
   if (!xml_fname) {
     xml_fname = strdup (DEFAULT_XML_FNAME);
-    b_free_xml_fname = true;
   }
 
   /* If we don't specify a driver_id or a source_name, scan the
      system for a CD that contains a VCD.
    */
-  if (NULL == img_fname && _img_type == DRIVER_UNKNOWN) {
+  if (NULL == source_name && source_type == DRIVER_UNKNOWN) {
     char **cd_drives=NULL;
     cd_drives = cdio_get_devices_with_cap(NULL, 
                 (CDIO_FS_ANAL_SVCD|CDIO_FS_ANAL_CVD|CDIO_FS_ANAL_VIDEOCD
@@ -1447,19 +1444,18 @@ main (int argc, const char *argv[])
     if ( NULL == cd_drives || NULL == cd_drives[0] ) {
       return VCDINFO_OPEN_ERROR;
     }
-    img_fname = strdup(cd_drives[0]);
-    b_free_img_fname = true;
+    source_name = strdup(cd_drives[0]);
     cdio_free_device_list(cd_drives);
   }
 
-  img_src = cdio_open(img_fname, _img_type);
+  img_src = cdio_open(source_name, source_type);
   if (NULL == img_src) {
     vcd_error ("Error determining place to read from.");
     exit (EXIT_FAILURE);
   }
   
-  if (NULL == img_fname) 
-    img_fname = cdio_get_default_device(img_src);
+  if (NULL == source_name) 
+    source_name = cdio_get_default_device(img_src);
 
   vcdxml.comment = vcd_xml_dump_cl_comment (argc, argv, 
 					      nocommand_comment_flag);
@@ -1498,10 +1494,11 @@ main (int argc, const char *argv[])
   vcd_info ("Writing XML description to `%s'...", xml_fname);
   vcd_xml_dump (&vcdxml, xml_fname);
   vcd_xml_destroy(&vcdxml);
-  if (b_free_xml_fname) free(xml_fname);
-  if (b_free_img_fname) free(img_fname);
+  free(xml_fname);
+  free(source_name);
+  poptFreeContext(optCon);
 
   cdio_destroy (img_src);
   vcd_info ("done");
-  return 0;
+  return EXIT_SUCCESS;
 }
