@@ -2025,6 +2025,43 @@ vcdinfo_close(vcdinfo_obj_t *p_obj)
   return(true);
 }
 
+/*! Return the selection number of the area that a point is enclosed in.
+   In short we return < 0 on an error of some kind.
+   If the VCD contains no extended selection list return -1.
+   If we are not in an extended selection list LID, return -2.
+   If there no area encloses the point return -3
+ */
+int 
+vcdinfo_get_area_selection(const vcdinfo_obj_t *p_vcdinfo, 
+                           lid_t lid, int16_t x, int16_t y)
+{
+  /* dbg_print(INPUT_DBG_CALL, "Called\n"); */
+  PsdListDescriptor_t pxd;
+  if (! vcdinfo_lid_get_pxd(p_vcdinfo, &pxd, lid) )
+    return -1;
+  if  (pxd.descriptor_type != PSD_TYPE_EXT_SELECTION_LIST &&
+       !pxd.psd->flags.SelectionAreaFlag) 
+    return -2;
+  {
+    const PsdSelectionListDescriptorExtended_t *d2 = 
+                  (const void *) &(pxd.psd->ofs[pxd.psd->nos]);
+    int i;
+    const int n = vcdinf_get_num_selections(pxd.psd);
+    for (i = 0; i < n; i++) {
+      vcd_debug("x1: %d, y1 %d, x2: %d, y2 %d",
+             d2->area[i].x1, d2->area[i].y1, d2->area[i].y2, d2->area[i].y2 );
+      if (d2->area[i].x1 <= x && 
+          d2->area[i].y1 <= y &&
+          d2->area[i].x2 >= x &&
+          d2->area[i].y2 >= y ) {
+        return i + vcdinf_get_bsn(pxd.psd);
+      }
+    }
+  }
+  return -3;
+  
+}
+
 
 /* 
  * Local variables:

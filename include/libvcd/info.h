@@ -255,6 +255,15 @@ extern "C" {
   char *
   vcdinfo_get_application_id(vcdinfo_obj_t *p_vcdinfo);
   
+  /*! Return the selection number of the area that a point is enclosed in.
+     In short we return < 0 on an error of some kind.
+     If the VCD contains no extended selection list return -1.
+     If we are not in an extended selection list LID, return -2.
+     If there no area encloses the point return -3
+   */
+  int 
+  vcdinfo_get_area_selection(const vcdinfo_obj_t *p_vcdinfo, 
+                             lid_t lid, int16_t x, int16_t y);
   /*!
     Return a pointer to the cdio structure for the CD image opened or
     NULL if error.
@@ -734,7 +743,7 @@ extern "C" {
     False is returned if not found.
   */
   bool vcdinfo_lid_get_pxd(const vcdinfo_obj_t *p_vcdinfo, 
-			   PsdListDescriptor_t *pxd, uint16_t lid);
+			   PsdListDescriptor_t *pxd, lid_t lid);
   
   /*!  Return the entry number closest and before the given LSN.
   */

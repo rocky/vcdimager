@@ -2,6 +2,15 @@ $Id$
 
 see ChangeLog for more information
 
+version 0.7.23 (development)
+=====================================
+
+* Add libvcdinfo vcdinfo_get_area_selection() a routine get the 
+  selection number represented by an area for a specified a point
+  location
+* hack on memory leaks some more
+* vcdxrip options more like vcd-info options
+
 version 0.7.22 (development)
 =====================================
 2005-05-14
