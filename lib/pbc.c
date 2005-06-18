@@ -802,7 +802,7 @@ _vcd_pbc_node_write (const VcdObj_t *obj, const pbc_t *p_pbc, void *buf,
 }
 
 pbc_t *
-vcd_pbc_new (enum pbc_type_t type)
+vcd_pbc_new (pbc_type_t type)
 {
   pbc_t *p_pbc;
 

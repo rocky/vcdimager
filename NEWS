@@ -10,6 +10,7 @@ version 0.7.23 (development)
   location
 * hack on memory leaks some more
 * vcdxrip options more like vcd-info options
+* check that selection area hot-spot values don't exceed 255. 
 
 version 0.7.22 (development)
 =====================================

@@ -258,47 +258,47 @@ get_psd_size (VcdObj_t *obj, bool extended)
 }
 
 void
-set_psd_vcd (VcdObj_t *obj, void *buf, bool extended)
+set_psd_vcd (VcdObj_t *p_obj, void *buf, bool b_extended)
 {
   CdioListNode_t *node;
 
-  if (extended)
-    vcd_assert (_vcd_obj_has_cap_p (obj, _CAP_PBC_X));
+  if (b_extended)
+    vcd_assert (_vcd_obj_has_cap_p (p_obj, _CAP_PBC_X));
 
-  vcd_assert (_vcd_pbc_available (obj));
+  vcd_assert (_vcd_pbc_available (p_obj));
 
-  _CDIO_LIST_FOREACH (node, obj->pbc_list)
+  _CDIO_LIST_FOREACH (node, p_obj->pbc_list)
     {
       pbc_t *p_pbc = _cdio_list_node_data (node);
       char *_buf = buf;
-      unsigned offset = (extended ? p_pbc->offset_ext : p_pbc->offset);
+      unsigned offset = (b_extended ? p_pbc->offset_ext : p_pbc->offset);
       
       vcd_assert (offset % INFO_OFFSET_MULT == 0);
 
-      _vcd_pbc_node_write (obj, p_pbc, _buf + offset, extended);
+      _vcd_pbc_node_write (p_obj, p_pbc, _buf + offset, b_extended);
     }
 }
 
 void
-set_lot_vcd(VcdObj_t *obj, void *buf, bool extended)
+set_lot_vcd(VcdObj_t *p_obj, void *buf, bool b_extended)
 {
   LotVcd_t *lot_vcd = NULL;
-  CdioListNode_t *node;
+  CdioListNode_t *p_node;
 
-  if (extended)
-    vcd_assert (_vcd_obj_has_cap_p (obj, _CAP_PBC_X));
+  if (b_extended)
+    vcd_assert (_vcd_obj_has_cap_p (p_obj, _CAP_PBC_X));
 
-  vcd_assert (_vcd_pbc_available (obj));
+  vcd_assert (_vcd_pbc_available (p_obj));
 
   lot_vcd = calloc(1, sizeof (LotVcd_t));
   memset(lot_vcd, 0xff, sizeof(LotVcd_t));
 
   lot_vcd->reserved = 0x0000;
 
-  _CDIO_LIST_FOREACH (node, obj->pbc_list)
+  _CDIO_LIST_FOREACH (p_node, p_obj->pbc_list)
     {
-      pbc_t *p_pbc = _cdio_list_node_data (node);
-      unsigned int offset = extended ? p_pbc->offset_ext : p_pbc->offset;
+      pbc_t *p_pbc = _cdio_list_node_data (p_node);
+      unsigned int offset = b_extended ? p_pbc->offset_ext : p_pbc->offset;
       
       vcd_assert (offset % INFO_OFFSET_MULT == 0);
 
@@ -315,18 +315,18 @@ set_lot_vcd(VcdObj_t *obj, void *buf, bool extended)
 }
 
 void
-set_info_vcd(VcdObj_t *obj, void *buf)
+set_info_vcd(VcdObj_t *p_obj, void *buf)
 {
   InfoVcd_t info_vcd;
-  CdioListNode_t *node = NULL;
+  CdioListNode_t *p_node = NULL;
   int n = 0;
 
   vcd_assert (sizeof (InfoVcd_t) == 2048);
-  vcd_assert (_cdio_list_length (obj->mpeg_track_list) <= 98);
+  vcd_assert (_cdio_list_length (p_obj->mpeg_track_list) <= 98);
   
   memset (&info_vcd, 0, sizeof (info_vcd));
 
-  switch (obj->type)
+  switch (p_obj->type)
     {
     case VCD_TYPE_VCD:
       memcpy (info_vcd.ID, INFO_ID_VCD, sizeof (info_vcd.ID));
@@ -364,21 +364,21 @@ set_info_vcd(VcdObj_t *obj, void *buf)
     }
   
   iso9660_strncpy_pad (info_vcd.album_desc, 
-                       obj->info_album_id,
+                       p_obj->info_album_id,
                        sizeof(info_vcd.album_desc), ISO9660_DCHARS); 
   /* fixme, maybe it's VCD_ACHARS? */
 
-  info_vcd.vol_count = uint16_to_be (obj->info_volume_count);
-  info_vcd.vol_id = uint16_to_be (obj->info_volume_number);
+  info_vcd.vol_count = uint16_to_be (p_obj->info_volume_count);
+  info_vcd.vol_id = uint16_to_be (p_obj->info_volume_number);
 
-  if (_vcd_obj_has_cap_p (obj, _CAP_PAL_BITS))
+  if (_vcd_obj_has_cap_p (p_obj, _CAP_PAL_BITS))
     {
       /* NTSC/PAL bitset */
 
       n = 0;
-      _CDIO_LIST_FOREACH (node, obj->mpeg_track_list)
+      _CDIO_LIST_FOREACH (p_node, p_obj->mpeg_track_list)
         {
-          mpeg_track_t *track = _cdio_list_node_data (node);
+          mpeg_track_t *track = _cdio_list_node_data (p_node);
           
           const struct vcd_mpeg_stream_vid_info *p_info = 
             &track->info->shdr[0];
@@ -397,45 +397,45 @@ set_info_vcd(VcdObj_t *obj, void *buf)
         }
     }
 
-  if (_vcd_obj_has_cap_p (obj, _CAP_PBC))
+  if (_vcd_obj_has_cap_p (p_obj, _CAP_PBC))
     {
-      info_vcd.flags.restriction = obj->info_restriction;
-      info_vcd.flags.use_lid2 = obj->info_use_lid2;
-      info_vcd.flags.use_track3 = obj->info_use_seq2;
+      info_vcd.flags.restriction = p_obj->info_restriction;
+      info_vcd.flags.use_lid2 = p_obj->info_use_lid2;
+      info_vcd.flags.use_track3 = p_obj->info_use_seq2;
 
-      if (_vcd_obj_has_cap_p (obj, _CAP_PBC_X)
-          &&_vcd_pbc_available (obj))
+      if (_vcd_obj_has_cap_p (p_obj, _CAP_PBC_X)
+          &&_vcd_pbc_available (p_obj))
         info_vcd.flags.pbc_x = true;
       
-      info_vcd.psd_size = uint32_to_be (get_psd_size (obj, false));
-      info_vcd.offset_mult = _vcd_pbc_available (obj) ? INFO_OFFSET_MULT : 0;
-      info_vcd.lot_entries = uint16_to_be (_vcd_pbc_max_lid (obj));
+      info_vcd.psd_size = uint32_to_be (get_psd_size (p_obj, false));
+      info_vcd.offset_mult = _vcd_pbc_available (p_obj) ? INFO_OFFSET_MULT : 0;
+      info_vcd.lot_entries = uint16_to_be (_vcd_pbc_max_lid (p_obj));
       
-      if (_cdio_list_length (obj->mpeg_segment_list))
+      if (_cdio_list_length (p_obj->mpeg_segment_list))
         {
           unsigned segments = 0;
         
-          if (!_vcd_pbc_available (obj))
+          if (!_vcd_pbc_available (p_obj))
             vcd_warn ("segment items available, but no PBC items set!"
                       " SPIs will be unreachable");
 
-          _CDIO_LIST_FOREACH (node, obj->mpeg_segment_list)
+          _CDIO_LIST_FOREACH (p_node, p_obj->mpeg_segment_list)
             {
-              mpeg_segment_t *p_segment = _cdio_list_node_data (node);
+              mpeg_segment_t *p_segment = _cdio_list_node_data (p_node);
               unsigned int idx;
               InfoSpiContents_t contents = { 0, };
 
               contents.video_type = 
                 _derive_vid_type (p_segment->info,
-                                  _vcd_obj_has_cap_p (obj, _CAP_4C_SVCD));
+                                  _vcd_obj_has_cap_p (p_obj, _CAP_4C_SVCD));
 
               contents.audio_type = 
                 _derive_aud_type (p_segment->info,
-                                  _vcd_obj_has_cap_p (obj, _CAP_4C_SVCD));
+                                  _vcd_obj_has_cap_p (p_obj, _CAP_4C_SVCD));
 
               contents.ogt =
                 _derive_ogt_type (p_segment->info,
-                                  _vcd_obj_has_cap_p (obj, _CAP_4C_SVCD));
+                                  _vcd_obj_has_cap_p (p_obj, _CAP_4C_SVCD));
 
               if (!contents.video_type && !contents.audio_type)
                 vcd_warn ("segment item '%s' seems contains neither video "
@@ -456,7 +456,7 @@ set_info_vcd(VcdObj_t *obj, void *buf)
 
           info_vcd.item_count = uint16_to_be (segments); 
 
-          cdio_lba_to_msf (cdio_lsn_to_lba(obj->mpeg_segment_start_extent), 
+          cdio_lba_to_msf (cdio_lsn_to_lba(p_obj->mpeg_segment_start_extent), 
                            &info_vcd.first_seg_addr);
         }
     }
@@ -469,7 +469,7 @@ set_tracks_svd_v30 (VcdObj_t *p_vcdobj, void *buf)
 {
   char tracks_svd_buf[ISO_BLOCKSIZE] = { 0, };
   TracksSVD_v30_t *tracks_svd = (void *) tracks_svd_buf;
-  CdioListNode_t *node;
+  CdioListNode_t *p_node;
   double playtime;
   int n;
 
@@ -480,9 +480,9 @@ set_tracks_svd_v30 (VcdObj_t *p_vcdobj, void *buf)
 
   n = 0;
   playtime = 0;
-  _CDIO_LIST_FOREACH (node, p_vcdobj->mpeg_track_list)
+  _CDIO_LIST_FOREACH (p_node, p_vcdobj->mpeg_track_list)
     {
-      mpeg_track_t *track = _cdio_list_node_data (node);
+      mpeg_track_t *track = _cdio_list_node_data (p_node);
       int i;
 
       playtime += track->info->playing_time;
@@ -524,7 +524,7 @@ set_tracks_svd (VcdObj_t *p_vcdobj, void *buf)
   char tracks_svd[ISO_BLOCKSIZE] = { 0, };
   TracksSVD_t    *tracks_svd1 = (void *) tracks_svd;
   TracksSVD2_t   *tracks_svd2;
-  CdioListNode_t *node;
+  CdioListNode_t *p_node;
   int n;
 
   vcd_assert (_vcd_obj_has_cap_p (p_vcdobj, _CAP_4C_SVCD));
@@ -547,9 +547,9 @@ set_tracks_svd (VcdObj_t *p_vcdobj, void *buf)
 
   n = 0;
 
-  _CDIO_LIST_FOREACH (node, p_vcdobj->mpeg_track_list)
+  _CDIO_LIST_FOREACH (p_node, p_vcdobj->mpeg_track_list)
     {
-      mpeg_track_t *track = _cdio_list_node_data (node);
+      mpeg_track_t *track = _cdio_list_node_data (p_node);
       const double playtime = track->info->playing_time;
 
       int _video;

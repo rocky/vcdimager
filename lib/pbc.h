@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2000, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,12 +28,12 @@
 #include "util.h"
 #include "vcd.h"
 
-enum pbc_type_t {
+typedef enum {
   PBC_INVALID = 0,
   PBC_PLAYLIST,
   PBC_SELECTION,
   PBC_END
-};
+} pbc_type_t;
 
 typedef struct psd_area_t pbc_area_t; /* fixme */
 #define pbc_area_t_SIZEOF struct_psd_area_t_SIZEOF
@@ -54,7 +54,7 @@ vcd_pbc_area_new (uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2)
 /* typedef struct _pbc_t pbc_t; */
 
 struct _pbc_t {
-  enum pbc_type_t type;
+  pbc_type_t type;
 
   char *id;
 
@@ -118,7 +118,7 @@ enum item_type_t {
 /* functions */
 
 pbc_t *
-vcd_pbc_new (enum pbc_type_t type);
+vcd_pbc_new (pbc_type_t type);
 
 pbc_t *
 _vcd_pbc_init (pbc_t *p_pbc);
@@ -127,31 +127,31 @@ void
 vcd_pbc_destroy (pbc_t *p_pbc);
 
 unsigned
-_vcd_pbc_lid_lookup (const VcdObj_t *obj, const char item_id[]);
+_vcd_pbc_lid_lookup (const VcdObj_t *p_obj, const char item_id[]);
 
 enum item_type_t
-_vcd_pbc_lookup (const VcdObj_t *obj, const char item_id[]);
+_vcd_pbc_lookup (const VcdObj_t *p_obj, const char item_id[]);
 
 uint16_t
-_vcd_pbc_pin_lookup (const VcdObj_t *obj, const char item_id[]);
+_vcd_pbc_pin_lookup (const VcdObj_t *p_obj, const char item_id[]);
 
 unsigned 
-_vcd_pbc_list_calc_size (const pbc_t *_pbc, bool extended);
+_vcd_pbc_list_calc_size (const pbc_t *_pbc, bool b_extended);
 
 bool
-_vcd_pbc_finalize (VcdObj_t *obj);
+_vcd_pbc_finalize (VcdObj_t *p_obj);
 
 bool
-_vcd_pbc_available (const VcdObj_t *obj);
+_vcd_pbc_available (const VcdObj_t *p_obj);
 
 uint16_t
-_vcd_pbc_max_lid (const VcdObj_t *obj);
+_vcd_pbc_max_lid (const VcdObj_t *p_obj);
 
 void
-_vcd_pbc_node_write (const VcdObj_t *obj, const pbc_t *_pbc, void *buf,
-		     bool extended);
+_vcd_pbc_node_write (const VcdObj_t *p_obj, const pbc_t *_pbc, void *p_buf,
+		     bool b_extended);
 
 void
-_vcd_pbc_check_unreferenced (const VcdObj_t *obj);
+_vcd_pbc_check_unreferenced (const VcdObj_t *p_obj);
 
 #endif /* __VCD_PBC_H__ */
