@@ -307,26 +307,41 @@ _get_prop_long (const char _prop_name[], xmlDocPtr doc, xmlNodePtr node,
 }
 
 static void
-_get_area_props (pbc_area_t **_area,
+_get_area_props (pbc_area_t **pp_area,
 		 xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
-  *_area = vcd_pbc_area_new (_get_prop_long ("x1", doc, node, ns),
-			     _get_prop_long ("y1", doc, node, ns),
-			     _get_prop_long ("x2", doc, node, ns),
-			     _get_prop_long ("y2", doc, node, ns));
+  const uint32_t x1 = _get_prop_long ("x1", doc, node, ns);
+  const uint32_t y1 = _get_prop_long ("y1", doc, node, ns);
+  const uint32_t x2 = _get_prop_long ("x2", doc, node, ns);
+  const uint32_t y2 = _get_prop_long ("y2", doc, node, ns);
+
+  if (x1 > 255) 
+    vcd_warn ("XML: value of x1 (%u) is greater than 255", x1);
+
+  if (x2 > 255) 
+    vcd_error ("XML: value of x2 (%u) is greater than 255", x2);
+
+  if (y1 > 255) 
+    vcd_error ("XML: value of y1 (%u) is greater than 255", y1);
+
+  if (y2 > 255) 
+    vcd_error ("XML: value of y2 (%u) is greater than 255", y2);
+
+  *pp_area = vcd_pbc_area_new ( x1, y1, x2, y2);
 }
 
 static bool
-_parse_pbc_selection (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+_parse_pbc_selection (vcdxml_t *p_obj, xmlDocPtr doc, xmlNodePtr node, 
+		      xmlNsPtr ns)
 {
   xmlNodePtr cur;
-  pbc_t *_pbc;
+  pbc_t *p_pbc;
 
-  _pbc = vcd_pbc_new (PBC_SELECTION);
-  _pbc->bsn = 1;
-  _pbc->loop_count = 1;
+  p_pbc = vcd_pbc_new (PBC_SELECTION);
+  p_pbc->bsn = 1;
+  p_pbc->loop_count = 1;
 
-  _parse_common_pbcattrs (_pbc, doc, node, ns);
+  _parse_common_pbcattrs (p_pbc, doc, node, ns);
 
   FOR_EACH (cur, node)
     {
@@ -335,68 +350,68 @@ _parse_pbc_selection (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns
       
       if (!xmlStrcmp (cur->name, (const xmlChar *) "prev"))
 	{ 
-	  GET_PROP_STR (_pbc->prev_id, (const xmlChar *) "ref", doc, cur, ns); 
-	  _get_area_props (&_pbc->prev_area, doc, cur, ns);
+	  GET_PROP_STR (p_pbc->prev_id, (const xmlChar *) "ref", doc, cur, ns);
+	  _get_area_props (&p_pbc->prev_area, doc, cur, ns);
 	}
       else if (!xmlStrcmp (cur->name, (const xmlChar *) "next"))
 	{ 
-	  GET_PROP_STR (_pbc->next_id, "ref", doc, cur, ns); 
-	  _get_area_props (&_pbc->next_area, doc, cur, ns);
+	  GET_PROP_STR (p_pbc->next_id, "ref", doc, cur, ns); 
+	  _get_area_props (&p_pbc->next_area, doc, cur, ns);
 	}
       else if (!xmlStrcmp (cur->name, (const xmlChar *) "return"))
 	{
-	  GET_PROP_STR (_pbc->retn_id, "ref", doc, cur, ns); 
-	  _get_area_props (&_pbc->return_area, doc, cur, ns);
+	  GET_PROP_STR (p_pbc->retn_id, "ref", doc, cur, ns); 
+	  _get_area_props (&p_pbc->return_area, doc, cur, ns);
 	}
       else if (!xmlStrcmp (cur->name, (const xmlChar *) "timeout"))
 	{ 
-	  GET_PROP_STR (_pbc->timeout_id, "ref", doc, cur, ns); 
+	  GET_PROP_STR (p_pbc->timeout_id, "ref", doc, cur, ns); 
 	}
       else if (!xmlStrcmp (cur->name, (const xmlChar *) "multi-default"))
 	{
 	  char *_numeric = NULL;
 
-	  _pbc->selection_type = _SEL_MULTI_DEF;
+	  p_pbc->selection_type = _SEL_MULTI_DEF;
 
 	  GET_PROP_STR (_numeric, "numeric", doc, cur, ns); 
 	  if (_numeric && !strcmp (_numeric, "disabled"))
-	    _pbc->selection_type = _SEL_MULTI_DEF_NO_NUM;
+	    p_pbc->selection_type = _SEL_MULTI_DEF_NO_NUM;
 	}
       else if (!xmlStrcmp (cur->name, (const xmlChar *) "default"))
 	{ 
-	  _pbc->selection_type = _SEL_NORMAL;
-	  GET_PROP_STR (_pbc->default_id, "ref", doc, cur, ns); 
+	  p_pbc->selection_type = _SEL_NORMAL;
+	  GET_PROP_STR (p_pbc->default_id, "ref", doc, cur, ns); 
 	}
       else if (!xmlStrcmp (cur->name, (const xmlChar *) "bsn"))
-	{ _pbc->bsn = _get_elem_long ("bsn", doc, cur, ns); }
+	{ p_pbc->bsn = _get_elem_long ("bsn", doc, cur, ns); }
       else if (!xmlStrcmp (cur->name, (const xmlChar *) "loop"))
 	{ 
 	  char *_tmp = NULL;
 	  
-	  _pbc->loop_count = _get_elem_long ("loop", doc, cur, ns); 
+	  p_pbc->loop_count = _get_elem_long ("loop", doc, cur, ns); 
 
 	  GET_PROP_STR (_tmp, "jump-timing", doc, cur, ns);
 	  
 	  if (_tmp && !strcmp (_tmp, "delayed"))
-	    _pbc->jump_delayed = true;
+	    p_pbc->jump_delayed = true;
 	}
       else if (!xmlStrcmp (cur->name, (const xmlChar *) "wait"))
-	{ _pbc->timeout_time = _get_elem_long ("wait", doc, cur, ns); }
+	{ p_pbc->timeout_time = _get_elem_long ("wait", doc, cur, ns); }
       else if (!xmlStrcmp (cur->name, (const xmlChar *) "play-item"))
-	{ GET_PROP_STR (_pbc->item_id, "ref", doc, cur, ns); }
+	{ GET_PROP_STR (p_pbc->item_id, "ref", doc, cur, ns); }
       else if (!xmlStrcmp (cur->name, (const xmlChar *) "select"))
 	{
 	  char *_select_ref = NULL;
 
 	  GET_PROP_STR (_select_ref, "ref", doc, cur, ns); 
 
-	  _cdio_list_append (_pbc->select_id_list, _select_ref);
+	  _cdio_list_append (p_pbc->select_id_list, _select_ref);
 
 	  {
 	    pbc_area_t *_area = NULL;
 
 	    _get_area_props (&_area, doc, cur, ns);
-	    _cdio_list_append (_pbc->select_area_list, _area);
+	    _cdio_list_append (p_pbc->select_area_list, _area);
 	  }
 	  
 	}
@@ -404,13 +419,14 @@ _parse_pbc_selection (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns
 	vcd_assert_not_reached ();
     }
 
-  _cdio_list_append (obj->pbc_list, _pbc);
+  _cdio_list_append (p_obj->pbc_list, p_pbc);
 
   return false;
 }
 
 static bool
-_parse_pbc_playlist (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+_parse_pbc_playlist (vcdxml_t *p_obj, xmlDocPtr doc, xmlNodePtr node, 
+		     xmlNsPtr ns)
 {
   xmlNodePtr cur;
   pbc_t *_pbc;
@@ -448,13 +464,14 @@ _parse_pbc_playlist (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 	vcd_assert_not_reached ();
     }
 
-  _cdio_list_append (obj->pbc_list, _pbc);
+  _cdio_list_append (p_obj->pbc_list, _pbc);
 
   return false;
 }
 
 static bool
-_parse_pbc_endlist (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+_parse_pbc_endlist (vcdxml_t *p_obj, xmlDocPtr doc, xmlNodePtr node, 
+		    xmlNsPtr ns)
 {
   xmlNodePtr cur;
   pbc_t *_pbc;
@@ -476,13 +493,13 @@ _parse_pbc_endlist (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 	vcd_assert_not_reached ();
     }
 
-  _cdio_list_append (obj->pbc_list, _pbc);
+  _cdio_list_append (p_obj->pbc_list, _pbc);
 
   return false;
 }
 
 static bool
-_parse_pbc (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+_parse_pbc (vcdxml_t *p_obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
   xmlNodePtr cur;
 
@@ -494,11 +511,11 @@ _parse_pbc (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 	continue; 
 
       if (!xmlStrcmp (cur->name, (const xmlChar *) "selection")) 
-	rc = _parse_pbc_selection (obj, doc, cur, ns);
+	rc = _parse_pbc_selection (p_obj, doc, cur, ns);
       else if (!xmlStrcmp (cur->name, (const xmlChar *) "playlist")) 
-	rc = _parse_pbc_playlist (obj, doc, cur, ns);
+	rc = _parse_pbc_playlist (p_obj, doc, cur, ns);
       else if (!xmlStrcmp (cur->name, (const xmlChar *) "endlist")) 
-	rc = _parse_pbc_endlist (obj, doc, cur, ns);
+	rc = _parse_pbc_endlist (p_obj, doc, cur, ns);
       else 
 	vcd_assert_not_reached ();
 
@@ -514,14 +531,15 @@ _parse_pbc (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
  */
 
 static bool
-_parse_mpeg_sequence (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+_parse_mpeg_sequence (vcdxml_t *p_obj, xmlDocPtr doc, xmlNodePtr node, 
+		      xmlNsPtr ns)
 {
   struct sequence_t *sequence;
   xmlNodePtr cur;
 
   sequence = calloc(1, sizeof (struct sequence_t));
 
-  _cdio_list_append (obj->sequence_list, sequence);
+  _cdio_list_append (p_obj->sequence_list, sequence);
 
   GET_PROP_STR (sequence->id, "id", doc, node, ns);
   sequence->src = vcd_xml_utf8_to_filename ((unsigned char *)sequence->src); // memleak
@@ -566,7 +584,7 @@ _parse_mpeg_sequence (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns
 }
 
 static bool
-_parse_sequences (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+_parse_sequences (vcdxml_t *p_obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
   xmlNodePtr cur;
 
@@ -579,7 +597,7 @@ _parse_sequences (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 
 
       if (!xmlStrcmp (cur->name, (const xmlChar *) "sequence-item")) 
-	rc = _parse_mpeg_sequence (obj, doc, cur, ns);
+	rc = _parse_mpeg_sequence (p_obj, doc, cur, ns);
       else
 	vcd_assert_not_reached ();
 
@@ -595,7 +613,8 @@ _parse_sequences (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
  */
 
 static bool
-_parse_file (vcdxml_t *obj, const char path[], xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+_parse_file (vcdxml_t *p_obj, const char path[], xmlDocPtr doc, 
+	     xmlNodePtr node, xmlNsPtr ns)
 {
   xmlNodePtr cur;
   char *_name = NULL;
@@ -638,14 +657,15 @@ _parse_file (vcdxml_t *obj, const char path[], xmlDocPtr doc, xmlNodePtr node, x
     _data->file_src = strdup (_src);
     _data->file_raw = (_format && !strcmp (_format, "mixed"));
 
-    _cdio_list_append (obj->filesystem, _data);
+    _cdio_list_append (p_obj->filesystem, _data);
   }
 
   return false;
 }
 
 static bool
-_parse_folder (vcdxml_t *obj, const char path[], xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+_parse_folder (vcdxml_t *p_obj, const char path[], xmlDocPtr doc, 
+	       xmlNodePtr node, xmlNsPtr ns)
 {
   xmlNodePtr cur;
   char *new_path = NULL;
@@ -680,7 +700,7 @@ _parse_folder (vcdxml_t *obj, const char path[], xmlDocPtr doc, xmlNodePtr node,
 	    _data->name = strdup (new_path);
 	    _data->file_src = NULL;
 
-	    _cdio_list_append (obj->filesystem, _data);
+	    _cdio_list_append (p_obj->filesystem, _data);
 	  }
 	  
 
@@ -691,9 +711,9 @@ _parse_folder (vcdxml_t *obj, const char path[], xmlDocPtr doc, xmlNodePtr node,
 	  /* fixme, free _tmp?? */
 	}
       else if (!xmlStrcmp (cur->name, (const xmlChar *) "folder")) 
-	rc = _parse_folder (obj, new_path, doc, cur, ns);
+	rc = _parse_folder (p_obj, new_path, doc, cur, ns);
       else if (!xmlStrcmp (cur->name, (const xmlChar *) "file"))
-	rc = _parse_file (obj, new_path, doc, cur, ns);
+	rc = _parse_file (p_obj, new_path, doc, cur, ns);
       else 
 	vcd_assert_not_reached ();
       
@@ -712,7 +732,8 @@ _parse_folder (vcdxml_t *obj, const char path[], xmlDocPtr doc, xmlNodePtr node,
 }
 
 static bool
-_parse_filesystem (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+_parse_filesystem (vcdxml_t *p_obj, xmlDocPtr doc, xmlNodePtr node, 
+		   xmlNsPtr ns)
 {
   xmlNodePtr cur;
 
@@ -724,9 +745,9 @@ _parse_filesystem (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 	continue; 
 
       if (!xmlStrcmp (cur->name, (const xmlChar *) "folder")) 
-	rc = _parse_folder (obj, "", doc, cur, ns);
+	rc = _parse_folder (p_obj, "", doc, cur, ns);
       else if (!xmlStrcmp (cur->name, (const xmlChar *) "file"))
-	rc = _parse_file (obj, "", doc, cur, ns);
+	rc = _parse_file (p_obj, "", doc, cur, ns);
       else 
 	vcd_assert_not_reached ();
 
@@ -770,18 +791,19 @@ _type_id_by_str (const char class[], const char version[])
 }
 
 static bool
-_parse_videocd (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+_parse_videocd (vcdxml_t *p_obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
   xmlNodePtr cur;
   char *_class = NULL;
   char *_version = NULL;
 
-  vcd_assert (obj != NULL);
+  vcd_assert (p_obj != NULL);
 
   GET_PROP_STR (_class, "class", doc, node, ns);
   GET_PROP_STR (_version, "version", doc, node, ns);
 
-  if ((obj->vcd_type = _type_id_by_str (_class, _version)) == VCD_TYPE_INVALID)
+  p_obj->vcd_type = _type_id_by_str (_class, _version);
+  if (p_obj->vcd_type == VCD_TYPE_INVALID)
     return true;
 
   FOR_EACH (cur, node)
@@ -794,19 +816,19 @@ _parse_videocd (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
       if (!xmlStrcmp (cur->name, (const xmlChar *) "meta")) 
 	{ /* NOOP */ }
       else if (!xmlStrcmp (cur->name, (const xmlChar *) "option")) 
-	rc = _parse_option (obj, doc, cur, ns);
+	rc = _parse_option (p_obj, doc, cur, ns);
       else if (!xmlStrcmp (cur->name, (const xmlChar *) "info")) 
-	rc = _parse_info (obj, doc, cur, ns);
+	rc = _parse_info (p_obj, doc, cur, ns);
       else if (!xmlStrcmp (cur->name, (const xmlChar *) "pvd")) 
-	rc = _parse_pvd (obj, doc, cur, ns);
+	rc = _parse_pvd (p_obj, doc, cur, ns);
       else if (!xmlStrcmp (cur->name, (const xmlChar *) "pbc")) 
-	rc = _parse_pbc (obj, doc, cur, ns);
+	rc = _parse_pbc (p_obj, doc, cur, ns);
       else if (!xmlStrcmp (cur->name, (const xmlChar *) "segment-items")) 
-	rc = _parse_segments (obj, doc, cur, ns);
+	rc = _parse_segments (p_obj, doc, cur, ns);
       else if (!xmlStrcmp (cur->name, (const xmlChar *) "filesystem")) 
-	rc = _parse_filesystem (obj, doc, cur, ns);
+	rc = _parse_filesystem (p_obj, doc, cur, ns);
       else if (!xmlStrcmp (cur->name, (const xmlChar *) "sequence-items")) 
-	rc = _parse_sequences (obj, doc, cur, ns);
+	rc = _parse_sequences (p_obj, doc, cur, ns);
       else vcd_warn ("XML: unexpected element: %s", cur->name);
 
       if (rc)
@@ -821,9 +843,9 @@ _parse_videocd (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
  */
 
 bool
-vcd_xml_parse (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
+vcd_xml_parse (vcdxml_t *p_obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
 {
-  vcd_assert (obj != NULL);
+  vcd_assert (p_obj != NULL);
   vcd_assert (node != NULL);
   vcd_assert (doc != NULL);
 
@@ -833,6 +855,6 @@ vcd_xml_parse (vcdxml_t *obj, xmlDocPtr doc, xmlNodePtr node, xmlNsPtr ns)
       return true;
     }
 
-  return _parse_videocd (obj, doc, node, ns);
+  return _parse_videocd (p_obj, doc, node, ns);
 }
 
