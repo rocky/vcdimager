@@ -1053,8 +1053,13 @@ which can be used for pointer device based selection in addition to the
 @key{NUMERIC} input, and/or for highlighting of areas on the screen on
 selection.
 
-Alas, this very useful feature is not widely supported amongst playing
-devices.
+The coordinate system used in menu-selection areas divides the entire
+viewable part of the screen into coordinates along the x and y axes
+from (x1,y1)=(0,0) in the upper left to the lower right
+(x2,y2)=(255,255), regardess the screen resolution or aspect ratio.
+
+Alas menu-selection areas and menu highlighting, however useful may
+not supported among playing devices.
 
 @subsubheading Multi Default Selection List
 
@@ -2110,16 +2115,20 @@ property for but the very first PBC list, in order to make the
 be rejected.
 
 @item x1 y1 x2 y2
-@cindex Hot spot area coordinates
+@cindex Hot-spot area coordinates
 @tgindex @var{x1}
 @tgindex @var{x2}
 @tgindex @var{y1}
 @tgindex @var{y2}
-Screen Co-ordinates for selection hotspot areas (only supported for
-@code{<selection>} members), with @samp{0,0} being the upper left and
-@samp{255,255} being the lower right screen point. @code{x1} and
-@code{y1} are required to be less than @code{x2} and @code{y2}
-respectively. @xref{Selection List}.
+Screen coordinates for selection-hotspot areas. This is only supported
+for @code{<selection>} members; @samp{0,0} is the upper left left
+screen coordinate and @samp{255,255} is the lower-right screen
+coordinate.  @code{x1} and @code{y1} are required to be less than
+@code{x2} and @code{y2} respectively. This coordinate system is
+independent and does not vary due to actual screen resolution or
+aspect ratio that may be use in display.
+
+@xref{Selection List}.
 
 @item play-item
 @cindex Play nothing item
@@ -2163,6 +2172,14 @@ item} is implicitly referenced.
   %pbcattrs;
 >
 
+<!ENTITY % ofsattrs
+ ref       IDREF       #IMPLIED
+ x1        %XY;        #IMPLIED
+ y1        %XY;        #IMPLIED
+ x2        %XY;        #IMPLIED
+ y2        %XY;        #IMPLIED
+>
+
 <!ELEMENT      bsn                      (#PCDATA)>
 <!ELEMENT      prev                     EMPTY>
 <!ELEMENT      next                     EMPTY>
@@ -2181,6 +2198,14 @@ item} is implicitly referenced.
 <!ATTLIST loop
   jump-timing  (immediate|delayed) 'immediate'
 >
+
+<!ATTLIST prev      %ofsattrs>
+<!ATTLIST next      %ofsattrs>
+<!ATTLIST return    %ofsattrs>
+<!ATTLIST default   %ofsattrs>
+<!ATTLIST select    %ofsattrs>
+<!ATTLIST timeout   ref       IDREF     #IMPLIED>
+<!ATTLIST play-item ref       IDREF     #IMPLIED>
 
 <!ELEMENT      play-item                EMPTY>
 <!ELEMENT      select                   EMPTY>
