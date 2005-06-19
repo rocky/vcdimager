@@ -260,10 +260,16 @@ extern "C" {
      If the VCD contains no extended selection list return -1.
      If we are not in an extended selection list LID, return -2.
      If there no area encloses the point return -3
-   */
+
+     max_x, max_y are the  maximum values that x and y can take on. 
+     They would be the largest coordinate in the screen coordinate space.
+     For example they might be 352, 240 (for VCD) or 704, 480 for SVCD NTSC, 
+     or 704, 576. 
+  */
   int 
   vcdinfo_get_area_selection(const vcdinfo_obj_t *p_vcdinfo, 
-                             lid_t lid, int16_t x, int16_t y);
+                             lid_t lid, int16_t x, int16_t y,
+			     uint16_t max_x, uint16_t max_y);
   /*!
     Return a pointer to the cdio structure for the CD image opened or
     NULL if error.

@@ -2030,10 +2030,16 @@ vcdinfo_close(vcdinfo_obj_t *p_obj)
    If the VCD contains no extended selection list return -1.
    If we are not in an extended selection list LID, return -2.
    If there no area encloses the point return -3
+
+   max_x, max_y are the  maximum values that x and y can take on. 
+   They would be the largest coordinate in the screen coordinate space.
+   For example they might be 352, 240 (for VCD) or 704, 480 for SVCD NTSC, 
+   or 704, 576. 
  */
 int 
 vcdinfo_get_area_selection(const vcdinfo_obj_t *p_vcdinfo, 
-                           lid_t lid, int16_t x, int16_t y)
+                           lid_t lid, int16_t x, int16_t y,
+                           uint16_t max_x, uint16_t max_y)
 {
   /* dbg_print(INPUT_DBG_CALL, "Called\n"); */
   PsdListDescriptor_t pxd;
@@ -2045,15 +2051,19 @@ vcdinfo_get_area_selection(const vcdinfo_obj_t *p_vcdinfo,
   {
     const PsdSelectionListDescriptorExtended_t *d2 = 
                   (const void *) &(pxd.psd->ofs[pxd.psd->nos]);
-    int i;
+    const int32_t scaled_x = x * 255 / max_x;
+    const int32_t scaled_y = y * 255 / max_y;
     const int n = vcdinf_get_num_selections(pxd.psd);
+    int i;
+    vcd_debug("max x %d, max y %d, scaled x: %d, scaled y %d", 
+              max_x, max_y, scaled_x, scaled_y);
     for (i = 0; i < n; i++) {
       vcd_debug("x1: %d, y1 %d, x2: %d, y2 %d",
              d2->area[i].x1, d2->area[i].y1, d2->area[i].y2, d2->area[i].y2 );
-      if (d2->area[i].x1 <= x && 
-          d2->area[i].y1 <= y &&
-          d2->area[i].x2 >= x &&
-          d2->area[i].y2 >= y ) {
+      if (d2->area[i].x1 <= scaled_x && 
+          d2->area[i].y1 <= scaled_y &&
+          d2->area[i].x2 >= scaled_x &&
+          d2->area[i].y2 >= scaled_y ) {
         return i + vcdinf_get_bsn(pxd.psd);
       }
     }
