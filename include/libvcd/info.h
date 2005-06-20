@@ -337,7 +337,7 @@ extern "C" {
     The first entry number is 0.
   */
   vcd_type_t 
-  vcdinfo_get_format_version (vcdinfo_obj_t *p_vcdinfo);
+  vcdinfo_get_format_version (const vcdinfo_obj_t *p_vcdinfo);
   
   /*!
     Return a string giving VCD format (VCD 1.0 VCD 1.1, SVCD, ... 
@@ -545,6 +545,13 @@ extern "C" {
   */
   const msf_t *
   vcdinfo_get_seg_msf(const vcdinfo_obj_t *p_vcdinfo, segnum_t i_seg);
+  
+  /*! Return the x-y resolution for a given segment.
+    Note first i_seg is 0.
+  */
+  void
+  vcdinfo_get_seg_resolution(const vcdinfo_obj_t *p_vcdinfo, segnum_t i_seg,
+			     /*out*/ uint16_t *max_x, /*out*/ uint16_t *max_y);
   
   /*!  
     Return the number of sectors for segment

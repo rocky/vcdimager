@@ -733,7 +733,7 @@ vcdinfo_get_entriesVcd (vcdinfo_obj_t *p_obj)
    The type is also set inside obj.
 */
 vcd_type_t
-vcdinfo_get_format_version (vcdinfo_obj_t *p_obj)
+vcdinfo_get_format_version (const vcdinfo_obj_t *p_obj)
 {
   return p_obj->vcd_type;
 }
@@ -1212,6 +1212,63 @@ vcdinfo_get_seg_msf(const vcdinfo_obj_t *p_obj, segnum_t i_seg)
   }
 }
 
+/*! Return the x-y resolution for a given segment.
+  Note first i_seg is 0.
+*/
+void
+vcdinfo_get_seg_resolution(const vcdinfo_obj_t *p_vcdinfo, segnum_t i_seg,
+                           /*out*/ uint16_t *max_x, /*out*/ uint16_t *max_y)
+{
+  vcdinfo_video_segment_type_t segtype 
+    = vcdinfo_get_video_type(p_vcdinfo, i_seg);
+  segnum_t i_segs = vcdinfo_get_num_segments(p_vcdinfo);
+  
+  if (i_seg >= i_segs) return;
+      
+  switch (segtype) {
+  case VCDINFO_FILES_VIDEO_NTSC_STILL:
+    *max_x = 704;
+    *max_y = 480;
+    break;
+  case VCDINFO_FILES_VIDEO_NTSC_STILL2:
+    *max_x = 352;
+    *max_y = 240;
+    break;
+  case VCDINFO_FILES_VIDEO_PAL_STILL:
+    *max_x = 704;
+    *max_y = 576;
+    break;
+  case VCDINFO_FILES_VIDEO_PAL_STILL2:
+    *max_x = 352;
+    *max_y = 288;
+    break;
+  default:
+    /* */
+    switch (vcdinfo_get_format_version(p_vcdinfo)) {
+    case VCD_TYPE_VCD:
+      *max_x = 352;
+      *max_y = 240;
+      break;
+    case VCD_TYPE_VCD11:
+    case VCD_TYPE_VCD2:
+      *max_x = 352;
+      switch(segtype) {
+      case VCDINFO_FILES_VIDEO_NTSC_MOTION:
+        *max_y = 240;
+        break;
+      case VCDINFO_FILES_VIDEO_PAL_MOTION:
+        *max_y = 288;
+      default:
+        *max_y = 289;
+      }
+      break;
+    default: ;
+    }
+  }
+}
+
+
+  
 /*!  
   Return the number of sectors for segment
   entry_num in obj.  0 is returned if there is no entry.
