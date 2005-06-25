@@ -2113,7 +2113,7 @@ vcdinfo_get_area_selection(const vcdinfo_obj_t *p_vcdinfo,
     const int n = vcdinf_get_num_selections(pxd.psd);
     int i;
     vcd_debug("max x %d, max y %d, scaled x: %d, scaled y %d", 
-              max_x, max_y, scaled_x, scaled_y);
+              max_x, max_y, (int) scaled_x, (int) scaled_y);
     for (i = 0; i < n; i++) {
       vcd_debug("x1: %d, y1 %d, x2: %d, y2 %d",
              d2->area[i].x1, d2->area[i].y1, d2->area[i].y2, d2->area[i].y2 );
