@@ -124,11 +124,13 @@ libvcdinfo_la_LDFLAGS += -Wl,--version-script=libvcdinfo.la.ver
 libvcdinfo.la.ver: $(libvcdinfo_la_OBJECTS)
 	echo 'VCDINFO_$(libvcdinfo_la_MAJOR) {' > $@
 	echo "  global:" >> $@
-	nm $(patsubst %lo,%o,$(libvcdinfo_la_OBJECTS)) | sed -n -e 's/^.*[ 	][ABCDGIRSTW][ABCDGIRSTW]*[ 	][ 	]*\([_A-Za-z][_A-Za-z0-9]*\)$$/    \1;/p' | sort | uniq >> $@
+	objs=`for obj in $(libvcdinfo_la_OBJECTS); do sed -ne "s/^pic_object='\(.*\)'$$/\1/p" $$obj; done`; \
+	nm $${objs} | sed -n -e 's/^.*[ 	][ABCDGIRSTW][ABCDGIRSTW]*[ 	][ 	]*\([_A-Za-z][_A-Za-z0-9]*\)$$/    \1;/p' | sort | uniq >> $@
 	echo '};' >> $@
 
 MOSTLYCLEANFILES = libvcdinfo.la.ver
 
 endif
+
 
 # EOF
