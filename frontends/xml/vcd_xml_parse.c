@@ -316,16 +316,16 @@ _get_area_props (pbc_area_t **pp_area,
   const uint32_t y2 = _get_prop_long ("y2", doc, node, ns);
 
   if (x1 > 255) 
-    vcd_warn ("XML: value of x1 (%u) is greater than 255", x1);
+    vcd_warn ("XML: value of x1 (%u) is greater than 255", (unsigned int) x1);
 
   if (x2 > 255) 
-    vcd_error ("XML: value of x2 (%u) is greater than 255", x2);
+    vcd_error ("XML: value of x2 (%u) is greater than 255", (unsigned int) x2);
 
   if (y1 > 255) 
-    vcd_error ("XML: value of y1 (%u) is greater than 255", y1);
+    vcd_error ("XML: value of y1 (%u) is greater than 255", (unsigned int) y1);
 
   if (y2 > 255) 
-    vcd_error ("XML: value of y2 (%u) is greater than 255", y2);
+    vcd_error ("XML: value of y2 (%u) is greater than 255", (unsigned int) y2);
 
   *pp_area = vcd_pbc_area_new ( x1, y1, x2, y2);
 }
