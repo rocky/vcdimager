@@ -263,7 +263,7 @@ _make_xml (vcdxml_t *obj, const char xml_fname[])
 	  
 	  if (p->file_src)
 	    { /* file */
-	      char *psz_fname_utf8 = vcd_xml_filename_to_utf8 (p->file_src);
+	      unsigned char *psz_fname_utf8 = vcd_xml_filename_to_utf8 (p->file_src);
 	      xmlNodePtr filenode = _get_node_pathname (doc, section, ns, p->name, false);
 
 	      xmlSetProp (filenode, (const xmlChar *) "src", psz_fname_utf8);
@@ -313,7 +313,8 @@ _make_xml (vcdxml_t *obj, const char xml_fname[])
       struct sequence_t *p_sequence =  _cdio_list_node_data (node);
       xmlNodePtr seq_node;
       CdioListNode_t *node2;
-      char *psz_xml_fname_utf8 = vcd_xml_filename_to_utf8 (p_sequence->src);
+      unsigned char *psz_xml_fname_utf8 = 
+	vcd_xml_filename_to_utf8 (p_sequence->src);
 
       seq_node = xmlNewChild (section, ns, (const xmlChar *) "sequence-item", 
 			      NULL);

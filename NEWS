@@ -14,6 +14,7 @@ version 0.7.23 (development)
 * vcdxrip options more like vcd-info options
 * check that selection area hot-spot values don't exceed 255. 
 * Update documentation
+* Remove gcc 4 warnings
 
 version 0.7.22 (development)
 =====================================
