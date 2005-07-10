@@ -4,17 +4,18 @@ see ChangeLog for more information
 
 version 0.7.23 (development)
 =====================================
+2005-07-1?
 
 * Add libvcdinfo vcdinfo_get_area_selection() a routine to get the 
   selection number represented by an area for a specified a point
   location
-* Add libvcdinfo vcdinfo_get_set_resulion() a routine to get the 
+* Add libvcdinfo vcdinfo_get_set_resolution() a routine to get the 
   resultion for a given segment
 * hack on memory leaks some more
 * vcdxrip options more like vcd-info options
 * check that selection area hot-spot values don't exceed 255. 
 * Update documentation
-* Remove gcc 4 warnings
+* Remove gcc 4 warnings and potential problems noted
 
 version 0.7.22 (development)
 =====================================
