@@ -60,14 +60,14 @@ static const char zero[CDIO_CD_FRAMESIZE_RAW] = { 0, };
  */
 
 mpeg_sequence_t *
-_vcd_obj_get_sequence_by_id (VcdObj_t *obj, const char sequence_id[])
+_vcd_obj_get_sequence_by_id (VcdObj_t *p_obj, const char sequence_id[])
 {
   CdioListNode_t *node;
 
   vcd_assert (sequence_id != NULL);
-  vcd_assert (obj != NULL);
+  vcd_assert (p_obj != NULL);
 
-  _CDIO_LIST_FOREACH (node, obj->mpeg_sequence_list)
+  _CDIO_LIST_FOREACH (node, p_obj->mpeg_sequence_list)
     {
       mpeg_sequence_t *_sequence = _cdio_list_node_data (node);
 
@@ -79,14 +79,14 @@ _vcd_obj_get_sequence_by_id (VcdObj_t *obj, const char sequence_id[])
 }
 
 mpeg_sequence_t *
-_vcd_obj_get_sequence_by_entry_id (VcdObj_t *obj, const char entry_id[])
+_vcd_obj_get_sequence_by_entry_id (VcdObj_t *p_obj, const char entry_id[])
 {
   CdioListNode_t *node;
 
   vcd_assert (entry_id != NULL);
-  vcd_assert (obj != NULL);
+  vcd_assert (p_obj != NULL);
 
-  _CDIO_LIST_FOREACH (node, obj->mpeg_sequence_list)
+  _CDIO_LIST_FOREACH (node, p_obj->mpeg_sequence_list)
     {
       mpeg_sequence_t *_sequence = _cdio_list_node_data (node);
       CdioListNode_t *node2;
@@ -113,14 +113,14 @@ _vcd_obj_get_sequence_by_entry_id (VcdObj_t *obj, const char entry_id[])
 }
 
 mpeg_segment_t *
-_vcd_obj_get_segment_by_id (VcdObj_t *obj, const char segment_id[])
+_vcd_obj_get_segment_by_id (VcdObj_t *p_obj, const char segment_id[])
 {
   CdioListNode_t *node;
 
   vcd_assert (segment_id != NULL);
-  vcd_assert (obj != NULL);
+  vcd_assert (p_obj != NULL);
 
-  _CDIO_LIST_FOREACH (node, obj->mpeg_segment_list)
+  _CDIO_LIST_FOREACH (node, p_obj->mpeg_segment_list)
     {
       mpeg_segment_t *_segment = _cdio_list_node_data (node);
 
@@ -132,12 +132,12 @@ _vcd_obj_get_segment_by_id (VcdObj_t *obj, const char segment_id[])
 }
 
 bool
-_vcd_obj_has_cap_p (const VcdObj_t *obj, enum vcd_capability_t capability)
+_vcd_obj_has_cap_p (const VcdObj_t *p_obj, enum vcd_capability_t capability)
 {
   switch (capability)
     {
     case _CAP_VALID:
-      switch (obj->type)
+      switch (p_obj->type)
         {
         case VCD_TYPE_VCD:
         case VCD_TYPE_VCD11:
@@ -154,7 +154,7 @@ _vcd_obj_has_cap_p (const VcdObj_t *obj, enum vcd_capability_t capability)
       break;
 
     case _CAP_MPEG2:
-      switch (obj->type)
+      switch (p_obj->type)
         {
         case VCD_TYPE_VCD:
         case VCD_TYPE_VCD11:
@@ -171,7 +171,7 @@ _vcd_obj_has_cap_p (const VcdObj_t *obj, enum vcd_capability_t capability)
       break;
 
     case _CAP_PBC:
-      switch (obj->type)
+      switch (p_obj->type)
         {
         case VCD_TYPE_VCD:
         case VCD_TYPE_VCD11:
@@ -188,7 +188,7 @@ _vcd_obj_has_cap_p (const VcdObj_t *obj, enum vcd_capability_t capability)
       break;
 
     case _CAP_PBC_X:
-      switch (obj->type)
+      switch (p_obj->type)
         {
         case VCD_TYPE_VCD:
         case VCD_TYPE_VCD11:
@@ -205,7 +205,7 @@ _vcd_obj_has_cap_p (const VcdObj_t *obj, enum vcd_capability_t capability)
       break;
 
     case _CAP_4C_SVCD:
-      switch (obj->type)
+      switch (p_obj->type)
         {
         case VCD_TYPE_VCD:
         case VCD_TYPE_VCD11:
@@ -222,15 +222,15 @@ _vcd_obj_has_cap_p (const VcdObj_t *obj, enum vcd_capability_t capability)
       break;
 
     case _CAP_PAL_BITS:
-      return _vcd_obj_has_cap_p (obj, _CAP_PBC); /* for now */
+      return _vcd_obj_has_cap_p (p_obj, _CAP_PBC); /* for now */
       break;
 
     case _CAP_MPEG1:
-      return !_vcd_obj_has_cap_p (obj, _CAP_MPEG2); /* for now */
+      return !_vcd_obj_has_cap_p (p_obj, _CAP_MPEG2); /* for now */
       break;
 
     case _CAP_TRACK_MARGINS:
-      return !_vcd_obj_has_cap_p (obj, _CAP_MPEG2); /* for now */
+      return !_vcd_obj_has_cap_p (p_obj, _CAP_MPEG2); /* for now */
       break;
     }
 
@@ -245,7 +245,7 @@ _vcd_obj_has_cap_p (const VcdObj_t *obj, enum vcd_capability_t capability)
 VcdObj_t *
 vcd_obj_new (vcd_type_t vcd_type)
 {
-  VcdObj_t *new_obj = NULL;
+  VcdObj_t *p_new_obj = NULL;
   static bool _first = true;
   
   if (_first)
@@ -263,56 +263,56 @@ vcd_obj_new (vcd_type_t vcd_type)
       _first = false;
     }
 
-  new_obj = calloc(1, sizeof (VcdObj_t));
-  new_obj->type = vcd_type;
+  p_new_obj = calloc(1, sizeof (VcdObj_t));
+  p_new_obj->type = vcd_type;
 
-  if (!_vcd_obj_has_cap_p (new_obj, _CAP_VALID))
+  if (!_vcd_obj_has_cap_p (p_new_obj, _CAP_VALID))
     {
       vcd_error ("VCD type not supported");
-      free (new_obj);
+      free (p_new_obj);
       return NULL;
     }
 
   if (vcd_type == VCD_TYPE_VCD)
     vcd_warn ("VCD 1.0 support is experimental -- user feedback needed!");
 
-  new_obj->iso_volume_label = strdup ("");
-  new_obj->iso_publisher_id = strdup ("");
-  new_obj->iso_application_id = strdup ("");
-  new_obj->iso_preparer_id = _vcd_strdup_upper (DEFAULT_ISO_PREPARER_ID);
-  new_obj->info_album_id = strdup ("");
-  new_obj->info_volume_count = 1;
-  new_obj->info_volume_number = 1;
+  p_new_obj->iso_volume_label = strdup ("");
+  p_new_obj->iso_publisher_id = strdup ("");
+  p_new_obj->iso_application_id = strdup ("");
+  p_new_obj->iso_preparer_id = _vcd_strdup_upper (DEFAULT_ISO_PREPARER_ID);
+  p_new_obj->info_album_id = strdup ("");
+  p_new_obj->info_volume_count = 1;
+  p_new_obj->info_volume_number = 1;
 
-  new_obj->custom_file_list = _cdio_list_new ();
-  new_obj->custom_dir_list = _cdio_list_new ();
+  p_new_obj->custom_file_list = _cdio_list_new ();
+  p_new_obj->custom_dir_list = _cdio_list_new ();
 
 
-  new_obj->mpeg_sequence_list = _cdio_list_new ();
+  p_new_obj->mpeg_sequence_list = _cdio_list_new ();
 
-  new_obj->mpeg_segment_list = _cdio_list_new ();
+  p_new_obj->mpeg_segment_list = _cdio_list_new ();
 
-  new_obj->pbc_list = _cdio_list_new ();
+  p_new_obj->pbc_list = _cdio_list_new ();
 
   /* gap's defined by IEC-10149 / ECMA-130 */
 
   /* pre-gap's for tracks but the first one */
-  new_obj->track_pregap = CDIO_PREGAP_SECTORS; 
+  p_new_obj->track_pregap = CDIO_PREGAP_SECTORS; 
   /* post-gap after last track */
-  new_obj->leadout_pregap = CDIO_POSTGAP_SECTORS; 
+  p_new_obj->leadout_pregap = CDIO_POSTGAP_SECTORS; 
 
-  if (_vcd_obj_has_cap_p (new_obj, _CAP_TRACK_MARGINS))
+  if (_vcd_obj_has_cap_p (p_new_obj, _CAP_TRACK_MARGINS))
     {
-      new_obj->track_front_margin = 30;
-      new_obj->track_rear_margin = 45;
+      p_new_obj->track_front_margin = 30;
+      p_new_obj->track_rear_margin  = 45;
     }
   else
     {
-      new_obj->track_front_margin = 0;
-      new_obj->track_rear_margin = 0;
+      p_new_obj->track_front_margin = 0;
+      p_new_obj->track_rear_margin  = 0;
     }
 
-  return new_obj;
+  return p_new_obj;
 }
 
 int 
@@ -591,17 +591,17 @@ vcd_obj_add_sequence_pause (VcdObj_t *obj, const char sequence_id[],
 }
 
 int 
-vcd_obj_add_segment_pause (VcdObj_t *obj, const char segment_id[], 
+vcd_obj_add_segment_pause (VcdObj_t *p_obj, const char segment_id[], 
                             double pause_time, const char pause_id[])
 {
   mpeg_segment_t *_segment;
 
-  vcd_assert (obj != NULL);
+  vcd_assert (p_obj != NULL);
 
   if (segment_id)
-    _segment = _vcd_obj_get_segment_by_id (obj, segment_id);
+    _segment = _vcd_obj_get_segment_by_id (p_obj, segment_id);
   else
-    _segment = _cdio_list_node_data (_cdio_list_end (obj->mpeg_segment_list));
+    _segment = _cdio_list_node_data (_cdio_list_end (p_obj->mpeg_segment_list));
 
   if (!_segment)
     {
@@ -631,30 +631,30 @@ vcd_obj_add_segment_pause (VcdObj_t *obj, const char segment_id[],
 }
 
 static int
-_entry_cmp (entry_t *ent1, entry_t *ent2)
+_entry_cmp (entry_t *p_ent1, entry_t *p_ent2)
 {
-  if (ent1->time < ent2->time)
+  if (p_ent1->time < p_ent2->time)
     return -1;
 
-  if (ent1->time > ent2->time)
+  if (p_ent1->time > p_ent2->time)
     return 1;
 
   return 0;
 }
 
 int 
-vcd_obj_add_sequence_entry (VcdObj_t *obj, const char sequence_id[], 
+vcd_obj_add_sequence_entry (VcdObj_t *p_obj, const char sequence_id[], 
                             double entry_time, const char entry_id[])
 {
   mpeg_sequence_t *p_sequence;
 
-  vcd_assert (obj != NULL);
+  vcd_assert (p_obj != NULL);
 
   if (sequence_id)
-    p_sequence = _vcd_obj_get_sequence_by_id (obj, sequence_id);
+    p_sequence = _vcd_obj_get_sequence_by_id (p_obj, sequence_id);
   else
     p_sequence =
-      _cdio_list_node_data (_cdio_list_end (obj->mpeg_sequence_list));
+      _cdio_list_node_data (_cdio_list_end (p_obj->mpeg_sequence_list));
 
   if (!p_sequence)
     {
@@ -668,7 +668,7 @@ vcd_obj_add_sequence_entry (VcdObj_t *obj, const char sequence_id[],
       return -1;
     }
 
-  if (entry_id && _vcd_pbc_lookup (obj, entry_id))
+  if (entry_id && _vcd_pbc_lookup (p_obj, entry_id))
     {
       vcd_error ("item id (%s) exists already", entry_id);
       return -1;
@@ -691,127 +691,131 @@ vcd_obj_add_sequence_entry (VcdObj_t *obj, const char sequence_id[],
 }
 
 void 
-vcd_obj_destroy (VcdObj_t *obj)
+vcd_obj_destroy (VcdObj_t *p_obj)
 {
-  CdioListNode_t *node;
+  CdioListNode_t *p_node;
 
-  vcd_assert (obj != NULL);
-  vcd_assert (!obj->in_output);
+  vcd_assert (p_obj != NULL);
+  vcd_assert (!p_obj->in_output);
 
-  free (obj->iso_volume_label);
-  free (obj->iso_application_id);
+  free (p_obj->iso_volume_label);
+  free (p_obj->iso_application_id);
 
-  _CDIO_LIST_FOREACH (node, obj->custom_file_list)
+  _CDIO_LIST_FOREACH (p_node, p_obj->custom_file_list)
     {
-      custom_file_t *p = _cdio_list_node_data (node);
+      custom_file_t *p = _cdio_list_node_data (p_node);
     
       free (p->iso_pathname);
     }
 
-  _cdio_list_free (obj->custom_file_list, true);
+  _cdio_list_free (p_obj->custom_file_list, true);
 
-  _cdio_list_free (obj->custom_dir_list, true);
+  _cdio_list_free (p_obj->custom_dir_list, true);
 
-  while (_cdio_list_length (obj->mpeg_sequence_list))
-    _vcd_obj_remove_mpeg_track (obj, 0);
-  _cdio_list_free (obj->mpeg_sequence_list, true);
+  while (_cdio_list_length (p_obj->mpeg_sequence_list))
+    _vcd_obj_remove_mpeg_track (p_obj, 0);
+  _cdio_list_free (p_obj->mpeg_sequence_list, true);
 
-  free (obj);
+  free (p_obj);
 }
 
 int 
-vcd_obj_set_param_uint (VcdObj_t *obj, vcd_parm_t param, unsigned arg)
+vcd_obj_set_param_uint (VcdObj_t *p_obj, vcd_parm_t param, unsigned arg)
 {
-  vcd_assert (obj != NULL);
+  vcd_assert (p_obj != NULL);
 
   switch (param) 
     {
     case VCD_PARM_VOLUME_COUNT:
-      obj->info_volume_count = arg;
-      if (!IN (obj->info_volume_count, 1, 65535))
+      p_obj->info_volume_count = arg;
+      if (!IN (p_obj->info_volume_count, 1, 65535))
         {
-          obj->info_volume_count = CLAMP (obj->info_volume_count, 1, 65535);
+          p_obj->info_volume_count = 
+            CLAMP (p_obj->info_volume_count, 1, 65535);
           vcd_warn ("volume count out of range, clamping to range");
         }
-      vcd_debug ("changed volume count to %u", obj->info_volume_count);
+      vcd_debug ("changed volume count to %u", p_obj->info_volume_count);
       break;
 
     case VCD_PARM_VOLUME_NUMBER:
-      obj->info_volume_number = arg;
-      if (!IN (obj->info_volume_number, 0, 65534))
+      p_obj->info_volume_number = arg;
+      if (!IN (p_obj->info_volume_number, 0, 65534))
         {
-          obj->info_volume_number = CLAMP (obj->info_volume_number, 0, 65534);
+          p_obj->info_volume_number = 
+            CLAMP (p_obj->info_volume_number, 0, 65534);
           vcd_warn ("volume number out of range, clamping to range");
         }
-      vcd_debug ("changed volume number to %u", obj->info_volume_number);
+      vcd_debug ("changed volume number to %u", p_obj->info_volume_number);
       break;
 
     case VCD_PARM_RESTRICTION:
-      obj->info_restriction = arg;
-      if (!IN (obj->info_restriction, 0, 3))
+      p_obj->info_restriction = arg;
+      if (!IN (p_obj->info_restriction, 0, 3))
         {
-          obj->info_restriction = CLAMP (obj->info_restriction, 0, 65534);
+          p_obj->info_restriction = CLAMP (p_obj->info_restriction, 0, 65534);
           vcd_warn ("restriction out of range, clamping to range");
         }
-      vcd_debug ("changed restriction number to %u", obj->info_restriction);
+      vcd_debug ("changed restriction number to %u", p_obj->info_restriction);
       break;
 
     case VCD_PARM_LEADOUT_PREGAP:
-      obj->leadout_pregap = arg;
-      if (!IN (obj->leadout_pregap, 0, 300))
+      p_obj->leadout_pregap = arg;
+      if (!IN (p_obj->leadout_pregap, 0, 300))
         {
-          obj->leadout_pregap = CLAMP (obj->leadout_pregap, 0, 300);
+          p_obj->leadout_pregap = CLAMP (p_obj->leadout_pregap, 0, 300);
           vcd_warn ("ledout pregap out of range, clamping to allowed range");
         }
-      if (obj->leadout_pregap < CDIO_PREGAP_SECTORS)
-        vcd_warn ("track leadout pregap set below %d sectors; created (S)VCD may be non-working", 
+      if (p_obj->leadout_pregap < CDIO_PREGAP_SECTORS)
+        vcd_warn ("track leadout pregap set below %d sectors; "
+                  "created (S)VCD may be non-working", 
                   CDIO_PREGAP_SECTORS);
 
-      vcd_debug ("changed leadout pregap to %u", obj->leadout_pregap);
+      vcd_debug ("changed leadout pregap to %u", p_obj->leadout_pregap);
       break;
 
     case VCD_PARM_TRACK_PREGAP:
-      obj->track_pregap = arg;
-      if (!IN (obj->track_pregap, 1, 300))
+      p_obj->track_pregap = arg;
+      if (!IN (p_obj->track_pregap, 1, 300))
         {
-          obj->track_pregap = CLAMP (obj->track_pregap, 1, 300);
+          p_obj->track_pregap = CLAMP (p_obj->track_pregap, 1, 300);
           vcd_warn ("track pregap out of range, clamping to allowed range");
         }
-      if (obj->track_pregap < CDIO_PREGAP_SECTORS)
-        vcd_warn ("track pre gap set below %d sectors; created (S)VCD may be non-working", 
+      if (p_obj->track_pregap < CDIO_PREGAP_SECTORS)
+        vcd_warn ("track pre gap set below %d sectors; "
+                  "created (S)VCD may be non-working", 
                   CDIO_PREGAP_SECTORS);
-      vcd_debug ("changed track pregap to %u", obj->track_pregap);
+      vcd_debug ("changed track pregap to %u", p_obj->track_pregap);
       break;
 
     case VCD_PARM_TRACK_FRONT_MARGIN:
-      obj->track_front_margin = arg;
-      if (!IN (obj->track_front_margin, 0, CDIO_PREGAP_SECTORS))
+      p_obj->track_front_margin = arg;
+      if (!IN (p_obj->track_front_margin, 0, CDIO_PREGAP_SECTORS))
         {
-          obj->track_front_margin = CLAMP (obj->track_front_margin, 0, 
+          p_obj->track_front_margin = CLAMP (p_obj->track_front_margin, 0, 
                                            CDIO_PREGAP_SECTORS);
           vcd_warn ("front margin out of range, clamping to allowed range");
         }
-      if (_vcd_obj_has_cap_p (obj, _CAP_TRACK_MARGINS) 
-          && obj->track_front_margin < 15)
+      if (_vcd_obj_has_cap_p (p_obj, _CAP_TRACK_MARGINS) 
+          && p_obj->track_front_margin < 15)
         vcd_warn ("front margin set smaller than recommended (%d < 15 sectors) for disc type used",
-                  obj->track_front_margin);
+                  p_obj->track_front_margin);
 
-      vcd_debug ("changed front margin to %u", obj->track_front_margin);
+      vcd_debug ("changed front margin to %u", p_obj->track_front_margin);
       break;
 
     case VCD_PARM_TRACK_REAR_MARGIN:
-      obj->track_rear_margin = arg;
-      if (!IN (obj->track_rear_margin, 0, CDIO_POSTGAP_SECTORS))
+      p_obj->track_rear_margin = arg;
+      if (!IN (p_obj->track_rear_margin, 0, CDIO_POSTGAP_SECTORS))
         {
-          obj->track_rear_margin = CLAMP (obj->track_rear_margin, 0, 
-                                          CDIO_POSTGAP_SECTORS);
+          p_obj->track_rear_margin = CLAMP (p_obj->track_rear_margin, 0, 
+                                            CDIO_POSTGAP_SECTORS);
           vcd_warn ("rear margin out of range, clamping to allowed range");
         }
-      if (_vcd_obj_has_cap_p (obj, _CAP_TRACK_MARGINS) 
-          && obj->track_rear_margin < 15)
+      if (_vcd_obj_has_cap_p (p_obj, _CAP_TRACK_MARGINS) 
+          && p_obj->track_rear_margin < 15)
         vcd_warn ("rear margin set smaller than recommended (%d < 15 sectors) for disc type used",
-                  obj->track_rear_margin);
-      vcd_debug ("changed rear margin to %u", obj->track_rear_margin);
+                 p_obj->track_rear_margin);
+      vcd_debug ("changed rear margin to %u", p_obj->track_rear_margin);
       break;
 
     default:
@@ -823,66 +827,66 @@ vcd_obj_set_param_uint (VcdObj_t *obj, vcd_parm_t param, unsigned arg)
 }
 
 int 
-vcd_obj_set_param_str (VcdObj_t *obj, vcd_parm_t param, const char *arg)
+vcd_obj_set_param_str (VcdObj_t *p_obj, vcd_parm_t param, const char *arg)
 {
-  vcd_assert (obj != NULL);
+  vcd_assert (p_obj != NULL);
   vcd_assert (arg != NULL);
 
   switch (param) 
     {
     case VCD_PARM_VOLUME_ID:
-      free (obj->iso_volume_label);
-      obj->iso_volume_label = strdup (arg);
-      if (strlen (obj->iso_volume_label) > ISO_MAX_VOLUME_ID)
+      free (p_obj->iso_volume_label);
+      p_obj->iso_volume_label = strdup (arg);
+      if (strlen (p_obj->iso_volume_label) > ISO_MAX_VOLUME_ID)
         {
-          obj->iso_volume_label[ISO_MAX_VOLUME_ID] = '\0';
+          p_obj->iso_volume_label[ISO_MAX_VOLUME_ID] = '\0';
           vcd_warn ("Volume label too long, will be truncated");
         }
-      vcd_debug ("changed volume label to `%s'", obj->iso_volume_label);
+      vcd_debug ("changed volume label to `%s'", p_obj->iso_volume_label);
       break;
 
     case VCD_PARM_PUBLISHER_ID:
-      free (obj->iso_publisher_id);
-      obj->iso_publisher_id = strdup (arg);
-      if (strlen (obj->iso_publisher_id) > ISO_MAX_PUBLISHER_ID)
+      free (p_obj->iso_publisher_id);
+      p_obj->iso_publisher_id = strdup (arg);
+      if (strlen (p_obj->iso_publisher_id) > ISO_MAX_PUBLISHER_ID)
         {
-          obj->iso_publisher_id[ISO_MAX_PUBLISHER_ID] = '\0';
+          p_obj->iso_publisher_id[ISO_MAX_PUBLISHER_ID] = '\0';
           vcd_warn ("Publisher ID too long, will be truncated");
         }
-      vcd_debug ("changed publisher id to `%s'", obj->iso_publisher_id);
+      vcd_debug ("changed publisher id to `%s'", p_obj->iso_publisher_id);
       break;
 
     case VCD_PARM_PREPARER_ID:
-      free (obj->iso_preparer_id);
-      obj->iso_preparer_id = strdup (arg);
-      if (strlen (obj->iso_preparer_id) > ISO_MAX_PREPARER_ID)
+      free (p_obj->iso_preparer_id);
+      p_obj->iso_preparer_id = strdup (arg);
+      if (strlen (p_obj->iso_preparer_id) > ISO_MAX_PREPARER_ID)
         {
-          obj->iso_preparer_id[ISO_MAX_PREPARER_ID] = '\0';
+          p_obj->iso_preparer_id[ISO_MAX_PREPARER_ID] = '\0';
           vcd_warn ("Preparer ID too long, will be truncated");
         }
-      vcd_debug ("changed preparer id to `%s'", obj->iso_preparer_id);
+      vcd_debug ("changed preparer id to `%s'", p_obj->iso_preparer_id);
       break;
 
     case VCD_PARM_APPLICATION_ID:
-      free (obj->iso_application_id);
-      obj->iso_application_id = strdup (arg);
-      if (strlen (obj->iso_application_id) > ISO_MAX_APPLICATION_ID)
+      free (p_obj->iso_application_id);
+      p_obj->iso_application_id = strdup (arg);
+      if (strlen (p_obj->iso_application_id) > ISO_MAX_APPLICATION_ID)
         {
-          obj->iso_application_id[ISO_MAX_APPLICATION_ID] = '\0';
+          p_obj->iso_application_id[ISO_MAX_APPLICATION_ID] = '\0';
           vcd_warn ("Application ID too long, will be truncated");
         }
-      vcd_debug ("changed application id to `%s'", obj->iso_application_id);
+      vcd_debug ("changed application id to `%s'", p_obj->iso_application_id);
       break;
       
     case VCD_PARM_ALBUM_ID:
-      free (obj->info_album_id);
-      obj->info_album_id = strdup (arg);
-      if (strlen (obj->info_album_id) > 16)
+      free (p_obj->info_album_id);
+      p_obj->info_album_id = strdup (arg);
+      if (strlen (p_obj->info_album_id) > 16)
         {
-          obj->info_album_id[16] = '\0';
+          p_obj->info_album_id[16] = '\0';
           vcd_warn ("Album ID too long, will be truncated");
         }
-      vcd_debug ("changed album id to `%s'", obj->info_album_id);
+      vcd_debug ("changed album id to `%s'", p_obj->info_album_id);
       break;
 
     default:
@@ -1071,7 +1075,7 @@ static void
 _finalize_vcd_iso_track_allocation (VcdObj_t *p_obj)
 {
   int n;
-  CdioListNode_t *node;
+  CdioListNode_t *p_node;
 
   uint32_t dir_secs = SECTOR_NIL;
 
@@ -1130,9 +1134,9 @@ _finalize_vcd_iso_track_allocation (VcdObj_t *p_obj)
 
   /* insert segments */
 
-  _CDIO_LIST_FOREACH (node, p_obj->mpeg_segment_list)
+  _CDIO_LIST_FOREACH (p_node, p_obj->mpeg_segment_list)
     {
-      mpeg_segment_t *_segment = _cdio_list_node_data (node);
+      mpeg_segment_t *_segment = _cdio_list_node_data (p_node);
       
       _segment->start_extent = 
         _vcd_salloc (p_obj->iso_bitmap, SECTOR_NIL, 
@@ -1174,9 +1178,9 @@ _finalize_vcd_iso_track_allocation (VcdObj_t *p_obj)
 
   /* now for the custom files */
 
-  _CDIO_LIST_FOREACH (node, p_obj->custom_file_list)
+  _CDIO_LIST_FOREACH (p_node, p_obj->custom_file_list)
     {
-      custom_file_t *p = _cdio_list_node_data (node);
+      custom_file_t *p = _cdio_list_node_data (p_node);
       
       if (p->sectors)
         {
@@ -1205,7 +1209,7 @@ static void
 _finalize_vcd_iso_track_filesystem (VcdObj_t *p_obj)
 {
   int n;
-  CdioListNode_t *node;
+  CdioListNode_t *p_node;
 
   /* create filesystem entries */
 
@@ -1295,9 +1299,9 @@ _finalize_vcd_iso_track_filesystem (VcdObj_t *p_obj)
   /* SEGMENTS */
 
   n = 1;
-  _CDIO_LIST_FOREACH (node, p_obj->mpeg_segment_list)
+  _CDIO_LIST_FOREACH (p_node, p_obj->mpeg_segment_list)
     {
-      mpeg_segment_t *segment = _cdio_list_node_data (node);
+      mpeg_segment_t *segment = _cdio_list_node_data (p_node);
       char segment_pathname[128] = { 0, };
       const char *fmt = NULL;
       uint8_t fnum = 0;
@@ -1356,15 +1360,15 @@ _finalize_vcd_iso_track_filesystem (VcdObj_t *p_obj)
     }
 
   /* custom files/dirs */
-  _CDIO_LIST_FOREACH (node, p_obj->custom_dir_list)
+  _CDIO_LIST_FOREACH (p_node, p_obj->custom_dir_list)
     {
-      char *p = _cdio_list_node_data (node);
+      char *p = _cdio_list_node_data (p_node);
       _vcd_directory_mkdir (p_obj->dir, p);
     }
 
-  _CDIO_LIST_FOREACH (node, p_obj->custom_file_list)
+  _CDIO_LIST_FOREACH (p_node, p_obj->custom_file_list)
     {
-      custom_file_t *p = _cdio_list_node_data (node);
+      custom_file_t *p = _cdio_list_node_data (p_node);
 
       _vcd_directory_mkfile (p_obj->dir, p->iso_pathname, p->start_extent,
                              (p->raw_flag 
@@ -1375,11 +1379,11 @@ _finalize_vcd_iso_track_filesystem (VcdObj_t *p_obj)
 
 
   n = 0;
-  _CDIO_LIST_FOREACH (node, p_obj->mpeg_sequence_list)
+  _CDIO_LIST_FOREACH (p_node, p_obj->mpeg_sequence_list)
     {
       char avseq_pathname[128] = { 0, };
       const char *fmt = NULL;
-      mpeg_sequence_t *p_sequence = _cdio_list_node_data (node);
+      mpeg_sequence_t *p_sequence = _cdio_list_node_data (p_node);
       uint32_t extent = p_sequence->relative_start_extent;
       uint8_t file_num = 0;
       
@@ -1591,12 +1595,12 @@ _write_source_mode2_form1 (VcdObj_t *obj, VcdDataSource_t *source,
 }
 
 static int
-_write_sequence (VcdObj_t *obj, int track_idx)
+_write_sequence (VcdObj_t *p_obj, int track_idx)
 {
   mpeg_sequence_t *track = 
-    _cdio_list_node_data (_vcd_list_at (obj->mpeg_sequence_list, track_idx));
+    _cdio_list_node_data (_vcd_list_at (p_obj->mpeg_sequence_list, track_idx));
   CdioListNode_t *pause_node;
-  int n, lastsect = obj->sectors_written;
+  int n, lastsect = p_obj->sectors_written;
   char buf[2324];
   struct {
     int audio;
@@ -1690,11 +1694,11 @@ _write_sequence (VcdObj_t *obj, int track_idx)
     free (norm_str);
   }
 
-  for (n = 0; n < obj->track_pregap; n++)
-    _write_m2_image_sector (obj, zero, lastsect++, 0, 0, SM_FORM2, 0);
+  for (n = 0; n < p_obj->track_pregap; n++)
+    _write_m2_image_sector (p_obj, zero, lastsect++, 0, 0, SM_FORM2, 0);
 
-  for (n = 0; n < obj->track_front_margin;n++)
-    _write_m2_image_sector (obj, zero, lastsect++, track_idx + 1,
+  for (n = 0; n < p_obj->track_front_margin;n++)
+    _write_m2_image_sector (p_obj, zero, lastsect++, track_idx + 1,
                             0, SM_FORM2|SM_REALT, 0);
 
   pause_node = _cdio_list_begin (track->pause_list);
@@ -1705,7 +1709,7 @@ _write_sequence (VcdObj_t *obj, int track_idx)
     bool set_trigger = false;
 
     vcd_mpeg_source_get_packet (track->source, n, buf, &pkt_flags, 
-                                obj->update_scan_offsets);
+                                p_obj->update_scan_offsets);
 
     while (pause_node)
       {
@@ -1779,7 +1783,7 @@ _write_sequence (VcdObj_t *obj, int track_idx)
     if (n == track->info->packets - 1)
       {
         sm |= SM_EOR;
-        if (!obj->track_rear_margin) /* if no rear margin... */
+        if (!p_obj->track_rear_margin) /* if no rear margin... */
           sm |= SM_EOF;
       }
 
@@ -1788,30 +1792,30 @@ _write_sequence (VcdObj_t *obj, int track_idx)
 
     fnum = track_idx + 1;
       
-    if (_vcd_obj_has_cap_p (obj, _CAP_4C_SVCD)
-        && !obj->svcd_vcd3_mpegav) /* IEC62107 SVCDs have a 
-                                      simplified subheader */
+    if (_vcd_obj_has_cap_p (p_obj, _CAP_4C_SVCD)
+        && !p_obj->svcd_vcd3_mpegav) /* IEC62107 SVCDs have a 
+                                        simplified subheader */
       {
         fnum = 1;
         ci = CI_MPEG2;
       }
 
-    if (_write_m2_image_sector (obj, buf, lastsect++, fnum, cnum, sm, ci))
+    if (_write_m2_image_sector (p_obj, buf, lastsect++, fnum, cnum, sm, ci))
       break;
   }
 
   vcd_mpeg_source_close (track->source);
 
-  for (n = 0; n < obj->track_rear_margin; n++)
+  for (n = 0; n < p_obj->track_rear_margin; n++)
     {
       const uint8_t ci = 0, cnum = 0;
       uint8_t fnum = track_idx + 1;
       uint8_t sm = SM_FORM2 | SM_REALT;
 
-      if (n + 1 == obj->track_rear_margin)
+      if (n + 1 == p_obj->track_rear_margin)
         sm |= SM_EOF;
 
-      _write_m2_image_sector (obj, zero, lastsect++, fnum, cnum, sm, ci);
+      _write_m2_image_sector (p_obj, zero, lastsect++, fnum, cnum, sm, ci);
     }
 
   vcd_debug ("MPEG packet statistics: %d video, %d audio, %d zero, %d ogt, %d unknown",
@@ -1822,11 +1826,11 @@ _write_sequence (VcdObj_t *obj, int track_idx)
 }
 
 static int
-_write_segment (VcdObj_t *obj, mpeg_segment_t *p_segment)
+_write_segment (VcdObj_t *p_obj, mpeg_segment_t *p_segment)
 {
   CdioListNode_t *pause_node;
-  unsigned packet_no;
-  int n = obj->sectors_written;
+  unsigned int packet_no;
+  int n = p_obj->sectors_written;
 
   vcd_assert (p_segment->start_extent == n);
 
@@ -1847,7 +1851,7 @@ _write_segment (VcdObj_t *obj, mpeg_segment_t *p_segment)
 
           vcd_mpeg_source_get_packet (p_segment->source, packet_no,
                                       buf, &pkt_flags, 
-                                      obj->update_scan_offsets);
+                                      p_obj->update_scan_offsets);
 
           fn = 1;
           cn = CN_EMPTY;
@@ -1919,7 +1923,7 @@ _write_segment (VcdObj_t *obj, mpeg_segment_t *p_segment)
               break;
             }
 
-          if (_vcd_obj_has_cap_p (obj, _CAP_4C_SVCD))
+          if (_vcd_obj_has_cap_p (p_obj, _CAP_4C_SVCD))
             {
               cn = 1;
               sm = SM_FORM2 | SM_REALT | SM_VIDEO;
@@ -1946,7 +1950,7 @@ _write_segment (VcdObj_t *obj, mpeg_segment_t *p_segment)
           sm = SM_FORM2 | SM_REALT;
           ci = CI_EMPTY;
 
-          if (_vcd_obj_has_cap_p (obj, _CAP_4C_SVCD))
+          if (_vcd_obj_has_cap_p (p_obj, _CAP_4C_SVCD))
             {
               fn = 0;
               sm = SM_FORM2;
@@ -1954,7 +1958,7 @@ _write_segment (VcdObj_t *obj, mpeg_segment_t *p_segment)
 
         }
 
-      _write_m2_image_sector (obj, buf, n, fn, cn, sm, ci);
+      _write_m2_image_sector (p_obj, buf, n, fn, cn, sm, ci);
           
       n++;
     }
@@ -1968,16 +1972,18 @@ static uint32_t
 _get_closest_aps (const struct vcd_mpeg_stream_info *_mpeg_info, double t,
                   struct aps_data *_best_aps)
 {
-  CdioListNode_t *node;
+  CdioListNode_t *p_node;
   struct aps_data best_aps;
   bool first = true;
 
+  best_aps.packet_no = 0xFFFF; /* A number which will be caught as an error*/
+  best_aps.timestamp = -1;     /* A number which will be caught as an error*/
   vcd_assert (_mpeg_info != NULL);
   vcd_assert (_mpeg_info->shdr[0].aps_list != NULL);
 
-  _CDIO_LIST_FOREACH (node, _mpeg_info->shdr[0].aps_list)
+  _CDIO_LIST_FOREACH (p_node, _mpeg_info->shdr[0].aps_list)
     {
-      struct aps_data *_aps = _cdio_list_node_data (node);
+      struct aps_data *_aps = _cdio_list_node_data (p_node);
   
       if (first)
         {
@@ -1997,15 +2003,15 @@ _get_closest_aps (const struct vcd_mpeg_stream_info *_mpeg_info, double t,
 }
 
 static void
-_update_entry_points (VcdObj_t *obj)
+_update_entry_points (VcdObj_t *p_obj)
 {
   CdioListNode_t *sequence_node;
 
-  _CDIO_LIST_FOREACH (sequence_node, obj->mpeg_sequence_list)
+  _CDIO_LIST_FOREACH (sequence_node, p_obj->mpeg_sequence_list)
     {
       mpeg_sequence_t *_sequence = _cdio_list_node_data (sequence_node);
       CdioListNode_t *entry_node;
-      unsigned last_packet_no = 0;
+      unsigned int last_packet_no = 0;
 
       _CDIO_LIST_FOREACH (entry_node, _sequence->entry_list)
         {
@@ -2030,61 +2036,61 @@ _update_entry_points (VcdObj_t *obj)
 }
 
 static int
-_write_vcd_iso_track (VcdObj_t *obj, const time_t *create_time)
+_write_vcd_iso_track (VcdObj_t *p_obj, const time_t *p_create_time)
 {
   CdioListNode_t *node;
   int n;
 
   /* generate dir sectors */
   
-  _vcd_directory_dump_entries (obj->dir, 
-                               _dict_get_bykey (obj, "dir")->buf, 
-                               _dict_get_bykey (obj, "dir")->sector);
+  _vcd_directory_dump_entries (p_obj->dir, 
+                               _dict_get_bykey (p_obj, "dir")->buf, 
+                               _dict_get_bykey (p_obj, "dir")->sector);
 
-  _vcd_directory_dump_pathtables (obj->dir, 
-                                  _dict_get_bykey (obj, "ptl")->buf, 
-                                  _dict_get_bykey (obj, "ptm")->buf);
+  _vcd_directory_dump_pathtables (p_obj->dir, 
+                                  _dict_get_bykey (p_obj, "ptl")->buf, 
+                                  _dict_get_bykey (p_obj, "ptm")->buf);
       
   /* generate PVD and EVD at last... */
-  iso9660_set_pvd (_dict_get_bykey (obj, "pvd")->buf,
-                   obj->iso_volume_label, 
-                   obj->iso_publisher_id,
-                   obj->iso_preparer_id,
-                   obj->iso_application_id, 
-                   obj->iso_size, 
-                   _dict_get_bykey (obj, "dir")->buf, 
-                   _dict_get_bykey (obj, "ptl")->sector,
-                   _dict_get_bykey (obj, "ptm")->sector,
-                   iso9660_pathtable_get_size (_dict_get_bykey (obj, "ptm")->buf),
-                   create_time
+  iso9660_set_pvd (_dict_get_bykey (p_obj, "pvd")->buf,
+                   p_obj->iso_volume_label, 
+                   p_obj->iso_publisher_id,
+                   p_obj->iso_preparer_id,
+                   p_obj->iso_application_id, 
+                   p_obj->iso_size, 
+                   _dict_get_bykey (p_obj, "dir")->buf, 
+                   _dict_get_bykey (p_obj, "ptl")->sector,
+                   _dict_get_bykey (p_obj, "ptm")->sector,
+                   iso9660_pathtable_get_size (_dict_get_bykey (p_obj, "ptm")->buf),
+                   p_create_time
 );
     
-  iso9660_set_evd (_dict_get_bykey (obj, "evd")->buf);
+  iso9660_set_evd (_dict_get_bykey (p_obj, "evd")->buf);
 
   /* fill VCD relevant files with data */
 
-  set_info_vcd (obj, _dict_get_bykey (obj, "info")->buf);
-  set_entries_vcd (obj, _dict_get_bykey (obj, "entries")->buf);
+  set_info_vcd (p_obj, _dict_get_bykey (p_obj, "info")->buf);
+  set_entries_vcd (p_obj, _dict_get_bykey (p_obj, "entries")->buf);
 
-  if (_vcd_pbc_available (obj))
+  if (_vcd_pbc_available (p_obj))
     {
-      if (_vcd_obj_has_cap_p (obj, _CAP_PBC_X))
+      if (_vcd_obj_has_cap_p (p_obj, _CAP_PBC_X))
         {
-          set_lot_vcd (obj, _dict_get_bykey (obj, "lot_x")->buf, true);
-          set_psd_vcd (obj, _dict_get_bykey (obj, "psd_x")->buf, true);
+          set_lot_vcd (p_obj, _dict_get_bykey (p_obj, "lot_x")->buf, true);
+          set_psd_vcd (p_obj, _dict_get_bykey (p_obj, "psd_x")->buf, true);
         }
 
-      _vcd_pbc_check_unreferenced (obj);
+      _vcd_pbc_check_unreferenced (p_obj);
   
-      set_lot_vcd (obj, _dict_get_bykey (obj, "lot")->buf, false);
-      set_psd_vcd (obj, _dict_get_bykey (obj, "psd")->buf, false);
+      set_lot_vcd (p_obj, _dict_get_bykey (p_obj, "lot")->buf, false);
+      set_psd_vcd (p_obj, _dict_get_bykey (p_obj, "psd")->buf, false);
     }
 
-  if (_vcd_obj_has_cap_p (obj, _CAP_4C_SVCD))
+  if (_vcd_obj_has_cap_p (p_obj, _CAP_4C_SVCD))
     {
-      set_tracks_svd (obj, _dict_get_bykey (obj, "tracks")->buf);
-      set_search_dat (obj, _dict_get_bykey (obj, "search")->buf);
-      set_scandata_dat (obj, _dict_get_bykey (obj, "scandata")->buf);
+      set_tracks_svd (p_obj, _dict_get_bykey (p_obj, "tracks")->buf);
+      set_search_dat (p_obj, _dict_get_bykey (p_obj, "search")->buf);
+      set_scandata_dat (p_obj, _dict_get_bykey (p_obj, "scandata")->buf);
     }
 
   /* start actually writing stuff */
@@ -2092,45 +2098,45 @@ _write_vcd_iso_track (VcdObj_t *obj, const time_t *create_time)
   vcd_info ("writing track 1 (ISO9660)...");
 
   /* 00:02:00 -> 00:04:74 */
-  for (n = 0;n < obj->mpeg_segment_start_extent; n++)
+  for (n = 0; n < p_obj->mpeg_segment_start_extent; n++)
     {
       const void *content = NULL;
       uint8_t flags = SM_DATA;
 
-      content = _dict_get_sector (obj, n);
-      flags |= _dict_get_sector_flags (obj, n);
+      content = _dict_get_sector (p_obj, n);
+      flags |= _dict_get_sector_flags (p_obj, n);
       
       if (content == NULL)
         content = zero;
 
-      _write_m2_image_sector (obj, content, n, 0, 0, flags, 0);
+      _write_m2_image_sector (p_obj, content, n, 0, 0, flags, 0);
     }
 
   /* SEGMENTS */
 
-  vcd_assert (n == obj->mpeg_segment_start_extent);
+  vcd_assert (n == p_obj->mpeg_segment_start_extent);
 
-  _CDIO_LIST_FOREACH (node, obj->mpeg_segment_list)
+  _CDIO_LIST_FOREACH (node, p_obj->mpeg_segment_list)
     {
       mpeg_segment_t *p_segment = _cdio_list_node_data (node);
 
-      _write_segment (obj, p_segment);
+      _write_segment (p_obj, p_segment);
     }
 
-  n = obj->sectors_written;
+  n = p_obj->sectors_written;
 
   /* EXT stuff */
 
-  vcd_assert (n == obj->ext_file_start_extent);
+  vcd_assert (n == p_obj->ext_file_start_extent);
 
-  for (;n < obj->custom_file_start_extent; n++)
+  for (;n < p_obj->custom_file_start_extent; n++)
     {
       const void *content = NULL;
       uint8_t flags = SM_DATA;
-      uint8_t fileno = _vcd_obj_has_cap_p (obj, _CAP_4C_SVCD) ? 0 : 1;
+      uint8_t fileno = _vcd_obj_has_cap_p (p_obj, _CAP_4C_SVCD) ? 0 : 1;
 
-      content = _dict_get_sector (obj, n);
-      flags |= _dict_get_sector_flags (obj, n);
+      content = _dict_get_sector (p_obj, n);
+      flags |= _dict_get_sector_flags (p_obj, n);
       
       if (content == NULL)
         {
@@ -2138,14 +2144,14 @@ _write_vcd_iso_track (VcdObj_t *obj, const time_t *create_time)
           content = zero;
         }
       
-      _write_m2_image_sector (obj, content, n, fileno, 0, flags, 0);
+      _write_m2_image_sector (p_obj, content, n, fileno, 0, flags, 0);
     }
 
   /* write custom files */
 
-  vcd_assert (n == obj->custom_file_start_extent);
+  vcd_assert (n == p_obj->custom_file_start_extent);
     
-  _CDIO_LIST_FOREACH (node, obj->custom_file_list)
+  _CDIO_LIST_FOREACH (node, p_obj->custom_file_list)
     {
       custom_file_t *p = _cdio_list_node_data (node);
         
@@ -2153,63 +2159,63 @@ _write_vcd_iso_track (VcdObj_t *obj, const time_t *create_time)
                 p->iso_pathname, (unsigned long) p->size, 
                 p->raw_flag ? ", raw sectors file": "");
       if (p->raw_flag)
-        _write_source_mode2_raw (obj, p->file, p->start_extent);
+        _write_source_mode2_raw (p_obj, p->file, p->start_extent);
       else
-        _write_source_mode2_form1 (obj, p->file, p->start_extent);
+        _write_source_mode2_form1 (p_obj, p->file, p->start_extent);
     }
   
   /* blank unalloced tracks */
-  while ((n = _vcd_salloc (obj->iso_bitmap, SECTOR_NIL, 1)) < obj->iso_size)
-    _write_m2_image_sector (obj, zero, n, 0, 0, SM_DATA, 0);
+  while ((n = _vcd_salloc (p_obj->iso_bitmap, SECTOR_NIL, 1)) < p_obj->iso_size)
+    _write_m2_image_sector (p_obj, zero, n, 0, 0, SM_DATA, 0);
 
   return 0;
 }
 
 
 long
-vcd_obj_get_image_size (VcdObj_t *obj)
+vcd_obj_get_image_size (VcdObj_t *p_obj)
 {
   long size_sectors = -1;
 
-  vcd_assert (!obj->in_output);
+  vcd_assert (!p_obj->in_output);
   
-  if (_cdio_list_length (obj->mpeg_sequence_list) > 0) 
+  if (_cdio_list_length (p_obj->mpeg_sequence_list) > 0) 
     {
       /* fixme -- make this efficient */
-      size_sectors = vcd_obj_begin_output (obj);
-      vcd_obj_end_output (obj);
+      size_sectors = vcd_obj_begin_output (p_obj);
+      vcd_obj_end_output (p_obj);
     }
 
   return size_sectors;
 }
 
 long
-vcd_obj_begin_output (VcdObj_t *obj)
+vcd_obj_begin_output (VcdObj_t *p_obj)
 {
   uint32_t image_size;
 
-  vcd_assert (obj != NULL);
-  vcd_assert (_cdio_list_length (obj->mpeg_sequence_list) > 0);
+  vcd_assert (p_obj != NULL);
+  vcd_assert (_cdio_list_length (p_obj->mpeg_sequence_list) > 0);
 
-  vcd_assert (!obj->in_output);
-  obj->in_output = true;
+  vcd_assert (!p_obj->in_output);
+  p_obj->in_output = true;
 
-  obj->in_track = 1;
-  obj->sectors_written = 0;
+  p_obj->in_track = 1;
+  p_obj->sectors_written = 0;
 
-  obj->iso_bitmap = _vcd_salloc_new ();
+  p_obj->iso_bitmap = _vcd_salloc_new ();
 
-  obj->dir = _vcd_directory_new ();
+  p_obj->dir = _vcd_directory_new ();
 
-  obj->buffer_dict_list = _cdio_list_new ();
+  p_obj->buffer_dict_list = _cdio_list_new ();
 
-  _finalize_vcd_iso_track (obj);
+  _finalize_vcd_iso_track (p_obj);
 
-  _update_entry_points (obj);
+  _update_entry_points (p_obj);
 
-  image_size = obj->relative_end_extent + obj->iso_size;
+  image_size = p_obj->relative_end_extent + p_obj->iso_size;
 
-  image_size += obj->leadout_pregap;
+  image_size += p_obj->leadout_pregap;
 
   if (image_size > CDIO_CD_MAX_SECTORS)
     vcd_error ("image too big (%d sectors > %d sectors)", 
@@ -2231,39 +2237,39 @@ vcd_obj_begin_output (VcdObj_t *obj)
 
 
 void
-vcd_obj_end_output (VcdObj_t *obj)
+vcd_obj_end_output (VcdObj_t *p_obj)
 {
-  vcd_assert (obj != NULL);
+  vcd_assert (p_obj != NULL);
 
-  vcd_assert (obj->in_output);
-  obj->in_output = false;
+  vcd_assert (p_obj->in_output);
+  p_obj->in_output = false;
 
-  _vcd_directory_destroy (obj->dir);
-  _vcd_salloc_destroy (obj->iso_bitmap);
+  _vcd_directory_destroy (p_obj->dir);
+  _vcd_salloc_destroy (p_obj->iso_bitmap);
 
-  _dict_clean (obj);
-  _cdio_list_free (obj->buffer_dict_list, true);
+  _dict_clean (p_obj);
+  _cdio_list_free (p_obj->buffer_dict_list, true);
 }
 
 int
-vcd_obj_append_pbc_node (VcdObj_t *obj, struct _pbc_t *_pbc)
+vcd_obj_append_pbc_node (VcdObj_t *p_obj, struct _pbc_t *p_pbc)
 {
-  vcd_assert (obj != NULL);
-  vcd_assert (_pbc != NULL);
+  vcd_assert (p_obj != NULL);
+  vcd_assert (p_pbc != NULL);
 
-  if (!_vcd_obj_has_cap_p (obj, _CAP_PBC))
+  if (!_vcd_obj_has_cap_p (p_obj, _CAP_PBC))
     {
       vcd_error ("PBC not supported for current VCD type");
       return -1;
     }
 
-  if (_pbc->item_id && _vcd_pbc_lookup (obj, _pbc->item_id))
+  if (p_pbc->item_id && _vcd_pbc_lookup (p_obj, p_pbc->item_id))
     {
-      vcd_error ("item id (%s) exists already", _pbc->item_id);
+      vcd_error ("item id (%s) exists already", p_pbc->item_id);
       return -1;
     }
   
-  _cdio_list_append (obj->pbc_list, _pbc);
+  _cdio_list_append (p_obj->pbc_list, p_pbc);
 
   return 0;
 }
@@ -2271,7 +2277,7 @@ vcd_obj_append_pbc_node (VcdObj_t *obj, struct _pbc_t *_pbc)
 int
 vcd_obj_write_image (VcdObj_t *p_obj, VcdImageSink_t *p_image_sink,
                      progress_callback_t callback, void *user_data,
-                     const time_t *create_time)
+                     const time_t *p_create_time)
 {
   CdioListNode_t *node;
 
@@ -2284,71 +2290,71 @@ vcd_obj_write_image (VcdObj_t *p_obj, VcdImageSink_t *p_image_sink,
   /* start with meta info */
 
   {
-    CdioList *cue_list;
-    vcd_cue_t *_cue;
+    CdioList *p_cue_list;
+    vcd_cue_t *p_cue;
 
-    cue_list = _cdio_list_new ();
+    p_cue_list = _cdio_list_new ();
 
-    _cdio_list_append (cue_list, (_cue = calloc(1, sizeof (vcd_cue_t))));
+    _cdio_list_append (p_cue_list, (p_cue = calloc(1, sizeof (vcd_cue_t))));
 
-    _cue->lsn = 0;
-    _cue->type = VCD_CUE_TRACK_START;
+    p_cue->lsn = 0;
+    p_cue->type = VCD_CUE_TRACK_START;
 
     _CDIO_LIST_FOREACH (node, p_obj->mpeg_sequence_list)
       {
-        mpeg_sequence_t *track = _cdio_list_node_data (node);
-        CdioListNode_t *entry_node;
+        mpeg_sequence_t *p_track = _cdio_list_node_data (node);
+        CdioListNode_t *p_entry_node;
 
-        _cdio_list_append (cue_list, 
-                           (_cue = calloc(1, sizeof (vcd_cue_t))));
+        _cdio_list_append (p_cue_list, 
+                           (p_cue = calloc(1, sizeof (vcd_cue_t))));
         
-        _cue->lsn = track->relative_start_extent + p_obj->iso_size;
-        _cue->lsn -= p_obj->track_pregap;
-        _cue->type = VCD_CUE_PREGAP_START;
+        p_cue->lsn = p_track->relative_start_extent + p_obj->iso_size;
+        p_cue->lsn -= p_obj->track_pregap;
+        p_cue->type = VCD_CUE_PREGAP_START;
 
-        _cdio_list_append (cue_list, 
-                           (_cue = calloc(1, sizeof (vcd_cue_t))));
+        _cdio_list_append (p_cue_list, 
+                           (p_cue = calloc(1, sizeof (vcd_cue_t))));
 
-        _cue->lsn = track->relative_start_extent + p_obj->iso_size;
-        _cue->type = VCD_CUE_TRACK_START;
+        p_cue->lsn = p_track->relative_start_extent + p_obj->iso_size;
+        p_cue->type = VCD_CUE_TRACK_START;
 
-        _CDIO_LIST_FOREACH (entry_node, track->entry_list)
+        _CDIO_LIST_FOREACH (p_entry_node, p_track->entry_list)
           {
-            entry_t *_entry = _cdio_list_node_data (entry_node);
+            entry_t *_entry = _cdio_list_node_data (p_entry_node);
 
-            _cdio_list_append (cue_list, 
-                               (_cue = calloc(1, sizeof (vcd_cue_t))));
+            _cdio_list_append (p_cue_list, 
+                               (p_cue = calloc(1, sizeof (vcd_cue_t))));
             
-            _cue->lsn = p_obj->iso_size;
-            _cue->lsn += track->relative_start_extent;
-            _cue->lsn += p_obj->track_front_margin;
-            _cue->lsn += _entry->aps.packet_no;
+            p_cue->lsn = p_obj->iso_size;
+            p_cue->lsn += p_track->relative_start_extent;
+            p_cue->lsn += p_obj->track_front_margin;
+            p_cue->lsn += _entry->aps.packet_no;
 
-            _cue->type = VCD_CUE_SUBINDEX;
+            p_cue->type = VCD_CUE_SUBINDEX;
           }
       }
 
     /* add last one... */
 
-    _cdio_list_append (cue_list, (_cue = calloc(1, sizeof (vcd_cue_t))));
+    _cdio_list_append (p_cue_list, (p_cue = calloc(1, sizeof (vcd_cue_t))));
 
-    _cue->lsn = p_obj->relative_end_extent + p_obj->iso_size;
+    p_cue->lsn = p_obj->relative_end_extent + p_obj->iso_size;
 
-    _cue->lsn += p_obj->leadout_pregap;
+    p_cue->lsn += p_obj->leadout_pregap;
 
-    _cue->type = VCD_CUE_END;
+    p_cue->type = VCD_CUE_END;
 
     /* send it to image object */
 
-    vcd_image_sink_set_cuesheet (p_image_sink, cue_list);
+    vcd_image_sink_set_cuesheet (p_image_sink, p_cue_list);
 
-    _cdio_list_free (cue_list, true);
+    _cdio_list_free (p_cue_list, true);
   }
 
   /* and now for the pay load */
 
   {
-    unsigned track;
+    unsigned int track;
 
     vcd_assert (p_obj != NULL);
     vcd_assert (p_obj->sectors_written == 0);
@@ -2362,11 +2368,12 @@ vcd_obj_write_image (VcdObj_t *p_obj, VcdImageSink_t *p_image_sink,
     if (_callback_wrapper (p_obj, true))
       return 1;
 
-    if (_write_vcd_iso_track (p_obj, create_time))
+    if (_write_vcd_iso_track (p_obj, p_create_time))
       return 1;
 
     if (p_obj->update_scan_offsets)
-      vcd_info ("'update scan offsets' option enabled for the following tracks!");
+      vcd_info ("'update scan offsets' option enabled for "
+                "the following tracks!");
 
     for (track = 0;
          track < _cdio_list_length (p_obj->mpeg_sequence_list);
