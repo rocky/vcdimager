@@ -43,9 +43,9 @@
 #     public release, then set AGE to 0. A changed interface means an
 #     incompatibility with previous versions.
 
-libvcdinfo_la_CURRENT := 1
-libvcdinfo_la_REVISION := 1
-libvcdinfo_la_AGE := 1
+libvcdinfo_la_CURRENT := 2
+libvcdinfo_la_REVISION := 0
+libvcdinfo_la_AGE := 2
 
 noinst_LTLIBRARIES = libvcd.la
 lib_LTLIBRARIES = libvcdinfo.la
