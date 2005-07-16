@@ -779,7 +779,11 @@ vcdinfo_lsn_get_entry(const vcdinfo_obj_t *p_obj, lsn_t lsn)
 }
 
   
-void * 
+/*!
+   \brief Get ISO 9660 Primary Volume Descriptor (PVD) for a VCDinfo
+   object.
+*/
+iso9660_pvd_t * 
 vcdinfo_get_pvd (vcdinfo_obj_t *p_obj) 
 {
   if (!p_obj) return NULL;
@@ -1821,6 +1825,9 @@ vcdinfo_init(vcdinfo_obj_t *p_obj)
    VCDINFO_OPEN_VCD is returned if everything went okay; 
    VCDINFO_OPEN_ERROR if there was an error and VCDINFO_OPEN_OTHER if the
    medium is something other than a VCD.
+
+   Only if VCDINFO_OPEN_VCD is returned, the caller needs free the
+   vcdinfo_obj_t. 
  */
 vcdinfo_open_return_t
 vcdinfo_open(vcdinfo_obj_t **pp_obj, char *source_name[], 

@@ -16,8 +16,8 @@ dnl along with this program; if not, write to the Free Software
 dnl Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 dnl 02111-1307, USA.
 
-define(RELEASE_NUM, 23)
-define(LIBVCD_VERSION_STR, 0.7.$1)
+define(RELEASE_NUM, 24)
+define(LIBVCD_VERSION_STR, 0.7.$1cvs)
 
 AC_PREREQ(2.52)
 AC_REVISION([$Id$])dnl
@@ -27,7 +27,7 @@ AC_INIT([GNU VCDimager],LIBVCD_VERSION_STR(RELEASE_NUM),
 AC_CONFIG_SRCDIR([lib/vcd.c])
 AM_INIT_AUTOMAKE(1.6.0)
 
-SPEC_VERSION=0.7.23
+SPEC_VERSION=0.7.24
 AC_SUBST(SPEC_VERSION)
 
 dnl AM_ACLOCAL_INCLUDE(.)

@@ -1,5 +1,6 @@
 /*!
    \file info.h
+   \brief  Interface for higher-level libvcdinfo. See also inf.h
 
     Copyright (C) 2002, 2003, 2004, 2005 Rocky Bernstein <rocky@panix.com>
 
@@ -33,6 +34,7 @@
 #include <libvcd/types.h>
 #include <libvcd/files.h>
 #include <cdio/cdio.h>
+#include <cdio/iso9660.h>
 #include <cdio/ds.h>
 
 #ifdef __cplusplus
@@ -387,8 +389,13 @@ extern "C" {
   uint16_t
   vcdinfo_get_multi_default_offset(const vcdinfo_obj_t *p_vcdinfo, lid_t lid,
 				   unsigned int selection);
-  
-  void * vcdinfo_get_pvd (vcdinfo_obj_t *p_vcdinfo);
+
+  /*!
+
+    \brief Get ISO 9660 Primary Volume Descriptor (PVD) for a VCDinfo
+    object.
+  */
+  iso9660_pvd_t * vcdinfo_get_pvd (vcdinfo_obj_t *p_vcdinfo);
   
   void * vcdinfo_get_scandata (vcdinfo_obj_t *p_vcdinfo);
 
@@ -798,8 +805,9 @@ extern "C" {
 				  unsigned int selection);
   
   /*!
-    \fn vcdinfo_selection_get_offset(const vcdinfo_obj_t *p_vcdinfo, lid_t lid,
-                                     unsigned int selection);
+    \fn uint16_t vcdinfo_selection_get_offset(const vcdinfo_obj_t *p_vcdinfo, 
+                                              lid_t lid,
+                                              unsigned int selection);
     \brief Get offset of a selection for a given LID. 
 
     Return the LID offset associated with a the selection number of the
@@ -847,6 +855,9 @@ extern "C" {
     VCDINFO_OPEN_VCD is returned if everything went okay; 
     VCDINFO_OPEN_ERROR if there was an error and VCDINFO_OPEN_OTHER if the
     medium is something other than a VCD.
+
+    Only if VCDINFO_OPEN_VCD is returned, the caller needs free the
+    vcdinfo_obj_t. 
  */
   vcdinfo_open_return_t
   vcdinfo_open(vcdinfo_obj_t **p_obj, char *source_name[], 
@@ -867,14 +878,14 @@ extern "C" {
   */
   bool vcdinfo_is_rejected(uint16_t offset);
 
-/* Include lower-level access as well. */
-#include <libvcd/inf.h>
-
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-/** Depricated */
+/* Include lower-level access as well. */
+#include <libvcd/inf.h>
+
+/** Deprecated */
 #define vcdinfo_msf2lba cdio_msf3_to_lba
   
 #endif /*_VCD_INFO_H*/

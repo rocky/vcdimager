@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2000, 2004 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2000, 2004, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,6 +17,9 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
+/** \file types.h 
+ *  \brief  Common type definitions specific to VCDs and used in vcdimager
+ */
 
 #ifndef __VCD_TYPES_H__
 #define __VCD_TYPES_H__
@@ -27,13 +30,13 @@
 extern "C" {
 #endif /* __cplusplus */
   
-  /* Opaque types ... */
+  /** Opaque types ... */
   
-  /* Defined fully in data_structures.c */
+  /** These are defined fully in data_structures.c */
   typedef struct _VcdList VcdList;
   typedef struct _VcdListNode VcdListNode;
   
-  /* Defined fully in files_private.h */
+  /** These are defined fully in files_private.h */
   typedef struct _InfoVcd_tag    InfoVcd_t;
   typedef struct _EntriesVcd_tag EntriesVcd_t;
   typedef struct _LotVcd_tag     LotVcd_t;
@@ -41,12 +44,12 @@ extern "C" {
   typedef struct _PsdPlayListDescriptor_tag      PsdPlayListDescriptor_t;
   typedef struct _PsdSelectionListDescriptor_tag PsdSelectionListDescriptor_t;
 
-  /* Overall data structure representing a VideoCD object.
-     Defined fully in info_private.h. 
+  /** Overall data structure representing a VideoCD object.
+      Defined fully in info_private.h. 
    */
   typedef struct _VcdObj VcdObj_t;
   
-  /* enum defining supported VideoCD types */
+  /** enum defining supported VideoCD types */
   typedef enum
     {
       VCD_TYPE_INVALID = 0,
@@ -58,21 +61,21 @@ extern "C" {
     }
     vcd_type_t;
   
-  /* The type of an playback control list ID (LID). */
+  /** The type of an playback control list ID (LID). */
   typedef uint16_t lid_t;
   
-  /* The type of a segment number 0..1980 segment items possible. */
+  /** The type of a segment number 0..1980 segment items possible. */
   typedef uint16_t segnum_t;
   
-  /* (0,0) == upper left , (255,255) == lower right 
-     setting all to zero disables area */
+  /** (0,0) == upper left; (255,255) == lower right.
+      Setting all to zero disables the area. */
   PRAGMA_BEGIN_PACKED
   struct psd_area_t
   {
-    uint8_t x1; /* upper left */
-    uint8_t y1; /* upper left */
-    uint8_t x2; /* lower right */
-    uint8_t y2; /* lower right */
+    uint8_t x1; /**< upper left */
+    uint8_t y1; /**< upper left */
+    uint8_t x2; /**< lower right */
+    uint8_t y2; /**< lower right */
   } GNUC_PACKED;
   PRAGMA_END_PACKED
   

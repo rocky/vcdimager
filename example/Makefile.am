@@ -20,8 +20,10 @@
 # Sample programs
 ####################################################
 
-noinst_PROGRAMS = info1
+noinst_PROGRAMS = info1 info2
 
-INCLUDES = -I$(top_srcdir) $(LIBVCD_CFLAGS) $(LIBCDIO_CFLAGS)
+INCLUDES      = -I$(top_srcdir) $(LIBVCD_CFLAGS) $(LIBCDIO_CFLAGS)
 
-info1_LDADD = $(LIBVCDINFO_LIBS) $(LIBVCD_LIBS) $(LIBISO9660_LIBS)
+info1_LDADD   = $(LIBVCDINFO_LIBS) $(LIBVCD_LIBS) $(LIBISO9660_LIBS)
+info2_SOURCES = info2.cpp
+info2_LDADD   = $(LIBVCDINFO_LIBS) $(LIBVCD_LIBS) $(LIBISO9660_LIBS)

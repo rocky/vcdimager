@@ -1,7 +1,8 @@
 /*!
    \file inf.h
+   \brief  Interface for lower-level libvcdinfo. See also info.h
 
-    Copyright (C) 2002, 2003, 2004 Rocky Bernstein <rocky@panix.com>
+    Copyright (C) 2002, 2003, 2004, 2005 Rocky Bernstein <rocky@panix.com>
 
  \verbatim
     This program is free software; you can redistribute it and/or modify
@@ -31,6 +32,10 @@
 
 #include <libvcd/info.h>
   
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
   const char * vcdinf_area_str (const struct psd_area_t *_area);
 
   /*!

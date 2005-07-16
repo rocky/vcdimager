@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2000, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,10 +23,11 @@
 
 #include <libvcd/types.h>
 
-/* subheader */
-
-/*
+/*!
+   \file sector.h 
   
+\verbatim 
+
   SVCD 1.0
   ~~~~~~~~
  
@@ -55,23 +56,25 @@
    *.*
     data sector:  fn=1 cn=0  sm=%x0001000 ci=0
 
+ \endverbatim
+
 */
 
 /* file numbers */
 
 /* dynamic */
 
-/* channel numbers */
+/** channel numbers */
 #define CN_VIDEO   0x01
 #define CN_STILL   0x02
 #define CN_STILL2  0x03
 #define CN_AUDIO   0x01
 #define CN_AUDIO2  0x02
-#define CN_OGT     0x02 /* fixme -- is it 0x04 ?? */
+#define CN_OGT     0x02 /**< fixme -- is it 0x04 ?? */
 #define CN_PAD     0x00
 #define CN_EMPTY   0x00
 
-/* submode byte */
+/** submode byte */
 #define SM_EOF    (1<<7)
 #define SM_REALT  (1<<6)
 #define SM_FORM2  (1<<5)
@@ -81,7 +84,7 @@
 #define SM_VIDEO  (1<<1)
 #define SM_EOR    (1<<0)
 
-/* coding information */
+/** coding information */
 #define CI_VIDEO   0x0f
 #define CI_STILL   0x1f
 #define CI_STILL2  0x3f
@@ -92,7 +95,7 @@
 #define CI_MPEG2   0x80
 #define CI_EMPTY   0x00
 
-/* make mode 2 form 1/2 sector
+/** make mode 2 form 1/2 sector
  *
  * data must be a buffer of size 2048 or 2324 for SM_FORM2
  * raw_sector must be a writable buffer of size 2352
