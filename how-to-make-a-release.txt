@@ -1,0 +1,46 @@
+- Let people know of a pending release; 
+  no major changes before release, please
+
+- test on lots of platforms; sourceforge compile farm, for example
+
+- "make distcheck" should work.
+
+- Go over Changelog and add NEWS. Update date of release.
+
+- Remove "cvs" from configure.ac's release name. E.g.
+    define(RELEASE_NUM, 75)
+    define(LIBVCD_VERSION_STR, 0.$1cvs)
+                                   ^^^
+    SPEC_VERSION=0.7.23cvs
+                       ^^^
+- Make sure sources are current and checked in:
+    cvs update -dPA .
+    cvs commit .
+
+- autogen.sh && make && make check
+
+- make doxygen documentation
+  cd docs/doxygen; ./run_doxygen
+
+- Tag release in CVS: 
+   cvs log -h configure.ac
+   cvs tag release_... .
+
+- "make distcheck" one more time
+
+- Get onto ftp.gnu.org. I use my perl program, e.g.
+   gnu-ftp-upload libcdio 0.75
+
+- Update/Announce on Freshmeat
+  http://freshmeat.net/projects/vcdimager/ "add release" generally
+  
+  The NEWS file is your friend.
+
+- copy doxygen html to web pages
+
+- Update www.vcdimager.org 
+  Copy tar.gz, NEWS, and ChangeLog files
+  Update NEWS flashes
+
+- Bump version in configure.ac and add "cvs". See places above in 
+  removal
