@@ -36,6 +36,10 @@
   
   The NEWS file is your friend.
 
+- Send mail to info-vcdimager@gnu.org
+
+  Again, The NEWS file is your friend.
+
 - copy doxygen html to web pages
 
 - Update www.vcdimager.org 
