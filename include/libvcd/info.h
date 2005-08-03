@@ -639,8 +639,16 @@ extern "C" {
     
     The "leadout" track is specified either by
     using i_track LEADOUT_TRACK or the total tracks+1.
-    VCDINFO_NULL_LBA is returned on failure.
+    VCDINFO_NULL_LSN is returned on failure.
   */
+
+  /*!  
+    Return the ending LSN for track number
+    i_track in cdio.  VCDINFO_NULL_LSN is returned on error.
+  */
+  lsn_t vcdinfo_get_track_last_lsn(const vcdinfo_obj_t *p_vcdinfo, 
+				   track_t i_track);
+
   int
   vcdinfo_get_track_msf(const vcdinfo_obj_t *p_vcdinfo, track_t i_track,
 			uint8_t *min, uint8_t *sec, uint8_t *frame);

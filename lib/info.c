@@ -1401,6 +1401,19 @@ vcdinfo_get_track_lsn(const vcdinfo_obj_t *p_obj, track_t i_track)
 }
 
 /*!  
+  Return the ending LSN for track number
+  i_track in cdio.  VCDINFO_NULL_LSN is returned on error.
+*/
+lsn_t vcdinfo_get_track_last_lsn(const vcdinfo_obj_t *p_obj, track_t i_track)
+{
+  if (!p_obj || !p_obj->img)
+    return VCDINFO_NULL_LSN;
+
+  /* CdIo tracks start at 1 rather than 0. */
+  return cdio_get_track_last_lsn(p_obj->img, i_track+1);
+}
+
+/*!  
   Return the starting MSF (minutes/secs/frames) for track number
   i_track in obj.  
 
