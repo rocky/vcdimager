@@ -77,7 +77,7 @@ bool
 read_info(CdIo_t *cdio, InfoVcd_t *info, vcd_type_t *vcd_type) 
 {
   if (cdio_read_mode2_sector (cdio, info, INFO_VCD_SECTOR, false)) {
-    vcd_error ("error reading Info sector (%d)", INFO_VCD_SECTOR);
+    vcd_warn ("error reading Info sector (%d)", INFO_VCD_SECTOR);
     return false;
   }
 
@@ -95,7 +95,7 @@ read_info(CdIo_t *cdio, InfoVcd_t *info, vcd_type_t *vcd_type)
       vcd_debug ("%s detected", vcdinf_get_format_version_str(*vcd_type));
       break;
     case VCD_TYPE_INVALID:
-      vcd_error ("unknown ID encountered -- maybe not a proper (S)VCD?");
+      vcd_warn ("unknown ID encountered -- maybe not a proper (S)VCD?");
       return false;
       break;
     default:
