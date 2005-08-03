@@ -11,9 +11,10 @@
 @include version.texi
 
 @ifinfo
-This file documents GNU VCDImager, The GNU Video CD Authoring Tools.
+This documents GNU VCDImager, The GNU Video CD Authoring Tools
+for version @value{VERSION}, @value{UPDATED}
 
-Copyright (C) Herbert Valerio Riedel @email{<hvr@@gnu.org>}
+Copyright @copyright{} 2001, 2005 Herbert Valerio Riedel @email{<hvr@@gnu.org>}
 
 @sp 2
 Permission is granted to copy, distribute and/or modify this document
@@ -42,7 +43,7 @@ uid                            Herbert Valerio Riedel <hvr@@gnu.org>
 
 @vskip 0pt plus 1filll
 
-Copyright @copyright{} 2001 Herbert Valerio Riedel @email{<hvr@@gnu.org>}
+Copyright @copyright{} 2001, 2005 Herbert Valerio Riedel @email{<hvr@@gnu.org>}
 @sp 1
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1 or
@@ -70,15 +71,22 @@ in the section entitled ``GNU Free Documentation License''.
 
 @node Top, Introduction, (dir), (dir)
 
+@ifinfo
+This documents @dfn{GNU VCDImager}, The GNU Video CD Authoring Tools
+for version @value{VERSION}, @value{UPDATED}.
+
+Copyright @copyright{} 2001, 2005 Herbert Valerio Riedel @email{<hvr@@gnu.org>}
+@end ifinfo
+
 @menu
 * Introduction::                
 * Video CD Concepts::           
-* Reference::                   
-* Video CD XML Description::    
-* Examples::                    
+* Reference::             Reference Guide to the programs comprising vcdimager 
+* VCD XML Description::     Reference of the XML description used by vcdimager
+* Examples::                Examples of using programs in this package
 * Tips and Hints::              
-* ISO 9660 Character Sets::              
-* Glossary::          
+* ISO 9660 Character Sets:: ISO646 d-characters and IS646 a-Characters
+* Glossary::                Acronyms and terms used here
 * GNU General Public License::  
 * GNU Free Documentation License::  
 * XML Tag Index::               
@@ -88,13 +96,13 @@ in the section entitled ``GNU Free Documentation License''.
 @node Introduction, Video CD Concepts, Top, Top
 @unnumbered Introduction
 
-This manual describes the @dfn{GNU VCDImager}@footnote{see
+This documents @dfn{GNU VCDImager}@footnote{see
 @uref{http://www.gnu.org/software/vcdimager/}} package, a tool-set for
 authoring, disassembling and analyzing Video CD's and Super Video CD's.
 
 @menu
-* Supplied Tools::              
-* Features::                    
+* Supplied Tools:: vcdimager, vcd-info, cdxa2mpeg, libvcdinfo, and vcdx*
+* Features:: Scope and features supported by these VCD tools and library
 @end menu
 
 @node Supplied Tools, Features, Introduction, Introduction
@@ -107,6 +115,9 @@ The following command-line tools are provided with this package:
 Simple front-end, allowing for easy command-line controlled generation of
 basic @acronym{VCD} and @acronym{SVCD} disc images without an
 intermediate @acronym{XML} description.
+
+@item libvcdinfo
+A library for working with VCDs to extract information.
 
 @item vcd-info
 Selectively shows detailed information about the structure a Video CD.
@@ -193,8 +204,10 @@ use the @option{--sector-2336} option for images longer than 80
 minutes}.
 
 @item 
-Image input support for GNU/Linux @code{ioctl()}-based cdrom devices,
-@acronym{BIN/CUE} images and @acronym{NRG} images.
+Support for CD-ROM devices on GNU/Linux (and other OSs) without the
+need to install a SCSI driver as well as hard-disk CD images:
+@code{BIN/CUE} images, cdrdao's @code{toc} image and @code{NRG}
+images.
 
 @end itemize
 
@@ -212,7 +225,7 @@ corrections and improvements for this manual to
 @menu
 * Overview::                    
 * Anatomy of Video CDs::        
-* Known Video CD Flavors::      
+* Known Video CD Flavors::     VCD 1.1, VCD 2,0 XVCD, SVCD, HQVCD, XSVCD
 * The ISO-9660 Track::           
 * Constraints on MPEG streams::  
 * Play Items::                  
@@ -1087,8 +1100,8 @@ interactivity.
 
 @emph{...to be written...}
 
-@node Reference, Video CD XML Description, Video CD Concepts, Top
-@chapter Reference
+@node Reference, VCD XML Description, Video CD Concepts, Top
+@chapter Program Reference
 
 @menu
 * Tools::                       
@@ -1276,8 +1289,8 @@ might not available or applicable.
 A better, more universal way to extract MPEGs from a Video CD is to
 use the @code{--tracks} option of @xref{vcdxrip}.
 
-@node Video CD XML Description, Examples, Reference, Top
-@chapter Video CD XML Description
+@node VCD XML Description, Examples, Reference, Top
+@chapter VCD XML Description
 @cindex DTD of Video CD XML
 
 The @acronym{DTD} the @acronym{XML} description conforms to, can be
@@ -1298,7 +1311,7 @@ with me at @email{<hvr@@gnu.org>}.}
 * <videocd> Root::              
 @end menu
 
-@node Common Rules, <videocd> Root, Video CD XML Description, Video CD XML Description
+@node Common Rules, <videocd> Root, VCD XML Description, VCD XML Description
 @section XML Simplified Rules
 
 @itemize @bullet
@@ -1432,7 +1445,7 @@ end list, @code{<endlist>}.
 
 @defindex tg
 
-@node <videocd> Root,  , Common Rules, Video CD XML Description
+@node <videocd> Root,  , Common Rules, VCD XML Description
 @section @code{<videocd>} Root
 @tgindex @code{videocd}
 
@@ -2430,7 +2443,7 @@ picture.
 @end cartouche
 @end smallexample
 
-@node Examples, Tips and Hints, Video CD XML Description, Top
+@node Examples, Tips and Hints, VCD XML Description, Top
 @chapter Examples
 @cindex @command{cdrdao}, How to use
 
@@ -2499,9 +2512,9 @@ $
 @end example
 
 @menu
-* Simple Multitrack Example::   
-* Video CD Disassembling::      
-* Video CD Low-level Information::      
+* Simple Multitrack Example::  vcdimager  to create a multi-track VCD
+* Video CD Disassembling::     vcdxrip to extract the contents of a VCD
+* Video CD Low-level Information:: vcd-info to show low-level details 
 @end menu
 
 @node Simple Multitrack Example, Video CD Disassembling, Examples, Examples
