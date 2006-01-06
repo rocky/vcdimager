@@ -1,7 +1,7 @@
 /*
     $Id$
 
-    Copyright (C) 2003, 2005 Rocky Bernstein <rocky@panix.com>
+    Copyright (C) 2003, 2005, 2006 Rocky Bernstein <rocky@panix.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -102,10 +102,9 @@ vcdinf_update_offset_list(struct _vcdinf_pbc_ctx *obj, bool extended)
           }
         } else {
           /* See if we've skipped any LID numbers. */
-          last_lid++;
           while (last_lid != ofs->lid ) {
             lid_t * lid=calloc(1, sizeof(lid_t));
-            *lid = last_lid;
+            *lid = last_lid++;
             _cdio_list_append(unused_lids, lid);
           }
           if (last_lid > max_seen_lid) max_seen_lid=last_lid;
