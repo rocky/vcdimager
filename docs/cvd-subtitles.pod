@@ -1,8 +1,8 @@
-=head1 CVD Subtitle Information
+=head1 CVD (Chaoji VCD) Subtitle Information
 
-The following information is culled from information from 
-Julio Sanchez Fernandez (L<http://subhandler.sourceforge.net>)
-by Rocky Bernstein. 
+The following information is culled from information from Julio
+Sánchez Fernández (L<http://subhandler.sourceforge.net>) by Rocky
+Bernstein.
 
 We do not have information on the subtitle format used on CVD's except
 the submux sample code and a couple of samples of dubious
