@@ -1,7 +1,8 @@
 /*
     $Id$
 
-    Copyright (C) 2001, 2003, 2004, 2005 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2001, 2003, 2004, 2005, 2006
+    Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -72,17 +73,17 @@ typedef struct {
 } _etn2_array_t;
 
 typedef struct {
-  uint8_t  _unknown1  GNUC_PACKED; /* 0x41 == 'A' */
-  uint8_t  track      GNUC_PACKED; /* binary or BCD?? */
-  uint8_t  index      GNUC_PACKED; /* makes 0->1 transitions */
-  uint8_t  _unknown2  GNUC_PACKED; /* ?? */
+  uint8_t  _unknown1;              /* 0x41 == 'A' */
+  uint8_t  track;                  /* binary or BCD?? */
+  uint8_t  index;                  /* makes 0->1 transitions */
+  uint8_t  _unknown2;              /* ?? */
   uint32_t lsn        GNUC_PACKED; 
 } _cuex_array_t;
 
 typedef struct {
   uint32_t id                    GNUC_PACKED;
   uint32_t len                   GNUC_PACKED;
-  char data[EMPTY_ARRAY_SIZE]    GNUC_PACKED;
+  char data[EMPTY_ARRAY_SIZE]               ;
 } _chunk_t;
 
 PRAGMA_END_PACKED

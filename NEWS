@@ -2,6 +2,16 @@ $Id$
 
 see ChangeLog for more information
 
+version 0.7.24 (development)
+=====================================
+2005-??-??
+
+* Add cdinfo_get_track_last_lsn() which is like cdinfo_get_track_last_lsn()
+* Make libvcdinfo work when called from C++, add C++ example program
+* Fail less severely when trying to determine if medium is VCD
+* Documentation and doxygen improvements
+
+
 version 0.7.23 (development)
 =====================================
 2005-07-11

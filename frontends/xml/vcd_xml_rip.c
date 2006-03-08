@@ -2,7 +2,7 @@
     $Id$
 
     Copyright (C) 2001, 2003, 2004, 2005 Herbert Valerio Riedel <hvr@gnu.org>
-    Copyright (C) 2005 Rocky Bernstein <rocky@panix.com>
+    Copyright (C) 2005, 2006 Rocky Bernstein <rocky@panix.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1069,7 +1069,7 @@ _rip_sequences (vcdxml_t *p_vcdxml, CdIo_t *p_cdio, int i_track)
       memset (&mpeg_ctx, 0, sizeof (VcdMpegStreamCtx));
 
       start_lsn = _seq->start_extent;
-      end_lsn = _nseq ? _nseq->start_extent : cdio_stat_size (p_cdio);
+      end_lsn = _nseq ? _nseq->start_extent : cdio_get_disc_last_lsn (p_cdio);
 
       vcd_info ("extracting %s... (start lsn %lu (+%lu))",
 		_seq->src, (long unsigned int) start_lsn, 

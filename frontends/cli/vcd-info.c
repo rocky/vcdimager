@@ -2,7 +2,8 @@
     $Id$
 
     Copyright (C) 2001, 2002 Herbert Valerio Riedel <hvr@gnu.org>
-    Copyright (C) 2002, 2003, 2004, 2005 Rocky Bernstein <rocky@panix.com>
+    Copyright (C) 2002, 2003, 2004, 2005, 2006
+    Rocky Bernstein <rocky@panix.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1198,7 +1199,7 @@ dump (char *image_fname[])
     goto err_exit;
   }
 
-  size = cdio_stat_size (p_cdio);
+  size = cdio_get_disc_last_lsn (p_cdio);
 
   if (gl.show.source) 
     {

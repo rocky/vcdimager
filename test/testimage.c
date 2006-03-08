@@ -2,6 +2,7 @@
     $Id$
 
     Copyright (C) 2001, 2005 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2006 Rocky Bernstein <rocky@panix.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -56,7 +57,7 @@ main (int argc, const char *argv[])
   vcd_assert (img != NULL);
 
   {
-    uint32_t n = cdio_stat_size (img);
+    uint32_t n = cdio_get_disc_last_lsn (img);
     char buf[M2RAW_SECTOR_SIZE];
     lsn = atoi (argv[3]);
 
