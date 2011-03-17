@@ -158,7 +158,7 @@ _parse_isofs_r (vcdxml_t *p_vcdxml, CdIo_t *p_cdio,
       char *_name = statbuf->filename;
 
       strncpy (_fullname, pathname, sizeof (_fullname));
-      strncat (_fullname, _name, sizeof (_fullname));
+      strncat (_fullname, _name, sizeof (_fullname)-strlen(_fullname)-1);
 
       if (NULL == statbuf)
 	return -1;
@@ -177,7 +177,7 @@ _parse_isofs_r (vcdxml_t *p_vcdxml, CdIo_t *p_cdio,
       _register_file (p_vcdxml, _fullname, statbuf);
 
       if (statbuf->type == _STAT_DIR) {
-	strncat (_fullname, "/", sizeof (_fullname));
+	strncat (_fullname, "/", sizeof (_fullname)-strlen(_fullname)-1);
 	if (_parse_isofs_r (p_vcdxml, p_cdio, _fullname)) {
 	  return -1;
 	}

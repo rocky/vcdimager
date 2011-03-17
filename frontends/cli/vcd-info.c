@@ -944,7 +944,7 @@ _dump_fs_recurse (const vcdinfo_obj_t *obj, const char pathname[])
 
       snprintf (_fullname, sizeof (_fullname), "%s%s", pathname, _name);
   
-      strncat (_fullname, "/", sizeof (_fullname));
+      strncat (_fullname, "/", sizeof (_fullname)-strlen(_fullname)-1);
 
       if (statbuf->type == _STAT_DIR
           && strcmp (_name, ".") 

@@ -1,14 +1,12 @@
 /*
-    $Id$
-
     Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
     Copyright 1998-2002 by Heiko Eissfeldt <heiko@colossus.escape.de>
     Copyright 2002 by Joerg Schilling
                   portions used & Chris Smith
 
     This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License.
+    it under the terms of the GNU General Public License version 2
+    as published by the Free Software Foundation.
 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -16,9 +14,9 @@
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+    along with this program; see the file COPYING.  If not, write to
+    the Free Software Foundation, 59 Temple Place - Suite 330, Boston,
+    MA 02111-1307, USA.  */
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"

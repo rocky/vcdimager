@@ -275,7 +275,7 @@ _do_cl (int argc, const char *argv[])
 	{
 	  char buf[1024] = { 0, };
 	  strncpy (buf, opt_arg, sizeof (buf));
-	  strncat (buf, ".toc", sizeof (buf));
+	  strncat (buf, ".toc", sizeof (buf)-strlen(buf)-1);
 
 	  _set_img_opt ("toc", buf);
 	}

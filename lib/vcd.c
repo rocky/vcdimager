@@ -1682,7 +1682,7 @@ _write_sequence (VcdObj_t *p_obj, int track_idx)
                                   track->info->ahdr[i].bitrate / 1024,
                                   _mode_str[track->info->ahdr[i].mode]);
                     
-            strncat (buf2, buf, sizeof(buf2)-i_buf2);
+            strncat (buf2, buf, sizeof(buf2)-strlen(buf2)-i_buf2-1);
             i_buf2 += i_buf;
           }      
 

@@ -116,8 +116,8 @@ do
       else 
 	echo "Run 'make ChangeLog' in maintainer mode for a real ChangeLog!" > ChangeLog
       fi
-      echo "Running automake --add-missing --gnu $am_opt ..."
-      automake --add-missing --gnu $am_opt
+      echo "Running automake --add-missing $am_opt ..."
+      automake --add-missing $am_opt
       echo "Running autoconf ..."
       autoconf
     )
