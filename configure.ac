@@ -17,7 +17,7 @@ dnl Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 dnl 02111-1307, USA.
 
 define(RELEASE_NUM, 24)
-define(LIBVCD_VERSION_STR, 0.7.$1cvs)
+define(LIBVCD_VERSION_STR, 0.7.$1)
 
 AC_PREREQ(2.52)
 AC_REVISION([$Id$])dnl
@@ -159,8 +159,8 @@ fi
 
 dnl headers
 
-AC_DEFINE(_DEVELOPMENT_, [], enable warnings about being development release)
-AC_DEFINE(_GNU_SOURCE, [], enable GNU libc extension)
+dnl AC_DEFINE(_DEVELOPMENT_, [], enable warnings about being development release)
+# AC_DEFINE(_GNU_SOURCE, [], enable GNU libc extension)
 AC_STDC_HEADERS
 AC_CHECK_HEADERS(sys/stat.h stdint.h inttypes.h stdbool.h sys/mman.h)
 
