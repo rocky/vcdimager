@@ -28,6 +28,9 @@
 #include <ctype.h>
 #include <math.h>
 
+#define _VCD_INFO_PRIVATE_H
+/* We don't want to pull in cdio's config */
+#define __CDIO_CONFIG_H__
 #include <cdio/cdio.h>
 #include <cdio/util.h>
 #include <cdio/iso9660.h>

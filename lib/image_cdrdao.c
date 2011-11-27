@@ -26,6 +26,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* We don't want to pull in cdio's config */
+#define __CDIO_CONFIG_H__
 /* Public headers */
 #include <cdio/iso9660.h>
 #include <cdio/util.h>

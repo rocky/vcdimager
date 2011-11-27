@@ -33,6 +33,9 @@
 #include <libvcd/version.h>
 #include <libvcd/types.h>
 #include <libvcd/files.h>
+
+/* We don't want to pull in cdio's config */
+#define __CDIO_CONFIG_H__
 #include <cdio/cdio.h>
 #include <cdio/iso9660.h>
 #include <cdio/ds.h>

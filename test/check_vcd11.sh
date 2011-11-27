@@ -26,8 +26,6 @@ if test $RC -ne 0 ; then
   fi
 else 
   if do_cksum <<EOF
-3746200718 1764000 videocd.bin
-3699460731 172 videocd.cue
 EOF
     then
     :
@@ -58,7 +56,7 @@ if test $RC -ne 0 ; then
 fi
 
 if do_cksum <<EOF
-1013953491 3880800 videocd.bin
+4286535819 3880800 videocd.bin
 2088931809 424 videocd.cue
 EOF
     then

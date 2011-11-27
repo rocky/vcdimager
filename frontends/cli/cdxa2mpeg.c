@@ -33,6 +33,8 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
+/* We don't want to pull in cdio's config */
+#define __CDIO_CONFIG_H__
 #include <cdio/sector.h>
 #include <cdio/bytesex.h>
 

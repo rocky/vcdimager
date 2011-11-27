@@ -28,6 +28,8 @@
 #include <stdio.h>
 #include <math.h>
 
+/* We don't want to pull in cdio's config */
+#define __CDIO_CONFIG_H__
 #include <cdio/iso9660.h>
 #include <libvcd/types.h>
 #include <libvcd/files.h>

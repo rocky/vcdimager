@@ -24,6 +24,8 @@
 #ifndef __VCD_TYPES_H__
 #define __VCD_TYPES_H__
 
+/* We don't want to pull in cdio's config */
+#define __CDIO_CONFIG_H__
 #include <cdio/types.h>
 
 #ifdef __cplusplus

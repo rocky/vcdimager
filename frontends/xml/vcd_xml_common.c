@@ -25,6 +25,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/* We don't want to pull in cdio's config */
+#define __CDIO_CONFIG_H__
+
 /* Private includes */
 #include "vcd_assert.h"
 #include "vcd.h"

@@ -25,12 +25,15 @@
 
 #ifndef _VCD_INFO_PRIVATE_H
 #define _VCD_INFO_PRIVATE_H
+/* We don't want to pull in cdio's config */
+#define __CDIO_CONFIG_H__
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
 
 #include <cdio/cdio.h>
+
 #include <cdio/ds.h>
 #include <cdio/iso9660.h>
 #include <libvcd/types.h>

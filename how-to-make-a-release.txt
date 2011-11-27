@@ -29,7 +29,7 @@
 - "make distcheck" one more time
 
 - Get onto ftp.gnu.org. I use my perl program, e.g.
-   gnu-ftp-upload libcdio 0.75
+   gnu-ftp-upload vcdimager 0.7.24
 
 - Update/Announce on Freshmeat
   http://freshmeat.net/projects/vcdimager/ "add release" generally

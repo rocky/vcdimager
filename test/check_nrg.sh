@@ -27,7 +27,7 @@ if test $RC -ne 0 ; then
 fi
 
 if do_cksum <<EOF
-1284184221 2630472 videocd.nrg
+2176989007 2630472 videocd.nrg
 EOF
     then
     :
@@ -72,7 +72,7 @@ if test $RC -ne 0 ; then
 fi
 
 if do_cksum <<EOF
-2897989104 1653964 videocd.nrg
+2290177553 1653964 videocd.nrg
 EOF
     then
     :

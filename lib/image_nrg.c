@@ -31,6 +31,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* We don't want to pull in cdio's config */
+#define __CDIO_CONFIG_H__
 #include <cdio/cdio.h>
 #include <cdio/bytesex.h>
 #include <cdio/iso9660.h>

@@ -27,8 +27,14 @@
 #include <string.h>
 #include <errno.h>
 
+#ifdef HAVE_TIME_H
+#include <time.h>
+#endif
+
 #include <popt.h>
 
+/* We don't want to pull in cdio's config */
+#define __CDIO_CONFIG_H__
 #include <libxml/parserInternals.h>
 #include <libxml/parser.h>
 #include <libxml/valid.h>

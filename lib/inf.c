@@ -49,6 +49,8 @@
 #include <unistd.h>
 #endif
 
+/* We don't want to pull in cdio's config */
+#define __CDIO_CONFIG_H__
 #include <cdio/cdio.h>
 #include <cdio/bytesex.h>
 #include <cdio/util.h>
