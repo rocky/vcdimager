@@ -18,33 +18,38 @@ test_vcdimager --type=vcd20 ${srcdir}/avseq00.m1p
 RC=$?
 
 if test $RC -ne 0 ; then
-  if test $RC -ne 77 ; then 
-    echo vcdimager failed 
-    exit $RC
-  else
-    echo vcdimager skipped
-    test_vcdimager_cleanup
-  fi
+    if test $RC -ne 77 ; then 
+	echo vcdimager failed 
+	exit $RC
+    else
+	echo vcdimager skipped
+	test_vcdimager_cleanup
+    fi
 else 
-  if do_cksum <<EOF
+    if do_cksum "quiet" <<EOF
 1594106842 1764000 videocd.bin
 3699460731 172 videocd.cue
 EOF
     then
-    :
-  else
-    echo "$0: cksum(1) checksums didn't match :-("
+	:
+    elif do_cksum <<EOF
+1170593626 1764000 videocd.bin
+3699460731 172 videocd.cue
+EOF
+    then
+	:
+    else
+	echo "$0: cksum(1) checksums didn't match :-("
+	cksum videocd.bin videocd.cue
+	exit 1
+    fi
 
-    cksum videocd.bin videocd.cue
-    exit 1
-  fi
-
-  echo "$0: vcdimager cksum(1) checksums matched :-)"
-
-  test_vcdinfo '-B -i videocd.cue ' \
-    vcd20_test0.dump ${srcdir}/vcd20_test0.right
-  RC=$?
-  check_result $RC 'vcd-info test 0'
+    echo "$0: vcdimager cksum(1) checksums matched :-)"
+    
+    test_vcdinfo '-B -i videocd.cue ' \
+	vcd20_test0.dump ${srcdir}/vcd20_test0.right
+    RC=$?
+    check_result $RC 'vcd-info test 0'
 fi
 
 test_vcdxbuild ${srcdir}/${BASE}.xml
@@ -59,11 +64,17 @@ if test $RC -ne 0 ; then
   exit $RC
 fi
 
-if do_cksum <<EOF
+if do_cksum "quiet" <<EOF
 3694706815 4840416 videocd.bin
 2350689551 447 videocd.cue
 EOF
-    then
+then
+    :
+elif do_cksum <<EOF
+1209563022 4840416 videocd.bin
+2350689551 447 videocd.cue
+EOF
+then
     :
 else
     echo "$0: cksum(1) checksums didn't match :-("

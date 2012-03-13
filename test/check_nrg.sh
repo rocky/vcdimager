@@ -26,14 +26,18 @@ if test $RC -ne 0 ; then
   exit $RC
 fi
 
-if do_cksum <<EOF
+if do_cksum "quiet" <<EOF
 2176989007 2630472 videocd.nrg
 EOF
-    then
+then
+    :
+elif do_cksum <<EOF
+1284184221 2630472 videocd.nrg
+EOF
+then
     :
 else
     echo "$0: cksum(1) checksums didn't match :-("
-
     cksum videocd.nrg
     exit 1
 fi
@@ -71,16 +75,19 @@ if test $RC -ne 0 ; then
   exit $RC
 fi
 
-if do_cksum <<EOF
+if do_cksum "quiet" <<EOF
 2290177553 1653964 videocd.nrg
 EOF
-    then
+then
+    :
+elif do_cksum <<EOF
+2897989104 1653964 videocd.nrg
+EOF
+then
     :
 else
     echo "$0: cksum(1) checksums didn't match :-("
-
     cksum videocd.nrg
-
     test_vcdxbuild_cleanup
     exit 1
 fi

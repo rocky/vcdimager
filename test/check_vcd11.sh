@@ -55,11 +55,23 @@ if test $RC -ne 0 ; then
   exit $RC
 fi
 
-if do_cksum <<EOF
+if do_cksum "quiet" <<EOF
 4286535819 3880800 videocd.bin
 2088931809 424 videocd.cue
 EOF
-    then
+then
+    :
+elif do_cksum "quiet" <<EOF
+1013953491 3880800 videocd.bin
+2088931809 424 videocd.cue
+EOF
+then
+    :
+elif do_cksum "quiet" <<EOF
+4286535819 3880800 videocd.bin
+2088931809 424 videocd.cue
+EOF
+then
     :
 else
     echo "$0: cksum(1) checksums didn't match :-("

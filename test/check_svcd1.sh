@@ -25,12 +25,18 @@ if test $RC -ne 0 ; then
     test_vcdimager_cleanup
   fi
 else
-  if do_cksum <<EOF
+  if do_cksum "quiet" <<EOF
 1923402845 1587600 videocd.bin
 3699460731 172 videocd.cue
 EOF
-    then
-    :
+  then
+      :
+  elif  do_cksum <<EOF
+3747978987 1587600 videocd.bin
+3699460731 172 videocd.cue
+EOF
+  then
+      :
   else
     echo "$0: cksum(1) checksums didn't match :-("
 
@@ -58,11 +64,17 @@ if test $RC -ne 0 ; then
   exit $RC
 fi
 
-if do_cksum <<EOF
+if do_cksum "quiet" <<EOF
 832619107 4059552 videocd.bin
 669873986 424 videocd.cue
 EOF
-    then
+then
+    :
+elif do_cksum <<EOF
+4104676060 4059552 videocd.bin
+669873986 424 videocd.cue
+EOF
+then
     :
 else
     echo "$0: cksum(1) checksums didn't match :-("
@@ -111,11 +123,17 @@ if test $RC -ne 0 ; then
   exit $RC
 fi
 
-if do_cksum <<EOF
+if do_cksum "quiet" <<EOF
 4248765257 2018016 videocd.bin
 483250638 172 videocd.cue
 EOF
-    then
+then
+    :
+elif do_cksum "quiet" <<EOF
+3695643404 2018016 videocd.bin
+483250638 172 videocd.cue
+EOF
+then
     :
 else
     echo "$0: cksum(1) checksums didn't match :-("
