@@ -1,6 +1,5 @@
 /*
-    $Id$
-
+    Copyright (C) 2018 Rocky Bernstein <rocky@gnu.org>
     Copyright (C) 2001, 2004 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
@@ -42,8 +41,6 @@
 #include "stream_stdio.h"
 #include "util.h"
 
-static const char _rcsid[] = "$Id$";
-
 /* reader */
 
 #define DEFAULT_VCD_DEVICE "videocd.bin"
@@ -74,7 +71,7 @@ _sink_init (_img_bincue_snk_t *_obj)
   if (!(_obj->cue_snk = vcd_data_sink_new_stdio (_obj->cue_fname)))
     vcd_error ("init failed");
 
-  _obj->init = true;  
+  _obj->init = true;
 }
 
 static void
@@ -90,13 +87,13 @@ _sink_free (void *user_data)
 }
 
 static int
-_set_cuesheet (void *user_data, const CdioList *vcd_cue_list)
+_set_cuesheet (void *user_data, const CdioList_t *vcd_cue_list)
 {
   _img_bincue_snk_t *_obj = user_data;
   CdioListNode_t *node;
   int track_no, index_no;
   const vcd_cue_t *_last_cue = 0;
-  
+
   _sink_init (_obj);
 
   vcd_data_sink_printf (_obj->cue_snk, "FILE \"%s\" BINARY\r\n",
@@ -104,20 +101,20 @@ _set_cuesheet (void *user_data, const CdioList *vcd_cue_list)
 
   track_no = 0;
   index_no = 0;
-  _CDIO_LIST_FOREACH (node, (CdioList *) vcd_cue_list)
+  _CDIO_LIST_FOREACH (node, (CdioList_t *) vcd_cue_list)
     {
       const vcd_cue_t *_cue = _cdio_list_node_data (node);
       char *psz_msf;
-      
+
       msf_t _msf = { 0, 0, 0 };
-      
+
       switch (_cue->type)
 	{
 	case VCD_CUE_TRACK_START:
 	  track_no++;
 	  index_no = 0;
 
-	  vcd_data_sink_printf (_obj->cue_snk, 
+	  vcd_data_sink_printf (_obj->cue_snk,
 				"  TRACK %2.2d MODE2/%d\r\n"
 				"    FLAGS DCP\r\n",
 				track_no, (_obj->sector_2336_flag ? 2336 : 2352));
@@ -127,8 +124,8 @@ _set_cuesheet (void *user_data, const CdioList *vcd_cue_list)
 	      cdio_lba_to_msf (_last_cue->lsn, &_msf);
 	      psz_msf = cdio_msf_to_str(&_msf);
 
-	      vcd_data_sink_printf (_obj->cue_snk, 
-				    "    INDEX %2.2d %s\r\n", 
+	      vcd_data_sink_printf (_obj->cue_snk,
+				    "    INDEX %2.2d %s\r\n",
 				    index_no, psz_msf);
 	      free(psz_msf);
 	    }
@@ -138,7 +135,7 @@ _set_cuesheet (void *user_data, const CdioList *vcd_cue_list)
 	  cdio_lba_to_msf (_cue->lsn, &_msf);
 	  psz_msf = cdio_msf_to_str(&_msf);
 
-	  vcd_data_sink_printf (_obj->cue_snk, 
+	  vcd_data_sink_printf (_obj->cue_snk,
 				"    INDEX %2.2d %s\r\n",
 				index_no, psz_msf);
 	  free(psz_msf);
@@ -157,12 +154,12 @@ _set_cuesheet (void *user_data, const CdioList *vcd_cue_list)
 	  cdio_lba_to_msf (_cue->lsn, &_msf);
 	  psz_msf = cdio_msf_to_str(&_msf);
 
-	  vcd_data_sink_printf (_obj->cue_snk, 
+	  vcd_data_sink_printf (_obj->cue_snk,
 				"    INDEX %2.2d %s\r\n",
 				index_no, psz_msf);
 	  free(psz_msf);
 	  break;
-	  
+
 	case VCD_CUE_END:
 	  vcd_data_sink_close (_obj->cue_snk);
 	  return 0;
@@ -179,7 +176,7 @@ _set_cuesheet (void *user_data, const CdioList *vcd_cue_list)
 
   return -1;
 }
- 
+
 static int
 _vcd_image_bincue_write (void *user_data, const void *data, lsn_t lsn)
 {
@@ -192,7 +189,7 @@ _vcd_image_bincue_write (void *user_data, const void *data, lsn_t lsn)
   offset *= _obj->sector_2336_flag ? M2RAW_SECTOR_SIZE : CDIO_CD_FRAMESIZE_RAW;
 
   vcd_data_sink_seek(_obj->bin_snk, offset);
-  
+
   if (_obj->sector_2336_flag)
     vcd_data_sink_write(_obj->bin_snk, buf + 12 + 4, M2RAW_SECTOR_SIZE, 1);
   else
@@ -258,4 +255,3 @@ vcd_image_sink_new_bincue (void)
 
   return vcd_image_sink_new (_data, &_funcs);
 }
-

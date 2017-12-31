@@ -1,7 +1,6 @@
 /*
-    $Id$
-
-    Copyright (C) 2000, 2004, 2005 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2018 Rocky Bernstein <rocky@gnu.org>
+    Copyright (C) 2000, 2004-2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -48,9 +47,6 @@
 #include "pbc.h"
 #include "util.h"
 
-static const char _rcsid[] = "$Id$";
-
-
 inline static bool
 _pal_p (const struct vcd_mpeg_stream_vid_info *_info)
 {
@@ -80,7 +76,7 @@ _derive_vid_type (const struct vcd_mpeg_stream_info *_info, bool svcd)
 static int
 _derive_ogt_type (const struct vcd_mpeg_stream_info *p_info, bool svcd)
 {
-  
+
   if (!svcd)
     return 0;
 
@@ -95,7 +91,7 @@ _derive_ogt_type (const struct vcd_mpeg_stream_info *p_info, bool svcd)
     return 0x1;
 
   vcd_debug ("OGT streams available: %d %d %d %d",
-             p_info->ogt[0], p_info->ogt[1], 
+             p_info->ogt[0], p_info->ogt[1],
              p_info->ogt[2], p_info->ogt[3]);
 
   return 0x0;
@@ -114,7 +110,7 @@ _derive_aud_type (const struct vcd_mpeg_stream_info *p_info, bool svcd)
 
       if (p_info->ahdr[1].seen)
         return 2; /* 2 streams */
-      
+
       return 1; /* just one stream */
     }
   else
@@ -190,7 +186,7 @@ set_entries_vcd (VcdObj_t *obj, void *buf)
       entries_vcd.version = ENTRIES_VERSION_HQVCD;
       entries_vcd.sys_prof_tag = ENTRIES_SPTAG_HQVCD;
       break;
-      
+
     default:
       vcd_assert_not_reached ();
       break;
@@ -207,7 +203,7 @@ set_entries_vcd (VcdObj_t *obj, void *buf)
       lsect += obj->iso_size;
 
       entries_vcd.entry[idx].n = cdio_to_bcd8(track_idx);
-      cdio_lba_to_msf(cdio_lsn_to_lba(lsect), 
+      cdio_lba_to_msf(cdio_lsn_to_lba(lsect),
                       &(entries_vcd.entry[idx].msf));
 
       idx++;
@@ -244,7 +240,7 @@ _set_bit (uint8_t bitset[], unsigned bitnum)
   bitset[_byte] |= (1 << _bit);
 }
 
-uint32_t 
+uint32_t
 get_psd_size (VcdObj_t *obj, bool extended)
 {
   if (extended)
@@ -252,7 +248,7 @@ get_psd_size (VcdObj_t *obj, bool extended)
 
   if (!_vcd_pbc_available (obj))
     return 0;
-  
+
   if (extended)
     return obj->psdx_size;
 
@@ -274,7 +270,7 @@ set_psd_vcd (VcdObj_t *p_obj, void *buf, bool b_extended)
       pbc_t *p_pbc = _cdio_list_node_data (node);
       char *_buf = buf;
       unsigned offset = (b_extended ? p_pbc->offset_ext : p_pbc->offset);
-      
+
       vcd_assert (offset % INFO_OFFSET_MULT == 0);
 
       _vcd_pbc_node_write (p_obj, p_pbc, _buf + offset, b_extended);
@@ -301,7 +297,7 @@ set_lot_vcd(VcdObj_t *p_obj, void *buf, bool b_extended)
     {
       pbc_t *p_pbc = _cdio_list_node_data (p_node);
       unsigned int offset = b_extended ? p_pbc->offset_ext : p_pbc->offset;
-      
+
       vcd_assert (offset % INFO_OFFSET_MULT == 0);
 
       if (p_pbc->rejected)
@@ -325,7 +321,7 @@ set_info_vcd(VcdObj_t *p_obj, void *buf)
 
   vcd_assert (sizeof (InfoVcd_t) == 2048);
   vcd_assert (_cdio_list_length (p_obj->mpeg_track_list) <= 98);
-  
+
   memset (&info_vcd, 0, sizeof (info_vcd));
 
   switch (p_obj->type)
@@ -359,15 +355,15 @@ set_info_vcd(VcdObj_t *p_obj, void *buf)
       info_vcd.version = INFO_VERSION_HQVCD;
       info_vcd.sys_prof_tag = INFO_SPTAG_HQVCD;
       break;
-      
+
     default:
       vcd_assert_not_reached ();
       break;
     }
-  
-  iso9660_strncpy_pad (info_vcd.album_desc, 
+
+  iso9660_strncpy_pad (info_vcd.album_desc,
                        p_obj->info_album_id,
-                       sizeof(info_vcd.album_desc), ISO9660_DCHARS); 
+                       sizeof(info_vcd.album_desc), ISO9660_DCHARS);
   /* fixme, maybe it's VCD_ACHARS? */
 
   info_vcd.vol_count = uint16_to_be (p_obj->info_volume_count);
@@ -381,8 +377,8 @@ set_info_vcd(VcdObj_t *p_obj, void *buf)
       _CDIO_LIST_FOREACH (p_node, p_obj->mpeg_track_list)
         {
           mpeg_track_t *track = _cdio_list_node_data (p_node);
-          
-          const struct vcd_mpeg_stream_vid_info *p_info = 
+
+          const struct vcd_mpeg_stream_vid_info *p_info =
             &track->info->shdr[0];
 
           if (vcd_mpeg_get_norm (p_info) == MPEG_NORM_PAL
@@ -394,7 +390,7 @@ set_info_vcd(VcdObj_t *p_obj, void *buf)
                         "for track #%d -- are we creating a X(S)VCD?", n);
               _set_bit(info_vcd.pal_flags, n);
             }
-        
+
           n++;
         }
     }
@@ -408,15 +404,15 @@ set_info_vcd(VcdObj_t *p_obj, void *buf)
       if (_vcd_obj_has_cap_p (p_obj, _CAP_PBC_X)
           &&_vcd_pbc_available (p_obj))
         info_vcd.flags.pbc_x = true;
-      
+
       info_vcd.psd_size = uint32_to_be (get_psd_size (p_obj, false));
       info_vcd.offset_mult = _vcd_pbc_available (p_obj) ? INFO_OFFSET_MULT : 0;
       info_vcd.lot_entries = uint16_to_be (_vcd_pbc_max_lid (p_obj));
-      
+
       if (_cdio_list_length (p_obj->mpeg_segment_list))
         {
           unsigned segments = 0;
-        
+
           if (!_vcd_pbc_available (p_obj))
             vcd_warn ("segment items available, but no PBC items set!"
                       " SPIs will be unreachable");
@@ -427,11 +423,11 @@ set_info_vcd(VcdObj_t *p_obj, void *buf)
               unsigned int idx;
               InfoSpiContents_t contents = { 0, };
 
-              contents.video_type = 
+              contents.video_type =
                 _derive_vid_type (p_segment->info,
                                   _vcd_obj_has_cap_p (p_obj, _CAP_4C_SVCD));
 
-              contents.audio_type = 
+              contents.audio_type =
                 _derive_aud_type (p_segment->info,
                                   _vcd_obj_has_cap_p (p_obj, _CAP_4C_SVCD));
 
@@ -448,7 +444,7 @@ set_info_vcd(VcdObj_t *p_obj, void *buf)
                   vcd_assert (segments + idx < MAX_SEGMENTS);
 
                   info_vcd.spi_contents[segments + idx] = contents;
-                
+
                   if (!contents.item_cont)
                     contents.item_cont = true;
                 }
@@ -456,9 +452,9 @@ set_info_vcd(VcdObj_t *p_obj, void *buf)
               segments += idx;
             }
 
-          info_vcd.item_count = uint16_to_be (segments); 
+          info_vcd.item_count = uint16_to_be (segments);
 
-          cdio_lba_to_msf (cdio_lsn_to_lba(p_obj->mpeg_segment_start_extent), 
+          cdio_lba_to_msf (cdio_lsn_to_lba(p_obj->mpeg_segment_start_extent),
                            &info_vcd.first_seg_addr);
         }
     }
@@ -475,7 +471,7 @@ set_tracks_svd_v30 (VcdObj_t *p_vcdobj, void *buf)
   double playtime;
   int n;
 
-  memcpy (tracks_svd->file_id, TRACKS_SVD_FILE_ID, 
+  memcpy (tracks_svd->file_id, TRACKS_SVD_FILE_ID,
           sizeof (TRACKS_SVD_FILE_ID)-1);
   tracks_svd->version = TRACKS_SVD_VERSION;
   tracks_svd->tracks = _cdio_list_length (p_vcdobj->mpeg_track_list);
@@ -489,9 +485,9 @@ set_tracks_svd_v30 (VcdObj_t *p_vcdobj, void *buf)
 
       playtime += track->info->playing_time;
 
-      tracks_svd->track[n].audio_info = track->info->ahdr[0].seen 
+      tracks_svd->track[n].audio_info = track->info->ahdr[0].seen
         ? 0x2 : 0x0; /* fixme */
-      tracks_svd->track[n].audio_info |= track->info->ahdr[1].seen 
+      tracks_svd->track[n].audio_info |= track->info->ahdr[1].seen
         ? 0x20 : 0x0; /* fixme */
 
       tracks_svd->track[n].ogt_info = 0x0;
@@ -500,7 +496,7 @@ set_tracks_svd_v30 (VcdObj_t *p_vcdobj, void *buf)
           tracks_svd->track[n].ogt_info |= 1 << (i * 2); /* fixme */
 
       /* setting playtime */
-      
+
       {
         double i, f;
 
@@ -508,15 +504,15 @@ set_tracks_svd_v30 (VcdObj_t *p_vcdobj, void *buf)
           playtime -= 6000.0;
 
         f = modf(playtime, &i);
-        
+
         cdio_lba_to_msf (i * 75, &tracks_svd->track[n].cum_playing_time);
-        tracks_svd->track[n].cum_playing_time.f = 
+        tracks_svd->track[n].cum_playing_time.f =
           cdio_to_bcd8 (floor (f * 75.0));
       }
-      
+
       n++;
-    }  
-  
+    }
+
   memcpy (buf, &tracks_svd_buf, sizeof(tracks_svd_buf));
 }
 
@@ -539,7 +535,7 @@ set_tracks_svd (VcdObj_t *p_vcdobj, void *buf)
 
   vcd_assert (sizeof (SVDTrackContent_t) == 1);
 
-  memcpy (tracks_svd1->file_id, TRACKS_SVD_FILE_ID, 
+  memcpy (tracks_svd1->file_id, TRACKS_SVD_FILE_ID,
           sizeof (TRACKS_SVD_FILE_ID)-1);
   tracks_svd1->version = TRACKS_SVD_VERSION;
 
@@ -555,21 +551,21 @@ set_tracks_svd (VcdObj_t *p_vcdobj, void *buf)
       const double playtime = track->info->playing_time;
 
       int _video;
-     
+
       _video = tracks_svd2->contents[n].video =
         _derive_vid_type (track->info, true);
 
       tracks_svd2->contents[n].audio =
         _derive_aud_type (track->info, true);
 
-      tracks_svd2->contents[n].ogt = 
+      tracks_svd2->contents[n].ogt =
         _derive_ogt_type (track->info, true);
 
       if (_video != 0x3 && _video != 0x7)
         vcd_warn("SVCD/TRACKS.SVCD: No MPEG motion video for track #%d?", n);
 
       /* setting playtime */
-      
+
       {
         double i, f;
 
@@ -586,15 +582,15 @@ set_tracks_svd (VcdObj_t *p_vcdobj, void *buf)
         cdio_lba_to_msf (i * 75, &(tracks_svd1->playing_time[n]));
         tracks_svd1->playing_time[n].f = cdio_to_bcd8 (floor (f * 75.0));
       }
-      
+
       n++;
-    }  
-  
+    }
+
   memcpy (buf, &tracks_svd, sizeof(tracks_svd));
 }
 
 static double
-_get_cumulative_playing_time (const VcdObj_t *p_vcdobj, 
+_get_cumulative_playing_time (const VcdObj_t *p_vcdobj,
                               unsigned int up_to_track_no)
 {
   double result = 0;
@@ -610,33 +606,33 @@ _get_cumulative_playing_time (const VcdObj_t *p_vcdobj,
       result += track->info->playing_time;
       up_to_track_no--;
     }
-  
+
   if (up_to_track_no)
     vcd_warn ("internal error...");
 
   return result;
 }
 
-static unsigned 
+static unsigned
 _get_scanpoint_count (const VcdObj_t *p_vcdobj)
 {
   double total_playing_time;
 
-  total_playing_time = 
-    _get_cumulative_playing_time (p_vcdobj, 
+  total_playing_time =
+    _get_cumulative_playing_time (p_vcdobj,
                                   _cdio_list_length (p_vcdobj->mpeg_track_list));
 
   return ceil (total_playing_time * 2.0);
 }
 
-uint32_t 
+uint32_t
 get_search_dat_size (const VcdObj_t *p_vcdobj)
 {
-  return sizeof (SearchDat_t) 
+  return sizeof (SearchDat_t)
     + (_get_scanpoint_count (p_vcdobj) * sizeof (msf_t));
 }
 
-static CdioList *
+static CdioList_t *
 _make_track_scantable (const VcdObj_t *p_vcdobj)
 {
   CdioList_t *p_all_aps = _cdio_list_new ();
@@ -650,16 +646,16 @@ _make_track_scantable (const VcdObj_t *p_vcdobj)
     {
       mpeg_track_t *track = _cdio_list_node_data (p_node);
       CdioListNode_t *p_node2;
-      
+
       _CDIO_LIST_FOREACH (p_node2, track->info->shdr[0].aps_list)
         {
           struct aps_data *_data = calloc(1, sizeof (struct aps_data));
-          
+
           *_data = *(struct aps_data *)_cdio_list_node_data (p_node2);
 
-          _data->timestamp += _get_cumulative_playing_time (p_vcdobj, 
+          _data->timestamp += _get_cumulative_playing_time (p_vcdobj,
                                                             i_track);
-          _data->packet_no += p_vcdobj->iso_size 
+          _data->packet_no += p_vcdobj->iso_size
             + track->relative_start_extent;
           _data->packet_no += p_vcdobj->track_front_margin;
 
@@ -667,7 +663,7 @@ _make_track_scantable (const VcdObj_t *p_vcdobj)
         }
       i_track++;
     }
-  
+
   {
     CdioListNode_t *aps_node = _cdio_list_begin (p_all_aps);
     CdioListNode_t *n;
@@ -688,7 +684,7 @@ _make_track_scantable (const VcdObj_t *p_vcdobj)
 
     for (t = 0; t < playing_time; t += 0.5)
       {
-	for(n = _cdio_list_node_next (aps_node); n; 
+	for(n = _cdio_list_node_next (aps_node); n;
             n = _cdio_list_node_next (n))
 	  {
 	    _data = _cdio_list_node_data (n);
@@ -699,22 +695,22 @@ _make_track_scantable (const VcdObj_t *p_vcdobj)
 		aps_time = _data->timestamp;
 		aps_packet = _data->packet_no;
 	      }
-	    else 
+	    else
 	      break;
 	  }
 
         {
           uint32_t *lsect = calloc(1, sizeof (uint32_t));
-          
+
           *lsect = aps_packet;
           _cdio_list_append (p_scantable, lsect);
         }
-        
+
       }
 
   }
 
-  _cdio_list_free (p_all_aps, true);
+  _cdio_list_free (p_all_aps, true, NULL);
 
   vcd_assert (scanpoints == _cdio_list_length (p_scantable));
 
@@ -735,13 +731,13 @@ set_search_dat (VcdObj_t *p_vcdobj, void *buf)
   memset (&search_dat, 0, sizeof (search_dat));
 
   memcpy (search_dat.file_id, SEARCH_FILE_ID, sizeof(search_dat.file_id));
-  
+
   search_dat.version = SEARCH_VERSION;
   search_dat.scan_points = uint16_to_be (_get_scanpoint_count (p_vcdobj));
   search_dat.time_interval = SEARCH_TIME_INTERVAL;
 
   memcpy (buf, &search_dat, sizeof (search_dat));
-  
+
   p_scantable = _make_track_scantable (p_vcdobj);
 
   n = 0;
@@ -749,19 +745,19 @@ set_search_dat (VcdObj_t *p_vcdobj, void *buf)
     {
       SearchDat_t *search_dat2 = buf;
       uint32_t sect = *(uint32_t *) _cdio_list_node_data (p_node);
-          
+
       cdio_lba_to_msf(cdio_lsn_to_lba(sect), &(search_dat2->points[n]));
       n++;
     }
 
   vcd_assert (n = _get_scanpoint_count (p_vcdobj));
 
-  _cdio_list_free (p_scantable, true);
+  _cdio_list_free (p_scantable, true, NULL);
 }
 
-static uint32_t 
+static uint32_t
 _get_scandata_count (const struct vcd_mpeg_stream_info *info)
-{ 
+{
   return ceil (info->playing_time * 2.0);
 }
 
@@ -774,7 +770,7 @@ _get_scandata_table (const struct vcd_mpeg_stream_info *info)
   int aps_packet;
   uint32_t *retval;
   unsigned int i;
-  
+
   retval = calloc(1, _get_scandata_count (info) * sizeof (uint32_t));
 
   _data = _cdio_list_node_data (aps_node);
@@ -793,7 +789,7 @@ _get_scandata_table (const struct vcd_mpeg_stream_info *info)
               aps_time = _data->timestamp;
               aps_packet = _data->packet_no;
             }
-          else 
+          else
             break;
         }
 
@@ -809,7 +805,7 @@ _get_scandata_table (const struct vcd_mpeg_stream_info *info)
   return retval;
 }
 
-uint32_t 
+uint32_t
 get_scandata_dat_size (const VcdObj_t *p_vcdobj)
 {
   uint32_t retval = 0;
@@ -835,7 +831,7 @@ get_scandata_dat_size (const VcdObj_t *p_vcdobj)
     _CDIO_LIST_FOREACH (node, p_vcdobj->mpeg_track_list)
       {
         const mpeg_track_t *track = _cdio_list_node_data (node);
-        
+
         retval += sizeof (msf_t) * _get_scandata_count (track->info);
       }
   }
@@ -849,11 +845,11 @@ set_scandata_dat (VcdObj_t *p_vcdobj, void *buf)
   const unsigned tracks = _cdio_list_length (p_vcdobj->mpeg_track_list);
 
   ScandataDat1_t *scandata_dat1 = (ScandataDat1_t *) buf;
-  ScandataDat2_t *scandata_dat2 = 
+  ScandataDat2_t *scandata_dat2 =
     (ScandataDat2_t *) &(scandata_dat1->cum_playtimes[tracks]);
   ScandataDat3_t *scandata_dat3 =
     (ScandataDat3_t *) &(scandata_dat2->spi_indexes[0]);
-  ScandataDat4_t *scandata_dat4 = 
+  ScandataDat4_t *scandata_dat4 =
     (ScandataDat4_t *) &(scandata_dat3->mpeg_track_offsets[tracks]);
 
   const uint16_t _begin_offset =
@@ -869,9 +865,9 @@ set_scandata_dat (VcdObj_t *p_vcdobj, void *buf)
   /* memset (buf, 0, get_scandata_dat_size (p_vcdobj)); */
 
   /* struct 1 */
-  memcpy (scandata_dat1->file_id, SCANDATA_FILE_ID, 
+  memcpy (scandata_dat1->file_id, SCANDATA_FILE_ID,
           sizeof (scandata_dat1->file_id));
-  
+
   scandata_dat1->version = SCANDATA_VERSION_SVCD;
   scandata_dat1->reserved = 0x00;
   scandata_dat1->scandata_count = uint16_to_be (_get_scanpoint_count (p_vcdobj));
@@ -943,7 +939,7 @@ set_scandata_dat (VcdObj_t *p_vcdobj, void *buf)
 
   /* struct 4 */
 
-  
+
 }
 
 vcd_type_t
@@ -953,7 +949,7 @@ vcd_files_info_detect_type (const void *info_buf)
   vcd_type_t _type = VCD_TYPE_INVALID;
 
   vcd_assert (info_buf != NULL);
-  
+
   if (!memcmp (_info->ID, INFO_ID_VCD, sizeof (_info->ID)))
     switch (_info->version)
       {
@@ -987,7 +983,7 @@ vcd_files_info_detect_type (const void *info_buf)
         break;
       }
   else if (!memcmp (_info->ID, INFO_ID_SVCD, sizeof (_info->ID)))
-    switch (_info->version) 
+    switch (_info->version)
       {
       case INFO_VERSION_SVCD:
         if (_info->sys_prof_tag != INFO_SPTAG_SVCD)
@@ -995,7 +991,7 @@ vcd_files_info_detect_type (const void *info_buf)
                     "-- assuming SVCD", _info->sys_prof_tag);
         _type = VCD_TYPE_SVCD;
         break;
-        
+
       default:
         vcd_warn ("INFO.SVD: unexpected version value %d seen "
                   " -- still assuming SVCD", _info->version);
@@ -1003,14 +999,14 @@ vcd_files_info_detect_type (const void *info_buf)
         break;
       }
   else if (!memcmp (_info->ID, INFO_ID_HQVCD, sizeof (_info->ID)))
-    switch (_info->version) 
+    switch (_info->version)
       {
       case INFO_VERSION_HQVCD:
   if (_info->sys_prof_tag != INFO_SPTAG_HQVCD)
           vcd_warn ("INFO.SVD: unexpected system profile tag value -- assuming hqvcd");
         _type = VCD_TYPE_HQVCD;
         break;
-        
+
       default:
         vcd_warn ("INFO.SVD: unexpected version value %d seen "
                   "-- still assuming HQVCD", _info->version);
@@ -1019,14 +1015,14 @@ vcd_files_info_detect_type (const void *info_buf)
       }
   else
     vcd_warn ("INFO.SVD: signature not found");
-  
+
   return _type;
 }
 
 /* eof */
 
 
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8

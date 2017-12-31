@@ -1,6 +1,4 @@
 /*
-    $Id$
-
     Copyright (C) 2001, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
@@ -38,9 +36,6 @@
 
 #include "vcd_xml_common.h"
 
-static const char _rcsid[] = "$Id$";
-
-
 enum {
   OP_NONE = 0,
   OP_VERSION = 1 << 1
@@ -56,8 +51,8 @@ _TAG_INDENT (void)
 {
   int _i;
 
-  for (_i = 0; _i < _TAG_LEVEL; _i++) 
-    fputs ("  ", _TAG_FD);  
+  for (_i = 0; _i < _TAG_LEVEL; _i++)
+    fputs ("  ", _TAG_FD);
 }
 
 static void
@@ -99,14 +94,14 @@ _TAG_CLOSE (void)
 }
 
 static void
-_TAG_COMMENT (const char fmt[]) 
+_TAG_COMMENT (const char fmt[])
 {
   _TAG_INDENT ();
   fprintf (_TAG_FD, " <!-- %s -->\n", fmt);
 }
 
 static void
-_TAG_PRINT (const char tag[], const char fmt[], ...) 
+_TAG_PRINT (const char tag[], const char fmt[], ...)
 {
   va_list args;
   va_start (args, fmt);
@@ -168,13 +163,13 @@ main (int argc, const char *argv[])
       {"output-file", 'o', POPT_ARG_STRING, &_output_file, OP_NONE,
        "file for XML output", "FILE"},
 
-      {"progress", 'p', POPT_ARG_NONE, &_progress_flag, 0,  
-       "show progress"}, 
-      
-      {"verbose", 'v', POPT_ARG_NONE, &_verbose_flag, OP_NONE, 
+      {"progress", 'p', POPT_ARG_NONE, &_progress_flag, 0,
+       "show progress"},
+
+      {"verbose", 'v', POPT_ARG_NONE, &_verbose_flag, OP_NONE,
        "be verbose"},
-    
-      {"quiet", 'q', POPT_ARG_NONE, &_quiet_flag, OP_NONE, 
+
+      {"quiet", 'q', POPT_ARG_NONE, &_quiet_flag, OP_NONE,
        "show only critical messages"},
 
       {"gui", '\0', POPT_ARG_NONE, &_gui_flag, 0, "enable GUI mode"},
@@ -266,7 +261,7 @@ main (int argc, const char *argv[])
     _TAG_OPEN ("mpeg-info", "src=\"%s\"", _mpeg_fname);
 
     if (_generic_info)
-      { 
+      {
         const struct vcd_mpeg_stream_info *_info = vcd_mpeg_source_get_info (src);
         int i;
 
@@ -302,7 +297,7 @@ main (int argc, const char *argv[])
             _TAG_PRINT ("horizontal-size", "%d", _vinfo->hsize);
             _TAG_PRINT ("vertical-size", "%d", _vinfo->vsize);
             _TAG_PRINT ("frame-rate", "%f", _vinfo->frate);
-            
+
             _TAG_PRINT ("bit-rate", "%d", _vinfo->bitrate);
 
             if (_dump_aps && _vinfo->aps_list)
@@ -314,10 +309,10 @@ main (int argc, const char *argv[])
                 _CDIO_LIST_FOREACH (n, _vinfo->aps_list)
                   {
                     struct aps_data *_data = _cdio_list_node_data (n);
-                    
+
                     _TAG_INDENT ();
                     fprintf (_TAG_FD, "<aps packet-no=\"%u\">%f</aps>\n",
-                             (unsigned int) _data->packet_no, 
+                             (unsigned int) _data->packet_no,
                              _data->timestamp);
                   }
 
@@ -345,7 +340,7 @@ main (int argc, const char *argv[])
 
               _TAG_COMMENT (_str[i]);
             }
-            
+
             _TAG_PRINT ("layer", "%d", _ainfo->layer);
             _TAG_PRINT ("sampling-frequency", "%d", _ainfo->sampfreq);
             _TAG_PRINT ("bit-rate", "%d", _ainfo->bitrate);
@@ -395,7 +390,7 @@ main (int argc, const char *argv[])
   return EXIT_SUCCESS;
 }
 
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8

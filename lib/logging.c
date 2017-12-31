@@ -1,8 +1,6 @@
 /*
-    $Id$
-
+    Copyright (C) 2003, 2018 Rocky Bernstein <rocky@gnu.org>
     Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
-    Copyright (C) 2003 Rocky Bernstein <rocky@panix.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,8 +30,6 @@
 
 /* Private headers */
 #include "vcd_assert.h"
-
-static const char _rcsid[] = "$Id$";
 
 vcd_log_level_t vcd_loglevel_default = VCD_LOG_WARN;
 
@@ -101,7 +97,7 @@ vcd_logv (vcd_log_level_t level, const char format[], va_list args)
     vcd_assert_not_reached ();
 
   in_recursion = 1;
-  
+
   vsnprintf(buf, sizeof(buf)-1, format, args);
 
   _handler(level, buf);
@@ -126,7 +122,7 @@ vcd_ ## level (const char format[], ...) \
   va_start (args, format); \
   vcd_logv (VCD_LOG_ ## LEVEL, format, args); \
   va_end (args); \
-} 
+}
 
 VCD_LOG_TEMPLATE(debug, DEBUG)
 VCD_LOG_TEMPLATE(info, INFO)
@@ -136,7 +132,7 @@ VCD_LOG_TEMPLATE(error, ERROR)
 #undef VCD_LOG_TEMPLATE
 
 
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8

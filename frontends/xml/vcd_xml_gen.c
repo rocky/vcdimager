@@ -1,6 +1,4 @@
 /*
-    $Id$
-
     Copyright (C) 2001, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
@@ -50,8 +48,6 @@
 #include "vcdxml.h"
 #include "vcd_xml_common.h"
 
-static const char _rcsid[] = "$Id$";
-
 /* defaults */
 #define DEFAULT_SYSTEM_ID      "CD-RTOS CD-BRIDGE"
 #define DEFAULT_VOLUME_ID      "VIDEOCD"
@@ -71,7 +67,7 @@ _parse_type_arg (const char arg[])
   struct {
     const char *str;
     vcd_type_t id;
-  } type_str[] = 
+  } type_str[] =
     {
       { "vcd10", VCD_TYPE_VCD },
       { "vcd11", VCD_TYPE_VCD11 },
@@ -81,10 +77,10 @@ _parse_type_arg (const char arg[])
       { "hqvcd", VCD_TYPE_HQVCD },
       { NULL, VCD_TYPE_INVALID }
     };
-      
+
   int i = 0;
 
-  while (type_str[i].str) 
+  while (type_str[i].str)
     if (strcasecmp(arg, type_str[i].str))
       i++;
     else
@@ -92,7 +88,7 @@ _parse_type_arg (const char arg[])
 
   if (!type_str[i].str)
     fprintf (stderr, "invalid type given\n");
-        
+
   return type_str[i].id;
 }
 
@@ -109,13 +105,13 @@ _parse_file_arg (const char *arg, char **fname1, char **fname2)
     *fname1 = strdup (tmp);
   else
     rc = -1;
-  
+
   tmp = strtok(NULL, ",");
   if (tmp)
     *fname2 = strdup (tmp);
   else
     rc = -1;
-  
+
   tmp = strtok(NULL, ",");
   if (tmp)
     rc = -1;
@@ -140,7 +136,7 @@ _add_dir (vcdxml_t *obj, const char pathname[])
 
   {
     struct filesystem_t *_file = calloc(1, sizeof (struct filesystem_t));
-    
+
     _file->name = strdup (pathname);
     _file->file_src = NULL;
     _file->file_raw = false;
@@ -150,7 +146,7 @@ _add_dir (vcdxml_t *obj, const char pathname[])
 }
 
 static void
-_add_dirtree (vcdxml_t *obj, const char pathname[], 
+_add_dirtree (vcdxml_t *obj, const char pathname[],
           const char iso_pathname[])
 {
   DIR *dir = NULL;
@@ -235,7 +231,7 @@ main (int argc, const char *argv[])
 {
   vcdxml_t obj;
   int n;
-  
+
   char *xml_fname = strdup (DEFAULT_XML_FNAME);
   char *type_str = strdup (DEFAULT_TYPE);
   int broken_svcd_mode_flag = 0;
@@ -252,7 +248,7 @@ main (int argc, const char *argv[])
   obj.pvd.volume_id = strdup (DEFAULT_VOLUME_ID);
   obj.pvd.application_id = strdup (DEFAULT_APPLICATION_ID);
   obj.info.album_id = strdup (DEFAULT_ALBUM_ID);
-  
+
   obj.info.volume_count = 1;
   obj.info.volume_number = 1;
 
@@ -268,7 +264,7 @@ main (int argc, const char *argv[])
       CL_ADD_FILE_RAW
     };
 
-    struct poptOption optionsTable[] = 
+    struct poptOption optionsTable[] =
       {
         {"output-file", 'o', POPT_ARG_STRING, &xml_fname, 0,
          "specify xml file for output (default: '" DEFAULT_XML_FNAME "')",
@@ -303,17 +299,17 @@ main (int argc, const char *argv[])
          "update scan data offsets in video mpeg2 stream"},
 
         {"nopbc", '\0', POPT_ARG_NONE, &nopbc_flag, 0, "don't create PBC"},
-        
+
         {"add-dirtree", '\0', POPT_ARG_STRING, NULL, CL_ADD_DIRTREE,
          "add directory contents recursively to ISO fs root", "DIR"},
 
-        {"add-dir", '\0', POPT_ARG_STRING, NULL, CL_ADD_DIR, 
+        {"add-dir", '\0', POPT_ARG_STRING, NULL, CL_ADD_DIR,
          "add empty dir to ISO fs", "ISO_DIRNAME"},
 
-        {"add-file", '\0', POPT_ARG_STRING, NULL, CL_ADD_FILE, 
+        {"add-file", '\0', POPT_ARG_STRING, NULL, CL_ADD_FILE,
          "add single file to ISO fs", "FILE,ISO_FILENAME"},
 
-        {"add-file-2336", '\0', POPT_ARG_STRING, NULL, CL_ADD_FILE_RAW, 
+        {"add-file-2336", '\0', POPT_ARG_STRING, NULL, CL_ADD_FILE_RAW,
          "add file containing full 2336 byte sectors to ISO fs",
          "FILE,ISO_FILENAME"},
 
@@ -327,16 +323,16 @@ main (int argc, const char *argv[])
         {"version", 'V', POPT_ARG_NONE, NULL, CL_VERSION,
          "display version and copyright information and exit"},
 
-        POPT_AUTOHELP 
+        POPT_AUTOHELP
 
         {NULL, 0, 0, NULL, 0}
       };
-    
+
     poptContext optCon = poptGetContext ("vcdimager", argc, argv, optionsTable, 0);
     poptSetOtherOptionHelp (optCon, "mpeg-track1 [mpeg-track2...]");
 
-    if (poptReadDefaultConfig (optCon, 0)) 
-      fprintf (stderr, "warning, reading popt configuration failed\n"); 
+    if (poptReadDefaultConfig (optCon, 0))
+      fprintf (stderr, "warning, reading popt configuration failed\n");
 
     while ((opt = poptGetNextOpt (optCon)) != -1)
       switch (opt)
@@ -352,7 +348,7 @@ main (int argc, const char *argv[])
             const char *arg = poptGetOptArg (optCon);
 
             vcd_assert (arg != NULL);
-            
+
             _add_dirtree (&obj, arg, "");
           }
           break;
@@ -362,7 +358,7 @@ main (int argc, const char *argv[])
             const char *arg = poptGetOptArg (optCon);
 
             vcd_assert (arg != NULL);
-            
+
             _add_dir (&obj, arg);
           }
           break;
@@ -375,7 +371,7 @@ main (int argc, const char *argv[])
 
             vcd_assert (arg != NULL);
 
-            if(!_parse_file_arg (arg, &fname1, &fname2)) 
+            if(!_parse_file_arg (arg, &fname1, &fname2))
               {
                 struct filesystem_t *_file = calloc(1, sizeof (struct filesystem_t));
 
@@ -401,7 +397,7 @@ main (int argc, const char *argv[])
 
     if (_verbose_flag && _quiet_flag)
       fprintf (stderr, "I can't be both, quiet and verbose... either one or another ;-)");
-    
+
     if ((args = poptGetArgs (optCon)) == NULL)
       {
         fprintf (stderr, "error: need at least one data track as argument "
@@ -427,7 +423,7 @@ main (int argc, const char *argv[])
                  CDIO_CD_MAX_TRACKS - 1);
         exit (EXIT_FAILURE);
       }
-                        
+
     if ((obj.vcd_type = _parse_type_arg (type_str)) == VCD_TYPE_INVALID)
       exit (EXIT_FAILURE);
 
@@ -447,7 +443,7 @@ main (int argc, const char *argv[])
       || obj.vcd_type == VCD_TYPE_VCD)
     nopbc_flag = true;
 
-  if (!nopbc_flag) 
+  if (!nopbc_flag)
     {
       pbc_t *_pbc;
       CdioListNode_t *node;
@@ -474,7 +470,7 @@ main (int argc, const char *argv[])
           _pbc->wait_time = 5;
 
           _cdio_list_append (_pbc->item_id_list, strdup (_sequence->id));
-          
+
           _cdio_list_append (obj.pbc_list, _pbc);
 
           n++;
@@ -489,30 +485,30 @@ main (int argc, const char *argv[])
       _cdio_list_append (obj.pbc_list, _pbc);
     }
 
-  if ((obj.vcd_type == VCD_TYPE_SVCD 
+  if ((obj.vcd_type == VCD_TYPE_SVCD
        || obj.vcd_type == VCD_TYPE_HQVCD)
       && update_scan_offsets_flag)
     {
       struct option_t *_opt = calloc(1, sizeof (struct option_t));
-      
+
       _opt->name = strdup (OPT_UPDATE_SCAN_OFFSETS);
       _opt->value = strdup ("true");
 
       _cdio_list_append (obj.option_list, _opt);
     }
 
-  if (obj.vcd_type == VCD_TYPE_SVCD 
+  if (obj.vcd_type == VCD_TYPE_SVCD
       && broken_svcd_mode_flag)
     {
       struct option_t *_opt = calloc(1, sizeof (struct option_t));
-      
+
       _opt->name = strdup (OPT_SVCD_VCD3_MPEGAV);
       _opt->value = strdup ("true");
 
       _cdio_list_append (obj.option_list, _opt);
 
       _opt = calloc(1, sizeof (struct option_t));
-      
+
       _opt->name = strdup (OPT_SVCD_VCD3_ENTRYSVD);
       _opt->value = strdup ("true");
 
@@ -528,7 +524,7 @@ main (int argc, const char *argv[])
 }
 
 
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8

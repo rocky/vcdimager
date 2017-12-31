@@ -1,8 +1,6 @@
 /*
-    $Id$
-
+    Copyright (c) 2002, 2005, 2018 Rocky Bernstein <rocky@gnu.org>
     Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
-                  2002, 2005 Rocky Bernstein <rocky@panix.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -36,8 +34,6 @@
 #include "image_sink.h"
 #include "util.h"
 
-static const char _rcsid[] = "$Id$";
-
 /*
  * VcdImageSink routines next.
  */
@@ -64,13 +60,13 @@ void
 vcd_image_sink_destroy (VcdImageSink_t *p_obj)
 {
   vcd_assert (p_obj != NULL);
-  
+
   p_obj->op.free (p_obj->user_data);
   free (p_obj);
 }
 
 int
-vcd_image_sink_set_cuesheet (VcdImageSink_t *p_obj, 
+vcd_image_sink_set_cuesheet (VcdImageSink_t *p_obj,
                              const CdioList_t *vcd_cue_list)
 {
   vcd_assert (p_obj != NULL);
@@ -102,7 +98,7 @@ vcd_image_sink_set_arg (VcdImageSink_t *obj, const char key[],
 }
 
 
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8

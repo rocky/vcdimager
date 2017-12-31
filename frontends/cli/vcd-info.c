@@ -1,9 +1,7 @@
 /*
-    $Id$
-
     Copyright (C) 2001, 2002 Herbert Valerio Riedel <hvr@gnu.org>
-    Copyright (C) 2002, 2003, 2004, 2005, 2006
-    Rocky Bernstein <rocky@panix.com>
+    Copyright (C) 2002, 2003, 2004, 2005, 2006, 2018
+    Rocky Bernstein <rocky@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -69,8 +67,8 @@ static struct gl_t
   char *access_mode;
 
   /* Boolean values set by command-line options to reduce output.
-     Note: because these are used by popt, the datatype here has to be 
-     int, not bool. 
+     Note: because these are used by popt, the datatype here has to be
+     int, not bool.
   */
   uint32_t debug_level;
   int      no_ext_psd_flag;  /* Ignore information in /EXT/PSD_X.VCD */
@@ -87,7 +85,7 @@ static struct gl_t
       int delimiter;  /* True supresses delimiters between sections   */
       int header;     /* True supresses the section headers           */
     } no;
-    
+
     struct entries_t  /* Switches for the ENTRIES section. */
     {
       int any;   /* True if any of the below variables are set true. */
@@ -103,7 +101,7 @@ static struct gl_t
     {
       int any;
       int all;
-      int album; /* Show album description info. */ 
+      int album; /* Show album description info. */
       int cc;    /* Show data cc. */
       int count; /* Show volume count */
       int id;    /* Show ID */
@@ -124,7 +122,7 @@ static struct gl_t
       int vers;  /* Show INFO version. */
       int vol;   /* Show volume number */
     } info;
-    
+
     struct pvd_t  /* Switches for the PVD section. */
     {
       int any;    /* True if any of the below variables are set true. */
@@ -148,7 +146,7 @@ static struct gl_t
     int scandata; /* Show scan data group -- needs to broken out. */
     int search;
     int source;   /* Show image source and size. */
-    int tracks;   
+    int tracks;
   } show;
 
 }
@@ -166,7 +164,7 @@ static bool
 _bitset_get_bit (const uint8_t bitvec[], int bit)
 {
   bool result = false;
-  
+
   if (_vcd_bit_set_p (bitvec[bit / 8], (bit % 8)))
     result = true;
 
@@ -203,7 +201,7 @@ _has_vcd2_ext_pbc (const vcdinfo_obj_t *p_vcdinfo)
   iso9660_stat_t *statbuf;
   CdIo_t *p_cdio;
   vcd2_ext_pbc_status_t ret_status;
-  
+
   if (!vcdinfo_has_pbc(p_vcdinfo))
     return PBC_VCD2_NO_PBC;
 
@@ -234,22 +232,22 @@ _has_vcd2_ext_pbc (const vcdinfo_obj_t *p_vcdinfo)
 static void
 dump_lot (const vcdinfo_obj_t *p_vcdinfo, bool ext)
 {
-  const LotVcd_t *lot = ext 
+  const LotVcd_t *lot = ext
     ? vcdinfo_get_lot_x(p_vcdinfo) : vcdinfo_get_lot(p_vcdinfo);
-  
+
   unsigned n, tmp;
   const uint16_t max_lid = vcdinfo_get_num_LIDs(p_vcdinfo);
   unsigned int mult = vcdinfo_get_offset_mult(p_vcdinfo);
 
   if (!gl.show.no.header)
-    fprintf (stdout, 
-             (vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_SVCD 
+    fprintf (stdout,
+             (vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_SVCD
               || vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_HQVCD)
              ? "SVCD/LOT.SVD\n"
              : (ext ? "EXT/LOT_X.VCD\n": "VCD/LOT.VCD\n"));
 
   if (lot->reserved)
-    fprintf (stdout, " RESERVED = 0x%4.4x (should be 0x0000)\n", 
+    fprintf (stdout, " RESERVED = 0x%4.4x (should be 0x0000)\n",
              uint16_from_be (lot->reserved));
 
   for (n = 0; n < LOT_VCD_OFFSETS; n++)
@@ -260,9 +258,9 @@ dump_lot (const vcdinfo_obj_t *p_vcdinfo, bool ext)
             fprintf (stdout, "warning, LID[1] should have offset = 0!\n");
 
           if (n >= max_lid)
-            fprintf (stdout, 
+            fprintf (stdout,
                      "warning, the following entry is greater than the maximum lid field in info\n");
-          fprintf (stdout, " LID[%d]: offset = %d (0x%4.4x)\n", 
+          fprintf (stdout, " LID[%d]: offset = %d (0x%4.4x)\n",
                    n + 1, tmp * mult, tmp);
         }
       else if (n < max_lid)
@@ -280,15 +278,15 @@ dump_psd (const vcdinfo_obj_t *p_vcdinfo, bool ext)
   CdioList_t *offset_list;
 
   if (!p_vcdinfo) return;
-  
+
   mult = vcdinfo_get_offset_mult(p_vcdinfo);
   psd  = ext ? vcdinfo_get_psd_x(p_vcdinfo) : vcdinfo_get_psd(p_vcdinfo);
-  offset_list = ext 
-    ? vcdinfo_get_offset_x_list(p_vcdinfo) 
+  offset_list = ext
+    ? vcdinfo_get_offset_x_list(p_vcdinfo)
     : vcdinfo_get_offset_list(p_vcdinfo);
 
-  fprintf (stdout, 
-           (vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_SVCD 
+  fprintf (stdout,
+           (vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_SVCD
             || vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_HQVCD)
            ? "SVCD/PSD.SVD\n"
            : (ext ? "EXT/PSD_X.VCD\n": "VCD/PSD.VCD\n"));
@@ -299,7 +297,7 @@ dump_psd (const vcdinfo_obj_t *p_vcdinfo, bool ext)
       unsigned _rofs = ofs->offset * mult;
 
       uint8_t type;
-      
+
       type = psd[_rofs];
 
       switch (type)
@@ -307,7 +305,7 @@ dump_psd (const vcdinfo_obj_t *p_vcdinfo, bool ext)
         case PSD_TYPE_PLAY_LIST:
           {
             const PsdPlayListDescriptor_t *pld = (const void *) (psd + _rofs);
-            
+
             int i;
             uint16_t lid = vcdinf_pld_get_lid(pld);
 
@@ -317,13 +315,13 @@ dump_psd (const vcdinfo_obj_t *p_vcdinfo, bool ext)
                      "  prev: %s | next: %s | return: %s\n"
                      "  playtime: %d/15s | wait: %ds | autowait: %ds\n",
                      n, vcdinfo_ofs2str (p_vcdinfo, ofs->offset, ext),
-                     pld->noi, lid, 
+                     pld->noi, lid,
                      _vcd_bool_str(vcdinfo_is_rejected(uint16_from_be(pld->lid))),
-                     vcdinfo_ofs2str(p_vcdinfo, 
+                     vcdinfo_ofs2str(p_vcdinfo,
                                      vcdinf_pld_get_prev_offset(pld), ext),
-                     vcdinfo_ofs2str(p_vcdinfo, 
+                     vcdinfo_ofs2str(p_vcdinfo,
                                      vcdinf_pld_get_next_offset(pld), ext),
-                     vcdinfo_ofs2str(p_vcdinfo, 
+                     vcdinfo_ofs2str(p_vcdinfo,
                                      vcdinf_pld_get_return_offset(pld),
                                      ext),
                      vcdinf_get_play_time(pld), vcdinf_get_wait_time (pld),
@@ -340,15 +338,15 @@ dump_psd (const vcdinfo_obj_t *p_vcdinfo, bool ext)
         case PSD_TYPE_END_LIST:
           {
             const PsdEndListDescriptor_t *d = (const void *) (psd + _rofs);
-            fprintf (stdout, " PSD[%.2d] (%s): end list descriptor\n", n, 
+            fprintf (stdout, " PSD[%.2d] (%s): end list descriptor\n", n,
                      vcdinfo_ofs2str (p_vcdinfo, ofs->offset, ext));
             if (vcdinfo_get_VCD_type(p_vcdinfo) != VCD_TYPE_VCD2)
               {
-                fprintf (stdout, 
-                         "  next disc number: %d (if 0 stop PBC handling)\n", 
+                fprintf (stdout,
+                         "  next disc number: %d (if 0 stop PBC handling)\n",
                          d->next_disc);
-                fprintf (stdout, 
-                         "  change picture item: %s\n", 
+                fprintf (stdout,
+                         "  change picture item: %s\n",
                          vcdinfo_pin2str (uint16_from_be (d->change_pic)));
               }
             fprintf (stdout, "\n");
@@ -375,30 +373,30 @@ dump_psd (const vcdinfo_obj_t *p_vcdinfo, bool ext)
                      *(uint8_t *) &d->flags,
                      vcdinf_get_num_selections(d),
                      vcdinf_get_bsn(d),
-                     lid, 
+                     lid,
                      _vcd_bool_str (vcdinf_psd_get_lid_rejected(d)),
-                     vcdinfo_ofs2str(p_vcdinfo, 
+                     vcdinfo_ofs2str(p_vcdinfo,
                                      vcdinf_psd_get_prev_offset(d),   ext),
-                     vcdinfo_ofs2str(p_vcdinfo, 
+                     vcdinfo_ofs2str(p_vcdinfo,
                                      vcdinf_psd_get_next_offset(d),   ext),
-                     vcdinfo_ofs2str(p_vcdinfo, 
+                     vcdinfo_ofs2str(p_vcdinfo,
                                      vcdinf_psd_get_return_offset(d), ext),
-                     vcdinfo_ofs2str(p_vcdinfo, 
+                     vcdinfo_ofs2str(p_vcdinfo,
                                      vcdinf_psd_get_default_offset(d),ext),
                      vcdinfo_ofs2str(p_vcdinfo, vcdinf_get_timeout_offset(d),
                                      ext),
                      vcdinf_get_timeout_time(d),
-                     vcdinf_get_loop_count(d), 
+                     vcdinf_get_loop_count(d),
                      _vcd_bool_str (vcdinf_has_jump_delay(d)),
                      vcdinfo_pin2str (vcdinf_psd_get_itemid(d)));
 
             for (i = 0; i < vcdinf_get_num_selections(d); i++)
               fprintf (stdout, "  ofs[%d]: %s\n", i,
-                       vcdinfo_ofs2str (p_vcdinfo, 
-                                        vcdinf_psd_get_offset(d, i), 
+                       vcdinfo_ofs2str (p_vcdinfo,
+                                        vcdinf_psd_get_offset(d, i),
                                         ext));
 
-            if (type == PSD_TYPE_EXT_SELECTION_LIST 
+            if (type == PSD_TYPE_EXT_SELECTION_LIST
                 || d->flags.SelectionAreaFlag)
               {
                 const PsdSelectionListDescriptorExtended_t *d2 =
@@ -422,7 +420,7 @@ dump_psd (const vcdinfo_obj_t *p_vcdinfo, bool ext)
           }
           break;
         default:
-          fprintf (stdout, " PSD[%2d] (%s): unkown descriptor type (0x%2.2x)\n", 
+          fprintf (stdout, " PSD[%2d] (%s): unkown descriptor type (0x%2.2x)\n",
                    n, vcdinfo_ofs2str (p_vcdinfo, ofs->offset, ext), type);
 
           fprintf (stdout, "  hexdump: ");
@@ -443,13 +441,13 @@ dump_info (vcdinfo_obj_t *p_vcdinfo)
   int n;
 
   if (!gl.show.no.header)
-    fprintf (stdout, 
-             (vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_SVCD 
+    fprintf (stdout,
+             (vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_SVCD
               || vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_HQVCD)
-             ? "SVCD/INFO.SVD\n" 
+             ? "SVCD/INFO.SVD\n"
              : "VCD/INFO.VCD\n");
 
-  if (gl.show.info.id) 
+  if (gl.show.info.id)
     fprintf (stdout, " ID: `%.8s'\n", info->ID);
   if (gl.show.info.vers)
     fprintf (stdout, " version: 0x%2.2x\n", info->version);
@@ -458,10 +456,10 @@ dump_info (vcdinfo_obj_t *p_vcdinfo)
   if (gl.show.info.album)
     fprintf (stdout, " album id: `%.16s'\n", vcdinfo_get_album_id(p_vcdinfo));
   if (gl.show.info.count)
-    fprintf (stdout, " volume count: %d\n", 
+    fprintf (stdout, " volume count: %d\n",
              vcdinfo_get_volume_count(p_vcdinfo));
   if (gl.show.info.vol)
-    fprintf (stdout, " volume number: %d\n", 
+    fprintf (stdout, " volume number: %d\n",
              vcdinfo_get_volume_num(p_vcdinfo));
 
   if (gl.show.info.pal)
@@ -471,16 +469,16 @@ dump_info (vcdinfo_obj_t *p_vcdinfo)
         {
           if (n == 48)
             fprintf (stdout, "\n  (bslbf)  ");
-          
+
           fprintf (stdout, n % 8 ? "%d" : " %d",
                    _bitset_get_bit (info->pal_flags, n));
         }
       fprintf (stdout, "\n");
-      
+
       fprintf (stdout, " flags:\n");
-      fprintf (stdout, 
-               ((vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_SVCD 
-                 || vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_HQVCD) 
+      fprintf (stdout,
+               ((vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_SVCD
+                 || vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_HQVCD)
                 ? "  reserved1: %s\n"
                 : "  karaoke area: %s\n"),
                _vcd_bool_str (info->flags.reserved1));
@@ -497,9 +495,9 @@ dump_info (vcdinfo_obj_t *p_vcdinfo)
   if (gl.show.info.st2)
     fprintf (stdout, "  start track #2: %s\n", _vcd_bool_str (info->flags.use_track3));
   if (gl.show.info.pbc) {
-    fprintf (stdout, 
-             ((vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_SVCD 
-               || vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_HQVCD) 
+    fprintf (stdout,
+             ((vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_SVCD
+               || vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_HQVCD)
               ? "  reserved2: %s\n"
               : "  extended pbc: %s\n"),
              _vcd_bool_str (info->flags.pbc_x));
@@ -515,20 +513,20 @@ dump_info (vcdinfo_obj_t *p_vcdinfo)
         fprintf(stdout, " Missing EXT/PSD_X.VCD for extended PBC info.\n");
         break;
       case PBC_VCD2_BAD_LOT_SIZE:
-        fprintf(stdout, 
+        fprintf(stdout,
                 " Size of EXT/LOT_X.VCD != LOT_VCD_SIZE*ISO_BLOCKSIZE\n");
         break;
       case PBC_VCD2_EXT:
         fprintf(stdout, " Detected extended VCD2.0 PBC files.\n");
         break;
-      case PBC_VCD2_NOPE: 
+      case PBC_VCD2_NOPE:
         break;
       }
   }
-  
+
 
   if (gl.show.info.psds)
-    fprintf (stdout, " psd size: %u\n", 
+    fprintf (stdout, " psd size: %u\n",
              (unsigned int) uint32_from_be (info->psd_size));
 
   if (gl.show.info.seg) {
@@ -536,9 +534,9 @@ dump_info (vcdinfo_obj_t *p_vcdinfo)
     fprintf (stdout, " first segment addr: %s\n", psz_msf);
     free(psz_msf);
   }
-    
+
   if (gl.show.info.ofm)
-    fprintf (stdout, " offset multiplier: 0x%2.2x\n", 
+    fprintf (stdout, " offset multiplier: 0x%2.2x\n",
              vcdinfo_get_offset_mult(p_vcdinfo));
 
   if (gl.show.info.lidn)
@@ -547,7 +545,7 @@ dump_info (vcdinfo_obj_t *p_vcdinfo)
 
   if (gl.show.info.segn)
     fprintf (stdout, " number of segments: %d\n", num_segments);
-  
+
   if (gl.show.info.segs)
     for (n = 0; n < num_segments; n++)
       {
@@ -559,7 +557,7 @@ dump_info (vcdinfo_obj_t *p_vcdinfo)
         psz_msf = cdio_msf_to_str(&msf);
         fprintf (stdout, " SEGMENT[%4.4d]: track# 0, LSN %6u "
                  "(MSF %s), %2u sectors\n",
-                 n, (unsigned int) lsn, psz_msf, 
+                 n, (unsigned int) lsn, psz_msf,
                  (unsigned int) vcdinfo_get_seg_sector_count(p_vcdinfo, n));
         free(psz_msf);
 
@@ -568,17 +566,17 @@ dump_info (vcdinfo_obj_t *p_vcdinfo)
                                         vcdinfo_get_seg_audio_type(p_vcdinfo, n)),
                  vcdinfo_video_type2str(p_vcdinfo, n),
                  _vcd_bool_str (info->spi_contents[n].item_cont),
-                 (vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_VCD2) 
+                 (vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_VCD2)
                    ? "" : ",\n   SVCD subtitle (OGT) substream:",
-                 (vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_VCD2) 
+                 (vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_VCD2)
                    ? "" : vcdinfo_ogt2str(p_vcdinfo, n));
       }
-  
+
   if (gl.show.info.start)
     if (vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_SVCD
         || vcdinfo_get_VCD_type(p_vcdinfo) == VCD_TYPE_HQVCD)
       for (n = 0; n < 5; n++)
-        fprintf (stdout, " volume start time[%d]: %d secs\n", 
+        fprintf (stdout, " volume start time[%d]: %d secs\n",
                  n, uint16_from_be (info->playing_time[n]));
 }
 
@@ -590,9 +588,9 @@ dump_entries (vcdinfo_obj_t *obj)
 
   num_entries = vcdinfo_get_num_entries(obj);
 
-  if (!gl.show.no.header) 
-    fprintf (stdout, 
-             (vcdinfo_get_VCD_type(obj) == VCD_TYPE_SVCD 
+  if (!gl.show.no.header)
+    fprintf (stdout,
+             (vcdinfo_get_VCD_type(obj) == VCD_TYPE_SVCD
               || vcdinfo_get_VCD_type(obj) == VCD_TYPE_HQVCD)
              ? "SVCD/ENTRIES.SVD\n"
              : "VCD/ENTRIES.VCD\n");
@@ -604,7 +602,7 @@ dump_entries (vcdinfo_obj_t *obj)
   else
     vcd_warn ("unexpected ID signature encountered");
 
-  if (gl.show.entries.id) 
+  if (gl.show.entries.id)
     fprintf (stdout, " ID: `%.8s'\n", entries->ID);
   if (gl.show.entries.vers)
     fprintf (stdout, " version: 0x%2.2x\n", entries->version);
@@ -614,7 +612,7 @@ dump_entries (vcdinfo_obj_t *obj)
   if (gl.show.entries.count)
     fprintf (stdout, " entries: %d\n", num_entries);
 
-  if (gl.show.entries.data) 
+  if (gl.show.entries.data)
     for (n = 0; n < num_entries; n++)
       {
         const lsn_t  lsn = vcdinfo_get_entry_lsn(obj, n);
@@ -632,9 +630,9 @@ dump_entries (vcdinfo_obj_t *obj)
       }
 }
 
-/* 
+/*
    Dump the track contents using information from TRACKS.SVCD.
-   See also dump_tracks which gives similar information but doesn't 
+   See also dump_tracks which gives similar information but doesn't
    need TRACKS.SVCD
 */
 static void
@@ -651,9 +649,9 @@ dump_tracks_svd (vcdinfo_obj_t *obj)
 
   fprintf (stdout, " ID: `%.8s'\n", tracks->file_id);
   fprintf (stdout, " version: 0x%2.2x\n", tracks->version);
-  
+
   fprintf (stdout, " tracks: %d\n", tracks->tracks);
-  
+
   for (j = 0; j < tracks->tracks; j++)
     {
       const char *video_types[] =
@@ -677,12 +675,12 @@ dump_tracks_svd (vcdinfo_obj_t *obj)
         };
       char *psz_msf = cdio_msf_to_str(&(tracks->playing_time[j]));
 
-      fprintf (stdout, 
+      fprintf (stdout,
                " track[%.2d]: %s,"
                " audio: %s, video: %s,\n"
                "            SVCD subtitle (OGT) stream: %s\n",
                j, psz_msf,
-               vcdinfo_audio_type2str(obj, 
+               vcdinfo_audio_type2str(obj,
                                       vcdinfo_get_track_audio_type(obj, j+1)),
                video_types[tracks2->contents[j].video],
                ogt_str[tracks2->contents[j].ogt]);
@@ -700,11 +698,11 @@ dump_tracks_svd (vcdinfo_obj_t *obj)
                tracks_v30->track[j].audio_info,
                tracks_v30->track[j].ogt_info);
       free(psz_msf);
-      
+
     }
 }
 
-/* 
+/*
    Dump the track contents based on low-level CD datas.
    See also dump_tracks which gives more information but requires
    TRACKS.SVCD to exist on the medium.
@@ -725,12 +723,12 @@ dump_tracks (const CdIo_t *cdio)
   for (i = first_track_num; i <= CDIO_CDROM_LEADOUT_TRACK; i++) {
     msf_t msf;
     char *psz_msf;
-    
+
     if (!cdio_get_track_msf(cdio, i, &msf)) {
       vcd_error("Error getting information for track %i.\n", i);
       continue;
     }
-    
+
     psz_msf = cdio_msf_to_str(&msf);
     if (i == CDIO_CDROM_LEADOUT_TRACK) {
       printf("%3d: %s  %06u  leadout\n",
@@ -743,7 +741,7 @@ dump_tracks (const CdIo_t *cdio)
              (int) i, psz_msf,
              (unsigned int) cdio_msf_to_lsn(&msf),
              track_format2str[cdio_get_track_format(cdio, i)]);
-      
+
     }
     free(psz_msf);
     /* skip to leadout? */
@@ -778,7 +776,7 @@ dump_scandata_dat (vcdinfo_obj_t *obj)
           const uint32_t lsn = cdio_msf_to_lsn(msf);
           char *psz_msf;
 
-          if (!gl.debug_level >= 1
+          if (!(gl.debug_level >= 1)
               && n > PRINTED_POINTS
               && n < scandata_count - PRINTED_POINTS)
             continue;
@@ -789,7 +787,7 @@ dump_scandata_dat (vcdinfo_obj_t *obj)
 
           free(psz_msf);
 
-          if (!gl.debug_level >= 1
+          if (!(gl.debug_level >= 1)
               && n == PRINTED_POINTS
               && scandata_count > (PRINTED_POINTS * 2))
             fprintf (stdout, " [..skipping...]\n");
@@ -797,16 +795,16 @@ dump_scandata_dat (vcdinfo_obj_t *obj)
     }
   else if (_sd1->version == SCANDATA_VERSION_SVCD)
     {
-      const ScandataDat2_t *_sd2 = 
+      const ScandataDat2_t *_sd2 =
         (const void *) &_sd1->cum_playtimes[track_count];
 
-      const ScandataDat3_t *_sd3 = 
+      const ScandataDat3_t *_sd3 =
         (const void *) &_sd2->spi_indexes[spi_count];
 
-      const ScandataDat4_t *_sd4 = 
+      const ScandataDat4_t *_sd4 =
         (const void *) &_sd3->mpeg_track_offsets[track_count];
 
-      const int scandata_ofs0 = 
+      const int scandata_ofs0 =
         __cd_offsetof (ScandataDat3_t, mpeg_track_offsets[track_count])
         - __cd_offsetof (ScandataDat3_t, mpeg_track_offsets);
 
@@ -823,27 +821,27 @@ dump_scandata_dat (vcdinfo_obj_t *obj)
           fprintf (stdout, "  cumulative_playingtime[%d]: %s\n", n, psz_msf);
           free(psz_msf);
         }
- 
+
       for (n = 0; n < spi_count; n++)
         {
           const int _ofs = uint16_from_be (_sd2->spi_indexes[n]);
 
           fprintf (stdout, "  segment scandata ofs[n]: %d\n", _ofs);
         }
- 
+
       fprintf (stdout, " sequence scandata ofs: %d\n",
                uint16_from_be (_sd3->mpegtrack_start_index));
 
       for (n = 0; n < track_count; n++)
         {
-          const int _ofs = 
+          const int _ofs =
             uint16_from_be (_sd3->mpeg_track_offsets[n].table_offset);
           const int _toc = _sd3->mpeg_track_offsets[n].track_num;
 
           fprintf (stdout, "  track [%d]: TOC num: %d, sd offset: %d\n",
                    n, _toc, _ofs);
         }
-  
+
       fprintf (stdout, " (scanpoint[0] offset = %d)\n", scandata_ofs0);
 
       for (n = 0; n < scandata_count; n++)
@@ -852,21 +850,21 @@ dump_scandata_dat (vcdinfo_obj_t *obj)
           const uint32_t lsn = cdio_msf_to_lsn(msf);
           char *psz_msf = cdio_msf_to_str(msf);
 
-          if (!gl.debug_level >= 1
+          if (!(gl.debug_level >= 1)
               && n > PRINTED_POINTS
               && n < scandata_count - PRINTED_POINTS) {
             free(psz_msf);
             continue;
           }
-          
 
-          fprintf (stdout, 
+
+          fprintf (stdout,
                    "  scanpoint[%.4d] (ofs:%5d): LSN %lu (MSF %s)\n",
-                   n, scandata_ofs0 + (n * 3), (unsigned long int) lsn, 
+                   n, scandata_ofs0 + (n * 3), (unsigned long int) lsn,
                    psz_msf);
           free(psz_msf);
 
-          if (!gl.debug_level >= 1
+          if (!(gl.debug_level >= 1)
               && n == PRINTED_POINTS
               && scandata_count > (PRINTED_POINTS * 2))
             fprintf (stdout, " [..skipping...]\n");
@@ -887,7 +885,7 @@ dump_search_dat (vcdinfo_obj_t *obj)
   fprintf (stdout, " ID: `%.8s'\n", searchdat->file_id);
   fprintf (stdout, " version: 0x%2.2x\n", searchdat->version);
   fprintf (stdout, " scanpoints: %u\n", (unsigned int) scan_points);
-  fprintf (stdout, " scaninterval: %lu (in 0.5sec units -- must be `1')\n", 
+  fprintf (stdout, " scaninterval: %lu (in 0.5sec units -- must be `1')\n",
            (unsigned long int) searchdat->time_interval);
 
   for (m = 0; m < scan_points;m++)
@@ -897,11 +895,11 @@ dump_search_dat (vcdinfo_obj_t *obj)
       const uint32_t lsn = cdio_msf_to_lsn(msf);
       char *psz_msf;
 
-      if (!gl.debug_level >= 1 
-          && m > PRINTED_POINTS 
+      if (!(gl.debug_level >= 1)
+          && m > PRINTED_POINTS
           && m < (scan_points - PRINTED_POINTS))
         continue;
-      
+
       psz_msf = cdio_msf_to_str(msf);
       ss2 = m * searchdat->time_interval;
 
@@ -914,8 +912,8 @@ dump_search_dat (vcdinfo_obj_t *obj)
                " sector: LSN %lu (MSF %s)\n", m, hh, mm, ss, ss2,
                (unsigned long int) lsn, psz_msf);
       free(psz_msf);
-      
-      if (!gl.debug_level >= 1
+
+      if (!(gl.debug_level >= 1)
           && m == PRINTED_POINTS && scan_points > (PRINTED_POINTS * 2))
         fprintf (stdout, " [..skipping...]\n");
     }
@@ -930,14 +928,14 @@ _dump_fs_recurse (const vcdinfo_obj_t *obj, const char pathname[])
   CdioListNode_t *entnode;
   CdIo_t *cdio = vcdinfo_get_cd_image(obj);
 
-  entlist = iso9660_fs_readdir (cdio, pathname, true);
-    
+  entlist = iso9660_fs_readdir (cdio, pathname);
+
   fprintf (stdout, " %s:\n", pathname);
 
   vcd_assert (entlist != NULL);
 
   /* just iterate */
-  
+
   _CDIO_LIST_FOREACH (entnode, entlist)
     {
       iso9660_stat_t *statbuf = _cdio_list_node_data (entnode);
@@ -945,15 +943,15 @@ _dump_fs_recurse (const vcdinfo_obj_t *obj, const char pathname[])
       char _fullname[4096] = { 0, };
 
       snprintf (_fullname, sizeof (_fullname), "%s%s", pathname, _name);
-  
+
       strncat (_fullname, "/", sizeof (_fullname)-strlen(_fullname)-1);
 
       if (statbuf->type == _STAT_DIR
-          && strcmp (_name, ".") 
+          && strcmp (_name, ".")
           && strcmp (_name, ".."))
         _cdio_list_append (dirlist, strdup (_fullname));
 
-      fprintf (stdout, 
+      fprintf (stdout,
                "  %c %s %d %d [fn %.2d] [LSN %6lu] ",
                (statbuf->type == _STAT_DIR) ? 'd' : '-',
                iso9660_get_xa_attr_str (statbuf->xa.attributes),
@@ -973,7 +971,7 @@ _dump_fs_recurse (const vcdinfo_obj_t *obj, const char pathname[])
 
     }
 
-  _cdio_list_free (entlist, true);
+  _cdio_list_free (entlist, true, NULL);
 
   fprintf (stdout, "\n");
 
@@ -986,7 +984,7 @@ _dump_fs_recurse (const vcdinfo_obj_t *obj, const char pathname[])
       _dump_fs_recurse (obj, _fullname);
     }
 
-  _cdio_list_free (dirlist, true);
+  _cdio_list_free (dirlist, true, NULL);
 }
 
 static void
@@ -996,7 +994,7 @@ dump_fs (vcdinfo_obj_t *obj)
   const lsn_t extent = iso9660_get_root_lsn(pvd);
 
   fprintf (stdout, "ISO9660 filesystem dump\n");
-  fprintf (stdout, " root directory in PVD set to LSN %lu\n\n", 
+  fprintf (stdout, " root directory in PVD set to LSN %lu\n\n",
            (unsigned long int) extent);
 
   _dump_fs_recurse (obj, "/");
@@ -1010,14 +1008,14 @@ dump_pvd (vcdinfo_obj_t *p_vcdinfo)
   if (!gl.show.no.header)
     fprintf (stdout, "ISO9660 primary volume descriptor\n");
 
-  
+
   if (iso9660_get_pvd_type(pvd) != ISO_VD_PRIMARY)
     vcd_warn ("unexpected descriptor type");
 
-  if (strncmp (iso9660_get_pvd_id(pvd), ISO_STANDARD_ID, 
+  if (strncmp (iso9660_get_pvd_id(pvd), ISO_STANDARD_ID,
                strlen (ISO_STANDARD_ID)))
     vcd_warn ("unexpected ID encountered (expected `" ISO_STANDARD_ID "'");
-  
+
   if (gl.show.pvd.id)
     fprintf (stdout, " ID: `%.5s'\n", iso9660_get_pvd_id(pvd));
 
@@ -1029,7 +1027,7 @@ dump_pvd (vcdinfo_obj_t *p_vcdinfo)
     fprintf (stdout, " system id: `%s'\n",    psz);
     free(psz);
   }
-  
+
 
   if (gl.show.pvd.vol)
     fprintf (stdout, " volume id: `%s'\n",
@@ -1056,14 +1054,14 @@ dump_pvd (vcdinfo_obj_t *p_vcdinfo)
     fprintf (stdout, " application id: `%s'\n", psz);
     free(psz);
   }
-  
+
   if (gl.show.pvd.iso)
-    fprintf (stdout, " ISO size: %d blocks (logical blocksize: %d bytes)\n", 
-             iso9660_get_pvd_space_size(pvd), 
+    fprintf (stdout, " ISO size: %d blocks (logical blocksize: %d bytes)\n",
+             iso9660_get_pvd_space_size(pvd),
              iso9660_get_pvd_block_size(pvd));
 
-  if (gl.show.pvd.xa) 
-    fprintf (stdout, " XA marker present: %s\n", 
+  if (gl.show.pvd.xa)
+    fprintf (stdout, " XA marker present: %s\n",
              _vcd_bool_str (vcdinfo_has_xa(p_vcdinfo)));
 }
 
@@ -1073,34 +1071,34 @@ dump_all (vcdinfo_obj_t *p_vcdinfo)
   CdIo_t *p_cdio;
 
   if (!p_vcdinfo) return;
-  
+
   p_cdio = vcdinfo_get_cd_image(p_vcdinfo);
 
-  if (gl.show.pvd.any) 
+  if (gl.show.pvd.any)
     {
       if (!gl.show.no.delimiter) fprintf (stdout, DELIM);
       dump_pvd (p_vcdinfo);
     }
-  
-  if (gl.show.fs) 
+
+  if (gl.show.fs)
     {
       if (!gl.show.no.delimiter) fprintf (stdout, DELIM);
       dump_fs (p_vcdinfo);
     }
 
-  if (gl.show.info.any) 
+  if (gl.show.info.any)
     {
       if (!gl.show.no.delimiter) fprintf (stdout, DELIM);
       dump_info (p_vcdinfo);
     }
-  
-  if (gl.show.entries.any) 
+
+  if (gl.show.entries.any)
     {
       if (!gl.show.no.delimiter) fprintf (stdout, DELIM);
       dump_entries (p_vcdinfo);
     }
 
-  if (gl.show.psd) 
+  if (gl.show.psd)
     {
       if (vcdinfo_get_psd_size (p_vcdinfo))
         {
@@ -1110,15 +1108,15 @@ dump_all (vcdinfo_obj_t *p_vcdinfo)
               if (!gl.show.no.delimiter) fprintf (stdout, DELIM);
               dump_lot (p_vcdinfo, false);
             }
-          
+
           if (!gl.show.no.delimiter) fprintf (stdout, DELIM);
           dump_psd (p_vcdinfo, false);
         }
-      
+
       if (vcdinfo_get_psd_x_size(p_vcdinfo) && ! gl.no_ext_psd_flag )
         {
           vcdinfo_visit_lot (p_vcdinfo, true);
-          if (gl.show.lot) 
+          if (gl.show.lot)
             {
               if (!gl.show.no.delimiter) fprintf (stdout, DELIM);
               dump_lot (p_vcdinfo, true);
@@ -1128,18 +1126,18 @@ dump_all (vcdinfo_obj_t *p_vcdinfo)
         }
     }
 
-  if (gl.show.tracks) 
+  if (gl.show.tracks)
     {
       if (vcdinfo_get_tracksSVD(p_vcdinfo))
         {
           if (!gl.show.no.delimiter) fprintf (stdout, DELIM);
           dump_tracks_svd (p_vcdinfo);
-        } 
+        }
       if (!gl.show.no.delimiter) fprintf (stdout, DELIM);
       dump_tracks (p_cdio);
     }
-  
-  if (gl.show.search) 
+
+  if (gl.show.search)
     {
       if (vcdinfo_get_searchDat(p_vcdinfo))
         {
@@ -1147,16 +1145,16 @@ dump_all (vcdinfo_obj_t *p_vcdinfo)
           dump_search_dat (p_vcdinfo);
         }
     }
-  
 
-  if (gl.show.scandata) 
+
+  if (gl.show.scandata)
     {
       if (vcdinfo_get_scandata(p_vcdinfo))
         {
           if (!gl.show.no.delimiter) fprintf (stdout, DELIM);
           dump_scandata_dat (p_vcdinfo);
         }
-      
+
     }
   if (!gl.show.no.delimiter) fprintf (stdout, DELIM);
 
@@ -1170,7 +1168,7 @@ dump (char *image_fname[])
   CdIo_t *p_cdio;
   iso9660_stat_t *p_statbuf;
   vcdinfo_open_return_t open_rc;
-  
+
   if (!gl.show.no.banner)
     {
       if (!gl.show.no.delimiter)
@@ -1203,7 +1201,7 @@ dump (char *image_fname[])
 
   size = cdio_get_disc_last_lsn (p_cdio);
 
-  if (gl.show.source) 
+  if (gl.show.source)
     {
       if (NULL == *image_fname) {
         *image_fname = vcdinfo_get_default_device(obj);
@@ -1213,10 +1211,10 @@ dump (char *image_fname[])
       }
       fprintf (stdout, "Image size: %d sectors\n", size);
     }
-    
+
   if (open_rc == VCDINFO_OPEN_OTHER) {
     vcd_warn ("Medium is not VCD image");
-    if (gl.show.fs) 
+    if (gl.show.fs)
       {
         if (vcdinfo_has_xa(obj))
         {
@@ -1248,10 +1246,10 @@ dump (char *image_fname[])
   if (vcdinfo_read_psd (obj))
     {
       /* ISO9660 crosscheck */
-      p_statbuf = iso9660_fs_stat (p_cdio, 
-                                 ((vcdinfo_get_VCD_type(obj) == VCD_TYPE_SVCD 
+      p_statbuf = iso9660_fs_stat (p_cdio,
+                                 ((vcdinfo_get_VCD_type(obj) == VCD_TYPE_SVCD
                              || vcdinfo_get_VCD_type(obj) == VCD_TYPE_HQVCD)
-                                  ? "/SVCD/PSD.SVD;1" 
+                                  ? "/SVCD/PSD.SVD;1"
                                   : "/VCD/PSD.VCD;1"));
       if (!p_statbuf)
         vcd_warn ("no PSD file entry found in ISO9660 fs");
@@ -1262,13 +1260,13 @@ dump (char *image_fname[])
           vcd_warn ("psd file entry in ISO9660 not at fixed LSN");
         free(p_statbuf);
       }
-          
+
     }
 
   dump_all (obj);
   vcdinfo_close(obj);
   return;
-  
+
  err_exit:
   poptFreeContext(optCon);
   exit (EXIT_FAILURE);
@@ -1277,18 +1275,18 @@ dump (char *image_fname[])
 static vcd_log_handler_t  gl_default_vcd_log_handler  = NULL;
 static cdio_log_handler_t gl_default_cdio_log_handler = NULL;
 
-static void 
+static void
 _vcd_log_handler (vcd_log_level_t level, const char message[])
 {
-  if (level == VCD_LOG_DEBUG && !gl.debug_level >= 1)
+  if (level == VCD_LOG_DEBUG && !(gl.debug_level >= 1))
     return;
 
   if (level == VCD_LOG_INFO && gl.quiet_flag)
     return;
-  
+
   if (level == VCD_LOG_WARN && gl.suppress_warnings)
     return;
-  
+
   gl_default_vcd_log_handler (level, message);
 }
 
@@ -1304,14 +1302,14 @@ enum {
   OP_SOURCE_SECTOR_2336,
 
   /* These are the remaining configuration options */
-  OP_VERSION,       OP_ENTRIES,   OP_INFO,      OP_PVD,       OP_SHOW, 
+  OP_VERSION,       OP_ENTRIES,   OP_INFO,      OP_PVD,       OP_SHOW,
   OP_ACCESS_MODE
 
 };
 
 /* Initialize global variables. */
-static void 
-init() 
+static void
+init()
 {
   gl.debug_level      = 0;
   gl.quiet_flag       = false;
@@ -1336,23 +1334,23 @@ typedef struct
 
 /* Comparison function called by bearch() to find sub-option record. */
 static int
-compare_subopts(const void *key1, const void *key2) 
+compare_subopts(const void *key1, const void *key2)
 {
   subopt_entry_t *a = (subopt_entry_t *) key1;
   subopt_entry_t *b = (subopt_entry_t *) key2;
   return (strncmp(a->name, b->name, 30));
 }
 
-/* Do processing of a --show-xxx sub option. 
+/* Do processing of a --show-xxx sub option.
    Basically we find the option in the array, set it's corresponding
-   flag variable to true as well as the "show.all" false. 
+   flag variable to true as well as the "show.all" false.
 */
 static void
 process_suboption(const char *subopt, subopt_entry_t *sublist, const int num,
-                  const char *subopt_name, int *any_flag) 
+                  const char *subopt_name, int *any_flag)
 {
-  subopt_entry_t *subopt_rec = 
-    bsearch(subopt, sublist, num, sizeof(subopt_entry_t), 
+  subopt_entry_t *subopt_rec =
+    bsearch(subopt, sublist, num, sizeof(subopt_entry_t),
             &compare_subopts);
   if (subopt_rec != NULL) {
     if (strcmp(subopt_name, "help") != 0) {
@@ -1365,10 +1363,10 @@ process_suboption(const char *subopt, subopt_entry_t *sublist, const int num,
     unsigned int i;
     bool is_help=strcmp(subopt, "help")==0;
     if (is_help) {
-      fprintf (stderr, "The list of sub options for \"%s\" are:\n", 
+      fprintf (stderr, "The list of sub options for \"%s\" are:\n",
                subopt_name);
     } else {
-      fprintf (stderr, "Invalid option following \"%s\": %s.\n", 
+      fprintf (stderr, "Invalid option following \"%s\": %s.\n",
                subopt_name, subopt);
       fprintf (stderr, "Should be one of: ");
     }
@@ -1395,98 +1393,98 @@ main (int argc, const char *argv[])
   /* Command-line options */
   struct poptOption optionsTable[] = {
 
-    {"access-mode", 'a', 
-     POPT_ARG_STRING, &gl.access_mode, 
+    {"access-mode", 'a',
+     POPT_ARG_STRING, &gl.access_mode,
      OP_ACCESS_MODE,
      "set CD-ROM access mode (IOCTL, READ_10, READ_CD)", "ACCESS"},
 
-    {"bin-file", 'b', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &source_name, 
+    {"bin-file", 'b', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &source_name,
      OP_SOURCE_BINCUE, "set \"bin\" CD-ROM disk image file as source", "FILE"},
 
-    {"cue-file", 'c', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &source_name, 
+    {"cue-file", 'c', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &source_name,
      OP_SOURCE_BINCUE, "set \"cue\" CD-ROM disk image file as source", "FILE"},
 
-    {"nrg-file", 'N', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &source_name, 
+    {"nrg-file", 'N', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &source_name,
      OP_SOURCE_NRG, "set Nero CD-ROM disk image file as source", "FILE"},
 
-    {"toc-file", '\0', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &source_name, 
+    {"toc-file", '\0', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &source_name,
      OP_SOURCE_CDRDAO, "set \"toc\" CD-ROM disk image file as source", "FILE"},
 
-    {"input", 'i', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &source_name, 
+    {"input", 'i', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &source_name,
      OP_SOURCE_UNDEF,
      "set source and determine if \"bin\" image or device", "FILE"},
 
     {"no-ext-psd", '\0', POPT_ARG_NONE, &gl.no_ext_psd_flag, 0,
      "ignore information in /EXT/PSD_X.VCD"},
 
-    {"sector-2336", '\0', 
-     POPT_ARG_NONE, &sector_2336_flag, 
+    {"sector-2336", '\0',
+     POPT_ARG_NONE, &sector_2336_flag,
      OP_SOURCE_SECTOR_2336,
      "use 2336 byte sector mode for image file"},
 
-    {"cdrom-device", 'C', 
-     POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &source_name, 
+    {"cdrom-device", 'C',
+     POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, &source_name,
      OP_SOURCE_DEVICE,
      "set CD-ROM device as source", "DEVICE"},
 
-    {"debug", 'd', POPT_ARG_INT, &gl.debug_level, 0, 
+    {"debug", 'd', POPT_ARG_INT, &gl.debug_level, 0,
      "Set debugging output to LEVEL"},
 
-    {"terse", 't', POPT_ARG_NONE, &terse_flag, 0, 
+    {"terse", 't', POPT_ARG_NONE, &terse_flag, 0,
      "same as --no-header --no-banner --no-delimiter"},
 
     {"no-banner", 'B', POPT_ARG_NONE, &gl.show.no.banner, 0,
      "do not show program banner header and RCS version string"},
-    
+
     {"no-delimiter", 'D', POPT_ARG_NONE, &gl.show.no.delimiter, 0,
      "do not show delimiter lines around various sections of output"},
-    
+
     {"no-header", 'H', POPT_ARG_NONE, &gl.show.no.header, 0,
      "do not show section header titles"},
-    
-    {"show-entries", '\0', POPT_ARG_STRING, &opt_arg, OP_ENTRIES, 
+
+    {"show-entries", '\0', POPT_ARG_STRING, &opt_arg, OP_ENTRIES,
      "show specific entry of the ENTRIES section "},
-    
-    {"show-entries-all", 'E', POPT_ARG_NONE, &gl.show.entries.all, OP_SHOW, 
+
+    {"show-entries-all", 'E', POPT_ARG_NONE, &gl.show.entries.all, OP_SHOW,
      "show ENTRIES section"},
-    
-    {"show-filesystem", 'F', POPT_ARG_NONE, &gl.show.fs, OP_SHOW, 
+
+    {"show-filesystem", 'F', POPT_ARG_NONE, &gl.show.fs, OP_SHOW,
      "show filesystem info"},
-    
-    {"show-info", '\0', POPT_ARG_STRING, &opt_arg, OP_INFO, 
+
+    {"show-info", '\0', POPT_ARG_STRING, &opt_arg, OP_INFO,
      "show specific entry of the INFO section "},
-    
-    {"show-info-all", 'I', POPT_ARG_NONE, &gl.show.info.all, OP_SHOW, 
+
+    {"show-info-all", 'I', POPT_ARG_NONE, &gl.show.info.all, OP_SHOW,
      "show INFO section"},
-    
-    {"show-lot", 'L', POPT_ARG_NONE, &gl.show.lot, OP_SHOW, 
+
+    {"show-lot", 'L', POPT_ARG_NONE, &gl.show.lot, OP_SHOW,
      "show LOT section"},
-    
-    {"show-psd", 'p', POPT_ARG_NONE, &gl.show.psd, OP_SHOW, 
+
+    {"show-psd", 'p', POPT_ARG_NONE, &gl.show.psd, OP_SHOW,
      "show PSD section(s)"},
-    
-    {"show-pvd-all", 'P', POPT_ARG_NONE, &gl.show.pvd.all, OP_SHOW, 
+
+    {"show-pvd-all", 'P', POPT_ARG_NONE, &gl.show.pvd.all, OP_SHOW,
      "show PVD section(s)"},
-    
-    {"show-pvd", '\0', POPT_ARG_STRING, &opt_arg, OP_PVD, 
+
+    {"show-pvd", '\0', POPT_ARG_STRING, &opt_arg, OP_PVD,
      "show a specific entry of the Primary Volume Descriptor (PVD) section"},
-    
-    {"show-scandata", 's', POPT_ARG_NONE, &gl.show.scandata, OP_SHOW, 
+
+    {"show-scandata", 's', POPT_ARG_NONE, &gl.show.scandata, OP_SHOW,
      "show scan data"},
 
-    {"show-search", 'X', POPT_ARG_NONE, &gl.show.search, OP_SHOW, 
+    {"show-search", 'X', POPT_ARG_NONE, &gl.show.search, OP_SHOW,
      "show search data"},
 
-    {"show-source", 'S', POPT_ARG_NONE, &gl.show.source, OP_SHOW, 
+    {"show-source", 'S', POPT_ARG_NONE, &gl.show.source, OP_SHOW,
      "show source image filename and size"},
 
-    {"show-tracks", 'T', POPT_ARG_NONE, &gl.show.tracks, OP_SHOW, 
+    {"show-tracks", 'T', POPT_ARG_NONE, &gl.show.tracks, OP_SHOW,
      "show tracks"},
 
-    {"show-format", 'f', POPT_ARG_NONE, &gl.show.format, OP_SHOW, 
+    {"show-format", 'f', POPT_ARG_NONE, &gl.show.format, OP_SHOW,
      "show VCD format (VCD 1.1, VCD 2.0, SVCD, ...)"},
-    
-    {"quiet", 'q', POPT_ARG_NONE, &gl.quiet_flag, 0, 
+
+    {"quiet", 'q', POPT_ARG_NONE, &gl.quiet_flag, 0,
      "show only critical messages"},
 
     {"version", 'V', POPT_ARG_NONE, NULL, OP_VERSION,
@@ -1552,21 +1550,21 @@ main (int argc, const char *argv[])
       {
       case OP_ENTRIES:
         {
-          process_suboption(opt_arg, entries_sublist,     
+          process_suboption(opt_arg, entries_sublist,
                             sizeof(entries_sublist) / sizeof(subopt_entry_t),
                             "--show-entries", &gl.show.entries.any);
           break;
         }
       case OP_INFO:
         {
-          process_suboption(opt_arg, info_sublist,     
+          process_suboption(opt_arg, info_sublist,
                             sizeof(info_sublist) / sizeof(subopt_entry_t),
                             "--show-info", &gl.show.info.any);
           break;
         }
       case OP_PVD:
         {
-          process_suboption(opt_arg, pvd_sublist,     
+          process_suboption(opt_arg, pvd_sublist,
                             sizeof(pvd_sublist) / sizeof(subopt_entry_t),
                             "--show-pvd", &gl.show.pvd.any);
           break;
@@ -1586,10 +1584,10 @@ main (int argc, const char *argv[])
         break;
 
       case OP_SOURCE_UNDEF:
-      case OP_SOURCE_BINCUE: 
-      case OP_SOURCE_CDRDAO: 
-      case OP_SOURCE_NRG: 
-      case OP_SOURCE_DEVICE: 
+      case OP_SOURCE_BINCUE:
+      case OP_SOURCE_CDRDAO:
+      case OP_SOURCE_NRG:
+      case OP_SOURCE_DEVICE:
       case OP_SOURCE_SECTOR_2336:
         {
           /* Check that we didn't speciy both DEVICE and SECTOR */
@@ -1603,24 +1601,24 @@ main (int argc, const char *argv[])
           case OP_SOURCE_BINCUE:
             /* Going from 2352 (default) to 2336 is okay. */
             okay = OP_SOURCE_SECTOR_2336 == opt;
-            if (okay) 
+            if (okay)
               gl.source_type = OP_SOURCE_SECTOR_2336;
             break;
           case OP_SOURCE_SECTOR_2336:
-            /* Make sure a we didn't do a second device. FIX: 
+            /* Make sure a we didn't do a second device. FIX:
                This also allows two -bin options if we had -2336 in the middle
              */
             okay = OP_SOURCE_DEVICE != opt;
             break;
-          case OP_SOURCE_NRG: 
-          case OP_SOURCE_CDRDAO: 
+          case OP_SOURCE_NRG:
+          case OP_SOURCE_CDRDAO:
           case OP_SOURCE_DEVICE:
             /* This case is implied, but we'll make it explicit anyway. */
             okay = false;
             break;
           }
 
-          if (!okay) 
+          if (!okay)
           {
             fprintf (stderr, "only one source allowed! - try --help\n");
             poptFreeContext(optCon);
@@ -1630,7 +1628,7 @@ main (int argc, const char *argv[])
         }
 
       default:
-        fprintf (stderr, "%s: %s\n", 
+        fprintf (stderr, "%s: %s\n",
                  poptBadOption(optCon, POPT_BADOPTION_NOALIAS),
                  poptStrerror(opt));
         fprintf (stderr, "error while parsing command line - try --help\n");
@@ -1647,13 +1645,13 @@ main (int argc, const char *argv[])
       }
 
       if (source_name) {
-        fprintf ( stderr, 
+        fprintf ( stderr,
                   "source file specified as an option and without "
                   " - try --help\n");
         poptFreeContext(optCon);
         exit (EXIT_FAILURE);
       }
-      
+
       source_name    = strdup(args[0]);
       gl.source_type = OP_SOURCE_UNDEF;
     }
@@ -1668,26 +1666,26 @@ main (int argc, const char *argv[])
 
   /* Handle massive show flag reversals below. */
   if (gl.show.all) {
-    gl.show.entries.all  = gl.show.pvd.all  = gl.show.info.all 
+    gl.show.entries.all  = gl.show.pvd.all  = gl.show.info.all
       = gl.show.format   = gl.show.fs       = gl.show.lot    = gl.show.psd
-      = gl.show.scandata = gl.show.scandata = gl.show.search = gl.show.source 
+      = gl.show.scandata = gl.show.scandata = gl.show.search = gl.show.source
       = gl.show.tracks   = true;
-  } 
+  }
 
-  if (gl.show.entries.all) 
+  if (gl.show.entries.all)
     memset(&gl.show.entries, true, sizeof(gl.show.entries));
-  
-  if (gl.show.pvd.all) 
+
+  if (gl.show.pvd.all)
     memset(&gl.show.pvd, true, sizeof(gl.show.pvd));
-  
-  if (gl.show.info.all) 
+
+  if (gl.show.info.all)
     memset(&gl.show.info, true, sizeof(gl.show.info));
-  
-  if (terse_flag) 
+
+  if (terse_flag)
     memset(&gl.show.no, true, sizeof(gl.show.no));
-  
+
   gl_default_vcd_log_handler  = vcd_log_set_handler (_vcd_log_handler);
-  gl_default_cdio_log_handler = 
+  gl_default_cdio_log_handler =
     cdio_log_set_handler ( (cdio_log_handler_t) _vcd_log_handler);
 
   dump (&source_name);
@@ -1697,7 +1695,7 @@ main (int argc, const char *argv[])
   return EXIT_SUCCESS;
 }
 
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8

@@ -1,7 +1,5 @@
-# $Id$
-#
+# Copyright (C) 2003, 2017 Rocky Bernstein <rocky@gnu.org>
 # Copyright (C) 2003 Herbert Valerio Riedel <hvr@gnu.org>
-# Copyright (C) 2003 Rocky Bernstein <rocky@panix.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,11 +21,11 @@ bin_PROGRAMS = vcdxbuild vcdxgen vcdxrip vcdxminfo
 man_MANS = vcdxbuild.1 vcdxgen.1 vcdxrip.1 vcdxminfo.1
 
 $(man_MANS): %.1: @MAINTAINER_MODE_TRUE@ %
-	-$(HELP2MAN) --output=$@ ./$<
+	-$(HELP2MAN) --output=$@ ./$(@:.1=)
 
 MAINTAINERCLEANFILES = $(man_MANS)
 
-INCLUDES = -I$(top_srcdir) $(LIBPOPT_CFLAGS) $(LIBVCD_CFLAGS) $(XML_CFLAGS) $(LIBCDIO_CFLAGS) $(LIBISO9660_CFLAGS) $(XML_CPPFLAGS)
+AM_CPPFLAGS = -I$(top_srcdir) $(LIBPOPT_CFLAGS) $(LIBVCD_CFLAGS) $(XML_CFLAGS) $(LIBCDIO_CFLAGS) $(LIBISO9660_CFLAGS) $(XML_CPPFLAGS)
 
 BUILT_SOURCES = videocd_dtd.inc
 MOSTLYCLEANFILES = videocd_dtd.inc
@@ -48,7 +46,7 @@ vcdxbuild_SOURCES = \
 	vcd_xml_master.c \
 	vcd_xml_master.h \
 	vcd_xml_parse.c \
-	vcd_xml_parse.h 
+	vcd_xml_parse.h
 
 vcdxrip_LDADD = $(XML_LIBS) $(LIBISO9660_LIBS) $(LIBVCDINFO_LIBS) $(LIBVCD_LIBS) $(LIBPOPT_LIBS) $(LIBCDIO_LIBS)
 vcdxrip_SOURCES = \
@@ -57,7 +55,7 @@ vcdxrip_SOURCES = \
 	vcd_xml_common.h \
 	vcd_xml_dump.h \
 	vcd_xml_dump.c \
-	vcd_xml_dtd.h 
+	vcd_xml_dtd.h
 
 vcdxgen_LDADD = $(XML_LIBS) $(LIBPOPT_LIBS) $(LIBVCD_LIBS) $(LIBCDIO_LIBS) $(LIBISO9660_LIBS)
 vcdxgen_SOURCES = \
@@ -66,7 +64,7 @@ vcdxgen_SOURCES = \
 	vcd_xml_common.h \
 	vcd_xml_dump.h \
 	vcd_xml_dump.c \
-	vcd_xml_dtd.h 
+	vcd_xml_dtd.h
 
 vcdxminfo_LDADD = $(XML_LIBS) $(LIBPOPT_LIBS) $(LIBVCD_LIBS) $(LIBCDIO_LIBS) $(LIBISO9660_LIBS)
 vcdxminfo_SOURCES = \
@@ -78,4 +76,3 @@ vcdxminfo_SOURCES = \
 
 videocd_dtd.inc: $(srcdir)/videocd.dtd
 	(sed 's/\"/\\"/g' | $(AWK) 'BEGIN { print "const char videocd_dtd[] = \\" } { print " \"" $$0 "\\n\" \\" } END { print ";" }') < $(srcdir)/videocd.dtd > videocd_dtd.inc
-

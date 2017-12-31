@@ -1,6 +1,5 @@
 /*
-    $Id$
-
+    Copyright (C) 2018, Rocky Bernstein <rocky@gnu.org>
     Copyright (C) 2000, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
@@ -40,9 +39,7 @@
 #include "stream.h"
 #include "util.h"
 
-static const char _rcsid[] = "$Id$";
-
-/* 
+/*
  * DataSource implementations
  */
 
@@ -68,7 +65,7 @@ _vcd_data_sink_open_if_necessary(VcdDataSink *obj)
   }
 }
 
-VcdDataSink* 
+VcdDataSink*
 vcd_data_sink_new(void *user_data, const vcd_data_sink_io_functions *funcs)
 {
   VcdDataSink *new_obj;
@@ -103,7 +100,7 @@ vcd_data_sink_write(VcdDataSink* obj, const void *ptr, long size, long nmemb)
   long written;
 
   vcd_assert (obj != NULL);
-  
+
   _vcd_data_sink_open_if_necessary(obj);
 
   written = obj->op.write(obj->user_data, ptr, size*nmemb);
@@ -126,7 +123,7 @@ vcd_data_sink_printf (VcdDataSink *obj, const char format[], ...)
 
   if (len < 0 || len > (sizeof (buf) - 1))
     vcd_error ("vsnprintf() returned %d", len);
-  
+
   retval = vcd_data_sink_write (obj, buf, 1, len);
 
   va_end (args);
@@ -156,7 +153,7 @@ vcd_data_sink_destroy(VcdDataSink* obj)
   obj->op.free(obj->user_data);
 }
 
-/* 
+/*
  * DataSource implementations
  */
 
@@ -194,7 +191,7 @@ vcd_data_source_seek(VcdDataSource_t* p_obj, long offset)
 
   if (p_obj->position != offset) {
 #ifdef STREAM_DEBUG
-    vcd_warn("had to reposition DataSource from %ld to %ld!", p_obj->position, 
+    vcd_warn("had to reposition DataSource from %ld to %ld!", p_obj->position,
              offset);
 #endif
     p_obj->position = offset;
@@ -205,7 +202,7 @@ vcd_data_source_seek(VcdDataSource_t* p_obj, long offset)
 }
 
 VcdDataSource_t *
-vcd_data_source_new(void *p_user_data, 
+vcd_data_source_new(void *p_user_data,
                     const vcd_data_source_io_functions *funcs)
 {
   VcdDataSource_t *new_obj;
@@ -218,8 +215,8 @@ vcd_data_source_new(void *p_user_data,
   return new_obj;
 }
 
-/** 
-    read size*nmemb bytes from obj into ptr 
+/**
+    read size*nmemb bytes from obj into ptr
 */
 long
 vcd_data_source_read(VcdDataSource_t* obj, void *ptr, long size, long nmemb)
@@ -272,7 +269,7 @@ vcd_data_source_destroy(VcdDataSource_t *p_obj)
 }
 
 
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8

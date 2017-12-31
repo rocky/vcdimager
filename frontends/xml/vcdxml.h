@@ -1,8 +1,6 @@
 /*
-    $Id$
-
-    Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
-    Copyright (C) 2005 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2018 Rocky Bernstein <rockyr@gnu.org>
+    Copyright (C) 2001, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -103,7 +101,7 @@ struct sequence_t {
 struct entry_point_t {
   char *id;
   double timestamp;
-  
+
   /* used for restoring */
   uint32_t extent;
 };
@@ -112,7 +110,7 @@ struct segment_t
 {
   char *id;
   char *src;
-  
+
   CdioList_t *autopause_list; /* double * */
 
   /* used for restoring vcds */
@@ -151,15 +149,15 @@ vcd_xml_destroy (vcdxml_t *p_vcdxml)
 
   vcd_assert (p_vcdxml != NULL);
 
-  _cdio_list_free (p_vcdxml->option_list,   true);
-  _cdio_list_free (p_vcdxml->segment_list,  true);
+  _cdio_list_free (p_vcdxml->option_list,   true, NULL);
+  _cdio_list_free (p_vcdxml->segment_list,  true, NULL);
 
   _CDIO_LIST_FOREACH (p_node, p_vcdxml->pbc_list)
     {
       pbc_t *p_pbc = _cdio_list_node_data(p_node);
       vcd_pbc_destroy(p_pbc);
     }
-  
+
   _CDIO_LIST_FOREACH (p_node, p_vcdxml->sequence_list)
     {
       struct sequence_t *p_sequence = _cdio_list_node_data(p_node);
@@ -172,10 +170,10 @@ vcd_xml_destroy (vcdxml_t *p_vcdxml)
 	  struct entry_point_t *p_entry = _cdio_list_node_data(p_node2);
 	  free(p_entry->id);
 	}
-      _cdio_list_free (p_sequence->entry_point_list, true);
-      _cdio_list_free (p_sequence->autopause_list, true);
+      _cdio_list_free (p_sequence->entry_point_list, true, NULL);
+      _cdio_list_free (p_sequence->autopause_list, true, NULL);
     }
-  
+
   _CDIO_LIST_FOREACH (p_node, p_vcdxml->filesystem)
     {
       struct filesystem_t *p_fs = _cdio_list_node_data(p_node);
@@ -183,9 +181,9 @@ vcd_xml_destroy (vcdxml_t *p_vcdxml)
       free(p_fs->file_src);
     }
 
-  _cdio_list_free (p_vcdxml->filesystem,    true);
-  _cdio_list_free (p_vcdxml->pbc_list, true);
-  _cdio_list_free (p_vcdxml->sequence_list, true);
+  _cdio_list_free (p_vcdxml->filesystem, true, NULL);
+  _cdio_list_free (p_vcdxml->pbc_list, true, NULL);
+  _cdio_list_free (p_vcdxml->sequence_list, true, NULL);
   free (p_vcdxml->comment);
   free (p_vcdxml->info.album_id);
   free (p_vcdxml->pvd.volume_id);

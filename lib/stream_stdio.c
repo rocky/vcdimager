@@ -1,6 +1,4 @@
 /*
-    $Id$
-
     Copyright (C) 2000, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
@@ -25,7 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h> 
+#include <unistd.h>
 #include <sys/stat.h>
 #include <errno.h>
 
@@ -37,8 +35,6 @@
 #include "stream_stdio.h"
 #include "util.h"
 
-static const char _rcsid[] = "$Id$";
-
 #define VCD_STREAM_STDIO_BUFSIZE (128*1024)
 
 typedef struct {
@@ -49,10 +45,10 @@ typedef struct {
 } _UserData;
 
 static int
-_stdio_open_source (void *user_data) 
+_stdio_open_source (void *user_data)
 {
   _UserData *const ud = user_data;
-  
+
   if ((ud->fd = fopen (ud->pathname, "rb")))
     {
       ud->fd_buf = calloc(1, VCD_STREAM_STDIO_BUFSIZE);
@@ -63,7 +59,7 @@ _stdio_open_source (void *user_data)
 }
 
 static int
-_stdio_open_sink (void *user_data) 
+_stdio_open_sink (void *user_data)
 {
   _UserData *const ud = user_data;
 
@@ -72,7 +68,7 @@ _stdio_open_sink (void *user_data)
       ud->fd_buf = calloc(1, VCD_STREAM_STDIO_BUFSIZE);
       setvbuf (ud->fd, ud->fd_buf, _IOFBF, VCD_STREAM_STDIO_BUFSIZE);
     }
-  
+
   return (ud->fd == NULL);
 }
 
@@ -83,7 +79,7 @@ _stdio_close(void *user_data)
 
   if (fclose (ud->fd))
     vcd_error ("fclose (): %s", strerror (errno));
- 
+
   ud->fd = NULL;
 
   free (ud->fd_buf);
@@ -101,7 +97,7 @@ _stdio_free(void *user_data)
     free(ud->pathname);
 
   if (ud->fd) /* should be NULL anyway... */
-    _stdio_close(user_data); 
+    _stdio_close(user_data);
 
   free(ud);
 }
@@ -159,7 +155,7 @@ _stdio_write(void *user_data, const void *buf, long count)
   long written;
 
   written = fwrite(buf, 1, count, ud->fd);
-  
+
   if (written != count)
     vcd_error ("fwrite (): %s", strerror (errno));
 
@@ -173,8 +169,8 @@ vcd_data_source_new_stdio(const char pathname[])
   vcd_data_source_io_functions funcs = { 0, };
   _UserData *ud = NULL;
   struct stat statbuf;
-  
-  if (stat (pathname, &statbuf) == -1) 
+
+  if (stat (pathname, &statbuf) == -1)
     {
       vcd_error ("could not stat() file `%s': %s", pathname, strerror (errno));
       return NULL;
@@ -206,7 +202,7 @@ vcd_data_sink_new_stdio(const char pathname[])
   _UserData *ud = NULL;
   struct stat statbuf;
 
-  if (stat (pathname, &statbuf) != -1) 
+  if (stat (pathname, &statbuf) != -1)
     vcd_warn ("file `%s' exist already, will get overwritten!", pathname);
 
   ud = calloc(1, sizeof (_UserData));
@@ -227,7 +223,7 @@ vcd_data_sink_new_stdio(const char pathname[])
 }
 
 
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8

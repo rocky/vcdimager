@@ -1,8 +1,6 @@
 /*
-    $Id$
-
+    Copyright (C) 2005, 2017 Rocky Bernstein <rocky@gnu.org>
     Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
-    Copyright (C) 2005 Rocky Bernstein <rocky@panix.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -38,10 +36,8 @@
 #include "vcd_xml_dtd.h"
 #include "vcd_xml_common.h"
 
-static const char _rcsid[] = "$Id$";
-
-static xmlNodePtr 
-_get_node (xmlDocPtr doc, xmlNodePtr cur, xmlNsPtr ns, 
+static xmlNodePtr
+_get_node (xmlDocPtr doc, xmlNodePtr cur, xmlNsPtr ns,
 	   const char nodename[], bool folder)
 {
   xmlNodePtr n = NULL;
@@ -55,13 +51,13 @@ _get_node (xmlDocPtr doc, xmlNodePtr cur, xmlNsPtr ns,
 	continue;
 
       vcd_assert (!xmlStrcmp (n->children->name, (const xmlChar *) "name"));
-      
+
       tmp = xmlNodeListGetString (doc, n->children->children, 1);
-      
+
       if (!xmlStrcmp (tmp, (const xmlChar *) nodename))
 	break;
     }
-  
+
   if (!n)
     {
       n = xmlNewNode (ns, _node_id);
@@ -84,7 +80,7 @@ _get_node (xmlDocPtr doc, xmlNodePtr cur, xmlNsPtr ns,
   return n;
 }
 
-static xmlNodePtr 
+static xmlNodePtr
 _get_node_pathname (xmlDocPtr doc, xmlNodePtr cur, xmlNsPtr ns, const char pathname[], bool folder)
 {
   char *_dir, *c;
@@ -126,9 +122,9 @@ _ref_area_helper (xmlNodePtr cur, xmlNsPtr ns, const char tag_id[], const char p
 
   if (!pbc_id)
     return;
-  
+
   node = xmlNewChild (cur, ns, (const xmlChar *) tag_id, NULL);
-  
+
   xmlSetProp (node, (const xmlChar *) "ref", (const xmlChar *) pbc_id);
 
   if (_area)
@@ -162,9 +158,9 @@ _make_xml (vcdxml_t *obj, const char xml_fname[])
   xmlKeepBlanksDefault(0);
 
   doc = xmlNewDoc ((const xmlChar *) "1.0");
-  
-  dtd = xmlNewDtd (doc, (const xmlChar *) "videocd", 
-		   (const xmlChar *) VIDEOCD_DTD_PUBID, 
+
+  dtd = xmlNewDtd (doc, (const xmlChar *) "videocd",
+		   (const xmlChar *) VIDEOCD_DTD_PUBID,
 		   (const xmlChar *) VIDEOCD_DTD_SYSID);
   xmlAddChild ((xmlNodePtr) doc, (xmlNodePtr) dtd);
 
@@ -177,7 +173,7 @@ _make_xml (vcdxml_t *obj, const char xml_fname[])
   ns = xmlNewNs (vcd_node, (const xmlChar *) VIDEOCD_DTD_XMLNS, NULL);
   xmlSetNs (vcd_node, ns);
 
-  switch (obj->vcd_type) 
+  switch (obj->vcd_type)
     {
     case VCD_TYPE_VCD:
       xmlSetProp (vcd_node, (const xmlChar *) "class", (const xmlChar *) "vcd");
@@ -214,7 +210,7 @@ _make_xml (vcdxml_t *obj, const char xml_fname[])
   _CDIO_LIST_FOREACH (node, obj->option_list)
     {
       struct option_t *_option = _cdio_list_node_data (node);
-      
+
       section = xmlNewChild (vcd_node, ns, (const xmlChar *) "option", NULL);
       xmlSetProp (section, (const xmlChar *) "name", (const xmlChar *) _option->name);
       xmlSetProp (section, (const xmlChar *) "value", (const xmlChar *) _option->value);
@@ -225,7 +221,7 @@ _make_xml (vcdxml_t *obj, const char xml_fname[])
   section = xmlNewChild (vcd_node, ns, (const xmlChar *) "info", NULL);
 
   xmlNewChild (section, ns, (const xmlChar *) "album-id", (const xmlChar *) obj->info.album_id);
-  
+
   snprintf (buf, sizeof (buf), "%d", obj->info.volume_count);
   xmlNewChild (section, ns, (const xmlChar *) "volume-count", (const xmlChar *) buf);
 
@@ -260,7 +256,7 @@ _make_xml (vcdxml_t *obj, const char xml_fname[])
       _CDIO_LIST_FOREACH (node, obj->filesystem)
 	{
 	  struct filesystem_t *p = _cdio_list_node_data (node);
-	  
+
 	  if (p->file_src)
 	    { /* file */
 	      unsigned char *psz_fname_utf8 = vcd_xml_filename_to_utf8 (p->file_src);
@@ -288,7 +284,7 @@ _make_xml (vcdxml_t *obj, const char xml_fname[])
 	  struct segment_t *_segment =  _cdio_list_node_data (node);
 	  xmlNodePtr seg_node;
 	  CdioListNode_t *node2;
-	  
+
 	  seg_node = xmlNewChild (section, ns, (const xmlChar *) "segment-item", NULL);
 	  xmlSetProp (seg_node, (const xmlChar *) "src", vcd_xml_filename_to_utf8 (_segment->src));
 	  xmlSetProp (seg_node, (const xmlChar *) "id", (const xmlChar *) _segment->id);
@@ -305,7 +301,7 @@ _make_xml (vcdxml_t *obj, const char xml_fname[])
     }
 
   /* sequences */
-    
+
   section = xmlNewChild (vcd_node, ns, (const xmlChar *) "sequence-items", NULL);
 
   _CDIO_LIST_FOREACH (node, obj->sequence_list)
@@ -313,24 +309,24 @@ _make_xml (vcdxml_t *obj, const char xml_fname[])
       struct sequence_t *p_sequence =  _cdio_list_node_data (node);
       xmlNodePtr seq_node;
       CdioListNode_t *node2;
-      unsigned char *psz_xml_fname_utf8 = 
+      unsigned char *psz_xml_fname_utf8 =
 	vcd_xml_filename_to_utf8 (p_sequence->src);
 
-      seq_node = xmlNewChild (section, ns, (const xmlChar *) "sequence-item", 
+      seq_node = xmlNewChild (section, ns, (const xmlChar *) "sequence-item",
 			      NULL);
       xmlSetProp (seq_node, (const xmlChar *) "src", psz_xml_fname_utf8);
       free(psz_xml_fname_utf8);
-      
-      xmlSetProp (seq_node, (const xmlChar *) "id", 
+
+      xmlSetProp (seq_node, (const xmlChar *) "id",
 		  (const xmlChar *) p_sequence->id);
 
       if (p_sequence->default_entry_id)
 	{
 	  xmlNodePtr ent_node;
 
-	  ent_node = xmlNewChild (seq_node, ns, 
+	  ent_node = xmlNewChild (seq_node, ns,
 				  (const xmlChar *) "default-entry", NULL);
-	  xmlSetProp (ent_node, (const xmlChar *) "id", 
+	  xmlSetProp (ent_node, (const xmlChar *) "id",
 		      (const xmlChar *) p_sequence->default_entry_id);
 	}
 
@@ -341,9 +337,9 @@ _make_xml (vcdxml_t *obj, const char xml_fname[])
 	  char buf[80];
 
 	  snprintf (buf, sizeof (buf), "%f", p_entry->timestamp);
-	  ent_node = xmlNewChild (seq_node, ns, (const xmlChar *) "entry", 
+	  ent_node = xmlNewChild (seq_node, ns, (const xmlChar *) "entry",
 				  (const xmlChar *) buf);
-	  xmlSetProp (ent_node, (const xmlChar *) "id", 
+	  xmlSetProp (ent_node, (const xmlChar *) "id",
 		      (const xmlChar *) p_entry->id);
 	}
 
@@ -353,7 +349,7 @@ _make_xml (vcdxml_t *obj, const char xml_fname[])
 	  char buf[80];
 
 	  snprintf (buf, sizeof (buf), "%f", *_ap_ts);
-	  xmlNewChild (seq_node, ns, (const xmlChar *) "auto-pause", 
+	  xmlNewChild (seq_node, ns, (const xmlChar *) "auto-pause",
 		       (const xmlChar *) buf);
 	}
     }
@@ -368,7 +364,7 @@ _make_xml (vcdxml_t *obj, const char xml_fname[])
 	{
 	  pbc_t *_pbc = _cdio_list_node_data (node);
 	  xmlNodePtr pl = NULL;
-	  
+
 	  switch (_pbc->type)
 	    {
 	      char buf[80];
@@ -396,9 +392,9 @@ _make_xml (vcdxml_t *obj, const char xml_fname[])
 	      _CDIO_LIST_FOREACH (node2, _pbc->item_id_list)
 		{
 		  const char *_id = _cdio_list_node_data (node2);
-		  
+
 		  if (_id)
-		    xmlSetProp (xmlNewChild (pl, ns, (const xmlChar *) "play-item", NULL), 
+		    xmlSetProp (xmlNewChild (pl, ns, (const xmlChar *) "play-item", NULL),
 				(const xmlChar *) "ref", (const xmlChar *) _id);
 		  else
 		    xmlNewChild (pl, ns, (const xmlChar *) "play-item", NULL);
@@ -423,18 +419,18 @@ _make_xml (vcdxml_t *obj, const char xml_fname[])
 		  break;
 
 		case _SEL_MULTI_DEF:
-		  xmlSetProp (xmlNewChild (pl, ns, (const xmlChar *) "multi-default", NULL), 
+		  xmlSetProp (xmlNewChild (pl, ns, (const xmlChar *) "multi-default", NULL),
 			      (const xmlChar *) "numeric", (const xmlChar *) "enabled");
 		  break;
 
 		case _SEL_MULTI_DEF_NO_NUM:
-		  xmlSetProp (xmlNewChild (pl, ns, (const xmlChar *) "multi-default", NULL), 
+		  xmlSetProp (xmlNewChild (pl, ns, (const xmlChar *) "multi-default", NULL),
 			      (const xmlChar *) "numeric", (const xmlChar *) "disabled");
 		  break;
 		}
 
 	      if (_pbc->timeout_id)
-		xmlSetProp (xmlNewChild (pl, ns, (const xmlChar *) "timeout", NULL), 
+		xmlSetProp (xmlNewChild (pl, ns, (const xmlChar *) "timeout", NULL),
 			    (const xmlChar *) "ref", (const xmlChar *) _pbc->timeout_id);
 
 	      snprintf (buf, sizeof (buf), "%d", _pbc->timeout_time);
@@ -442,17 +438,17 @@ _make_xml (vcdxml_t *obj, const char xml_fname[])
 
 	      snprintf (buf, sizeof (buf), "%d", _pbc->loop_count);
 	      xmlSetProp (xmlNewChild (pl, ns, (const xmlChar *) "loop", (const xmlChar *) buf),
-			  (const xmlChar *) "jump-timing", 
+			  (const xmlChar *) "jump-timing",
 			  (_pbc->jump_delayed ? (const xmlChar *) "delayed" : (const xmlChar *) "immediate"));
 
 	      if (_pbc->item_id)
-		xmlSetProp (xmlNewChild (pl, ns, 
-					 (const xmlChar *) "play-item", NULL), 
-			    (const xmlChar *) "ref", 
+		xmlSetProp (xmlNewChild (pl, ns,
+					 (const xmlChar *) "play-item", NULL),
+			    (const xmlChar *) "ref",
 			    (const xmlChar *) _pbc->item_id);
 
 	      {
-		CdioListNode_t *node3 = 
+		CdioListNode_t *node3 =
 		  _cdio_list_begin (_pbc->select_area_list);
 
 		_CDIO_LIST_FOREACH (node2, _pbc->select_id_list)
@@ -470,7 +466,7 @@ _make_xml (vcdxml_t *obj, const char xml_fname[])
 		  }
 	      }
 	      break;
-	      
+
 	    case PBC_END:
 	      pl = xmlNewChild (section, ns, (const xmlChar *) "endlist", NULL);
 
@@ -488,7 +484,7 @@ _make_xml (vcdxml_t *obj, const char xml_fname[])
 	    default:
 	      vcd_assert_not_reached ();
 	    }
-	  
+
 	  xmlSetProp (pl, (const xmlChar *) "id", (const xmlChar *) _pbc->id);
 	  if (_pbc->rejected)
 	    xmlSetProp (pl, (const xmlChar *) "rejected", (const xmlChar *) "true");
@@ -504,12 +500,12 @@ int
 vcd_xml_dump (vcdxml_t *obj, const char xml_fname[])
 {
   _make_xml (obj, xml_fname);
-  
+
   return 0;
 }
 
-/* 
-   Print command line used as a XML comment. Start is either 0 or 
+/*
+   Print command line used as a XML comment. Start is either 0 or
    1. The program might be invoked either from a binary or a libtool
    wrapper script to invoke the module.
 */
@@ -528,18 +524,18 @@ vcd_xml_dump_cl_comment (int argc, const char *argv[], int start)
     retval = strdup (" command arguments used: ");
     break;
   default:
-    fprintf (stderr, "internal error: expecting start=0 or start=1\n"); 
+    fprintf (stderr, "internal error: expecting start=0 or start=1\n");
     retval = strdup (" command line used: ");
     start=0;
   }
-  
+
 
   len = strlen (retval);
 
   for (idx = start; idx < argc; idx++)
     {
       len += strlen (argv[idx]) + 1;
-      
+
       retval = realloc (retval, len + 1);
 
       strcat (retval, argv[idx]);
@@ -553,4 +549,3 @@ vcd_xml_dump_cl_comment (int argc, const char *argv[], int start)
 
   return retval;
 }
-

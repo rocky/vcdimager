@@ -75,9 +75,9 @@ This file documents GNU Video CD Information Tool.
 Copyright (C) 2003, 2004, 2005 Rocky Bernstein
 
 @menu
-* Introduction::                What is the program and why would I use it? 
-* Command Options::             How do I get this to do anything? 
-* Output Sections::             How do interpret the output? 
+* Introduction::                What is the program and why would I use it?
+* Command Options::             How do I get this to do anything?
+* Output Sections::             How do interpret the output?
 * Some Examples::               Okay, enough talk. How about some simple examples?
 * History and Thanks::          History and Acknowledgments
 
@@ -91,11 +91,11 @@ Indexes
 
 Command Options
 
-* Where Options::               Options controlling where to read from 
+* Where Options::               Options controlling where to read from
 * What Options::                Options controlling what do you want shown
 * All Options::                 A complete list of options
 
-Options controlling where to read from 
+Options controlling where to read from
 
 * CD Images::                   Reading from a file containing a CD disk image
 * CD-ROM Device::               Reading from a CD-ROM device
@@ -109,7 +109,7 @@ Output Sections
 * Info::                        Disc Information
 * LOT::                         LID Offset Table (LOT) Section
 * PSD::                         Program Segment Descriptors (PSD) Section
-* Tracks::                      Tracks 
+* Tracks::                      Tracks
 
 @end detailmenu
 @end menu
@@ -165,13 +165,13 @@ the``default'' CD-ROM device is in you might run:
 
 @smallexample
   vcd-info --no-banner --show-format
-@end smallexample 
+@end smallexample
 
 To get the album information you might run:
 
 @smallexample
   vcd-info --no-banner --show-info album
-@end smallexample 
+@end smallexample
 
 After doing this for a while and seeing this was useful, I then wrote
 a Video CD ``info'' library. A library is much faster and furthermore
@@ -197,13 +197,13 @@ to dump, these all start @kbd{--show-} and another set of options
 which specify where the CD-ROM or CD-ROM disk-image is.
 
 @menu
-* Where Options::               Options controlling where to read from 
+* Where Options::               Options controlling where to read from
 * What Options::                Options controlling what do you want shown
 * All Options::                 A complete list of options
 @end menu
 
 @node Where Options, What Options, Command Options, Command Options
-@section Options controlling where to read from 
+@section Options controlling where to read from
 
 If you don't specify any place to read from @value{program} will try
 to read from the default device that may be appropriate for your OS.
@@ -253,7 +253,7 @@ specify a filename after --cue-file a default name is used, probably
 names used when you use @command{vcdimager} or @command{vcdxbuild}.
 
 If you use the @kbd{--toc-file} option, the file read is expected to
-be a CD-ROM disk image using for the format @kbd{cdrdao} uses.  
+be a CD-ROM disk image using for the format @kbd{cdrdao} uses.
 
 If you use the @kbd{--nrg-file} option (short form @kbd{-N}), the file
 read is expected to be a CD-ROM disk image using a proprietary and
@@ -309,7 +309,7 @@ you.
 
 By default @value{program} will show just about everything it can
 about a Video CD image. There is additional information you can get using
-the option @kbd{--debug}, but this is of a debugging nature. 
+the option @kbd{--debug}, but this is of a debugging nature.
 
 However if you specify something in particular to dump, for example to
 dump track information via command option @kbd{--show-tracks},
@@ -383,7 +383,7 @@ information. Sometimes, you just wanna know what version you got.
 @end table
 
 Next we have some miscellaneous options that don't fall into another
-particular category. 
+particular category.
 
 @table @code
 @item --access-mode
@@ -499,13 +499,13 @@ A 2-hex digit version number. See line 3 of the example in
 @end ftable
 
 @item --show-filesystem
-@itemx -F 
+@itemx -F
 @kindex @code{--show-filesystem}
 List everything in the filesystem section.  For information about what is in
 this section,  see @ref{Filesystem, ,ISO-9660 section}.
 
 @item --show-format
-@itemx -f 
+@itemx -f
 @kindex @code{--show-format}
 Show the format that the Video CD is in. The value will be one of ``VCD
 1.1'', ``VCD 2.0'', ``SVCD'', or ``HQVCD''. Note that @value{program}
@@ -567,7 +567,7 @@ applied for compatibility. Tag, 0x00 for "SUPERVCD", 0x01 for
 See line 4 of the example in @ref{Info, ,Disc Information}.
 @item psds
 PSD size. See line 18 of the example in @ref{Info, ,Disc Information}.
-@item res 
+@item res
 Restriction number, e.g. ``unsuitable for kids''; 0 is unrestricted,
 1 is restricted category 1, 2 is restricted category 2, 3 is
 restricted category 3. The XML tag for this is <restriction>.
@@ -584,7 +584,7 @@ Special info is encoded into the pictures. A boolean value. See line
 13 of the example in @ref{Info, ,Disc Information}.
 @item start
 start time offset. Only relevant if SVCD or HQVCD. The XML tag for
-this is <start-time-offset>. 
+this is <start-time-offset>.
 @item st2
 start track #2. A boolean value. The XML tag for this is
 <next-volume-use-sequence2>. See line 16 of the example in
@@ -615,7 +615,7 @@ Descriptors (PSD) Section}.
 @kindex @code{--show-pvd-all}
 List everything in the PVD section. For an example of this section and
 some additional information, see the listing @ref{PVD, ,Primary
-Volume Descriptor (PVD) Section}. 
+Volume Descriptor (PVD) Section}.
 
 @item --show-pvd @var{suboption}
 @itemx -P @ovar{sub-option}
@@ -663,17 +663,17 @@ Section}.
 @end ftable
 
 @item --show-scandata
-This option is relevant only if the program streams are MPEG2's. That is
-the Video CD image is not VCD 1.0, VCD 1.1 VCD 2.0. 
-
 @itemx -s
+This option is relevant only if the program streams are MPEG2's. That is
+the Video CD image is not VCD 1.0, VCD 1.1 VCD 2.0.
+
 @kindex @code{--show-scandata}
 
 @item --show-search
 @itemx -X
 @kindex @code{--show-search}
 This option is relevant only if the program streams are MPEG2's. That is
-the VCD image is not VCD 1.0, VCD 1.1 VCD 2.0. 
+the VCD image is not VCD 1.0, VCD 1.1 VCD 2.0.
 
 @item --show-source
 @itemx -S
@@ -681,7 +681,7 @@ the VCD image is not VCD 1.0, VCD 1.1 VCD 2.0.
 
 Just list out where you are reading from and the size of the image.
 
-Here's an example of the output of this: 
+Here's an example of the output of this:
 
 @smallexample
 Source: image file `/src/dvdrip/dumbo/dumbo.cue'
@@ -705,7 +705,7 @@ sections of output separated by a string of dashes like this:
 
 @smallexample
 ------------------------------------------------------------------------
-@end smallexample 
+@end smallexample
 
 These separate the major logical sections of a Video CD
 
@@ -716,7 +716,7 @@ These separate the major logical sections of a Video CD
 * Info::                        Disc Information
 * LOT::                         LID Offset Table (LOT) Section
 * PSD::                         Program Segment Descriptors (PSD) Section
-* Tracks::                      Tracks 
+* Tracks::                      Tracks
 @end menu
 
 Note that in example given in these sections, numbers at the beginning
@@ -725,7 +725,7 @@ use these to help refer to parts of the example.
 
 @node PVD, Filesystem, Output Sections, Output Sections
 @section Primary Volume Descriptor (PVD) Section
-@cindex Primary Volume Descriptor (PVD) 
+@cindex Primary Volume Descriptor (PVD)
 
 The first track of a Video CD is an ISO-9660 formatted track. As such
 it contains information defined by the ISO 9660 specification. The
@@ -839,7 +839,7 @@ the 8th and 9th characters refer to permissions for a group while, and
 @item
 the 10th and 11th characters refer to permissions for a user.
 @end itemize
- 
+
 In each of these pairs the first character (6, 8, 10) is "x" if the
 entry is executable. For a directory this means the directory is
 allowed to be listed or "searched".  The second character of a pair
@@ -951,7 +951,7 @@ through program control.
 
 @node PSD, Tracks, LOT, Output Sections
 @section Program Segment Descriptors (PSD) Section
-@cindex Program Segment Descriptors (PSD) 
+@cindex Program Segment Descriptors (PSD)
 
 Here is part of sample output from the test PAL SVCD that can be found
 from:
@@ -1061,7 +1061,7 @@ from:
  2.  ID: `TRACKSVD'
  3.  version: 0x01
  4. tracks: 1
- 5.  track[00]: 00:59:61, audio: 2 streams, video: PAL stream, OGT stream: 
+ 5.  track[00]: 00:59:61, audio: 2 streams, video: PAL stream, OGT stream:
      all available
  6. CVD interpretation (probably)
  7. (track[00]: 00:59:61 (cumulated), audio: 00, ogt: de)
@@ -1086,7 +1086,7 @@ can't be determined from information on the image). The video stream
 on the single stream is in PAL format and there is a subtitle.
 Actually the subtitle may be in one of at least two format, a format
 defined by Philips called OGT (Overlay Graphics Text) as it is listed
-above or it might be in another format used in CVD's.  
+above or it might be in another format used in CVD's.
 
 On line 6, the CVD interpretation is a bit of a guess, and lines 6--7
 only appears if the Video CD image is not VCD 1.@emph{x} or VCD 2.0.
@@ -1100,7 +1100,7 @@ number 0xde. This may be completely bogus though.
 
 The bottom part of the display shows track info obtained in a
 lower-level way. The information above CDROM TRACKS comes from
-meta-data read in that IS09660 filesystem. 
+meta-data read in that IS09660 filesystem.
 
 If you are reading from a CD-ROM device, this information comes from
 comes requests from the device to give track information. If what you
@@ -1117,17 +1117,17 @@ currently sitting in your CD-ROM drive. If the CD is in the
 
 @smallexample
   vcd-info
-@end smallexample 
+@end smallexample
 
 It means the same thing as:
 @smallexample
   vcd-info --cdrom-device
-@end smallexample 
+@end smallexample
 
 and using the ``short'' option:
 @smallexample
   vcd-info -C
-@end smallexample 
+@end smallexample
 
 I have a combined CD-ROM and DVD drive called @kbd{/dev/dvd}. I have
 another CD-ROM drive which goes under the name @kbd{/dev/cdrom}, but I
@@ -1138,12 +1138,12 @@ this will work:
 
 @smallexample
   vcd-info -C=/dev/dvd
-@end smallexample 
+@end smallexample
 
 Or even better, I'll let @value{program} figure out it's a CD-ROM device:
 @smallexample
   vcd-info -i /dev/dvd
-@end smallexample 
+@end smallexample
 The equals sign before @kbd{/dev/dvd} is optional in either format.
 
 Let's say you just used vcdimager or vcdxbuild it created output to
@@ -1151,25 +1151,25 @@ its ``default'' location (probably @kbd{videocd.cue} and
 @kbd{videocd.bin}. To dump out this out:
 @smallexample
   vcd-info --cue-file
-@end smallexample 
+@end smallexample
 
 But if you specified the output to go to say @kbd{nausicaa.bin} and
 @kbd{nausicaa.cue} you would have to specify that location like this:
 @smallexample
   vcd-info -c nausicaa.cue
-@end smallexample 
+@end smallexample
 
-Or again not having to worry about what type of file you could use 
+Or again not having to worry about what type of file you could use
 the ``intelligent'' input option again as we did before:
 @smallexample
   vcd-info -i nausicaa.cue
-@end smallexample 
+@end smallexample
 
 To list all of the sub-options to choose from in the Primary Volume
 Descriptor section (PVD) try this:
 @smallexample
   vcd-info --show-pvd help
-@end smallexample 
+@end smallexample
 
 Okay, now for for some more obscure stuff. Let's say I'm writing a
 front-end GUI to do all sorts of stuff and I just need to pick out the
@@ -1179,19 +1179,19 @@ want any extra lines not relevant other than the version.
 
 @smallexample
   vcd-info --no-banner --show-format
-@end smallexample 
+@end smallexample
 
 Or even shorter:
 @smallexample
   vcd-info -t -f
-@end smallexample 
+@end smallexample
 
 I want to see the filesystem info and track info for the CD
 in my default drive
 
 @smallexample
   vcd-info --show-tracks --show-filesystem
-@end smallexample 
+@end smallexample
 
 I want to see the filesystem info and track info for the CD
 in my default drive
@@ -1200,7 +1200,7 @@ And finally I want to see just the ``data'' part --- that is the list
 of the entries section, no summary information like a count or ID tag.
 @smallexample
   vcd-info --show-entries data
-@end smallexample 
+@end smallexample
 
 @node History and Thanks, General Index, Some Examples, Top
 @chapter History and Thanks

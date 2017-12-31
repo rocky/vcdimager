@@ -1,6 +1,4 @@
 /*
-    $Id$
-
     Copyright (C) 2000, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
@@ -32,8 +30,6 @@
 #include "vcd_assert.h"
 #include "util.h"
 
-static const char _rcsid[] = "$Id$";
-
 size_t
 _vcd_strlenv(char **str_array)
 {
@@ -51,7 +47,7 @@ void
 _vcd_strfreev(char **strv)
 {
   int n;
-  
+
   vcd_assert (strv != NULL);
 
   for(n = 0; strv[n]; n++)
@@ -86,7 +82,7 @@ _vcd_strjoin (char *strv[], unsigned count, const char delim[])
         strcat (new_str, delim);
       strcat (new_str, strv[n]);
     }
-  
+
   return new_str;
 }
 
@@ -107,14 +103,14 @@ _vcd_strsplit(const char str[], char delim) /* fixme -- non-reentrant */
 
   n = 1;
   p = _str;
-  while(*p) 
+  while(*p)
     if (*(p++) == delim)
       n++;
 
   strv = calloc(1, sizeof (char *) * (n+1));
-  
+
   n = 0;
-  while((p = strtok(n ? NULL : _str, _delim)) != NULL) 
+  while((p = strtok(n ? NULL : _str, _delim)) != NULL)
     strv[n++] = strdup(p);
 
   free(_str);
@@ -132,7 +128,7 @@ _vcd_memdup (const void *mem, size_t count)
       new_mem = malloc(count);
       memcpy (new_mem, mem, count);
     }
-  
+
   return new_mem;
 }
 
@@ -158,7 +154,7 @@ _vcd_strdup_upper (const char str[])
 }
 
 
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8

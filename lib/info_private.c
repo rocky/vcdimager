@@ -1,7 +1,5 @@
 /*
-    $Id$
-
-    Copyright (C) 2003, 2005, 2006 Rocky Bernstein <rocky@panix.com>
+    Copyright (C) 2003, 2005, 2006, 2017 Rocky Bernstein <rocky@panix.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,7 +15,7 @@
     along with this program; if not, write to the Free Foundation
     Software, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-/* 
+/*
    Like vcdinfo but exposes more of the internal structure. It is probably
    better to use vcdinfo, when possible.
 */
@@ -63,8 +61,6 @@
 #include "info_private.h"
 #include "pbc.h"
 
-static const char _rcsid[] = "$Id$";
-
 /*
   This fills in unassigned LIDs in the offset table.  Due to
   "rejected" LOT entries, some of these might not have gotten filled
@@ -80,10 +76,10 @@ vcdinf_update_offset_list(struct _vcdinf_pbc_ctx *obj, bool extended)
     CdioListNode_t *node;
     CdioList_t *unused_lids = _cdio_list_new();
     CdioListNode_t *next_unused_node = _cdio_list_begin(unused_lids);
-    
+
     unsigned int last_lid=0;
     CdioList_t *offset_list = extended ? obj->offset_x_list : obj->offset_list;
-    
+
     lid_t max_seen_lid=0;
 
     _CDIO_LIST_FOREACH (node, offset_list)
@@ -112,7 +108,7 @@ vcdinf_update_offset_list(struct _vcdinf_pbc_ctx *obj, bool extended)
           if (last_lid > max_seen_lid) max_seen_lid=last_lid;
         }
       }
-    _cdio_list_free(unused_lids, true);
+    _cdio_list_free(unused_lids, true, NULL);
   }
 }
 
@@ -137,8 +133,8 @@ vcdinf_visit_lot (struct _vcdinf_pbc_ctx *obj)
     if ((tmp = vcdinf_get_lot_offset(lot, n)) != PSD_OFS_DISABLED)
       ret &= vcdinf_visit_pbc (obj, n + 1, tmp, true);
 
-  _vcd_list_sort (obj->extended ? obj->offset_x_list : obj->offset_list, 
-                  (_cdio_list_cmp_func) vcdinf_lid_t_cmp);
+  _vcd_list_sort (obj->extended ? obj->offset_x_list : obj->offset_list,
+                  (_cdio_list_cmp_func_t) vcdinf_lid_t_cmp);
 
   /* Now really complete the offset table with LIDs.  This routine
      might obviate the need for vcdinf_visit_pbc() or some of it which is
@@ -154,7 +150,7 @@ vcdinf_visit_lot (struct _vcdinf_pbc_ctx *obj)
    Returns false if there was some error.
 */
 bool
-vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, unsigned int offset, 
+vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, unsigned int offset,
                   bool in_lot)
 {
   CdioListNode_t *node;
@@ -196,7 +192,7 @@ vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, unsigned int offset,
 
   if (obj->extended) {
     offset_list = obj->offset_x_list;
-  } else 
+  } else
     offset_list = obj->offset_list;
 
   _CDIO_LIST_FOREACH (node, offset_list)
@@ -215,7 +211,7 @@ vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, unsigned int offset,
              */
             ofs->lid = lid;
           }
-          
+
           ofs->ext = obj->extended;
 
           return true; /* already been there... */
@@ -240,14 +236,14 @@ vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, unsigned int offset,
 
         if (!ofs->lid)
           ofs->lid = lid;
-        else 
+        else
           if (ofs->lid != lid)
             vcd_warn ("LOT entry assigned LID %d, but descriptor has LID %d",
                       ofs->lid, lid);
 
         ret &= vcdinf_visit_pbc (obj, 0, vcdinf_pld_get_prev_offset(d), false);
         ret &= vcdinf_visit_pbc (obj, 0, vcdinf_pld_get_next_offset(d), false);
-        ret &= vcdinf_visit_pbc (obj, 0, vcdinf_pld_get_return_offset(d), 
+        ret &= vcdinf_visit_pbc (obj, 0, vcdinf_pld_get_return_offset(d),
                                  false);
       }
       break;
@@ -263,22 +259,22 @@ vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, unsigned int offset,
 
         if (!ofs->lid)
           ofs->lid = uint16_from_be (d->lid) & 0x7fff;
-        else 
+        else
           if (ofs->lid != (uint16_from_be (d->lid) & 0x7fff))
             vcd_warn ("LOT entry assigned LID %d, but descriptor has LID %d",
                       ofs->lid, uint16_from_be (d->lid) & 0x7fff);
 
         ret &= vcdinf_visit_pbc (obj, 0, vcdinf_psd_get_prev_offset(d), false);
         ret &= vcdinf_visit_pbc (obj, 0, vcdinf_psd_get_next_offset(d), false);
-        ret &= vcdinf_visit_pbc (obj, 0, vcdinf_psd_get_return_offset(d), 
+        ret &= vcdinf_visit_pbc (obj, 0, vcdinf_psd_get_return_offset(d),
                                  false);
-        ret &= vcdinf_visit_pbc (obj, 0, vcdinf_psd_get_default_offset(d), 
+        ret &= vcdinf_visit_pbc (obj, 0, vcdinf_psd_get_default_offset(d),
                                  false);
-        ret &= vcdinf_visit_pbc (obj, 0, uint16_from_be (d->timeout_ofs), 
+        ret &= vcdinf_visit_pbc (obj, 0, uint16_from_be (d->timeout_ofs),
                                  false);
 
         for (idx = 0; idx < vcdinf_get_num_selections(d); idx++)
-          ret &= vcdinf_visit_pbc (obj, 0, vcdinf_psd_get_offset(d, idx), 
+          ret &= vcdinf_visit_pbc (obj, 0, vcdinf_psd_get_offset(d, idx),
                                    false);
       }
       break;
@@ -320,7 +316,7 @@ vcdinf_get_entry_msf(const EntriesVcd_t *entries, unsigned int entry_num)
 }
 
 
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8

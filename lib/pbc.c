@@ -1,6 +1,5 @@
 /*
-    $Id$
-
+    Copyright (C) 2018 Rocky Bernstein <rocky@gnu.org>
     Copyright (C) 2000, 2004, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
@@ -46,8 +45,6 @@
 #include "obj.h"
 #include "pbc.h"
 #include "util.h"
-
-static const char _rcsid[] = "$Id$";
 
 static uint8_t
 _wtime (int seconds)
@@ -118,7 +115,7 @@ static void
 _set_area_helper (pbc_area_t *dest, const pbc_area_t *src, const char sel_id[])
 {
   memset (dest, 0, sizeof (pbc_area_t));
-  
+
   if (src)
     {
       if (src->x1 || src->x2 || src->y1 || src->y2) /* not disabled */
@@ -131,7 +128,7 @@ _set_area_helper (pbc_area_t *dest, const pbc_area_t *src, const char sel_id[])
 	    vcd_error ("selection '%s': area y1 >= y2 (%d >= %d)",
 		       sel_id, src->y1, src->y2);
 	}
-  
+
       *dest = *src;
     }
 }
@@ -153,7 +150,7 @@ _vcd_pbc_lookup (const VcdObj_t *obj, const char item_id[])
 	return ITEM_TYPE_ENTRY;
       else if (id <= MAX_ENCODED_SEGMENT_NUM)
 	return ITEM_TYPE_SEGMENT;
-      else 
+      else
 	vcd_assert_not_reached ();
     }
   else if (_vcd_pbc_lid_lookup (obj, item_id))
@@ -196,7 +193,7 @@ _vcd_pbc_pin_lookup (const VcdObj_t *obj, const char item_id[])
 
       /* default entry point */
 
-      if (_sequence->default_entry_id 
+      if (_sequence->default_entry_id
 	  && !strcmp (item_id, _sequence->default_entry_id))
 	return n + 100;
       n++;
@@ -256,7 +253,7 @@ uint16_t
 _vcd_pbc_max_lid (const VcdObj_t *obj)
 {
   uint16_t retval = 0;
-  
+
   if (_vcd_pbc_available (obj))
     retval = _cdio_list_length (obj->pbc_list);
 
@@ -288,7 +285,7 @@ _vcd_pbc_node_length (const VcdObj_t *obj, const pbc_t *p_pbc, bool extended)
       if (extended || _vcd_obj_has_cap_p (obj, _CAP_4C_SVCD))
 	retval += __cd_offsetof (PsdSelectionListDescriptorExtended_t, area[n]);
       break;
-      
+
     case PBC_END:
       retval = sizeof (PsdEndListDescriptor_t);
       break;
@@ -301,7 +298,7 @@ _vcd_pbc_node_length (const VcdObj_t *obj, const pbc_t *p_pbc, bool extended)
   return retval;
 }
 
-static uint16_t 
+static uint16_t
 _lookup_psd_offset (const VcdObj_t *obj, const char item_id[], bool extended)
 {
   CdioListNode_t *node;
@@ -319,12 +316,12 @@ _lookup_psd_offset (const VcdObj_t *obj, const char item_id[], bool extended)
 
       if (!p_pbc->id || strcmp (item_id, p_pbc->id))
 	continue;
-	
+
       return (extended ? p_pbc->offset_ext : p_pbc->offset) / INFO_OFFSET_MULT;
     }
 
   vcd_error ("PSD: referenced PSD '%s' not found", item_id);
-	    
+
   /* not found */
   return PSD_OFS_DISABLED;
 }
@@ -372,7 +369,7 @@ _vcd_pbc_mark_id (const VcdObj_t *obj, const char _id[])
     case PBC_PLAYLIST:
       {
 	CdioListNode_t *node;
-	
+
 	_vcd_pbc_mark_id (obj, p_pbc->prev_id);
 	_vcd_pbc_mark_id (obj, p_pbc->next_id);
 	_vcd_pbc_mark_id (obj, p_pbc->retn_id);
@@ -393,7 +390,7 @@ _vcd_pbc_mark_id (const VcdObj_t *obj, const char _id[])
 	_vcd_pbc_mark_id (obj, p_pbc->prev_id);
 	_vcd_pbc_mark_id (obj, p_pbc->next_id);
 	_vcd_pbc_mark_id (obj, p_pbc->retn_id);
-	
+
 	if (p_pbc->selection_type == _SEL_NORMAL)
 	  _vcd_pbc_mark_id (obj, p_pbc->default_id);
 
@@ -407,7 +404,7 @@ _vcd_pbc_mark_id (const VcdObj_t *obj, const char _id[])
 
 	    _vcd_pbc_mark_id (obj, _id);
 	  }
-      }      
+      }
       break;
 
     case PBC_END:
@@ -508,23 +505,23 @@ _vcd_pbc_node_write (const VcdObj_t *obj, const pbc_t *p_pbc, void *buf,
 	_PsdPlayListDescriptor *_md = buf;
 	CdioListNode_t *node;
 	int n;
-	
+
 	_md->type = PSD_TYPE_PLAY_LIST;
 	_md->noi = _cdio_list_length (p_pbc->item_id_list);
-	
+
 	vcd_assert (p_pbc->lid < 0x8000);
 	_md->lid = uint16_to_be (p_pbc->lid | (p_pbc->rejected ? 0x8000 : 0));
-	
-	_md->prev_ofs = 
+
+	_md->prev_ofs =
 	  uint16_to_be (_lookup_psd_offset (obj, p_pbc->prev_id, extended));
-	_md->next_ofs = 
+	_md->next_ofs =
 	  uint16_to_be (_lookup_psd_offset (obj, p_pbc->next_id, extended));
 	_md->return_ofs =
 	  uint16_to_be (_lookup_psd_offset (obj, p_pbc->retn_id, extended));
 	_md->ptime = uint16_to_be (rint (p_pbc->playing_time * 15.0));
 	_md->wtime = _wtime (p_pbc->wait_time);
 	_md->atime = _wtime (p_pbc->auto_pause_time);
-	
+
 	n = 0;
 	_CDIO_LIST_FOREACH (node, p_pbc->item_id_list)
 	  {
@@ -537,12 +534,12 @@ _vcd_pbc_node_write (const VcdObj_t *obj, const pbc_t *p_pbc, void *buf,
 
 		if (!_pin)
 		  vcd_error ("PSD: referenced play item '%s' not found", _id);
-		
-		_md->itemid[n] = uint16_to_be (_pin); 
+
+		_md->itemid[n] = uint16_to_be (_pin);
 	      }
 	    else
 	      _md->itemid[n] = 0; /* play nothing */
-	      
+
 	    n++;
 	  }
       }
@@ -587,9 +584,9 @@ _vcd_pbc_node_write (const VcdObj_t *obj, const pbc_t *p_pbc, void *buf,
 	vcd_assert (p_pbc->lid < 0x8000);
 	_md->lid = uint16_to_be (p_pbc->lid | (p_pbc->rejected ? 0x8000 : 0));
 
-	_md->prev_ofs = 
+	_md->prev_ofs =
 	  uint16_to_be (_lookup_psd_offset (obj, p_pbc->prev_id, extended));
-	_md->next_ofs = 
+	_md->next_ofs =
 	  uint16_to_be (_lookup_psd_offset (obj, p_pbc->next_id, extended));
 	_md->return_ofs =
 	  uint16_to_be (_lookup_psd_offset (obj, p_pbc->retn_id, extended));
@@ -600,7 +597,7 @@ _vcd_pbc_node_write (const VcdObj_t *obj, const pbc_t *p_pbc, void *buf,
 	    _md->default_ofs =
 	      uint16_to_be (_lookup_psd_offset (obj, p_pbc->default_id, extended));
 	    break;
-	    
+
 	  case _SEL_MULTI_DEF:
 	    _md->default_ofs = uint16_to_be (PSD_OFS_MULTI_DEF);
 	    if (p_pbc->default_id)
@@ -614,7 +611,7 @@ _vcd_pbc_node_write (const VcdObj_t *obj, const pbc_t *p_pbc, void *buf,
 	      vcd_warn ("ignoring default target '%s' for multi default (w/o num) selection '%s'",
 			p_pbc->default_id, p_pbc->id);
 	    break;
-	    
+
 	  default:
 	    vcd_assert_not_reached ();
 	    break;
@@ -628,7 +625,7 @@ _vcd_pbc_node_write (const VcdObj_t *obj, const pbc_t *p_pbc, void *buf,
 	  vcd_warn ("loop count %d > 127", p_pbc->loop_count);
 
 	_md->loop = (p_pbc->loop_count > 0x7f) ? 0x7f : p_pbc->loop_count;
-	
+
 	if (p_pbc->jump_delayed)
 	  _md->loop |= 0x80;
 
@@ -645,7 +642,7 @@ _vcd_pbc_node_write (const VcdObj_t *obj, const pbc_t *p_pbc, void *buf,
 	if (p_pbc->item_id)
 	  {
 	    const uint16_t _pin = _vcd_pbc_pin_lookup (obj, p_pbc->item_id);
-	    
+
 	    if (!_pin)
 	      vcd_error ("PSD: referenced play item '%s' not found", p_pbc->item_id);
 
@@ -659,7 +656,7 @@ _vcd_pbc_node_write (const VcdObj_t *obj, const pbc_t *p_pbc, void *buf,
 	  {
 	  case _SEL_NORMAL:
 	    break;
-	    
+
 	  case _SEL_MULTI_DEF:
 	  case _SEL_MULTI_DEF_NO_NUM:
 	    if (p_pbc->jump_delayed)
@@ -680,7 +677,7 @@ _vcd_pbc_node_write (const VcdObj_t *obj, const pbc_t *p_pbc, void *buf,
 	      if ((_seq = _vcd_obj_get_sequence_by_id ((VcdObj_t *) obj, p_pbc->item_id))
 		  || (_seq = _vcd_obj_get_sequence_by_entry_id ((VcdObj_t *) obj, p_pbc->item_id)))
 		{
-		  const unsigned _entries = 
+		  const unsigned _entries =
 		    _cdio_list_length (_seq->entry_list) + 1;
 
 		  if (_nos != _entries)
@@ -693,10 +690,10 @@ _vcd_pbc_node_write (const VcdObj_t *obj, const pbc_t *p_pbc, void *buf,
 			   " is requried to be sequence or entry point"
 			   " item for multi default selecton",
 			   p_pbc->id, p_pbc->item_id);
-	    }	    
+	    }
 
 	    break;
-	    
+
 	  default:
 	    vcd_assert_not_reached ();
 	    break;
@@ -711,10 +708,10 @@ _vcd_pbc_node_write (const VcdObj_t *obj, const pbc_t *p_pbc, void *buf,
 	  _CDIO_LIST_FOREACH (node, p_pbc->select_id_list)
 	    {
 	      const char *_id = _cdio_list_node_data (node);
-	    
-	      _md->ofs[idx] = 
+
+	      _md->ofs[idx] =
 		uint16_to_be (_lookup_psd_offset (obj, _id, extended));
-	    
+
 	      idx++;
 	    }
 	}
@@ -724,7 +721,7 @@ _vcd_pbc_node_write (const VcdObj_t *obj, const pbc_t *p_pbc, void *buf,
 	    PsdSelectionListDescriptorExtended_t *_md2;
 	    CdioListNode_t *node;
 	    int n;
-	    
+
 	    /* append extended selection areas */
 
 	    _md2 = (void *) &_md->ofs[_nos];
@@ -750,7 +747,7 @@ _vcd_pbc_node_write (const VcdObj_t *obj, const pbc_t *p_pbc, void *buf,
 	  }
       }
       break;
-      
+
     case PBC_END:
       {
 	PsdEndListDescriptor_t *_md = buf;
@@ -771,7 +768,7 @@ _vcd_pbc_node_write (const VcdObj_t *obj, const pbc_t *p_pbc, void *buf,
 			    " but next volume is 0", p_pbc->id);
 
 		if (!_pin)
-		  vcd_error ("PSD: referenced play item '%s' not found", 
+		  vcd_error ("PSD: referenced play item '%s' not found",
 			     p_pbc->item_id);
 
 		_md->change_pic = uint16_to_be (_pin);
@@ -783,12 +780,12 @@ _vcd_pbc_node_write (const VcdObj_t *obj, const pbc_t *p_pbc, void *buf,
 
 		if (!_segment)
 		  vcd_warn ("PSD: endlist '%s': referenced play item '%s'"
-			    " is not a segment play item", 
+			    " is not a segment play item",
 			    p_pbc->id, p_pbc->image_id);
 		else if (_segment->info->shdr[0].seen
 			 || !(_segment->info->shdr[1].seen || _segment->info->shdr[2].seen))
 		  vcd_warn ("PSD: endlist '%s': referenced play item '%s'"
-			    " should be a still picture", 
+			    " should be a still picture",
 			    p_pbc->id, p_pbc->image_id);
 	      }
 	  }
@@ -821,7 +818,7 @@ vcd_pbc_new (pbc_type_t type)
       p_pbc->select_id_list = _cdio_list_new ();
       p_pbc->select_area_list = _cdio_list_new ();
       break;
-      
+
     case PBC_END:
       break;
 
@@ -850,14 +847,14 @@ vcd_pbc_destroy (pbc_t *p_pbc)
   switch (p_pbc->type)
     {
     case PBC_PLAYLIST:
-      _cdio_list_free (p_pbc->item_id_list, false);
+      _cdio_list_free (p_pbc->item_id_list, false, NULL);
       break;
 
     case PBC_SELECTION:
-      _cdio_list_free (p_pbc->select_id_list, true);
-      _cdio_list_free (p_pbc->select_area_list, true);
+      _cdio_list_free (p_pbc->select_id_list, true, NULL);
+      _cdio_list_free (p_pbc->select_area_list, true, NULL);
       break;
-      
+
     case PBC_END:
       break;
 
@@ -867,7 +864,7 @@ vcd_pbc_destroy (pbc_t *p_pbc)
     }
 }
 
-/* 
+/*
  */
 
 bool

@@ -1,7 +1,6 @@
 /*
-    $Id$
-
-    Copyright (C) 2000, 2004, 2005 Herbert Valerio Riedel <hvr@gnu.org>
+    Copyright (C) 2018, Rocky Bernstein <rocky@gnu.org>
+    Copyright (C) 2000, 2004-2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -53,8 +52,6 @@
 #include "util.h"
 #include "vcd.h"
 
-static const char _rcsid[] = "$Id$";
-
 static const char zero[CDIO_CD_FRAMESIZE_RAW] = { 0, };
 
 #define DEFAULT_ISO_PREPARER_ID       "GNU VCDImager " VERSION " " HOST_ARCH
@@ -95,7 +92,7 @@ _vcd_obj_get_sequence_by_entry_id (VcdObj_t *p_obj, const char entry_id[])
       CdioListNode_t *node2;
 
       /* default entry point */
-      if (_sequence->default_entry_id 
+      if (_sequence->default_entry_id
           && !strcmp (entry_id, _sequence->default_entry_id))
         return _sequence;
 
@@ -104,7 +101,7 @@ _vcd_obj_get_sequence_by_entry_id (VcdObj_t *p_obj, const char entry_id[])
 	{
 	  entry_t *_entry = _cdio_list_node_data (node2);
 
-	  if (_entry->id 
+	  if (_entry->id
               && !strcmp (entry_id, _entry->id))
 	    return _sequence;
 	}
@@ -243,17 +240,17 @@ _vcd_obj_has_cap_p (const VcdObj_t *p_obj, enum vcd_capability_t capability)
 
 /*
  * public methods
- */ 
+ */
 
 VcdObj_t *
 vcd_obj_new (vcd_type_t vcd_type)
 {
   VcdObj_t *p_new_obj = NULL;
   static bool _first = true;
-  
+
   if (_first)
     {
-#if defined(_DEVELOPMENT_)      
+#if defined(_DEVELOPMENT_)
       vcd_warn ("initializing libvcd %s [%s]", VERSION, HOST_ARCH);
       vcd_warn (" ");
       vcd_warn (" this is the Beta development branch!");
@@ -300,9 +297,9 @@ vcd_obj_new (vcd_type_t vcd_type)
   /* gap's defined by IEC-10149 / ECMA-130 */
 
   /* pre-gap's for tracks but the first one */
-  p_new_obj->track_pregap = CDIO_PREGAP_SECTORS; 
+  p_new_obj->track_pregap = CDIO_PREGAP_SECTORS;
   /* post-gap after last track */
-  p_new_obj->leadout_pregap = CDIO_POSTGAP_SECTORS; 
+  p_new_obj->leadout_pregap = CDIO_POSTGAP_SECTORS;
 
   if (_vcd_obj_has_cap_p (p_new_obj, _CAP_TRACK_MARGINS))
     {
@@ -318,7 +315,7 @@ vcd_obj_new (vcd_type_t vcd_type)
   return p_new_obj;
 }
 
-int 
+int
 vcd_obj_remove_item (VcdObj_t *p_vcdobj, const char id[])
 {
   vcd_warn ("vcd_obj_remove_item('%s') not implemented yet!", id);
@@ -336,7 +333,7 @@ _vcd_obj_remove_mpeg_track (VcdObj_t *p_vcdobj, int track_id)
   vcd_assert (track_id >= 0);
 
   node = _vcd_list_at (p_vcdobj->mpeg_sequence_list, track_id);
-  
+
   vcd_assert (node != NULL);
 
   track = (mpeg_sequence_t *) _cdio_list_node_data (node);
@@ -344,25 +341,25 @@ _vcd_obj_remove_mpeg_track (VcdObj_t *p_vcdobj, int track_id)
   vcd_mpeg_source_destroy (track->source, true);
 
   length = track->info ? track->info->packets : 0;
-  length += p_vcdobj->track_pregap + p_vcdobj->track_front_margin 
+  length += p_vcdobj->track_pregap + p_vcdobj->track_front_margin
     + 0 + p_vcdobj->track_rear_margin;
 
   /* fixup offsets */
   {
     CdioListNode_t *node2 = node;
     while ((node2 = _cdio_list_node_next (node2)) != NULL)
-      ((mpeg_sequence_t *) _cdio_list_node_data (node))->relative_start_extent 
+      ((mpeg_sequence_t *) _cdio_list_node_data (node))->relative_start_extent
         -= length;
   }
 
   p_vcdobj->relative_end_extent -= length;
 
   /* shift up */
-  _cdio_list_node_free (node, true);
+  _cdio_list_node_free (node, true, NULL);
 }
 
 int
-vcd_obj_append_segment_play_item (VcdObj_t *p_vcdobj, 
+vcd_obj_append_segment_play_item (VcdObj_t *p_vcdobj,
                                   VcdMpegSource_t *p_mpeg_source,
                                   const char item_id[])
 {
@@ -389,7 +386,7 @@ vcd_obj_append_segment_play_item (VcdObj_t *p_vcdobj,
       return -1;
     }
 
-  vcd_info ("scanning mpeg segment item #%d for scanpoints...", 
+  vcd_info ("scanning mpeg segment item #%d for scanpoints...",
             _cdio_list_length (p_vcdobj->mpeg_segment_list));
 
   vcd_mpeg_source_scan (p_mpeg_source, !p_vcdobj->relaxed_aps,
@@ -408,7 +405,7 @@ vcd_obj_append_segment_play_item (VcdObj_t *p_vcdobj,
   segment->source = p_mpeg_source;
 
   segment->id = strdup (item_id);
- 
+
   segment->info = vcd_mpeg_source_get_info (p_mpeg_source);
   segment->segment_count = _vcd_len2blocks (segment->info->packets, 150);
 
@@ -424,7 +421,7 @@ vcd_obj_append_segment_play_item (VcdObj_t *p_vcdobj,
 }
 
 int
-vcd_obj_append_sequence_play_item (VcdObj_t *p_vcdobj, 
+vcd_obj_append_sequence_play_item (VcdObj_t *p_vcdobj,
                                    VcdMpegSource_t *p_mpeg_source,
                                    const char item_id[],
                                    const char default_entry_id[])
@@ -467,7 +464,7 @@ vcd_obj_append_sequence_play_item (VcdObj_t *p_vcdobj,
 
   if (default_entry_id)
     sequence->default_entry_id = strdup (default_entry_id);
-  
+
   sequence->info = vcd_mpeg_source_get_info (p_mpeg_source);
   length = sequence->info->packets;
 
@@ -477,7 +474,7 @@ vcd_obj_append_sequence_play_item (VcdObj_t *p_vcdobj,
   p_vcdobj->relative_end_extent += p_vcdobj->track_pregap;
   sequence->relative_start_extent = p_vcdobj->relative_end_extent;
 
-  p_vcdobj->relative_end_extent += p_vcdobj->track_front_margin + length 
+  p_vcdobj->relative_end_extent += p_vcdobj->track_front_margin + length
     + p_vcdobj->track_rear_margin;
 
   /* sanity checks */
@@ -514,13 +511,13 @@ vcd_obj_append_sequence_play_item (VcdObj_t *p_vcdobj,
               vcd_warn ("audio stream #%d not supported by this VCD type", i);
 
             if (sequence->info->ahdr[i].sampfreq != 44100)
-              vcd_warn ("audio stream #%d has sampling frequency %d Hz (should be 44100 Hz)", 
+              vcd_warn ("audio stream #%d has sampling frequency %d Hz (should be 44100 Hz)",
                         i, sequence->info->ahdr[i].sampfreq);
 
             if (sequence->info->ahdr[i].layer != 2)
               vcd_warn ("audio stream #%d is not layer II", i);
 
-            if (_vcd_obj_has_cap_p (p_vcdobj, _CAP_MPEG1) 
+            if (_vcd_obj_has_cap_p (p_vcdobj, _CAP_MPEG1)
                 && sequence->info->ahdr[i].bitrate != 224*1024)
               vcd_warn ("audio stream #%d has bitrate %d kbps (should be 224 kbps for this vcd type)",
                         i, sequence->info->ahdr[i].bitrate);
@@ -531,7 +528,7 @@ vcd_obj_append_sequence_play_item (VcdObj_t *p_vcdobj,
           }
       }
   }
-    
+
   /* vcd_debug ("track# %d's detected playing time: %.2f seconds",  */
   /*            track_no, sequence->info->playing_time); */
 
@@ -552,8 +549,8 @@ _pause_cmp (pause_t *ent1, pause_t *ent2)
   return 0;
 }
 
-int 
-vcd_obj_add_sequence_pause (VcdObj_t *obj, const char sequence_id[], 
+int
+vcd_obj_add_sequence_pause (VcdObj_t *obj, const char sequence_id[],
                             double pause_time, const char pause_id[])
 {
   mpeg_sequence_t *p_sequence;
@@ -563,7 +560,7 @@ vcd_obj_add_sequence_pause (VcdObj_t *obj, const char sequence_id[],
   if (sequence_id)
     p_sequence = _vcd_obj_get_sequence_by_id (obj, sequence_id);
   else
-    p_sequence = 
+    p_sequence =
       _cdio_list_node_data (_cdio_list_end (obj->mpeg_sequence_list));
 
   if (!p_sequence)
@@ -585,16 +582,16 @@ vcd_obj_add_sequence_pause (VcdObj_t *obj, const char sequence_id[],
     _cdio_list_append (p_sequence->pause_list, _pause);
   }
 
-  _vcd_list_sort (p_sequence->pause_list, 
-                  (_cdio_list_cmp_func) _pause_cmp);
+  _vcd_list_sort (p_sequence->pause_list,
+                  (_cdio_list_cmp_func_t) _pause_cmp);
 
   vcd_debug ("added autopause point at %f", pause_time);
 
   return 0;
 }
 
-int 
-vcd_obj_add_segment_pause (VcdObj_t *p_obj, const char segment_id[], 
+int
+vcd_obj_add_segment_pause (VcdObj_t *p_obj, const char segment_id[],
                             double pause_time, const char pause_id[])
 {
   mpeg_segment_t *_segment;
@@ -625,8 +622,8 @@ vcd_obj_add_segment_pause (VcdObj_t *p_obj, const char segment_id[],
     _cdio_list_append (_segment->pause_list, _pause);
   }
 
-  _vcd_list_sort (_segment->pause_list, 
-                  (_cdio_list_cmp_func) _pause_cmp);
+  _vcd_list_sort (_segment->pause_list,
+                  (_cdio_list_cmp_func_t) _pause_cmp);
 
   vcd_debug ("added autopause point at %f", pause_time);
 
@@ -645,8 +642,8 @@ _entry_cmp (entry_t *p_ent1, entry_t *p_ent2)
   return 0;
 }
 
-int 
-vcd_obj_add_sequence_entry (VcdObj_t *p_obj, const char sequence_id[], 
+int
+vcd_obj_add_sequence_entry (VcdObj_t *p_obj, const char sequence_id[],
                             double entry_time, const char entry_id[])
 {
   mpeg_sequence_t *p_sequence;
@@ -687,13 +684,13 @@ vcd_obj_add_sequence_entry (VcdObj_t *p_obj, const char sequence_id[],
     _cdio_list_append (p_sequence->entry_list, _entry);
   }
 
-  _vcd_list_sort (p_sequence->entry_list, 
-                  (_cdio_list_cmp_func) _entry_cmp);
+  _vcd_list_sort (p_sequence->entry_list,
+                  (_cdio_list_cmp_func_t) _entry_cmp);
 
   return 0;
 }
 
-void 
+void
 vcd_obj_destroy (VcdObj_t *p_obj)
 {
   CdioListNode_t *p_node;
@@ -707,33 +704,33 @@ vcd_obj_destroy (VcdObj_t *p_obj)
   _CDIO_LIST_FOREACH (p_node, p_obj->custom_file_list)
     {
       custom_file_t *p = _cdio_list_node_data (p_node);
-    
+
       free (p->iso_pathname);
     }
 
-  _cdio_list_free (p_obj->custom_file_list, true);
+  _cdio_list_free (p_obj->custom_file_list, true, NULL);
 
-  _cdio_list_free (p_obj->custom_dir_list, true);
+  _cdio_list_free (p_obj->custom_dir_list, true, NULL);
 
   while (_cdio_list_length (p_obj->mpeg_sequence_list))
     _vcd_obj_remove_mpeg_track (p_obj, 0);
-  _cdio_list_free (p_obj->mpeg_sequence_list, true);
+  _cdio_list_free (p_obj->mpeg_sequence_list, true, NULL);
 
   free (p_obj);
 }
 
-int 
+int
 vcd_obj_set_param_uint (VcdObj_t *p_obj, vcd_parm_t param, unsigned arg)
 {
   vcd_assert (p_obj != NULL);
 
-  switch (param) 
+  switch (param)
     {
     case VCD_PARM_VOLUME_COUNT:
       p_obj->info_volume_count = arg;
       if (!IN (p_obj->info_volume_count, 1, 65535))
         {
-          p_obj->info_volume_count = 
+          p_obj->info_volume_count =
             CLAMP (p_obj->info_volume_count, 1, 65535);
           vcd_warn ("volume count out of range, clamping to range");
         }
@@ -744,7 +741,7 @@ vcd_obj_set_param_uint (VcdObj_t *p_obj, vcd_parm_t param, unsigned arg)
       p_obj->info_volume_number = arg;
       if (!IN (p_obj->info_volume_number, 0, 65534))
         {
-          p_obj->info_volume_number = 
+          p_obj->info_volume_number =
             CLAMP (p_obj->info_volume_number, 0, 65534);
           vcd_warn ("volume number out of range, clamping to range");
         }
@@ -770,7 +767,7 @@ vcd_obj_set_param_uint (VcdObj_t *p_obj, vcd_parm_t param, unsigned arg)
         }
       if (p_obj->leadout_pregap < CDIO_PREGAP_SECTORS)
         vcd_warn ("track leadout pregap set below %d sectors; "
-                  "created (S)VCD may be non-working", 
+                  "created (S)VCD may be non-working",
                   CDIO_PREGAP_SECTORS);
 
       vcd_debug ("changed leadout pregap to %u", p_obj->leadout_pregap);
@@ -785,7 +782,7 @@ vcd_obj_set_param_uint (VcdObj_t *p_obj, vcd_parm_t param, unsigned arg)
         }
       if (p_obj->track_pregap < CDIO_PREGAP_SECTORS)
         vcd_warn ("track pre gap set below %d sectors; "
-                  "created (S)VCD may be non-working", 
+                  "created (S)VCD may be non-working",
                   CDIO_PREGAP_SECTORS);
       vcd_debug ("changed track pregap to %u", p_obj->track_pregap);
       break;
@@ -794,11 +791,11 @@ vcd_obj_set_param_uint (VcdObj_t *p_obj, vcd_parm_t param, unsigned arg)
       p_obj->track_front_margin = arg;
       if (!IN (p_obj->track_front_margin, 0, CDIO_PREGAP_SECTORS))
         {
-          p_obj->track_front_margin = CLAMP (p_obj->track_front_margin, 0, 
+          p_obj->track_front_margin = CLAMP (p_obj->track_front_margin, 0,
                                            CDIO_PREGAP_SECTORS);
           vcd_warn ("front margin out of range, clamping to allowed range");
         }
-      if (_vcd_obj_has_cap_p (p_obj, _CAP_TRACK_MARGINS) 
+      if (_vcd_obj_has_cap_p (p_obj, _CAP_TRACK_MARGINS)
           && p_obj->track_front_margin < 15)
         vcd_warn ("front margin set smaller than recommended (%d < 15 sectors) for disc type used",
                   p_obj->track_front_margin);
@@ -810,11 +807,11 @@ vcd_obj_set_param_uint (VcdObj_t *p_obj, vcd_parm_t param, unsigned arg)
       p_obj->track_rear_margin = arg;
       if (!IN (p_obj->track_rear_margin, 0, CDIO_POSTGAP_SECTORS))
         {
-          p_obj->track_rear_margin = CLAMP (p_obj->track_rear_margin, 0, 
+          p_obj->track_rear_margin = CLAMP (p_obj->track_rear_margin, 0,
                                             CDIO_POSTGAP_SECTORS);
           vcd_warn ("rear margin out of range, clamping to allowed range");
         }
-      if (_vcd_obj_has_cap_p (p_obj, _CAP_TRACK_MARGINS) 
+      if (_vcd_obj_has_cap_p (p_obj, _CAP_TRACK_MARGINS)
           && p_obj->track_rear_margin < 15)
         vcd_warn ("rear margin set smaller than recommended (%d < 15 sectors) for disc type used",
                  p_obj->track_rear_margin);
@@ -829,13 +826,13 @@ vcd_obj_set_param_uint (VcdObj_t *p_obj, vcd_parm_t param, unsigned arg)
   return 0;
 }
 
-int 
+int
 vcd_obj_set_param_str (VcdObj_t *p_obj, vcd_parm_t param, const char *arg)
 {
   vcd_assert (p_obj != NULL);
   vcd_assert (arg != NULL);
 
-  switch (param) 
+  switch (param)
     {
     case VCD_PARM_VOLUME_ID:
       free (p_obj->iso_volume_label);
@@ -880,7 +877,7 @@ vcd_obj_set_param_str (VcdObj_t *p_obj, vcd_parm_t param, const char *arg)
         }
       vcd_debug ("changed application id to `%s'", p_obj->iso_application_id);
       break;
-      
+
     case VCD_PARM_ALBUM_ID:
       free (p_obj->info_album_id);
       p_obj->info_album_id = strdup (arg);
@@ -900,12 +897,12 @@ vcd_obj_set_param_str (VcdObj_t *p_obj, vcd_parm_t param, const char *arg)
   return 0;
 }
 
-int 
+int
 vcd_obj_set_param_bool (VcdObj_t *p_obj, vcd_parm_t param, bool arg)
 {
   vcd_assert (p_obj != NULL);
 
-  switch (param) 
+  switch (param)
     {
     case VCD_PARM_RELAXED_APS:
       p_obj->relaxed_aps = arg ? true : false;
@@ -914,13 +911,13 @@ vcd_obj_set_param_bool (VcdObj_t *p_obj, vcd_parm_t param, bool arg)
 
     case VCD_PARM_NEXT_VOL_LID2:
       p_obj->info_use_lid2 = arg ? true : false;
-      vcd_debug ("changing 'next volume use lid 2' to %d", 
+      vcd_debug ("changing 'next volume use lid 2' to %d",
                  p_obj->info_use_lid2);
       break;
 
     case VCD_PARM_NEXT_VOL_SEQ2:
       p_obj->info_use_seq2 = arg ? true : false;
-      vcd_debug ("changing 'next volume use sequence 2' to %d", 
+      vcd_debug ("changing 'next volume use sequence 2' to %d",
                  p_obj->info_use_seq2);
       break;
 
@@ -928,7 +925,7 @@ vcd_obj_set_param_bool (VcdObj_t *p_obj, vcd_parm_t param, bool arg)
       if (p_obj->type == VCD_TYPE_SVCD)
         {
           if ((p_obj->svcd_vcd3_mpegav = arg ? true : false))
-            vcd_warn ("!! enabling deprecated VCD3.0 MPEGAV folder --" 
+            vcd_warn ("!! enabling deprecated VCD3.0 MPEGAV folder --"
                       " SVCD will not be IEC62107 compliant !!");
         }
       else
@@ -939,7 +936,7 @@ vcd_obj_set_param_bool (VcdObj_t *p_obj, vcd_parm_t param, bool arg)
       if (p_obj->type == VCD_TYPE_SVCD)
         {
           if ((p_obj->svcd_vcd3_entrysvd = arg ? true : false))
-            vcd_warn ("!! enabling deprecated VCD3.0 ENTRYSVD signature --" 
+            vcd_warn ("!! enabling deprecated VCD3.0 ENTRYSVD signature --"
                       " SVCD will not be IEC62107 compliant !!");
         }
       else
@@ -950,7 +947,7 @@ vcd_obj_set_param_bool (VcdObj_t *p_obj, vcd_parm_t param, bool arg)
       if (p_obj->type == VCD_TYPE_SVCD)
         {
           if ((p_obj->svcd_vcd3_tracksvd = arg ? true : false))
-            vcd_warn ("!! enabling deprecated VCD3.0 TRACK.SVD format --" 
+            vcd_warn ("!! enabling deprecated VCD3.0 TRACK.SVD format --"
                       " SVCD will not be IEC62107 compliant !!");
         }
       else
@@ -961,7 +958,7 @@ vcd_obj_set_param_bool (VcdObj_t *p_obj, vcd_parm_t param, bool arg)
       if (_vcd_obj_has_cap_p (p_obj, _CAP_4C_SVCD))
         {
           p_obj->update_scan_offsets = arg ? true : false;
-          vcd_debug ("changing 'update scan offsets' to %d", 
+          vcd_debug ("changing 'update scan offsets' to %d",
                      p_obj->update_scan_offsets);
         }
       else
@@ -971,7 +968,7 @@ vcd_obj_set_param_bool (VcdObj_t *p_obj, vcd_parm_t param, bool arg)
     case VCD_PARM_LEADOUT_PAUSE:
       vcd_warn ("use of 'leadout pause' is deprecated and may be removed in later releases;"
                 " use 'leadout pregap' instead");
-      vcd_obj_set_param_uint (p_obj, VCD_PARM_LEADOUT_PREGAP, 
+      vcd_obj_set_param_uint (p_obj, VCD_PARM_LEADOUT_PREGAP,
                               (arg ? CDIO_PREGAP_SECTORS : 0));
       break;
 
@@ -992,10 +989,10 @@ vcd_obj_add_dir (VcdObj_t *p_obj, const char iso_pathname[])
   vcd_assert (iso_pathname != NULL);
 
   _iso_pathname = _vcd_strdup_upper (iso_pathname);
-    
+
   if (!iso9660_dirname_valid_p (_iso_pathname))
     {
-      vcd_error("pathname `%s' is not a valid iso pathname", 
+      vcd_error("pathname `%s' is not a valid iso pathname",
                 _iso_pathname);
       free (_iso_pathname);
       return 1;
@@ -1003,8 +1000,8 @@ vcd_obj_add_dir (VcdObj_t *p_obj, const char iso_pathname[])
 
   _cdio_list_append (p_obj->custom_dir_list, _iso_pathname);
 
-  _vcd_list_sort (p_obj->custom_dir_list, 
-                  (_cdio_list_cmp_func) strcmp);
+  _vcd_list_sort (p_obj->custom_dir_list,
+                  (_cdio_list_cmp_func_t) strcmp);
 
   return 0;
 }
@@ -1014,7 +1011,7 @@ vcd_obj_add_file (VcdObj_t *p_obj, const char iso_pathname[],
                   VcdDataSource_t *file, bool raw_flag)
 {
   uint32_t size = 0, sectors = 0;
- 
+
   vcd_assert (p_obj != NULL);
   vcd_assert (file != NULL);
   vcd_assert (iso_pathname != NULL);
@@ -1038,7 +1035,7 @@ vcd_obj_add_file (VcdObj_t *p_obj, const char iso_pathname[],
 
       if (size % M2RAW_SECTOR_SIZE)
         {
-          vcd_error("raw mode2 file must have size multiple of %d \n", 
+          vcd_error("raw mode2 file must have size multiple of %d \n",
                     M2RAW_SECTOR_SIZE);
           return 1;
         }
@@ -1049,21 +1046,21 @@ vcd_obj_add_file (VcdObj_t *p_obj, const char iso_pathname[],
   {
     custom_file_t *p;
     char *_iso_pathname = _vcd_strdup_upper (iso_pathname);
-    
+
     if (!iso9660_pathname_valid_p (_iso_pathname))
       {
-        vcd_error("pathname `%s' is not a valid iso pathname", 
+        vcd_error("pathname `%s' is not a valid iso pathname",
                   _iso_pathname);
         free (_iso_pathname);
         return 1;
       }
 
     p = calloc(1, sizeof (custom_file_t));
-    
+
     p->file = file;
     p->iso_pathname = _iso_pathname;
     p->raw_flag = raw_flag;
-  
+
     p->size = size;
     p->start_extent = 0;
     p->sectors = sectors;
@@ -1080,8 +1077,6 @@ _finalize_vcd_iso_track_allocation (VcdObj_t *p_obj)
   int n;
   CdioListNode_t *p_node;
 
-  uint32_t dir_secs = SECTOR_NIL;
-
   _dict_clean (p_obj);
 
   /* pre-alloc 16 blocks of ISO9660 required silence */
@@ -1089,7 +1084,7 @@ _finalize_vcd_iso_track_allocation (VcdObj_t *p_obj)
     vcd_assert_not_reached ();
 
   /* keep karaoke sectors blank -- well... guess I'm too paranoid :) */
-  if (_vcd_salloc (p_obj->iso_bitmap, 75, 75) == SECTOR_NIL) 
+  if (_vcd_salloc (p_obj->iso_bitmap, 75, 75) == SECTOR_NIL)
     vcd_assert_not_reached ();
 
   /* pre-alloc descriptors, PVD */
@@ -1098,10 +1093,10 @@ _finalize_vcd_iso_track_allocation (VcdObj_t *p_obj)
   _dict_insert (p_obj, "evd", ISO_EVD_SECTOR, 1, SM_EOR|SM_EOF);  /* EOR+EOF */
 
   /* reserve for iso directory */
-  dir_secs = _vcd_salloc (p_obj->iso_bitmap, 18, 75-18);
+  _vcd_salloc (p_obj->iso_bitmap, 18, 75-18);
 
   /* VCD information area */
-  
+
   _dict_insert (p_obj, "info", INFO_VCD_SECTOR, 1, SM_EOF);       /* INFO.VCD */           /* EOF */
   _dict_insert (p_obj, "entries", ENTRIES_VCD_SECTOR, 1, SM_EOF); /* ENTRIES.VCD */        /* EOF */
 
@@ -1110,14 +1105,14 @@ _finalize_vcd_iso_track_allocation (VcdObj_t *p_obj)
   if (_vcd_pbc_available (p_obj))
     {
       _dict_insert (p_obj, "lot", LOT_VCD_SECTOR, LOT_VCD_SIZE, SM_EOF); /* LOT.VCD */            /* EOF */
-      _dict_insert (p_obj, "psd", PSD_VCD_SECTOR, 
+      _dict_insert (p_obj, "psd", PSD_VCD_SECTOR,
                     _vcd_len2blocks (get_psd_size (p_obj, false), ISO_BLOCKSIZE), SM_EOF); /* PSD.VCD */ /* EOF */
     }
 
   if (_vcd_obj_has_cap_p (p_obj, _CAP_4C_SVCD))
     {
       _dict_insert (p_obj, "tracks", SECTOR_NIL, 1, SM_EOF);   /* TRACKS.SVD */
-      _dict_insert (p_obj, "search", SECTOR_NIL, 
+      _dict_insert (p_obj, "search", SECTOR_NIL,
                     _vcd_len2blocks (get_search_dat_size (p_obj), ISO_BLOCKSIZE), SM_EOF); /* SEARCH.DAT */
 
       vcd_assert (_dict_get_bykey (p_obj, "tracks")->sector > INFO_VCD_SECTOR);
@@ -1126,13 +1121,13 @@ _finalize_vcd_iso_track_allocation (VcdObj_t *p_obj)
 
   /* done with primary information area */
 
-  p_obj->mpeg_segment_start_extent = 
+  p_obj->mpeg_segment_start_extent =
     _vcd_len2blocks (_vcd_salloc_get_highest (p_obj->iso_bitmap) + 1, 75) * 75;
 
   /* salloc up to end of vcd sector */
-  for(n = 0;n < p_obj->mpeg_segment_start_extent;n++) 
+  for(n = 0;n < p_obj->mpeg_segment_start_extent;n++)
     _vcd_salloc (p_obj->iso_bitmap, n, 1);
-  
+
   vcd_assert (_vcd_salloc_get_highest (p_obj->iso_bitmap) + 1 == p_obj->mpeg_segment_start_extent);
 
   /* insert segments */
@@ -1140,14 +1135,14 @@ _finalize_vcd_iso_track_allocation (VcdObj_t *p_obj)
   _CDIO_LIST_FOREACH (p_node, p_obj->mpeg_segment_list)
     {
       mpeg_segment_t *_segment = _cdio_list_node_data (p_node);
-      
-      _segment->start_extent = 
-        _vcd_salloc (p_obj->iso_bitmap, SECTOR_NIL, 
+
+      _segment->start_extent =
+        _vcd_salloc (p_obj->iso_bitmap, SECTOR_NIL,
                      _segment->segment_count * VCDINFO_SEGMENT_SECTOR_SIZE);
 
       vcd_assert (_segment->start_extent % 75 == 0);
-      vcd_assert (_vcd_salloc_get_highest (p_obj->iso_bitmap) + 1 
-                  == _segment->start_extent 
+      vcd_assert (_vcd_salloc_get_highest (p_obj->iso_bitmap) + 1
+                  == _segment->start_extent
                   + _segment->segment_count * VCDINFO_SEGMENT_SECTOR_SIZE);
     }
 
@@ -1159,7 +1154,7 @@ _finalize_vcd_iso_track_allocation (VcdObj_t *p_obj)
 
   if (_vcd_obj_has_cap_p (p_obj, _CAP_4C_SVCD))
     {
-      _dict_insert (p_obj, "scandata", SECTOR_NIL, 
+      _dict_insert (p_obj, "scandata", SECTOR_NIL,
                     _vcd_len2blocks (get_scandata_dat_size (p_obj),
                                      ISO_BLOCKSIZE),
                     SM_EOF);
@@ -1169,9 +1164,9 @@ _finalize_vcd_iso_track_allocation (VcdObj_t *p_obj)
       &&_vcd_pbc_available (p_obj))
     {
       _dict_insert (p_obj, "lot_x", SECTOR_NIL, LOT_VCD_SIZE, SM_EOF);
-      
+
       _dict_insert (p_obj, "psd_x", SECTOR_NIL,
-                    _vcd_len2blocks (get_psd_size (p_obj, true), 
+                    _vcd_len2blocks (get_psd_size (p_obj, true),
                                      ISO_BLOCKSIZE), SM_EOF);
     }
 
@@ -1184,7 +1179,7 @@ _finalize_vcd_iso_track_allocation (VcdObj_t *p_obj)
   _CDIO_LIST_FOREACH (p_node, p_obj->custom_file_list)
     {
       custom_file_t *p = _cdio_list_node_data (p_node);
-      
+
       if (p->sectors)
         {
           p->start_extent =
@@ -1201,8 +1196,8 @@ _finalize_vcd_iso_track_allocation (VcdObj_t *p_obj)
   p_obj->iso_size =
     MAX (MIN_ISO_SIZE, _vcd_salloc_get_highest (p_obj->iso_bitmap) + 1);
 
-  vcd_debug ("iso9660: highest alloced sector is %lu (using %d as isosize)", 
-             (unsigned long int) _vcd_salloc_get_highest (p_obj->iso_bitmap), 
+  vcd_debug ("iso9660: highest alloced sector is %lu (using %d as isosize)",
+             (unsigned long int) _vcd_salloc_get_highest (p_obj->iso_bitmap),
              p_obj->iso_size);
 
   /* after this point the ISO9660's size is frozen */
@@ -1232,21 +1227,21 @@ _finalize_vcd_iso_track_filesystem (VcdObj_t *p_obj)
     if (_cdio_list_length (p_obj->mpeg_segment_list))
       _vcd_directory_mkdir (p_obj->dir, "SEGMENT");
 
-    _vcd_directory_mkfile (p_obj->dir, "VCD/ENTRIES.VCD", 
-                           _dict_get_bykey (p_obj, "entries")->sector, 
-                           ISO_BLOCKSIZE, false, 0);    
+    _vcd_directory_mkfile (p_obj->dir, "VCD/ENTRIES.VCD",
+                           _dict_get_bykey (p_obj, "entries")->sector,
+                           ISO_BLOCKSIZE, false, 0);
     _vcd_directory_mkfile (p_obj->dir, "VCD/INFO.VCD",
-                           _dict_get_bykey (p_obj, "info")->sector, 
+                           _dict_get_bykey (p_obj, "info")->sector,
                            ISO_BLOCKSIZE, false, 0);
 
     /* only for vcd2.0 */
     if (_vcd_pbc_available (p_obj))
       {
-        _vcd_directory_mkfile (p_obj->dir, "VCD/LOT.VCD", 
-                               _dict_get_bykey (p_obj, "lot")->sector, 
+        _vcd_directory_mkfile (p_obj->dir, "VCD/LOT.VCD",
+                               _dict_get_bykey (p_obj, "lot")->sector,
                                ISO_BLOCKSIZE*LOT_VCD_SIZE, false, 0);
-        _vcd_directory_mkfile (p_obj->dir, "VCD/PSD.VCD", 
-                               _dict_get_bykey (p_obj, "psd")->sector, 
+        _vcd_directory_mkfile (p_obj->dir, "VCD/PSD.VCD",
+                               _dict_get_bykey (p_obj, "psd")->sector,
                                get_psd_size (p_obj, false), false, 0);
       }
     break;
@@ -1270,27 +1265,27 @@ _finalize_vcd_iso_track_filesystem (VcdObj_t *p_obj)
     _vcd_directory_mkdir (p_obj->dir, "SVCD");
 
     _vcd_directory_mkfile (p_obj->dir, "SVCD/ENTRIES.SVD",
-                           _dict_get_bykey (p_obj, "entries")->sector, 
-                           ISO_BLOCKSIZE, false, 0);    
+                           _dict_get_bykey (p_obj, "entries")->sector,
+                           ISO_BLOCKSIZE, false, 0);
     _vcd_directory_mkfile (p_obj->dir, "SVCD/INFO.SVD",
-                           _dict_get_bykey (p_obj, "info")->sector, 
+                           _dict_get_bykey (p_obj, "info")->sector,
                            ISO_BLOCKSIZE, false, 0);
 
     if (_vcd_pbc_available (p_obj))
       {
         _vcd_directory_mkfile (p_obj->dir, "SVCD/LOT.SVD",
-                               _dict_get_bykey (p_obj, "lot")->sector, 
+                               _dict_get_bykey (p_obj, "lot")->sector,
                                ISO_BLOCKSIZE*LOT_VCD_SIZE, false, 0);
-        _vcd_directory_mkfile (p_obj->dir, "SVCD/PSD.SVD", 
-                               _dict_get_bykey (p_obj, "psd")->sector, 
+        _vcd_directory_mkfile (p_obj->dir, "SVCD/PSD.SVD",
+                               _dict_get_bykey (p_obj, "psd")->sector,
                                get_psd_size (p_obj, false), false, 0);
       }
 
-    _vcd_directory_mkfile (p_obj->dir, "SVCD/SEARCH.DAT", 
-                           _dict_get_bykey (p_obj, "search")->sector, 
+    _vcd_directory_mkfile (p_obj->dir, "SVCD/SEARCH.DAT",
+                           _dict_get_bykey (p_obj, "search")->sector,
                            get_search_dat_size (p_obj), false, 0);
     _vcd_directory_mkfile (p_obj->dir, "SVCD/TRACKS.SVD",
-                           _dict_get_bykey (p_obj, "tracks")->sector, 
+                           _dict_get_bykey (p_obj, "tracks")->sector,
                            ISO_BLOCKSIZE, false, 0);
     break;
 
@@ -1309,7 +1304,7 @@ _finalize_vcd_iso_track_filesystem (VcdObj_t *p_obj)
       const char *fmt = NULL;
       uint8_t fnum = 0;
 
-      switch (p_obj->type) 
+      switch (p_obj->type)
         {
         case VCD_TYPE_VCD2:
           fmt = "SEGMENT/ITEM%4.4d.DAT";
@@ -1323,10 +1318,10 @@ _finalize_vcd_iso_track_filesystem (VcdObj_t *p_obj)
         default:
           vcd_assert_not_reached ();
         }
-      
+
       snprintf (segment_pathname, sizeof (segment_pathname), fmt, n);
-        
-      _vcd_directory_mkfile (p_obj->dir, segment_pathname, 
+
+      _vcd_directory_mkfile (p_obj->dir, segment_pathname,
                              segment->start_extent,
                              segment->info->packets * ISO_BLOCKSIZE,
                              true, fnum);
@@ -1343,12 +1338,12 @@ _finalize_vcd_iso_track_filesystem (VcdObj_t *p_obj)
     {
       /* psd_x -- extended PSD */
       _vcd_directory_mkfile (p_obj->dir, "EXT/PSD_X.VCD",
-                             _dict_get_bykey (p_obj, "psd_x")->sector, 
+                             _dict_get_bykey (p_obj, "psd_x")->sector,
                              get_psd_size (p_obj, true), false, 1);
 
       /* lot_x -- extended LOT */
       _vcd_directory_mkfile (p_obj->dir, "EXT/LOT_X.VCD",
-                             _dict_get_bykey (p_obj, "lot_x")->sector, 
+                             _dict_get_bykey (p_obj, "lot_x")->sector,
                              ISO_BLOCKSIZE*LOT_VCD_SIZE, false, 1);
 
       vcd_assert (p_obj->type == VCD_TYPE_VCD2);
@@ -1358,7 +1353,7 @@ _finalize_vcd_iso_track_filesystem (VcdObj_t *p_obj)
     {
       /* scandata.dat -- scanpoints */
       _vcd_directory_mkfile (p_obj->dir, "EXT/SCANDATA.DAT",
-                             _dict_get_bykey (p_obj, "scandata")->sector, 
+                             _dict_get_bykey (p_obj, "scandata")->sector,
                              get_scandata_dat_size (p_obj), false, 0);
     }
 
@@ -1374,9 +1369,9 @@ _finalize_vcd_iso_track_filesystem (VcdObj_t *p_obj)
       custom_file_t *p = _cdio_list_node_data (p_node);
 
       _vcd_directory_mkfile (p_obj->dir, p->iso_pathname, p->start_extent,
-                             (p->raw_flag 
+                             (p->raw_flag
                               ? (ISO_BLOCKSIZE * (p->size / M2RAW_SECTOR_SIZE))
-                              : p->size), 
+                              : p->size),
                              p->raw_flag, 1);
     }
 
@@ -1389,10 +1384,10 @@ _finalize_vcd_iso_track_filesystem (VcdObj_t *p_obj)
       mpeg_sequence_t *p_sequence = _cdio_list_node_data (p_node);
       uint32_t extent = p_sequence->relative_start_extent;
       uint8_t file_num = 0;
-      
+
       extent += p_obj->iso_size;
 
-      switch (p_obj->type) 
+      switch (p_obj->type)
         {
         case VCD_TYPE_VCD:
           fmt = "MPEGAV/MUSIC%2.2d.DAT";
@@ -1415,19 +1410,19 @@ _finalize_vcd_iso_track_filesystem (VcdObj_t *p_obj)
               fmt = "MPEGAV/AVSEQ%2.2d.MPG";
               file_num = n + 1;
             }
-            
+
           break;
         default:
           vcd_assert_not_reached ();
         }
 
       vcd_assert (n < 98);
-      
+
       snprintf (avseq_pathname, sizeof (avseq_pathname), fmt, n + 1);
-      
+
       /* file entry contains front margin, mpeg stream and rear margin */
       _vcd_directory_mkfile (p_obj->dir, avseq_pathname, extent,
-                             (p_obj->track_front_margin 
+                             (p_obj->track_front_margin
                               + p_sequence->info->packets
                               + p_obj->track_rear_margin) * ISO_BLOCKSIZE,
                              true, file_num);
@@ -1438,33 +1433,33 @@ _finalize_vcd_iso_track_filesystem (VcdObj_t *p_obj)
   /* register isofs dir structures */
   {
     uint32_t dirs_size = _vcd_directory_get_size (p_obj->dir);
-    
+
     /* be sure to stay out of information areas */
 
-    switch (p_obj->type) 
+    switch (p_obj->type)
       {
       case VCD_TYPE_VCD:
       case VCD_TYPE_VCD11:
       case VCD_TYPE_VCD2:
         /* karaoke area starts at 03:00 */
-        if (16 + 2 + dirs_size + 2 >= 75) 
+        if (16 + 2 + dirs_size + 2 >= 75)
           vcd_error ("directory section to big for a VCD");
         break;
 
       case VCD_TYPE_SVCD:
       case VCD_TYPE_HQVCD:
         /* since no karaoke exists the next fixed area starts at 04:00 */
-        if (16 + 2 + dirs_size + 2 >= 150) 
+        if (16 + 2 + dirs_size + 2 >= 150)
           vcd_error ("directory section to big for a SVCD");
         break;
       default:
         vcd_assert_not_reached ();
       }
-    
+
     /* un-alloc small area */
-    
+
     _vcd_salloc_free (p_obj->iso_bitmap, 18, dirs_size + 2);
-    
+
     /* alloc it again! */
 
     _dict_insert (p_obj, "dir", 18, dirs_size, SM_EOR|SM_EOF);
@@ -1495,7 +1490,7 @@ _callback_wrapper (VcdObj_t *p_obj, int force)
     progress_info_t _pi;
 
     _pi.sectors_written = p_obj->sectors_written;
-    _pi.total_sectors = p_obj->relative_end_extent + p_obj->iso_size; 
+    _pi.total_sectors = p_obj->relative_end_extent + p_obj->iso_size;
     _pi.in_track = p_obj->in_track;
     _pi.total_tracks = _cdio_list_length (p_obj->mpeg_sequence_list) + 1;
 
@@ -1507,7 +1502,7 @@ _callback_wrapper (VcdObj_t *p_obj, int force)
 
 static int
 _write_m2_image_sector (VcdObj_t *obj, const void *data, uint32_t extent,
-                        uint8_t fnum, uint8_t cnum, uint8_t sm, uint8_t ci) 
+                        uint8_t fnum, uint8_t cnum, uint8_t sm, uint8_t ci)
 {
   char buf[CDIO_CD_FRAMESIZE_RAW] = { 0, };
 
@@ -1516,7 +1511,7 @@ _write_m2_image_sector (VcdObj_t *obj, const void *data, uint32_t extent,
   _vcd_make_mode2(buf, data, extent, fnum, cnum, sm, ci);
 
   vcd_image_sink_write (obj->image_sink, buf, extent);
-  
+
   obj->sectors_written++;
 
   return _callback_wrapper (obj, false);
@@ -1539,7 +1534,7 @@ _write_m2_raw_image_sector (VcdObj_t *obj, const void *data, uint32_t extent)
 }
 
 static void
-_write_source_mode2_raw (VcdObj_t *obj, VcdDataSource_t *source, 
+_write_source_mode2_raw (VcdObj_t *obj, VcdDataSource_t *source,
                          uint32_t extent)
 {
   int n;
@@ -1547,7 +1542,7 @@ _write_source_mode2_raw (VcdObj_t *obj, VcdDataSource_t *source,
 
   sectors = vcd_data_source_stat (source) / M2RAW_SECTOR_SIZE;
 
-  vcd_data_source_seek (source, 0); 
+  vcd_data_source_seek (source, 0);
 
   for (n = 0;n < sectors;n++) {
     char buf[M2RAW_SECTOR_SIZE] = { 0, };
@@ -1562,7 +1557,7 @@ _write_source_mode2_raw (VcdObj_t *obj, VcdDataSource_t *source,
 }
 
 static void
-_write_source_mode2_form1 (VcdObj_t *obj, VcdDataSource_t *source, 
+_write_source_mode2_form1 (VcdObj_t *obj, VcdDataSource_t *source,
                            uint32_t extent)
 {
   int n;
@@ -1576,19 +1571,19 @@ _write_source_mode2_form1 (VcdObj_t *obj, VcdDataSource_t *source,
   if (!last_block_size)
     last_block_size = CDIO_CD_FRAMESIZE;
 
-  vcd_data_source_seek (source, 0); 
+  vcd_data_source_seek (source, 0);
 
   for (n = 0;n < sectors;n++) {
     char buf[CDIO_CD_FRAMESIZE] = { 0, };
 
-    vcd_data_source_read (source, buf, 
-                          ((n + 1 == sectors) 
+    vcd_data_source_read (source, buf,
+                          ((n + 1 == sectors)
                            ? last_block_size
                            : CDIO_CD_FRAMESIZE), 1);
 
-    if (_write_m2_image_sector (obj, buf, extent+n, 1, 0, 
-                                ((n+1 < sectors) 
-                                 ? SM_DATA 
+    if (_write_m2_image_sector (obj, buf, extent+n, 1, 0,
+                                ((n+1 < sectors)
+                                 ? SM_DATA
                                  : SM_DATA |SM_EOF),
                                 0))
       break;
@@ -1600,7 +1595,7 @@ _write_source_mode2_form1 (VcdObj_t *obj, VcdDataSource_t *source,
 static int
 _write_sequence (VcdObj_t *p_obj, int track_idx)
 {
-  mpeg_sequence_t *track = 
+  mpeg_sequence_t *track =
     _cdio_list_node_data (_vcd_list_at (p_obj->mpeg_sequence_list, track_idx));
   CdioListNode_t *pause_node;
   int n, lastsect = p_obj->sectors_written;
@@ -1634,7 +1629,7 @@ _write_sequence (VcdObj_t *p_obj, int track_idx)
     case MPEG_NORM_NTSC_S:
       norm_str = strdup ("NTSC 2/3 D1 (480x480/29.97fps)");
       break;
-	
+
     case MPEG_NORM_OTHER:
       {
         char buf[1024] = { 0, };
@@ -1677,17 +1672,17 @@ _write_sequence (VcdObj_t *p_obj, int track_idx)
               0
             };
 
-            int i_buf = snprintf (buf, sizeof (buf), 
-                                  "audio[%d]: l%d/%2.1fkHz/%dkbps/%s ", 
+            int i_buf = snprintf (buf, sizeof (buf),
+                                  "audio[%d]: l%d/%2.1fkHz/%dkbps/%s ",
                                   i,
                                   track->info->ahdr[i].layer,
                                   track->info->ahdr[i].sampfreq / 1000.0,
                                   track->info->ahdr[i].bitrate / 1024,
                                   _mode_str[track->info->ahdr[i].mode]);
-                    
+
             strncat (buf2, buf, sizeof(buf2)-strlen(buf2)-i_buf2-1);
             i_buf2 += i_buf;
-          }      
+          }
 
       vcd_info ("writing track %d, %s, %s, %s...", track_idx + 2,
                 (track->info->version == MPEG_VERS_MPEG1 ? "MPEG1" : "MPEG2"),
@@ -1711,7 +1706,7 @@ _write_sequence (VcdObj_t *p_obj, int track_idx)
     struct vcd_mpeg_packet_info pkt_flags;
     bool set_trigger = false;
 
-    vcd_mpeg_source_get_packet (track->source, n, buf, &pkt_flags, 
+    vcd_mpeg_source_get_packet (track->source, n, buf, &pkt_flags,
                                 p_obj->update_scan_offsets);
 
     while (pause_node)
@@ -1727,13 +1722,13 @@ _write_sequence (VcdObj_t *p_obj, int track_idx)
         /* seems it's time to trigger! */
         set_trigger = true;
 
-        vcd_debug ("setting auto pause trigger for time %f (pts %f) @%d", 
+        vcd_debug ("setting auto pause trigger for time %f (pts %f) @%d",
                    _pause->time, pkt_flags.pts, n);
 
         pause_node = _cdio_list_node_next (pause_node);
       }
 
-    switch (vcd_mpeg_packet_get_type (&pkt_flags)) 
+    switch (vcd_mpeg_packet_get_type (&pkt_flags))
       {
     case PKT_TYPE_VIDEO:
       mpeg_packets.video++;
@@ -1748,7 +1743,7 @@ _write_sequence (VcdObj_t *p_obj, int track_idx)
       ci = CI_OGT;
       cnum = CN_OGT;
       break;
-    
+
     case PKT_TYPE_AUDIO:
       mpeg_packets.audio++;
       sm = SM_FORM2|SM_REALT|SM_AUDIO;
@@ -1794,9 +1789,9 @@ _write_sequence (VcdObj_t *p_obj, int track_idx)
       sm |= SM_TRIG;
 
     fnum = track_idx + 1;
-      
+
     if (_vcd_obj_has_cap_p (p_obj, _CAP_4C_SVCD)
-        && !p_obj->svcd_vcd3_mpegav) /* IEC62107 SVCDs have a 
+        && !p_obj->svcd_vcd3_mpegav) /* IEC62107 SVCDs have a
                                         simplified subheader */
       {
         fnum = 1;
@@ -1853,14 +1848,14 @@ _write_segment (VcdObj_t *p_obj, mpeg_segment_t *p_segment)
           bool _need_eor = false;
 
           vcd_mpeg_source_get_packet (p_segment->source, packet_no,
-                                      buf, &pkt_flags, 
+                                      buf, &pkt_flags,
                                       p_obj->update_scan_offsets);
 
           fn = 1;
           cn = CN_EMPTY;
           sm = SM_FORM2 | SM_REALT;
           ci = CI_EMPTY;
-  
+
           while (pause_node)
             {
               pause_t *_pause = _cdio_list_node_data (pause_node);
@@ -1874,13 +1869,13 @@ _write_segment (VcdObj_t *p_obj, mpeg_segment_t *p_segment)
               /* seems it's time to trigger! */
               set_trigger = true;
 
-              vcd_debug ("setting auto pause trigger for time %f (pts %f) @%d", 
+              vcd_debug ("setting auto pause trigger for time %f (pts %f) @%d",
                          _pause->time, pkt_flags.pts, n);
 
               pause_node = _cdio_list_node_next (pause_node);
             }
-            
-          switch (vcd_mpeg_packet_get_type (&pkt_flags)) 
+
+          switch (vcd_mpeg_packet_get_type (&pkt_flags))
             {
             case PKT_TYPE_VIDEO:
               sm = SM_FORM2 | SM_REALT | SM_VIDEO;
@@ -1896,7 +1891,7 @@ _write_segment (VcdObj_t *p_obj, mpeg_segment_t *p_segment)
               if (pkt_flags.video[1] || pkt_flags.video[2])
                 { /* search for endcode -- hack */
                   int idx;
-                
+
                   for (idx = 0; idx <= 2320; idx++)
                     if (buf[idx] == 0x00
                         && buf[idx + 1] == 0x00
@@ -1911,7 +1906,7 @@ _write_segment (VcdObj_t *p_obj, mpeg_segment_t *p_segment)
 
             case PKT_TYPE_AUDIO:
               sm = SM_FORM2 | SM_REALT | SM_AUDIO;
-                  
+
               ci = CI_AUDIO;
               cn = CN_AUDIO;
               break;
@@ -1941,7 +1936,7 @@ _write_segment (VcdObj_t *p_obj, mpeg_segment_t *p_segment)
 
           if (_need_eor)
             {
-              vcd_debug ("setting EOR for SeqEnd at packet# %d ('%s')", 
+              vcd_debug ("setting EOR for SeqEnd at packet# %d ('%s')",
                          packet_no, p_segment->id);
               sm |= SM_EOR;
             }
@@ -1962,7 +1957,7 @@ _write_segment (VcdObj_t *p_obj, mpeg_segment_t *p_segment)
         }
 
       _write_m2_image_sector (p_obj, buf, n, fn, cn, sm, ci);
-          
+
       n++;
     }
 
@@ -1987,7 +1982,7 @@ _get_closest_aps (const struct vcd_mpeg_stream_info *_mpeg_info, double t,
   _CDIO_LIST_FOREACH (p_node, _mpeg_info->shdr[0].aps_list)
     {
       struct aps_data *_aps = _cdio_list_node_data (p_node);
-  
+
       if (first)
         {
           best_aps = *_aps;
@@ -1995,7 +1990,7 @@ _get_closest_aps (const struct vcd_mpeg_stream_info *_mpeg_info, double t,
         }
       else if (fabs (_aps->timestamp - t) < fabs (best_aps.timestamp - t))
         best_aps = *_aps;
-      else 
+      else
         break;
     }
 
@@ -2045,29 +2040,29 @@ _write_vcd_iso_track (VcdObj_t *p_obj, const time_t *p_create_time)
   int n;
 
   /* generate dir sectors */
-  
-  _vcd_directory_dump_entries (p_obj->dir, 
-                               _dict_get_bykey (p_obj, "dir")->buf, 
+
+  _vcd_directory_dump_entries (p_obj->dir,
+                               _dict_get_bykey (p_obj, "dir")->buf,
                                _dict_get_bykey (p_obj, "dir")->sector);
 
-  _vcd_directory_dump_pathtables (p_obj->dir, 
-                                  _dict_get_bykey (p_obj, "ptl")->buf, 
+  _vcd_directory_dump_pathtables (p_obj->dir,
+                                  _dict_get_bykey (p_obj, "ptl")->buf,
                                   _dict_get_bykey (p_obj, "ptm")->buf);
-      
+
   /* generate PVD and EVD at last... */
   iso9660_set_pvd (_dict_get_bykey (p_obj, "pvd")->buf,
-                   p_obj->iso_volume_label, 
+                   p_obj->iso_volume_label,
                    p_obj->iso_publisher_id,
                    p_obj->iso_preparer_id,
-                   p_obj->iso_application_id, 
-                   p_obj->iso_size, 
-                   _dict_get_bykey (p_obj, "dir")->buf, 
+                   p_obj->iso_application_id,
+                   p_obj->iso_size,
+                   _dict_get_bykey (p_obj, "dir")->buf,
                    _dict_get_bykey (p_obj, "ptl")->sector,
                    _dict_get_bykey (p_obj, "ptm")->sector,
                    iso9660_pathtable_get_size (_dict_get_bykey (p_obj, "ptm")->buf),
                    p_create_time
 );
-    
+
   iso9660_set_evd (_dict_get_bykey (p_obj, "evd")->buf);
 
   /* fill VCD relevant files with data */
@@ -2084,7 +2079,7 @@ _write_vcd_iso_track (VcdObj_t *p_obj, const time_t *p_create_time)
         }
 
       _vcd_pbc_check_unreferenced (p_obj);
-  
+
       set_lot_vcd (p_obj, _dict_get_bykey (p_obj, "lot")->buf, false);
       set_psd_vcd (p_obj, _dict_get_bykey (p_obj, "psd")->buf, false);
     }
@@ -2108,7 +2103,7 @@ _write_vcd_iso_track (VcdObj_t *p_obj, const time_t *p_create_time)
 
       content = _dict_get_sector (p_obj, n);
       flags |= _dict_get_sector_flags (p_obj, n);
-      
+
       if (content == NULL)
         content = zero;
 
@@ -2140,33 +2135,33 @@ _write_vcd_iso_track (VcdObj_t *p_obj, const time_t *p_create_time)
 
       content = _dict_get_sector (p_obj, n);
       flags |= _dict_get_sector_flags (p_obj, n);
-      
+
       if (content == NULL)
         {
           vcd_debug ("unexpected empty EXT sector");
           content = zero;
         }
-      
+
       _write_m2_image_sector (p_obj, content, n, fileno, 0, flags, 0);
     }
 
   /* write custom files */
 
   vcd_assert (n == p_obj->custom_file_start_extent);
-    
+
   _CDIO_LIST_FOREACH (node, p_obj->custom_file_list)
     {
       custom_file_t *p = _cdio_list_node_data (node);
-        
-      vcd_info ("writing file `%s' (%lu bytes%s)", 
-                p->iso_pathname, (unsigned long) p->size, 
+
+      vcd_info ("writing file `%s' (%lu bytes%s)",
+                p->iso_pathname, (unsigned long) p->size,
                 p->raw_flag ? ", raw sectors file": "");
       if (p->raw_flag)
         _write_source_mode2_raw (p_obj, p->file, p->start_extent);
       else
         _write_source_mode2_form1 (p_obj, p->file, p->start_extent);
     }
-  
+
   /* blank unalloced tracks */
   while ((n = _vcd_salloc (p_obj->iso_bitmap, SECTOR_NIL, 1)) < p_obj->iso_size)
     _write_m2_image_sector (p_obj, zero, n, 0, 0, SM_DATA, 0);
@@ -2181,8 +2176,8 @@ vcd_obj_get_image_size (VcdObj_t *p_obj)
   long size_sectors = -1;
 
   vcd_assert (!p_obj->in_output);
-  
-  if (_cdio_list_length (p_obj->mpeg_sequence_list) > 0) 
+
+  if (_cdio_list_length (p_obj->mpeg_sequence_list) > 0)
     {
       /* fixme -- make this efficient */
       size_sectors = vcd_obj_begin_output (p_obj);
@@ -2221,7 +2216,7 @@ vcd_obj_begin_output (VcdObj_t *p_obj)
   image_size += p_obj->leadout_pregap;
 
   if (image_size > CDIO_CD_MAX_SECTORS)
-    vcd_error ("image too big (%d sectors > %d sectors)", 
+    vcd_error ("image too big (%d sectors > %d sectors)",
                (unsigned) image_size, (unsigned) CDIO_CD_MAX_SECTORS);
 
   {
@@ -2229,7 +2224,7 @@ vcd_obj_begin_output (VcdObj_t *p_obj)
 
     if (image_size > CDIO_CD_74MIN_SECTORS)
       vcd_warn ("generated image (%d sectors [%s]) may not fit "
-                "on 74min CDRs (%d sectors)", 
+                "on 74min CDRs (%d sectors)",
                 (unsigned) image_size, _tmp, (unsigned) CDIO_CD_74MIN_SECTORS);
 
     free (_tmp);
@@ -2251,7 +2246,7 @@ vcd_obj_end_output (VcdObj_t *p_obj)
   _vcd_salloc_destroy (p_obj->iso_bitmap);
 
   _dict_clean (p_obj);
-  _cdio_list_free (p_obj->buffer_dict_list, true);
+  _cdio_list_free (p_obj->buffer_dict_list, true, NULL);
 }
 
 int
@@ -2271,7 +2266,7 @@ vcd_obj_append_pbc_node (VcdObj_t *p_obj, struct _pbc_t *p_pbc)
       vcd_error ("item id (%s) exists already", p_pbc->item_id);
       return -1;
     }
-  
+
   _cdio_list_append (p_obj->pbc_list, p_pbc);
 
   return 0;
@@ -2293,7 +2288,7 @@ vcd_obj_write_image (VcdObj_t *p_obj, VcdImageSink_t *p_image_sink,
   /* start with meta info */
 
   {
-    CdioList *p_cue_list;
+    CdioList_t *p_cue_list;
     vcd_cue_t *p_cue;
 
     p_cue_list = _cdio_list_new ();
@@ -2308,14 +2303,14 @@ vcd_obj_write_image (VcdObj_t *p_obj, VcdImageSink_t *p_image_sink,
         mpeg_sequence_t *p_track = _cdio_list_node_data (node);
         CdioListNode_t *p_entry_node;
 
-        _cdio_list_append (p_cue_list, 
+        _cdio_list_append (p_cue_list,
                            (p_cue = calloc(1, sizeof (vcd_cue_t))));
-        
+
         p_cue->lsn = p_track->relative_start_extent + p_obj->iso_size;
         p_cue->lsn -= p_obj->track_pregap;
         p_cue->type = VCD_CUE_PREGAP_START;
 
-        _cdio_list_append (p_cue_list, 
+        _cdio_list_append (p_cue_list,
                            (p_cue = calloc(1, sizeof (vcd_cue_t))));
 
         p_cue->lsn = p_track->relative_start_extent + p_obj->iso_size;
@@ -2325,9 +2320,9 @@ vcd_obj_write_image (VcdObj_t *p_obj, VcdImageSink_t *p_image_sink,
           {
             entry_t *_entry = _cdio_list_node_data (p_entry_node);
 
-            _cdio_list_append (p_cue_list, 
+            _cdio_list_append (p_cue_list,
                                (p_cue = calloc(1, sizeof (vcd_cue_t))));
-            
+
             p_cue->lsn = p_obj->iso_size;
             p_cue->lsn += p_track->relative_start_extent;
             p_cue->lsn += p_obj->track_front_margin;
@@ -2351,7 +2346,7 @@ vcd_obj_write_image (VcdObj_t *p_obj, VcdImageSink_t *p_image_sink,
 
     vcd_image_sink_set_cuesheet (p_image_sink, p_cue_list);
 
-    _cdio_list_free (p_cue_list, true);
+    _cdio_list_free (p_cue_list, true, NULL);
   }
 
   /* and now for the pay load */
@@ -2367,7 +2362,7 @@ vcd_obj_write_image (VcdObj_t *p_obj, VcdImageSink_t *p_image_sink,
     p_obj->progress_callback = callback;
     p_obj->callback_user_data = user_data;
     p_obj->image_sink = p_image_sink;
-  
+
     if (_callback_wrapper (p_obj, true))
       return 1;
 
@@ -2396,7 +2391,7 @@ vcd_obj_write_image (VcdObj_t *p_obj, VcdImageSink_t *p_image_sink,
         int n, lastsect = p_obj->sectors_written;
 
         vcd_debug ("writting post-gap ('leadout pregap')...");
-        
+
         for (n = 0; n < p_obj->leadout_pregap; n++)
           _write_m2_image_sector (p_obj, zero, lastsect++, 0, 0, SM_FORM2, 0);
       }
@@ -2405,12 +2400,12 @@ vcd_obj_write_image (VcdObj_t *p_obj, VcdImageSink_t *p_image_sink,
       return 1;
 
     p_obj->image_sink = NULL;
-  
+
     vcd_image_sink_destroy (p_image_sink);
 
     return 0; /* ok */
   }
-}  
+}
 
 const char *
 vcd_version_string (bool full_text)
@@ -2431,7 +2426,7 @@ vcd_version_string (bool full_text)
 }
 
 
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8

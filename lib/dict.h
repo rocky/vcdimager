@@ -39,7 +39,7 @@ struct _dict_t
 };
 
 static void
-_dict_insert (VcdObj_t *obj, const char key[], uint32_t sector, uint32_t length, 
+_dict_insert (VcdObj_t *obj, const char key[], uint32_t sector, uint32_t length,
               uint8_t end_flags)
 {
   struct _dict_t *_new_node;
@@ -61,7 +61,7 @@ _dict_insert (VcdObj_t *obj, const char key[], uint32_t sector, uint32_t length,
   _cdio_list_prepend (obj->buffer_dict_list, _new_node);
 }
 
-static 
+static
 int _dict_key_cmp (struct _dict_t *a, char *b)
 {
   vcd_assert (a != NULL);
@@ -70,7 +70,7 @@ int _dict_key_cmp (struct _dict_t *a, char *b)
   return !strcmp (a->key, b);
 }
 
-static 
+static
 int _dict_sector_cmp (struct _dict_t *a, uint32_t *b)
 {
   vcd_assert (a != NULL);
@@ -88,9 +88,9 @@ _dict_get_bykey (VcdObj_t *obj, const char key[])
   vcd_assert (key != NULL);
 
   node = _cdio_list_find (obj->buffer_dict_list,
-			  (_cdio_list_iterfunc) _dict_key_cmp,
+			  (_cdio_list_iterfunc_t) _dict_key_cmp,
 			  (char *) key);
-  
+
   if (node)
     return _cdio_list_node_data (node);
 
@@ -105,8 +105,8 @@ _dict_get_bysector (VcdObj_t *obj, uint32_t sector)
   vcd_assert (obj != NULL);
   vcd_assert (sector != SECTOR_NIL);
 
-  node = _cdio_list_find (obj->buffer_dict_list, 
-			  (_cdio_list_iterfunc) _dict_sector_cmp, 
+  node = _cdio_list_find (obj->buffer_dict_list,
+			  (_cdio_list_iterfunc_t) _dict_sector_cmp,
 			  &sector);
 
   if (node)
@@ -158,7 +158,7 @@ _dict_clean (VcdObj_t *obj)
       free (p->key);
       free (p->buf);
 
-      _cdio_list_node_free (node, true);
+      _cdio_list_node_free (node, true, NULL);
     }
 }
 

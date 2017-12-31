@@ -1,13 +1,11 @@
 /*
-    $Id$
-
     Copyright (C) 2001, 2003, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
     (at your option) any later version.
-    
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -28,6 +26,7 @@
 #include <errno.h>
 
 #ifdef HAVE_TIME_H
+#define __USE_XOPEN
 #include <time.h>
 #endif
 
@@ -55,8 +54,6 @@
 #include "vcd_xml_dtd.h"
 #include "vcd_xml_common.h"
 
-static const char _rcsid[] = "$Id$";
-
 static void
 _init_xml (void)
 {
@@ -66,7 +63,7 @@ _init_xml (void)
   _init_done = true;
 
   xmlKeepBlanksDefaultValue = false;
-  xmlIndentTreeOutput = true; 
+  xmlIndentTreeOutput = true;
 
   vcd_xml_dtd_init ();
 }
@@ -89,12 +86,12 @@ _xmlParseFile(const char *filename)
   /* assert (_init_done == true); */
 
   ctxt = xmlCreateFileParserCtxt (filename);
-  
+
   if (!ctxt)
     return NULL;
 
   /* ctxt->keepBlanks = false; */
-  ctxt->pedantic = true; 
+  ctxt->pedantic = true;
   ctxt->validate = true;
 
   if (ctxt->sax)
@@ -108,10 +105,10 @@ _xmlParseFile(const char *filename)
 
   ctxt->vctxt.nodeMax = 0;
 
-  if (!ctxt->directory 
+  if (!ctxt->directory
       && (directory = xmlParserGetDirectory(filename)))
     ctxt->directory = (char *) xmlStrdup((xmlChar *) directory);
-  
+
   xmlParseDocument(ctxt);
 
   if (ctxt->wellFormed && ctxt->valid)
@@ -123,7 +120,7 @@ _xmlParseFile(const char *filename)
     }
 
   xmlFreeParserCtxt(ctxt);
-    
+
   return(ret);
 }
 
@@ -177,7 +174,7 @@ _do_cl (int argc, const char *argv[])
 {
   const char **args = NULL;
   int n, opt = 0;
-  enum { 
+  enum {
     CL_VERSION = 1,
     CL_IMG_TYPE,
     CL_IMG_OPT,
@@ -189,7 +186,7 @@ _do_cl (int argc, const char *argv[])
     CL_DUMP_DTD
   };
   poptContext optCon = NULL;
-  struct poptOption optionsTable[] = 
+  struct poptOption optionsTable[] =
     {
       {"image-type", 'i', POPT_ARG_STRING, NULL, CL_IMG_TYPE,
        "specify image type for output (default: '" DEFAULT_IMG_TYPE "')",
@@ -201,7 +198,7 @@ _do_cl (int argc, const char *argv[])
       {"cue-file", 'c', POPT_ARG_STRING, NULL, CL_CUE_FILE,
        "specify cue file for output (default: '" DEFAULT_CUE_FILE "')",
        "FILE"},
-      
+
       {"bin-file", 'b', POPT_ARG_STRING, NULL, CL_BIN_FILE,
        "specify bin file for output (default: '" DEFAULT_BIN_FILE "')",
        "FILE"},
@@ -218,25 +215,25 @@ _do_cl (int argc, const char *argv[])
       {"create-time", 'T', POPT_ARG_STRING, &gl.create_timestr, 0,
        "specify creation date on files in CD image (default: current date)"},
 
-      {"progress", 'p', POPT_ARG_NONE, &gl.progress_flag, 0,  
-       "show progress"}, 
+      {"progress", 'p', POPT_ARG_NONE, &gl.progress_flag, 0,
+       "show progress"},
 
       {"dump-dtd", '\0', POPT_ARG_NONE, NULL, CL_DUMP_DTD,
        "dump internal DTD to stdout"},
 
-      {"check", '\0', POPT_ARG_NONE | POPT_ARGFLAG_DOC_HIDDEN, 
+      {"check", '\0', POPT_ARG_NONE | POPT_ARGFLAG_DOC_HIDDEN,
        &gl.check_flag, 0, "enable check mode (undocumented)"},
 
       {"file-prefix", '\0', POPT_ARG_STRING | POPT_ARGFLAG_DOC_HIDDEN,
-       &gl.file_prefix, 0, "add prefix string to all filenames (undocumented)"}, 
+       &gl.file_prefix, 0, "add prefix string to all filenames (undocumented)"},
 
       { "filename-encoding", '\0', POPT_ARG_STRING, &vcd_xml_filename_charset, 0,
         "use given charset encoding for filenames instead of UTF8" },
 
-      {"verbose", 'v', POPT_ARG_NONE, &gl.verbose_flag, 0, 
+      {"verbose", 'v', POPT_ARG_NONE, &gl.verbose_flag, 0,
        "be verbose"},
-	
-      {"quiet", 'q', POPT_ARG_NONE, &gl.quiet_flag, 0, 
+
+      {"quiet", 'q', POPT_ARG_NONE, &gl.quiet_flag, 0,
        "show only critical messages"},
 
       {"gui", '\0', POPT_ARG_NONE, &gl.gui_flag, 0, "enable GUI mode"},
@@ -244,7 +241,7 @@ _do_cl (int argc, const char *argv[])
       {"version", 'V', POPT_ARG_NONE, NULL, CL_VERSION,
        "display version and copyright information and exit"},
 
-      POPT_AUTOHELP 
+      POPT_AUTOHELP
 
       {NULL, 0, 0, NULL, 0}
     };
@@ -252,8 +249,8 @@ _do_cl (int argc, const char *argv[])
   optCon = poptGetContext ("vcdimager", argc, argv, optionsTable, 0);
   poptSetOtherOptionHelp (optCon, "[OPTION...] <xml-control-file>");
 
-  if (poptReadDefaultConfig (optCon, 0)) 
-    fprintf (stderr, "warning, reading popt configuration failed\n"); 
+  if (poptReadDefaultConfig (optCon, 0))
+    fprintf (stderr, "warning, reading popt configuration failed\n");
 
   while ((opt = poptGetNextOpt (optCon)) != -1)
     switch (opt)
@@ -308,7 +305,7 @@ _do_cl (int argc, const char *argv[])
 
       case CL_IMG_TYPE:
 	opt_arg = poptGetOptArg (optCon);
-	  
+
 	if (!strcmp (opt_arg, "bincue"))
 	  gl.img_type = IMG_TYPE_BINCUE;
 	else if (!strcmp (opt_arg, "cdrdao"))
@@ -323,9 +320,9 @@ _do_cl (int argc, const char *argv[])
 	{
 	  char buf[1024] = { 0, }, *buf2;
 	  opt_arg = poptGetOptArg (optCon);
-	 
+
 	  strncpy (buf, opt_arg, sizeof (buf));
-	  
+
 	  if ((buf2 = strchr (buf, '=')))
 	    {
 	      *buf2 = '\0';
@@ -343,7 +340,7 @@ _do_cl (int argc, const char *argv[])
 
   if (gl.verbose_flag && gl.quiet_flag)
     vcd_error ("I can't be both, quiet and verbose... either one or another ;-)");
-    
+
   if ((args = poptGetArgs (optCon)) == NULL)
     vcd_error ("xml input file argument missing -- try --help");
 
@@ -386,23 +383,23 @@ _create_sink (void)
   _CDIO_LIST_FOREACH (node, gl.img_options)
     {
       struct key_val_t *_cons = _cdio_list_node_data (node);
-      
+
       if (vcd_image_sink_set_arg (image_sink, _cons->key, _cons->val))
-	vcd_error ("error while setting image option '%s' (key='%s')", 
+	vcd_error ("error while setting image option '%s' (key='%s')",
 		   _cons->key, _cons->val);
     }
-  
+
   return image_sink;
 }
 
-int 
+int
 main (int argc, const char *argv[])
 {
   time_t create_time;
   xmlDocPtr vcd_doc;
 
   memset(&gl, 0, sizeof(gl));
-  
+
   vcd_xml_progname = "vcdxbuild";
 
   _init_xml ();
@@ -455,13 +452,13 @@ main (int argc, const char *argv[])
     VcdImageSink_t *image_sink;
 
     vcd_xml_init (&vcdxml);
-    
+
     if (!(root = xmlDocGetRootElement (vcd_doc)))
       vcd_error ("XML document seems to be empty (no root node found)");
 
     if (!(ns = xmlSearchNsByHref (vcd_doc, root, (const xmlChar *) VIDEOCD_DTD_XMLNS)))
       vcd_error ("Namespace not found in document");
-    
+
     if (vcd_xml_parse (&vcdxml, vcd_doc, root, ns))
       vcd_error ("parsing tree failed");
 
@@ -472,43 +469,43 @@ main (int argc, const char *argv[])
       }
 
     vcdxml.file_prefix = gl.file_prefix;
-    
+
     create_time = time(NULL);
     if (gl.create_timestr != NULL) {
-      if (!strcmp (gl.create_timestr, "TESTING")) 
+      if (!strcmp (gl.create_timestr, "TESTING"))
 	create_time = 269236800L;
       else {
 #ifdef HAVE_STRPTIME
 	struct tm tm;
-	
+
 	if (NULL == strptime(gl.create_timestr, "%Y-%m-%d %H:%M:%S", &tm)) {
-	  vcd_warn("Trouble converting date string %s using strptime.", 
+	  vcd_warn("Trouble converting date string %s using strptime.",
 		   gl.create_timestr);
 	  vcd_warn("String should match %%Y-%%m-%%d %%H:%%M:%%S");
 	} else {
 	  create_time = mktime(&tm);
 	}
-#else 
+#else
 	create_time = 269236800L;
 #endif
       }
     }
-  
+
     if (vcd_xml_master (&vcdxml, image_sink, &create_time)) {
       vcd_warn ("building videocd failed");
       goto err_exit;
     }
-    
-    
+
+
     vcd_xml_destroy(&vcdxml);
-  } 
+  }
 
   xmlFreeDoc (vcd_doc);
   free(gl.xml_fname);
-  _cdio_list_free (gl.img_options, true);
+  _cdio_list_free (gl.img_options, true, NULL);
   return EXIT_SUCCESS;
- err_exit: 
+ err_exit:
   free(gl.xml_fname);
-  _cdio_list_free (gl.img_options, true);
+  _cdio_list_free (gl.img_options, true, NULL);
   return EXIT_FAILURE;
 }

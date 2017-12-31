@@ -1,6 +1,5 @@
 /*
-    $Id$
-
+    Copyright (C) 2017 Rocky Bernstein <rocky@gnu.org>
     Copyright (C) 2000, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
@@ -28,7 +27,7 @@
 
 CdioListNode_t *_vcd_list_at (CdioList_t *list, int idx);
 
-void _vcd_list_sort (CdioList_t *p_list, _cdio_list_cmp_func cmp_func);
+void _vcd_list_sort (CdioList_t *p_list, _cdio_list_cmp_func_t cmp_func);
 
 /* n-way tree */
 
@@ -38,10 +37,10 @@ typedef struct _VcdTreeNode VcdTreeNode_t;
 #define _VCD_CHILD_FOREACH(child, parent) \
  for (child = _vcd_tree_node_first_child (parent); child; child = _vcd_tree_node_next_sibling (child))
 
-typedef int (*_vcd_tree_node_cmp_func) (VcdTreeNode_t *p_node1, 
+typedef int (*_vcd_tree_node_cmp_func) (VcdTreeNode_t *p_node1,
                                         VcdTreeNode_t *p_node2);
 
-typedef void (*_vcd_tree_node_traversal_func) (VcdTreeNode_t *p_node, 
+typedef void (*_vcd_tree_node_traversal_func) (VcdTreeNode_t *p_node,
                                                void *p_user_data);
 
 VcdTree_t *_vcd_tree_new (void *p_root_data);
@@ -59,7 +58,7 @@ void _vcd_tree_node_destroy (VcdTreeNode_t *p_node, bool free_data);
 
 void *_vcd_tree_node_set_data (VcdTreeNode_t *p_node, void *p_new_data);
 
-VcdTreeNode_t *_vcd_tree_node_append_child (VcdTreeNode_t *p_node, 
+VcdTreeNode_t *_vcd_tree_node_append_child (VcdTreeNode_t *p_node,
                                             void *p_cdata);
 
 VcdTreeNode_t *_vcd_tree_node_first_child (VcdTreeNode_t *p_node);
@@ -72,22 +71,21 @@ VcdTreeNode_t *_vcd_tree_node_root (VcdTreeNode_t *p_node);
 
 bool _vcd_tree_node_is_root (VcdTreeNode_t *p_node);
 
-void _vcd_tree_node_traverse (VcdTreeNode_t *p_node, 
+void _vcd_tree_node_traverse (VcdTreeNode_t *p_node,
                               _vcd_tree_node_traversal_func trav_func,
                               void *user_data);
 
 void
-_vcd_tree_node_traverse_bf (VcdTreeNode_t *p_node, 
+_vcd_tree_node_traverse_bf (VcdTreeNode_t *p_node,
                             _vcd_tree_node_traversal_func trav_func,
                             void *p_user_data);
-     
+
 #endif /* __VCD_DATA_STRUCTURES_H__ */
 
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8
  *  indent-tabs-mode: nil
  * End:
  */
-

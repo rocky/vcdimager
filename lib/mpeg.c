@@ -1,6 +1,5 @@
 /*
-  $Id$
-
+  Copyright (C) 2018 Rocky Bernstein <rocky@gnu.org>
   Copyright (C) 2000, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
   This program is free software; you can redistribute it and/or modify
@@ -31,8 +30,6 @@
 #include "bitvec.h"
 #include "mpeg.h"
 #include "util.h"
-
-static const char _rcsid[] = "$Id$";
 
 #define MPEG_START_CODE_PATTERN  ((uint32_t) 0x00000100)
 #define MPEG_START_CODE_MASK     ((uint32_t) 0xffffff00)
@@ -79,9 +76,9 @@ static struct {
 };
 
 static const double frame_rates[16] =  {
-  0.0, 24000.0/1001, 24.0, 25.0, 
-  30000.0/1001, 30.0,  50.0, 60000.0/1001, 
-  60.0, 0.0, 
+  0.0, 24000.0/1001, 24.0, 25.0,
+  30000.0/1001, 30.0,  50.0, 60000.0/1001,
+  60.0, 0.0,
 };
 
 #ifdef DEBUG
@@ -98,7 +95,7 @@ _start_code_p (uint32_t code)
   return (code & MPEG_START_CODE_MASK) == MPEG_START_CODE_PATTERN;
 }
 
-static inline int 
+static inline int
 _vid_streamid_idx (uint8_t streamid)
 {
   switch (streamid | MPEG_START_CODE_PATTERN)
@@ -119,11 +116,11 @@ _vid_streamid_idx (uint8_t streamid)
       vcd_assert_not_reached ();
       break;
     }
-  
+
   return -1;
 }
 
-static inline int 
+static inline int
 _aud_streamid_idx (uint8_t streamid)
 {
   switch (streamid | MPEG_START_CODE_PATTERN)
@@ -144,7 +141,7 @@ _aud_streamid_idx (uint8_t streamid)
       vcd_assert_not_reached ();
       break;
     }
-  
+
   return -1;
 }
 
@@ -160,7 +157,7 @@ _parse_timecode (const uint8_t *buf, unsigned *offset)
 
   _retval <<= 15;
   _retval |= vcd_bitvec_read_bits (buf, offset, 15);
-      
+
   MARKER (buf, offset);
 
   _retval <<= 15;
@@ -172,7 +169,7 @@ _parse_timecode (const uint8_t *buf, unsigned *offset)
 }
 
 static void
-_parse_sequence_header (uint8_t streamid, const uint8_t *buf, 
+_parse_sequence_header (uint8_t streamid, const uint8_t *buf,
 			VcdMpegStreamCtx *state)
 {
   unsigned offset = 0;
@@ -180,8 +177,8 @@ _parse_sequence_header (uint8_t streamid, const uint8_t *buf,
   const uint8_t *data = buf;
   const int vid_idx = _vid_streamid_idx (streamid);
 
-  const double aspect_ratios[16] = 
-    { 
+  const double aspect_ratios[16] =
+    {
       0.0000, 1.0000, 0.6735, 0.7031,
       0.7615, 0.8055, 0.8437, 0.8935,
       0.9375, 0.9815, 1.0255, 1.0695,
@@ -190,7 +187,7 @@ _parse_sequence_header (uint8_t streamid, const uint8_t *buf,
 
   if (state->stream.shdr[vid_idx].seen) /* we have it already */
     return;
-  
+
   hsize = vcd_bitvec_read_bits (data, &offset, 12);
 
   vsize = vcd_bitvec_read_bits (data, &offset, 12);
@@ -216,33 +213,32 @@ _parse_sequence_header (uint8_t streamid, const uint8_t *buf,
 
   if (vcd_bitvec_read_bits (data, &offset, 1))
     offset += 64 << 3;
-  
+
   state->stream.shdr[vid_idx].hsize = hsize;
   state->stream.shdr[vid_idx].vsize = vsize;
   state->stream.shdr[vid_idx].aratio = aspect_ratios[aratio];
   state->stream.shdr[vid_idx].frate = frame_rates[frate];
   state->stream.shdr[vid_idx].bitrate = 400 * brate;
-  state->stream.shdr[vid_idx].vbvsize = bufsize * 16 * 1024; 
+  state->stream.shdr[vid_idx].vbvsize = bufsize * 16 * 1024;
   state->stream.shdr[vid_idx].constrained_flag = (constr != 0);
 
   state->stream.shdr[vid_idx].seen = true;
 }
 
 static void
-_parse_gop_header (uint8_t streamid, const uint8_t *buf, 
+_parse_gop_header (uint8_t streamid, const uint8_t *buf,
 		   VcdMpegStreamCtx *state)
 {
   const uint8_t *data = buf;
   unsigned offset = 0;
-  
-  bool drop_flag; 
+
   /* bool close_gop; */
   /* bool broken_link; */
 
   unsigned hour, minute, second, frame;
 
-  drop_flag = vcd_bitvec_read_bits(data, &offset, 1) != 0;
-  
+  /* drop_flag = vcd_bitvec_read_bits(data, &offset, 1) != 0; */
+
   hour = vcd_bitvec_read_bits(data, &offset, 5);
 
   minute = vcd_bitvec_read_bits(data, &offset, 6);
@@ -281,7 +277,7 @@ _check_scan_data (const char str[], const msf_t *msf,
                 "if it is not enabled already!");
       state->stream.scan_data_warnings++;
       return;
-    }      
+    }
 
   if (msf->m == 0xff
       && msf->s == 0xff
@@ -302,7 +298,7 @@ _check_scan_data (const char str[], const msf_t *msf,
     }
 
   if ((msf->m >> 4) > 9
-      || ((0x80 ^ msf->s) >> 4) > 9      
+      || ((0x80 ^ msf->s) >> 4) > 9
       || ((0x80 ^ msf->f) >> 4) > 9
       || (msf->m & 0xf) > 9
       || (msf->s & 0xf) > 9
@@ -319,7 +315,7 @@ _check_scan_data (const char str[], const msf_t *msf,
 }
 
 static void
-_parse_user_data (uint8_t streamid, const void *buf, unsigned len, 
+_parse_user_data (uint8_t streamid, const void *buf, unsigned len,
                   unsigned offset,
                   VcdMpegStreamCtx *state)
 {
@@ -357,7 +353,7 @@ _parse_user_data (uint8_t streamid, const void *buf, unsigned len,
           {
             struct vcd_mpeg_scan_data_t *usdi = (void *) udg;
             vcd_assert (sizeof (struct vcd_mpeg_scan_data_t) == 14);
-            
+
             if (GNUC_UNLIKELY (usdi->len != 14))
               {
                 vcd_warn ("invalid user scan data length (%d != 14)", usdi->len);
@@ -369,7 +365,7 @@ _parse_user_data (uint8_t streamid, const void *buf, unsigned len,
             _check_scan_data ("next_I_offset    ", &usdi->next_ofs, state);
             _check_scan_data ("backward_I_offset", &usdi->back_ofs, state);
             _check_scan_data ("forward_I_offset ", &usdi->forw_ofs, state);
-          
+
             state->packet.scan_data_ptr = usdi;
             state->stream.scan_data++;
           }
@@ -390,7 +386,7 @@ _parse_user_data (uint8_t streamid, const void *buf, unsigned len,
       vcd_assert (udg->len >= 2);
       udg = (void *) &udg->data[udg->len - 2];
     }
-  
+
   vcd_assert (pos <= len);
 }
 
@@ -424,7 +420,7 @@ _analyze_pes_header (const uint8_t *buf, int len,
         case 2: /* %10 */
           _has_pts = true;
           break;
-          
+
         case 3: /* %11 */
           _has_dts = _has_pts = true;
           break;
@@ -435,7 +431,7 @@ _analyze_pes_header (const uint8_t *buf, int len,
         }
 
       pos2++; /* ESCR_flag */
-      
+
       pos2++; /* */
       pos2++; /* */
       pos2++; /* */
@@ -473,7 +469,7 @@ _analyze_pes_header (const uint8_t *buf, int len,
       pes_mpeg_ver = MPEG_VERS_MPEG1;
 
       /* get rid of stuffing bytes */
-      while (((pos2 + 8) < (len << 3)) 
+      while (((pos2 + 8) < (len << 3))
              && vcd_bitvec_peek_bits (buf, pos2, 8) == 0xff)
         pos2 += 8;
 
@@ -485,7 +481,7 @@ _analyze_pes_header (const uint8_t *buf, int len,
           pos2 += 13; /* STD_buffer_size */
         }
 
-      switch (vcd_bitvec_peek_bits (buf, pos2, 4)) 
+      switch (vcd_bitvec_peek_bits (buf, pos2, 4))
         {
         case 0x2: /* %0010 */
           pos2 += 4;
@@ -515,7 +511,7 @@ _analyze_pes_header (const uint8_t *buf, int len,
           vcd_assert (vcd_bitvec_peek_bits (buf, pos2, 8) == 0xff);
           vcd_warn ("Unexpected stuffing byte noticed in ISO11172 PES header!");
           pos2 += 8;
-          break; 
+          break;
 
         default:
           vcd_error ("Error in ISO11172 PES header");
@@ -528,7 +524,7 @@ _analyze_pes_header (const uint8_t *buf, int len,
   if (_has_pts)
     {
       double pts2;
-      
+
       pts2 = (double) pts / 90000.0;
 
       if (!state->stream.seen_pts)
@@ -611,7 +607,7 @@ _analyze_audio_pes (uint8_t streamid, const uint8_t *buf, int len, bool only_pts
       {
         const int bits = vcd_bitvec_read_bits (buf, &bitpos, 4);
 
-        const unsigned bit_rates[4][16] = { 
+        const unsigned bit_rates[4][16] = {
           {0, },
           {0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 0},
           {0, 32, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 384, 0},
@@ -639,15 +635,15 @@ _analyze_audio_pes (uint8_t streamid, const uint8_t *buf, int len, bool only_pts
           state->stream.ahdr[aud_idx].sampfreq = 0;
           break;
         }
-      
+
       bitpos++; /* padding_bit */
 
       bitpos++; /* private_bit */
 
       state->stream.ahdr[aud_idx].mode = 1 + vcd_bitvec_read_bits (buf, &bitpos, 2); /* mode */
-      
+
       state->stream.ahdr[aud_idx].seen = true;
-      
+
       /* we got the info, let's jump outta here */
       break;
     }
@@ -671,7 +667,7 @@ _analyze_video_pes (uint8_t streamid, const uint8_t *buf, int len, bool only_pts
   /* if only pts extraction was needed, we are done here... */
   if (only_pts)
     return;
-  
+
   while (pos + 4 <= len)
     {
       uint32_t code = vcd_bitvec_peek_bits32 (buf, pos << 3);
@@ -686,11 +682,11 @@ _analyze_video_pes (uint8_t streamid, const uint8_t *buf, int len, bool only_pts
 	{
 	case MPEG_PICTURE_CODE:
 	  pos += 4;
-	  
+
           if (vcd_bitvec_peek_bits (buf, (pos << 3) + 10, 3) == 1)
             ipicture_header_pos = pos;
 	  break;
-	  
+
 	case MPEG_SEQUENCE_CODE:
 	  pos += 4;
 	  sequence_header_pos = pos;
@@ -723,7 +719,7 @@ _analyze_video_pes (uint8_t streamid, const uint8_t *buf, int len, bool only_pts
   /* decide whether this packet qualifies as access point */
   state->packet.aps = APS_NONE; /* paranoia */
 
-  if (state->packet.has_pts 
+  if (state->packet.has_pts
       && ipicture_header_pos != -1)
     {
       enum aps_t _aps_type = APS_NONE;
@@ -736,7 +732,7 @@ _analyze_video_pes (uint8_t streamid, const uint8_t *buf, int len, bool only_pts
               && sequence_header_pos < gop_header_pos
               && gop_header_pos < ipicture_header_pos)
             _aps_type = (sequence_header_pos - 4 == pes_header) ? APS_ASGI : APS_SGI;
-          else if (gop_header_pos != 1 
+          else if (gop_header_pos != 1
                    && gop_header_pos < ipicture_header_pos)
             _aps_type = APS_GI;
           else
@@ -748,7 +744,7 @@ _analyze_video_pes (uint8_t streamid, const uint8_t *buf, int len, bool only_pts
           break;
         }
 
-      if (_aps_type) 
+      if (_aps_type)
         {
           const double pts2 = state->packet.pts;
 
@@ -775,8 +771,8 @@ _register_streamid (uint8_t streamid, VcdMpegStreamCtx *state)
   switch (code)
     {
     case MPEG_VIDEO_E0_CODE:
-    case MPEG_VIDEO_E1_CODE: 
-    case MPEG_VIDEO_E2_CODE: 
+    case MPEG_VIDEO_E1_CODE:
+    case MPEG_VIDEO_E2_CODE:
       state->packet.video[_vid_streamid_idx (streamid)] = true;
       break;
 
@@ -790,14 +786,14 @@ _register_streamid (uint8_t streamid, VcdMpegStreamCtx *state)
       state->packet.padding = true;
       break;
 
-    case MPEG_SYSTEM_HEADER_CODE: 
+    case MPEG_SYSTEM_HEADER_CODE:
       state->packet.system_header = true;
       break;
     }
 }
 
 static void
-_analyze_system_header (const uint8_t *buf, int len, 
+_analyze_system_header (const uint8_t *buf, int len,
                         VcdMpegStreamCtx *state)
 {
   unsigned bitpos = 0;
@@ -808,7 +804,7 @@ _analyze_system_header (const uint8_t *buf, int len,
 
   MARKER (buf, &bitpos);
 
-  bitpos += 6; /* audio_bound */ 
+  bitpos += 6; /* audio_bound */
 
   bitpos++; /* fixed_flag */
   bitpos++; /* CSPS_flag */
@@ -817,12 +813,12 @@ _analyze_system_header (const uint8_t *buf, int len,
 
   MARKER (buf, &bitpos);
 
-  bitpos += 5; /* video_bound */ 
+  bitpos += 5; /* video_bound */
 
   bitpos += 1; /* packet_rate_restriction_flag -- only ISO 13818-1 */
   bitpos += 7; /* reserved */
 
-  while (vcd_bitvec_peek_bits (buf, bitpos, 1) == 1 
+  while (vcd_bitvec_peek_bits (buf, bitpos, 1) == 1
          && bitpos <= (len << 3))
     {
       const uint8_t stream_id = vcd_bitvec_read_bits (buf, &bitpos, 8);
@@ -839,7 +835,7 @@ _analyze_system_header (const uint8_t *buf, int len,
 }
 
 static void
-_analyze_private_1_stream (const uint8_t *buf, int len, 
+_analyze_private_1_stream (const uint8_t *buf, int len,
                            VcdMpegStreamCtx *state)
 {
   unsigned bitpos = _analyze_pes_header (buf, len, state);
@@ -851,7 +847,7 @@ _analyze_private_1_stream (const uint8_t *buf, int len,
 
   private_data_id = vcd_bitvec_read_bits (buf, &bitpos, 8);
 
-  switch (private_data_id) 
+  switch (private_data_id)
     {
       uint8_t sub_stream_id;
 
@@ -901,7 +897,7 @@ vcd_mpeg_parse_packet (const void *_buf, unsigned buflen, bool parse_pes,
 
   vcd_assert (buf != NULL);
   vcd_assert (ctx != NULL);
-  
+
   /* clear packet info */
   memset (&(ctx->packet), 0, sizeof (ctx->packet));
 
@@ -922,7 +918,7 @@ vcd_mpeg_parse_packet (const void *_buf, unsigned buflen, bool parse_pes,
 
       vcd_warn ("mpeg scan: pack header code (0x%8.8x) expected, "
                 "but 0x%8.8x found (buflen = %d)",
-                (unsigned int) MPEG_PACK_HEADER_CODE, 
+                (unsigned int) MPEG_PACK_HEADER_CODE,
                 (unsigned int) _code, buflen);
 
       ctx->stream.packets--;
@@ -974,7 +970,7 @@ vcd_mpeg_parse_packet (const void *_buf, unsigned buflen, bool parse_pes,
 	  uint16_t size;
           int bits;
           unsigned bitpos;
-          
+
 	case MPEG_PACK_HEADER_CODE:
 	  if (pos)
 	    return pos;
@@ -1031,9 +1027,9 @@ vcd_mpeg_parse_packet (const void *_buf, unsigned buflen, bool parse_pes,
               _scr += vcd_bitvec_read_bits (buf, &bitpos, 9); /* SCR ext */
 
               MARKER (buf, &bitpos);
-              
+
               _muxrate = vcd_bitvec_read_bits (buf, &bitpos, 22);
-              
+
               MARKER (buf, &bitpos);
               MARKER (buf, &bitpos);
 
@@ -1051,7 +1047,7 @@ vcd_mpeg_parse_packet (const void *_buf, unsigned buflen, bool parse_pes,
             }
           else
             {
-              vcd_warn ("packet not recognized as either version 1 or 2 (%d)" 
+              vcd_warn ("packet not recognized as either version 1 or 2 (%d)"
                         " -- assuming v1", bits);
             }
 
@@ -1069,10 +1065,10 @@ vcd_mpeg_parse_packet (const void *_buf, unsigned buflen, bool parse_pes,
 	  pos += 4;
 	  size = vcd_bitvec_peek_bits16 (buf, pos << 3);
 	  pos += 2;
-	  
-	  if (pos + size > buflen)	  
+
+	  if (pos + size > buflen)
             {
-              vcd_warn ("packet length beyond buffer" 
+              vcd_warn ("packet length beyond buffer"
                         " (pos = %d + size = %d > buflen = %d) "
                         "-- stream may be truncated or packet length > 2324 bytes!",
                         pos, size, buflen);
@@ -1084,13 +1080,13 @@ vcd_mpeg_parse_packet (const void *_buf, unsigned buflen, bool parse_pes,
 
 	  switch (code)
 	    {
-	    case MPEG_SYSTEM_HEADER_CODE: 
+	    case MPEG_SYSTEM_HEADER_CODE:
               _analyze_system_header (buf + pos, size, ctx);
               break;
 
 	    case MPEG_VIDEO_E0_CODE:
-	    case MPEG_VIDEO_E1_CODE: 
-	    case MPEG_VIDEO_E2_CODE: 
+	    case MPEG_VIDEO_E1_CODE:
+	    case MPEG_VIDEO_E2_CODE:
               _analyze_video_pes (code & 0xff, buf + pos, size, !parse_pes, ctx);
               break;
 
@@ -1107,7 +1103,7 @@ vcd_mpeg_parse_packet (const void *_buf, unsigned buflen, bool parse_pes,
 
 	  pos += size;
 	  break;
-	  
+
 	case MPEG_PROGRAM_END_CODE:
 	  ctx->packet.pem = true;
 	  pos += 4;
@@ -1130,11 +1126,11 @@ vcd_mpeg_parse_packet (const void *_buf, unsigned buflen, bool parse_pes,
   return buflen;
 }
 
-mpeg_norm_t 
+mpeg_norm_t
 vcd_mpeg_get_norm (const struct vcd_mpeg_stream_vid_info *_info)
 {
   int i;
-        
+
   for (i = 0; norm_table[i].norm != MPEG_NORM_OTHER;i++)
     if (norm_table[i].hsize == _info->hsize
         && norm_table[i].vsize == _info->vsize
@@ -1147,21 +1143,21 @@ vcd_mpeg_get_norm (const struct vcd_mpeg_stream_vid_info *_info)
 enum vcd_mpeg_packet_type
 vcd_mpeg_packet_get_type (const struct vcd_mpeg_packet_info *_info)
 {
-  if (_info->video[0] 
+  if (_info->video[0]
       || _info->video[1]
       || _info->video[2])
     return PKT_TYPE_VIDEO;
-  else if (_info->audio[0] 
+  else if (_info->audio[0]
            || _info->audio[1]
            || _info->audio[2])
     return PKT_TYPE_AUDIO;
   else if (_info->zero)
     return PKT_TYPE_ZERO;
-  else if (_info->ogt[0] 
-           || _info->ogt[1] 
+  else if (_info->ogt[0]
+           || _info->ogt[1]
            || _info->ogt[2]
            || _info->ogt[3])
-    return PKT_TYPE_OGT; 
+    return PKT_TYPE_OGT;
   else if (_info->system_header || _info->padding)
     return PKT_TYPE_EMPTY;
 
@@ -1169,7 +1165,7 @@ vcd_mpeg_packet_get_type (const struct vcd_mpeg_packet_info *_info)
 }
 
 
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8

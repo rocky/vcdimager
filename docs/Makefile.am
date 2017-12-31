@@ -5,7 +5,7 @@ TEXI2PDF = texi2dvi --pdf
 pdf: vcdimager.pdf vcd-info.pdf vcdxrip.pdf
 
 %.pdf: %.tex
-	$(TEXI2PDF) $(AM_TEXI2PDFFLAGS) $(TEXI2PDFFLAGS) $< -o $ <at> 
+	$(TEXI2PDF) $(AM_TEXI2PDFFLAGS) $(TEXI2PDFFLAGS) $< -o $ <at>
 
 txt: vcdimager.txt vcd-info.txt vcdxrip.txt svcd-ogt-subtitles.txt \
 	cvd-subtitles.txt
@@ -18,10 +18,10 @@ html: vcdimager.html vcd-info.html vcdxrip.html svcd-ogt-subtitles.html \
 %.ps.gz: %.ps
 	gzip -9c $< > $@
 
-.texi.pdf:
+.texi.pdf: stamp-vti
 	texi2pdf $<
 
-.texi.html:
+.texi.html: stamp-vti
 	texi2html $<
 
 .pod.html:

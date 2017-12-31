@@ -103,9 +103,9 @@ typedef struct {
       unsigned vbvsize;
       bool constrained_flag;
 
-      CdioList *aps_list; /* filled up by vcd_mpeg_source */
+      CdioList_t *aps_list; /* filled up by vcd_mpeg_source */
       double last_aps_pts; /* temp, see ->packet */
-      
+
     } shdr[3];
 
     struct vcd_mpeg_stream_aud_info {
@@ -147,7 +147,7 @@ typedef enum {
   MPEG_NORM_NTSC_S
 } mpeg_norm_t;
 
-mpeg_norm_t 
+mpeg_norm_t
 vcd_mpeg_get_norm (const struct vcd_mpeg_stream_vid_info *_info);
 
 enum vcd_mpeg_packet_type {
@@ -185,7 +185,7 @@ struct vcd_mpeg_stream_vid_type {
 #endif /* __VCD_MPEG_H__ */
 
 
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8

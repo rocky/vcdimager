@@ -1,7 +1,5 @@
-# $Id$
-#
+# Copyright (C) 2003, 2017 Rocky Bernstein <rocky@gnu.org>
 # Copyright (C) 2003 Herbert Valerio Riedel <hvr@gnu.org>
-# Copyright (C) 2003 Rocky Bernstein <rocky@panix.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +17,7 @@
 # 02111-1307, USA.
 bin_PROGRAMS = vcdimager cdxa2mpeg vcd-info
 
-INCLUDES = -I$(top_srcdir) $(LIBPOPT_CFLAGS) $(LIBVCD_CFLAGS) $(LIBCDIO_CFLAGS) $(LIBISO9660_CFLAGS)
+AM_CPPFLAGS = -I$(top_srcdir) $(LIBPOPT_CFLAGS) $(LIBVCD_CFLAGS) $(LIBCDIO_CFLAGS) $(LIBISO9660_CFLAGS)
 
 vcdimager_SOURCES = vcdimager.c
 vcdimager_LDADD =  $(LIBISO9660_LIBS) $(LIBVCD_LIBS) $(LIBPOPT_LIBS) $(LIBCDIO_LIBS)
@@ -33,7 +31,7 @@ vcd_info_LDADD = $(LIBISO9660_LIBS) $(LIBVCDINFO_LIBS) $(LIBVCD_LIBS) $(LIBPOPT_
 man_MANS = vcdimager.1 cdxa2mpeg.1 vcd-info.1
 
 $(man_MANS): %.1: @MAINTAINER_MODE_TRUE@ %
-	-$(HELP2MAN) --output=$@ ./$<
+	-$(HELP2MAN) --output=$@ ./$(@:.1=)
 
 MAINTAINERCLEANFILES = $(man_MANS)
 

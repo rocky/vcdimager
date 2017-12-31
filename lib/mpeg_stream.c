@@ -1,6 +1,5 @@
 /*
-    $Id$
-
+    Copyright (C) 2018 Rocky Bernstein <rocky@gnu.org>
     Copyright (C) 2000, 2004, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
@@ -39,14 +38,12 @@
 #include "mpeg.h"
 #include "util.h"
 
-static const char _rcsid[] = "$Id$";
-
 struct _VcdMpegSource
 {
   VcdDataSource_t *data_source;
 
   bool scanned;
-  
+
   /* _get_packet cache */
   unsigned _read_pkt_pos;
   unsigned _read_pkt_no;
@@ -62,7 +59,7 @@ VcdMpegSource_t *
 vcd_mpeg_source_new (VcdDataSource_t *mpeg_file)
 {
   VcdMpegSource_t *new_obj;
-  
+
   vcd_assert (mpeg_file != NULL);
 
   new_obj = calloc(1, sizeof (VcdMpegSource_t));
@@ -84,7 +81,7 @@ vcd_mpeg_source_destroy (VcdMpegSource_t *obj, bool destroy_file_obj)
 
   for (i = 0; i < 3; i++)
     if (obj->info.shdr[i].aps_list)
-      _cdio_list_free (obj->info.shdr[i].aps_list, true);
+      _cdio_list_free (obj->info.shdr[i].aps_list, true, NULL);
 
   free (obj);
 }
@@ -104,7 +101,7 @@ vcd_mpeg_source_stat (VcdMpegSource_t *obj)
 {
   vcd_assert (obj != NULL);
   vcd_assert (!obj->scanned);
-  
+
   return obj->info.packets * 2324;
 }
 
@@ -132,7 +129,7 @@ vcd_mpeg_source_scan (VcdMpegSource_t *obj, bool strict_aps, bool fix_scan_info,
   vcd_assert (!obj->scanned);
 
   memset (&state, 0, sizeof (state));
-  
+
   if (fix_scan_info)
     state.stream.scan_data_warnings = VCD_MPEG_SCAN_DATA_WARNS + 1;
 
@@ -190,14 +187,14 @@ vcd_mpeg_source_scan (VcdMpegSource_t *obj, bool strict_aps, bool fix_scan_info,
         case APS_ASGI:
           {
             struct aps_data *_data = calloc(1, sizeof (struct aps_data));
-            
+
             _data->packet_no = pno;
             _data->timestamp = state.packet.aps_pts;
 
             if (!state.stream.shdr[state.packet.aps_idx].aps_list)
-              state.stream.shdr[state.packet.aps_idx].aps_list = 
+              state.stream.shdr[state.packet.aps_idx].aps_list =
                 _cdio_list_new ();
-            
+
             _cdio_list_append (state.stream.shdr[state.packet.aps_idx].aps_list, _data);
           }
           break;
@@ -240,7 +237,7 @@ vcd_mpeg_source_scan (VcdMpegSource_t *obj, bool strict_aps, bool fix_scan_info,
   obj->info.playing_time = obj->info.max_pts - obj->info.min_pts;
 
   if (obj->info.min_pts)
-    vcd_debug ("pts start offset %f (max pts = %f)", 
+    vcd_debug ("pts start offset %f (max pts = %f)",
                obj->info.min_pts, obj->info.max_pts);
 
   vcd_debug ("playing time %f", obj->info.playing_time);
@@ -256,8 +253,8 @@ vcd_mpeg_source_scan (VcdMpegSource_t *obj, bool strict_aps, bool fix_scan_info,
         _CDIO_LIST_FOREACH (n, obj->info.shdr[i].aps_list)
         {
           struct aps_data *_data = _cdio_list_node_data (n);
-          
-          _data->timestamp -= obj->info.min_pts; 
+
+          _data->timestamp -= obj->info.min_pts;
         }
   }
 
@@ -270,7 +267,7 @@ vcd_mpeg_source_scan (VcdMpegSource_t *obj, bool strict_aps, bool fix_scan_info,
 }
 
 static double
-_approx_pts (CdioList *aps_list, uint32_t packet_no)
+_approx_pts (CdioList_t *aps_list, uint32_t packet_no)
 {
   double retval = 0;
   CdioListNode_t *node;
@@ -296,7 +293,7 @@ _approx_pts (CdioList *aps_list, uint32_t packet_no)
 
       if (_aps->packet_no >= packet_no)
         break;
-      
+
       _laps = _aps;
     }
 
@@ -308,7 +305,7 @@ _approx_pts (CdioList *aps_list, uint32_t packet_no)
   return retval;
 }
 
-static void 
+static void
 _set_scan_msf (msf_t *_msf, long lsn)
 {
   if (lsn == -1)
@@ -322,9 +319,9 @@ _set_scan_msf (msf_t *_msf, long lsn)
   _msf->f |= 0x80;
 }
 
-static void 
+static void
 _fix_scan_info (struct vcd_mpeg_scan_data_t *scan_data_ptr,
-                unsigned packet_no, double pts, CdioList *aps_list)
+                unsigned packet_no, double pts, CdioList_t *aps_list)
 {
   CdioListNode_t *node;
   long _next = -1, _prev = -1, _forw = -1, _back = -1;
@@ -338,7 +335,7 @@ _fix_scan_info (struct vcd_mpeg_scan_data_t *scan_data_ptr,
       else if (_aps->packet_no < packet_no)
         {
           _prev = _aps->packet_no;
-          
+
           if (pts - _aps->timestamp < 10 && _back == -1)
             _back = _aps->packet_no;
         }
@@ -366,7 +363,7 @@ _fix_scan_info (struct vcd_mpeg_scan_data_t *scan_data_ptr,
 
 int
 vcd_mpeg_source_get_packet (VcdMpegSource_t *obj, unsigned long packet_no,
-			    void *packet_buf, 
+			    void *packet_buf,
                             struct vcd_mpeg_packet_info *flags,
                             bool fix_scan_info)
 {
@@ -408,7 +405,7 @@ vcd_mpeg_source_get_packet (VcdMpegSource_t *obj, unsigned long packet_no,
       char buf[2324] = { 0, };
       int read_len = MIN (sizeof (buf), (length - pos));
       int pkt_len;
-      
+
       vcd_data_source_read (obj->data_source, buf, read_len, 1);
 
       pkt_len = vcd_mpeg_parse_packet (buf, read_len,
@@ -418,7 +415,7 @@ vcd_mpeg_source_get_packet (VcdMpegSource_t *obj, unsigned long packet_no,
 
       if (pno == packet_no)
 	{
-          /* optimized for sequential access, 
+          /* optimized for sequential access,
              thus save pointer to next mpeg pack */
 	  obj->_read_pkt_pos = pos + pkt_len;
 	  obj->_read_pkt_no = pno + 1;
@@ -434,16 +431,16 @@ vcd_mpeg_source_get_packet (VcdMpegSource_t *obj, unsigned long packet_no,
                 vid_idx = 2;
               else if (state.packet.video[1])
                 vid_idx = 1;
-              else 
+              else
                 vid_idx = 0;
 
               if (state.packet.has_pts)
                 _pts = state.packet.pts - obj->info.min_pts;
               else
-                _pts = _approx_pts (obj->info.shdr[vid_idx].aps_list, 
+                _pts = _approx_pts (obj->info.shdr[vid_idx].aps_list,
                                     packet_no);
 
-              _fix_scan_info (state.packet.scan_data_ptr, packet_no, 
+              _fix_scan_info (state.packet.scan_data_ptr, packet_no,
                               _pts, obj->info.shdr[vid_idx].aps_list);
             }
 
@@ -482,7 +479,7 @@ vcd_mpeg_source_close (VcdMpegSource_t *p_vcdmpegsource)
 }
 
 
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8

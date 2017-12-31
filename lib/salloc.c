@@ -1,6 +1,4 @@
 /*
-    $Id$
-
     Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
@@ -35,8 +33,6 @@
 #include "vcd_assert.h"
 #include "salloc.h"
 #include "util.h"
-
-static const char _rcsid[] = "$Id$";
 
 #define VCD_SALLOC_CHUNK_SIZE 16
 
@@ -159,10 +155,10 @@ _vcd_salloc_free (VcdSalloc *bitmap, uint32_t sec, uint32_t size)
 {
   uint32_t i;
 
-  for (i = 0; i < size; i++) 
+  for (i = 0; i < size; i++)
     {
       vcd_assert (_vcd_salloc_is_set (bitmap, sec + i));
-      
+
       _vcd_salloc_unset (bitmap, sec + i);
     }
 }
@@ -203,7 +199,7 @@ uint32_t _vcd_salloc_get_highest (const VcdSalloc *bitmap)
 }
 
 
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8

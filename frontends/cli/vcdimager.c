@@ -1,6 +1,5 @@
 /*
-    $Id$
-
+    Copyright (C) 2018 Rocky Bernstein <rocky@gnu.org>
     Copyright (C) 2001, 2003, 2004, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
@@ -41,8 +40,6 @@
 
 #include <popt.h>
 
-static const char _rcsid[] = "$Id$";
-
 /* defaults */
 #define DEFAULT_CUE_FILE       "videocd.cue"
 #define DEFAULT_BIN_FILE       "videocd.bin"
@@ -51,7 +48,7 @@ static const char _rcsid[] = "$Id$";
 #define DEFAULT_ALBUM_ID       ""
 #define DEFAULT_TYPE           "vcd2"
 
-/* global stuff kept as a singleton makes for less typing effort :-) 
+/* global stuff kept as a singleton makes for less typing effort :-)
  */
 
 struct add_files_t {
@@ -111,7 +108,7 @@ gl_add_dir (char *iso_fname)
 
 static VcdObj_t *gl_vcd_obj = NULL;
 
-static void 
+static void
 _vcd_log_handler (vcd_log_level_t level, const char message[])
 {
   if (level == VCD_LOG_DEBUG && !gl.verbose_flag)
@@ -119,7 +116,7 @@ _vcd_log_handler (vcd_log_level_t level, const char message[])
 
   if (level == VCD_LOG_INFO && gl.quiet_flag)
     return;
-  
+
   gl.default_vcd_log_handler (level, message);
 }
 
@@ -136,13 +133,13 @@ _parse_file_arg (const char *arg, char **fname1, char **fname2)
     *fname1 = strdup (tmp);
   else
     rc = -1;
-  
+
   tmp = strtok(NULL, ",");
   if (tmp)
     *fname2 = strdup (tmp);
   else
     rc = -1;
-  
+
   tmp = strtok(NULL, ",");
   if (tmp)
     rc = -1;
@@ -180,7 +177,7 @@ main (int argc, const char *argv[])
   gl.volume_label = DEFAULT_VOLUME_ID;
   gl.application_id = DEFAULT_APPLICATION_ID;
   gl.album_id = DEFAULT_ALBUM_ID;
-  
+
   gl.volume_count = 1;
   gl.volume_number = 1;
 
@@ -199,7 +196,7 @@ main (int argc, const char *argv[])
       CL_ADD_FILE_RAW
     };
 
-    struct poptOption optionsTable[] = 
+    struct poptOption optionsTable[] =
       {
         {"type", 't', POPT_ARG_STRING, &gl.type, 0,
          "select VideoCD type ('vcd11', 'vcd2', 'svcd' or 'hqvcd')"
@@ -208,7 +205,7 @@ main (int argc, const char *argv[])
         {"cue-file", 'c', POPT_ARG_STRING, &gl.cue_fname, 0,
          "specify cue file for output (default: '" DEFAULT_CUE_FILE "')",
          "FILE"},
-      
+
         {"bin-file", 'b', POPT_ARG_STRING, &gl.image_fname, 0,
          "specify bin file for output (default: '" DEFAULT_BIN_FILE "')",
          "FILE"},
@@ -218,7 +215,7 @@ main (int argc, const char *argv[])
          "')", "LABEL"},
 
         {"iso-application-id", '\0', POPT_ARG_STRING, &gl.application_id, 0,
-         "specify ISO application id for video cd (default: '" 
+         "specify ISO application id for video cd (default: '"
          DEFAULT_APPLICATION_ID "')", "LABEL"},
 
         {"info-album-id", '\0', POPT_ARG_STRING, &gl.album_id, 0,
@@ -236,47 +233,47 @@ main (int argc, const char *argv[])
 
         {"update-scan-offsets", '\0', POPT_ARG_NONE, &gl.update_scan_offsets, 0,
          "update scan data offsets in video mpeg2 stream"},
-        
+
         {"sector-2336", '\0', POPT_ARG_NONE, &gl.sector_2336_flag, 0,
          "use 2336 byte sectors for output"},
 
-        {"add-dir", '\0', POPT_ARG_STRING, NULL, CL_ADD_DIR, 
+        {"add-dir", '\0', POPT_ARG_STRING, NULL, CL_ADD_DIR,
          "add empty dir to ISO fs", "ISO_DIRNAME"},
 
-        {"add-file", '\0', POPT_ARG_STRING, NULL, CL_ADD_FILE, 
+        {"add-file", '\0', POPT_ARG_STRING, NULL, CL_ADD_FILE,
          "add single file to ISO fs", "FILE,ISO_FILENAME"},
 
-        {"add-file-2336", '\0', POPT_ARG_STRING, NULL, CL_ADD_FILE_RAW, 
+        {"add-file-2336", '\0', POPT_ARG_STRING, NULL, CL_ADD_FILE_RAW,
          "add file containing full 2336 byte sectors to ISO fs",
          "FILE,ISO_FILENAME"},
 
         {"create-time", 'T', POPT_ARG_STRING, &gl.create_timestr, 0,
          "specify creation date on files in CD image (default: current date)"},
-      
+
         {"progress", 'p', POPT_ARG_NONE | POPT_ARGFLAG_DOC_HIDDEN,
          NULL, 0, "show progress"},
 
-        {"check", '\0', POPT_ARG_NONE | POPT_ARGFLAG_DOC_HIDDEN, 
+        {"check", '\0', POPT_ARG_NONE | POPT_ARGFLAG_DOC_HIDDEN,
          &gl.check_flag, 0, "enabled check mode"},
 
         {"verbose", 'v', POPT_ARG_NONE, &gl.verbose_flag, 0, "be verbose"},
 
-        {"quiet", 'q', POPT_ARG_NONE, &gl.quiet_flag, 0, 
+        {"quiet", 'q', POPT_ARG_NONE, &gl.quiet_flag, 0,
          "show only critical messages"},
 
         {"version", 'V', POPT_ARG_NONE, NULL, CL_VERSION,
          "display version and copyright information and exit"},
 
-        POPT_AUTOHELP 
+        POPT_AUTOHELP
 
         {NULL, 0, 0, NULL, 0}
       };
-    
+
     poptContext optCon = poptGetContext ("vcdimager", argc, argv, optionsTable, 0);
     poptSetOtherOptionHelp (optCon, "[OPTION...] <mpeg-tracks...>");
 
-    if (poptReadDefaultConfig (optCon, 0)) 
-      fprintf (stderr, "warning, reading popt configuration failed\n"); 
+    if (poptReadDefaultConfig (optCon, 0))
+      fprintf (stderr, "warning, reading popt configuration failed\n");
 
     while ((opt = poptGetNextOpt (optCon)) != -1)
       switch (opt)
@@ -296,7 +293,7 @@ main (int argc, const char *argv[])
             gl_add_dir (strdup (arg));
           }
           break;
-          
+
         case CL_ADD_FILE:
         case CL_ADD_FILE_RAW:
           {
@@ -305,7 +302,7 @@ main (int argc, const char *argv[])
 
             vcd_assert (arg != NULL);
 
-            if(!_parse_file_arg (arg, &fname1, &fname2)) 
+            if(!_parse_file_arg (arg, &fname1, &fname2))
               gl_add_file (fname1, fname2, (opt == CL_ADD_FILE_RAW));
             else
               {
@@ -323,7 +320,7 @@ main (int argc, const char *argv[])
 
     if (gl.verbose_flag && gl.quiet_flag)
       vcd_error ("I can't be both, quiet and verbose... either one or another ;-)");
-    
+
     if ((args = poptGetArgs (optCon)) == NULL)
       vcd_error ("error: need at least one data track as argument "
                  "-- try --help");
@@ -343,7 +340,7 @@ main (int argc, const char *argv[])
       struct {
         const char *str;
         vcd_type_t id;
-      } type_str[] = 
+      } type_str[] =
         {
           { "vcd10", VCD_TYPE_VCD },
           { "vcd11", VCD_TYPE_VCD11 },
@@ -353,10 +350,10 @@ main (int argc, const char *argv[])
           { "hqvcd", VCD_TYPE_HQVCD },
           { NULL, }
         };
-      
+
       int i = 0;
 
-      while (type_str[i].str) 
+      while (type_str[i].str)
         if (strcasecmp(gl.type, type_str[i].str))
           i++;
         else
@@ -364,7 +361,7 @@ main (int argc, const char *argv[])
 
       if (!type_str[i].str)
         vcd_error ("invalid type given");
-        
+
       type_id = type_str[i].id;
     }
 
@@ -383,12 +380,12 @@ main (int argc, const char *argv[])
     vcd_obj_set_param_str (gl_vcd_obj, VCD_PARM_PREPARER_ID, "GNU VCDIMAGER CHECK MODE");
 
   vcd_obj_set_param_str (gl_vcd_obj, VCD_PARM_VOLUME_ID, gl.volume_label);
-  vcd_obj_set_param_str (gl_vcd_obj, VCD_PARM_APPLICATION_ID, 
+  vcd_obj_set_param_str (gl_vcd_obj, VCD_PARM_APPLICATION_ID,
                          gl.application_id);
   vcd_obj_set_param_str (gl_vcd_obj, VCD_PARM_ALBUM_ID, gl.album_id);
 
   vcd_obj_set_param_uint (gl_vcd_obj, VCD_PARM_VOLUME_COUNT, gl.volume_count);
-  vcd_obj_set_param_uint (gl_vcd_obj, VCD_PARM_VOLUME_NUMBER, 
+  vcd_obj_set_param_uint (gl_vcd_obj, VCD_PARM_VOLUME_NUMBER,
                           gl.volume_number);
 
   if (type_id == VCD_TYPE_SVCD)
@@ -398,26 +395,26 @@ main (int argc, const char *argv[])
       vcd_obj_set_param_bool (gl_vcd_obj, VCD_PARM_SVCD_VCD3_ENTRYSVD,
                               gl.broken_svcd_mode_flag);
 
-      vcd_obj_set_param_bool (gl_vcd_obj, VCD_PARM_UPDATE_SCAN_OFFSETS, 
+      vcd_obj_set_param_bool (gl_vcd_obj, VCD_PARM_UPDATE_SCAN_OFFSETS,
                               gl.update_scan_offsets);
     }
 
   create_time = time(NULL);
   if (gl.create_timestr != NULL) {
-    if (!strcmp (gl.create_timestr, "TESTING")) 
+    if (!strcmp (gl.create_timestr, "TESTING"))
       create_time = 269236800L;
     else {
 #ifdef HAVE_STRPTIME
       struct tm tm;
-      
+
       if (NULL == strptime(gl.create_timestr, "%Y-%m-%d %H:%M:%S", &tm)) {
-        vcd_warn("Trouble converting date string %s using strptime.", 
+        vcd_warn("Trouble converting date string %s using strptime.",
                  gl.create_timestr);
         vcd_warn("String should match %%Y-%%m-%%d %%H:%%M:%%S");
       } else {
         create_time = mktime(&tm);
       }
-#else 
+#else
       create_time = 269236800L;
 #endif
     }
@@ -429,14 +426,14 @@ main (int argc, const char *argv[])
 
     if (p->fname)
       {
-        fprintf (stdout, "debug: adding [%s] as [%s] (raw=%d)\n", 
+        fprintf (stdout, "debug: adding [%s] as [%s] (raw=%d)\n",
                  p->fname, p->iso_fname, p->raw_flag);
-        
+
         if (vcd_obj_add_file(gl_vcd_obj, p->iso_fname,
                              vcd_data_source_new_stdio (p->fname),
                              p->raw_flag))
           {
-            fprintf (stderr, 
+            fprintf (stderr,
                      "error while adding file `%s' as `%s' to (S)VCD\n",
                      p->fname, p->iso_fname);
             exit (EXIT_FAILURE);
@@ -448,7 +445,7 @@ main (int argc, const char *argv[])
 
         if (vcd_obj_add_dir(gl_vcd_obj, p->iso_fname))
           {
-            fprintf (stderr, 
+            fprintf (stderr,
                      "error while adding dir `%s' to (S)VCD\n", p->iso_fname);
             exit (EXIT_FAILURE);
           }
@@ -458,7 +455,7 @@ main (int argc, const char *argv[])
   for (n = 0; gl.track_fnames[n] != NULL; n++)
     {
       VcdDataSource_t *data_source;
-      
+
       data_source = vcd_data_source_new_stdio (gl.track_fnames[n]);
 
       vcd_assert (data_source != NULL);
@@ -477,9 +474,9 @@ main (int argc, const char *argv[])
 
     vcd_image_sink_set_arg (p_image_sink, "bin", gl.image_fname);
     vcd_image_sink_set_arg (p_image_sink, "cue", gl.cue_fname);
-    vcd_image_sink_set_arg (p_image_sink, "sector", 
+    vcd_image_sink_set_arg (p_image_sink, "sector",
                             gl.sector_2336_flag ? "2336" : "2352");
-    
+
     if (!p_image_sink)
       {
         vcd_error ("failed to create image object");
@@ -493,14 +490,14 @@ main (int argc, const char *argv[])
     vcd_obj_end_output (gl_vcd_obj);
 
     {
-      unsigned _bytes = sectors * 
+      unsigned _bytes = sectors *
         (gl.sector_2336_flag ? M2RAW_SECTOR_SIZE : CDIO_CD_FRAMESIZE_RAW);
       char *_msfstr = cdio_lba_to_msf_str (sectors);
 
-      fprintf (stdout, 
+      fprintf (stdout,
                "finished ok, image created with %d sectors [%s] (%d bytes)\n",
                sectors, _msfstr, _bytes);
-      
+
       free (_msfstr);
     }
   }
@@ -509,7 +506,7 @@ main (int argc, const char *argv[])
 }
 
 
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8

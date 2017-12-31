@@ -1,5 +1,5 @@
-dnl Copyright (C) 2003, 2004 Herbert Valerio Riedel <hvr@gnu.org>
-dnl Copyright (C) 2003, 2004, 2005, 2006 Rocky Bernstein <rocky@panix.com>
+dnl Copyright (C) 2003-2006, 2017 Rocky Bernstein <rocky@gnu.org>
+dnl Copyright (C) 2003-2004 Herbert Valerio Riedel <hvr@gnu.org>
 dnl
 dnl This program is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -16,13 +16,13 @@ dnl along with this program; if not, write to the Free Software
 dnl Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 dnl 02111-1307, USA.
 
-define(RELEASE_NUM, 24)
-define(LIBVCD_VERSION_STR, 0.7.$1)
+define(RELEASE_NUM, 0git)
+define(LIBVCD_VERSION_STR, 2.0.$1)
 
 AC_PREREQ(2.52)
 AC_REVISION([$Id$])dnl
 
-AC_INIT([GNU VCDimager],LIBVCD_VERSION_STR(RELEASE_NUM), 
+AC_INIT([GNU VCDimager],LIBVCD_VERSION_STR(RELEASE_NUM),
 	[bugs-vcdimager@gnu.org], [vcdimager])
 AC_CONFIG_SRCDIR([lib/vcd.c])
 AM_INIT_AUTOMAKE(1.6.0)
@@ -50,11 +50,11 @@ AC_DEFINE_UNQUOTED(HOST_ARCH, "$host_os/$host_cpu", [host os/cpu identifier])
 dnl conditionally built frontends
 
 AC_ARG_WITH(cli-frontend,
-	[  --without-cli-frontend  enable cli frontend (enabled by default)], 
+	[  --without-cli-frontend  enable cli frontend (enabled by default)],
 	enable_cli_fe="${withval}", enable_cli_fe=yes)
 
 AC_ARG_WITH(xml-frontend,
-	[  --without-xml-frontend  enable XML frontend (enabled by default)], 
+	[  --without-xml-frontend  enable XML frontend (enabled by default)],
 	enable_xml_fe="${withval}", enable_xml_fe=yes)
 
 AC_ARG_WITH(versioned_libs,
@@ -64,7 +64,7 @@ enable_versioned_libs="${withval}", enable_versioned_libs=yes)
 dnl programs
 
 AC_PROG_CC
-if test "x$GCC" != "xyes" 
+if test "x$GCC" != "xyes"
 then
   echo "*** non GNU CC compiler detected."
   echo "*** This package has not been tested very well with non GNU compilers"
@@ -86,13 +86,13 @@ else
 	WOPT="-std=c99 -pedantic"
         ;;
     esac
-    
+
     WOPT="std=c99 -pedantic"
     SAVE_CFLAGS="$CFLAGS"
     CFLAGS="$CFLAGS $WOPT"
     AC_MSG_CHECKING([whether $CC accepts $WOPT])
-    AC_TRY_COMPILE([], [], 
-      [has_option=yes; warning_flags="$warning_flags $WOPT"], 
+    AC_TRY_COMPILE([], [],
+      [has_option=yes; warning_flags="$warning_flags $WOPT"],
       has_option=no)
     CFLAGS="$SAVE_CFLAGS"
     AC_MSG_RESULT($has_option)
@@ -130,10 +130,10 @@ DIFF_OPTS=
 
 if test "$DIFF" = no ; then
    AC_PATH_PROG(DIFF, cmp, no)
-else 
+else
    dnl Try for GNU diff options.
   # MSDOG output uses \r\n rather than \n in tests
-  for diff_opt in -w --unified ; do 
+  for diff_opt in -w --unified ; do
     if $DIFF $diff_opt ./configure ./configure > /dev/null 2>&1; then
       AC_MSG_RESULT([adding $diff_opt to diff in regression tests])
       DIFF_OPTS="$DIFF_OPTS $diff_opt"
@@ -164,7 +164,7 @@ dnl AC_DEFINE(_DEVELOPMENT_, [], enable warnings about being development release
 AC_STDC_HEADERS
 AC_CHECK_HEADERS(sys/stat.h stdint.h inttypes.h stdbool.h sys/mman.h time.h)
 
-if test "x$ac_cv_header_stdint_h" != "xyes" 
+if test "x$ac_cv_header_stdint_h" != "xyes"
  then
    AC_CHECK_SIZEOF(int, 4)
    AC_CHECK_SIZEOF(long, 4)
@@ -179,7 +179,7 @@ AC_C_INLINE
 dnl ISOC99_PRAGMA
 AC_MSG_CHECKING([whether $CC supports ISO C99 _Pragma()])
 AC_TRY_COMPILE([_Pragma("pack(1)")], [], [
-  ISOC99_PRAGMA=yes 
+  ISOC99_PRAGMA=yes
   AC_DEFINE(HAVE_ISOC99_PRAGMA, [], [Supports ISO _Pragma() macro])
 ],ISOC99_PRAGMA=no)
 AC_MSG_RESULT($ISOC99_PRAGMA)
@@ -198,7 +198,7 @@ if test "x$empty_array_size" = "xxxx"
 then
   AC_MSG_ERROR([compiler is unable to creaty empty arrays])
 else
-  AC_DEFINE_UNQUOTED(EMPTY_ARRAY_SIZE, $empty_array_size, 
+  AC_DEFINE_UNQUOTED(EMPTY_ARRAY_SIZE, $empty_array_size,
 	[what to put between the brackets for empty arrays])
   changequote(`,')
   msg="[${empty_array_size}]"
@@ -275,25 +275,25 @@ don't know its value for host "$host".
 dnl
 
 dnl system
-PKG_CHECK_MODULES(LIBCDIO, libcdio >= 0.76, [], 
-	[AC_MSG_ERROR(Required libcdio library not found. Please get libcdio from http://www.gnu.org/software/libcdio/ and install it.)])
+PKG_CHECK_MODULES(LIBCDIO, libcdio >= 1.1.0, [],
+	[AC_MSG_ERROR(Required libcdio library (> 2.0.0) not found. Please get libcdio from http://www.gnu.org/software/libcdio/ and install it.)])
 AC_SUBST(LIBCDIO_LIBS)
 AC_SUBST(LIBCDIO_CFLAGS)
 
-PKG_CHECK_MODULES(LIBISO9660, libiso9660 >= 0.76, [], 
+PKG_CHECK_MODULES(LIBISO9660, libiso9660 >= 1.1.0, [],
 	[AC_MSG_ERROR(Required libiso9660 library (part of libcdio) not found. Please get libcdio from http://www.gnu.org/software/libcdio/ and install it.)])
 AC_SUBST(LIBISO9660_CFLAGS)
 AC_SUBST(LIBISO9660_LIBS)
 
 case $host_os in
      cygwin*)
-	AC_DEFINE([CYGWIN], [1], 
+	AC_DEFINE([CYGWIN], [1],
                   [Define 1 if you are compiling using cygwin])
 	;;
      darwin*)
-       AC_CHECK_HEADERS(IOKit/IOKitLib.h CoreFoundation/CFBase.h, 
+       AC_CHECK_HEADERS(IOKit/IOKitLib.h CoreFoundation/CFBase.h,
                         [have_iokit_h="yes"])
-       if test "x$have_iokit_h" = "xyes" ; then 
+       if test "x$have_iokit_h" = "xyes" ; then
 	 LIBS="$LIBS  -framework CoreFoundation -framework IOKit"
        fi
      ;;
@@ -303,19 +303,19 @@ LIBS="$LIBS -lm"
 CFLAGS="$CFLAGS $WARN_CFLAGS"
 
 # We need either GNU make or --without-versioned-libs
-if test "x$enable_versioned_libs" = "xyes" ; then 
+if test "x$enable_versioned_libs" = "xyes" ; then
   if test -n "$MAKE" ; then
     $MAKE --version 2>/dev/null >/dev/null
     if test "$?" -ne 0 ; then
-       AC_MSG_ERROR(Either set MAKE variable to GNU make or use 
+       AC_MSG_ERROR(Either set MAKE variable to GNU make or use
    --without-versioned-libs option)
     fi
-  else 
+  else
     make --version 2>/dev/null >/dev/null
     if test "$?" -ne 0 ; then
-       AC_MSG_ERROR(Either set MAKE variable to GNU make or use 
+       AC_MSG_ERROR(Either set MAKE variable to GNU make or use
    --without-versioned-libs option)
-    else 
+    else
       # Do we have GNU ld? We need that too.
       if test "$with_gnu_ld" != yes; then
         AC_MSG_WARN(I don't see GNU ld. I'm going to assume --without-versioned-libs)

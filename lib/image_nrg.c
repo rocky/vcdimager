@@ -1,6 +1,5 @@
 /*
-    $Id$
-
+    Copyright (C) 2018 Rocky Bernstein <rocky@gnu.org>
     Copyright (C) 2001, 2003, 2004, 2005, 2006
     Herbert Valerio Riedel <hvr@gnu.org>
 
@@ -47,8 +46,6 @@
 #include "stream_stdio.h"
 #include "util.h"
 
-static const char _rcsid[] = "$Id$";
-
 /* structures used */
 
 /* this ugly image format is typical for lazy win32 programmers... at
@@ -59,7 +56,7 @@ PRAGMA_BEGIN_PACKED
 typedef struct {
   uint32_t start      GNUC_PACKED;
   uint32_t length     GNUC_PACKED;
-  uint32_t type       GNUC_PACKED; /* only 0x3 seen so far... 
+  uint32_t type       GNUC_PACKED; /* only 0x3 seen so far...
                                       -> MIXED_MODE2 2336 blocksize */
   uint32_t start_lsn  GNUC_PACKED; /* does not include any pre-gaps! */
   uint32_t _unknown   GNUC_PACKED; /* wtf is this for? -- always zero... */
@@ -79,7 +76,7 @@ typedef struct {
   uint8_t  track;                  /* binary or BCD?? */
   uint8_t  index;                  /* makes 0->1 transitions */
   uint8_t  _unknown2;              /* ?? */
-  uint32_t lsn        GNUC_PACKED; 
+  uint32_t lsn        GNUC_PACKED;
 } _cuex_array_t;
 
 typedef struct {
@@ -126,7 +123,7 @@ _sink_init (_img_nrg_snk_t *_obj)
   if (!(_obj->nrg_snk = vcd_data_sink_new_stdio (_obj->nrg_fname)))
     vcd_error ("init failed");
 
-  _obj->init = true;  
+  _obj->init = true;
 }
 
 
@@ -159,7 +156,7 @@ _set_cuesheet (void *user_data, const CdioList_t *vcd_cue_list)
       vcd_cue_t *_cue2 = calloc(1, sizeof (vcd_cue_t));
       *_cue2 = *_cue;
       _cdio_list_append (_obj->vcd_cue_list, _cue2);
-  
+
       if (_cue->type == VCD_CUE_TRACK_START)
 	num++;
 
@@ -186,7 +183,7 @@ _map (_img_nrg_snk_t *_obj, uint32_t lsn)
   _CDIO_LIST_FOREACH (node, _obj->vcd_cue_list)
     {
       _cue = _cdio_list_node_data (node);
-      
+
       if (lsn < _cue->lsn)
 	break;
 
@@ -204,7 +201,7 @@ _map (_img_nrg_snk_t *_obj, uint32_t lsn)
 
       _last = _cue;
     }
-  
+
   vcd_assert (node != NULL);
 
   switch (_last->type)
@@ -216,7 +213,7 @@ _map (_img_nrg_snk_t *_obj, uint32_t lsn)
     case VCD_CUE_PREGAP_START:
       return -1;
       break;
-    
+
     default:
     case VCD_CUE_END:
       vcd_assert_not_reached ();
@@ -244,10 +241,10 @@ _write_tail (_img_nrg_snk_t *_obj, uint32_t offset)
   _CDIO_LIST_FOREACH (node, _obj->vcd_cue_list)
     {
       vcd_cue_t *_cue = _cdio_list_node_data (node);
-      
+
       if (_cue->type == VCD_CUE_TRACK_START)
 	{
-	  vcd_cue_t *_cue2 = 
+	  vcd_cue_t *_cue2 =
 	    _cdio_list_node_data (_cdio_list_node_next (node));
 
 	  _etnf_array_t _etnf = { 0, };
@@ -255,14 +252,14 @@ _write_tail (_img_nrg_snk_t *_obj, uint32_t offset)
 	  _etnf.type = UINT32_TO_BE (0x3);
 	  _etnf.start_lsn = uint32_to_be (_map (_obj, _cue->lsn));
 	  _etnf.start = uint32_to_be (_map (_obj, _cue->lsn) * M2RAW_SECTOR_SIZE);
-	  
+
 	  _etnf.length = uint32_to_be ((_cue2->lsn - _cue->lsn) * M2RAW_SECTOR_SIZE);
 
 	  vcd_data_sink_write (_obj->nrg_snk, &_etnf, sizeof (_etnf_array_t), 1);
 	}
-	
+
     }
-  
+
   {
     uint32_t tracks = uint32_to_be (_obj->tracks);
 
@@ -283,7 +280,7 @@ _write_tail (_img_nrg_snk_t *_obj, uint32_t offset)
 
   return 0;
 }
- 
+
 static int
 _vcd_image_nrg_write (void *user_data, const void *data, lsn_t lsn)
 {
@@ -304,7 +301,7 @@ _vcd_image_nrg_write (void *user_data, const void *data, lsn_t lsn)
 
   if (_obj->cue_end_lsn - 1 == lsn)
     {
-      vcd_debug ("ENDLSN reached! (%lu == %lu)", 
+      vcd_debug ("ENDLSN reached! (%lu == %lu)",
 		 (long unsigned int) lsn, (long unsigned int) _lsn);
       return _write_tail (_obj, (_lsn + 1) * M2RAW_SECTOR_SIZE);
     }
@@ -351,4 +348,3 @@ vcd_image_sink_new_nrg (void)
 
   return vcd_image_sink_new (_data, &_funcs);
 }
-
