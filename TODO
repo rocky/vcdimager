@@ -11,7 +11,7 @@ TODO LIST:
  * support for karaoke area
  * implement missing ISO9660 labels/ids/properties
 
-- version 2.0+
+- version 4.0+
  * support for apple meta info in ISO9660
  * C++ rewrite (OOD & OOA already on paper)
  * releasing libvcd
