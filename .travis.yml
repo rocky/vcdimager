@@ -1,0 +1,16 @@
+env:
+  global:
+    - DOWNLOAD_LOC="ftp://ftp.gnu.org/pub/gnu/libcdio/libcdio-2.0.0.tar.gz"
+  matrix:
+    - LIBCDIO_VERSION="2.0.0"
+
+install:
+  # Prerequisites
+  - sudo apt-get install -y automake autoconf libtool help2man libpopt-dev
+  - wget $DOWNLOAD_LOC
+  - tar -xpf libcdio-${LIBCDIO_VERSION}.tar.gz
+  - cd libcdio-${LIBCDIO_VERSION} && ./configure --prefix=/usr && make && sudo make install && cd .. && rm -fr libcdio-${LIBCDIO_VERSION}
+  - ./autogen.sh && make
+
+script:
+- make check
