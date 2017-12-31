@@ -1,6 +1,4 @@
 /*
-    $Id$
-
     Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
@@ -37,19 +35,17 @@
 #include "vcd_xml_dtd.h"
 #include "videocd_dtd.inc"
 
-static const char _rcsid[] = "$Id$";
-
 int vcd_xml_dtd_loaded = -1; /* extern */
 
 static xmlExternalEntityLoader _xmlExternalEntityLoaderDefault = 0;
 
-static xmlParserInputPtr 
-_xmlExternalEntityLoader (const char *sysid, const char *pubid, 
+static xmlParserInputPtr
+_xmlExternalEntityLoader (const char *sysid, const char *pubid,
 			  xmlParserCtxtPtr context)
 {
   vcd_assert (vcd_xml_dtd_loaded >= 0);
 
-  vcd_debug ("EEL sysid=[%s] pubid=[%s]", 
+  vcd_debug ("EEL sysid=[%s] pubid=[%s]",
 	     sysid ? sysid : "NULL", pubid ? pubid : "NULL");
 
   if ((pubid && !strcmp (pubid, VIDEOCD_DTD_PUBID))
@@ -57,30 +53,30 @@ _xmlExternalEntityLoader (const char *sysid, const char *pubid,
     {
       xmlParserInputBufferPtr _input_buf;
 
-      _input_buf = xmlParserInputBufferCreateMem (videocd_dtd, 
+      _input_buf = xmlParserInputBufferCreateMem (videocd_dtd,
 						  strlen (videocd_dtd),
 						  XML_CHAR_ENCODING_8859_1);
-      
+
       vcd_xml_dtd_loaded++;
 
-      return xmlNewIOInputStream (context, _input_buf, 
+      return xmlNewIOInputStream (context, _input_buf,
 				  XML_CHAR_ENCODING_8859_1);
     }
-  
+
   /*   fprintf (stderr, "unsupported doctype (pubid: %s, sysid: %s) encountered\n", */
   /* 	   pubid, sysid); */
-  
+
   /* exit (EXIT_FAILURE); */
 
-  return _xmlExternalEntityLoaderDefault (sysid, pubid, context); 
+  return _xmlExternalEntityLoaderDefault (sysid, pubid, context);
 }
 
-void 
+void
 vcd_xml_dtd_init (void)
 {
   vcd_assert (vcd_xml_dtd_loaded == -1);
-  
-  _xmlExternalEntityLoaderDefault = xmlGetExternalEntityLoader (); 
+
+  _xmlExternalEntityLoaderDefault = xmlGetExternalEntityLoader ();
   xmlSetExternalEntityLoader (_xmlExternalEntityLoader);
 
   vcd_xml_dtd_loaded++;

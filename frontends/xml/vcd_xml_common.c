@@ -1,6 +1,4 @@
 /*
-    $Id$
-
     Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
@@ -36,8 +34,6 @@
 
 #include "vcd_xml_common.h"
 
-static const char _rcsid[] = "$Id$";
-
 bool vcd_xml_gui_mode = false;
 
 const char *vcd_xml_progname = "UNSET";
@@ -51,7 +47,7 @@ bool vcd_xml_check_mode = false;
 
 static vcd_log_handler_t __default_vcd_log_handler = 0;
 
-static void 
+static void
 _vcd_xml_log_handler (vcd_log_level_t level, const char message[])
 {
 
@@ -99,7 +95,7 @@ vcd_xml_log_init (void)
   __default_vcd_log_handler = vcd_log_set_handler (_vcd_xml_log_handler);
 }
 
-int 
+int
 vcd_xml_scan_progress_cb (const vcd_mpeg_prog_info_t *info, void *user_data)
 {
   const bool _last = info->current_pos == info->length;
@@ -136,7 +132,7 @@ vcd_xml_read_progress_cb (const _read_progress_t *info, void *user_data)
 
   if (!vcd_xml_show_progress)
     return 0;
-  
+
   if (vcd_xml_gui_mode)
     fprintf (stdout, "<progress operation=\"extract\" id=\"%s\" position=\"%ld\" size=\"%ld\" />\n",
 	     (char *) user_data, info->done, info->total);
@@ -145,7 +141,7 @@ vcd_xml_read_progress_cb (const _read_progress_t *info, void *user_data)
       fprintf (stdout, "#extract[%s]: %ld/%ld (%2.0f%%)          \r",
 	       (char *) user_data, info->done, info->total,
 	       (double) info->done / info->total * 100);
-      
+
       if (_last)
 	{
 	  fflush (stdout);
@@ -176,7 +172,7 @@ vcd_xml_write_progress_cb (const progress_info_t *info, void *user_data)
 	       info->in_track, info->total_tracks, info->sectors_written,
 	       info->total_sectors,
 	       (double) info->sectors_written / info->total_sectors * 100);
-      
+
       if (_last)
 	{
 	  fflush (stdout);
@@ -246,12 +242,12 @@ _convert (const char in[], const char encoding[], bool from)
 
   temp = size - 1;
   if (from) {
-    if (NULL != handler->output)  
+    if (NULL != handler->output)
       ret = handler->output (out, &out_size, (const unsigned char *) in, &temp);
     else
       return strdup(in);
   } else {
-    if (NULL != handler->input)  
+    if (NULL != handler->input)
       ret = handler->input (out, &out_size, (const unsigned char *) in, &temp);
     else
       return strdup(in);
