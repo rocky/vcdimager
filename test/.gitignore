@@ -1,1 +1,10 @@
+/*.log
+/*.trs
+/check_bitfield
 /check_common_fn
+/check_sizeof
+/mpegscan
+/mpegscan2
+/testassert
+/testimage
+/testvcd

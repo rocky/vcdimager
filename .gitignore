@@ -2,6 +2,13 @@
 *.tar.gz
 *~
 .deps
+.libs
+/INSTALL
+*.1
+*.o
+*.lo
+*.la
+*.info
 /install-sh
 /libtool.m4
 /ltoptions.m4
