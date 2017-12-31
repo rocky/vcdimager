@@ -2,7 +2,7 @@
    \file info.h
    \brief  Interface for higher-level libvcdinfo. See also inf.h
 
-    Copyright (C) 2002, 2003, 2004, 2005 Rocky Bernstein <rocky@panix.com>
+    Copyright (C) 2002, 2003, 2004, 2005 Rocky Bernstein <rocky@gnu.org>
 
  \verbatim
     This program is free software; you can redistribute it and/or modify

@@ -1,7 +1,5 @@
 /*
-    $Id$
-
-    Copyright (C) 2005 Rocky Bernstein <rocky@panix.com>
+    Copyright (C) 2005 Rocky Bernstein <rocky@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -43,7 +41,7 @@ main (int argc, const char *argv[])
   char *psz = NULL;
 
   /* Set to give only errors on open, not warnings. */
-  vcd_loglevel_default = VCD_LOG_ERROR; 
+  vcd_loglevel_default = VCD_LOG_ERROR;
 
   if ( vcdinfo_open(&p_vcdinfo, &psz_source, DRIVER_DEVICE,
                     NULL) != VCDINFO_OPEN_VCD) {
@@ -63,7 +61,7 @@ main (int argc, const char *argv[])
   psz = vcdinfo_get_preparer_id(p_vcdinfo);
   printf ("Preparer id: `%s'\n",    psz);
   free(psz);
-  
+
   psz = vcdinfo_get_publisher_id(p_vcdinfo);
   printf ("Publisher id: `%s'\n",  psz);
   free(psz);
@@ -75,17 +73,17 @@ main (int argc, const char *argv[])
   psz = vcdinfo_get_application_id(p_vcdinfo);
   printf ("Application id: `%s'\n", psz);
   free(psz);
-  
-  { 
+
+  {
     const iso9660_pvd_t *p_pvd = vcdinfo_get_pvd(p_vcdinfo);
 
     if (iso9660_get_pvd_type(p_pvd) != ISO_VD_PRIMARY)
       printf ("Unexpected descriptor type\n");
-    
-    if (strncmp (iso9660_get_pvd_id(p_pvd), ISO_STANDARD_ID, 
+
+    if (strncmp (iso9660_get_pvd_id(p_pvd), ISO_STANDARD_ID,
 		 strlen (ISO_STANDARD_ID)))
       printf ("Unexpected ID encountered (expected `" ISO_STANDARD_ID "'");
-  
+
     printf("PVD ID: `%.5s'\n",  iso9660_get_pvd_id(p_pvd));
     printf("PVD version: %d\n", iso9660_get_pvd_version(p_pvd));
   }

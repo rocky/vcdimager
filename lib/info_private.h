@@ -1,7 +1,7 @@
 /*!
    \file vcdinf.h
 
-    Copyright (C) 2002,2003 Rocky Bernstein <rocky@panix.com>
+    Copyright (C) 2002,2003 Rocky Bernstein <rocky@gnu.org>
 
  \verbatim
     This program is free software; you can redistribute it and/or modify
@@ -45,19 +45,19 @@ extern "C" {
 
   struct _VcdInfo {
     vcd_type_t vcd_type;
-    
+
     CdIo_t *img;
-    
+
     iso9660_pvd_t pvd;
-    
+
     InfoVcd_t info;
     EntriesVcd_t entries;
-    
+
     CdioList_t *offset_list;
     CdioList_t *offset_x_list;
-    uint32_t *seg_sizes; 
+    uint32_t *seg_sizes;
     lsn_t   first_segment_lsn;
-    
+
     LotVcd_t *lot;
     LotVcd_t *lot_x;
     uint8_t *psd;
@@ -66,20 +66,20 @@ extern "C" {
     bool extended;
 
     bool has_xa;           /* True if has extended attributes (XA) */
-    
+
     void *tracks_buf;
     void *search_buf;
     void *scandata_buf;
-    
+
     char *source_name; /* VCD device or file currently open */
-    
+
   };
-  
+
   /*!  Return the starting MSF (minutes/secs/frames) for sequence
     entry_num in obj.  NULL is returned if there is no entry.
     The first entry number is 0.
   */
-  const msf_t * vcdinf_get_entry_msf(const EntriesVcd_t *entries, 
+  const msf_t * vcdinf_get_entry_msf(const EntriesVcd_t *entries,
 				     unsigned int entry_num);
 
   struct _vcdinf_pbc_ctx {
@@ -88,7 +88,7 @@ extern "C" {
     unsigned offset_mult;
     CdioList_t *offset_x_list;
     CdioList_t *offset_list;
-    
+
     LotVcd_t *lot;
     LotVcd_t *lot_x;
     uint8_t *psd;
@@ -104,14 +104,14 @@ extern "C" {
      Returns false if there was some error.
   */
   bool vcdinf_visit_lot (struct _vcdinf_pbc_ctx *obj);
-  
-  /*! 
+
+  /*!
      Recursive routine to populate obj->offset_list or obj->offset_x_list
      by reading playback control entries referred to via lid.
 
      Returns false if there was some error.
   */
-  bool vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid, 
+  bool vcdinf_visit_pbc (struct _vcdinf_pbc_ctx *obj, lid_t lid,
 			 unsigned int offset, bool in_lot);
 
 #ifdef __cplusplus

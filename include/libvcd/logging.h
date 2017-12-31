@@ -1,8 +1,6 @@
 /*
-    $Id$
-
     Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
-    Copyright (C) 2003, 2005 Rocky Bernstein <rocky@panix.com>
+    Copyright (C) 2003, 2005 Rocky Bernstein <rocky@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,9 +16,9 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-/** \file logging.h 
+/** \file logging.h
  *  \brief Header to control logging and level of detail of output.
- *         
+ *
  */
 
 #ifndef __VCD_LOGGING_H__
@@ -37,7 +35,7 @@ extern "C" {
  */
 typedef enum {
   VCD_LOG_DEBUG = 1, /**< Debug-level messages - helps debug what's up. */
-  VCD_LOG_INFO,      /**< Informational - indicates perhaps something of 
+  VCD_LOG_INFO,      /**< Informational - indicates perhaps something of
                            interest. */
   VCD_LOG_WARN,      /**< Warning conditions - something that looks funny. */
   VCD_LOG_ERROR,     /**< Error conditions - may terminate program.  */
@@ -45,7 +43,7 @@ typedef enum {
 } vcd_log_level_t;
 
 /**
- * The place to save the preference concerning how much verbosity 
+ * The place to save the preference concerning how much verbosity
  * is desired. This is used by the internal default log handler, but
  * it could be use by applications which provide their own log handler.
  */
@@ -62,7 +60,7 @@ extern vcd_log_level_t vcd_loglevel_default;
  * @param level   The log level.
  * @param message The log message.
  */
-typedef void (*vcd_log_handler_t) (vcd_log_level_t level, 
+typedef void (*vcd_log_handler_t) (vcd_log_level_t level,
                                    const char message[]);
 
 /**
@@ -92,7 +90,7 @@ vcd_log_set_handler (vcd_log_handler_t new_handler);
  */
 void
 vcd_log (vcd_log_level_t level, const char format[], ...) GNUC_PRINTF(2, 3);
-    
+
 /**
  * Handle a debugging message.
  *
@@ -132,7 +130,7 @@ vcd_error (const char format[], ...) GNUC_PRINTF(1,2);
 #endif /* __VCD_LOGGING_H__ */
 
 
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8

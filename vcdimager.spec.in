@@ -54,7 +54,7 @@ cdxa2mpeg   Simple tool for converting RIFF CDXA file to plain mpeg.
 Authors:
 --------
     Herbert Valerio Riedel <hvr@gnu.org>
-    Rocky Bernstein <rocky@panix.com>
+    Rocky Bernstein <rocky@gnu.org>
 
 %description -l de
 GNU VCDImager ist eine vollwertige Suite zum erstellen, mastern,
@@ -81,7 +81,7 @@ cdxa2mpeg   Einfaches tool zur Konvertierung von RIFF CDXA Dateien in MPEG.
 Autor:
 ------
     Herbert Valerio Riedel <hvr@gnu.org>
-    Rocky Bernstein <rocky@panix.com>
+    Rocky Bernstein <rocky@gnu.org>
 
 %package -n libvcd
 Summary:        (Super)Video CD image mastering and ripping tool - Libraries
@@ -146,22 +146,22 @@ make all
 * Sun Feb 15 2004 Manfred Tremmel <Manfred.Tremmel@iiv.de>
 - some little changes
 
-* Sat Feb 14 2004 Rocky Bernstein <rocky@panix.com>
+* Sat Feb 14 2004 Rocky Bernstein <rocky@gnu.org>
 - require libcdio 0.66
 
 * Tue Sep 09 2003 Frantisek Dvorak <valtri@atlas.cz>
 - versions of tarball and rpm differ
 - remove some duplicate items
 
-* Sun Aug 10 2003 Rocky Bernstein <rocky@panix.com>
+* Sun Aug 10 2003 Rocky Bernstein <rocky@gnu.org>
 - one more fix from Manfred Tremmel <Manfred.Tremmel@iiv.de>
   at http://www.iiv.de/schwinde/buerger/tremmel/
 
-* Wed Aug 06 2003 Rocky Bernstein <rocky@panix.com>
+* Wed Aug 06 2003 Rocky Bernstein <rocky@gnu.org>
 - fixes from Manfred Tremmel <Manfred.Tremmel@iiv.de>
   at http://www.iiv.de/schwinde/buerger/tremmel/
 
-* Sat Aug 03 2003 Rocky Bernstein <rocky@panix.com>
+* Sat Aug 03 2003 Rocky Bernstein <rocky@gnu.org>
 - minor spec cleanups
 
 * Sat Jan 04 2002 Herbert Valerio Riedel <hvr@gnu.org>

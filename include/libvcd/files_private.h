@@ -3,7 +3,7 @@
 
     Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
               (C) 2000 Jens B. Jorgensen <jbj1@ultraemail.net>
-              (C) 2005 Rocky Bernstein <rocky@panix.com>
+              (C) 2005 Rocky Bernstein <rocky@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -34,10 +34,10 @@
 #define ENTRIES_ID_SVCD "ENTRYVCD" /* not ENTRYSVD! */
 
 #define ENTRIES_VERSION_VCD   0x01
-#define ENTRIES_SPTAG_VCD     0x00   
+#define ENTRIES_SPTAG_VCD     0x00
 
 #define ENTRIES_VERSION_VCD11 0x01
-#define ENTRIES_SPTAG_VCD11   0x00   
+#define ENTRIES_SPTAG_VCD11   0x00
 
 #define ENTRIES_VERSION_VCD2  0x02
 #define ENTRIES_SPTAG_VCD2    0x00
@@ -74,13 +74,13 @@ typedef struct _EntriesVcd_tag {
 #define INFO_ID_HQVCD "HQ-VCD  "
 
 #define INFO_VERSION_VCD   0x01
-#define INFO_SPTAG_VCD     0x00   
+#define INFO_SPTAG_VCD     0x00
 
 #define INFO_VERSION_VCD11 0x01
-#define INFO_SPTAG_VCD11   0x01   
+#define INFO_SPTAG_VCD11   0x01
 
 #define INFO_VERSION_VCD2  0x02
-#define INFO_SPTAG_VCD2    0x00   
+#define INFO_SPTAG_VCD2    0x00
 
 #define INFO_VERSION_SVCD  0x01
 #define INFO_SPTAG_SVCD    0x00
@@ -102,8 +102,8 @@ typedef struct {
                                               0x1 ==> restricted category 1,
                                               0x2 ==> restricted category 2,
                                               0x3 ==> restricted category 3 */
-  bool       special_info : 1;                /**< Special Information is 
-                                                   encoded 
+  bool       special_info : 1;                /**< Special Information is
+                                                   encoded
                                                    in the pictures */
   bool       user_data_cc : 1;                /**< MPEG User Data is used
                                                    for Closed Caption */
@@ -112,13 +112,13 @@ typedef struct {
                                                  disc has the same album
                                                  id then start the next
                                                  disc at List ID #2,
-                                                 otherwise List ID #1 */ 
+                                                 otherwise List ID #1 */
   bool       use_track3 : 1;                  /**< If == 1 and the PSD is
                                                  not interpreted  and
                                                  next disc has same album
                                                  id, then start next disc
                                                  with track 3, otherwise
-                                                 start with track 2 */ 
+                                                 start with track 2 */
   bool       pbc_x : 1;                       /**< extended PBC available */
 #else
   bool       pbc_x : 1;
@@ -143,7 +143,7 @@ enum {
   VCD_FILES_VIDEO_PAL_MOTION = 7
 };
 
-typedef struct 
+typedef struct
 {
 #if defined(BITFIELD_LSBF)
   bitfield_t audio_type : 2;                /**< Audio characteristics:
@@ -152,7 +152,7 @@ typedef struct
                                                     stream without extension
                                               0x2 - Two MPEG1 or MPEG2 audio
                                                     streams without extension
-                                              0x3 - One MPEG2 multi-channel 
+                                              0x3 - One MPEG2 multi-channel
                                                     audio stream w/ extension*/
   bitfield_t video_type : 3;                /**< Video characteristics:
                                               0x0 - No MPEG video data
@@ -163,16 +163,16 @@ typedef struct
                                               0x5 - PAL still picture
                                               0x6 - Reserved (PAL hires?)
                                               0x7 - PAL motion picture */
-  bool       item_cont : 1;                 /**< Indicates segment is 
+  bool       item_cont : 1;                 /**< Indicates segment is
                                                  continuation
                                               0x0 - 1st or only segment of item
                                               0x1 - 2nd or later
                                                     segment of item */
-  bitfield_t ogt : 2;                       /**< 0x0 - no OGT substream 
+  bitfield_t ogt : 2;                       /**< 0x0 - no OGT substream
                                                  0x1 - sub-stream 0 available
-                                                 0x2 - sub-stream 0 & 1 
+                                                 0x2 - sub-stream 0 & 1
                                                        available
-                                                 0x3 - all OGT sub-substreams 
+                                                 0x3 - all OGT sub-substreams
                                                        available */
 #else
   bitfield_t ogt : 2;
@@ -189,14 +189,14 @@ typedef struct _InfoVcd_tag {
                                   VCD, "SUPERVCD" or
                                   "HQ-VCD  " for SVCD */
   uint8_t version;           /**< 0x02 -- VCD2.0,
-                                  0x01 for SVCD and VCD1.x */ 
+                                  0x01 for SVCD and VCD1.x */
   uint8_t sys_prof_tag;      /**< System Profile Tag, used
                                   to define the set of
                                   mandatory parts to be
                                   applied for compatibility;
                                   0x00 for "SUPERVCD",
                                   0x01 for "HQ-VCD  ",
-                                  0x0n for VCDx.n */ 
+                                  0x0n for VCDx.n */
   char album_desc[16];       /**< album identification/desc. */
   uint16_t vol_count;        /**< number of volumes in album */
   uint16_t vol_id;           /**< number id of this volume in album */
@@ -215,8 +215,8 @@ typedef struct _InfoVcd_tag {
   uint16_t lot_entries;      /**< offsets in lot */
   uint16_t item_count;       /**< segments used for segmentitems */
   InfoSpiContents_t spi_contents[MAX_SEGMENTS]; /**< The next 1980 bytes
-                                                   contain one byte for each 
-                                                   possible segment play item. 
+                                                   contain one byte for each
+                                                   possible segment play item.
                                                    Each byte indicates
                                                    contents. */
 
@@ -287,7 +287,7 @@ typedef struct {
   bitfield_t reserved : 6;
   bool       CommandListFlag : 1;
   bool       SelectionAreaFlag : 1;
-#endif  
+#endif
 } GNUC_PACKED PsdSelectionListFlags_t;
 
 #define PsdSelectionListFlags_t_SIZEOF 1
@@ -385,10 +385,10 @@ typedef struct {
                                              0x03 : NTSC video
                                              0x07 : PAL video */
   bool       reserved1 : 1;                  /**< Reserved, must be zero */
-  bitfield_t ogt : 2;                        /**< 0x0 - no OGT substream 
+  bitfield_t ogt : 2;                        /**< 0x0 - no OGT substream
                                              0x1 - sub-stream 0 available
                                              0x2 - sub-stream 0 & 1 available
-                                             0x3 - all OGT sub-substreams 
+                                             0x3 - all OGT sub-substreams
                                                    available */
 #else
   bitfield_t ogt : 2;
@@ -408,7 +408,7 @@ typedef struct {
 #define TRACKS_SVD_VERSION  0x01
 
 typedef struct {
-  char file_id[sizeof(TRACKS_SVD_FILE_ID)-1];  /**< == "TRACKSVD" with out 
+  char file_id[sizeof(TRACKS_SVD_FILE_ID)-1];  /**< == "TRACKSVD" with out
                                                     final NULL byte */
   uint8_t version;  /**< == 0x01 */
   uint8_t reserved; /**< Reserved, must be zero */
@@ -454,7 +454,7 @@ typedef struct {
 #define SEARCH_TIME_INTERVAL  0x01
 
 typedef struct {
-  char file_id[sizeof(SEARCH_FILE_ID)-1]; /**< == "SEARCHSV" without final 
+  char file_id[sizeof(SEARCH_FILE_ID)-1]; /**< == "SEARCHSV" without final
                                                NULL byte */
   uint8_t version;  /**< = 0x01 */
   uint8_t reserved; /**< Reserved, must be zero */
@@ -467,7 +467,7 @@ typedef struct {
 
 #define SearchDat_t_SIZEOF 13
 
-/* SPICONTX.SVD 
+/* SPICONTX.SVD
  */
 
 #define SPICONTX_FILE_ID      "SPICONSV"
@@ -499,7 +499,7 @@ typedef struct {
   uint8_t version;                          /**< = 0x02 */
   uint8_t reserved;                         /**< Reserved, must be zero */
   uint16_t scan_points;                     /**< the number of scan points */
-  msf_t points[EMPTY_ARRAY_SIZE];           /**< actual scan points 
+  msf_t points[EMPTY_ARRAY_SIZE];           /**< actual scan points
                                                points[time(iframe)/0.5] */
 } GNUC_PACKED ScandataDat_v2_t;
 
@@ -519,11 +519,11 @@ typedef struct {
   uint8_t reserved;                         /**< Reserved, must be zero */
   uint16_t scandata_count;                  /**< number of 3-byte entries in
                                                  the table */
-  uint16_t track_count;                     /**< number of MPEG tracks on 
+  uint16_t track_count;                     /**< number of MPEG tracks on
                                                disc */
-  uint16_t spi_count;                       /**<  number of consecutively 
-                                               recorded play item segments 
-                                               (as opposed to the number of 
+  uint16_t spi_count;                       /**<  number of consecutively
+                                               recorded play item segments
+                                               (as opposed to the number of
                                                segment play items). */
   msf_t cum_playtimes[EMPTY_ARRAY_SIZE];    /**<  cumulative playing
                                                time up to track
@@ -548,7 +548,7 @@ typedef struct {
                                      following scandata table
                                      where the MPEG track
                                      scan points start */
-  
+
   /* The scandata table starts here */
   struct {
     uint8_t track_num;   /* Track number as in TOC */
@@ -570,7 +570,7 @@ PRAGMA_END_PACKED
 #endif /* __VCD_FILES_PRIVATE_H__ */
 
 
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8

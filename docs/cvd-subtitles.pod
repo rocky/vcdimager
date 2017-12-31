@@ -10,7 +10,7 @@ origin. Thus, the information below is result of reading some code
 whose correctness is not known and some experimentation.
 
 Please, if you have any corrections or additions to make, send
-them to rocky@panix.com.
+them to rocky@gnu.org.
 
 CVD subtitles are different in several ways from SVCD OGT subtitles.
 See
@@ -53,10 +53,10 @@ Although metadata information does come in a fixed field order, every
 metadata field consists of a tag byte followed by parameters. In all
 cases seen, the size including the tag byte is exactly four bytes.
 
-  code    Meaning 
+  code    Meaning
   ----    -------
   0x0c 	Unknown
-  
+
   0x04 	24-bit subtitle duration in 1/90000ths of a second
 
   0x17	upper left x, y position, each a 10-bit value, encoded:
@@ -64,22 +64,22 @@ cases seen, the size including the tag byte is exactly four bytes.
            y = ((p[2]&0x03)<<8) + p[3];
 
   0x1f	lower right x, y position, each a 10-bit (0-1023) value,
-        encoded as above 
+        encoded as above
 
-  0x24    3 bytes primary palette 0 - 1 byte for each of y, u, and v 
+  0x24    3 bytes primary palette 0 - 1 byte for each of y, u, and v
   0x25    3 bytes primary palette 1 - 1 byte for each of y, u, and v
   0x26    3 bytes primary palette 2 - 1 byte for each of y, u, and v
   0x27    3 bytes primary palette 3 - 1 byte for each of y, u, and v
 
-  0x2c    3 bytes highlight palette 0 - 1 byte for each of y, u, and v 
+  0x2c    3 bytes highlight palette 0 - 1 byte for each of y, u, and v
   0x2d    3 bytes highlight palette 1 - 1 byte for each of y, u, and v
   0x2e    3 bytes highlight palette 2 - 1 byte for each of y, u, and v
   0x2f    3 bytes highlight palette 3 - 1 byte for each of y, u, and v
 
-  0x37    3 bytes transparency for primary palette - 1 byte for each 
+  0x37    3 bytes transparency for primary palette - 1 byte for each
   	  of y, u  and v
 
-  0x3f    3 bytes transparency for highlight palette - 1 byte for each 
+  0x3f    3 bytes transparency for highlight palette - 1 byte for each
   	  of y, u  and v
 
   0x47    Offset to start of even rows of interlaced image.

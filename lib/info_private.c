@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003, 2005, 2006, 2017 Rocky Bernstein <rocky@panix.com>
+    Copyright (C) 2003, 2005, 2006, 2017 Rocky Bernstein <rocky@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

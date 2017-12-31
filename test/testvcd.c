@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 Rocky Bernstein <rocky@panix.com>
+ * Copyright (C) 2005 Rocky Bernstein <rocky@gnu.org>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  */
-/* Test the operation of vcd-info and vcdxrip on a real CD-ROM - not a 
+/* Test the operation of vcd-info and vcdxrip on a real CD-ROM - not a
    CD-ROM image. */
 
 #ifdef HAVE_CONFIG_H
@@ -60,7 +60,7 @@ main(int argc, const char *argv[])
   struct stat statbuf;
 
   /* Set to give only errors on open, not warnings. */
-  vcd_loglevel_default = VCD_LOG_ERROR; 
+  vcd_loglevel_default = VCD_LOG_ERROR;
 
   if ( vcdinfo_open(&p_vcdinfo, &psz_source, DRIVER_DEVICE,
                     NULL) != VCDINFO_OPEN_VCD) {
@@ -77,18 +77,18 @@ main(int argc, const char *argv[])
     snprintf(cmd, sizeof(cmd), FRONTEND_DIR "cli/vcd-info -i %s", psz_source);
     i_rc = system(cmd);
   }
-  
+
   if (0 != stat(FRONTEND_DIR "xml/vcdxrip", &statbuf)) {
     printf("Unable to find vcdxrip program; skipping test\n");
   } else {
     int i_rc2;
-    snprintf(cmd, sizeof(cmd), 
+    snprintf(cmd, sizeof(cmd),
 	     FRONTEND_DIR "xml/vcdxrip --norip --input=%s", psz_source);
     i_rc2 = system(cmd);
-    if (i_rc2 && SKIP_TEST_RC != i_rc && !i_rc) 
+    if (i_rc2 && SKIP_TEST_RC != i_rc && !i_rc)
       i_rc = i_rc2;
   }
-  
+
   free(psz_source);
   return i_rc;
 }

@@ -1,8 +1,6 @@
 /*
-    $Id$
-
     Copyright (C) 2001, 2005 Herbert Valerio Riedel <hvr@gnu.org>
-    Copyright (C) 2006 Rocky Bernstein <rocky@panix.com>
+    Copyright (C) 2006 Rocky Bernstein <rocky@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -48,10 +46,10 @@ main (int argc, const char *argv[])
   if (!strcmp ("nrg", argv[1]))
     img = cdio_open_nrg (argv[2]);
   else if (!strcmp ("bincue", argv[1]))
-    img = cdio_open_bincue (argv[2]) /* src, NULL, false) */; 
+    img = cdio_open_bincue (argv[2]) /* src, NULL, false) */;
   else if (!strcmp ("cd", argv[1]))
     img = cdio_open_cd (argv[2]) /* argv[2]) */;
-  else 
+  else
     vcd_error ("unrecognized img type");
 
   vcd_assert (img != NULL);
@@ -64,7 +62,7 @@ main (int argc, const char *argv[])
     vcd_debug ("size = %lu", (unsigned long int) n);
 
     vcd_debug ("reading sector %lu to testimage.out", (unsigned long int) lsn);
-    
+
     if (!cdio_read_mode2_sector (img, buf, lsn, true))
       {
 	struct m2f2sector
@@ -91,7 +89,7 @@ main (int argc, const char *argv[])
     else
       vcd_error ("failed...");
 
-    
+
   }
 
   return 0;
