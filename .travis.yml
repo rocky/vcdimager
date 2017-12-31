@@ -1,6 +1,6 @@
 env:
   global:
-    - DOWNLOAD_LOC="ftp://ftp.gnu.org/pub/gnu/libcdio/libcdio-2.0.0.tar.gz"
+    - DOWNLOAD_LOC="ftp://ftp.gnu.org/pub/gnu/libcdio/libcdio-2.0.0.tar.bz2"
   matrix:
     - LIBCDIO_VERSION="2.0.0"
 

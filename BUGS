@@ -5,7 +5,7 @@ compilers/architectures
 
 This package has been developed with GNU CC in mind. Caution has been
 taken to stay compatible with other compilers, but there's been no
-testing or whatsoever to ensure anything. 
+testing or whatsoever to ensure anything.
 
 Most of the code is ISO C99 compliant, with the exception of the
 following features not allowed or required in ISO C99:
@@ -29,6 +29,3 @@ vcdimager/vcdxbuild
  *) mpeg analyzation doesn't detect all non-conforming parameters
  *) memleaks exist
  *) XML strings encodings not handled well yet
-
---
-$Id$

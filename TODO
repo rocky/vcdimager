@@ -3,7 +3,7 @@
 TODO LIST:
 ~~~~~~~~~~
 
-- version 1.0
+- version 3.0
  * check for VideoCD1.x/VideoCD2.0/SuperVideoCD1.0 conformance
  * optimize/improve MPEG detection/scanning/handling code
  * documentation/examples (XML!!)
@@ -30,10 +30,7 @@ MISSING INFORMATION (read `INFO WISHLIST'):
  * more infos about VideoCD 1.0 (aka Karaoke CD)
 
  * more infos on chinese/asian SVCD spec (aka VCD 3.0?) and CVD
-  
+
  * more infos on closed caption for VCD2.0/SVCD1.0
 
  * ...so much more... :-)
-
---
-$Id$
