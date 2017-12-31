@@ -1,7 +1,5 @@
-# $Id$
-#
+# Copyright (C) 2003, 2017 Rocky Bernstein <rocky@panix.com>
 # Copyright (C) 2003 Herbert Valerio Riedel <hvr@gnu.org>
-# Copyright (C) 2003 Rocky Bernstein <rocky@panix.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,11 +16,11 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 # 02111-1307, USA.
 
-SUBDIRS = include lib frontends test amiga docs example
+SUBDIRS = include lib frontends test docs example
 
 # pkg-config(1) related rules
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = libvcdinfo.pc 
+pkgconfig_DATA = libvcdinfo.pc
 
 EXTRA_DIST = BUGS FAQ cygwin-dist.sh HACKING libpopt.m4 \
 	ChangeLog_pre0_5 ChangeLog_pre0_7_14 \
@@ -53,7 +51,7 @@ if MAINTAINER_MODE
 
 .PHONY: ChangeLog
 ChangeLog:
-	$(CVS2CL) -W 450 --header $(srcdir)/cvs2cl_header --utc -w -I ChangeLog --usermap $(srcdir)/cvs2cl_usermap -P 
+	$(CVS2CL) -W 450 --header $(srcdir)/cvs2cl_header --utc -w -I ChangeLog --usermap $(srcdir)/cvs2cl_usermap -P
 
 ACLOCAL_AMFLAGS=-I .
 

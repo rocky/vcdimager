@@ -1,6 +1,3 @@
-# $Id$
-#   $Id$
-#
 #    Copyright (C) 2004, 2005 Rocky Bernstein <rocky@panix.com>
 #
 #    This program is free software; you can redistribute it and/or modify
@@ -21,11 +18,11 @@
 # Things to make the libvcd and libvcdinfo librares
 ####################################################
 
-# From libtool documentation amended with guidance from N. Boullis: 
+# From libtool documentation amended with guidance from N. Boullis:
 #
 #  1. Start with version information of `0:0:0' for each libtool library.
 #
-#  2. It is probably not a good idea to update the version information 
+#  2. It is probably not a good idea to update the version information
 #     several times between public releases, but rather once per public
 #     release. (This seems to be more an aesthetic consideration than
 #     a hard technical one.)
@@ -50,7 +47,7 @@ libvcdinfo_la_AGE := 2
 noinst_LTLIBRARIES = libvcd.la
 lib_LTLIBRARIES = libvcdinfo.la
 
-INCLUDES = $(LIBVCD_CFLAGS) $(LIBCDIO_CFLAGS)
+AM_CPPFLAGS = $(LIBVCD_CFLAGS) $(LIBCDIO_CFLAGS)
 
 libvcd_la_LIBADD = $(LIBCDIO_LIBS) $(LIBISO9660_LIBS)
 libvcd_la_SOURCES = \
@@ -86,7 +83,7 @@ libvcd_la_SOURCES = \
 	sector.c \
 	stream.c \
 	stream_stdio.c \
-	util.c 
+	util.c
 
 libvcdinfo_la_SOURCES = \
 	info.c \
@@ -94,7 +91,7 @@ libvcdinfo_la_SOURCES = \
 	info_private.h \
 	info_private.c \
 	vcd_read.c \
-	vcd_read.h 
+	vcd_read.h
 
 libvcdinfo_la_LIBADD = $(LIBCDIO_LIBS) $(LIBISO9660_LIBS) $(LIBVCD_LIBS)
 libvcdinfo_la_LDFLAGS = -version-info $(libvcdinfo_la_CURRENT):$(libvcdinfo_la_REVISION):$(libvcdinfo_la_AGE)

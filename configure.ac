@@ -340,7 +340,6 @@ AC_SUBST(LIBVCDINFO_LIBS)
 AC_CONFIG_FILES([ \
 	Makefile \
 	libvcdinfo.pc \
-	amiga/Makefile \
 	include/Makefile \
 	include/libvcd/Makefile \
 	include/libvcd/version.h \

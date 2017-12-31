@@ -1,6 +1,6 @@
 noinst_PROGRAMS = mpegscan mpegscan2 testimage testassert testvcd
 
-INCLUDES = -I$(top_srcdir) $(POPT_CFLAGS) $(LIBVCD_CFLAGS) $(LIBCDIO_CFLAGS)
+AM_CPPFLAGS = -I$(top_srcdir) $(POPT_CFLAGS) $(LIBVCD_CFLAGS) $(LIBCDIO_CFLAGS)
 
 mpegscan_LDADD = $(LIBVCD_LIBS) $(LIBISO9660_LIBS)
 mpegscan2_LDADD = $(LIBVCD_LIBS) $(LIBISO9660_LIBS)

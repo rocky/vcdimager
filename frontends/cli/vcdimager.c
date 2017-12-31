@@ -36,7 +36,11 @@
 #ifdef HAVE_STRING_H
 #include <string.h>
 #endif
+
+#ifdef HAVE_TIME_H
+#define __USE_XOPEN
 #include <time.h>
+#endif
 
 #include <popt.h>
 
