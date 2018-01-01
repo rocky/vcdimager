@@ -208,73 +208,73 @@ else
 fi
 dnl empty_array_size
 
-#
-# Check bitfield order in structs
-#
-AC_MSG_CHECKING([bitfield ordering in structs])
-dnl basic compile test for all platforms
-AC_COMPILE_IFELSE([
-int
- main() {
-  struct { char bit_0:1, bit_12:2, bit_345:3, bit_67:2; }
-#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)
-  __attribute__((packed))
-#endif
-  bf = { 1,1,1,1 };
-  switch (0) case 0: case sizeof(bf) == 1:;
-  return 0;
-}
-], [], AC_MSG_ERROR([compiler doesn't support bitfield structs]))
+dnl #
+dnl # Check bitfield order in structs
+dnl #
+dnl AC_MSG_CHECKING([bitfield ordering in structs])
+dnl dnl basic compile test for all platforms
+dnl AC_COMPILE_IFELSE([
+dnl int
+dnl  main() {
+dnl   struct { char bit_0:1, bit_12:2, bit_345:3, bit_67:2; }
+dnl #if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)
+dnl   __attribute__((packed))
+dnl #endif
+dnl   bf = { 1,1,1,1 };
+dnl   switch (0) case 0: case sizeof(bf) == 1:;
+dnl   return 0;
+dnl }
+dnl ], [], AC_MSG_ERROR([compiler doesn't support bitfield structs]))
 
-dnl run test
-AC_RUN_IFELSE([
-int main() {
-  struct { char bit_0:1, bit_12:2, bit_345:3, bit_67:2; }
-#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)
-  __attribute__((packed))
-#endif
-  bf = { 1,1,1,1 };
-  if (sizeof (bf) != 1) return 1;
-  return *((unsigned char*) &bf) != 0x4b; }
-], bf_lsbf=1, [
-  AC_RUN_IFELSE([
-int main() {
-  struct { char bit_0:1, bit_12:2, bit_345:3, bit_67:2; }
-#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)
-  __attribute__((packed))
-#endif
- bf = { 1,1,1,1 };
- if (sizeof (bf) != 1) return 1;
- return *((unsigned char*) &bf) != 0xa5; }
-], bf_lsbf=0, AC_MSG_ERROR([unsupported bitfield ordering]))
-  ],
-  [case "$host" in
-     *-*-mingw32* | *-*-cygwin*)
-       bf_lsbf=1
-     ;;
-     *)
-       AC_MSG_RESULT([unknown])
-       AC_MSG_ERROR([value of bitfield test isn't known for $host
-*********************************************************************
-Value of bitfield test can't find out for cross-compiling and we
-don't know its value for host "$host".
-*********************************************************************])
-  esac]
-)
+dnl dnl run test
+dnl AC_RUN_IFELSE([
+dnl int main() {
+dnl   struct { char bit_0:1, bit_12:2, bit_345:3, bit_67:2; }
+dnl #if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)
+dnl   __attribute__((packed))
+dnl #endif
+dnl   bf = { 1,1,1,1 };
+dnl   if (sizeof (bf) != 1) return 1;
+dnl   return *((unsigned char*) &bf) != 0x4b; }
+dnl ], bf_lsbf=1, [
+dnl   AC_RUN_IFELSE([
+dnl int main() {
+dnl   struct { char bit_0:1, bit_12:2, bit_345:3, bit_67:2; }
+dnl #if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)
+dnl   __attribute__((packed))
+dnl #endif
+dnl  bf = { 1,1,1,1 };
+dnl  if (sizeof (bf) != 1) return 1;
+dnl  return *((unsigned char*) &bf) != 0xa5; }
+dnl ], bf_lsbf=0, AC_MSG_ERROR([unsupported bitfield ordering]))
+dnl   ],
+dnl   [case "$host" in
+dnl      *-*-mingw32* | *-*-cygwin*)
+dnl        bf_lsbf=1
+dnl      ;;
+dnl      *)
+dnl        AC_MSG_RESULT([unknown])
+dnl        AC_MSG_ERROR([value of bitfield test isn't known for $host
+dnl *********************************************************************
+dnl Value of bitfield test can't find out for cross-compiling and we
+dnl don't know its value for host "$host".
+dnl *********************************************************************])
+dnl   esac]
+dnl )
 
-    if test "x$cross_compiling" = "xyes"; then
-      TEXT=" (guessed)"
-    else
-      TEXT=""
-    fi
+dnl     if test "x$cross_compiling" = "xyes"; then
+dnl       TEXT=" (guessed)"
+dnl     else
+dnl       TEXT=""
+dnl     fi
 
-    if test "x$bf_lsbf" = "x1"; then
-      AC_MSG_RESULT(LSBF${TEXT})
-      AC_DEFINE(BITFIELD_LSBF, [], [compiler does lsbf in struct bitfields])
-    else
-      AC_MSG_RESULT(MSBF${TEXT})
-    fi
-dnl
+dnl     if test "x$bf_lsbf" = "x1"; then
+dnl       AC_MSG_RESULT(LSBF${TEXT})
+dnl       AC_DEFINE(BITFIELD_LSBF, [], [compiler does lsbf in struct bitfields])
+dnl     else
+dnl       AC_MSG_RESULT(MSBF${TEXT})
+dnl     fi
+dnl dnl
 
 dnl system
 PKG_CHECK_MODULES(LIBCDIO, libcdio >= 1.1.0, [],
