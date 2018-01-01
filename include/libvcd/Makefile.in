@@ -14,7 +14,7 @@
 
 @SET_MAKE@
 
-#   $Id: Makefile.am,v 1.2 2003/11/10 11:57:49 rocky Exp $
+#   $Id$
 #
 #    Copyright (C) 2003 Rocky Bernstein <rocky@panix.com>
 #                  2003 Herbert Valerio Riedel <hvr@gnu.org>

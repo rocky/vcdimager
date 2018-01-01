@@ -1269,20 +1269,4 @@ And the rest is history.
 @unnumbered Sub-Option Index
 @printindex fn
 
-@tex
-% I think something like @colophon should be in texinfo.  In the
-% meantime:
-\long\def\colophon{\hbox to0pt{}\vfill
-\centerline{The body of this manual is set in}
-\centerline{\fontname\tenrm,}
-\centerline{with headings in {\bf\fontname\tenbf}}
-\centerline{and examples in {\tt\fontname\tentt}.}
-\centerline{{\it\fontname\tenit\/},}
-\centerline{{\bf\fontname\tenbf}, and}
-\centerline{{\sl\fontname\tensl\/}}
-\centerline{are used for emphasis.}\vfill}
-\page\colophon
-% Blame: doc@cygnus.com, 1991.
-@end tex
-
 @bye

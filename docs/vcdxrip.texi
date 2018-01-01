@@ -77,8 +77,8 @@ This file documents GNU Video CD Ripping Program.
 Copyright (C) 2003, 2005 Herbert Valerio Riedel and Rocky Bernstein
 
 @menu
-* Introduction::                What is the program and why would I use it? 
-* Command Options::             How do I get this to do anything? 
+* Introduction::                What is the program and why would I use it?
+* Command Options::             How do I get this to do anything?
 * Some Examples::               Okay, enough talk. How about some simple examples?
 * History::                     History
 
@@ -92,13 +92,13 @@ Indexes
 Command Options
 
 * General Options::             Generic options
-* Where Options::               Options controlling where to read from 
+* Where Options::               Options controlling where to read from
 * What Options::                Options controlling what do you want done
 * Miscellaneous Options::       Miscellaneous options
 
-Options controlling where to read from 
+Options controlling where to read from
 
-* BIN/CUE TOC or NRG file::     
+* BIN/CUE TOC or NRG file::
 * CD-ROM Device::               Reading from a CD-ROM device
 * Intelligent Input::           Reading from wherever
 * Input options::               A list of just the input options
@@ -140,7 +140,7 @@ extracting a single file located on the CD.
 
 You might use @value{program} as a step in re-mastering or re-authoring
 and existing CD, or it could be used to extract MPEGs from a CD or
-on-disk CD image file. 
+on-disk CD image file.
 
 Since Video CD's use the ISO-9660 format, another way to ``extract''
 an MPEG or piece of a Video CD is simply to mount the CD and use file
@@ -160,7 +160,7 @@ which specify where the CD-ROM or on-disk CD-ROM image is.
 
 @menu
 * General Options::             Generic options
-* Where Options::               Options controlling where to read from 
+* Where Options::               Options controlling where to read from
 * What Options::                Options controlling what do you want done
 * Miscellaneous Options::       Miscellaneous options
 @end menu
@@ -201,7 +201,7 @@ this information. Sometimes, you just wanna know what version you got.
 @end table
 
 @node Where Options, What Options, General Options, Command Options
-@section Options controlling where to read from 
+@section Options controlling where to read from
 
 If you don't specify any place to read from @value{program} will try
 to read from the default device that may be appropriate for your OS.
@@ -220,7 +220,7 @@ sense to read from one place, these options are mutually exclusive;
 use only one option from this set.
 
 @menu
-* BIN/CUE TOC or NRG file::     
+* BIN/CUE TOC or NRG file::
 * CD-ROM Device::               Reading from a CD-ROM device
 * Intelligent Input::           Reading from wherever
 * Input options::               A list of just the input options
@@ -345,13 +345,13 @@ TOC or NRG file, ,Reading from a file containing a CD disc image}.
 @section Options controlling what do you want done
 
 By default @value{program} will extract everything it can about a Video CD
-image. 
+image.
 
 However if you specify something in particular you don't want to
 extract, for example you don't want to extract the tracks or
 ``segments'' use  @kbd{--nosegments}.
 
-The options below reduce what is extracted. 
+The options below reduce what is extracted.
 
 When you use any of the options @code{--nosequence},
 @code{--nosegments}, @code{--norip} or @code{--tracks} you will get
@@ -374,7 +374,7 @@ operation. For example, there may be some additional documentation or
 commentary in some sort of text format and these may be put under
 additional directories.  Normally, such files are extracted with the
 directory or path information removed. If you don't want these
-additional files extracted use the @code{--nofiles} option. 
+additional files extracted use the @code{--nofiles} option.
 
 Using @code{--nofiles} will still extract files which are necessary
 for Video CD playback however. (These are located under the /SEGMENT, /EXT,
@@ -475,21 +475,21 @@ work:
 @noindent
 @smallexample
 vcdxrip
-@end smallexample 
+@end smallexample
 
 It means the same thing as:
 
 @noindent
 @smallexample
 vcdxrip --cdrom-device
-@end smallexample 
+@end smallexample
 
 and using the short option:
 
 @noindent
 @smallexample
 vcdxrip -C
-@end smallexample 
+@end smallexample
 
 I have a combined CD-ROM and DVD drive called @kbd{/dev/dvd}. I have
 another CD-ROM drive which goes under the name @kbd{/dev/cdrom}, but I
@@ -501,14 +501,14 @@ this will work:
 @noindent
 @smallexample
 vcdxrip -C=/dev/dvd
-@end smallexample 
+@end smallexample
 
 Or even better, I'll let @value{program} figure out it's a CD-ROM device:
 
 @noindent
 @smallexample
 vcdxrip -i /dev/dvd
-@end smallexample 
+@end smallexample
 
 The equals sign before @kbd{/dev/dvd} is optional in either format.
 
@@ -519,7 +519,7 @@ its ``default'' location (probably @kbd{videocd.cue} and
 @noindent
 @smallexample
 vcdxrip --bin-file
-@end smallexample 
+@end smallexample
 
 But if you specified the output to go to say @kbd{nausicaa.bin} and
 @kbd{nausicaa.cue} you would have to specify that location like this:
@@ -527,23 +527,23 @@ But if you specified the output to go to say @kbd{nausicaa.bin} and
 @noindent
 @smallexample
 vcdxrip -b nausicaa.bin
-@end smallexample 
+@end smallexample
 
-Or again not having to worry about what type of file you could use 
+Or again not having to worry about what type of file you could use
 the ``intelligent'' input option again as we did before:
 
 @noindent
 @smallexample
 vcdxrip -i nausicaa.bin
-@end smallexample 
+@end smallexample
 
 If I want the XML file that gets created to to ``nausicaa.xml'' rather
-than ``videocd.xml'' then use this: 
+than ``videocd.xml'' then use this:
 
 @noindent
 @smallexample
 vcdxrip -i nausicaa.bin -o nausicaa.xml
-@end smallexample 
+@end smallexample
 
 @node Extraction Examples,  , Input Examples, Some Examples
 @section Examples specifying what to rip
@@ -554,7 +554,7 @@ the previous section:
 @noindent
 @smallexample
 vcdxrip --norip -i nausicaa.bin --output-file nausicaa.xml
-@end smallexample 
+@end smallexample
 
 Suppose I want extract only the big MPEGs of the CD in the default CD
 without menus and extra file information. This is probably close:
@@ -562,7 +562,7 @@ without menus and extra file information. This is probably close:
 @noindent
 @smallexample
 vcdxrip --nosequences --nofiles
-@end smallexample 
+@end smallexample
 
 The above will create an XML description file. Suppose on the other
 hand I just want the extraneous files but not the MPEG data of the CD
@@ -571,14 +571,14 @@ in the default CD-ROM drive, then this may work:
 @noindent
 @smallexample
 vcdxrip --noseqeunces --nosegments
-@end smallexample 
+@end smallexample
 
 If you only want to extract track 1 from your CD this might work:
 
 @noindent
 @smallexample
 vcdxrip --track 1
-@end smallexample 
+@end smallexample
 
 @node History, General Index, Some Examples, Top
 @chapter History
@@ -592,21 +592,5 @@ This program was written by Herbert Valerio Riedel.
 @node Option Index,  , General Index, Top
 @unnumbered Option Index
 @printindex ky
-
-@tex
-% I think something like @colophon should be in texinfo.  In the
-% meantime:
-\long\def\colophon{\hbox to0pt{}\vfill
-\centerline{The body of this manual is set in}
-\centerline{\fontname\tenrm,}
-\centerline{with headings in {\bf\fontname\tenbf}}
-\centerline{and examples in {\tt\fontname\tentt}.}
-\centerline{{\it\fontname\tenit\/},}
-\centerline{{\bf\fontname\tenbf}, and}
-\centerline{{\sl\fontname\tensl\/}}
-\centerline{are used for emphasis.}\vfill}
-\page\colophon
-% Blame: doc@cygnus.com, 1991.
-@end tex
 
 @bye

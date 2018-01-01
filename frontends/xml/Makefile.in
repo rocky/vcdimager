@@ -827,8 +827,8 @@ uninstall-man: uninstall-man1
 .PRECIOUS: Makefile
 
 
-$(man_MANS): %.1: @MAINTAINER_MODE_TRUE@ %
-	-$(HELP2MAN) --output=$@ ./$(@:.1=)
+@MAINTAINER_MODE_TRUE@$(man_MANS): %.1:
+@MAINTAINER_MODE_TRUE@	-$(HELP2MAN) --no-info --libtool -o $@ ./$<
 
 Makefile: $(BUILT_SOURCES)
 

@@ -20,8 +20,10 @@ bin_PROGRAMS = vcdxbuild vcdxgen vcdxrip vcdxminfo
 
 man_MANS = vcdxbuild.1 vcdxgen.1 vcdxrip.1 vcdxminfo.1
 
-$(man_MANS): %.1: @MAINTAINER_MODE_TRUE@ %
-	-$(HELP2MAN) --output=$@ ./$(@:.1=)
+if MAINTAINER_MODE
+$(man_MANS): %.1:
+	-$(HELP2MAN) --no-info --libtool -o $@ ./$<
+endif
 
 MAINTAINERCLEANFILES = $(man_MANS)
 
