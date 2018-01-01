@@ -6,7 +6,7 @@ env:
 
 install:
   # Prerequisites
-  - sudo apt-get install -y automake autoconf libtool help2man libpopt-dev
+  - sudo apt-get install -y automake autoconf libtool help2man libpopt-dev texinfo
   - wget $DOWNLOAD_LOC
   - tar -xpf libcdio-${LIBCDIO_VERSION}.tar.gz
   - cd libcdio-${LIBCDIO_VERSION} && ./configure --prefix=/usr && make && sudo make install && cd .. && rm -fr libcdio-${LIBCDIO_VERSION}
