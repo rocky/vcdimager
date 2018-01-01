@@ -225,8 +225,9 @@ int
   return 0;
 }
 ], [], AC_MSG_ERROR([compiler doesn't support bitfield structs]))
-    dnl run test
-    AC_RUN_IFELSE([
+
+dnl run test
+AC_RUN_IFELSE([
 int main() {
   struct { char bit_0:1, bit_12:2, bit_345:3, bit_67:2; }
 #if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)

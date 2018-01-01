@@ -53,6 +53,6 @@ if MAINTAINER_MODE
 ChangeLog:
 	$(CVS2CL) -W 450 --header $(srcdir)/cvs2cl_header --utc -w -I ChangeLog --usermap $(srcdir)/cvs2cl_usermap -P
 
-ACLOCAL_AMFLAGS=-I .
+ACLOCAL_AMFLAGS=-I m4
 
 endif
