@@ -151,11 +151,11 @@ dnl For vcdimager and vcdxbuild to be able to set creation time of VCD
 AC_CHECK_FUNCS(getdate strptime, , )
 
 if test "x$enable_cli_fe" = "xyes" -o "x$enable_xml_fe" = "xyes"; then
-  AM_PATH_LIBPOPT(, [enable_cli_fe=no; enable_xml_fe=no])
+  PKG_CHECK_MODULES(LIBPOPT, popt, [], [enable_cli_fe=no; enable_xml_fe=no])
 fi
 
 if test "x$enable_xml_fe" = "xyes"; then
-  AM_PATH_XML2(2.3.8, , enable_xml_fe=no)
+  PKG_CHECK_MODULES(XML, libxml-2.0 >= 2.3.8, [], [enable_xml_fe=no])
 fi
 
 dnl headers
