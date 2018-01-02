@@ -22,7 +22,7 @@
 
 noinst_PROGRAMS = info1 info2
 
-INCLUDES      = -I$(top_srcdir) $(LIBVCD_CFLAGS) $(LIBCDIO_CFLAGS)
+AM_CPPFLAGS   = -I$(top_srcdir) $(LIBVCD_CFLAGS) $(LIBCDIO_CFLAGS)
 
 info1_LDADD   = $(LIBVCDINFO_LIBS) $(LIBVCD_LIBS) $(LIBISO9660_LIBS)
 info2_SOURCES = info2.cpp
