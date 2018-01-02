@@ -208,7 +208,7 @@ fi
 #
 AC_MSG_CHECKING([bitfield ordering in structs])
 dnl basic compile test for all platforms
-AC_COMPILE_IFELSE([
+AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
 int
  main() {
   struct { char bit_0:1, bit_12:2, bit_345:3, bit_67:2; }
@@ -219,10 +219,10 @@ int
   switch (0) case 0: case sizeof(bf) == 1:;
   return 0;
 }
-], [], AC_MSG_ERROR([compiler doesn't support bitfield structs]))
+]])], [], AC_MSG_ERROR([compiler doesn't support bitfield structs]))
 
 dnl run test
-AC_RUN_IFELSE([
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
 int main() {
   struct { char bit_0:1, bit_12:2, bit_345:3, bit_67:2; }
 #if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)
@@ -231,8 +231,8 @@ int main() {
   bf = { 1,1,1,1 };
   if (sizeof (bf) != 1) return 1;
   return *((unsigned char*) &bf) != 0x4b; }
-], bf_lsbf=1, [
-  AC_RUN_IFELSE([
+]])], bf_lsbf=1, [
+  AC_RUN_IFELSE([AC_LANG_SOURCE([[
 int main() {
   struct { char bit_0:1, bit_12:2, bit_345:3, bit_67:2; }
 #if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)
@@ -241,7 +241,7 @@ int main() {
  bf = { 1,1,1,1 };
  if (sizeof (bf) != 1) return 1;
  return *((unsigned char*) &bf) != 0xa5; }
-], bf_lsbf=0, AC_MSG_ERROR([unsupported bitfield ordering]))
+]])], bf_lsbf=0, AC_MSG_ERROR([unsupported bitfield ordering]))
   ],
   [case "$host" in
      *-*-mingw32* | *-*-cygwin*)
