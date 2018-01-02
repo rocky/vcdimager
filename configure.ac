@@ -35,7 +35,7 @@ dnl AM_ACLOCAL_INCLUDE(.)
 dnl AM_CONFIG_HEADER(include/libvcd/acconfig.h)
 AM_CONFIG_HEADER(config.h)
 
-LIBVCD_VERSION_NUM=RELEASE_NUM
+LIBVCD_VERSION_NUM=$(echo RELEASE_NUM | sed 's/git$//')
 AC_SUBST(LIBVCD_VERSION_NUM)
 
 AM_MISSING_PROG(HELP2MAN, help2man, $missing_dir)
