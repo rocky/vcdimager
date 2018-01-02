@@ -21,7 +21,7 @@ bin_PROGRAMS = vcdxbuild vcdxgen vcdxrip vcdxminfo
 man_MANS = vcdxbuild.1 vcdxgen.1 vcdxrip.1 vcdxminfo.1
 
 if MAINTAINER_MODE
-$(man_MANS): %.1:
+$(man_MANS): %.1: %$(EXEEXT)
 	-$(HELP2MAN) --no-info --libtool -o $@ ./$<
 endif
 
