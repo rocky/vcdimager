@@ -1,7 +1,7 @@
 /*
-    Copyright (C) 2001, 2002 Herbert Valerio Riedel <hvr@gnu.org>
     Copyright (C) 2002, 2003, 2004, 2005, 2006, 2018
     Rocky Bernstein <rocky@gnu.org>
+    Copyright (C) 2001, 2002 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1668,7 +1668,7 @@ main (int argc, const char *argv[])
   if (gl.show.all) {
     gl.show.entries.all  = gl.show.pvd.all  = gl.show.info.all
       = gl.show.format   = gl.show.fs       = gl.show.lot    = gl.show.psd
-      = gl.show.scandata = gl.show.scandata = gl.show.search = gl.show.source
+      = gl.show.scandata = gl.show.search   = gl.show.source
       = gl.show.tracks   = true;
   }
 

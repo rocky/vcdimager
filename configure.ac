@@ -1,4 +1,4 @@
-dnl Copyright (C) 2003-2006, 2017 Rocky Bernstein <rocky@gnu.org>
+dnl Copyright (C) 2003-2006, 2017-2018 Rocky Bernstein <rocky@gnu.org>
 dnl Copyright (C) 2003-2004 Herbert Valerio Riedel <hvr@gnu.org>
 dnl
 dnl This program is free software; you can redistribute it and/or modify
@@ -71,7 +71,23 @@ then
   echo "*** This package has not been tested very well with non GNU compilers"
   echo "*** you should try to use 'gcc' for compiling this package."
 else
-  WARN_CFLAGS="-Wall -Wchar-subscripts -Wmissing-prototypes -Wmissing-declarations -Wunused -Wpointer-arith -Wwrite-strings -Wnested-externs -Wno-sign-compare"
+  WARN_CFLAGS="
+       -Wall
+       -Wbad-function-cast
+       -Wcast-align
+       -Wchar-subscripts
+       -Wdeclaration-after-statement
+       -Wendif-labels
+       -Winline
+       -Wmissing-declarations
+       -Wmissing-prototypes
+       -Wnested-externs
+       -Wno-sign-compare
+       -Wpointer-arith
+       -Wundef
+       -Wunused
+       -Wwrite-strings
+       "
 
   warning_flags=""
 
@@ -272,12 +288,12 @@ don't know its value for host "$host".
 dnl
 
 dnl system
-PKG_CHECK_MODULES(LIBCDIO, libcdio >= 1.1.0, [],
+PKG_CHECK_MODULES(LIBCDIO, libcdio >= 2.0.0, [],
 	[AC_MSG_ERROR(Required libcdio library (> 2.0.0) not found. Please get libcdio from http://www.gnu.org/software/libcdio/ and install it.)])
 AC_SUBST(LIBCDIO_LIBS)
 AC_SUBST(LIBCDIO_CFLAGS)
 
-PKG_CHECK_MODULES(LIBISO9660, libiso9660 >= 1.1.0, [],
+PKG_CHECK_MODULES(LIBISO9660, libiso9660 >= 2.0.0, [],
 	[AC_MSG_ERROR(Required libiso9660 library (part of libcdio) not found. Please get libcdio from http://www.gnu.org/software/libcdio/ and install it.)])
 AC_SUBST(LIBISO9660_CFLAGS)
 AC_SUBST(LIBISO9660_LIBS)
