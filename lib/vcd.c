@@ -56,6 +56,22 @@ static const char zero[CDIO_CD_FRAMESIZE_RAW] = { 0, };
 
 #define DEFAULT_ISO_PREPARER_ID       "GNU VCDImager " VERSION " " HOST_ARCH
 
+static void sequence_free(mpeg_sequence_t *data)
+{
+  if (data != NULL) free(data);
+}
+
+static void dict_free(struct _dict_t *data)
+{
+  if (data != NULL) free(data);
+}
+
+static void cue_data_free(vcd_cue_t *data)
+{
+  if (data != NULL) free(data);
+}
+
+
 /* exported private functions
  */
 
@@ -714,7 +730,7 @@ vcd_obj_destroy (VcdObj_t *p_obj)
 
   while (_cdio_list_length (p_obj->mpeg_sequence_list))
     _vcd_obj_remove_mpeg_track (p_obj, 0);
-  _cdio_list_free (p_obj->mpeg_sequence_list, true, NULL);
+  _cdio_list_free (p_obj->mpeg_sequence_list, true, (CdioDataFree_t) &sequence_free);
 
   free (p_obj);
 }
@@ -2233,7 +2249,6 @@ vcd_obj_begin_output (VcdObj_t *p_obj)
   return image_size;
 }
 
-
 void
 vcd_obj_end_output (VcdObj_t *p_obj)
 {
@@ -2246,7 +2261,7 @@ vcd_obj_end_output (VcdObj_t *p_obj)
   _vcd_salloc_destroy (p_obj->iso_bitmap);
 
   _dict_clean (p_obj);
-  _cdio_list_free (p_obj->buffer_dict_list, true, NULL);
+  _cdio_list_free (p_obj->buffer_dict_list, true, (CdioDataFree_t) &dict_free);
 }
 
 int
@@ -2346,7 +2361,7 @@ vcd_obj_write_image (VcdObj_t *p_obj, VcdImageSink_t *p_image_sink,
 
     vcd_image_sink_set_cuesheet (p_image_sink, p_cue_list);
 
-    _cdio_list_free (p_cue_list, true, NULL);
+    _cdio_list_free (p_cue_list, true, (CdioDataFree_t) &cue_data_free);
   }
 
   /* and now for the pay load */

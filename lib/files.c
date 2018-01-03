@@ -632,6 +632,13 @@ get_search_dat_size (const VcdObj_t *p_vcdobj)
     + (_get_scanpoint_count (p_vcdobj) * sizeof (msf_t));
 }
 
+static void uint32_free(uint32_t *data)
+{
+  if (data != NULL) free(data);
+}
+
+
+
 static CdioList_t *
 _make_track_scantable (const VcdObj_t *p_vcdobj)
 {
@@ -710,7 +717,7 @@ _make_track_scantable (const VcdObj_t *p_vcdobj)
 
   }
 
-  _cdio_list_free (p_all_aps, true, NULL);
+  _cdio_list_free (p_all_aps, true, (CdioDataFree_t) &uint32_free);
 
   vcd_assert (scanpoints == _cdio_list_length (p_scantable));
 
@@ -752,7 +759,7 @@ set_search_dat (VcdObj_t *p_vcdobj, void *buf)
 
   vcd_assert (n = _get_scanpoint_count (p_vcdobj));
 
-  _cdio_list_free (p_scantable, true, NULL);
+  _cdio_list_free (p_scantable, true, (CdioDataFree_t) &uint32_free);
 }
 
 static uint32_t

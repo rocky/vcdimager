@@ -1,5 +1,4 @@
 #!/bin/sh
-#$Id$
 
 if test -z $srcdir ; then
   srcdir=`pwd`
@@ -17,8 +16,8 @@ test_vcdimager -t svcd ${srcdir}/avseq00.m1p
 RC=$?
 
 if test $RC -ne 0 ; then
-  if test $RC -ne 77 ; then 
-    echo vcdimager failed 
+  if test $RC -ne 77 ; then
+    echo vcdimager failed
     exit $RC
   else
     echo vcdimager skipped
@@ -59,7 +58,7 @@ if test $RC -ne 0 ; then
     echo vcdxbuild skipped
     test_vcdxbuild_cleanup
   else
-    echo vcdxbuild failed 
+    echo vcdxbuild failed
   fi
   exit $RC
 fi
@@ -99,14 +98,14 @@ RC=$?
 check_result $RC 'vcd-info test 1'
 
 test_vcdinfo '--no-banner --cue-file videocd.cue --show-info-all' \
-    svcd1_test2.dump ${srcdir}/svcd1_test2.right 
+    svcd1_test2.dump ${srcdir}/svcd1_test2.right
 RC=$?
 check_result $RC 'vcd-info test 2'
 
 cp ${srcdir}/avseq00.m1p avseq01.mpg
 cp ${srcdir}/item0000.m1p item0001.mpg
 
-if test ! -f check_cue.xml ; then 
+if test ! -f check_cue.xml ; then
   cp ${srcdir}/check_cue.xml check_cue.xml
   REMOVE_EXTRA=check_cue.xml
 fi
@@ -118,7 +117,7 @@ if test $RC -ne 0 ; then
     echo vcdxbuild skipped
     test_vcdxbuild_cleanup
   else
-    echo vcdxbuild failed 
+    echo vcdxbuild failed
   fi
   exit $RC
 fi
@@ -153,7 +152,7 @@ test_vcdxrip \
 RC=$?
 check_result $RC 'vcdxrip generation'
 
-# 
+#
 # Compare extracted avseq and item
 cmp_files avseq01.mpg ${srcdir}/avseq00.m1p vcdxrip
 check_result $RC 'vcdxrip sequence extraction'

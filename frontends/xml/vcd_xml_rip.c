@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2005, 2006, 2018 Rocky Bernstein <rocky@gnu.org>
+    Copyright (C) 2005-2006, 2018 Rocky Bernstein <rocky@gnu.org>
     Copyright (C) 2001, 2003, 2004, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
@@ -870,7 +870,7 @@ _parse_pbc (vcdxml_t *p_vcdxml, CdIo_t *p_cdio, bool no_ext_psd)
   _cdio_list_free (_pbc_ctx.offset_list, true, NULL);
   free(_pbc_ctx.lot);
   free(_pbc_ctx.psd);
-  return 0;
+  return rc;
 }
 
 static int
@@ -1275,14 +1275,15 @@ main (int argc, const char *argv[])
   int _track_flag=0;
   int _x_track_flag=0;
 
-  enum {
+  typedef enum {
     OP_SOURCE_UNDEF = DRIVER_UNKNOWN,
     OP_SOURCE_BINCUE= DRIVER_BINCUE,
     OP_SOURCE_NRG   = DRIVER_NRG,
     OP_SOURCE_CDRDAO= DRIVER_CDRDAO,
     OP_SOURCE_CDROM = DRIVER_DEVICE,
     OP_VERSION      = 20
-  } source_type = OP_SOURCE_UNDEF;
+  } option_t;
+  option_t source_type = OP_SOURCE_UNDEF;
 
   vcd_xml_progname = "vcdxrip";
 
@@ -1431,7 +1432,7 @@ main (int argc, const char *argv[])
   /* If we don't specify a driver_id or a source_name, scan the
      system for a CD that contains a VCD.
    */
-  if (NULL == source_name && source_type == DRIVER_UNKNOWN) {
+  if (NULL == source_name && source_type == (option_t) DRIVER_UNKNOWN) {
     char **cd_drives=NULL;
     cd_drives = cdio_get_devices_with_cap(NULL,
                 (CDIO_FS_ANAL_SVCD|CDIO_FS_ANAL_CVD|CDIO_FS_ANAL_VIDEOCD

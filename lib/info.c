@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2005, 2017 Rocky Bernstein <rocky@gnu.org>
+    Copyright (C) 2002-2005, 2017-2018 Rocky Bernstein <rocky@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1845,7 +1845,7 @@ vcdinfo_open(vcdinfo_obj_t **pp_obj, char *source_name[],
   CdIo_t *p_cdio;
   vcdinfo_obj_t *p_obj = calloc(1, sizeof(vcdinfo_obj_t));
   iso9660_stat_t *statbuf;
-
+  bool free_source_name = false;
 
   /* If we don't specify a driver_id or a source_name, scan the
      system for a CD that contains a VCD.
@@ -1860,6 +1860,7 @@ vcdinfo_open(vcdinfo_obj_t **pp_obj, char *source_name[],
       goto err_return;
     }
     *source_name = strdup(cd_drives[0]);
+    free_source_name = true;
     cdio_free_device_list(cd_drives);
   }
 
@@ -1878,6 +1879,7 @@ vcdinfo_open(vcdinfo_obj_t **pp_obj, char *source_name[],
     if (NULL == *source_name) {
       goto err_return;
     }
+    free_source_name = true;
   }
 
   memset (p_obj, 0, sizeof (vcdinfo_obj_t));
@@ -2056,11 +2058,12 @@ vcdinfo_open(vcdinfo_obj_t **pp_obj, char *source_name[],
   return VCDINFO_OPEN_VCD;
 
  other_return:
-  free(p_obj);
+  vcdinfo_close(p_obj);
   return VCDINFO_OPEN_OTHER;
 
  err_return:
-  free(p_obj);
+  if (free_source_name && *source_name) free(*source_name);
+  vcdinfo_close(p_obj);
   return VCDINFO_OPEN_ERROR;
 
 
@@ -2080,15 +2083,15 @@ vcdinfo_close(vcdinfo_obj_t *p_obj)
       _cdio_list_free(p_obj->offset_list, true, NULL);
     if (p_obj->offset_x_list != NULL)
       _cdio_list_free(p_obj->offset_x_list, true, NULL);
-    free(p_obj->seg_sizes);
-    free(p_obj->lot);
-    free(p_obj->lot_x);
-    free(p_obj->psd_x);
-    free(p_obj->psd);
-    free(p_obj->scandata_buf);
-    free(p_obj->tracks_buf);
-    free(p_obj->search_buf);
-    free(p_obj->source_name);
+    CDIO_FREE_IF_NOT_NULL(p_obj->seg_sizes);
+    CDIO_FREE_IF_NOT_NULL(p_obj->lot);
+    CDIO_FREE_IF_NOT_NULL(p_obj->lot_x);
+    CDIO_FREE_IF_NOT_NULL(p_obj->psd_x);
+    CDIO_FREE_IF_NOT_NULL(p_obj->psd);
+    CDIO_FREE_IF_NOT_NULL(p_obj->scandata_buf);
+    CDIO_FREE_IF_NOT_NULL(p_obj->tracks_buf);
+    CDIO_FREE_IF_NOT_NULL(p_obj->search_buf);
+    CDIO_FREE_IF_NOT_NULL(p_obj->source_name);
 
     if (p_obj->img != NULL) cdio_destroy (p_obj->img);
     _vcdinfo_zero(p_obj);
