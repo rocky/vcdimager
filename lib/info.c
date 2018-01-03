@@ -98,7 +98,7 @@ _init_segments (vcdinfo_obj_t *p_obj)
   lsn_t last_lsn=0;
 
   p_obj->first_segment_lsn = cdio_msf_to_lsn(&info->first_seg_addr);
-  p_obj->seg_sizes         = calloc(1, num_segments * sizeof(uint32_t *));
+  p_obj->seg_sizes         = calloc(1, num_segments * sizeof(uint32_t));
 
   if (NULL == p_obj->seg_sizes || 0 == num_segments) return;
 
@@ -699,7 +699,6 @@ vcdinfo_get_entry_lba(const vcdinfo_obj_t *p_obj, unsigned int entry_num)
   if ( !p_obj ) return VCDINFO_NULL_LBA;
   else {
     const msf_t *msf = vcdinfo_get_entry_msf(p_obj, entry_num);
-    msf = vcdinfo_get_entry_msf(p_obj, entry_num);
     return (msf != NULL) ? cdio_msf_to_lba(msf) : VCDINFO_NULL_LBA;
   }
 }

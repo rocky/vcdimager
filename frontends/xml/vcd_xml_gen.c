@@ -375,8 +375,8 @@ main (int argc, const char *argv[])
               {
                 struct filesystem_t *_file = calloc(1, sizeof (struct filesystem_t));
 
-                _file->name = strdup (fname2);
-                _file->file_src = strdup (fname1);
+                _file->name = fname2;
+                _file->file_src = fname1;
                 _file->file_raw = (opt == CL_ADD_FILE_RAW);
 
                 _cdio_list_append (obj.filesystem, _file);

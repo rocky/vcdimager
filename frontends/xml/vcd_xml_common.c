@@ -244,13 +244,17 @@ _convert (const char in[], const char encoding[], bool from)
   if (from) {
     if (NULL != handler->output)
       ret = handler->output (out, &out_size, (const unsigned char *) in, &temp);
-    else
+    else {
+      free(out);
       return strdup(in);
+    }
   } else {
     if (NULL != handler->input)
       ret = handler->input (out, &out_size, (const unsigned char *) in, &temp);
-    else
+    else {
+      free(out);
       return strdup(in);
+    }
   }
 
   if (ret < 0 || (temp - size + 1))

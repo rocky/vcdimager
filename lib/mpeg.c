@@ -493,7 +493,6 @@ _analyze_pes_header (const uint8_t *buf, int len,
         case 0x3: /* %0011 */
           pos2 += 4;
 
-          _has_dts = _has_pts = true;
           pts = _parse_timecode (buf, &pos2);
 
           vcd_assert (vcd_bitvec_peek_bits (buf, pos2, 4) == 1); /* %0001 */
