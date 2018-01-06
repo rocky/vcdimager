@@ -1,5 +1,13 @@
 see ChangeLog for more information
 
+version 2.0.0
+2018-01-??
+
+* Use libcdio 2.0.0 API (which is less leaky and less hacky)
+* Remove some memory leaks
+* Convert repo from CVS to git
+* Update autotools for circa 2018 conventions not 2011 conventions
+
 version 0.7.24
 =====================================
 2011-03-17
@@ -17,14 +25,14 @@ version 0.7.23 (development)
 =====================================
 2005-07-11
 
-* Add libvcdinfo vcdinfo_get_area_selection() a routine to get the 
+* Add libvcdinfo vcdinfo_get_area_selection() a routine to get the
   selection number represented by an area for a specified a point
   location
-* Add libvcdinfo vcdinfo_get_set_resolution() a routine to get the 
+* Add libvcdinfo vcdinfo_get_set_resolution() a routine to get the
   resolution for a given segment
 * hack on memory leaks some more
 * vcdxrip options more like vcd-info options
-* check that selection area hot-spot values don't exceed 255. 
+* check that selection area hot-spot values don't exceed 255.
 * Update documentation
 * Remove gcc 4 warnings and potential problems noted
 * make --disable-static --enable-shared work with --versioned-libs
@@ -50,10 +58,10 @@ version 0.7.21 (development)
 * make -mno-cygwin work
 * release number is now preprocessor symbol so applications can make use of
   for compatibility
-* More libcdio things moved into libcdio (e.g. MSF printing, 
+* More libcdio things moved into libcdio (e.g. MSF printing,
   iso9660 PVD handling)
 * use generic list things from libcdio. Eventually everything will
-  use glib. But this moves in the right direction by consolidating code 
+  use glib. But this moves in the right direction by consolidating code
   a little
 * Darwin compilation fixes
 * Miscellaneous contributed bug fixes
@@ -63,7 +71,7 @@ version 0.7.20 (unstable/development)
 2004-02-20
 
 * Join in libcdio branch (forked after 0.7.14)
-* Performance fix: (libvcdinfo) Redo the way we find segment 
+* Performance fix: (libvcdinfo) Redo the way we find segment
   LSNs to greatly reduce the number of CD reads when there are many
   files in the ISO-9660 track, or there are many segments or continued
   segments. Requires libcdio 0.65 API change.
@@ -80,7 +88,7 @@ version 0.7.19 (unstable/development)
 =====================================
 -unreleased-
 
-* Use VCD CD-drive auto scanning in vcdxrip and vcd-info that is 
+* Use VCD CD-drive auto scanning in vcdxrip and vcd-info that is
   now part of in libcdio
 * doc changes, clarification of cdxa2mpeg
 * error checking in cdxa2mpeg (from Nicolas Boullis)
@@ -90,8 +98,8 @@ version 0.7.18 (unstable/development)
 =====================================
 -unreleased-
 
-* Move iso9660 stuff into libcdio. 
-* More private files are private. 
+* Move iso9660 stuff into libcdio.
+* More private files are private.
 
 version 0.7.17 (unstable/development)
 =====================================
@@ -173,7 +181,7 @@ version 0.7.10 (unstable/development)
 =====================================
 2001-08-29
 
-* vcdxrip: new option for ignoring (faulty) extended pbc's 
+* vcdxrip: new option for ignoring (faulty) extended pbc's
 * fixed wrong warning for extended end list attributes
 * allow multi default selections to have entry points as play-item
 * gui mode added to vcdxbuild, vcdxminfo and vcdxrip
@@ -188,7 +196,7 @@ version 0.7.10 (unstable/development)
   VCD2.0 added
 * new options for customization track gaps/margins
 * added --image-type/--image-option to vcdxbuild
-* implemented setting of <publisher-id> 
+* implemented setting of <publisher-id>
 
 version 0.7.9 (unstable/development)
 ====================================
@@ -220,7 +228,7 @@ version 0.7.8 (unstable/development)
 * added new tool for dumping mpeg infos/aps addresses
 * added support for empty (ref-less) <select> and <play-item>'s
 * fixed/added support for multi default selections
-* implement <default-entry> for allowing to reference the default 
+* implement <default-entry> for allowing to reference the default
   entry point of sequence items
 
 version 0.7.7 (unstable/development)
@@ -284,7 +292,7 @@ version 0.7.2 (unstable/development)
 * implemented option-tag parsing
 * new <option name="relaxed aps" value="true"/> for relaxed aps
   constrains (see manual on access point sectors as well for important
-  warnings) 
+  warnings)
 * handle truncated streams more tolerant
 * started updating manual
 * 'broken svcd mode' xml-<option> splitted up into "svcd vcd30 mpegav"
@@ -305,7 +313,7 @@ version 0.7.0 (unstable/development)
 ====================================
 2001-05-24
 
-* dummy PBC generation disabled for classic vcdimager frontend 
+* dummy PBC generation disabled for classic vcdimager frontend
   (use vcdxgen instead)
 * warn if labels are non-conforming
 * use PTS times instead of inaccurate GOP timecodes
@@ -342,7 +350,7 @@ version 0.6.0 (stable)
 ======================
 2001-04-15
 
-* implemented --rip-spi operation  
+* implemented --rip-spi operation
 * give up on invalid mpeg packets when scanning mpeg
 * fixed directory section growing into karaoke area
 
@@ -431,7 +439,7 @@ version 0.5.9alpha1
 
 version 0.5
 ===========
-never released 
+never released
 
 * major rewrite
 

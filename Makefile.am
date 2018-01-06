@@ -1,4 +1,4 @@
-# Copyright (C) 2003, 2017 Rocky Bernstein <rocky@panix.com>
+# Copyright (C) 2003, 2017-2018 Rocky Bernstein <rocky@panix.com>
 # Copyright (C) 2003 Herbert Valerio Riedel <hvr@gnu.org>
 #
 # This program is free software; you can redistribute it and/or modify
@@ -44,14 +44,14 @@ cygwin-dist:
 	./cygwin-dist.sh $(VERSION)
 endif
 
-# cvs2cl
 MAINTAINERCLEANFILES = ChangeLog
 
 if MAINTAINER_MODE
 
 .PHONY: ChangeLog
+#: Create ChangeLog from version control
 ChangeLog:
-	$(CVS2CL) -W 450 --header $(srcdir)/cvs2cl_header --utc -w -I ChangeLog --usermap $(srcdir)/cvs2cl_usermap -P
+	git log --pretty --numstat --summary | $(GIT2CL) >$@
 
 ACLOCAL_AMFLAGS=-I m4
 
