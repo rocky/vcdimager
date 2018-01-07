@@ -7,13 +7,16 @@ pdf: vcdimager.pdf vcd-info.pdf vcdxrip.pdf
 txt: vcdimager.txt vcd-info.txt vcdxrip.txt svcd-ogt-subtitles.txt \
 	cvd-subtitles.txt
 
-ps: vcdimager.ps vcd-info.ps vcdxrip.html
+ps: vcdimager.ps vcd-info.ps
 
 html: vcdimager.html vcd-info.html vcdxrip.html svcd-ogt-subtitles.html \
 	cvd-subtitles.html
 
 %.ps.gz: %.ps
 	gzip -9c $< > $@
+
+.texi.dvi:
+	@echo texi2dvi is broken
 
 .texi.pdf: stamp-vti
 	texi2pdf $<
