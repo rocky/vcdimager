@@ -16,10 +16,10 @@ dnl along with this program; if not, write to the Free Software
 dnl Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 dnl 02111-1307, USA.
 
-define(RELEASE_NUM, 0rc1)
+define(RELEASE_NUM, 0)
 define(LIBVCD_VERSION_STR, 2.0.$1)
 
-AC_PREREQ(2.52)
+AC_PREREQ(2.61)
 AC_REVISION([$Id$])dnl
 
 AC_INIT([GNU VCDimager],LIBVCD_VERSION_STR(RELEASE_NUM),
@@ -27,6 +27,11 @@ AC_INIT([GNU VCDimager],LIBVCD_VERSION_STR(RELEASE_NUM),
 AC_CONFIG_SRCDIR([lib/vcd.c])
 AM_INIT_AUTOMAKE(1.6.0)
 AC_CONFIG_MACRO_DIR([m4])
+
+# Enable silent build rules by default (Automake v1.11 or later).
+# Disable by either passing --disable-silent-rules to configure or passing V=1 to make
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])],
+         [AC_SUBST([AM_DEFAULT_VERBOSITY], [1])])
 
 SPEC_VERSION=VCD_VERSION_STR
 AC_SUBST(SPEC_VERSION)

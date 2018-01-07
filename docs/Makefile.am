@@ -1,11 +1,8 @@
 info_TEXINFOS = vcdimager.texi vcd-info.texi vcdxrip.texi
 vcdimager_TEXINFOS = fdl.texi gpl.texi glossary.texi
-TEXI2PDF = texi2dvi --pdf
+EXTRA_DIST = cvd-subtitles.pod svcd-ogt-subtitles.pod doxygen/Doxyfile.in doxygen/run_doxygen
 
 pdf: vcdimager.pdf vcd-info.pdf vcdxrip.pdf
-
-%.pdf: %.tex
-	$(TEXI2PDF) $(AM_TEXI2PDFFLAGS) $(TEXI2PDFFLAGS) $< -o $ <at>
 
 txt: vcdimager.txt vcd-info.txt vcdxrip.txt svcd-ogt-subtitles.txt \
 	cvd-subtitles.txt

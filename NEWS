@@ -1,7 +1,7 @@
 see ChangeLog for more information
 
 version 2.0.0
-2018-01-??
+2018-01-07  Samish
 
 * Use libcdio 2.0.0 API (which is less leaky and less hacky)
 * Remove some memory leaks
