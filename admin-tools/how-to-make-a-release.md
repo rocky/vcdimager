@@ -45,13 +45,13 @@
 
    gnupload from the automake distribution.
    locate gnupload
-   /src/external-vcs/coreutils/build-aux/gnupload --to ftp.gnu.org:libcdio libcdio-${VCDIMAGER_VERSION}.tar.*  # (Use "is" password)
+   ~/bin/gnupload --to ftp.gnu.org:vcdimager vcdimager-${VCDIMAGER_VERSION}.tar.*  # (Use "is" password)
 
 - Make sure sources are current and checked in:
     git pull
     git commit .
 
-- Send mail to info-vcdimager@gnu.org
+- Send mail to info-vcdimager@gnu.org and libcdio-devel@gnu.org
 
   Again, The NEWS file is your friend.
 
