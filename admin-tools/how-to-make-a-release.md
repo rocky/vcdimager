@@ -12,7 +12,7 @@
 - Remove "git from configure.ac's release name. E.g.
 
 ```
-    define(RELEASE_NUM, 0rc1)
+    define(RELEASE_NUM, 1)
     define(LIBVCD_VERSION_STR, 2.0.$1git)
                                    ^^^
 ```

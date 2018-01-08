@@ -16,7 +16,7 @@ dnl along with this program; if not, write to the Free Software
 dnl Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 dnl 02111-1307, USA.
 
-define(RELEASE_NUM, 1git)
+define(RELEASE_NUM, 1)
 define(LIBVCD_VERSION_STR, 2.0.$1)
 
 AC_PREREQ(2.61)
