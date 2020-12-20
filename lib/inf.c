@@ -333,7 +333,7 @@ vcdinf_lid_t_cmp (vcdinfo_offset_t *a, vcdinfo_offset_t *b)
     {
       if (a->lid > b->lid) return +1;
       if (a->lid < b->lid) return -1;
-      vcd_warn ("LID %d at offset %d has same nunber as LID of offset %d",
+      vcd_warn ("LID %d at offset %d has same number as LID of offset %d",
                 a->lid, a->offset, b->offset);
     }
   else if (a->lid) return -1;

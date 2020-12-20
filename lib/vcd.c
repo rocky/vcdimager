@@ -2405,7 +2405,7 @@ vcd_obj_write_image (VcdObj_t *p_obj, VcdImageSink_t *p_image_sink,
       {
         int n, lastsect = p_obj->sectors_written;
 
-        vcd_debug ("writting post-gap ('leadout pregap')...");
+        vcd_debug ("writing post-gap ('leadout pregap')...");
 
         for (n = 0; n < p_obj->leadout_pregap; n++)
           _write_m2_image_sector (p_obj, zero, lastsect++, 0, 0, SM_FORM2, 0);

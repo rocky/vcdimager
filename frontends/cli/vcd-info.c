@@ -420,7 +420,8 @@ dump_psd (const vcdinfo_obj_t *p_vcdinfo, bool ext)
           }
           break;
         default:
-          fprintf (stdout, " PSD[%2d] (%s): unkown descriptor type (0x%2.2x)\n",
+          fprintf (stdout,
+                   " PSD[%2d] (%s): unknown descriptor type (0x%2.2x)\n",
                    n, vcdinfo_ofs2str (p_vcdinfo, ofs->offset, ext), type);
 
           fprintf (stdout, "  hexdump: ");
