@@ -31,8 +31,14 @@ vcd_info_LDADD = $(LIBISO9660_LIBS) $(LIBVCDINFO_LIBS) $(LIBVCD_LIBS) $(LIBPOPT_
 man_MANS = vcdimager.1 cdxa2mpeg.1 vcd-info.1
 
 if MAINTAINER_MODE
-$(man_MANS): %.1: %$(EXEEXT)
-	-$(HELP2MAN) --no-info --libtool -o $@ ./$<
+vcdimager.1: vcdimager$(EXEEXT)
+	-$(HELP2MAN) --name "Generates simple pbc-less VCD and SVCD disc images directly" --no-info --libtool -o $@ ./$<
+
+cdxa2mpeg.1: cdxa2mpeg$(EXEEXT)
+	-$(HELP2MAN) --name "Simple tool for converting RIFF CDXA file to plain mpeg" --no-info --libtool -o $@ ./$<
+
+vcd-info.1: vcd-info$(EXEEXT)
+	-$(HELP2MAN) --name "Display (selectively) the contents of a Video CD or CD image" --no-info --libtool -o $@ ./$<
 endif
 
 MAINTAINERCLEANFILES = $(man_MANS)

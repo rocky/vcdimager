@@ -21,8 +21,17 @@ bin_PROGRAMS = vcdxbuild vcdxgen vcdxrip vcdxminfo
 man_MANS = vcdxbuild.1 vcdxgen.1 vcdxrip.1 vcdxminfo.1
 
 if MAINTAINER_MODE
-$(man_MANS): %.1: %$(EXEEXT)
-	-$(HELP2MAN) --no-info --libtool -o $@ ./$<
+vcdxbuild.1: vcdxbuild$(EXEEXT)
+	-$(HELP2MAN) --name "Builds a VCD/SVCD according to a supplied XML control file" --no-info --libtool -o $@ ./$<
+
+vcdxgen.1: vcdxgen$(EXEEXT)
+	-$(HELP2MAN) --name "XML VCD-description generator" --no-info --libtool -o $@ ./$<
+
+vcdxrip.1: vcdxrip$(EXEEXT)
+	-$(HELP2MAN) --name "Reverses the process for a given VCD or SVCD disc" --no-info --libtool -o $@ ./$<
+
+vcdxminfo.1: vcdxminfo$(EXEEXT)
+	-$(HELP2MAN) --name "Debugging tool for displaying MPEG stream properties" --no-info --libtool -o $@ ./$<
 endif
 
 MAINTAINERCLEANFILES = $(man_MANS)

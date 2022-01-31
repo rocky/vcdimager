@@ -687,8 +687,8 @@ _vcd_pbc_node_write (const VcdObj_t *obj, const pbc_t *p_pbc, void *buf,
 		}
 	      else
 		vcd_error ("selection '%s': play item '%s'"
-			   " is requried to be sequence or entry point"
-			   " item for multi default selecton",
+			   " is required to be sequence or entry point"
+			   " item for multi default selection",
 			   p_pbc->id, p_pbc->item_id);
 	    }
 
