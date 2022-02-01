@@ -198,14 +198,6 @@ AC_C_BIGENDIAN
 AC_C_CONST
 AC_C_INLINE
 
-dnl ISOC99_PRAGMA
-AC_MSG_CHECKING([whether $CC supports ISO C99 _Pragma()])
-AC_TRY_COMPILE([_Pragma("pack(1)")], [], [
-  ISOC99_PRAGMA=yes
-  AC_DEFINE(HAVE_ISOC99_PRAGMA, [], [Supports ISO _Pragma() macro])
-],ISOC99_PRAGMA=no)
-AC_MSG_RESULT($ISOC99_PRAGMA)
-
 empty_array_size="xxxx"
 AC_TRY_COMPILE([],[struct { int foo; int bar[]; } doo;], empty_array_size="")
 
