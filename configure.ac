@@ -320,27 +320,12 @@ esac
 LIBS="$LIBS -lm"
 CFLAGS="$CFLAGS $WARN_CFLAGS"
 
-# We need either GNU make or --without-versioned-libs
 if test "x$enable_versioned_libs" = "xyes" ; then
-  if test -n "$MAKE" ; then
-    $MAKE --version 2>/dev/null >/dev/null
-    if test "$?" -ne 0 ; then
-       AC_MSG_ERROR(Either set MAKE variable to GNU make or use
-   --without-versioned-libs option)
-    fi
-  else
-    make --version 2>/dev/null >/dev/null
-    if test "$?" -ne 0 ; then
-       AC_MSG_ERROR(Either set MAKE variable to GNU make or use
-   --without-versioned-libs option)
-    else
-      # Do we have GNU ld? We need that too.
-      if test "$with_gnu_ld" != yes; then
+   # Do we have GNU ld? We need that too.
+   if test "$with_gnu_ld" != yes; then
         AC_MSG_WARN(I don't see GNU ld. I'm going to assume --without-versioned-libs)
-	enable_versioned_libs='no'
-      fi
-    fi
-  fi
+        enable_versioned_libs='no'
+   fi
 fi
 
 AM_CONDITIONAL(CYGWIN, test "x$CYGWIN" = "xyes")
