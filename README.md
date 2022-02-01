@@ -19,7 +19,4 @@ instructions.
 
 See the file BUGS for known issues.
 
-See the file FAQ for some frequently asked questions (and the
-corresponding answers)
-
 The user manual is kept as texinfo documentation.
