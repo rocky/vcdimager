@@ -140,6 +140,7 @@ fi
 
 AC_PROG_CPP
 AM_PROG_CC_STDC
+AM_PROG_NM
 AC_PROG_AWK
 dnl AM_PROG_LIBTOOL tests whether we have GNU ld
 dnl this must come before checking --with-versioned-libs
