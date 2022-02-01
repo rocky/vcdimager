@@ -268,6 +268,7 @@ int main() {
      *-*-mingw32* | *-*-cygwin*)
        bf_lsbf=1
      ;;
+     *-linux-*) bf_lsbf=1 ;;
      *)
        AC_MSG_RESULT([unknown])
        AC_MSG_ERROR([value of bitfield test isn't known for $host
