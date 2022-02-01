@@ -18,9 +18,8 @@
 
 bin_PROGRAMS = vcdxbuild vcdxgen vcdxrip vcdxminfo
 
+if ENABLE_DOC
 man_MANS = vcdxbuild.1 vcdxgen.1 vcdxrip.1 vcdxminfo.1
-
-if MAINTAINER_MODE
 vcdxbuild.1: vcdxbuild$(EXEEXT)
 	-$(HELP2MAN) --name "Builds a VCD/SVCD according to a supplied XML control file" --no-info --libtool -o $@ ./$<
 

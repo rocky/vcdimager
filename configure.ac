@@ -53,6 +53,13 @@ AC_PROG_CXX
 
 AC_DEFINE_UNQUOTED(HOST_ARCH, "$host_os/$host_cpu", [host os/cpu identifier])
 
+AC_ARG_ENABLE(doc,
+	[AS_HELP_STRING([--disable-doc],[Do not build documentation])],
+	[enable_doc="${enableval}"],
+	[enable_doc=yes]
+)
+AM_CONDITIONAL(ENABLE_DOC, test "x$enable_doc" = "xyes")
+
 dnl conditionally built frontends
 
 AC_ARG_WITH(cli-frontend,

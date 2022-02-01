@@ -28,9 +28,8 @@ cdxa2mpeg_LDADD =  $(LIBISO9660_LIBS) $(LIBVCD_LIBS) $(LIBPOPT_LIBS)
 vcd_info_SOURCES = vcd-info.c
 vcd_info_LDADD = $(LIBISO9660_LIBS) $(LIBVCDINFO_LIBS) $(LIBVCD_LIBS) $(LIBPOPT_LIBS) $(LIBCDIO_LIBS) $(LIBISO9660_LIBS)
 
+if ENABLE_DOC
 man_MANS = vcdimager.1 cdxa2mpeg.1 vcd-info.1
-
-if MAINTAINER_MODE
 vcdimager.1: vcdimager$(EXEEXT)
 	-$(HELP2MAN) --name "Generates simple pbc-less VCD and SVCD disc images directly" --no-info --libtool -o $@ ./$<
 
